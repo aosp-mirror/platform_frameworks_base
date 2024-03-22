@@ -28,10 +28,8 @@ import com.android.server.pm.UserManagerInternal;
 
 final class UserData {
 
-    private static SparseArray<UserData> sUserData;
-
-    @GuardedBy("ImfLock.class")
-    private static InputMethodBindingController.Creator sBindingControllerCreator;
+    @NonNull
+    private static final SparseArray<UserData> sPerUserMonitor = new SparseArray<>();
 
     @UserIdInt
     final int mUserId;
@@ -39,33 +37,24 @@ final class UserData {
     @GuardedBy("ImfLock.class")
     final Sequence mSequence = new Sequence();
 
-    @NonNull
-    final InputMethodBindingController mBindingController;
-
     /**
      * Not intended to be instantiated.
      */
-    private UserData(int userId,
-            InputMethodBindingController bindingController) {
+    private UserData(int userId) {
         mUserId = userId;
-        mBindingController = bindingController;
     }
 
     @GuardedBy("ImfLock.class")
     static UserData getOrCreate(@UserIdInt int userId) {
-        UserData userData = sUserData.get(userId);
-        if (userData == null) {
-            userData = new UserData(userId, sBindingControllerCreator.create());
-            sUserData.put(userId, userData);
+        UserData monitor = sPerUserMonitor.get(userId);
+        if (monitor == null) {
+            monitor = new UserData(userId);
+            sPerUserMonitor.put(userId, monitor);
         }
-        return userData;
+        return monitor;
     }
 
-    @GuardedBy("ImfLock.class")
-    static void initialize(Handler handler,
-            InputMethodBindingController.Creator bindingControllerCreator) {
-        sUserData = new SparseArray<>();
-        sBindingControllerCreator = bindingControllerCreator;
+    static void initialize(Handler handler) {
         final UserManagerInternal userManagerInternal =
                 LocalServices.getService(UserManagerInternal.class);
         userManagerInternal.addUserLifecycleListener(
@@ -75,7 +64,7 @@ final class UserData {
                         final int userId = user.id;
                         handler.post(() -> {
                             synchronized (ImfLock.class) {
-                                sUserData.remove(userId);
+                                sPerUserMonitor.remove(userId);
                             }
                         });
                     }
