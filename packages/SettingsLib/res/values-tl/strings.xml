@@ -619,8 +619,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Hindi nakagawa ng bagong user"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Hindi nakagawa ng bagong guest"</string>
     <string name="user_nickname" msgid="262624187455825083">"Nickname"</string>
-    <!-- no translation found for edit_user_info_message (6677556031419002895) -->
-    <skip />
+    <string name="edit_user_info_message" msgid="6677556031419002895">"Makikita ng sinumang gumagamit ng device na ito ang pangalan at larawang pipiliin mo."</string>
     <string name="user_add_user" msgid="7876449291500212468">"Magdagdag ng user"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Magdagdag ng bisita"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Alisin ang bisita"</string>
