@@ -18,6 +18,7 @@ package com.android.server.display;
 
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.utils.DebugUtils;
 
 import java.io.PrintWriter;
@@ -52,7 +53,8 @@ public class HysteresisLevels {
      * @param potentialOldBrightnessRange whether or not the values used could be from the old
      *                                    screen brightness range ie, between 1-255.
     */
-    HysteresisLevels(float[] brighteningThresholdsPercentages,
+    @VisibleForTesting
+    public HysteresisLevels(float[] brighteningThresholdsPercentages,
             float[] darkeningThresholdsPercentages,
             float[] brighteningThresholdLevels, float[] darkeningThresholdLevels,
             float minDarkeningThreshold, float minBrighteningThreshold,
@@ -138,7 +140,10 @@ public class HysteresisLevels {
         return levelArray;
     }
 
-    void dump(PrintWriter pw) {
+    /**
+     * Print the object's debug information into the given stream.
+     */
+    public void dump(PrintWriter pw) {
         pw.println("HysteresisLevels");
         pw.println("  mBrighteningThresholdLevels=" + Arrays.toString(mBrighteningThresholdLevels));
         pw.println("  mBrighteningThresholdsPercentages="
@@ -148,5 +153,46 @@ public class HysteresisLevels {
         pw.println("  mDarkeningThresholdsPercentages="
                 + Arrays.toString(mDarkeningThresholdsPercentages));
         pw.println("  mMinDarkening=" + mMinDarkening);
+    }
+
+
+    /**
+     * Creates hysteresis levels for Active Ambient Lux
+     */
+    public static HysteresisLevels getAmbientBrightnessThresholds(DisplayDeviceConfig ddc) {
+        return new HysteresisLevels(ddc.getAmbientBrighteningPercentages(),
+                ddc.getAmbientDarkeningPercentages(), ddc.getAmbientBrighteningLevels(),
+                ddc.getAmbientDarkeningLevels(), ddc.getAmbientLuxDarkeningMinThreshold(),
+                ddc.getAmbientLuxBrighteningMinThreshold());
+    }
+
+    /**
+     * Creates hysteresis levels for Active Screen Brightness
+     */
+    public static HysteresisLevels getBrightnessThresholds(DisplayDeviceConfig ddc) {
+        return new HysteresisLevels(ddc.getScreenBrighteningPercentages(),
+                ddc.getScreenDarkeningPercentages(), ddc.getScreenBrighteningLevels(),
+                ddc.getScreenDarkeningLevels(), ddc.getScreenDarkeningMinThreshold(),
+                ddc.getScreenBrighteningMinThreshold(), true);
+    }
+
+    /**
+     * Creates hysteresis levels for Idle Ambient Lux
+     */
+    public static HysteresisLevels getAmbientBrightnessThresholdsIdle(DisplayDeviceConfig ddc) {
+        return new HysteresisLevels(ddc.getAmbientBrighteningPercentagesIdle(),
+                ddc.getAmbientDarkeningPercentagesIdle(), ddc.getAmbientBrighteningLevelsIdle(),
+                ddc.getAmbientDarkeningLevelsIdle(), ddc.getAmbientLuxDarkeningMinThresholdIdle(),
+                ddc.getAmbientLuxBrighteningMinThresholdIdle());
+    }
+
+    /**
+     * Creates hysteresis levels for Idle Screen Brightness
+     */
+    public static HysteresisLevels getBrightnessThresholdsIdle(DisplayDeviceConfig ddc) {
+        return new HysteresisLevels(ddc.getScreenBrighteningPercentagesIdle(),
+                ddc.getScreenDarkeningPercentagesIdle(), ddc.getScreenBrighteningLevelsIdle(),
+                ddc.getScreenDarkeningLevelsIdle(), ddc.getScreenDarkeningMinThresholdIdle(),
+                ddc.getScreenBrighteningMinThresholdIdle());
     }
 }
