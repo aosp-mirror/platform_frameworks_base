@@ -33,9 +33,6 @@ interface ShadeViewController {
     /** Returns whether the shade's top level view is enabled. */
     @Deprecated("No longer supported. Do not add new calls to this.") val isViewEnabled: Boolean
 
-    /** Returns whether status bar icons should be hidden when the shade is expanded. */
-    fun shouldHideStatusBarIconsWhenExpanded(): Boolean
-
     /** If the latency tracker is enabled, begins tracking expand latency. */
     @Deprecated("No longer supported. Do not add new calls to this.")
     fun startExpandLatencyTracking()
