@@ -70,9 +70,11 @@ class TaskContainer {
     @Nullable
     private SplitPinContainer mSplitPinContainer;
 
-    /** The overlay container in this Task. */
+    /**
+     * The {@link TaskFragmentContainer#isAlwaysOnTopOverlay()} in the Task.
+     */
     @Nullable
-    private TaskFragmentContainer mOverlayContainer;
+    private TaskFragmentContainer mAlwaysOnTopOverlayContainer;
 
     @NonNull
     private final Configuration mConfiguration;
@@ -316,10 +318,12 @@ class TaskContainer {
         return null;
     }
 
-    /** Returns the overlay container in the task, or {@code null} if it doesn't exist. */
+    /**
+     * Returns the always-on-top overlay container in the task, or {@code null} if it doesn't exist.
+     */
     @Nullable
-    TaskFragmentContainer getOverlayContainer() {
-        return mOverlayContainer;
+    TaskFragmentContainer getAlwaysOnTopOverlayContainer() {
+        return mAlwaysOnTopOverlayContainer;
     }
 
     int indexOf(@NonNull TaskFragmentContainer child) {
@@ -531,7 +535,21 @@ class TaskContainer {
         updateSplitPinContainerIfNecessary();
         // Update overlay container after split pin container since the overlay should be on top of
         // pin container.
-        updateOverlayContainerIfNecessary();
+        updateAlwaysOnTopOverlayIfNecessary();
+    }
+
+    private void updateAlwaysOnTopOverlayIfNecessary() {
+        final List<TaskFragmentContainer> alwaysOnTopOverlays = mContainers
+                .stream().filter(TaskFragmentContainer::isAlwaysOnTopOverlay).toList();
+        if (alwaysOnTopOverlays.size() > 1) {
+            throw new IllegalStateException("There must be at most one always-on-top overlay "
+                    + "container per Task");
+        }
+        mAlwaysOnTopOverlayContainer = alwaysOnTopOverlays.isEmpty()
+                ? null : alwaysOnTopOverlays.getFirst();
+        if (mAlwaysOnTopOverlayContainer != null) {
+            moveContainerToLastIfNecessary(mAlwaysOnTopOverlayContainer);
+        }
     }
 
     private void updateSplitPinContainerIfNecessary() {
@@ -556,18 +574,6 @@ class TaskContainer {
             removeSplitPinContainer();
         } else if (mSplitPinContainer.getPrimaryContainer() != adjacentContainer) {
             mSplitPinContainer.setPrimaryContainer(adjacentContainer);
-        }
-    }
-
-    private void updateOverlayContainerIfNecessary() {
-        final List<TaskFragmentContainer> overlayContainers = mContainers.stream()
-                .filter(TaskFragmentContainer::isOverlay).toList();
-        if (overlayContainers.size() > 1) {
-            throw new IllegalStateException("There must be at most one overlay container per Task");
-        }
-        mOverlayContainer = overlayContainers.isEmpty() ? null : overlayContainers.get(0);
-        if (mOverlayContainer != null) {
-            moveContainerToLastIfNecessary(mOverlayContainer);
         }
     }
 

@@ -1023,6 +1023,14 @@ class TaskFragmentContainer {
         return mAssociatedActivityToken != null;
     }
 
+    /**
+     * Returns {@code true} if the overlay container should be always on top, which should be
+     * a non-fill-parent overlay without activity association.
+     */
+    boolean isAlwaysOnTopOverlay() {
+        return isOverlay() && !isAssociatedWithActivity();
+    }
+
     @Override
     public String toString() {
         return toString(true /* includeContainersToFinishOnExit */);
