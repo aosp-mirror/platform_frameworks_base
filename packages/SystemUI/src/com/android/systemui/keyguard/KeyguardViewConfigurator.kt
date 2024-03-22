@@ -40,7 +40,6 @@ import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
-import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.keyguard.shared.model.LockscreenSceneBlueprint
@@ -52,7 +51,6 @@ import com.android.systemui.keyguard.ui.composable.blueprint.ComposableLockscree
 import com.android.systemui.keyguard.ui.view.KeyguardIndicationArea
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.keyguard.ui.view.layout.KeyguardBlueprintCommandListener
-import com.android.systemui.keyguard.ui.viewmodel.AodAlphaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
@@ -84,7 +82,6 @@ constructor(
     private val keyguardRootViewModel: KeyguardRootViewModel,
     private val keyguardIndicationAreaViewModel: KeyguardIndicationAreaViewModel,
     private val notificationShadeWindowView: NotificationShadeWindowView,
-    private val featureFlags: FeatureFlagsClassic,
     private val indicationController: KeyguardIndicationController,
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val occludingAppDeviceEntryMessageViewModel: OccludingAppDeviceEntryMessageViewModel,
@@ -101,13 +98,13 @@ constructor(
     private val deviceEntryHapticsInteractor: DeviceEntryHapticsInteractor,
     private val vibratorHelper: VibratorHelper,
     private val falsingManager: FalsingManager,
-    private val aodAlphaViewModel: AodAlphaViewModel,
     private val keyguardClockViewModel: KeyguardClockViewModel,
     private val smartspaceViewModel: KeyguardSmartspaceViewModel,
     private val lockscreenContentViewModel: LockscreenContentViewModel,
     private val lockscreenSceneBlueprintsLazy: Lazy<Set<LockscreenSceneBlueprint>>,
     private val keyguardBlueprintViewBinder: KeyguardBlueprintViewBinder,
     private val clockInteractor: KeyguardClockInteractor,
+    private val keyguardViewMediator: KeyguardViewMediator,
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
@@ -209,6 +206,7 @@ constructor(
                 deviceEntryHapticsInteractor,
                 vibratorHelper,
                 falsingManager,
+                keyguardViewMediator,
             )
     }
 
