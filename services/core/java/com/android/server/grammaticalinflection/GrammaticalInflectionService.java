@@ -143,6 +143,15 @@ public class GrammaticalInflectionService extends SystemService {
         }
 
         @Override
+        public int peekSystemGrammaticalGenderByUserId(AttributionSource attributionSource,
+                int userId) {
+            return canGetSystemGrammaticalGender(attributionSource)
+                    ? GrammaticalInflectionService.this.getSystemGrammaticalGender(
+                    attributionSource, userId)
+                    : GRAMMATICAL_GENDER_NOT_SPECIFIED;
+        }
+
+        @Override
         public void onShellCommand(FileDescriptor in, FileDescriptor out,
                 FileDescriptor err, String[] args, ShellCallback callback,
                 ResultReceiver resultReceiver) {

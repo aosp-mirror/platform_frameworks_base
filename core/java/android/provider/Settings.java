@@ -16,6 +16,8 @@
 
 package android.provider;
 
+import static android.app.Flags.systemTermsOfAddressEnabled;
+
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
@@ -37,6 +39,7 @@ import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.Application;
 import android.app.AutomaticZenRule;
+import android.app.GrammaticalInflectionManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.SearchManager;
@@ -4594,6 +4597,13 @@ public final class Settings {
             }
             outConfig.fontWeightAdjustment = Settings.Secure.getIntForUser(
                     cr, Settings.Secure.FONT_WEIGHT_ADJUSTMENT, DEFAULT_FONT_WEIGHT, userHandle);
+            if (systemTermsOfAddressEnabled()) {
+                GrammaticalInflectionManager manager =
+                        ActivityThread.currentApplication().getApplicationContext()
+                                .getSystemService(GrammaticalInflectionManager.class);
+                outConfig.setGrammaticalGender(
+                        manager.peekSystemGrammaticalGenderByUserId(userHandle));
+            }
 
             final String localeValue =
                     Settings.System.getStringForUser(cr, SYSTEM_LOCALES, userHandle);
