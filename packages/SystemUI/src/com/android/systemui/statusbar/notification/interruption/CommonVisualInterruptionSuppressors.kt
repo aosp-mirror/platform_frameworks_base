@@ -228,11 +228,11 @@ class AlertKeyguardVisibilitySuppressor(
         keyguardNotificationVisibilityProvider.shouldHideNotification(entry)
 }
 
-
 class AvalancheSuppressor(
     private val avalancheProvider: AvalancheProvider,
     private val systemClock: SystemClock,
-) : VisualInterruptionFilter(
+) :
+    VisualInterruptionFilter(
         types = setOf(PEEK, PULSE),
         reason = "avalanche",
     ) {
@@ -261,7 +261,7 @@ class AvalancheSuppressor(
         return suppress
     }
 
-    private fun calculateState(entry: NotificationEntry): State  {
+    private fun calculateState(entry: NotificationEntry): State {
         if (
             entry.ranking.isConversation &&
                 entry.sbn.notification.`when` > avalancheProvider.startTime
