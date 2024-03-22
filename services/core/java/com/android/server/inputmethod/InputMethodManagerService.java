@@ -1136,7 +1136,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 if (!isCurrentUser) {
                     return;
                 }
-                mSettings = newSettings;
+                mSettings = queryInputMethodServicesInternal(mContext, userId,
+                        newAdditionalSubtypeMap, DirectBootAwareness.AUTO);
                 postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */);
 
                 boolean changed = false;
