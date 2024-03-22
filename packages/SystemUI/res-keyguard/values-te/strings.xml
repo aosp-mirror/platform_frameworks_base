@@ -111,12 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"అదనపు సెక్యూరిటీ కోసం, బదులుగా ఆకృతిని ఉపయోగించండి"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"అదనపు సెక్యూరిటీ కోసం, బదులుగా PINను ఉపయోగించండి"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"అదనపు సెక్యూరిటీ కోసం, బదులుగా పాస్‌వర్డ్‌ను ఉపయోగించండి"</string>
-    <!-- no translation found for kg_prompt_added_security_pin (5487992065995475528) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_pattern (1017068086102168544) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_password (6053156069765029006) -->
-    <skip />
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"అదనపు సెక్యూరిటీ కోసం PIN ఎంటర్ చేయాలి"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"అదనపు సెక్యూరిటీ కోసం ఆకృతి అవసరం"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"అదనపు సెక్యూరిటీ కోసం పాస్‌వర్డ్‌ను ఎంటర్ చేయాలి"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"పరికరం నిర్వాహకుల ద్వారా లాక్ చేయబడింది"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"పరికరం మాన్యువల్‌గా లాక్ చేయబడింది"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"గుర్తించలేదు"</string>
