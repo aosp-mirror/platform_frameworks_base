@@ -26,6 +26,11 @@ android_test {
         "platform-test-annotations",
         "platform-test-rules",
         "truth",
+
+        // beadstead
+        "Nene",
+        "Harrier",
+        "TestApp",
     ],
     test_suites: [
         "general-tests",
