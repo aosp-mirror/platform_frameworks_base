@@ -898,6 +898,32 @@ public class TaskFragmentTest extends WindowTestsBase {
         }
     }
 
+    @Test
+    public void testSetResumedActivity() {
+        // Setup two activities in ActivityEmbedding split.
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment taskFragmentLeft = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .createActivityCount(1)
+                .build();
+        final TaskFragment taskFragmentRight = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .createActivityCount(1)
+                .build();
+        taskFragmentRight.setAdjacentTaskFragment(taskFragmentLeft);
+        taskFragmentLeft.setAdjacentTaskFragment(taskFragmentRight);
+        final ActivityRecord appLeftTop = taskFragmentLeft.getTopMostActivity();
+        final ActivityRecord appRightTop = taskFragmentRight.getTopMostActivity();
+
+        // Ensure the focused app is updated when the right activity resumed.
+        taskFragmentRight.setResumedActivity(appRightTop, "test");
+        assertEquals(appRightTop, task.getDisplayContent().mFocusedApp);
+
+        // Ensure the focused app is updated when the left activity resumed.
+        taskFragmentLeft.setResumedActivity(appLeftTop, "test");
+        assertEquals(appLeftTop, task.getDisplayContent().mFocusedApp);
+    }
+
     private WindowState createAppWindow(ActivityRecord app, String name) {
         final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, app, name,
                 0 /* ownerId */, false /* ownerCanAddInternalSystemWindow */, new TestIWindow());
