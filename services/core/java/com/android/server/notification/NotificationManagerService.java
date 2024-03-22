@@ -11924,6 +11924,9 @@ public class NotificationManagerService extends SystemService {
         if (record != null && (record.getSbn().getNotification().flags
                 & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY) > 0) {
             boolean isAppForeground = pkg != null && packageImportance == IMPORTANCE_FOREGROUND;
+
+            // Lifetime extended notifications don't need to alert on state change.
+            record.setPostSilently(true);
             mHandler.post(new EnqueueNotificationRunnable(record.getUser().getIdentifier(),
                     record, isAppForeground,
                     mPostNotificationTrackerFactory.newTracker(null)));
