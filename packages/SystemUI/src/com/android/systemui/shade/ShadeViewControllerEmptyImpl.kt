@@ -45,7 +45,6 @@ class ShadeViewControllerEmptyImpl @Inject constructor() :
     override val isViewEnabled: Boolean = false
     override fun shouldHideStatusBarIconsWhenExpanded() = false
     @Deprecated("Not supported by scenes") override fun blockExpansionForCurrentTouch() {}
-    override fun disableHeader(state1: Int, state2: Int, animated: Boolean) {}
     override fun startExpandLatencyTracking() {}
     override fun startBouncerPreHideAnimation() {}
     override fun dozeTimeTick() {}

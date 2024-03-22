@@ -111,7 +111,6 @@ class ShadeControllerImplTest : SysuiTestCase() {
             ShadeControllerImpl(
                 commandQueue,
                 FakeExecutor(FakeSystemClock()),
-                touchLog,
                 windowRootViewVisibilityInteractor,
                 keyguardStateController,
                 statusBarStateController,
@@ -119,7 +118,7 @@ class ShadeControllerImplTest : SysuiTestCase() {
                 statusBarWindowController,
                 deviceProvisionedController,
                 notificationShadeWindowController,
-                windowManager,
+                0,
                 Lazy { npvc },
                 Lazy { assistManager },
                 Lazy { gutsManager },

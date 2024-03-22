@@ -36,13 +36,6 @@ interface ShadeViewController {
     /** Returns whether status bar icons should be hidden when the shade is expanded. */
     fun shouldHideStatusBarIconsWhenExpanded(): Boolean
 
-    /**
-     * Disables the shade header.
-     *
-     * @see ShadeHeaderController.disable
-     */
-    fun disableHeader(state1: Int, state2: Int, animated: Boolean)
-
     /** If the latency tracker is enabled, begins tracking expand latency. */
     @Deprecated("No longer supported. Do not add new calls to this.")
     fun startExpandLatencyTracking()

@@ -48,6 +48,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeHeaderController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.statusbar.CommandQueue;
@@ -79,6 +80,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     @Mock private QuickSettingsController mQuickSettingsController;
     @Mock private ShadeViewController mShadeViewController;
     @Mock private PanelExpansionInteractor mPanelExpansionInteractor;
+    @Mock private ShadeHeaderController mShadeHeaderController;
     @Mock private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final MetricsLogger mMetricsLogger = new FakeMetricsLogger();
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -112,8 +114,8 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 mScreenPinningRequest,
                 mShadeController,
                 mCommandQueue,
-                mShadeViewController,
                 mPanelExpansionInteractor,
+                mShadeHeaderController,
                 mRemoteInputQuickSettingsDisabler,
                 mMetricsLogger,
                 mKeyguardUpdateMonitor,

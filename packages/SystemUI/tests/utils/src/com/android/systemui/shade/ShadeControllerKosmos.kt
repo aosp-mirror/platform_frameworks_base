@@ -18,7 +18,6 @@
 
 package com.android.systemui.shade
 
-import android.view.WindowManager
 import com.android.systemui.assist.AssistManager
 import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
@@ -66,7 +65,6 @@ val Kosmos.shadeControllerImpl by
         ShadeControllerImpl(
             mock<CommandQueue>(),
             fakeExecutor,
-            mock<LogBuffer>(),
             windowRootViewVisibilityInteractor,
             mock<KeyguardStateController>(),
             statusBarStateController,
@@ -74,7 +72,7 @@ val Kosmos.shadeControllerImpl by
             mock<StatusBarWindowController>(),
             deviceProvisionedController,
             mock<NotificationShadeWindowController>(),
-            mock<WindowManager>(),
+            0,
             { mock<NotificationPanelViewController>() },
             { mock<AssistManager>() },
             { mock<NotificationGutsManager>() },
