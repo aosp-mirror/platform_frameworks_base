@@ -814,15 +814,15 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"הצגת סמלי התראות בעדיפות נמוכה"</string>
     <string name="other" msgid="429768510980739978">"אחר"</string>
-    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"הסרת האריח"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"הוספת האריח בסוף הרשימה"</string>
-    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"העברת האריח"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"הוספת אריח"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"הסרת הלחצן"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"הוספת הלחצן בסוף הרשימה"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"העברת הלחצן"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"הוספת לחצן"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"העברה למיקום <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"הוספה למיקום <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"מיקום <xliff:g id="POSITION">%1$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"האריח נוסף"</string>
-    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"האריח הוסר"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"הלחצן נוסף"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"הלחצן הוסר"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"עורך הגדרות מהירות."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"התראות <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"פתיחת הגדרות."</string>
@@ -1154,9 +1154,9 @@
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"כדי לעבור בין רשתות, צריך לנתק את האתרנט"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"‏כדי לשפר את חוויית השימוש במכשיר, אפליקציות ושירותים יוכלו לחפש רשתות Wi-Fi בכל שלב, גם כאשר ה-Wi-Fi כבוי. אפשר לשנות זאת בהגדרות של חיפוש נקודות Wi-Fi. "<annotation id="link">"שינוי"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"השבתה של מצב טיסה"</string>
-    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"האפליקציה <xliff:g id="APPNAME">%1$s</xliff:g> מבקשת להוסיף להגדרות המהירות את האריח הבא"</string>
-    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"הוספת אריח"</string>
-    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"לא להוסיף אריח"</string>
+    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"אפליקציית <xliff:g id="APPNAME">%1$s</xliff:g> מבקשת להוסיף להגדרות המהירות את הלחצן הבא"</string>
+    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"להוסיף לחצן"</string>
+    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"לא להוסיף לחצן"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"בחירת משתמש"</string>
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{אפליקציה אחת (#) פעילה}one{# אפליקציות פעילות}two{# אפליקציות פעילות}other{# אפליקציות פעילות}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"מידע חדש"</string>

@@ -589,7 +589,7 @@
     <string name="volume_dialog_title" msgid="6502703403483577940">"「%s」音量控制項"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"有來電和通知時會響鈴 (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"正在播放「<xliff:g id="LABEL">%s</xliff:g>」的裝置："</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"將播放音訊的媒體："</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"音訊播放位置"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"系統使用者介面調整精靈"</string>
     <string name="status_bar" msgid="4357390266055077437">"狀態列"</string>
     <string name="demo_mode" msgid="263484519766901593">"系統 UI 展示模式"</string>

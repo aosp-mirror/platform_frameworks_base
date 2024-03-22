@@ -1140,7 +1140,7 @@
     <string name="mobile_data_connection_active" msgid="944490013299018227">"متصلة بالإنترنت"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"متصلة مؤقتًا"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"الاتصال ضعيف"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"لن يتم تلقائيًا الاتصال ببيانات الجوّال."</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"لن يتم تلقائيًا الاتصال ببيانات الجوّال"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"لا يتوفّر اتصال بالإنترنت"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"لا تتوفّر شبكات أخرى."</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"لا تتوفّر أي شبكات."</string>

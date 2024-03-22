@@ -286,7 +286,7 @@
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Geblokkeer"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Mediatoestel"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Gebruiker"</string>
-    <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
+    <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internet"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Netwerke is beskikbaar"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Netwerke is nie beskikbaar nie"</string>
