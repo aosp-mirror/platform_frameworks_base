@@ -122,6 +122,7 @@ public abstract class NetworkEvaluationTestBase {
         MockitoAnnotations.initMocks(this);
 
         mSetFlagsRule.enableFlags(Flags.FLAG_VALIDATE_NETWORK_ON_IPSEC_LOSS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_EVALUATE_IPSEC_LOSS_ON_LP_NC_CHANGE);
 
         when(mNetwork.getNetId()).thenReturn(-1);
 
