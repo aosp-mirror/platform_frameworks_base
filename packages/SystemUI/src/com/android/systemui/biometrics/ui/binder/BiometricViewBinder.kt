@@ -486,6 +486,7 @@ class Spaghetti(
         fun onUserCanceled()
         fun onButtonNegative()
         fun onButtonTryAgain()
+        fun onContentViewMoreOptionsButtonPressed()
         fun onError()
         fun onUseDeviceCredential()
         fun onStartDelayedFingerprintSensor()

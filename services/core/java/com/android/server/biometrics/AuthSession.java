@@ -831,6 +831,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                     break;
 
                 case BiometricPrompt.DISMISSED_REASON_NEGATIVE:
+                case BiometricPrompt.DISMISSED_REASON_CONTENT_VIEW_MORE_OPTIONS:
                     mClientReceiver.onDialogDismissed(reason);
                     break;
 

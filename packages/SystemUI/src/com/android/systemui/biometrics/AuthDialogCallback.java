@@ -32,6 +32,7 @@ public interface AuthDialogCallback {
     int DISMISSED_ERROR = 5;
     int DISMISSED_BY_SYSTEM_SERVER = 6;
     int DISMISSED_CREDENTIAL_AUTHENTICATED = 7;
+    int DISMISSED_BUTTON_CONTENT_VIEW_MORE_OPTIONS = 8;
 
     @IntDef({DISMISSED_USER_CANCELED,
             DISMISSED_BUTTON_NEGATIVE,
@@ -39,7 +40,8 @@ public interface AuthDialogCallback {
             DISMISSED_BIOMETRIC_AUTHENTICATED,
             DISMISSED_ERROR,
             DISMISSED_BY_SYSTEM_SERVER,
-            DISMISSED_CREDENTIAL_AUTHENTICATED})
+            DISMISSED_CREDENTIAL_AUTHENTICATED,
+            DISMISSED_BUTTON_CONTENT_VIEW_MORE_OPTIONS})
     @interface DismissedReason {}
 
     /**
