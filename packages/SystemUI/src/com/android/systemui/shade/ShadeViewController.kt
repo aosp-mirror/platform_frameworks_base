@@ -96,6 +96,7 @@ interface ShadeViewController {
     val shadeHeadsUpTracker: ShadeHeadsUpTracker
 
     /** Returns the ShadeFoldAnimator. */
+    @Deprecated("This interface is deprecated in Scene Container")
     val shadeFoldAnimator: ShadeFoldAnimator
 
     companion object {
@@ -142,9 +143,10 @@ interface ShadeHeadsUpTracker {
 }
 
 /** Handles the lifecycle of the shade's animation that happens when folding a foldable. */
+@Deprecated("This interface should not be used in scene container.")
 interface ShadeFoldAnimator {
     /** Updates the views to the initial state for the fold to AOD animation. */
-    fun prepareFoldToAodAnimation()
+    @Deprecated("Not used when migrateClocksToBlueprint enabled") fun prepareFoldToAodAnimation()
 
     /**
      * Starts fold to AOD animation.
@@ -153,21 +155,24 @@ interface ShadeFoldAnimator {
      * @param endAction invoked when the animation finishes, also if it was cancelled.
      * @param cancelAction invoked when the animation is cancelled, before endAction.
      */
+    @Deprecated("Not used when migrateClocksToBlueprint enabled")
     fun startFoldToAodAnimation(startAction: Runnable, endAction: Runnable, cancelAction: Runnable)
 
     /** Cancels fold to AOD transition and resets view state. */
-    fun cancelFoldToAodAnimation()
+    @Deprecated("Not used when migrateClocksToBlueprint enabled") fun cancelFoldToAodAnimation()
 
     /** Returns the main view of the shade. */
-    val view: ViewGroup?
+    @Deprecated("Not used in Scene Container") val view: ViewGroup?
 }
 
 /**
  * An interface that provides the current state of the notification panel and related views, which
  * is needed to calculate [KeyguardStatusBarView]'s state in [KeyguardStatusBarViewController].
  */
+@Deprecated("This interface should not be used in scene container.")
 interface ShadeViewStateProvider {
     /** Returns the expanded height of the panel view. */
+    @Deprecated("deprecated by migrate_keyguard_status_bar_view flag")
     val panelViewExpandedHeight: Float
 
     /**
@@ -176,8 +181,9 @@ interface ShadeViewStateProvider {
      * TODO(b/138786270): If HeadsUpAppearanceController was injectable, we could inject it into
      *   [KeyguardStatusBarViewController] and remove this method.
      */
-    fun shouldHeadsUpBeVisible(): Boolean
+    @Deprecated("deprecated in Flexiglass.") fun shouldHeadsUpBeVisible(): Boolean
 
     /** Return the fraction of the shade that's expanded, when in lockscreen. */
+    @Deprecated("deprecated by migrate_keyguard_status_bar_view flag")
     val lockscreenShadeDragProgress: Float
 }
