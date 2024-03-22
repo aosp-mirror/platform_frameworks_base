@@ -42,7 +42,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.print.PrintManager;
 import android.provider.Settings;
-import android.provider.Settings.Secure;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
@@ -783,30 +782,5 @@ public class Utils {
             }
         }
         return false;
-    }
-
-    /** Whether to show the wireless charging warning in Settings. */
-    public static boolean shouldShowWirelessChargingWarningTip(
-            @NonNull Context context, @NonNull String tag) {
-        try {
-            return Secure.getInt(context.getContentResolver(), WIRELESS_CHARGING_WARNING_ENABLED, 0)
-                    == 1;
-        } catch (Exception e) {
-            Log.e(tag, "shouldShowWirelessChargingWarningTip()", e);
-        }
-        return false;
-    }
-
-    /** Stores the state of whether the wireless charging warning in Settings is enabled. */
-    public static void updateWirelessChargingWarningEnabled(
-            @NonNull Context context, boolean enabled, @NonNull String tag) {
-        try {
-            Secure.putInt(
-                    context.getContentResolver(),
-                    WIRELESS_CHARGING_WARNING_ENABLED,
-                    enabled ? 1 : 0);
-        } catch (Exception e) {
-            Log.e(tag, "setWirelessChargingWarningEnabled()", e);
-        }
     }
 }
