@@ -2383,6 +2383,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mFillResponseEventLogger.maybeSetResponseStatus(RESPONSE_STATUS_FAILURE);
             }
             mPresentationStatsEventLogger.logAndEndEvent();
+            mFillResponseEventLogger.maybeSetLatencyResponseProcessingMillis();
             mFillResponseEventLogger.logAndEndEvent();
         }
         notifyUnavailableToClient(AutofillManager.STATE_UNKNOWN_FAILED,
@@ -5400,6 +5401,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
         // Log the existing FillResponse event.
         mFillResponseEventLogger.maybeSetAvailableCount(0);
+        mFillResponseEventLogger.maybeSetLatencyResponseProcessingMillis();
         mFillResponseEventLogger.logAndEndEvent();
         mService.resetLastResponse();
 
