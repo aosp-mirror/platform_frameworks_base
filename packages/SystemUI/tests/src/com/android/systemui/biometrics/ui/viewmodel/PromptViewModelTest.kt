@@ -16,12 +16,14 @@
 
 package com.android.systemui.biometrics.ui.viewmodel
 
+import android.app.ActivityTaskManager
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Point
 import android.graphics.drawable.BitmapDrawable
+import android.hardware.biometrics.BiometricFingerprintConstants
 import android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT
 import android.hardware.biometrics.PromptContentItemBulletedText
 import android.hardware.biometrics.PromptContentView
@@ -38,9 +40,12 @@ import com.android.systemui.Flags.FLAG_BP_TALKBACK
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.UdfpsUtils
+import com.android.systemui.biometrics.data.repository.FakeBiometricStatusRepository
 import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
+import com.android.systemui.biometrics.domain.interactor.BiometricStatusInteractor
+import com.android.systemui.biometrics.domain.interactor.BiometricStatusInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
@@ -49,6 +54,7 @@ import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.biometrics.extractAuthenticatorTypes
 import com.android.systemui.biometrics.faceSensorPropertiesInternal
 import com.android.systemui.biometrics.fingerprintSensorPropertiesInternal
+import com.android.systemui.biometrics.shared.model.AuthenticationReason
 import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
 import com.android.systemui.biometrics.shared.model.DisplayRotation
@@ -57,6 +63,7 @@ import com.android.systemui.biometrics.shared.model.toSensorType
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.display.data.repository.FakeDisplayRepository
+import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
 import com.android.systemui.res.R
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -100,6 +107,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     @Mock private lateinit var packageManager: PackageManager
     @Mock private lateinit var applicationInfoWithIcon: ApplicationInfo
     @Mock private lateinit var applicationInfoNoIcon: ApplicationInfo
+    @Mock private lateinit var activityTaskManager: ActivityTaskManager
 
     private val fakeExecutor = FakeExecutor(FakeSystemClock())
     private val testScope = TestScope()
@@ -113,9 +121,11 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     private lateinit var fingerprintRepository: FakeFingerprintPropertyRepository
     private lateinit var promptRepository: FakePromptRepository
     private lateinit var displayStateRepository: FakeDisplayStateRepository
+    private lateinit var biometricStatusRepository: FakeBiometricStatusRepository
     private lateinit var displayRepository: FakeDisplayRepository
     private lateinit var displayStateInteractor: DisplayStateInteractor
     private lateinit var udfpsOverlayInteractor: UdfpsOverlayInteractor
+    private lateinit var biometricStatusInteractor: BiometricStatusInteractor
 
     private lateinit var selector: PromptSelectorInteractor
     private lateinit var viewModel: PromptViewModel
@@ -153,6 +163,9 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                 selectedUserInteractor,
                 testScope.backgroundScope
             )
+        biometricStatusRepository = FakeBiometricStatusRepository()
+        biometricStatusInteractor =
+            BiometricStatusInteractorImpl(activityTaskManager, biometricStatusRepository)
         selector =
             PromptSelectorInteractorImpl(fingerprintRepository, promptRepository, lockPatternUtils)
         selector.resetPrompt()
@@ -168,6 +181,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                 selector,
                 mContext,
                 udfpsOverlayInteractor,
+                biometricStatusInteractor,
                 udfpsUtils
             )
         iconViewModel = viewModel.iconViewModel
@@ -1043,8 +1057,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     fun auto_confirm_authentication_when_finger_down() = runGenericTest {
         val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
 
-        // No icon button when face only, can't confirm before auth
-        if (!testCase.isFaceOnly) {
+        if (testCase.isCoex) {
             viewModel.onOverlayTouch(obtainMotionEvent(MotionEvent.ACTION_DOWN))
         }
         viewModel.showAuthenticated(testCase.authenticatedModality, 0)
@@ -1059,14 +1072,18 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         assertThat(canTryAgain).isFalse()
         assertThat(authenticated?.isAuthenticated).isTrue()
 
-        if (testCase.isFaceOnly && expectConfirmation) {
-            assertThat(size).isEqualTo(PromptSize.MEDIUM)
-            assertButtonsVisible(
-                cancel = true,
-                confirm = true,
-            )
+        if (expectConfirmation) {
+            if (testCase.isFaceOnly) {
+                assertThat(size).isEqualTo(PromptSize.MEDIUM)
+                assertButtonsVisible(
+                    cancel = true,
+                    confirm = true,
+                )
 
-            viewModel.confirmAuthenticated()
+                viewModel.confirmAuthenticated()
+            } else if (testCase.isCoex) {
+                assertThat(authenticated?.isAuthenticatedAndConfirmed).isTrue()
+            }
             assertThat(message).isEqualTo(PromptMessage.Empty)
             assertButtonsVisible()
         }
@@ -1076,8 +1093,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     fun cannot_auto_confirm_authentication_when_finger_up() = runGenericTest {
         val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
 
-        // No icon button when face only, can't confirm before auth
-        if (!testCase.isFaceOnly) {
+        if (testCase.isCoex) {
             viewModel.onOverlayTouch(obtainMotionEvent(MotionEvent.ACTION_DOWN))
             viewModel.onOverlayTouch(obtainMotionEvent(MotionEvent.ACTION_UP))
         }
@@ -1379,6 +1395,12 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             packageName = packageName,
         )
 
+        biometricStatusRepository.setFingerprintAcquiredStatus(
+            AcquiredFingerprintAuthenticationStatus(
+                AuthenticationReason.BiometricPromptAuthentication,
+                BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_UNKNOWN
+            )
+        )
         // put the view model in the initial authenticating state, unless explicitly skipped
         val startMode =
             when {
