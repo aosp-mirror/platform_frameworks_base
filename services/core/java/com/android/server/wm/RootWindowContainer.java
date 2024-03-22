@@ -31,6 +31,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_OCCLUDING;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.TRANSIT_SLEEP;
@@ -2496,15 +2497,17 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // Use NONE if keyguard is not showing.
                 int transit = TRANSIT_NONE;
                 Task startTask = null;
+                int flags = 0;
+                if (display.isKeyguardOccluded()) {
+                    startTask = display.getTaskOccludingKeyguard();
+                    flags = TRANSIT_FLAG_KEYGUARD_OCCLUDING;
+                    transit = WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
+                }
                 if (wasSleeping) {
                     transit = TRANSIT_WAKE;
-                } else if (display.isKeyguardOccluded()) {
-                    // The display was awake so this is resuming activity for occluding keyguard.
-                    transit = WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
-                    startTask = display.getTaskOccludingKeyguard();
                 }
                 display.mTransitionController.requestStartTransition(
-                        display.mTransitionController.createTransition(transit),
+                        display.mTransitionController.createTransition(transit, flags),
                         startTask, null /* remoteTransition */, null /* displayChange */);
             }
             // Set the sleeping state of the root tasks on the display.
