@@ -16,6 +16,10 @@
 
 package com.android.server.voiceinteraction;
 
+import static android.Manifest.permission.CAMERA;
+import static android.Manifest.permission.RECORD_AUDIO;
+import static android.app.AppOpsManager.OP_CAMERA;
+import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.service.voice.VisualQueryDetectionServiceFailure.ERROR_CODE_ILLEGAL_ATTENTION_STATE;
 import static android.service.voice.VisualQueryDetectionServiceFailure.ERROR_CODE_ILLEGAL_STREAMING_STATE;
 
@@ -24,6 +28,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.media.AudioFormat;
 import android.media.permission.Identity;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
@@ -58,6 +63,14 @@ import java.util.concurrent.ScheduledExecutorService;
 final class VisualQueryDetectorSession extends DetectorSession {
 
     private static final String TAG = "VisualQueryDetectorSession";
+
+    private static final String VISUAL_QUERY_DETECTION_AUDIO_OP_MESSAGE =
+            "Providing query detection result from VisualQueryDetectionService to "
+                    + "VoiceInteractionService";
+
+    private static final String VISUAL_QUERY_DETECTION_CAMERA_OP_MESSAGE =
+            "Providing query detection result from VisualQueryDetectionService to "
+                    + "VoiceInteractionService";
     private IVisualQueryDetectionAttentionListener mAttentionListener;
     private boolean mEgressingData;
     private boolean mQueryStreaming;
@@ -172,6 +185,22 @@ final class VisualQueryDetectorSession extends DetectorSession {
                                         "Cannot stream queries without attention signals."));
                         return;
                     }
+                    try {
+                        enforcePermissionsForVisualQueryDelivery(RECORD_AUDIO, OP_RECORD_AUDIO,
+                                VISUAL_QUERY_DETECTION_AUDIO_OP_MESSAGE);
+                    } catch (SecurityException e) {
+                        Slog.w(TAG, "Ignoring #onQueryDetected due to a SecurityException", e);
+                        try {
+                            callback.onVisualQueryDetectionServiceFailure(
+                                    new VisualQueryDetectionServiceFailure(
+                                            ERROR_CODE_ILLEGAL_STREAMING_STATE,
+                                            "Cannot stream queries without audio permission."));
+                        } catch (RemoteException e1) {
+                            notifyOnDetectorRemoteException();
+                            throw e1;
+                        }
+                        return;
+                    }
                     mQueryStreaming = true;
                     callback.onQueryDetected(partialQuery);
                     Slog.i(TAG, "Egressed from visual query detection process.");
@@ -202,6 +231,48 @@ final class VisualQueryDetectorSession extends DetectorSession {
                                                 + "enabling the setting."));
                         return;
                     }
+
+                    // Show camera icon if visual only accessibility data egresses
+                    if (partialResult.getAccessibilityDetectionData() != null) {
+                        try {
+                            enforcePermissionsForVisualQueryDelivery(CAMERA, OP_CAMERA,
+                                    VISUAL_QUERY_DETECTION_CAMERA_OP_MESSAGE);
+                        } catch (SecurityException e) {
+                            Slog.w(TAG, "Ignoring #onQueryDetected due to a SecurityException", e);
+                            try {
+                                callback.onVisualQueryDetectionServiceFailure(
+                                        new VisualQueryDetectionServiceFailure(
+                                                ERROR_CODE_ILLEGAL_STREAMING_STATE,
+                                                "Cannot stream visual only accessibility data "
+                                                        + "without camera permission."));
+                            } catch (RemoteException e1) {
+                                notifyOnDetectorRemoteException();
+                                throw e1;
+                            }
+                            return;
+                        }
+                    }
+
+                    // Show microphone icon if text query egresses
+                    if (!partialResult.getPartialQuery().isEmpty()) {
+                        try {
+                            enforcePermissionsForVisualQueryDelivery(RECORD_AUDIO, OP_RECORD_AUDIO,
+                                    VISUAL_QUERY_DETECTION_AUDIO_OP_MESSAGE);
+                        } catch (SecurityException e) {
+                            Slog.w(TAG, "Ignoring #onQueryDetected due to a SecurityException", e);
+                            try {
+                                callback.onVisualQueryDetectionServiceFailure(
+                                        new VisualQueryDetectionServiceFailure(
+                                                ERROR_CODE_ILLEGAL_STREAMING_STATE,
+                                                "Cannot stream queries without audio permission."));
+                            } catch (RemoteException e1) {
+                                notifyOnDetectorRemoteException();
+                                throw e1;
+                            }
+                            return;
+                        }
+                    }
+
                     mQueryStreaming = true;
                     callback.onResultDetected(partialResult);
                     Slog.i(TAG, "Egressed from visual query detection process.");
@@ -278,6 +349,20 @@ final class VisualQueryDetectorSession extends DetectorSession {
             Slog.d(TAG, "updateAccessibilityEgressStateLocked");
         }
         mEnableAccessibilityDataEgress = enable;
+    }
+
+    void enforcePermissionsForVisualQueryDelivery(String permission, int op, String msg) {
+        Binder.withCleanCallingIdentity(() -> {
+            synchronized (mLock) {
+                enforcePermissionForDataDelivery(mContext, mVoiceInteractorIdentity,
+                        permission, msg);
+                mAppOpsManager.noteOpNoThrow(
+                        op, mVoiceInteractorIdentity.uid,
+                        mVoiceInteractorIdentity.packageName,
+                        mVoiceInteractorIdentity.attributionTag,
+                        msg);
+            }
+        });
     }
 
     @SuppressWarnings("GuardedBy")
