@@ -59,16 +59,12 @@ interface ICompanionDeviceManager {
         int userId);
 
     @EnforcePermission("REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE")
-    void legacyStartObservingDevicePresence(in String deviceAddress, in String callingPackage, int userId);
+    void registerDevicePresenceListenerService(in String deviceAddress, in String callingPackage,
+        int userId);
 
     @EnforcePermission("REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE")
-    void legacyStopObservingDevicePresence(in String deviceAddress, in String callingPackage, int userId);
-
-    @EnforcePermission("REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE")
-    void startObservingDevicePresence(in ObservingDevicePresenceRequest request, in String packageName, int userId);
-
-    @EnforcePermission("REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE")
-    void stopObservingDevicePresence(in ObservingDevicePresenceRequest request, in String packageName, int userId);
+    void unregisterDevicePresenceListenerService(in String deviceAddress, in String callingPackage,
+        int userId);
 
     boolean canPairWithoutPrompt(in String packageName, in String deviceMacAddress, int userId);
 
@@ -97,11 +93,9 @@ interface ICompanionDeviceManager {
     @EnforcePermission("USE_COMPANION_TRANSPORTS")
     void removeOnMessageReceivedListener(int messageType, IOnMessageReceivedListener listener);
 
-    @EnforcePermission("REQUEST_COMPANION_SELF_MANAGED")
-    void notifySelfManagedDeviceAppeared(int associationId);
+    void notifyDeviceAppeared(int associationId);
 
-    @EnforcePermission("REQUEST_COMPANION_SELF_MANAGED")
-    void notifySelfManagedDeviceDisappeared(int associationId);
+    void notifyDeviceDisappeared(int associationId);
 
     PendingIntent buildPermissionTransferUserConsentIntent(String callingPackage, int userId,
         int associationId);
@@ -141,4 +135,10 @@ interface ICompanionDeviceManager {
     byte[] getBackupPayload(int userId);
 
     void applyRestoredPayload(in byte[] payload, int userId);
+
+    @EnforcePermission("REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE")
+    void startObservingDevicePresence(in ObservingDevicePresenceRequest request, in String packageName, int userId);
+
+    @EnforcePermission("REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE")
+    void stopObservingDevicePresence(in ObservingDevicePresenceRequest request, in String packageName, int userId);
 }
