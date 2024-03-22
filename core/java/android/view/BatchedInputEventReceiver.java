@@ -29,6 +29,7 @@ public class BatchedInputEventReceiver extends InputEventReceiver {
     private Choreographer mChoreographer;
     private boolean mBatchingEnabled;
     private boolean mBatchedInputScheduled;
+    private final String mTag;
     private final Handler mHandler;
     private final Runnable mConsumeBatchedInputEvents = new Runnable() {
         @Override
@@ -43,6 +44,7 @@ public class BatchedInputEventReceiver extends InputEventReceiver {
         super(inputChannel, looper);
         mChoreographer = choreographer;
         mBatchingEnabled = true;
+        mTag = inputChannel.getName();
         traceBoolVariable("mBatchingEnabled", mBatchingEnabled);
         traceBoolVariable("mBatchedInputScheduled", mBatchedInputScheduled);
         mHandler = new Handler(looper);
@@ -123,7 +125,12 @@ public class BatchedInputEventReceiver extends InputEventReceiver {
     private final class BatchedInputRunnable implements Runnable {
         @Override
         public void run() {
-            doConsumeBatchedInput(mChoreographer.getFrameTimeNanos());
+            try {
+                Trace.traceBegin(Trace.TRACE_TAG_INPUT, mTag);
+                doConsumeBatchedInput(mChoreographer.getFrameTimeNanos());
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_INPUT);
+            }
         }
     }
     private final BatchedInputRunnable mBatchedInputRunnable = new BatchedInputRunnable();
