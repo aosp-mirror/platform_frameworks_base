@@ -180,7 +180,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"Enkele standaardwaarden ingesteld"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Geen standaardwaarden ingesteld"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Instellingen tekst-naar-spraak"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Tekst-naar-spraakuitvoer"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Tekst-naar-spraak-uitvoer"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Spreeksnelheid"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Snelheid waarmee de tekst wordt gesproken"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Toonhoogte"</string>
