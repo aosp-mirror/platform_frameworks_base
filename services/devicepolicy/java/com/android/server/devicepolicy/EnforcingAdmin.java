@@ -325,8 +325,22 @@ final class EnforcingAdmin {
 
     @Override
     public String toString() {
-        return "EnforcingAdmin { mPackageName= " + mPackageName + ", mComponentName= "
-                + mComponentName + ", mAuthorities= " + mAuthorities + ", mUserId= "
-                + mUserId + ", mIsRoleAuthority= " + mIsRoleAuthority + " }\n";
+        StringBuilder sb = new StringBuilder();
+        sb.append("EnforcingAdmin { mPackageName= ");
+        sb.append(mPackageName);
+        if (mComponentName != null) {
+            sb.append(", mComponentName= ");
+            sb.append(mComponentName);
+        }
+        if (mAuthorities != null) {
+            sb.append(", mAuthorities= ");
+            sb.append(mAuthorities);
+        }
+        sb.append(", mUserId= ");
+        sb.append(mUserId);
+        sb.append(", mIsRoleAuthority= ");
+        sb.append(mIsRoleAuthority);
+        sb.append(" }");
+        return sb.toString();
     }
 }
