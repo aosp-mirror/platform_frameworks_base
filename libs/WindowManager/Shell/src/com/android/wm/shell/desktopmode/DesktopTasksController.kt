@@ -1342,6 +1342,13 @@ class DesktopTasksController(
                     "setTaskListener"
             ) { _ -> listener?.let { remoteListener.register(it) } ?: remoteListener.unregister() }
         }
+
+        override fun moveToDesktop(taskId: Int) {
+            ExecutorUtils.executeRemoteCallWithTaskPermission(
+                controller,
+                "moveToDesktop"
+            ) { c -> c.moveToDesktop(taskId) }
+        }
     }
 
     companion object {
