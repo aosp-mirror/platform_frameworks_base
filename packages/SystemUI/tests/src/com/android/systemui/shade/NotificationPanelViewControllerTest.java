@@ -1043,7 +1043,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     public void testPanelClosedWhenClosingQsInSplitShade() {
         mShadeExpansionStateManager.onPanelExpansionChanged(/* fraction= */ 1,
-                /* expanded= */ true, /* tracking= */ false, /* dragDownPxAmount= */ 0);
+                /* expanded= */ true, /* tracking= */ false);
         enableSplitShade(/* enabled= */ true);
         mNotificationPanelViewController.setExpandedFraction(1f);
 

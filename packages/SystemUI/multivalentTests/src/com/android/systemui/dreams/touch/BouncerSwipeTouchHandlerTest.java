@@ -376,7 +376,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         // Ensure correct expansion passed in.
         ShadeExpansionChangeEvent event =
                 new ShadeExpansionChangeEvent(
-                        expansion, /* expanded= */ false, /* tracking= */ true, dragDownAmount);
+                        expansion, /* expanded= */ false, /* tracking= */ true);
         verify(mScrimController).expand(event);
     }
 

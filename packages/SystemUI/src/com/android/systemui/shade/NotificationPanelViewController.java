@@ -4122,7 +4122,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     @Override
     public void updateExpansionAndVisibility() {
         mShadeExpansionStateManager.onPanelExpansionChanged(
-                mExpandedFraction, isExpanded(), isTracking(), mExpansionDragDownAmountPx);
+                mExpandedFraction, isExpanded(), isTracking());
 
         updateVisibility();
     }
