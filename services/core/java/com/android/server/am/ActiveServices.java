@@ -8154,7 +8154,7 @@ public final class ActiveServices {
                 BackgroundStartPrivileges.NONE);
         @ReasonCode int allowStartFgs = shouldAllowFgsStartForegroundNoBindingCheckLocked(
                 allowWhileInUse, callingPid, callingUid, callingPackage, null /* targetService */,
-                BackgroundStartPrivileges.NONE);
+                BackgroundStartPrivileges.NONE, null);
 
         if (allowStartFgs == REASON_DENIED) {
             if (canBindingClientStartFgsLocked(callingUid) != null) {
@@ -8410,7 +8410,8 @@ public final class ActiveServices {
                                                 allowWhileInUse2,
                                                 clientPid, clientUid, clientPackageName,
                                                 null /* targetService */,
-                                                BackgroundStartPrivileges.NONE);
+                                                BackgroundStartPrivileges.NONE,
+                                                pr);
                                 if (allowStartFgs != REASON_DENIED) {
                                     return new Pair<>(allowStartFgs, clientPackageName);
                                 } else {
@@ -8447,7 +8448,7 @@ public final class ActiveServices {
         ActivityManagerService.FgsTempAllowListItem tempAllowListReason =
                 r.mInfoTempFgsAllowListReason = mAm.isAllowlistedForFgsStartLOSP(callingUid);
         int ret = shouldAllowFgsStartForegroundNoBindingCheckLocked(allowWhileInUse, callingPid,
-                callingUid, callingPackage, r, backgroundStartPrivileges);
+                callingUid, callingPackage, r, backgroundStartPrivileges, null);
 
         // If an app (App 1) is bound by another app (App 2) that could start an FGS, then App 1
         // is also allowed to start an FGS. We check all the binding
@@ -8503,7 +8504,8 @@ public final class ActiveServices {
     private @ReasonCode int shouldAllowFgsStartForegroundNoBindingCheckLocked(
             @ReasonCode int allowWhileInUse, int callingPid, int callingUid, String callingPackage,
             @Nullable ServiceRecord targetService,
-            BackgroundStartPrivileges backgroundStartPrivileges) {
+            BackgroundStartPrivileges backgroundStartPrivileges,
+            @Nullable ProcessRecord targetRecord) {
         int ret = allowWhileInUse;
 
         if (ret == REASON_DENIED) {
@@ -8565,13 +8567,15 @@ public final class ActiveServices {
         if (ret == REASON_DENIED) {
             // Flag check: are we disabling SAW FGS background starts?
             final boolean shouldDisableSaw = Flags.fgsDisableSaw()
-                    && CompatChanges.isChangeEnabled(FGS_BOOT_COMPLETED_RESTRICTIONS, callingUid);
+                    && CompatChanges.isChangeEnabled(FGS_SAW_RESTRICTIONS, callingUid);
             if (shouldDisableSaw) {
-                final ProcessRecord processRecord = mAm
-                        .getProcessRecordLocked(targetService.processName,
-                                targetService.appInfo.uid);
-                if (processRecord != null) {
-                    if (processRecord.mState.hasOverlayUi()) {
+                if (targetRecord == null) {
+                    synchronized (mAm.mPidsSelfLocked) {
+                        targetRecord = mAm.mPidsSelfLocked.get(callingPid);
+                    }
+                }
+                if (targetRecord != null) {
+                    if (targetRecord.mState.hasOverlayUi()) {
                         if (mAm.mAtmInternal.hasSystemAlertWindowPermission(callingUid, callingPid,
                                 callingPackage)) {
                             ret = REASON_SYSTEM_ALERT_WINDOW_PERMISSION;
