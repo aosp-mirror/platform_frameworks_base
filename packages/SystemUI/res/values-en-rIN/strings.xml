@@ -86,6 +86,8 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Taking screenshots is blocked by your IT admin"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Edit"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Edit screenshot"</string>
+    <!-- no translation found for screenshot_share_label (1653061117238861559) -->
+    <skip />
     <string name="screenshot_share_description" msgid="2861628935812656612">"Share screenshot"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Capture more"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Dismiss screenshot"</string>
@@ -538,7 +540,8 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"This device is managed by your parent. Your parent can see and manage information such as the apps that you use, your location and your screen time."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Kept unlocked by trust agent"</string>
-    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"Theft protection\nDevice locked, too many unlock attempts"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"Device was locked, too many authentication attempts"</string>
+    <string name="keyguard_indication_after_adaptive_auth_lock" msgid="2323400645470712787">"Device locked\nFailed authentication"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Sound settings"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Automatically caption media"</string>
@@ -583,10 +586,8 @@
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Mute"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"Cast"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Unavailable because ring is muted"</string>
-    <!-- no translation found for stream_alarm_unavailable (4059817189292197839) -->
-    <skip />
-    <!-- no translation found for stream_media_unavailable (6823020894438959853) -->
-    <skip />
+    <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Unavailable because Do Not Disturb is on"</string>
+    <string name="stream_media_unavailable" msgid="6823020894438959853">"Unavailable because Do Not Disturb is on"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Tap to unmute."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Tap to set to vibrate. Accessibility services may be muted."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Tap to mute. Accessibility services may be muted."</string>
@@ -603,16 +604,11 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibrate"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s volume controls"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Calls and notifications will ring (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
-    <!-- no translation found for volume_panel_enter_media_output_settings (8824244246272552669) -->
-    <skip />
-    <!-- no translation found for volume_panel_expanded_sliders (1885750987768506271) -->
-    <skip />
-    <!-- no translation found for volume_panel_collapsed_sliders (1413383759434791450) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_mute (6962563028495243738) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_unmute (7489063242934477382) -->
-    <skip />
+    <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"Enter output settings"</string>
+    <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"Volume sliders expanded"</string>
+    <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"Volume sliders collapsed"</string>
+    <string name="volume_panel_hint_mute" msgid="6962563028495243738">"mute %s"</string>
+    <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"unmute %s"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"Playing <xliff:g id="LABEL">%s</xliff:g> on"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"Audio will play on"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
@@ -759,7 +755,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Cycle forwards through recent apps"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Cycle backwards through recent apps"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Open apps list"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Show taskbar"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Open settings"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Open Assistant"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Lock screen"</string>
@@ -768,6 +763,10 @@
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Enter split screen with current app to RHS"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Enter split screen with current app to LHS"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Switch from split screen to full screen"</string>
+    <!-- no translation found for system_multitasking_splitscreen_focus_rhs (3838578650313318508) -->
+    <skip />
+    <!-- no translation found for system_multitasking_splitscreen_focus_lhs (3164261844398662518) -->
+    <skip />
     <string name="system_multitasking_replace" msgid="7410071959803642125">"During split screen: Replace an app from one to another"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Input"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Switch to next language"</string>
@@ -1266,8 +1265,7 @@
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Camera is blocked"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Camera and microphone blocked"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Microphone is blocked"</string>
-    <!-- no translation found for priority_mode_dream_overlay_content_description (3361628029609329182) -->
-    <skip />
+    <string name="priority_mode_dream_overlay_content_description" msgid="3361628029609329182">"Do not disturb"</string>
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"User presence is detected"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Set default notes app in Settings"</string>
     <string name="install_app" msgid="5066668100199613936">"Install app"</string>

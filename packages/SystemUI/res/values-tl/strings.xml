@@ -59,7 +59,7 @@
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Hiniling ng ibang device na palitan ang wika ng system"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Palitan ang wika"</string>
     <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"Huwag palitan ang wika"</string>
-    <string name="share_wifi_button_text" msgid="1285273973812029240">"Ibahagi ang Wi‑Fi"</string>
+    <string name="share_wifi_button_text" msgid="1285273973812029240">"I-share ang Wi‑Fi"</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Payagan ang wireless na pag-debug sa network na ito?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Pangalan ng Network (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nAddress ng Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Palaging payagan sa network na ito"</string>
@@ -86,6 +86,8 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Na-block ng iyong IT admin ang pagkuha ng mga screenshot"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"I-edit"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"I-edit ang screenshot"</string>
+    <!-- no translation found for screenshot_share_label (1653061117238861559) -->
+    <skip />
     <string name="screenshot_share_description" msgid="2861628935812656612">"Ibahagi ang screenshot"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Mag-capture pa"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"I-dismiss ang screenshot"</string>
@@ -538,7 +540,8 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Pinapamahalaan ng iyong magulang ang device na ito. Makikita at mapapamahalaan ng iyong magulang ang impormasyon tulad ng mga app na ginagamit mo, iyong lokasyon, at tagal ng paggamit mo sa device."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Pinanatiling naka-unlock ng TrustAgent"</string>
-    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"Theft protection\nNa-lock ang device, sobrang pag-unlock"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"Na-lock ang device, masyadong maraming pagsubok sa pag-authenticate"</string>
+    <string name="keyguard_indication_after_adaptive_auth_lock" msgid="2323400645470712787">"Na-lock ang device\nHindi pumasa sa pag-authenticate"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Mga setting ng tunog"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"I-autocaption ang media"</string>
@@ -752,7 +755,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Mag-cycle pasulong sa mga kamakailang app"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Mag-cycle pabalik sa mga kamakailang app"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Buksan ang listahan ng mga app"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Ipakita ang taskbar"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Buksan ang mga setting"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Buksan ang assistant"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"I-lock ang screen"</string>
@@ -761,6 +763,10 @@
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Lumipat sa split screen nang nasa RHS ang kasalukuyang app"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Lumipat sa split screen nang nasa LHS ang kasalukuyang app"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Lumipat sa full screen mula sa split screen"</string>
+    <!-- no translation found for system_multitasking_splitscreen_focus_rhs (3838578650313318508) -->
+    <skip />
+    <!-- no translation found for system_multitasking_splitscreen_focus_lhs (3164261844398662518) -->
+    <skip />
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Habang nasa split screen: magpalit-palit ng app"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Input"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Lumipat sa susunod na wika"</string>
@@ -1259,8 +1265,7 @@
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Naka-block ang camera"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Naka-block ang camera at mikropono"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Naka-block ang mikropono"</string>
-    <!-- no translation found for priority_mode_dream_overlay_content_description (3361628029609329182) -->
-    <skip />
+    <string name="priority_mode_dream_overlay_content_description" msgid="3361628029609329182">"Huwag istorbohin"</string>
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"Na-detect ang presensya ng user"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Magtakda ng default na app sa pagtatala sa Mga Setting"</string>
     <string name="install_app" msgid="5066668100199613936">"I-install ang app"</string>

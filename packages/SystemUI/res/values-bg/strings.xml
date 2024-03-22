@@ -86,6 +86,8 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Правенето на екранни снимки е блокирано от системния ви администратор"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Редактиране"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Редактиране на екранната снимка"</string>
+    <!-- no translation found for screenshot_share_label (1653061117238861559) -->
+    <skip />
     <string name="screenshot_share_description" msgid="2861628935812656612">"Споделяне на екранната снимка"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Заснемане на още"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Отхвърляне на екранната снимка"</string>
@@ -538,7 +540,8 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Това устройство се управлява от родителя ви. Той може да вижда и управлява информация, като например приложенията, които използвате, местоположението ви и времето на ползване."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Поддържа се отключено от надежден агент"</string>
-    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"Защита от кражба\nУ-вото е закл., твърде много опити за откл."</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"Устройството бе заключено. Твърде много опити за удостоверяване"</string>
+    <string name="keyguard_indication_after_adaptive_auth_lock" msgid="2323400645470712787">"Устройството е заключено\nНеуспешно удостоверяване"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Настройки за звука"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Медия с автоматични надписи"</string>
@@ -752,7 +755,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Превъртане напред през скорошните приложения"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Превъртане назад през скорошните приложения"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Отваряне на списъка с приложения"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Показване на лентата на задачите"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Отваряне на настройките"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Отваряне на Асистент"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Заключване на екрана"</string>
@@ -761,6 +763,10 @@
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Преминаване към разделен екран с текущото приложение отдясно"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Преминаване към разделен екран с текущото приложение отляво"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Превключване от разделен към цял екран"</string>
+    <!-- no translation found for system_multitasking_splitscreen_focus_rhs (3838578650313318508) -->
+    <skip />
+    <!-- no translation found for system_multitasking_splitscreen_focus_lhs (3164261844398662518) -->
+    <skip />
     <string name="system_multitasking_replace" msgid="7410071959803642125">"При разделен екран: замяна на дадено приложение с друго"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Въвеждане"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Превключване към следващия език"</string>
@@ -1259,8 +1265,7 @@
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Достъпът до камерата е блокиран"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Достъпът до камерата и микрофона е блокиран"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Достъпът до микрофона е блокиран"</string>
-    <!-- no translation found for priority_mode_dream_overlay_content_description (3361628029609329182) -->
-    <skip />
+    <string name="priority_mode_dream_overlay_content_description" msgid="3361628029609329182">"Не безпокойте"</string>
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"Установено е присъствие на потребител"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Задайте стандартно приложение за бележки от настройките"</string>
     <string name="install_app" msgid="5066668100199613936">"Инсталиране на приложението"</string>
