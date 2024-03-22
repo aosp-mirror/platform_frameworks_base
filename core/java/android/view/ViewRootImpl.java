@@ -12617,14 +12617,14 @@ public final class ViewRootImpl implements ViewParent,
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
     public void votePreferredFrameRateCategory(int frameRateCategory, int reason, View view) {
-        if (frameRateCategory == FRAME_RATE_CATEGORY_HIGH) {
-            mFrameRateCategoryHighCount = FRAME_RATE_CATEGORY_COUNT;
-        } else if (frameRateCategory == FRAME_RATE_CATEGORY_HIGH_HINT) {
-            mFrameRateCategoryHighHintCount = FRAME_RATE_CATEGORY_COUNT;
-        } else if (frameRateCategory == FRAME_RATE_CATEGORY_NORMAL) {
-            mFrameRateCategoryNormalCount = FRAME_RATE_CATEGORY_COUNT;
-        } else if (frameRateCategory == FRAME_RATE_CATEGORY_LOW) {
-            mFrameRateCategoryLowCount = FRAME_RATE_CATEGORY_COUNT;
+        switch (frameRateCategory) {
+            case FRAME_RATE_CATEGORY_LOW -> mFrameRateCategoryLowCount = FRAME_RATE_CATEGORY_COUNT;
+            case FRAME_RATE_CATEGORY_NORMAL ->
+                    mFrameRateCategoryNormalCount = FRAME_RATE_CATEGORY_COUNT;
+            case FRAME_RATE_CATEGORY_HIGH_HINT ->
+                    mFrameRateCategoryHighHintCount = FRAME_RATE_CATEGORY_COUNT;
+            case FRAME_RATE_CATEGORY_HIGH ->
+                    mFrameRateCategoryHighCount = FRAME_RATE_CATEGORY_COUNT;
         }
 
         int oldCategory = mPreferredFrameRateCategory;
