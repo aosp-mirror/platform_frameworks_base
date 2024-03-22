@@ -667,7 +667,7 @@ public class ViewRootImplTest {
     }
 
     /**
-     * Test how values of the frame rate cateogry are aggregated.
+     * Test how values of the frame rate category are aggregated.
      * It should take the max value among all of the voted categories per frame.
      */
     @Test
