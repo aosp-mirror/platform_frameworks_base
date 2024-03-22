@@ -333,6 +333,7 @@ public class IpSecPacketLossDetectorTest extends NetworkEvaluationTestBase {
     public void testHandleLossRate_validationFail() throws Exception {
         checkHandleLossRate(
                 22, true /* isLastStateExpectedToUpdate */, true /* isCallbackExpected */);
+        verify(mConnectivityManager).reportNetworkConnectivity(mNetwork, false);
     }
 
     @Test
