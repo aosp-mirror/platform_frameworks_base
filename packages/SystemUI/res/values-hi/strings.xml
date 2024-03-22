@@ -86,6 +86,8 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"आईटी एडमिन ने स्क्रीनशॉट लेने पर रोक लगाई है"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"बदलाव करें"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"स्क्रीनशॉट में बदलाव करें"</string>
+    <!-- no translation found for screenshot_share_label (1653061117238861559) -->
+    <skip />
     <string name="screenshot_share_description" msgid="2861628935812656612">"स्क्रीनशॉट शेयर करें"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"ज़्यादा कॉन्टेंट कैप्चर करें"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"स्क्रीनशॉट को खारिज करें"</string>
@@ -538,7 +540,8 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"इस डिवाइस का प्रबंधन आपके अभिभावक करते हैं. अभिभावक आपके डिवाइस से जुड़ी जानकारी देख सकते हैं. साथ ही, इसे प्रबंधित कर सकते हैं. इनमें आपके इस्तेमाल किए गए ऐप्लिकेशन, जगह की जानकारी, और डिवाइस के इस्तेमाल में बिताए गए समय जैसी जानकारी शामिल है."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"वीपीएन"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent की वजह से अनलॉक रखा गया है"</string>
-    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"चोरी से सुरक्षा\nडिवाइस लॉक हो गया, अनलॉक की कई कोशिशें की गईं"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"कई बार पुष्टि करने की कोशिश की वजह से, डिवाइस लॉक है"</string>
+    <string name="keyguard_indication_after_adaptive_auth_lock" msgid="2323400645470712787">"डिवाइस लॉक है\nपुष्टि नहीं की जा सकी."</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"साउंड सेटिंग"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"ऑडियो-वीडियो से अपने-आप कैप्शन बनना"</string>
@@ -583,10 +586,8 @@
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"आवाज़ बंद है"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"कास्ट करें"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"रिंग म्यूट होने से आवाज़ नहीं सुनाई दी"</string>
-    <!-- no translation found for stream_alarm_unavailable (4059817189292197839) -->
-    <skip />
-    <!-- no translation found for stream_media_unavailable (6823020894438959853) -->
-    <skip />
+    <string name="stream_alarm_unavailable" msgid="4059817189292197839">"सुविधा बंद है, क्योंकि \'परेशान न करें\' मोड चालू है"</string>
+    <string name="stream_media_unavailable" msgid="6823020894438959853">"सुविधा बंद है, क्योंकि \'परेशान न करें\' मोड चालू है"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. अनम्यूट करने के लिए टैप करें."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. कंपन पर सेट करने के लिए टैप करें. सुलभता सेवाएं म्यूट हो सकती हैं."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. म्यूट करने के लिए टैप करें. सुलभता सेवाएं म्यूट हो सकती हैं."</string>
@@ -603,16 +604,11 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"वाइब्रेशन की सुविधा चालू करें"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s की आवाज़ कम या ज़्यादा करने की सुविधा"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"कॉल और सूचनाएं आने पर घंटी बजेगी (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
-    <!-- no translation found for volume_panel_enter_media_output_settings (8824244246272552669) -->
-    <skip />
-    <!-- no translation found for volume_panel_expanded_sliders (1885750987768506271) -->
-    <skip />
-    <!-- no translation found for volume_panel_collapsed_sliders (1413383759434791450) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_mute (6962563028495243738) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_unmute (7489063242934477382) -->
-    <skip />
+    <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"आउटपुट की सेटिंग डालें"</string>
+    <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"आवाज़ के स्लाइडर को बड़ा किया गया"</string>
+    <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"आवाज़ के स्लाइडर को छोटा किया गया"</string>
+    <string name="volume_panel_hint_mute" msgid="6962563028495243738">"%s को म्यूट करें"</string>
+    <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"%s को अनम्यूट करें"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> को चलाया जा रहा है"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"ऑडियो इसमें चलेगा"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"सिस्टम यूज़र इंटरफ़ेस (यूआई) ट्यूनर"</string>
@@ -759,7 +755,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"हाल ही में इस्तेमाल किए गए ऐप्लिकेशन के अगले पेज पर जाने के लिए"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"हाल ही में इस्तेमाल किए गए ऐप्लिकेशन के पिछले पेज पर जाने के लिए"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"ऐप्लिकेशन की सूची खोलने के लिए"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"टास्कबार दिखाने के लिए"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"सेटिंग खोलने के लिए"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Google Assistant खोलने के लिए"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"लॉक स्क्रीन"</string>
@@ -768,6 +763,10 @@
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"स्प्लिट स्क्रीन का इस्तेमाल करके, मौजूदा ऐप्लिकेशन को दाईं ओर ले जाएं"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"स्प्लिट स्क्रीन का इस्तेमाल करके, मौजूदा ऐप्लिकेशन को बाईं ओर ले जाएं"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"स्प्लिट स्क्रीन से फ़ुल स्क्रीन मोड पर स्विच करने के लिए"</string>
+    <!-- no translation found for system_multitasking_splitscreen_focus_rhs (3838578650313318508) -->
+    <skip />
+    <!-- no translation found for system_multitasking_splitscreen_focus_lhs (3164261844398662518) -->
+    <skip />
     <string name="system_multitasking_replace" msgid="7410071959803642125">"स्प्लिट स्क्रीन के दौरान: एक ऐप्लिकेशन को दूसरे ऐप्लिकेशन से बदलें"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"इनपुट"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"अगली भाषा पर स्विच करने के लिए"</string>
@@ -1266,8 +1265,7 @@
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"कैमरे का ऐक्सेस नहीं है"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"कैमरे और माइक्रोफ़ोन का ऐक्सेस नहीं है"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"माइक्रोफ़ोन का ऐक्सेस नहीं है"</string>
-    <!-- no translation found for priority_mode_dream_overlay_content_description (3361628029609329182) -->
-    <skip />
+    <string name="priority_mode_dream_overlay_content_description" msgid="3361628029609329182">"\'परेशान न करें\' मोड"</string>
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"उपयोगकर्ता की मौजूदगी का पता लगाया गया"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"सेटिंग में जाकर, नोट लेने की सुविधा देने वाले ऐप्लिकेशन को डिफ़ॉल्ट के तौर पर सेट करें"</string>
     <string name="install_app" msgid="5066668100199613936">"ऐप्लिकेशन इंस्टॉल करें"</string>

@@ -86,6 +86,8 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"‏יצירת צילומי המסך נחסמה על ידי מנהל ה-IT"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"עריכה"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"עריכת צילום מסך"</string>
+    <!-- no translation found for screenshot_share_label (1653061117238861559) -->
+    <skip />
     <string name="screenshot_share_description" msgid="2861628935812656612">"שיתוף של צילום מסך"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"צילום תוכן נוסף"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"סגירת צילום מסך"</string>
@@ -538,7 +540,10 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"מכשיר זה מנוהל על ידי ההורה שלך. להורה שלך יש אפשרות לצפות בפרטים כמו האפליקציות שבשימוש, המיקום וזמן המסך שלך, ולנהל אותם."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"הנעילה נמנעת על ידי סביבה מהימנה"</string>
-    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"הגנה מפני גניבה\nהמכשיר ננעל, יותר מדי ניסיונות לביטול הנעילה"</string>
+    <!-- no translation found for kg_prompt_after_adaptive_auth_lock (2587481497846342760) -->
+    <skip />
+    <!-- no translation found for keyguard_indication_after_adaptive_auth_lock (2323400645470712787) -->
+    <skip />
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>‏. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"הגדרות צליל"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"הוספת כתוביות באופן אוטומטי למדיה"</string>
@@ -583,10 +588,8 @@
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"השתקה"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"‏הפעלת Cast"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"לא זמין כי הצלצול מושתק"</string>
-    <!-- no translation found for stream_alarm_unavailable (4059817189292197839) -->
-    <skip />
-    <!-- no translation found for stream_media_unavailable (6823020894438959853) -->
-    <skip />
+    <string name="stream_alarm_unavailable" msgid="4059817189292197839">"לא זמין כי התכונה \'נא לא להפריע\' מופעלת"</string>
+    <string name="stream_media_unavailable" msgid="6823020894438959853">"לא זמין כי התכונה \'נא לא להפריע\' מופעלת"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"‏%1$s. יש להקיש כדי לבטל את ההשתקה."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"‏%1$s. צריך להקיש כדי להגדיר רטט. ייתכן ששירותי הנגישות מושתקים."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"‏%1$s. יש להקיש כדי להשתיק. ייתכן ששירותי הנגישות יושתקו."</string>
@@ -603,16 +606,11 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"רטט"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"‏בקרי עוצמת קול של %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"הטלפון יצלצל כשמתקבלות שיחות והתראות (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
-    <!-- no translation found for volume_panel_enter_media_output_settings (8824244246272552669) -->
-    <skip />
-    <!-- no translation found for volume_panel_expanded_sliders (1885750987768506271) -->
-    <skip />
-    <!-- no translation found for volume_panel_collapsed_sliders (1413383759434791450) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_mute (6962563028495243738) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_unmute (7489063242934477382) -->
-    <skip />
+    <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"הזנה של הגדרות הפלט"</string>
+    <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"פסי ההזזה של עוצמת הקול במצב מורחב"</string>
+    <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"פסי ההזזה של עוצמת הקול במצב מכווץ"</string>
+    <string name="volume_panel_hint_mute" msgid="6962563028495243738">"‏השתקה של %s"</string>
+    <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"‏ביטול ההשתקה של %s"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"הפעלה של <xliff:g id="LABEL">%s</xliff:g> במכשיר"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"האודיו יופעל במכשיר"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
@@ -759,7 +757,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"דפדוף קדימה באפליקציות האחרונות"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"דפדוף אחורה באפליקציות האחרונות"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"פתיחה של רשימת האפליקציות"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"הצגת סרגל האפליקציות"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"פתיחת ההגדרות"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"‏לפתיחת Google Assistant"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"מסך הנעילה"</string>
@@ -768,6 +765,10 @@
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"‏כניסה למסך מפוצל עם האפליקציה הנוכחית ל-RHS"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"‏כניסה למסך מפוצל עם האפליקציה הנוכחית ל-LHS"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"החלפה ממסך מפוצל למסך מלא"</string>
+    <!-- no translation found for system_multitasking_splitscreen_focus_rhs (3838578650313318508) -->
+    <skip />
+    <!-- no translation found for system_multitasking_splitscreen_focus_lhs (3164261844398662518) -->
+    <skip />
     <string name="system_multitasking_replace" msgid="7410071959803642125">"כשהמסך מפוצל: החלפה בין אפליקציה אחת לאחרת"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"קלט"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"מעבר לשפה הבאה"</string>
@@ -839,15 +840,15 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"הצגת סמלי התראות בעדיפות נמוכה"</string>
     <string name="other" msgid="429768510980739978">"אחר"</string>
-    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"הסרת האריח"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"הוספת האריח בסוף הרשימה"</string>
-    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"העברת האריח"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"הוספת אריח"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"הסרת הלחצן"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"הוספת הלחצן בסוף הרשימה"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"העברת הלחצן"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"הוספת לחצן"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"העברה למיקום <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"הוספה למיקום <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"מיקום <xliff:g id="POSITION">%1$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"האריח נוסף"</string>
-    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"האריח הוסר"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"הלחצן נוסף"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"הלחצן הוסר"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"עורך הגדרות מהירות."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"התראות <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"פתיחת הגדרות."</string>
@@ -1179,9 +1180,9 @@
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"כדי לעבור בין רשתות, צריך לנתק את האתרנט"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"‏כדי לשפר את חוויית השימוש במכשיר, אפליקציות ושירותים יוכלו לחפש רשתות Wi-Fi בכל שלב, גם כאשר ה-Wi-Fi כבוי. אפשר לשנות זאת בהגדרות של חיפוש נקודות Wi-Fi. "<annotation id="link">"שינוי"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"השבתה של מצב טיסה"</string>
-    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"האפליקציה <xliff:g id="APPNAME">%1$s</xliff:g> מבקשת להוסיף להגדרות המהירות את האריח הבא"</string>
-    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"הוספת אריח"</string>
-    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"לא להוסיף אריח"</string>
+    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"אפליקציית <xliff:g id="APPNAME">%1$s</xliff:g> מבקשת להוסיף להגדרות המהירות את הלחצן הבא"</string>
+    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"להוסיף לחצן"</string>
+    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"לא להוסיף לחצן"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"בחירת משתמש"</string>
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{אפליקציה אחת (#) פעילה}one{# אפליקציות פעילות}two{# אפליקציות פעילות}other{# אפליקציות פעילות}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"מידע חדש"</string>
@@ -1266,8 +1267,7 @@
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"המצלמה חסומה"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"המצלמה והמיקרופון חסומים"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"המיקרופון חסום"</string>
-    <!-- no translation found for priority_mode_dream_overlay_content_description (3361628029609329182) -->
-    <skip />
+    <string name="priority_mode_dream_overlay_content_description" msgid="3361628029609329182">"נא לא להפריע"</string>
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"נוכחות המשתמש זוהתה"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"צריך להגדיר את אפליקציית ברירת המחדל לפתקים ב\'הגדרות\'"</string>
     <string name="install_app" msgid="5066668100199613936">"התקנת האפליקציה"</string>

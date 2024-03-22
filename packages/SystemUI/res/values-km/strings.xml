@@ -86,6 +86,8 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"ការថតអេក្រង់ត្រូវបានទប់ស្កាត់ដោយអ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យារបស់អ្នក"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"កែ"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"កែ​រូបថត​អេក្រង់"</string>
+    <!-- no translation found for screenshot_share_label (1653061117238861559) -->
+    <skip />
     <string name="screenshot_share_description" msgid="2861628935812656612">"ចែករំលែករូបថតអេក្រង់"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"ថត​ច្រើនទៀត"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ច្រានចោល​រូបថត​អេក្រង់"</string>
@@ -538,7 +540,10 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"ឧបករណ៍​នេះ​ស្ថិត​ក្រោម​ការ​គ្រប់គ្រង​របស់មាតាបិតាអ្នក។ មាតាបិតារបស់អ្នកអាចមើល និងគ្រប់គ្រងព័ត៌មាន​ដូចជា កម្មវិធីដែលអ្នកប្រើ ទីតាំងរបស់អ្នក និងរយៈពេលប្រើប្រាស់ឧបករណ៍របស់អ្នកជាដើម។"</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"បាន​ដោះសោ​ដោយភ្នាក់ងារ​​ទុកចិត្ត"</string>
-    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"ការការពារ​ចោរ​លួច\nបានចាក់សោឧបករណ៍ ការព្យាយាមដោះសោច្រើនដងពេក"</string>
+    <!-- no translation found for kg_prompt_after_adaptive_auth_lock (2587481497846342760) -->
+    <skip />
+    <!-- no translation found for keyguard_indication_after_adaptive_auth_lock (2323400645470712787) -->
+    <skip />
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"ការកំណត់សំឡេង"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"ដាក់អក្សររត់លើមេឌៀដោយស្វ័យប្រវត្តិ"</string>
@@ -583,10 +588,8 @@
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"បិទសំឡេង"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"បញ្ជូន"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"មិន​អាច​ប្រើ​បាន​ទេ​ ព្រោះ​សំឡេង​រោទ៍​ត្រូវ​បាន​បិទ"</string>
-    <!-- no translation found for stream_alarm_unavailable (4059817189292197839) -->
-    <skip />
-    <!-- no translation found for stream_media_unavailable (6823020894438959853) -->
-    <skip />
+    <string name="stream_alarm_unavailable" msgid="4059817189292197839">"មិនអាចប្រើបានទេ ដោយសារមុខងារកុំ​រំខានត្រូវបានបើក"</string>
+    <string name="stream_media_unavailable" msgid="6823020894438959853">"មិនអាចប្រើបានទេ ដោយសារមុខងារកុំ​រំខានត្រូវបានបើក"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s។ ប៉ះដើម្បីបើកសំឡេង។"</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s។ ប៉ះដើម្បីកំណត់ឲ្យញ័រ។ សេវាកម្មលទ្ធភាពប្រើប្រាស់អាចនឹងត្រូវបានបិទសំឡេង។"</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s។ ប៉ះដើម្បីបិទសំឡេង។ សេវាកម្មលទ្ធភាពប្រើប្រាស់អាចនឹងត្រូវបានបិទសំឡេង។"</string>
@@ -603,16 +606,11 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"ញ័រ"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s របារ​បញ្ជា​កម្រិត​សំឡេង"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"ការ​ហៅ​ទូរសព្ទ និង​ការជូន​ដំណឹង​នឹង​រោទ៍ (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
-    <!-- no translation found for volume_panel_enter_media_output_settings (8824244246272552669) -->
-    <skip />
-    <!-- no translation found for volume_panel_expanded_sliders (1885750987768506271) -->
-    <skip />
-    <!-- no translation found for volume_panel_collapsed_sliders (1413383759434791450) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_mute (6962563028495243738) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_unmute (7489063242934477382) -->
-    <skip />
+    <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"ចូលការកំណត់ឧបករណ៍មេឌៀ"</string>
+    <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"បានពង្រីកគ្រាប់រំកិលកម្រិតសំឡេង"</string>
+    <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"បានបង្រួមគ្រាប់រំកិលកម្រិតសំឡេង"</string>
+    <string name="volume_panel_hint_mute" msgid="6962563028495243738">"បិទសំឡេង %s"</string>
+    <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"បើក​សំឡេង %s"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"កំពុងចាក់​​ <xliff:g id="LABEL">%s</xliff:g> នៅ​លើ"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"សំឡេងនឹងលេងនៅលើ"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"កម្មវិធីសម្រួល UI ប្រព័ន្ធ"</string>
@@ -759,7 +757,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"រុករកទៅមុខ ដើម្បីមើលកម្មវិធីថ្មីៗ"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"រុករកថយក្រោយ ដើម្បីមើលកម្មវិធីថ្មីៗ"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"បើកបញ្ជីកម្មវិធី"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"បង្ហាញរបារកិច្ចការ"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"បើកការកំណត់"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"បើក​ជំនួយការ"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ចាក់​សោ​អេក្រង់"</string>
@@ -768,6 +765,10 @@
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"ចូលក្នុងមុខងារបំបែកអេក្រង់ដោយប្រើកម្មវិធីបច្ចុប្បន្ននៅខាងស្ដាំដៃ"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"ចូលក្នុងមុខងារ​បំបែកអេក្រង់ដោយប្រើកម្មវិធីបច្ចុប្បន្ននៅខាងឆ្វេងដៃ"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"ប្ដូរពីមុខងារ​បំបែកអេក្រង់ទៅជាអេក្រង់ពេញ"</string>
+    <!-- no translation found for system_multitasking_splitscreen_focus_rhs (3838578650313318508) -->
+    <skip />
+    <!-- no translation found for system_multitasking_splitscreen_focus_lhs (3164261844398662518) -->
+    <skip />
     <string name="system_multitasking_replace" msgid="7410071959803642125">"ក្នុងអំឡុងពេលប្រើមុខងារបំបែកអេក្រង់៖ ជំនួសកម្មវិធីពីមួយទៅមួយទៀត"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"បញ្ចូល"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"ប្ដូរទៅភាសាបន្ទាប់"</string>
@@ -1266,8 +1267,7 @@
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"បាន​ទប់ស្កាត់​កាមេរ៉ា"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"បានទប់ស្កាត់​កាមេរ៉ា និង​មីក្រូហ្វូន"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"បាន​ទប់ស្កាត់​មីក្រូហ្វូន"</string>
-    <!-- no translation found for priority_mode_dream_overlay_content_description (3361628029609329182) -->
-    <skip />
+    <string name="priority_mode_dream_overlay_content_description" msgid="3361628029609329182">"កុំ​រំខាន"</string>
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"វត្តមានអ្នកប្រើប្រាស់ត្រូវបានចាប់ដឹង"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"កំណត់កម្មវិធីកំណត់ចំណាំលំនាំដើមនៅក្នុងការកំណត់"</string>
     <string name="install_app" msgid="5066668100199613936">"ដំឡើង​កម្មវិធី"</string>

@@ -86,6 +86,8 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"你的 IT 管理員已禁止擷取螢幕畫面"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"編輯"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"編輯螢幕截圖"</string>
+    <!-- no translation found for screenshot_share_label (1653061117238861559) -->
+    <skip />
     <string name="screenshot_share_description" msgid="2861628935812656612">"分享螢幕截圖"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"擴大螢幕截圖範圍"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"關閉螢幕截圖"</string>
@@ -538,7 +540,8 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"這個裝置是由你的家長管理。家長可以查看及管理裝置上的資訊，例如你使用的應用程式、所在位置和螢幕時間。"</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"由 TrustAgent 維持解鎖狀態"</string>
-    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"防盜保護\n解鎖失敗次數過多，裝置已鎖定"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"驗證錯誤次數過多，裝置已鎖定"</string>
+    <string name="keyguard_indication_after_adaptive_auth_lock" msgid="2323400645470712787">"裝置已鎖定\n驗證失敗"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>。<xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"音效設定"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"自動產生媒體字幕"</string>
@@ -583,10 +586,8 @@
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"靜音"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"投放"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"鈴聲已設為靜音，因此無法使用"</string>
-    <!-- no translation found for stream_alarm_unavailable (4059817189292197839) -->
-    <skip />
-    <!-- no translation found for stream_media_unavailable (6823020894438959853) -->
-    <skip />
+    <string name="stream_alarm_unavailable" msgid="4059817189292197839">"「零打擾」模式已開啟，因此無法調整音量"</string>
+    <string name="stream_media_unavailable" msgid="6823020894438959853">"「零打擾」模式已開啟，因此無法調整音量"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s。輕觸即可取消靜音。"</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s。輕觸即可設為震動，但系統可能會將無障礙服務一併設為靜音。"</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s。輕觸即可設為靜音，但系統可能會將無障礙服務一併設為靜音。"</string>
@@ -603,18 +604,13 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"震動"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"「%s」音量控制項"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"有來電和通知時會響鈴 (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
-    <!-- no translation found for volume_panel_enter_media_output_settings (8824244246272552669) -->
-    <skip />
-    <!-- no translation found for volume_panel_expanded_sliders (1885750987768506271) -->
-    <skip />
-    <!-- no translation found for volume_panel_collapsed_sliders (1413383759434791450) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_mute (6962563028495243738) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_unmute (7489063242934477382) -->
-    <skip />
+    <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"進入輸出設定"</string>
+    <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"音量滑桿已展開"</string>
+    <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"音量滑桿已收合"</string>
+    <string name="volume_panel_hint_mute" msgid="6962563028495243738">"將%s設為靜音"</string>
+    <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"將%s取消靜音"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"正在播放「<xliff:g id="LABEL">%s</xliff:g>」的裝置："</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"將播放音訊的媒體："</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"音訊播放位置"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"系統使用者介面調整精靈"</string>
     <string name="status_bar" msgid="4357390266055077437">"狀態列"</string>
     <string name="demo_mode" msgid="263484519766901593">"系統 UI 展示模式"</string>
@@ -759,7 +755,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"前往最近開啟的應用程式"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"返回最近開啟的應用程式"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"開啟應用程式清單"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"顯示工作列"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"開啟設定"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"開啟 Google 助理"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"螢幕鎖定"</string>
@@ -768,6 +763,10 @@
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"進入分割畫面模式，並將目前的應用程式顯示於右側"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"進入分割畫面模式，並將目前的應用程式顯示於左側"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"從分割畫面切換到完整畫面"</string>
+    <!-- no translation found for system_multitasking_splitscreen_focus_rhs (3838578650313318508) -->
+    <skip />
+    <!-- no translation found for system_multitasking_splitscreen_focus_lhs (3164261844398662518) -->
+    <skip />
     <string name="system_multitasking_replace" msgid="7410071959803642125">"使用分割畫面期間：更換應用程式"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"輸入"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"切換到下一個語言"</string>
@@ -1266,8 +1265,7 @@
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"已封鎖攝影機"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"已封鎖攝影機和麥克風"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"已封鎖麥克風"</string>
-    <!-- no translation found for priority_mode_dream_overlay_content_description (3361628029609329182) -->
-    <skip />
+    <string name="priority_mode_dream_overlay_content_description" msgid="3361628029609329182">"零打擾"</string>
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"偵測到使用者"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"在「設定」中指定預設記事應用程式"</string>
     <string name="install_app" msgid="5066668100199613936">"安裝應用程式"</string>
