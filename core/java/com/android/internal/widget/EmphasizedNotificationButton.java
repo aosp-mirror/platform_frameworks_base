@@ -229,7 +229,8 @@ public class EmphasizedNotificationButton extends Button {
                     + "gluedLayoutDirection = " + mGluedLayoutDirection);
         }
 
-        if (layoutDirection != mGluedLayoutDirection) {
+        final boolean alreadyGlued = mGluedLayoutDirection != LAYOUT_DIRECTION_UNDEFINED;
+        if (alreadyGlued && layoutDirection != mGluedLayoutDirection) {
             if (DEBUG_NEW_ACTION_LAYOUT) {
                 Log.d(TAG, "onRtlPropertiesChanged: layout direction changed; regluing");
             }
