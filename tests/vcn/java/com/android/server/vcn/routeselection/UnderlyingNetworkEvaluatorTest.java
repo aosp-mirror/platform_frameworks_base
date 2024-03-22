@@ -31,6 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -332,5 +333,37 @@ public class UnderlyingNetworkEvaluatorTest extends NetworkEvaluationTestBase {
                 UnderlyingNetworkEvaluator.getComparator(mVcnContext)
                         .compare(penalized, notPenalized);
         assertEquals(1, result);
+    }
+
+    @Test
+    public void testNotifyNetworkMetricMonitorOnLpChange() throws Exception {
+        // Clear calls invoked when initializing mNetworkEvaluator
+        reset(mIpSecPacketLossDetector);
+
+        final UnderlyingNetworkEvaluator evaluator = newUnderlyingNetworkEvaluator();
+        evaluator.setNetworkCapabilities(
+                CELL_NETWORK_CAPABILITIES,
+                VcnGatewayConnectionConfig.DEFAULT_UNDERLYING_NETWORK_TEMPLATES,
+                SUB_GROUP,
+                mSubscriptionSnapshot,
+                mCarrierConfig);
+
+        verify(mIpSecPacketLossDetector).onLinkPropertiesOrCapabilitiesChanged();
+    }
+
+    @Test
+    public void testNotifyNetworkMetricMonitorOnNcChange() throws Exception {
+        // Clear calls invoked when initializing mNetworkEvaluator
+        reset(mIpSecPacketLossDetector);
+
+        final UnderlyingNetworkEvaluator evaluator = newUnderlyingNetworkEvaluator();
+        evaluator.setLinkProperties(
+                LINK_PROPERTIES,
+                VcnGatewayConnectionConfig.DEFAULT_UNDERLYING_NETWORK_TEMPLATES,
+                SUB_GROUP,
+                mSubscriptionSnapshot,
+                mCarrierConfig);
+
+        verify(mIpSecPacketLossDetector).onLinkPropertiesOrCapabilitiesChanged();
     }
 }
