@@ -479,8 +479,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @GuardedBy("ImfLock.class")
     private int getSequenceNumberLocked() {
-        final UserData monitor = UserData.getOrCreate(mCurrentUserId);
-        return monitor.mSequence.getSequenceNumber();
+        return mBindingController.getSequenceNumber();
     }
 
     /**
@@ -489,8 +488,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @GuardedBy("ImfLock.class")
     private void advanceSequenceNumberLocked() {
-        final UserData monitor = UserData.getOrCreate(mCurrentUserId);
-        monitor.mSequence.advanceSequenceNumber();
+        mBindingController.advanceSequenceNumber();
     }
 
     @GuardedBy("ImfLock.class")
@@ -1379,7 +1377,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // InputMethodSettingsRepository should be initialized before buildInputMethodListLocked
         InputMethodSettingsRepository.initialize(mHandler, mContext);
         AdditionalSubtypeMapRepository.initialize(mHandler, mContext);
-        UserData.initialize(mHandler);
 
         mCurrentUserId = mActivityManagerInternal.getCurrentUserId();
 
