@@ -14,6 +14,7 @@
      limitations under the License.
 -->
 <configuration description="Config for BootImageProfileTest">
+     <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer" />
      <!-- do not use DeviceSetup#set-property because it reboots the device b/136200738.
          furthermore the changes in /data/local.prop don't actually seem to get picked up.
     -->
