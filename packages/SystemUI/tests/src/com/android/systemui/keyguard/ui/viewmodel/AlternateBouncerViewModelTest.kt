@@ -28,6 +28,7 @@ import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.phone.statusBarKeyguardViewManager
 import com.android.systemui.testKosmos
+import com.android.systemui.util.mockito.any
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -36,6 +37,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import org.mockito.Mockito.verify
 
 @ExperimentalCoroutinesApi
 @RunWith(JUnit4::class)
@@ -46,6 +48,20 @@ class AlternateBouncerViewModelTest : SysuiTestCase() {
     private val transitionRepository = kosmos.fakeKeyguardTransitionRepository
     private val statusBarKeyguardViewManager = kosmos.statusBarKeyguardViewManager
     private val underTest = kosmos.alternateBouncerViewModel
+
+    @Test
+    fun showPrimaryBouncer() =
+        testScope.runTest {
+            underTest.showPrimaryBouncer()
+            verify(statusBarKeyguardViewManager).showPrimaryBouncer(any())
+        }
+
+    @Test
+    fun hideAlternateBouncer() =
+        testScope.runTest {
+            underTest.hideAlternateBouncer()
+            verify(statusBarKeyguardViewManager).hideAlternateBouncer(any())
+        }
 
     @Test
     fun transitionToAlternateBouncer_scrimAlphaUpdate() =
