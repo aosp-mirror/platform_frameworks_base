@@ -136,7 +136,7 @@ class InstallRepository(private val context: Context) {
 
         callingPackage = callerInfo.packageName
 
-        if (callingPackage == null && sessionId != SessionInfo.INVALID_ID) {
+        if (sessionId != SessionInfo.INVALID_ID) {
             val sessionInfo: SessionInfo? = packageInstaller.getSessionInfo(sessionId)
             callingPackage = sessionInfo?.getInstallerPackageName()
             callingAttributionTag = sessionInfo?.getInstallerAttributionTag()
