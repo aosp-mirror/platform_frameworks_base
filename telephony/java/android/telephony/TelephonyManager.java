@@ -15013,7 +15013,8 @@ public class TelephonyManager {
     /**
      * Get the emergency assistance package name.
      *
-     * @return the package name of the emergency assistance app.
+     * @return the package name of the emergency assistance app, or {@code null} if no app
+     * supports emergency assistance.
      * @throws IllegalStateException if emergency assistance is not enabled or the device is
      * not voice capable.
      *
