@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright (C) 2024 The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<resources>
+    <color name="settingslib_materialColorSurfaceContainerLowest">@android:color/system_surface_container_lowest_dark</color>
+    <color name="settingslib_materialColorOnSecondaryContainer">@android:color/system_on_secondary_container_dark</color>
+    <color name="settingslib_materialColorOnTertiaryContainer">@android:color/system_on_tertiary_container_dark</color>
+    <color name="settingslib_materialColorSurfaceContainerLow">@android:color/system_surface_container_low_dark</color>
+    <color name="settingslib_materialColorOnPrimaryContainer">@android:color/system_on_primary_container_dark</color>
+    <color name="settingslib_materialColorOnErrorContainer">@android:color/system_on_error_container_dark</color>
+    <color name="settingslib_materialColorOnSurfaceInverse">@android:color/system_on_surface_light</color>
+    <color name="settingslib_materialColorSecondaryContainer">@android:color/system_secondary_container_dark</color>
+    <color name="settingslib_materialColorErrorContainer">@android:color/system_error_container_dark</color>
+    <color name="settingslib_materialColorPrimaryInverse">@android:color/system_primary_light</color>
+    <color name="settingslib_materialColorSurfaceInverse">@android:color/system_surface_light</color>
+    <color name="settingslib_materialColorSurfaceVariant">@android:color/system_surface_variant_dark</color>
+    <color name="settingslib_materialColorTertiaryContainer">@android:color/system_tertiary_container_dark</color>
+    <color name="settingslib_materialColorPrimaryContainer">@android:color/system_primary_container_dark</color>
+    <color name="settingslib_materialColorOnBackground">@android:color/system_on_background_dark</color>
+    <color name="settingslib_materialColorOnSecondary">@android:color/system_on_secondary_dark</color>
+    <color name="settingslib_materialColorOnTertiary">@android:color/system_on_tertiary_dark</color>
+    <color name="settingslib_materialColorSurfaceDim">@android:color/system_surface_dim_dark</color>
+    <color name="settingslib_materialColorSurfaceBright">@android:color/system_surface_bright_dark</color>
+    <color name="settingslib_materialColorOnError">@android:color/system_on_error_dark</color>
+    <color name="settingslib_materialColorSurface">@android:color/system_surface_dark</color>
+    <color name="settingslib_materialColorSurfaceContainerHigh">@android:color/system_surface_container_high_dark</color>
+    <color name="settingslib_materialColorSurfaceContainerHighest">@android:color/system_surface_container_highest_dark</color>
+    <color name="settingslib_materialColorOnSurfaceVariant">@android:color/system_on_surface_variant_dark</color>
+    <color name="settingslib_materialColorOutline">@android:color/system_outline_dark</color>
+    <color name="settingslib_materialColorOutlineVariant">@android:color/system_outline_variant_dark</color>
+    <color name="settingslib_materialColorOnPrimary">@android:color/system_on_primary_dark</color>
+    <color name="settingslib_materialColorOnSurface">@android:color/system_on_surface_dark</color>
+    <color name="settingslib_materialColorSurfaceContainer">@android:color/system_surface_container_dark</color>
+    <color name="settingslib_materialColorPrimary">@android:color/system_primary_dark</color>
+    <color name="settingslib_materialColorSecondary">@android:color/system_secondary_dark</color>
+    <color name="settingslib_materialColorTertiary">@android:color/system_tertiary_dark</color>
+</resources>
