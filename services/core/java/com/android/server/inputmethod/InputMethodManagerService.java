@@ -1546,7 +1546,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // and user switch would not happen at that time.
         resetCurrentMethodAndClientLocked(UnbindReason.SWITCH_USER);
 
-        final InputMethodSettings newSettings = InputMethodSettingsRepository.get(newUserId);
+        final InputMethodSettings newSettings = queryInputMethodServicesInternal(mContext,
+                newUserId, AdditionalSubtypeMapRepository.get(newUserId), DirectBootAwareness.AUTO);
+        InputMethodSettingsRepository.put(newUserId, newSettings);
         mSettings = newSettings;
         postInputMethodSettingUpdatedLocked(initialUserSwitch /* resetDefaultEnabledIme */);
         if (TextUtils.isEmpty(mSettings.getSelectedInputMethod())) {
