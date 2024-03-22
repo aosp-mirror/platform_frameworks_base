@@ -574,7 +574,8 @@ public class NotificationTestHelper {
         mFeatureFlags.setDefault(Flags.IMPROVED_HUN_ANIMATIONS);
 
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
-                mContext.LAYOUT_INFLATER_SERVICE);
+                Context.LAYOUT_INFLATER_SERVICE);
+        inflater.setFactory2(new RowInflaterTask.RowAsyncLayoutInflater(entry));
         mRow = (ExpandableNotificationRow) inflater.inflate(
                 R.layout.status_bar_notification_row,
                 null /* root */,
