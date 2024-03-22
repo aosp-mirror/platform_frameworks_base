@@ -25,6 +25,7 @@ android.R$attr
 android.R$id
 android.R$styleable
 android.accessibilityservice.AccessibilityServiceInfo$1
+android.accessibilityservice.AccessibilityServiceInfo$DynamicPropertyDefaults
 android.accessibilityservice.AccessibilityServiceInfo
 android.accessibilityservice.AccessibilityShortcutInfo
 android.accessibilityservice.GestureDescription$MotionEventGenerator
@@ -211,7 +212,6 @@ android.app.ActivityClient$ActivityClientControllerSingleton-IA
 android.app.ActivityClient$ActivityClientControllerSingleton
 android.app.ActivityClient-IA
 android.app.ActivityClient
-android.app.ActivityManager$1
 android.app.ActivityManager$2
 android.app.ActivityManager$3
 android.app.ActivityManager$AppTask
@@ -267,12 +267,10 @@ android.app.ActivityThread$3
 android.app.ActivityThread$4
 android.app.ActivityThread$ActivityClientRecord$1
 android.app.ActivityThread$ActivityClientRecord
-android.app.ActivityThread$AndroidOs
 android.app.ActivityThread$AppBindData
 android.app.ActivityThread$ApplicationThread$$ExternalSyntheticLambda2
 android.app.ActivityThread$ApplicationThread$1
 android.app.ActivityThread$ApplicationThread-IA
-android.app.ActivityThread$ApplicationThread
 android.app.ActivityThread$BindServiceData
 android.app.ActivityThread$ContextCleanupInfo
 android.app.ActivityThread$CreateBackupAgentData
@@ -302,7 +300,6 @@ android.app.ActivityTransitionState$1
 android.app.ActivityTransitionState
 android.app.AlarmManager$AlarmClockInfo$1
 android.app.AlarmManager$AlarmClockInfo
-android.app.AlarmManager$ListenerWrapper
 android.app.AlarmManager$OnAlarmListener
 android.app.AlarmManager
 android.app.AlertDialog$Builder
@@ -320,10 +317,8 @@ android.app.AppOpsManager$$ExternalSyntheticLambda4
 android.app.AppOpsManager$$ExternalSyntheticLambda5
 android.app.AppOpsManager$$ExternalSyntheticLambda6
 android.app.AppOpsManager$1
-android.app.AppOpsManager$2
 android.app.AppOpsManager$3
 android.app.AppOpsManager$4
-android.app.AppOpsManager$5
 android.app.AppOpsManager$AppOpsCollector
 android.app.AppOpsManager$AttributedHistoricalOps$1
 android.app.AppOpsManager$AttributedHistoricalOps
@@ -366,7 +361,6 @@ android.app.AppOpsManager
 android.app.AppOpsManagerInternal
 android.app.Application$ActivityLifecycleCallbacks
 android.app.Application$OnProvideAssistDataListener
-android.app.Application
 android.app.ApplicationErrorReport$1
 android.app.ApplicationErrorReport$AnrInfo
 android.app.ApplicationErrorReport$BatteryInfo
@@ -390,7 +384,6 @@ android.app.ApplicationPackageManager$GetPackagesForUidResult
 android.app.ApplicationPackageManager$HasSystemFeatureQuery
 android.app.ApplicationPackageManager$MoveCallbackDelegate
 android.app.ApplicationPackageManager$ResourceName
-android.app.ApplicationPackageManager
 android.app.AsyncNotedAppOp$1
 android.app.AsyncNotedAppOp
 android.app.AutomaticZenRule$1
@@ -403,6 +396,7 @@ android.app.BackgroundServiceStartNotAllowedException$1
 android.app.BackgroundServiceStartNotAllowedException
 android.app.BroadcastOptions
 android.app.ClientTransactionHandler
+android.app.ComponentCaller
 android.app.ComponentOptions
 android.app.ConfigurationChangedListenerController
 android.app.ConfigurationController
@@ -411,7 +405,6 @@ android.app.ContentProviderHolder-IA
 android.app.ContentProviderHolder
 android.app.ContextImpl$1
 android.app.ContextImpl$ApplicationContentResolver
-android.app.ContextImpl
 android.app.DexLoadReporter
 android.app.Dialog$$ExternalSyntheticLambda0
 android.app.Dialog$$ExternalSyntheticLambda1
@@ -483,7 +476,6 @@ android.app.IActivityTaskManager
 android.app.IAlarmCompleteListener$Stub$Proxy
 android.app.IAlarmCompleteListener$Stub
 android.app.IAlarmCompleteListener
-android.app.IAlarmListener$Stub$Proxy
 android.app.IAlarmListener$Stub
 android.app.IAlarmListener
 android.app.IAlarmManager$Stub$Proxy
@@ -498,7 +490,6 @@ android.app.IAppTraceRetriever
 android.app.IApplicationStartInfoCompleteListener$Stub$Proxy
 android.app.IApplicationStartInfoCompleteListener$Stub
 android.app.IApplicationStartInfoCompleteListener
-android.app.IApplicationThread$Stub$Proxy
 android.app.IApplicationThread$Stub
 android.app.IApplicationThread
 android.app.IAssistDataReceiver$Stub$Proxy
@@ -543,13 +534,11 @@ android.app.IScreenCaptureObserver
 android.app.ISearchManager$Stub$Proxy
 android.app.ISearchManager$Stub
 android.app.ISearchManager
-android.app.IServiceConnection$Stub$Proxy
 android.app.IServiceConnection$Stub
 android.app.IServiceConnection
 android.app.IStopUserCallback$Stub$Proxy
 android.app.IStopUserCallback$Stub
 android.app.IStopUserCallback
-android.app.ITaskStackListener$Stub$Proxy
 android.app.ITaskStackListener$Stub
 android.app.ITaskStackListener
 android.app.ITransientNotification$Stub$Proxy
@@ -569,7 +558,6 @@ android.app.IUiModeManagerCallback
 android.app.IUidFrozenStateChangedCallback$Stub$Proxy
 android.app.IUidFrozenStateChangedCallback$Stub
 android.app.IUidFrozenStateChangedCallback
-android.app.IUidObserver$Stub$Proxy
 android.app.IUidObserver$Stub
 android.app.IUidObserver
 android.app.IUnsafeIntentStrictModeCallback$Stub
@@ -598,19 +586,16 @@ android.app.Instrumentation
 android.app.IntentReceiverLeaked
 android.app.IntentService$ServiceHandler
 android.app.IntentService
-android.app.JobSchedulerImpl
 android.app.KeyguardManager$1
 android.app.KeyguardManager$KeyguardDismissCallback
 android.app.KeyguardManager
 android.app.ListActivity
 android.app.LoadedApk$ReceiverDispatcher$Args$$ExternalSyntheticLambda0
 android.app.LoadedApk$ReceiverDispatcher$Args
-android.app.LoadedApk$ReceiverDispatcher$InnerReceiver
 android.app.LoadedApk$ReceiverDispatcher
 android.app.LoadedApk$ServiceDispatcher$ConnectionInfo-IA
 android.app.LoadedApk$ServiceDispatcher$ConnectionInfo
 android.app.LoadedApk$ServiceDispatcher$DeathMonitor
-android.app.LoadedApk$ServiceDispatcher$InnerConnection
 android.app.LoadedApk$ServiceDispatcher$RunConnection
 android.app.LoadedApk$ServiceDispatcher
 android.app.LoadedApk$SplitDependencyLoaderImpl
@@ -1425,6 +1410,7 @@ android.content.BroadcastReceiver$PendingResult$1
 android.content.BroadcastReceiver$PendingResult
 android.content.BroadcastReceiver
 android.content.ClipData$1
+android.content.ClipData$Item-IA
 android.content.ClipData$Item
 android.content.ClipData
 android.content.ClipDescription$1
@@ -1442,7 +1428,6 @@ android.content.ComponentName$1
 android.content.ComponentName$WithComponentName
 android.content.ComponentName
 android.content.ContentCaptureOptions$1
-android.content.ContentCaptureOptions$ContentProtectionOptions$$ExternalSyntheticLambda0
 android.content.ContentCaptureOptions$ContentProtectionOptions
 android.content.ContentCaptureOptions
 android.content.ContentInterface
@@ -1500,7 +1485,6 @@ android.content.IContentProvider
 android.content.IContentService$Stub$Proxy
 android.content.IContentService$Stub
 android.content.IContentService
-android.content.IIntentReceiver$Stub$Proxy
 android.content.IIntentReceiver$Stub
 android.content.IIntentReceiver
 android.content.IIntentSender$Stub$Proxy
@@ -2022,7 +2006,6 @@ android.content.res.StringBlock
 android.content.res.ThemedResourceCache
 android.content.res.TypedArray
 android.content.res.Validator
-android.content.res.XmlBlock$Parser
 android.content.res.XmlBlock
 android.content.res.XmlResourceParser
 android.content.res.loader.AssetsProvider
@@ -2054,7 +2037,6 @@ android.database.CharArrayBuffer
 android.database.ContentObservable
 android.database.ContentObserver$$ExternalSyntheticLambda0
 android.database.ContentObserver$$ExternalSyntheticLambda1
-android.database.ContentObserver$Transport
 android.database.ContentObserver
 android.database.CrossProcessCursor
 android.database.CrossProcessCursorWrapper
@@ -2073,7 +2055,6 @@ android.database.DatabaseUtils$InsertHelper
 android.database.DatabaseUtils
 android.database.DefaultDatabaseErrorHandler
 android.database.IBulkCursor
-android.database.IContentObserver$Stub$Proxy
 android.database.IContentObserver$Stub
 android.database.IContentObserver
 android.database.MatrixCursor$RowBuilder
@@ -2084,6 +2065,8 @@ android.database.Observable
 android.database.SQLException
 android.database.StaleDataException
 android.database.sqlite.DatabaseObjectNotClosedException
+android.database.sqlite.FeatureFlags
+android.database.sqlite.FeatureFlagsImpl
 android.database.sqlite.Flags
 android.database.sqlite.SQLiteAbortException
 android.database.sqlite.SQLiteAccessPermException
@@ -2601,7 +2584,6 @@ android.hardware.SyncFence
 android.hardware.SystemSensorManager$BaseEventQueue
 android.hardware.SystemSensorManager$SensorEventQueue
 android.hardware.SystemSensorManager$TriggerEventQueue
-android.hardware.SystemSensorManager
 android.hardware.TriggerEvent
 android.hardware.TriggerEventListener
 android.hardware.biometrics.BiometricAuthenticator$AuthenticationCallback
@@ -2811,6 +2793,7 @@ android.hardware.camera2.utils.ArrayUtils
 android.hardware.camera2.utils.ConcurrentCameraIdCombination$1
 android.hardware.camera2.utils.ConcurrentCameraIdCombination-IA
 android.hardware.camera2.utils.ConcurrentCameraIdCombination
+android.hardware.camera2.utils.ExceptionUtils
 android.hardware.camera2.utils.HashCodeHelpers
 android.hardware.camera2.utils.SurfaceUtils
 android.hardware.camera2.utils.TypeReference$SpecializedBaseTypeReference
@@ -2830,6 +2813,7 @@ android.hardware.contexthub.V1_0.MemRange
 android.hardware.contexthub.V1_0.NanoAppBinary
 android.hardware.contexthub.V1_0.PhysicalSensor
 android.hardware.contexthub.V1_1.Setting
+android.hardware.devicestate.DeviceState
 android.hardware.devicestate.DeviceStateInfo$1
 android.hardware.devicestate.DeviceStateInfo
 android.hardware.devicestate.DeviceStateManager$DeviceStateCallback
@@ -2838,7 +2822,6 @@ android.hardware.devicestate.DeviceStateManager
 android.hardware.devicestate.DeviceStateManagerGlobal$DeviceStateCallbackWrapper$$ExternalSyntheticLambda0
 android.hardware.devicestate.DeviceStateManagerGlobal$DeviceStateCallbackWrapper$$ExternalSyntheticLambda1
 android.hardware.devicestate.DeviceStateManagerGlobal$DeviceStateCallbackWrapper$$ExternalSyntheticLambda2
-android.hardware.devicestate.DeviceStateManagerGlobal$DeviceStateCallbackWrapper$$ExternalSyntheticLambda3
 android.hardware.devicestate.DeviceStateManagerGlobal$DeviceStateCallbackWrapper
 android.hardware.devicestate.DeviceStateManagerGlobal$DeviceStateManagerCallback-IA
 android.hardware.devicestate.DeviceStateManagerGlobal$DeviceStateManagerCallback
@@ -2883,7 +2866,6 @@ android.hardware.display.DisplayManagerGlobal$1
 android.hardware.display.DisplayManagerGlobal$DisplayListenerDelegate$$ExternalSyntheticLambda0
 android.hardware.display.DisplayManagerGlobal$DisplayListenerDelegate
 android.hardware.display.DisplayManagerGlobal$DisplayManagerCallback-IA
-android.hardware.display.DisplayManagerGlobal$DisplayManagerCallback
 android.hardware.display.DisplayManagerGlobal
 android.hardware.display.DisplayManagerInternal$DisplayPowerCallbacks
 android.hardware.display.DisplayManagerInternal$DisplayPowerRequest
@@ -2899,7 +2881,6 @@ android.hardware.display.IColorDisplayManager
 android.hardware.display.IDisplayManager$Stub$Proxy
 android.hardware.display.IDisplayManager$Stub
 android.hardware.display.IDisplayManager
-android.hardware.display.IDisplayManagerCallback$Stub$Proxy
 android.hardware.display.IDisplayManagerCallback$Stub
 android.hardware.display.IDisplayManagerCallback
 android.hardware.display.IVirtualDisplayCallback$Stub$Proxy
@@ -3012,6 +2993,7 @@ android.hardware.location.ContextHubClientCallback
 android.hardware.location.ContextHubInfo$1
 android.hardware.location.ContextHubInfo-IA
 android.hardware.location.ContextHubInfo
+android.hardware.location.ContextHubManager$1
 android.hardware.location.ContextHubManager$2
 android.hardware.location.ContextHubManager$3
 android.hardware.location.ContextHubManager$Callback
@@ -5122,7 +5104,6 @@ android.media.IMediaRoute2ProviderServiceCallback
 android.media.IMediaRouter2$Stub$Proxy
 android.media.IMediaRouter2$Stub
 android.media.IMediaRouter2
-android.media.IMediaRouter2Manager$Stub$Proxy
 android.media.IMediaRouter2Manager$Stub
 android.media.IMediaRouter2Manager
 android.media.IMediaRouterClient$Stub$Proxy
@@ -5187,7 +5168,6 @@ android.media.MediaCodec$ParameterDescriptor
 android.media.MediaCodec$PersistentSurface
 android.media.MediaCodec$QueueRequest
 android.media.MediaCodecInfo$AudioCapabilities
-android.media.MediaCodecInfo$CodecCapabilities
 android.media.MediaCodecInfo$CodecProfileLevel
 android.media.MediaCodecInfo$EncoderCapabilities
 android.media.MediaCodecInfo$Feature
@@ -5624,7 +5604,6 @@ android.net.INetdEventCallback
 android.net.INetworkManagementEventObserver$Stub$Proxy
 android.net.INetworkManagementEventObserver$Stub
 android.net.INetworkManagementEventObserver
-android.net.INetworkPolicyListener$Stub$Proxy
 android.net.INetworkPolicyListener$Stub
 android.net.INetworkPolicyListener
 android.net.INetworkPolicyManager$Stub$Proxy
@@ -5649,7 +5628,6 @@ android.net.LocalSocket
 android.net.LocalSocketAddress$Namespace
 android.net.LocalSocketAddress
 android.net.LocalSocketImpl$SocketInputStream
-android.net.LocalSocketImpl$SocketOutputStream
 android.net.LocalSocketImpl
 android.net.MatchAllNetworkSpecifier$1
 android.net.MatchAllNetworkSpecifier
@@ -5700,17 +5678,13 @@ android.net.Uri$AbstractHierarchicalUri
 android.net.Uri$AbstractPart
 android.net.Uri$Builder
 android.net.Uri$HierarchicalUri-IA
-android.net.Uri$HierarchicalUri
 android.net.Uri$NotCachedHolder
 android.net.Uri$OpaqueUri-IA
-android.net.Uri$OpaqueUri
 android.net.Uri$Part$EmptyPart
 android.net.Uri$Part
 android.net.Uri$PathPart
-android.net.Uri$PathSegments
 android.net.Uri$PathSegmentsBuilder
 android.net.Uri$StringUri-IA
-android.net.Uri$StringUri
 android.net.Uri-IA
 android.net.Uri
 android.net.UriCodec
@@ -5958,7 +5932,6 @@ android.os.Binder
 android.os.BinderProxy$BinderProxyMapSizeException
 android.os.BinderProxy$NoImagePreloadHolder
 android.os.BinderProxy$ProxyMap
-android.os.BinderProxy
 android.os.BluetoothServiceManager$ServiceRegisterer
 android.os.BluetoothServiceManager
 android.os.BugreportManager
@@ -6089,7 +6062,6 @@ android.os.IIncidentCompanion
 android.os.IIncidentManager$Stub$Proxy
 android.os.IIncidentManager$Stub
 android.os.IIncidentManager
-android.os.IInstalld$Stub$Proxy
 android.os.IInstalld$Stub
 android.os.IInstalld
 android.os.IInterface
@@ -6205,7 +6177,6 @@ android.os.OutcomeReceiver
 android.os.PackageTagsList$1
 android.os.PackageTagsList
 android.os.Parcel$1
-android.os.Parcel$2
 android.os.Parcel$LazyValue
 android.os.Parcel$ReadWriteHelper
 android.os.Parcel$SquashReadHelper
@@ -6258,6 +6229,7 @@ android.os.PowerSaveState
 android.os.PowerWhitelistManager
 android.os.Process$ProcessStartResult
 android.os.Process
+android.os.ProfilingServiceManager
 android.os.ProxyFileDescriptorCallback
 android.os.RecoverySystem$1
 android.os.RecoverySystem$2
@@ -6311,14 +6283,12 @@ android.os.StrictMode$1
 android.os.StrictMode$2
 android.os.StrictMode$3
 android.os.StrictMode$4
-android.os.StrictMode$5
 android.os.StrictMode$6
 android.os.StrictMode$7
 android.os.StrictMode$8
 android.os.StrictMode$9
 android.os.StrictMode$AndroidBlockGuardPolicy$$ExternalSyntheticLambda0
 android.os.StrictMode$AndroidBlockGuardPolicy$$ExternalSyntheticLambda1
-android.os.StrictMode$AndroidBlockGuardPolicy
 android.os.StrictMode$AndroidCloseGuardReporter-IA
 android.os.StrictMode$AndroidCloseGuardReporter
 android.os.StrictMode$InstanceTracker
@@ -6341,7 +6311,6 @@ android.os.StrictMode$VmPolicy
 android.os.StrictMode
 android.os.SynchronousResultReceiver$Result
 android.os.SynchronousResultReceiver
-android.os.SystemClock$1
 android.os.SystemClock$2
 android.os.SystemClock$3
 android.os.SystemClock
@@ -6518,7 +6487,6 @@ android.ota.nano.OtaPackageMetadata$PartitionState
 android.permission.ILegacyPermissionManager$Stub$Proxy
 android.permission.ILegacyPermissionManager$Stub
 android.permission.ILegacyPermissionManager
-android.permission.IOnPermissionsChangeListener$Stub$Proxy
 android.permission.IOnPermissionsChangeListener$Stub
 android.permission.IOnPermissionsChangeListener
 android.permission.IPermissionChecker$Stub$Proxy
@@ -6536,7 +6504,6 @@ android.permission.PermissionControllerManager$1
 android.permission.PermissionControllerManager
 android.permission.PermissionManager$1
 android.permission.PermissionManager$2
-android.permission.PermissionManager$OnPermissionsChangeListenerDelegate
 android.permission.PermissionManager$PackageNamePermissionQuery
 android.permission.PermissionManager$PermissionQuery
 android.permission.PermissionManager$SplitPermissionInfo-IA
@@ -7067,9 +7034,11 @@ android.service.media.IMediaBrowserService
 android.service.media.IMediaBrowserServiceCallbacks$Stub$Proxy
 android.service.media.IMediaBrowserServiceCallbacks$Stub
 android.service.media.IMediaBrowserServiceCallbacks
+android.service.media.MediaBrowserService$$ExternalSyntheticLambda0
 android.service.media.MediaBrowserService$BrowserRoot
 android.service.media.MediaBrowserService$ConnectionRecord
 android.service.media.MediaBrowserService$Result
+android.service.media.MediaBrowserService$ServiceBinder$$ExternalSyntheticLambda1
 android.service.media.MediaBrowserService$ServiceBinder-IA
 android.service.media.MediaBrowserService$ServiceBinder
 android.service.media.MediaBrowserService$ServiceState
@@ -7081,12 +7050,9 @@ android.service.notification.Condition
 android.service.notification.ConditionProviderService$H-IA
 android.service.notification.ConditionProviderService$H
 android.service.notification.ConditionProviderService$Provider-IA
-android.service.notification.ConditionProviderService$Provider
 android.service.notification.ConditionProviderService
-android.service.notification.IConditionProvider$Stub$Proxy
 android.service.notification.IConditionProvider$Stub
 android.service.notification.IConditionProvider
-android.service.notification.INotificationListener$Stub$Proxy
 android.service.notification.INotificationListener$Stub
 android.service.notification.INotificationListener
 android.service.notification.IStatusBarNotificationHolder$Stub$Proxy
@@ -7098,7 +7064,6 @@ android.service.notification.NotificationAssistantService
 android.service.notification.NotificationListenerFilter$1
 android.service.notification.NotificationListenerFilter
 android.service.notification.NotificationListenerService$MyHandler
-android.service.notification.NotificationListenerService$NotificationListenerWrapper
 android.service.notification.NotificationListenerService$Ranking
 android.service.notification.NotificationListenerService$RankingMap$1
 android.service.notification.NotificationListenerService$RankingMap-IA
@@ -7584,7 +7549,6 @@ android.telephony.PhoneStateListener$IPhoneStateListenerStub$$ExternalSyntheticL
 android.telephony.PhoneStateListener$IPhoneStateListenerStub$$ExternalSyntheticLambda62
 android.telephony.PhoneStateListener$IPhoneStateListenerStub$$ExternalSyntheticLambda6
 android.telephony.PhoneStateListener$IPhoneStateListenerStub$$ExternalSyntheticLambda9
-android.telephony.PhoneStateListener$IPhoneStateListenerStub
 android.telephony.PhoneStateListener
 android.telephony.PhysicalChannelConfig$1
 android.telephony.PhysicalChannelConfig$Builder
@@ -7688,7 +7652,6 @@ android.telephony.TelephonyCallback$IPhoneStateListenerStub$$ExternalSyntheticLa
 android.telephony.TelephonyCallback$IPhoneStateListenerStub$$ExternalSyntheticLambda52
 android.telephony.TelephonyCallback$IPhoneStateListenerStub$$ExternalSyntheticLambda63
 android.telephony.TelephonyCallback$IPhoneStateListenerStub$$ExternalSyntheticLambda65
-android.telephony.TelephonyCallback$IPhoneStateListenerStub
 android.telephony.TelephonyCallback$ImsCallDisconnectCauseListener
 android.telephony.TelephonyCallback$LinkCapacityEstimateChangedListener
 android.telephony.TelephonyCallback$MediaQualityStatusChangedListener
@@ -8381,7 +8344,6 @@ android.updatabledriver.UpdatableDriverProto$DenylistsOrBuilder
 android.util.AndroidException
 android.util.AndroidRuntimeException
 android.util.ArrayMap$1
-android.util.ArrayMap
 android.util.ArraySet$1
 android.util.ArraySet
 android.util.AtomicFile
@@ -8451,11 +8413,6 @@ android.util.LongSparseLongArray$Parcelling
 android.util.LongSparseLongArray
 android.util.LruCache
 android.util.MalformedJsonException
-android.util.MapCollections$ArrayIterator
-android.util.MapCollections$EntrySet
-android.util.MapCollections$KeySet
-android.util.MapCollections$MapIterator
-android.util.MapCollections$ValuesCollection
 android.util.MapCollections
 android.util.MathUtils
 android.util.MemoryIntArray$1
@@ -8502,7 +8459,6 @@ android.util.SparseIntArray
 android.util.SparseLongArray
 android.util.SparseSetArray
 android.util.Spline$LinearSpline
-android.util.Spline$MonotoneCubicSpline
 android.util.Spline
 android.util.StateSet
 android.util.StringBuilderPrinter
@@ -8731,13 +8687,11 @@ android.view.IScrollCaptureResponseListener
 android.view.ISurfaceControlViewHost
 android.view.ISurfaceControlViewHostParent$Stub
 android.view.ISurfaceControlViewHostParent
-android.view.ISystemGestureExclusionListener$Stub$Proxy
 android.view.ISystemGestureExclusionListener$Stub
 android.view.ISystemGestureExclusionListener
 android.view.IWallpaperVisibilityListener$Stub$Proxy
 android.view.IWallpaperVisibilityListener$Stub
 android.view.IWallpaperVisibilityListener
-android.view.IWindow$Stub$Proxy
 android.view.IWindow$Stub
 android.view.IWindow
 android.view.IWindowFocusObserver$Stub
@@ -9062,6 +9016,7 @@ android.view.View
 android.view.ViewAnimationHostBridge
 android.view.ViewAnimationUtils
 android.view.ViewConfiguration
+android.view.ViewCredentialHandler
 android.view.ViewDebug$ExportedProperty
 android.view.ViewDebug$FlagToString
 android.view.ViewDebug$HierarchyHandler
@@ -9164,7 +9119,6 @@ android.view.ViewRootImpl$UnhandledKeyManager
 android.view.ViewRootImpl$ViewPostImeInputStage
 android.view.ViewRootImpl$ViewPreImeInputStage
 android.view.ViewRootImpl$ViewRootHandler
-android.view.ViewRootImpl$W
 android.view.ViewRootImpl$WindowInputEventReceiver
 android.view.ViewRootImpl
 android.view.ViewRootInsetsControllerHost
@@ -9401,7 +9355,6 @@ android.view.contentcapture.IContentCaptureManager$Stub
 android.view.contentcapture.IContentCaptureManager
 android.view.contentcapture.IContentCaptureOptionsCallback$Stub
 android.view.contentcapture.IContentCaptureOptionsCallback
-android.view.contentcapture.IDataShareWriteAdapter$Stub$Proxy
 android.view.contentcapture.IDataShareWriteAdapter$Stub
 android.view.contentcapture.IDataShareWriteAdapter
 android.view.contentcapture.MainContentCaptureSession$$ExternalSyntheticLambda0
@@ -9769,6 +9722,7 @@ android.webkit.WebViewProviderResponse-IA
 android.webkit.WebViewProviderResponse
 android.webkit.WebViewRenderProcess
 android.webkit.WebViewRenderProcessClient
+android.webkit.WebViewUpdateManager
 android.webkit.WebViewUpdateService
 android.webkit.WebViewZygote
 android.widget.AbsListView$1
@@ -10365,6 +10319,7 @@ android.window.WindowOnBackInvokedDispatcher$OnBackInvokedCallbackWrapper$$Exter
 android.window.WindowOnBackInvokedDispatcher$OnBackInvokedCallbackWrapper$$ExternalSyntheticLambda2
 android.window.WindowOnBackInvokedDispatcher$OnBackInvokedCallbackWrapper$$ExternalSyntheticLambda3
 android.window.WindowOnBackInvokedDispatcher$OnBackInvokedCallbackWrapper$$ExternalSyntheticLambda4
+android.window.WindowOnBackInvokedDispatcher$OnBackInvokedCallbackWrapper$$ExternalSyntheticLambda5
 android.window.WindowOnBackInvokedDispatcher$OnBackInvokedCallbackWrapper$CallbackRef
 android.window.WindowOnBackInvokedDispatcher$OnBackInvokedCallbackWrapper
 android.window.WindowOnBackInvokedDispatcher
@@ -10568,10 +10523,8 @@ com.android.i18n.timezone.internal.Memory
 com.android.i18n.timezone.internal.MemoryMappedFile
 com.android.i18n.timezone.internal.NioBufferIterator
 com.android.i18n.util.Log
-com.android.icu.charset.CharsetDecoderICU
 com.android.icu.charset.CharsetEncoderICU
 com.android.icu.charset.CharsetFactory
-com.android.icu.charset.CharsetICU
 com.android.icu.charset.NativeConverter
 com.android.icu.text.CompatibleDecimalFormatFactory
 com.android.icu.text.DateSorterBridge
@@ -10998,13 +10951,10 @@ com.android.internal.app.AssistUtils
 com.android.internal.app.IAppOpsActiveCallback$Stub$Proxy
 com.android.internal.app.IAppOpsActiveCallback$Stub
 com.android.internal.app.IAppOpsActiveCallback
-com.android.internal.app.IAppOpsAsyncNotedCallback$Stub$Proxy
 com.android.internal.app.IAppOpsAsyncNotedCallback$Stub
 com.android.internal.app.IAppOpsAsyncNotedCallback
-com.android.internal.app.IAppOpsCallback$Stub$Proxy
 com.android.internal.app.IAppOpsCallback$Stub
 com.android.internal.app.IAppOpsCallback
-com.android.internal.app.IAppOpsNotedCallback$Stub$Proxy
 com.android.internal.app.IAppOpsNotedCallback$Stub
 com.android.internal.app.IAppOpsNotedCallback
 com.android.internal.app.IAppOpsService$Stub$Proxy
@@ -11190,7 +11140,6 @@ com.android.internal.infra.AndroidFuture$$ExternalSyntheticLambda1
 com.android.internal.infra.AndroidFuture$$ExternalSyntheticLambda3
 com.android.internal.infra.AndroidFuture$1
 com.android.internal.infra.AndroidFuture$2
-com.android.internal.infra.AndroidFuture
 com.android.internal.infra.GlobalWhitelistState
 com.android.internal.infra.IAndroidFuture$Stub$Proxy
 com.android.internal.infra.IAndroidFuture$Stub
@@ -11354,7 +11303,6 @@ com.android.internal.os.CachedDeviceState$Readonly
 com.android.internal.os.CachedDeviceState$TimeInStateStopwatch
 com.android.internal.os.CachedDeviceState
 com.android.internal.os.ClassLoaderFactory
-com.android.internal.os.Clock$1
 com.android.internal.os.Clock
 com.android.internal.os.FuseAppLoop$1
 com.android.internal.os.FuseAppLoop
@@ -11532,7 +11480,6 @@ com.android.internal.protolog.common.IProtoLogGroup
 com.android.internal.protolog.common.LogDataType
 com.android.internal.security.VerityUtils
 com.android.internal.statusbar.IAddTileResultCallback
-com.android.internal.statusbar.IStatusBar$Stub$Proxy
 com.android.internal.statusbar.IStatusBar$Stub
 com.android.internal.statusbar.IStatusBar
 com.android.internal.statusbar.IStatusBarService$Stub$Proxy
@@ -11753,7 +11700,6 @@ com.android.internal.telephony.IOnSubscriptionsChangedListener
 com.android.internal.telephony.IOns$Stub$Proxy
 com.android.internal.telephony.IOns$Stub
 com.android.internal.telephony.IOns
-com.android.internal.telephony.IPhoneStateListener$Stub$Proxy
 com.android.internal.telephony.IPhoneStateListener$Stub
 com.android.internal.telephony.IPhoneStateListener
 com.android.internal.telephony.IPhoneSubInfo$Stub$Proxy
@@ -13125,7 +13071,6 @@ com.android.internal.util.WakeupMessage
 com.android.internal.util.XmlPullParserWrapper
 com.android.internal.util.XmlSerializerWrapper
 com.android.internal.util.XmlUtils$ForcedTypedXmlPullParser
-com.android.internal.util.XmlUtils$ForcedTypedXmlSerializer
 com.android.internal.util.XmlUtils$ReadMapCallback
 com.android.internal.util.XmlUtils$WriteMapCallback
 com.android.internal.util.XmlUtils
@@ -13171,7 +13116,6 @@ com.android.internal.util.function.pooled.PooledLambda
 com.android.internal.util.function.pooled.PooledLambdaImpl$LambdaType$ReturnType
 com.android.internal.util.function.pooled.PooledLambdaImpl$LambdaType
 com.android.internal.util.function.pooled.PooledLambdaImpl$Pool
-com.android.internal.util.function.pooled.PooledLambdaImpl
 com.android.internal.util.function.pooled.PooledPredicate
 com.android.internal.util.function.pooled.PooledRunnable
 com.android.internal.util.function.pooled.PooledSupplier$OfDouble
@@ -13456,6 +13400,7 @@ com.android.service.ims.presence.SubscribePublisher
 com.android.service.nano.StringListParamProto
 com.android.telephony.Rlog
 com.android.text.flags.Flags
+com.android.window.flags.Flags
 com.google.android.collect.Lists
 com.google.android.collect.Maps
 com.google.android.collect.Sets
@@ -13891,7 +13836,6 @@ gov.nist.javax.sip.stack.UDPMessageChannel$PingBackTimerTask
 gov.nist.javax.sip.stack.UDPMessageChannel
 gov.nist.javax.sip.stack.UDPMessageProcessor
 java.io.InterruptedIOException
-java.nio.DirectByteBuffer
 javax.microedition.khronos.egl.EGL10
 javax.microedition.khronos.egl.EGL11
 javax.microedition.khronos.egl.EGL
@@ -14020,7 +13964,6 @@ org.apache.http.conn.ssl.X509HostnameVerifier
 org.apache.http.params.CoreConnectionPNames
 org.apache.http.params.HttpConnectionParams
 org.apache.http.params.HttpParams
-org.ccil.cowan.tagsoup.AttributesImpl
 org.ccil.cowan.tagsoup.AutoDetector
 org.ccil.cowan.tagsoup.CommandLine
 org.ccil.cowan.tagsoup.Element
