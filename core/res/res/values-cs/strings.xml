@@ -86,7 +86,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Mobilní síť není dostupná"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Zkuste změnit preferovanou síť. Změníte ji klepnutím."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Tísňová volání jsou nedostupná"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Přes Wi‑Fi nelze uskutečňovat tísňová volání"</string>
+    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Upozornění"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Přesměrování hovorů"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Režim tísňového zpětného volání"</string>
@@ -1185,6 +1186,10 @@
     <string name="deleteText" msgid="4200807474529938112">"Smazat"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Metoda zadávání dat"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Operace s textem"</string>
+    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
+    <skip />
+    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
+    <skip />
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Zpět"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Přepnout metodu zadávání"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"V úložišti je málo místa"</string>
@@ -1973,7 +1978,7 @@
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"Přidat dozorovaného uživatele"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Přidat jazyk"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Preferovaná oblast"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"Zadejte název jazyka"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"Zadejte jazyk"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Navrhované"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Navrženo"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Navrhované jazyky"</string>

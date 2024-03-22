@@ -84,7 +84,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"無法連上行動網路"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"請嘗試變更偏好的網路。輕觸即可變更。"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"無法撥打緊急電話"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"無法透過 Wi‑Fi 撥打緊急電話"</string>
+    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"快訊"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"來電轉接"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"緊急回撥模式"</string>
@@ -1183,6 +1184,10 @@
     <string name="deleteText" msgid="4200807474529938112">"刪除"</string>
     <string name="inputMethod" msgid="1784759500516314751">"輸入法"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"文字動作"</string>
+    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
+    <skip />
+    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
+    <skip />
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"返回"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"切換輸入法"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"儲存空間即將用盡"</string>
@@ -1900,7 +1905,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"確定"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"省電模式會開啟深色主題，並限制或關閉背景活動、某些視覺效果、特定功能和部分網路連線。"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"省電模式會開啟深色主題，並限制或關閉背景活動、某些視覺效果、特定功能和部分網路連線。"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。你目前使用的應用程式可以存取資料，但存取頻率可能不如平時高。舉例來說，圖片可能不會自動顯示，在你輕觸後才會顯示。"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。你有一個使用中的應用程式仍可存取資料，但存取頻率可能會變低。舉例來說，圖片可能要等到你輕觸後才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"要開啟數據節省模式嗎？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"開啟"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{1 分鐘 (直到 {formattedTime})}other{# 分鐘 (直到 {formattedTime})}}"</string>
@@ -1971,7 +1976,7 @@
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"新增受監管的使用者"</string>
     <string name="language_selection_title" msgid="52674936078683285">"新增語言"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"地區偏好設定"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"請輸入語言名稱"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"請輸入語言"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"建議語言"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"建議地區"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"建議語言"</string>
