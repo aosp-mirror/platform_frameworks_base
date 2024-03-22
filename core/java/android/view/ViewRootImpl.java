@@ -108,6 +108,7 @@ import static android.view.accessibility.Flags.fixMergedContentChangeEventV2;
 import static android.view.accessibility.Flags.forceInvertColor;
 import static android.view.accessibility.Flags.reduceWindowContentChangedEventThrottle;
 import static android.view.flags.Flags.toolkitFrameRateTypingReadOnly;
+import static android.view.flags.Flags.toolkitFrameRateVelocityMappingReadOnly;
 import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateFunctionEnablingReadOnly;
@@ -1154,6 +1155,8 @@ public final class ViewRootImpl implements ViewParent,
     private static boolean sToolkitFrameRateFunctionEnablingReadOnlyFlagValue;
     private static boolean sToolkitMetricsForFrameRateDecisionFlagValue;
     private static boolean sToolkitFrameRateTypingReadOnlyFlagValue;
+    private static boolean sToolkitFrameRateVelocityMappingReadOnlyFlagValue =
+            toolkitFrameRateVelocityMappingReadOnly();;
 
     static {
         sToolkitSetFrameRateReadOnlyFlagValue = toolkitSetFrameRateReadOnly();
@@ -12463,7 +12466,9 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void setPreferredFrameRateCategory(int preferredFrameRateCategory) {
-        if (!shouldSetFrameRateCategory()) {
+        if (!shouldSetFrameRateCategory()
+                || (mFrameRateCompatibility == FRAME_RATE_COMPATIBILITY_GTE
+                && sToolkitFrameRateVelocityMappingReadOnlyFlagValue)) {
             return;
         }
         int categoryFromConflictedFrameRates = FRAME_RATE_CATEGORY_NO_PREFERENCE;
@@ -12558,8 +12563,12 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void setPreferredFrameRate(float preferredFrameRate) {
-        if (!shouldSetFrameRate() || (mFrameRateCompatibility == FRAME_RATE_COMPATIBILITY_GTE
-                && preferredFrameRate > 0)) {
+        if (!shouldSetFrameRate()) {
+            return;
+        }
+        if (mFrameRateCompatibility == FRAME_RATE_COMPATIBILITY_GTE
+                && preferredFrameRate > 0 && !sToolkitFrameRateVelocityMappingReadOnlyFlagValue) {
+            mIsTouchBoosting = false;
             return;
         }
 
