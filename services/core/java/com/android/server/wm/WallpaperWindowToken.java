@@ -192,7 +192,18 @@ class WallpaperWindowToken extends WindowToken {
     void setVisibility(boolean visible) {
         if (mVisibleRequested != visible) {
             // Before setting mVisibleRequested so we can track changes.
-            mTransitionController.collect(this);
+            final WindowState wpTarget = mDisplayContent.mWallpaperController.getWallpaperTarget();
+            final boolean isTargetNotCollectedActivity = wpTarget != null
+                    && wpTarget.mActivityRecord != null
+                    && !mTransitionController.isCollecting(wpTarget.mActivityRecord);
+            // Skip collecting requesting-invisible wallpaper if the wallpaper target is an activity
+            // and it is not collected. Because the visibility change may be called after the
+            // transition of activity is finished, e.g. WallpaperController#hideWallpapers from
+            // hiding surface of the target. Then if there is a next transition, the wallpaper
+            // change may be collected into the unrelated transition and cause a weird animation.
+            if (!isTargetNotCollectedActivity || visible) {
+                mTransitionController.collect(this);
+            }
 
             setVisibleRequested(visible);
         }
