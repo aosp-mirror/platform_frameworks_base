@@ -5206,9 +5206,10 @@
   <java-symbol type="string" name="keyboard_layout_notification_multiple_selected_title"/>
   <java-symbol type="string" name="keyboard_layout_notification_multiple_selected_message"/>
 
-  <!-- For redacted notifications -->
+  <!-- For redacted notifications and screen sharing-->
   <java-symbol type="string" name="redacted_notification_message"/>
   <java-symbol type="string" name="redacted_notification_action_title"/>
+  <java-symbol type="string" name="screen_not_shared_sensitive_content"/>
 
   <java-symbol type="bool" name="config_batteryStatsResetOnUnplugHighBatteryLevel" />
   <java-symbol type="bool" name="config_batteryStatsResetOnUnplugAfterSignificantCharge" />
