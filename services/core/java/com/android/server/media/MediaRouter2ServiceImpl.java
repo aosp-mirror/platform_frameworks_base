@@ -1022,7 +1022,7 @@ class MediaRouter2ServiceImpl {
 
         // Uid and package name are shared across all manager records in the list.
         boolean isAppOpAllowed =
-                mAppOpsManager.unsafeCheckOp(
+                mAppOpsManager.unsafeCheckOpNoThrow(
                                 AppOpsManager.OPSTR_MEDIA_ROUTING_CONTROL,
                                 record.mOwnerUid,
                                 record.mOwnerPackageName)
