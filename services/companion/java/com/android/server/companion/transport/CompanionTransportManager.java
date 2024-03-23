@@ -46,6 +46,7 @@ import java.util.concurrent.Future;
 @SuppressLint("LongLogTag")
 public class CompanionTransportManager {
     private static final String TAG = "CDM_CompanionTransportManager";
+    private static final boolean DEBUG = false;
 
     private boolean mSecureTransportEnabled = true;
 
@@ -136,17 +137,11 @@ public class CompanionTransportManager {
         }
     }
 
-    /**
-     * Attach transport.
-     */
-    public void attachSystemDataTransport(int associationId, ParcelFileDescriptor fd) {
-        Slog.i(TAG, "Attaching transport for association id=[" + associationId + "]...");
-
-        mAssociationStore.getAssociationWithCallerChecks(associationId);
-
+    public void attachSystemDataTransport(String packageName, int userId, int associationId,
+            ParcelFileDescriptor fd) {
         synchronized (mTransports) {
             if (mTransports.contains(associationId)) {
-                detachSystemDataTransport(associationId);
+                detachSystemDataTransport(packageName, userId, associationId);
             }
 
             // TODO: Implement new API to pass a PSK
@@ -154,18 +149,9 @@ public class CompanionTransportManager {
 
             notifyOnTransportsChanged();
         }
-
-        Slog.i(TAG, "Transport attached.");
     }
 
-    /**
-     * Detach transport.
-     */
-    public void detachSystemDataTransport(int associationId) {
-        Slog.i(TAG, "Detaching transport for association id=[" + associationId + "]...");
-
-        mAssociationStore.getAssociationWithCallerChecks(associationId);
-
+    public void detachSystemDataTransport(String packageName, int userId, int associationId) {
         synchronized (mTransports) {
             final Transport transport = mTransports.removeReturnOld(associationId);
             if (transport == null) {
@@ -175,8 +161,6 @@ public class CompanionTransportManager {
             transport.stop();
             notifyOnTransportsChanged();
         }
-
-        Slog.i(TAG, "Transport detached.");
     }
 
     private void notifyOnTransportsChanged() {
@@ -323,7 +307,8 @@ public class CompanionTransportManager {
         int associationId = transport.mAssociationId;
         AssociationInfo association = mAssociationStore.getAssociationById(associationId);
         if (association != null) {
-            detachSystemDataTransport(
+            detachSystemDataTransport(association.getPackageName(),
+                    association.getUserId(),
                     association.getId());
         }
     }
