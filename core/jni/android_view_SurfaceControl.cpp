@@ -208,10 +208,17 @@ static struct {
 static struct {
     jclass clazz;
     jmethodID ctor;
+    jfieldID timeoutMillis;
+} gIdleScreenRefreshRateConfigClassInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID ctor;
     jfieldID defaultMode;
     jfieldID allowGroupSwitching;
     jfieldID primaryRanges;
     jfieldID appRequestRanges;
+    jfieldID idleScreenRefreshRateConfig;
 } gDesiredDisplayModeSpecsClassInfo;
 
 static struct {
@@ -1407,6 +1414,18 @@ static jboolean nativeSetDesiredDisplayModeSpecs(JNIEnv* env, jclass clazz, jobj
         return ranges;
     };
 
+    const auto makeIdleScreenRefreshRateConfig = [env](jobject obj)
+            -> std::optional<gui::DisplayModeSpecs::IdleScreenRefreshRateConfig> {
+        if (obj == NULL) {
+            return std::nullopt;
+        }
+        gui::DisplayModeSpecs::IdleScreenRefreshRateConfig idleScreenRefreshRateConfig;
+        idleScreenRefreshRateConfig.timeoutMillis =
+                env->GetIntField(obj, gIdleScreenRefreshRateConfigClassInfo.timeoutMillis);
+
+        return idleScreenRefreshRateConfig;
+    };
+
     gui::DisplayModeSpecs specs;
     specs.defaultMode = env->GetIntField(DesiredDisplayModeSpecs,
                                          gDesiredDisplayModeSpecsClassInfo.defaultMode);
@@ -1420,6 +1439,10 @@ static jboolean nativeSetDesiredDisplayModeSpecs(JNIEnv* env, jclass clazz, jobj
     specs.appRequestRanges =
             makeRanges(env->GetObjectField(DesiredDisplayModeSpecs,
                                            gDesiredDisplayModeSpecsClassInfo.appRequestRanges));
+
+    specs.idleScreenRefreshRateConfig = makeIdleScreenRefreshRateConfig(
+            env->GetObjectField(DesiredDisplayModeSpecs,
+                                gDesiredDisplayModeSpecsClassInfo.idleScreenRefreshRateConfig));
 
     size_t result = SurfaceComposerClient::setDesiredDisplayModeSpecs(token, specs);
     return result == NO_ERROR ? JNI_TRUE : JNI_FALSE;
@@ -1440,6 +1463,17 @@ static jobject nativeGetDesiredDisplayModeSpecs(JNIEnv* env, jclass clazz, jobje
                               rangeToJava(ranges.physical), rangeToJava(ranges.render));
     };
 
+    const auto idleScreenRefreshRateConfigToJava =
+            [env](const std::optional<gui::DisplayModeSpecs::IdleScreenRefreshRateConfig>&
+                          idleScreenRefreshRateConfig) -> jobject {
+        if (!idleScreenRefreshRateConfig.has_value()) {
+            return NULL; // Return null if input config is null
+        }
+        return env->NewObject(gIdleScreenRefreshRateConfigClassInfo.clazz,
+                              gIdleScreenRefreshRateConfigClassInfo.ctor,
+                              idleScreenRefreshRateConfig->timeoutMillis);
+    };
+
     gui::DisplayModeSpecs specs;
     if (SurfaceComposerClient::getDesiredDisplayModeSpecs(token, &specs) != NO_ERROR) {
         return nullptr;
@@ -1448,7 +1482,8 @@ static jobject nativeGetDesiredDisplayModeSpecs(JNIEnv* env, jclass clazz, jobje
     return env->NewObject(gDesiredDisplayModeSpecsClassInfo.clazz,
                           gDesiredDisplayModeSpecsClassInfo.ctor, specs.defaultMode,
                           specs.allowGroupSwitching, rangesToJava(specs.primaryRanges),
-                          rangesToJava(specs.appRequestRanges));
+                          rangesToJava(specs.appRequestRanges),
+                          idleScreenRefreshRateConfigToJava(specs.idleScreenRefreshRateConfig));
 }
 
 static jobject nativeGetDisplayNativePrimaries(JNIEnv* env, jclass, jobject tokenObj) {
@@ -2607,13 +2642,23 @@ int register_android_view_SurfaceControl(JNIEnv* env)
             GetFieldIDOrDie(env, RefreshRateRangesClazz, "render",
                             "Landroid/view/SurfaceControl$RefreshRateRange;");
 
+    jclass IdleScreenRefreshRateConfigClazz =
+            FindClassOrDie(env, "android/view/SurfaceControl$IdleScreenRefreshRateConfig");
+    gIdleScreenRefreshRateConfigClassInfo.clazz =
+            MakeGlobalRefOrDie(env, IdleScreenRefreshRateConfigClazz);
+    gIdleScreenRefreshRateConfigClassInfo.ctor =
+            GetMethodIDOrDie(env, gIdleScreenRefreshRateConfigClassInfo.clazz, "<init>", "(I)V");
+    gIdleScreenRefreshRateConfigClassInfo.timeoutMillis =
+            GetFieldIDOrDie(env, gIdleScreenRefreshRateConfigClassInfo.clazz, "timeoutMillis", "I");
+
     jclass DesiredDisplayModeSpecsClazz =
             FindClassOrDie(env, "android/view/SurfaceControl$DesiredDisplayModeSpecs");
     gDesiredDisplayModeSpecsClassInfo.clazz = MakeGlobalRefOrDie(env, DesiredDisplayModeSpecsClazz);
     gDesiredDisplayModeSpecsClassInfo.ctor =
             GetMethodIDOrDie(env, gDesiredDisplayModeSpecsClassInfo.clazz, "<init>",
                              "(IZLandroid/view/SurfaceControl$RefreshRateRanges;Landroid/view/"
-                             "SurfaceControl$RefreshRateRanges;)V");
+                             "SurfaceControl$RefreshRateRanges;Landroid/view/"
+                             "SurfaceControl$IdleScreenRefreshRateConfig;)V");
     gDesiredDisplayModeSpecsClassInfo.defaultMode =
             GetFieldIDOrDie(env, DesiredDisplayModeSpecsClazz, "defaultMode", "I");
     gDesiredDisplayModeSpecsClassInfo.allowGroupSwitching =
@@ -2624,6 +2669,9 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gDesiredDisplayModeSpecsClassInfo.appRequestRanges =
             GetFieldIDOrDie(env, DesiredDisplayModeSpecsClazz, "appRequestRanges",
                             "Landroid/view/SurfaceControl$RefreshRateRanges;");
+    gDesiredDisplayModeSpecsClassInfo.idleScreenRefreshRateConfig =
+            GetFieldIDOrDie(env, DesiredDisplayModeSpecsClazz, "idleScreenRefreshRateConfig",
+                            "Landroid/view/SurfaceControl$IdleScreenRefreshRateConfig;");
 
     jclass jankDataClazz =
                 FindClassOrDie(env, "android/view/SurfaceControl$JankData");

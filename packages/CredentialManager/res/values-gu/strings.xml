@@ -39,9 +39,12 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"આપણે પાસવર્ડ રહિત ભવિષ્ય તરફ આગળ વધી રહ્યાં છીએ, છતાં પાસકીની સાથોસાથ હજી પણ પાસવર્ડ ઉપલબ્ધ રહેશે."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"તમારી <xliff:g id="CREATETYPES">%1$s</xliff:g> ક્યાં સાચવવી તે પસંદ કરો"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"તમારી માહિતી સાચવવા માટે પાસવર્ડ મેનેજર પસંદ કરો અને આગલી વખતે વધુ ઝડપથી સાઇન ઇન કરો"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"<xliff:g id="APPNAME">%1$s</xliff:g>માં સાઇન ઇન કરવા માટે પાસકી બનાવીએ?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"<xliff:g id="APPNAME">%1$s</xliff:g>માં પાસવર્ડ સાચવવા માટે પાસકી બનાવીએ?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> માટે સાઇન-ઇન કરવાની માહિતી સાચવીએ?"</string>
+    <!-- no translation found for choose_create_option_passkey_title (8762295821604276511) -->
+    <skip />
+    <!-- no translation found for choose_create_option_password_title (4481366993598649224) -->
+    <skip />
+    <!-- no translation found for choose_create_option_sign_in_title (7092914088455358079) -->
+    <skip />
     <string name="passkey" msgid="632353688396759522">"પાસકી"</string>
     <string name="password" msgid="6738570945182936667">"પાસવર્ડ"</string>
     <string name="passkeys" msgid="5733880786866559847">"પાસકી"</string>
@@ -70,6 +73,8 @@
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"છોડી દો"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે શું તમારી સાચવેલી પાસકીનો ઉપયોગ કરીએ?"</string>
     <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"શું <xliff:g id="APP_NAME">%1$s</xliff:g> માટે તમારા સાચવેલા પાસવર્ડનો ઉપયોગ કરીએ?"</string>
+    <!-- no translation found for get_dialog_title_single_tap_for (2057945648748859483) -->
+    <skip />
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"શું <xliff:g id="APP_NAME">%1$s</xliff:g>માં સાઇન ઇન કરવા માટે તમારી આ લૉગ ઇન વિગતોનો ઉપયોગ કરીએ?"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે સાઇન ઇન વિકલ્પો અનલૉક કરીએ?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે કોઈ સાચવેલી પાસકી પસંદ કરો"</string>

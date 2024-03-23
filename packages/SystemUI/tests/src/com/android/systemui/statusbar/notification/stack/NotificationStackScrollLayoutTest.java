@@ -931,14 +931,14 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     public void testWindowInsetAnimationProgress_updatesBottomInset() {
-        int bottomImeInset = 100;
+        int imeInset = 100;
         WindowInsets windowInsets = new WindowInsets.Builder()
-                .setInsets(ime(), Insets.of(0, 0, 0, bottomImeInset)).build();
+                .setInsets(ime(), Insets.of(0, 0, 0, imeInset)).build();
         ArrayList<WindowInsetsAnimation> windowInsetsAnimations = new ArrayList<>();
         mStackScrollerInternal
                 .dispatchWindowInsetsAnimationProgress(windowInsets, windowInsetsAnimations);
 
-        assertEquals(bottomImeInset, mStackScrollerInternal.mBottomInset);
+        assertEquals(imeInset, mStackScrollerInternal.mImeInset);
     }
 
     @Test

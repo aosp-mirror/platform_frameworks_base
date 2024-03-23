@@ -4209,6 +4209,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }, mHandler);
     }
 
+    @GuardedBy("ImfLock.class")
     private void addStylusDeviceIdLocked(int deviceId) {
         if (mStylusIds == null) {
             mStylusIds = new IntArray();

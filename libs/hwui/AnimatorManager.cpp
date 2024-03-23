@@ -90,7 +90,13 @@ void AnimatorManager::pushStaging() {
         }
         mCancelAllAnimators = false;
     } else {
-        for (auto& animator : mAnimators) {
+        // create a copy of mAnimators as onAnimatorTargetChanged can erase mAnimators.
+        FatVector<sp<BaseRenderNodeAnimator>> animators;
+        animators.reserve(mAnimators.size());
+        for (const auto& animator : mAnimators) {
+            animators.push_back(animator);
+        }
+        for (auto& animator : animators) {
             animator->pushStaging(mAnimationHandle->context());
         }
     }

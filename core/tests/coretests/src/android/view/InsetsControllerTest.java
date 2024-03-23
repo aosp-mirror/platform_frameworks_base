@@ -21,12 +21,11 @@ import static android.view.InsetsController.ANIMATION_TYPE_HIDE;
 import static android.view.InsetsController.ANIMATION_TYPE_NONE;
 import static android.view.InsetsController.ANIMATION_TYPE_RESIZE;
 import static android.view.InsetsController.ANIMATION_TYPE_SHOW;
-import static android.view.InsetsController.AnimationType;
+import static android.view.InsetsSource.FLAG_ANIMATE_RESIZING;
 import static android.view.InsetsSource.ID_IME;
 import static android.view.InsetsSourceConsumer.ShowResult.IME_SHOW_DELAYED;
 import static android.view.InsetsSourceConsumer.ShowResult.SHOW_IMMEDIATELY;
 import static android.view.ViewRootImpl.CAPTION_ON_SHELL;
-import static android.view.WindowInsets.Type.SIZE;
 import static android.view.WindowInsets.Type.all;
 import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.defaultVisible;
@@ -671,36 +670,81 @@ public class InsetsControllerTest {
     }
 
     @Test
-    public void testResizeAnimation_insetsTypes() {
-        for (int i = 0; i < SIZE; i++) {
-            final @InsetsType int type = 1 << i;
-            final @AnimationType int expectedAnimationType = (type & systemBars()) != 0
-                            ? ANIMATION_TYPE_RESIZE
-                            : ANIMATION_TYPE_NONE;
-            doTestResizeAnimation_insetsTypes(type, expectedAnimationType);
-        }
-    }
-
-    private void doTestResizeAnimation_insetsTypes(@InsetsType int type,
-            @AnimationType int expectedAnimationType) {
-        final int id = type;
+    public void testResizeAnimation_withFlagAnimateResizing() {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            final int id = ID_NAVIGATION_BAR;
+            final @InsetsType int type = navigationBars();
             final InsetsState state1 = new InsetsState();
-            state1.getOrCreateSource(id, type).setVisible(true).setFrame(0, 0, 500, 50);
+            state1.getOrCreateSource(id, type)
+                    .setVisible(true)
+                    .setFrame(0, 0, 500, 50)
+                    .setFlags(FLAG_ANIMATE_RESIZING, FLAG_ANIMATE_RESIZING);
             final InsetsState state2 = new InsetsState(state1, true /* copySources */);
             state2.peekSource(id).setFrame(0, 0, 500, 60);
-            final String message = "Animation type of " + WindowInsets.Type.toString(type) + ":";
+
+            // New insets source won't cause the resize animation.
+            mController.onStateChanged(state1);
+            assertEquals("There must not be resize animation.", ANIMATION_TYPE_NONE,
+                    mController.getAnimationType(type));
+
+            // Changing frame of the source with FLAG_ANIMATE_RESIZING will cause the resize
+            // animation.
+            mController.onStateChanged(state2);
+            assertEquals("There must be resize animation.", ANIMATION_TYPE_RESIZE,
+                    mController.getAnimationType(type));
+        });
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
+
+    @Test
+    public void testResizeAnimation_withoutFlagAnimateResizing() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            final int id = ID_STATUS_BAR;
+            final @InsetsType int type = statusBars();
+            final InsetsState state1 = new InsetsState();
+            state1.getOrCreateSource(id, type)
+                    .setVisible(true)
+                    .setFrame(0, 0, 500, 50)
+                    .setFlags(0, FLAG_ANIMATE_RESIZING);
+            final InsetsState state2 = new InsetsState(state1, true /* copySources */);
+            state2.peekSource(id).setFrame(0, 0, 500, 60);
+            final String message = "There must not be resize animation.";
 
             // New insets source won't cause the resize animation.
             mController.onStateChanged(state1);
             assertEquals(message, ANIMATION_TYPE_NONE, mController.getAnimationType(type));
 
-            // Changing frame might cause the resize animation. This depends on the insets type.
+            // Changing frame of the source without FLAG_ANIMATE_RESIZING must not cause the resize
+            // animation.
             mController.onStateChanged(state2);
-            assertEquals(message, expectedAnimationType, mController.getAnimationType(type));
+            assertEquals(message, ANIMATION_TYPE_NONE, mController.getAnimationType(type));
+        });
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
 
-            // Cancel the existing animations for the next iteration.
-            mController.cancelExistingAnimations();
+    @Test
+    public void testResizeAnimation_sourceFrame() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            final int id = ID_STATUS_BAR;
+            final @InsetsType int type = statusBars();
+            final InsetsState state1 = new InsetsState();
+            state1.setDisplayFrame(new Rect(0, 0, 500, 1000));
+            state1.getOrCreateSource(id, type).setFrame(0, 0, 500, 50);
+            final InsetsState state2 = new InsetsState(state1, true /* copySources */);
+            state2.setDisplayFrame(state1.getDisplayFrame());
+            state2.peekSource(id).setFrame(0, 0, 500, 0);
+            final String message = "There must not be resize animation.";
+
+            // New insets source won't cause the resize animation.
+            mController.onStateChanged(state1);
+            assertEquals(message, ANIMATION_TYPE_NONE, mController.getAnimationType(type));
+
+            // Changing frame won't cause the resize animation if the new frame is empty.
+            mController.onStateChanged(state2);
+            assertEquals(message, ANIMATION_TYPE_NONE, mController.getAnimationType(type));
+
+            // Changing frame won't cause the resize animation if the existing frame is empty.
+            mController.onStateChanged(state1);
             assertEquals(message, ANIMATION_TYPE_NONE, mController.getAnimationType(type));
         });
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();

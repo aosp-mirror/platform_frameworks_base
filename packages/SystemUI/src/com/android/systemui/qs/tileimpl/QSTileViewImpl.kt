@@ -181,11 +181,14 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
     /** Visuo-haptic long-press effects */
     private var longPressEffect: QSLongPressEffect? = null
+    private val longPressEffectViewBinder = QSLongPressEffectViewBinder()
     private var initialLongPressProperties: QSLongPressProperties? = null
     private var finalLongPressProperties: QSLongPressProperties? = null
     private val colorEvaluator = ArgbEvaluator.getInstance()
     val hasLongPressEffect: Boolean
         get() = longPressEffect != null
+    @VisibleForTesting val isLongPressEffectBound: Boolean
+        get() = longPressEffectViewBinder.isBound
 
     init {
         val typedValue = TypedValue()
@@ -616,11 +619,14 @@ open class QSTileViewImpl @JvmOverloads constructor(
                 // set the valid long-press effect as the touch listener
                 showRippleEffect = false
                 setOnTouchListener(longPressEffect)
-                QSLongPressEffectViewBinder.bind(this, longPressEffect)
+                if (!longPressEffectViewBinder.isBound) {
+                    longPressEffectViewBinder.bind(this, longPressEffect)
+                }
             } else {
                 // Long-press effects might have been enabled before but the new state does not
                 // handle a long-press. In this case, we go back to the behaviour of a regular tile
                 // and clean-up the resources
+                longPressEffectViewBinder.dispose()
                 showRippleEffect = isClickable
                 setOnTouchListener(null)
                 longPressEffect = null

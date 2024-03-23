@@ -444,6 +444,17 @@ public class AuthControllerTest extends SysuiTestCase {
                 AdditionalMatchers.aryEq(credentialAttestation));
     }
 
+    @Test
+    public void testSendsReasonContentViewMoreOptions_whenButtonPressed() throws Exception {
+        showDialog(new int[]{1} /* sensorIds */, false /* credentialAllowed */);
+        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_BUTTON_CONTENT_VIEW_MORE_OPTIONS,
+                null, /* credentialAttestation */
+                mAuthController.mCurrentDialog.getRequestId());
+        verify(mReceiver).onDialogDismissed(
+                eq(BiometricPrompt.DISMISSED_REASON_CONTENT_VIEW_MORE_OPTIONS),
+                eq(null) /* credentialAttestation */);
+    }
+
     // Statusbar tests
 
     @Test

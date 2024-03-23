@@ -85,7 +85,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Não é possível estabelecer ligação à rede móvel."</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Experimente alterar a rede preferida. Toque para alterar."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Chamadas de emergência indisponíveis"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Não é possível efetuar chamadas de emergência através de Wi‑Fi."</string>
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"As chamadas de emergência requerem uma rede móvel"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertas"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Reencaminhamento de chamadas"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Modo de chamada de retorno de emergência"</string>
@@ -1184,6 +1184,8 @@
     <string name="deleteText" msgid="4200807474529938112">"Eliminar"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Método de entrada"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Acções de texto"</string>
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"A escrita manual não é suportada neste campo"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"A escrita manual não é suportada nos campos de palavras-passe"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Voltar"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Alternar o método de introdução"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Está quase sem espaço de armazenamento"</string>
@@ -1901,7 +1903,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"A Poupança de bateria ativa o tema escuro e limita ou desativa a atividade em segundo plano, alguns efeitos visuais, determinadas funcionalidades e algumas ligações de rede."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"A Poupança de bateria ativa o tema escuro e limita ou desativa a atividade em segundo plano, alguns efeitos visuais, determinadas funcionalidades e algumas ligações de rede."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Para ajudar a reduzir a utilização de dados, a Poupança de dados impede que algumas apps enviem ou recebam dados em segundo plano. Uma determinada app que esteja a utilizar atualmente pode aceder aos dados, mas é possível que o faça com menos frequência. Isto pode significar, por exemplo, que as imagens não são apresentadas até que toque nas mesmas."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Para ajudar a reduzir a utilização de dados, a Poupança de dados impede que algumas apps enviem ou recebam dados em segundo plano. Qualquer app que esteja a usar atualmente pode aceder aos dados, mas é possível que o faça com menos frequência. Isto pode significar, por exemplo, que as imagens não são apresentadas até que toque nelas."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Ativar a Poupança de dados?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ativar"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Durante um minuto (até à[s] {formattedTime})}many{Durante # minutos (até à[s] {formattedTime})}other{Durante # minutos (até à[s] {formattedTime})}}"</string>
@@ -1972,7 +1974,7 @@
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"Adicionar utilizador supervisionado"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Adicionar um idioma"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Preferência de região"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"Intr. nome do idioma"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"Introduza o idioma"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Sugeridos"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Sugeridas"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Idiomas sugeridos"</string>

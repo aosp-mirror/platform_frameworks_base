@@ -41,6 +41,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+import static android.view.flags.Flags.toolkitFrameRateDefaultNormalReadOnly;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -593,8 +594,9 @@ public class ViewRootImplTest {
         sInstrumentation.runOnMainSync(() -> {
             view.setVisibility(View.VISIBLE);
             view.invalidate();
-            assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
-                    FRAME_RATE_CATEGORY_HIGH);
+            int expected = toolkitFrameRateDefaultNormalReadOnly()
+                    ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
+            assertEquals(expected, viewRootImpl.getPreferredFrameRateCategory());
         });
         sInstrumentation.waitForIdleSync();
 
@@ -658,7 +660,9 @@ public class ViewRootImplTest {
         ViewRootImpl viewRootImpl = view.getViewRootImpl();
         sInstrumentation.runOnMainSync(() -> {
             view.invalidate();
-            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
+            int expected = toolkitFrameRateDefaultNormalReadOnly()
+                    ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
+            assertEquals(expected, viewRootImpl.getPreferredFrameRateCategory());
         });
     }
 
@@ -1017,11 +1021,13 @@ public class ViewRootImplTest {
 
         ViewRootImpl viewRootImpl = view.getViewRootImpl();
 
-        // In transistion from frequent update to infrequent update
+        // In transition from frequent update to infrequent update
         Thread.sleep(delay);
         sInstrumentation.runOnMainSync(() -> {
             view.invalidate();
-            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
+            int expected = toolkitFrameRateDefaultNormalReadOnly()
+                    ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
+            assertEquals(expected, viewRootImpl.getPreferredFrameRateCategory());
         });
 
         // reset the frame rate category counts
@@ -1033,7 +1039,7 @@ public class ViewRootImplTest {
             sInstrumentation.waitForIdleSync();
         }
 
-        // In transistion from frequent update to infrequent update
+        // In transition from frequent update to infrequent update
         Thread.sleep(delay);
         sInstrumentation.runOnMainSync(() -> {
             view.setRequestedFrameRate(view.REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE);
@@ -1107,8 +1113,9 @@ public class ViewRootImplTest {
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
                     FRAME_RATE_CATEGORY_NO_PREFERENCE);
             view.invalidate();
-            assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
-                    FRAME_RATE_CATEGORY_HIGH);
+            int expected = toolkitFrameRateDefaultNormalReadOnly()
+                    ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
+            assertEquals(expected, viewRootImpl.getPreferredFrameRateCategory());
         });
 
          // reset the frame rate category counts

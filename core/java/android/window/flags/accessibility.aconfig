@@ -13,6 +13,16 @@ flag {
   description: "Always draw fullscreen orange border in fullscreen magnification"
   bug: "291891390"
   metadata {
-        purpose: PURPOSE_BUGFIX
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "use_window_original_touchable_region_when_magnification_recompute_bounds"
+  namespace: "accessibility"
+  description: "The flag controls whether to use the window original touchable regions in accessibilityController recomputeBounds"
+  bug: "323366243"
+  metadata {
+    purpose: PURPOSE_BUGFIX
   }
 }

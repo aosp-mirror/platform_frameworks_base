@@ -149,6 +149,10 @@ class ActivityMetricsLogger {
     private static final int WINDOW_STATE_MULTI_WINDOW = 4;
     private static final int WINDOW_STATE_INVALID = -1;
 
+    // These should match AppStartOccurred.MultiWindowLaunchType in the atoms.proto
+    private static final int MULTI_WINDOW_LAUNCH_TYPE_UNSPECIFIED = 0;
+    private static final int MULTI_WINDOW_LAUNCH_TYPE_APP_PAIR = 1;
+
     /**
      * If a launching activity isn't visible within this duration when the device is sleeping, e.g.
      * keyguard is locked, its transition info will be dropped.
@@ -329,6 +333,8 @@ class ActivityMetricsLogger {
         @Nullable Runnable mPendingFullyDrawn;
         /** Non-null if the trace is active. */
         @Nullable String mLaunchTraceName;
+        /** Whether this transition info is for an activity that is a part of multi-window. */
+        int mMultiWindowLaunchType = MULTI_WINDOW_LAUNCH_TYPE_UNSPECIFIED;
 
         /** @return Non-null if there will be a window drawn event for the launch. */
         @Nullable
@@ -477,6 +483,7 @@ class ActivityMetricsLogger {
         final int activityRecordIdHashCode;
         final boolean relaunched;
         final long timestampNs;
+        final int multiWindowLaunchType;
 
         private TransitionInfoSnapshot(TransitionInfo info) {
             this(info, info.mLastLaunchedActivity, INVALID_DELAY);
@@ -507,6 +514,7 @@ class ActivityMetricsLogger {
             this.windowsFullyDrawnDelayMs = windowsFullyDrawnDelayMs;
             relaunched = info.mRelaunched;
             timestampNs = info.mLaunchingState.mStartRealtimeNs;
+            multiWindowLaunchType = info.mMultiWindowLaunchType;
         }
 
         @WaitResult.LaunchState int getLaunchState() {
@@ -744,6 +752,10 @@ class ActivityMetricsLogger {
             return;
         }
 
+        // Look at all other transition infos and mark them as a split pair if they belong to
+        // adjacent tasks
+        updateSplitPairLaunches(newInfo);
+
         if (DEBUG_METRICS) Slog.i(TAG, "notifyActivityLaunched successful");
         // A new launch sequence has begun. Start tracking it.
         mTransitionInfoList.add(newInfo);
@@ -765,6 +777,36 @@ class ActivityMetricsLogger {
             final TransitionInfo prevInfo = mTransitionInfoList.get(i);
             if (prevInfo.mIsDrawn || !prevInfo.mLastLaunchedActivity.isVisibleRequested()) {
                 scheduleCheckActivityToBeDrawn(prevInfo.mLastLaunchedActivity, 0 /* delay */);
+            }
+        }
+    }
+
+    /**
+     * Updates all transition infos including the given {@param info} if they are a part of a
+     * split pair launch.
+     */
+    private void updateSplitPairLaunches(@NonNull TransitionInfo info) {
+        final Task launchedActivityTask = info.mLastLaunchedActivity.getTask();
+        final Task adjacentToLaunchedTask = launchedActivityTask.getAdjacentTask();
+        if (adjacentToLaunchedTask == null) {
+            // Not a part of a split pair
+            return;
+        }
+        for (int i = mTransitionInfoList.size() - 1; i >= 0; i--) {
+            final TransitionInfo otherInfo = mTransitionInfoList.get(i);
+            if (otherInfo == info) {
+                continue;
+            }
+            final Task otherTask = otherInfo.mLastLaunchedActivity.getTask();
+            // The adjacent task is the split root in which activities are started
+            if (otherTask.isDescendantOf(adjacentToLaunchedTask)) {
+                if (DEBUG_METRICS) {
+                    Slog.i(TAG, "Found adjacent tasks t1=" + launchedActivityTask.mTaskId
+                            + " t2=" + otherTask.mTaskId);
+                }
+                // These tasks are adjacent, so mark them as such
+                info.mMultiWindowLaunchType = MULTI_WINDOW_LAUNCH_TYPE_APP_PAIR;
+                otherInfo.mMultiWindowLaunchType = MULTI_WINDOW_LAUNCH_TYPE_APP_PAIR;
             }
         }
     }
@@ -1168,7 +1210,8 @@ class ActivityMetricsLogger {
                 packageState,
                 false, // is_xr_activity
                 firstLaunch,
-                0L /* TODO: stoppedDuration */);
+                0L /* TODO: stoppedDuration */,
+                info.multiWindowLaunchType);
         // Reset the stopped state to avoid reporting stopped again
         if (info.processRecord != null) {
             info.processRecord.setWasStoppedLogged(true);

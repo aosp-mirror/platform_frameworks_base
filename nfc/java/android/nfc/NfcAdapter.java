@@ -1117,7 +1117,7 @@ public final class NfcAdapter {
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     public boolean enable() {
         try {
-            return sService.enable();
+            return sService.enable(mContext.getPackageName());
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             // Try one more time
@@ -1126,7 +1126,7 @@ public final class NfcAdapter {
                 return false;
             }
             try {
-                return sService.enable();
+                return sService.enable(mContext.getPackageName());
             } catch (RemoteException ee) {
                 Log.e(TAG, "Failed to recover NFC Service.");
             }
@@ -1156,7 +1156,7 @@ public final class NfcAdapter {
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     public boolean disable() {
         try {
-            return sService.disable(true);
+            return sService.disable(true, mContext.getPackageName());
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             // Try one more time
@@ -1165,7 +1165,7 @@ public final class NfcAdapter {
                 return false;
             }
             try {
-                return sService.disable(true);
+                return sService.disable(true, mContext.getPackageName());
             } catch (RemoteException ee) {
                 Log.e(TAG, "Failed to recover NFC Service.");
             }
@@ -1181,7 +1181,7 @@ public final class NfcAdapter {
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     public boolean disable(boolean persist) {
         try {
-            return sService.disable(persist);
+            return sService.disable(persist, mContext.getPackageName());
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             // Try one more time
@@ -1190,7 +1190,7 @@ public final class NfcAdapter {
                 return false;
             }
             try {
-                return sService.disable(persist);
+                return sService.disable(persist, mContext.getPackageName());
             } catch (RemoteException ee) {
                 Log.e(TAG, "Failed to recover NFC Service.");
             }

@@ -2099,6 +2099,65 @@ public final class SurfaceControl implements Parcelable {
         }
     }
 
+    /**
+     * Contains information of the idle time of the screen after which the refresh rate is to be
+     * reduced.
+     *
+     * @hide
+     */
+    public static final class IdleScreenRefreshRateConfig {
+        /**
+         *  The time(in ms) after which the refresh rate is to be reduced. Defaults to -1, which
+         *  means no timeout has been configured for the current conditions
+         */
+        public int timeoutMillis;
+
+        public IdleScreenRefreshRateConfig() {
+            timeoutMillis = -1;
+        }
+
+        public IdleScreenRefreshRateConfig(int timeoutMillis) {
+            this.timeoutMillis = timeoutMillis;
+        }
+
+        /**
+         * Checks whether the two objects have the same values.
+         */
+        @Override
+        public boolean equals(Object other) {
+            if (other == this) {
+                return true;
+            }
+
+            if (!(other instanceof IdleScreenRefreshRateConfig) || other == null) {
+                return false;
+            }
+
+            IdleScreenRefreshRateConfig
+                    idleScreenRefreshRateConfig = (IdleScreenRefreshRateConfig) other;
+            return timeoutMillis == idleScreenRefreshRateConfig.timeoutMillis;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(timeoutMillis);
+        }
+
+        @Override
+        public String toString() {
+            return "timeoutMillis: " + timeoutMillis;
+        }
+
+        /**
+         * Copies the supplied object's values to this object.
+         */
+        public void copyFrom(IdleScreenRefreshRateConfig other) {
+            if (other != null) {
+                this.timeoutMillis = other.timeoutMillis;
+            }
+        }
+    }
+
 
     /**
      * Contains information about desired display configuration.
@@ -2132,6 +2191,15 @@ public final class SurfaceControl implements Parcelable {
          */
         public final RefreshRateRanges appRequestRanges;
 
+        /**
+         * Represents the idle time of the screen after which the associated display's refresh rate
+         * is to be reduced to preserve power
+         * Defaults to null, meaning that the device is not configured to have a timeout.
+         * Timeout value of -1 refers that the current conditions require no timeout
+         */
+        @Nullable
+        public IdleScreenRefreshRateConfig idleScreenRefreshRateConfig;
+
         public DesiredDisplayModeSpecs() {
             this.primaryRanges = new RefreshRateRanges();
             this.appRequestRanges = new RefreshRateRanges();
@@ -2144,13 +2212,17 @@ public final class SurfaceControl implements Parcelable {
         }
 
         public DesiredDisplayModeSpecs(int defaultMode, boolean allowGroupSwitching,
-                RefreshRateRanges primaryRanges, RefreshRateRanges appRequestRanges) {
+                RefreshRateRanges primaryRanges, RefreshRateRanges appRequestRanges,
+                @Nullable IdleScreenRefreshRateConfig idleScreenRefreshRateConfig) {
             this.defaultMode = defaultMode;
             this.allowGroupSwitching = allowGroupSwitching;
             this.primaryRanges =
                     new RefreshRateRanges(primaryRanges.physical, primaryRanges.render);
             this.appRequestRanges =
                     new RefreshRateRanges(appRequestRanges.physical, appRequestRanges.render);
+            this.idleScreenRefreshRateConfig =
+                    (idleScreenRefreshRateConfig == null) ? null : new IdleScreenRefreshRateConfig(
+                            idleScreenRefreshRateConfig.timeoutMillis);
         }
 
         @Override
@@ -2165,7 +2237,9 @@ public final class SurfaceControl implements Parcelable {
             return other != null && defaultMode == other.defaultMode
                     && allowGroupSwitching == other.allowGroupSwitching
                     && primaryRanges.equals(other.primaryRanges)
-                    && appRequestRanges.equals(other.appRequestRanges);
+                    && appRequestRanges.equals(other.appRequestRanges)
+                    && Objects.equals(
+                    idleScreenRefreshRateConfig, other.idleScreenRefreshRateConfig);
         }
 
         @Override
@@ -2181,6 +2255,7 @@ public final class SurfaceControl implements Parcelable {
             allowGroupSwitching = other.allowGroupSwitching;
             primaryRanges.copyFrom(other.primaryRanges);
             appRequestRanges.copyFrom(other.appRequestRanges);
+            copyIdleScreenRefreshRateConfig(other.idleScreenRefreshRateConfig);
         }
 
         @Override
@@ -2188,7 +2263,21 @@ public final class SurfaceControl implements Parcelable {
             return "defaultMode=" + defaultMode
                     + " allowGroupSwitching=" + allowGroupSwitching
                     + " primaryRanges=" + primaryRanges
-                    + " appRequestRanges=" + appRequestRanges;
+                    + " appRequestRanges=" + appRequestRanges
+                    + " idleScreenRefreshRate=" + String.valueOf(idleScreenRefreshRateConfig);
+        }
+
+        private void copyIdleScreenRefreshRateConfig(IdleScreenRefreshRateConfig other) {
+            if (idleScreenRefreshRateConfig == null) {
+                if (other != null) {
+                    idleScreenRefreshRateConfig =
+                            new IdleScreenRefreshRateConfig(other.timeoutMillis);
+                }
+            } else if (other == null) {
+                idleScreenRefreshRateConfig = null;
+            } else {
+                idleScreenRefreshRateConfig.copyFrom(other);
+            }
         }
     }
 

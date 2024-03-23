@@ -1318,6 +1318,28 @@ public class BiometricServiceTest {
     }
 
     @Test
+    public void testDismissedReasonMoreOptions_whilePaused_invokeHalCancel() throws Exception {
+        setupAuthForOnly(TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
+        invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
+                false /* requireConfirmation */, null /* authenticators */);
+
+        mBiometricService.mAuthSession.mSensorReceiver.onError(
+                SENSOR_ID_FACE,
+                getCookieForCurrentSession(mBiometricService.mAuthSession),
+                BiometricConstants.BIOMETRIC_ERROR_TIMEOUT,
+                0 /* vendorCode */);
+        mBiometricService.mAuthSession.mSysuiReceiver.onDialogDismissed(
+                BiometricPrompt.DISMISSED_REASON_CONTENT_VIEW_MORE_OPTIONS,
+                null /* credentialAttestation */);
+        waitForIdle();
+
+        verify(mReceiver1).onDialogDismissed(
+                eq(BiometricPrompt.DISMISSED_REASON_CONTENT_VIEW_MORE_OPTIONS));
+        verify(mBiometricService.mSensors.get(0).impl)
+                .cancelAuthenticationFromService(any(), any(), anyLong());
+    }
+
+    @Test
     public void testAcquire_whenAuthenticating_sentToSystemUI() throws Exception {
         when(mContext.getResources().getString(anyInt())).thenReturn("test string");
 

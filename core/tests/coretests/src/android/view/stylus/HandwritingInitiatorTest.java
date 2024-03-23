@@ -21,7 +21,7 @@ import static android.view.MotionEvent.ACTION_HOVER_MOVE;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
 import static android.view.inputmethod.Flags.initiationWithoutInputConnection;
-import static android.view.stylus.HandwritingTestUtil.createView;
+import static android.view.stylus.HandwritingTestUtil.createEditText;
 
 import static com.android.text.flags.Flags.handwritingCursorPosition;
 
@@ -112,13 +112,13 @@ public class HandwritingInitiatorTest {
         mHandwritingInitiator =
                 spy(new HandwritingInitiator(viewConfiguration, inputMethodManager));
 
-        mTestView1 = createView(sHwArea1, /* autoHandwritingEnabled= */ true,
+        mTestView1 = createEditText(sHwArea1, /* autoHandwritingEnabled= */ true,
                 /* isStylusHandwritingAvailable= */ true,
                 HW_BOUNDS_OFFSETS_LEFT_PX,
                 HW_BOUNDS_OFFSETS_TOP_PX,
                 HW_BOUNDS_OFFSETS_RIGHT_PX,
                 HW_BOUNDS_OFFSETS_BOTTOM_PX);
-        mTestView2 = createView(sHwArea2, /* autoHandwritingEnabled= */ true,
+        mTestView2 = createEditText(sHwArea2, /* autoHandwritingEnabled= */ true,
                 /* isStylusHandwritingAvailable= */ true,
                 HW_BOUNDS_OFFSETS_LEFT_PX,
                 HW_BOUNDS_OFFSETS_TOP_PX,
@@ -412,7 +412,7 @@ public class HandwritingInitiatorTest {
     @Test
     public void onTouchEvent_notStartHandwriting_whenHandwritingNotAvailable() {
         final Rect rect = new Rect(600, 600, 900, 900);
-        final View testView = createView(rect, true /* autoHandwritingEnabled */,
+        final View testView = createEditText(rect, true /* autoHandwritingEnabled */,
                 false /* isStylusHandwritingAvailable */);
         mHandwritingInitiator.updateHandwritingAreasForView(testView);
 
@@ -717,7 +717,7 @@ public class HandwritingInitiatorTest {
             mTestView1.setHandwritingDelegatorCallback(null);
             onEditorFocusedOrConnectionCreated(mTestView1);
         } else {
-            View mockView = createView(sHwArea1, false /* autoHandwritingEnabled */,
+            View mockView = createEditText(sHwArea1, false /* autoHandwritingEnabled */,
                     true /* isStylusHandwritingAvailable */);
             onEditorFocusedOrConnectionCreated(mockView);
         }

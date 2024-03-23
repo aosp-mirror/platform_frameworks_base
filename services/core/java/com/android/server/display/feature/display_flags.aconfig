@@ -11,6 +11,14 @@ flag {
 }
 
 flag {
+    name: "resolution_backup_restore"
+    namespace: "display_manager"
+    description: "Backup/Restore support for High Resolution setting"
+    bug: "321821289"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "enable_connected_display_management"
     namespace: "display_manager"
     description: "Feature flag for Connected Display management"

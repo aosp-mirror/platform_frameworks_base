@@ -26,14 +26,13 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"डिव्हाइस"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"या अ‍ॅपला तुमच्या <xliff:g id="DEVICE_NAME">%1$s</xliff:g> वर या परवानग्या अ‍ॅक्सेस करण्याची अनुमती असेल"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ला ही माहिती तुमच्या फोनवरून अ‍ॅक्सेस करण्यासाठी अनुमती द्या"</string>
-    <!-- no translation found for title_app_streaming_with_mirroring (3364582597581570658) -->
-    <skip />
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ला तुमच्या फोनची अ‍ॅप्स स्ट्रीम करण्याची अनुमती द्यायची आहे का?"</string>
+    <!-- String.format failed for translation -->
     <!-- no translation found for summary_app_streaming (295548145144086753) -->
     <skip />
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"क्रॉस-डिव्हाइस सेवा"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"तुमच्या डिव्हाइसदरम्यान ॲप्स स्ट्रीम करण्यासाठी <xliff:g id="APP_NAME">%1$s</xliff:g> हे तुमच्या <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> च्या वतीने परवानगीची विनंती करत आहे"</string>
-    <!-- no translation found for helper_summary_app_streaming_with_mirroring (6138581029144467467) -->
-    <skip />
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"तुमच्या डिव्हाइसदरम्यान ॲप्स दाखवण्यासाठी आणि स्ट्रीम करण्यासाठी <xliff:g id="APP_NAME">%1$s</xliff:g> हे तुमच्या <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> च्या वतीने परवानगीची विनंती करत आहे"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ला ही माहिती तुमच्या फोनवरून अ‍ॅक्सेस करण्यासाठी अनुमती द्या"</string>
@@ -41,8 +40,8 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play सेवा"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"तुमच्या फोनमधील फोटो, मीडिया आणि सूचना ॲक्सेस करण्यासाठी <xliff:g id="APP_NAME">%1$s</xliff:g> हे तुमच्या <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> च्या वतीने परवानगीची विनंती करत आहे"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; ला ही कृती करण्याची अनुमती द्यायची आहे का?"</string>
-    <!-- no translation found for title_nearby_device_streaming_with_mirroring (242855799919611657) -->
-    <skip />
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; ला तुमच्या फोनची अ‍ॅप्स आणि सिस्टीमची वैशिष्ट्ये स्ट्रीम करण्याची अनुमती द्यायची आहे का?"</string>
+    <!-- String.format failed for translation -->
     <!-- no translation found for summary_nearby_device_streaming (4039565463149145573) -->
     <skip />
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> हे जवळपासच्या डिव्हाइसवर अ‍ॅप्स आणि इतर सिस्टीम वैशिष्‍ट्ये स्ट्रीम करण्यासाठी तुमच्या <xliff:g id="DEVICE_NAME">%2$s</xliff:g> च्या वतीने परवानगीची विनंती करा"</string>

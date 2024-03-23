@@ -111,12 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"لمزيد من الأمان، استخدِم النقش بدلاً من ذلك."</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"لمزيد من الأمان، أدخِل رقم التعريف الشخصي بدلاً من ذلك."</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"لمزيد من الأمان، أدخِل كلمة المرور بدلاً من ذلك."</string>
-    <!-- no translation found for kg_prompt_added_security_pin (5487992065995475528) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_pattern (1017068086102168544) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_password (6053156069765029006) -->
-    <skip />
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"يجب إدخال رقم التعريف الشخصي لمزيد من الأمان"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"يجب رسم النقش لمزيد من الأمان"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"يجب إدخال كلمة المرور لمزيد من الأمان"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"اختار المشرف قفل الجهاز"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"تم حظر الجهاز يدويًا"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"لم يتم التعرّف عليه."</string>

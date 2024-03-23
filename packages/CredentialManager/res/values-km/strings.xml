@@ -39,9 +39,12 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"នៅពេលដែលយើងឈានទៅរកអនាគតដែលគ្មានពាក្យសម្ងាត់ ពាក្យសម្ងាត់នៅតែអាចប្រើបានរួមជាមួយកូដសម្ងាត់។"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"ជ្រើសរើសកន្លែង​ដែលត្រូវរក្សាទុក<xliff:g id="CREATETYPES">%1$s</xliff:g>របស់អ្នក"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"ជ្រើសរើស​កម្មវិធីគ្រប់គ្រងពាក្យសម្ងាត់ ដើម្បីរក្សាទុក​ព័ត៌មានរបស់អ្នក និងចូលគណនី​បានកាន់តែរហ័ស​នៅពេលលើកក្រោយ"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"បង្កើតកូដសម្ងាត់ ដើម្បីចូលគណនី <xliff:g id="APPNAME">%1$s</xliff:g> ឬ?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"រក្សាទុកពាក្យសម្ងាត់ ដើម្បីចូលគណនី <xliff:g id="APPNAME">%1$s</xliff:g> ឬ?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"រក្សាទុក​ព័ត៌មានអំពី​ការចូលគណនីសម្រាប់ <xliff:g id="APPNAME">%1$s</xliff:g> ឬ?"</string>
+    <!-- no translation found for choose_create_option_passkey_title (8762295821604276511) -->
+    <skip />
+    <!-- no translation found for choose_create_option_password_title (4481366993598649224) -->
+    <skip />
+    <!-- no translation found for choose_create_option_sign_in_title (7092914088455358079) -->
+    <skip />
     <string name="passkey" msgid="632353688396759522">"កូដសម្ងាត់"</string>
     <string name="password" msgid="6738570945182936667">"ពាក្យសម្ងាត់"</string>
     <string name="passkeys" msgid="5733880786866559847">"កូដសម្ងាត់"</string>
@@ -70,6 +73,8 @@
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"ច្រានចោល"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"ប្រើកូដសម្ងាត់ដែលបានរក្សាទុករបស់អ្នកសម្រាប់ <xliff:g id="APP_NAME">%1$s</xliff:g> ឬ?"</string>
     <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"ប្រើពាក្យសម្ងាត់​ដែលអ្នកបាន​រក្សាទុកសម្រាប់ <xliff:g id="APP_NAME">%1$s</xliff:g> ឬ?"</string>
+    <!-- no translation found for get_dialog_title_single_tap_for (2057945648748859483) -->
+    <skip />
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"ប្រើការចូលគណនីរបស់អ្នកសម្រាប់ <xliff:g id="APP_NAME">%1$s</xliff:g> ឬ?"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"ដោះ​សោជម្រើសចូល​គណនីសម្រាប់ <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"ជ្រើសរើសកូដសម្ងាត់ដែលបានរក្សាទុកសម្រាប់ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

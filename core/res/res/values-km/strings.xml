@@ -84,7 +84,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"មិន​អាច​ភ្ជាប់​បណ្ដាញ​ទូរសព្ទ​ចល័តបានទេ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"សាកល្បង​ប្ដូរ​ទៅបណ្ដាញ​ដែល​ចង់ប្រើ។ សូមចុច​ដើម្បីផ្លាស់​ប្ដូរ។"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"មិន​អាច​ប្រើ​ការ​ហៅ​បន្ទាន់​បានទេ"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"មិន​អាចធ្វើការ​ហៅ​បន្ទាន់​តាម Wi‑Fi បានទេ"</string>
+    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ការជូនដំណឹង"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"ការបញ្ជូន​ការហៅ​ទូរសព្ទ​បន្ត"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"មុខងារ​ហៅត្រឡប់​វិញ​បន្ទាន់"</string>
@@ -1183,6 +1184,10 @@
     <string name="deleteText" msgid="4200807474529938112">"លុប"</string>
     <string name="inputMethod" msgid="1784759500516314751">"វិធីបញ្ចូល"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"សកម្មភាព​អត្ថបទ"</string>
+    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
+    <skip />
+    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
+    <skip />
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"ថយក្រោយ"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ប្ដូរវិធីសាស្ត្រ​បញ្ចូល"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"អស់​ទំហំ​ផ្ទុក"</string>

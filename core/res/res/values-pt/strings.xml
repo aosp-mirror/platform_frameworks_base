@@ -85,7 +85,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Não foi possível acessar a rede móvel"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Tente alterar a rede preferencial. Toque para alterar."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Chamadas de emergência indisponíveis"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Não é possível fazer chamadas de emergência por Wi‑Fi"</string>
+    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertas"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Encaminhamento de chamada"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Modo de retorno de chamada de emergência"</string>
@@ -1184,6 +1185,10 @@
     <string name="deleteText" msgid="4200807474529938112">"Excluir"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Método de entrada"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Ações de texto"</string>
+    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
+    <skip />
+    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
+    <skip />
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Voltar"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Mudar o método de entrada"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Pouco espaço de armazenamento"</string>
@@ -1972,7 +1977,7 @@
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"Adicionar usuário supervisionado"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Adicionar um idioma"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Preferência de região"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"Digitar nome do idioma"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"Digite o nome do idioma"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Sugeridos"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Sugestões"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Idiomas sugeridos"</string>

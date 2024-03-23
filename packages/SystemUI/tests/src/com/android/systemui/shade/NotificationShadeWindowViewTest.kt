@@ -36,7 +36,6 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyevent.domain.interactor.SysUIKeyEventHandler
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.statusbar.DragDownHelper
@@ -56,7 +55,6 @@ import com.android.systemui.statusbar.phone.DozeServiceHost
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
-import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -195,9 +193,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 quickSettingsController,
                 primaryBouncerInteractor,
                 alternateBouncerInteractor,
-                { Mockito.mock(JavaAdapter::class.java) },
-                { Mockito.mock(AlternateBouncerDependencies::class.java) },
-                mock()
+                mock(),
             )
 
         controller.setupExpandedStatusBar()

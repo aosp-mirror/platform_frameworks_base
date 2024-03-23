@@ -86,6 +86,8 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"ਤੁਹਾਡੇ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਸਕ੍ਰੀਨਸ਼ਾਟ ਲੈਣ ਦੀ ਸੁਵਿਧਾ ਨੂੰ ਬਲਾਕ ਕੀਤਾ ਗਿਆ ਹੈ"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"ਸੰਪਾਦਨ ਕਰੋ"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਦਾ ਸੰਪਾਦਨ ਕਰੋ"</string>
+    <!-- no translation found for screenshot_share_label (1653061117238861559) -->
+    <skip />
     <string name="screenshot_share_description" msgid="2861628935812656612">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"ਹੋਰ ਕੈਪਚਰ ਕਰੋ"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਖਾਰਜ ਕਰੋ"</string>
@@ -437,10 +439,8 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"ਹਟਾਓ"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ਵਿਜੇਟ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"ਹੋ ਗਿਆ"</string>
-    <!-- no translation found for dialog_title_to_allow_any_widget (1004820948962675644) -->
-    <skip />
-    <!-- no translation found for button_text_to_open_settings (1987729256950941628) -->
-    <skip />
+    <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"ਕੀ ਲਾਕ-ਸਕ੍ਰੀਨ \'ਤੇ ਕਿਸੇ ਵੀ ਵਿਜੇਟ ਨੂੰ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
+    <string name="button_text_to_open_settings" msgid="1987729256950941628">"ਸੈਟਿੰਗਾਂ ਖੋਲ੍ਹੋ"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"ਕੰਮ ਸੰਬੰਧੀ ਐਪਾਂ ਤੋਂ ਰੋਕ ਹਟਾਈਏ?"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"ਰੋਕ ਹਟਾਓ"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ਵਰਤੋਂਕਾਰ ਸਵਿੱਚ ਕਰੋ"</string>
@@ -540,7 +540,10 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"ਇਸ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਬੰਧਨ ਤੁਹਾਡੇ ਮਾਂ-ਪਿਓ ਵੱਲੋਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਤੁਹਾਡੇ ਮਾਂ-ਪਿਓ ਤੁਹਾਡੀਆਂ ਐਪਾਂ ਦੀ ਵਰਤੋਂ, ਤੁਹਾਡੇ ਟਿਕਾਣੇ ਅਤੇ ਤੁਹਾਡੇ ਸਕ੍ਰੀਨ ਸਮੇਂ ਵਰਗੀ ਜਾਣਕਾਰੀ ਨੂੰ ਦੇਖ ਅਤੇ ਉਸਦਾ ਪ੍ਰਬੰਧਨ ਕਰ ਸਕਦੇ ਹਨ।"</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"ਟਰੱਸਟ-ਏਜੰਟ ਵੱਲੋਂ ਅਣਲਾਕ ਰੱਖਿਆ ਗਿਆ"</string>
-    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"ਚੋਰੀ ਤੋਂ ਸੁਰੱਖਿਆ\nਡੀਵਾਈਸ ਲਾਕ ਹੋ ਗਿਆ, ਅਣਲਾਕ ਕਰਨ ਦੀਆਂ ਕਈ ਕੋਸ਼ਿਸ਼ਾਂ ਕੀਤੀਆਂ ਗਈਆਂ"</string>
+    <!-- no translation found for kg_prompt_after_adaptive_auth_lock (2587481497846342760) -->
+    <skip />
+    <!-- no translation found for keyguard_indication_after_adaptive_auth_lock (2323400645470712787) -->
+    <skip />
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"ਧੁਨੀ ਸੈਟਿੰਗਾਂ"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"ਸਵੈਚਲਿਤ ਸੁਰਖੀ ਮੀਡੀਆ"</string>
@@ -585,10 +588,8 @@
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"ਮਿਊਟ"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"ਕਾਸਟ ਕਰੋ"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"ਉਪਲਬਧ ਨਹੀਂ ਹੈ ਕਿਉਂਕਿ ਘੰਟੀ ਮਿਊਟ ਕੀਤੀ ਹੋਈ ਹੈ"</string>
-    <!-- no translation found for stream_alarm_unavailable (4059817189292197839) -->
-    <skip />
-    <!-- no translation found for stream_media_unavailable (6823020894438959853) -->
-    <skip />
+    <string name="stream_alarm_unavailable" msgid="4059817189292197839">"ਉਪਲਬਧ ਨਹੀਂ ਹੈ ਕਿਉਂਕਿ ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ ਵਿਸ਼ੇਸ਼ਤਾ ਚਾਲੂ ਹੈ"</string>
+    <string name="stream_media_unavailable" msgid="6823020894438959853">"ਉਪਲਬਧ ਨਹੀਂ ਹੈ ਕਿਉਂਕਿ ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ ਵਿਸ਼ੇਸ਼ਤਾ ਚਾਲੂ ਹੈ"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s। ਅਣਮਿਊਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s। ਥਰਥਰਾਹਟ ਸੈੱਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ। ਪਹੁੰਚਯੋਗਤਾ ਸੇਵਾਵਾਂ ਮਿਊਟ ਹੋ ਸਕਦੀਆਂ ਹਨ।"</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s। ਮਿਊਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ। ਪਹੁੰਚਯੋਗਤਾ ਸੇਵਾਵਾਂ ਮਿਊਟ ਹੋ ਸਕਦੀਆਂ ਹਨ।"</string>
@@ -605,16 +606,11 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"ਥਰਥਰਾਹਟ"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s ਵੌਲਿਊਮ ਕੰਟਰੋਲ"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"ਕਾਲਾਂ ਆਉਣ ਅਤੇ ਸੂਚਨਾਵਾਂ ਮਿਲਣ \'ਤੇ ਘੰਟੀ ਵਜੇਗੀ (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
-    <!-- no translation found for volume_panel_enter_media_output_settings (8824244246272552669) -->
-    <skip />
-    <!-- no translation found for volume_panel_expanded_sliders (1885750987768506271) -->
-    <skip />
-    <!-- no translation found for volume_panel_collapsed_sliders (1413383759434791450) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_mute (6962563028495243738) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_unmute (7489063242934477382) -->
-    <skip />
+    <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"ਆਊਟਪੁੱਟ ਸੈਟਿੰਗਾਂ ਦਾਖਲ ਕਰੋ"</string>
+    <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"ਅਵਾਜ਼ ਸਲਾਈਡਰਾਂ ਵਿਸਤਾਰ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"ਅਵਾਜ਼ ਸਲਾਈਡਰਾਂ ਨੂੰ ਸਮੇਟਿਆ ਗਿਆ"</string>
+    <string name="volume_panel_hint_mute" msgid="6962563028495243738">"%s ਨੂੰ ਮਿਊਟ ਕਰੋ"</string>
+    <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"%s ਨੂੰ ਅਣਮਿਊਟ ਕਰੋ"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> ਚਲਾਇਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"ਆਡੀਓ ਇਸ \'ਤੇ ਚੱਲੇਗੀ"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI ਟਿਊਨਰ"</string>
@@ -761,7 +757,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"ਹਾਲ ਹੀ ਵਿੱਚ ਖੋਲ੍ਹੀਆਂ ਗਈਆਂ ਐਪਾਂ \'ਤੇ ਅੱਗੇ ਜਾਓ"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"ਹਾਲ ਹੀ ਵਿੱਚ ਖੋਲ੍ਹੀਆਂ ਗਈਆਂ ਐਪਾਂ \'ਤੇ ਵਾਪਸ ਜਾਓ"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"ਐਪਾਂ ਦੀ ਸੂਚੀ ਖੋਲ੍ਹੋ"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"ਟਾਸਕਬਾਰ ਦਿਖਾਓ"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"ਸੈਟਿੰਗਾਂ ਖੋਲ੍ਹੋ"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistant ਖੋਲ੍ਹੋ"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ਲਾਕ ਸਕ੍ਰੀਨ"</string>
@@ -770,6 +765,10 @@
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"RHS ਲਈ ਮੌਜੂਦਾ ਐਪ ਨਾਲ ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਵਿੱਚ ਦਾਖਲ ਹੋਵੋ"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"LHS ਲਈ ਮੌਜੂਦਾ ਐਪ ਨਾਲ ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਵਿੱਚ ਦਾਖਲ ਹੋਵੋ"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਤੋਂ ਪੂਰੀ ਸਕ੍ਰੀਨ \'ਤੇ ਸਵਿੱਚ ਕਰੋ"</string>
+    <!-- no translation found for system_multitasking_splitscreen_focus_rhs (3838578650313318508) -->
+    <skip />
+    <!-- no translation found for system_multitasking_splitscreen_focus_lhs (3164261844398662518) -->
+    <skip />
     <string name="system_multitasking_replace" msgid="7410071959803642125">"ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਦੌਰਾਨ: ਇੱਕ ਐਪ ਨਾਲ ਦੂਜੀ ਐਪ ਨੂੰ ਬਦਲੋ"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"ਇਨਪੁੱਟ"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"ਅਗਲੀ ਭਾਸ਼ਾ \'ਤੇ ਸਵਿੱਚ ਕਰੋ"</string>
@@ -1268,8 +1267,7 @@
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"ਕੈਮਰਾ ਬਲਾਕ ਕੀਤਾ ਗਿਆ"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"ਕੈਮਰਾ ਅਤੇ ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਬਲਾਕ ਕੀਤੇ ਗਏ"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਬਲਾਕ ਕੀਤਾ ਗਿਆ"</string>
-    <!-- no translation found for priority_mode_dream_overlay_content_description (3361628029609329182) -->
-    <skip />
+    <string name="priority_mode_dream_overlay_content_description" msgid="3361628029609329182">"ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ"</string>
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"ਵਰਤੋਂਕਾਰ ਦੀ ਮੌਜੂਦਗੀ ਦਾ ਪਤਾ ਲਗਾਇਆ ਜਾਂਦਾ ਹੈ"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਜਾ ਕੇ ਪੂਰਵ-ਨਿਰਧਾਰਿਤ ਨੋਟ ਐਪ ਨੂੰ ਸੈੱਟ ਕਰੋ"</string>
     <string name="install_app" msgid="5066668100199613936">"ਐਪ ਸਥਾਪਤ ਕਰੋ"</string>

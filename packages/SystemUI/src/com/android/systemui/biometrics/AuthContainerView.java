@@ -218,6 +218,11 @@ public class AuthContainerView extends LinearLayout
         }
 
         @Override
+        public void onContentViewMoreOptionsButtonPressed() {
+            animateAway(AuthDialogCallback.DISMISSED_BUTTON_CONTENT_VIEW_MORE_OPTIONS);
+        }
+
+        @Override
         public void onError() {
             animateAway(AuthDialogCallback.DISMISSED_ERROR);
         }
@@ -513,7 +518,8 @@ public class AuthContainerView extends LinearLayout
                 mConfig.mOpPackageName);
         final CredentialViewModel vm = mCredentialViewModelProvider.get();
         vm.setAnimateContents(animateContents);
-        ((CredentialView) mCredentialView).init(vm, this, mPanelController, animatePanel);
+        ((CredentialView) mCredentialView).init(vm, this, mPanelController, animatePanel,
+                mBiometricCallback);
 
         mLayout.addView(mCredentialView);
     }

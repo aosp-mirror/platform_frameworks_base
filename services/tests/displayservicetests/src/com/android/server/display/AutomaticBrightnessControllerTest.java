@@ -22,9 +22,7 @@ import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIG
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_IDLE;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyFloat;
@@ -38,9 +36,6 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.hardware.Sensor;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -52,6 +47,8 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.os.Clock;
+import com.android.server.display.brightness.LightSensorController;
 import com.android.server.display.brightness.clamper.BrightnessClamperController;
 import com.android.server.testutils.OffsettableClock;
 
@@ -61,7 +58,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
@@ -69,31 +65,18 @@ import org.mockito.MockitoAnnotations;
 public class AutomaticBrightnessControllerTest {
     private static final float BRIGHTNESS_MIN_FLOAT = 0.0f;
     private static final float BRIGHTNESS_MAX_FLOAT = 1.0f;
-    private static final int LIGHT_SENSOR_RATE = 20;
     private static final int INITIAL_LIGHT_SENSOR_RATE = 20;
-    private static final int BRIGHTENING_LIGHT_DEBOUNCE_CONFIG = 2000;
-    private static final int DARKENING_LIGHT_DEBOUNCE_CONFIG = 4000;
-    private static final int BRIGHTENING_LIGHT_DEBOUNCE_CONFIG_IDLE = 1000;
-    private static final int DARKENING_LIGHT_DEBOUNCE_CONFIG_IDLE = 2000;
     private static final float DOZE_SCALE_FACTOR = 0.54f;
-    private static final boolean RESET_AMBIENT_LUX_AFTER_WARMUP_CONFIG = false;
-    private static final int LIGHT_SENSOR_WARMUP_TIME = 0;
-    private static final int AMBIENT_LIGHT_HORIZON_SHORT = 1000;
-    private static final int AMBIENT_LIGHT_HORIZON_LONG = 2000;
     private static final float EPSILON = 0.001f;
     private OffsettableClock mClock = new OffsettableClock();
     private TestLooper mTestLooper;
     private Context mContext;
     private AutomaticBrightnessController mController;
-    private Sensor mLightSensor;
 
-    @Mock SensorManager mSensorManager;
     @Mock BrightnessMappingStrategy mBrightnessMappingStrategy;
     @Mock BrightnessMappingStrategy mIdleBrightnessMappingStrategy;
     @Mock BrightnessMappingStrategy mDozeBrightnessMappingStrategy;
-    @Mock HysteresisLevels mAmbientBrightnessThresholds;
     @Mock HysteresisLevels mScreenBrightnessThresholds;
-    @Mock HysteresisLevels mAmbientBrightnessThresholdsIdle;
     @Mock HysteresisLevels mScreenBrightnessThresholdsIdle;
     @Mock Handler mNoOpHandler;
     @Mock BrightnessRangeController mBrightnessRangeController;
@@ -101,17 +84,18 @@ public class AutomaticBrightnessControllerTest {
     BrightnessClamperController mBrightnessClamperController;
     @Mock BrightnessThrottler mBrightnessThrottler;
 
+    @Mock
+    LightSensorController mLightSensorController;
+
     @Before
     public void setUp() throws Exception {
         // Share classloader to allow package private access.
         System.setProperty("dexmaker.share_classloader", "true");
         MockitoAnnotations.initMocks(this);
 
-        mLightSensor = TestUtils.createSensor(Sensor.TYPE_LIGHT, "Light Sensor");
         mContext = InstrumentationRegistry.getContext();
         setupController(BrightnessMappingStrategy.INVALID_LUX,
-                BrightnessMappingStrategy.INVALID_NITS, /* applyDebounce= */ false,
-                /* useHorizon= */ true);
+                BrightnessMappingStrategy.INVALID_NITS);
     }
 
     @After
@@ -123,8 +107,7 @@ public class AutomaticBrightnessControllerTest {
         }
     }
 
-    private void setupController(float userLux, float userNits, boolean applyDebounce,
-            boolean useHorizon) {
+    private void setupController(float userLux, float userNits) {
         mClock = new OffsettableClock.Stopped();
         mTestLooper = new TestLooper(mClock::now);
 
@@ -147,25 +130,22 @@ public class AutomaticBrightnessControllerTest {
                     }
 
                     @Override
-                    AutomaticBrightnessController.Clock createClock() {
-                        return mClock::now;
+                    Clock createClock() {
+                        return new Clock() {
+                            @Override
+                            public long uptimeMillis() {
+                                return mClock.now();
+                            }
+                        };
                     }
 
                 }, // pass in test looper instead, pass in offsettable clock
-                () -> { }, mTestLooper.getLooper(), mSensorManager, mLightSensor,
-                brightnessMappingStrategyMap, LIGHT_SENSOR_WARMUP_TIME, BRIGHTNESS_MIN_FLOAT,
-                BRIGHTNESS_MAX_FLOAT, DOZE_SCALE_FACTOR, LIGHT_SENSOR_RATE,
-                INITIAL_LIGHT_SENSOR_RATE, applyDebounce ? BRIGHTENING_LIGHT_DEBOUNCE_CONFIG : 0,
-                applyDebounce ? DARKENING_LIGHT_DEBOUNCE_CONFIG : 0,
-                applyDebounce ? BRIGHTENING_LIGHT_DEBOUNCE_CONFIG_IDLE : 0,
-                applyDebounce ? DARKENING_LIGHT_DEBOUNCE_CONFIG_IDLE : 0,
-                RESET_AMBIENT_LUX_AFTER_WARMUP_CONFIG,
-                mAmbientBrightnessThresholds, mScreenBrightnessThresholds,
-                mAmbientBrightnessThresholdsIdle, mScreenBrightnessThresholdsIdle,
+                () -> { }, mTestLooper.getLooper(),
+                brightnessMappingStrategyMap, BRIGHTNESS_MIN_FLOAT,
+                BRIGHTNESS_MAX_FLOAT, DOZE_SCALE_FACTOR, mScreenBrightnessThresholds,
+                mScreenBrightnessThresholdsIdle,
                 mContext, mBrightnessRangeController, mBrightnessThrottler,
-                useHorizon ? AMBIENT_LIGHT_HORIZON_SHORT : 1,
-                useHorizon ? AMBIENT_LIGHT_HORIZON_LONG : 10000, userLux, userNits,
-                mBrightnessClamperController
+                userLux, userNits, mLightSensorController, mBrightnessClamperController
         );
 
         when(mBrightnessRangeController.getCurrentBrightnessMax()).thenReturn(
@@ -186,20 +166,15 @@ public class AutomaticBrightnessControllerTest {
 
     @Test
     public void testNoHysteresisAtMinBrightness() throws Exception {
-        ArgumentCaptor<SensorEventListener> listenerCaptor =
-                ArgumentCaptor.forClass(SensorEventListener.class);
-        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
-                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
+        ArgumentCaptor<LightSensorController.LightSensorListener> listenerCaptor =
+                ArgumentCaptor.forClass(LightSensorController.LightSensorListener.class);
+        verify(mLightSensorController).setListener(listenerCaptor.capture());
+        LightSensorController.LightSensorListener listener = listenerCaptor.getValue();
 
         // Set up system to return 0.02f as a brightness value
         float lux1 = 100.0f;
         // Brightness as float (from 0.0f to 1.0f)
         float normalizedBrightness1 = 0.02f;
-        when(mAmbientBrightnessThresholds.getBrighteningThreshold(lux1))
-                .thenReturn(lux1);
-        when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux1))
-                .thenReturn(lux1);
         when(mBrightnessMappingStrategy.getBrightness(eq(lux1), eq(null), anyInt()))
                 .thenReturn(normalizedBrightness1);
 
@@ -210,39 +185,31 @@ public class AutomaticBrightnessControllerTest {
                 .thenReturn(1.0f);
 
         // Send new sensor value and verify
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux1));
+        listener.onAmbientLuxChange(lux1);
         assertEquals(normalizedBrightness1, mController.getAutomaticScreenBrightness(), EPSILON);
 
         // Set up system to return 0.0f (minimum possible brightness) as a brightness value
         float lux2 = 10.0f;
         float normalizedBrightness2 = 0.0f;
-        when(mAmbientBrightnessThresholds.getBrighteningThreshold(lux2))
-                .thenReturn(lux2);
-        when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux2))
-                .thenReturn(lux2);
         when(mBrightnessMappingStrategy.getBrightness(anyFloat(), eq(null), anyInt()))
                 .thenReturn(normalizedBrightness2);
 
         // Send new sensor value and verify
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux2));
+        listener.onAmbientLuxChange(lux2);
         assertEquals(normalizedBrightness2, mController.getAutomaticScreenBrightness(), EPSILON);
     }
 
     @Test
     public void testNoHysteresisAtMaxBrightness() throws Exception {
-        ArgumentCaptor<SensorEventListener> listenerCaptor =
-                ArgumentCaptor.forClass(SensorEventListener.class);
-        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
-                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
+        ArgumentCaptor<LightSensorController.LightSensorListener> listenerCaptor =
+                ArgumentCaptor.forClass(LightSensorController.LightSensorListener.class);
+        verify(mLightSensorController).setListener(listenerCaptor.capture());
+        LightSensorController.LightSensorListener listener = listenerCaptor.getValue();
 
         // Set up system to return 0.98f as a brightness value
         float lux1 = 100.0f;
         float normalizedBrightness1 = 0.98f;
-        when(mAmbientBrightnessThresholds.getBrighteningThreshold(lux1))
-                .thenReturn(lux1);
-        when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux1))
-                .thenReturn(lux1);
+
         when(mBrightnessMappingStrategy.getBrightness(eq(lux1), eq(null), anyInt()))
                 .thenReturn(normalizedBrightness1);
 
@@ -253,35 +220,30 @@ public class AutomaticBrightnessControllerTest {
                 .thenReturn(1.1f);
 
         // Send new sensor value and verify
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux1));
+        listener.onAmbientLuxChange(lux1);
         assertEquals(normalizedBrightness1, mController.getAutomaticScreenBrightness(), EPSILON);
 
 
         // Set up system to return 1.0f as a brightness value (brightness_max)
         float lux2 = 110.0f;
         float normalizedBrightness2 = 1.0f;
-        when(mAmbientBrightnessThresholds.getBrighteningThreshold(lux2))
-                .thenReturn(lux2);
-        when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux2))
-                .thenReturn(lux2);
         when(mBrightnessMappingStrategy.getBrightness(anyFloat(), eq(null), anyInt()))
                 .thenReturn(normalizedBrightness2);
 
         // Send new sensor value and verify
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux2));
+        listener.onAmbientLuxChange(lux2);
         assertEquals(normalizedBrightness2, mController.getAutomaticScreenBrightness(), EPSILON);
     }
 
     @Test
     public void testUserAddUserDataPoint() throws Exception {
-        ArgumentCaptor<SensorEventListener> listenerCaptor =
-                ArgumentCaptor.forClass(SensorEventListener.class);
-        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
-                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
+        ArgumentCaptor<LightSensorController.LightSensorListener> listenerCaptor =
+                ArgumentCaptor.forClass(LightSensorController.LightSensorListener.class);
+        verify(mLightSensorController).setListener(listenerCaptor.capture());
+        LightSensorController.LightSensorListener listener = listenerCaptor.getValue();
 
         // Sensor reads 1000 lux,
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 1000));
+        listener.onAmbientLuxChange(1000);
 
         // User sets brightness to 100
         mController.configure(AUTO_BRIGHTNESS_ENABLED, null /* configuration= */,
@@ -298,12 +260,11 @@ public class AutomaticBrightnessControllerTest {
     public void testRecalculateSplines() throws Exception {
         // Enabling the light sensor, and setting the ambient lux to 1000
         int currentLux = 1000;
-        ArgumentCaptor<SensorEventListener> listenerCaptor =
-                ArgumentCaptor.forClass(SensorEventListener.class);
-        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
-                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, currentLux));
+        ArgumentCaptor<LightSensorController.LightSensorListener> listenerCaptor =
+                ArgumentCaptor.forClass(LightSensorController.LightSensorListener.class);
+        verify(mLightSensorController).setListener(listenerCaptor.capture());
+        LightSensorController.LightSensorListener listener = listenerCaptor.getValue();
+        listener.onAmbientLuxChange(currentLux);
 
         // User sets brightness to 0.5f
         when(mBrightnessMappingStrategy.getBrightness(currentLux,
@@ -333,14 +294,13 @@ public class AutomaticBrightnessControllerTest {
 
     @Test
     public void testShortTermModelTimesOut() throws Exception {
-        ArgumentCaptor<SensorEventListener> listenerCaptor =
-                ArgumentCaptor.forClass(SensorEventListener.class);
-        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
-                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
+        ArgumentCaptor<LightSensorController.LightSensorListener> listenerCaptor =
+                ArgumentCaptor.forClass(LightSensorController.LightSensorListener.class);
+        verify(mLightSensorController).setListener(listenerCaptor.capture());
+        LightSensorController.LightSensorListener listener = listenerCaptor.getValue();
 
         // Sensor reads 123 lux,
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 123));
+        listener.onAmbientLuxChange(123);
         // User sets brightness to 100
         mController.configure(AUTO_BRIGHTNESS_ENABLED, /* configuration= */ null,
                 /* brightness= */ 0.5f, /* userChangedBrightness= */ true, /* adjustment= */ 0,
@@ -354,7 +314,7 @@ public class AutomaticBrightnessControllerTest {
                 123f, 0.5f)).thenReturn(true);
 
         // Sensor reads 1000 lux,
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 1000));
+        listener.onAmbientLuxChange(1000);
         mTestLooper.moveTimeForward(
                 mBrightnessMappingStrategy.getShortTermModelTimeout() + 1000);
         mTestLooper.dispatchAll();
@@ -373,14 +333,13 @@ public class AutomaticBrightnessControllerTest {
 
     @Test
     public void testShortTermModelDoesntTimeOut() throws Exception {
-        ArgumentCaptor<SensorEventListener> listenerCaptor =
-                ArgumentCaptor.forClass(SensorEventListener.class);
-        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
-                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
+        ArgumentCaptor<LightSensorController.LightSensorListener> listenerCaptor =
+                ArgumentCaptor.forClass(LightSensorController.LightSensorListener.class);
+        verify(mLightSensorController).setListener(listenerCaptor.capture());
+        LightSensorController.LightSensorListener listener = listenerCaptor.getValue();
 
         // Sensor reads 123 lux,
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 123));
+        listener.onAmbientLuxChange(123);
         // User sets brightness to 100
         mController.configure(AUTO_BRIGHTNESS_ENABLED, null /* configuration= */,
                 0.51f /* brightness= */, true /* userChangedBrightness= */, 0 /* adjustment= */,
@@ -399,7 +358,7 @@ public class AutomaticBrightnessControllerTest {
         mTestLooper.dispatchAll();
 
         // Sensor reads 100000 lux,
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 678910));
+        listener.onAmbientLuxChange(678910);
         mController.switchMode(AUTO_BRIGHTNESS_MODE_DEFAULT);
 
         // Verify short term model is not reset.
@@ -413,14 +372,13 @@ public class AutomaticBrightnessControllerTest {
 
     @Test
     public void testShortTermModelIsRestoredWhenSwitchingWithinTimeout() throws Exception {
-        ArgumentCaptor<SensorEventListener> listenerCaptor =
-                ArgumentCaptor.forClass(SensorEventListener.class);
-        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
-                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
+        ArgumentCaptor<LightSensorController.LightSensorListener> listenerCaptor =
+                ArgumentCaptor.forClass(LightSensorController.LightSensorListener.class);
+        verify(mLightSensorController).setListener(listenerCaptor.capture());
+        LightSensorController.LightSensorListener listener = listenerCaptor.getValue();
 
         // Sensor reads 123 lux,
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 123));
+        listener.onAmbientLuxChange(123);
         // User sets brightness to 100
         mController.configure(AUTO_BRIGHTNESS_ENABLED, /* configuration= */ null,
                 /* brightness= */ 0.5f, /* userChangedBrightness= */ true, /* adjustment= */ 0,
@@ -440,7 +398,7 @@ public class AutomaticBrightnessControllerTest {
                 123f, 0.5f)).thenReturn(true);
 
         // Sensor reads 1000 lux,
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 1000));
+        listener.onAmbientLuxChange(1000);
         mTestLooper.moveTimeForward(
                 mBrightnessMappingStrategy.getShortTermModelTimeout() + 1000);
         mTestLooper.dispatchAll();
@@ -459,14 +417,13 @@ public class AutomaticBrightnessControllerTest {
 
     @Test
     public void testShortTermModelNotRestoredAfterTimeout() throws Exception {
-        ArgumentCaptor<SensorEventListener> listenerCaptor =
-                ArgumentCaptor.forClass(SensorEventListener.class);
-        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
-                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
+        ArgumentCaptor<LightSensorController.LightSensorListener> listenerCaptor =
+                ArgumentCaptor.forClass(LightSensorController.LightSensorListener.class);
+        verify(mLightSensorController).setListener(listenerCaptor.capture());
+        LightSensorController.LightSensorListener listener = listenerCaptor.getValue();
 
         // Sensor reads 123 lux,
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 123));
+        listener.onAmbientLuxChange(123);
         // User sets brightness to 100
         mController.configure(AUTO_BRIGHTNESS_ENABLED, /* configuration= */ null,
                 /* brightness= */ 0.5f, /* userChangedBrightness= */ true, /* adjustment= */ 0,
@@ -488,7 +445,7 @@ public class AutomaticBrightnessControllerTest {
                 123f, 0.5f)).thenReturn(true);
 
         // Sensor reads 1000 lux,
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 1000));
+        listener.onAmbientLuxChange(1000);
         // Do not fast-forward time.
         mTestLooper.dispatchAll();
 
@@ -506,14 +463,13 @@ public class AutomaticBrightnessControllerTest {
 
     @Test
     public void testSwitchBetweenModesNoUserInteractions() throws Exception {
-        ArgumentCaptor<SensorEventListener> listenerCaptor =
-                ArgumentCaptor.forClass(SensorEventListener.class);
-        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
-                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
+        ArgumentCaptor<LightSensorController.LightSensorListener> listenerCaptor =
+                ArgumentCaptor.forClass(LightSensorController.LightSensorListener.class);
+        verify(mLightSensorController).setListener(listenerCaptor.capture());
+        LightSensorController.LightSensorListener listener = listenerCaptor.getValue();
 
         // Sensor reads 123 lux,
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 123));
+        listener.onAmbientLuxChange(123);
         when(mBrightnessMappingStrategy.getShortTermModelTimeout()).thenReturn(2000L);
         when(mBrightnessMappingStrategy.getUserBrightness()).thenReturn(
                 PowerManager.BRIGHTNESS_INVALID_FLOAT);
@@ -529,7 +485,7 @@ public class AutomaticBrightnessControllerTest {
                 BrightnessMappingStrategy.INVALID_LUX);
 
         // Sensor reads 1000 lux,
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 1000));
+        listener.onAmbientLuxChange(1000);
         // Do not fast-forward time.
         mTestLooper.dispatchAll();
 
@@ -545,14 +501,19 @@ public class AutomaticBrightnessControllerTest {
 
     @Test
     public void testSwitchToIdleMappingStrategy() throws Exception {
-        ArgumentCaptor<SensorEventListener> listenerCaptor =
-                ArgumentCaptor.forClass(SensorEventListener.class);
-        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
-                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
+        ArgumentCaptor<LightSensorController.LightSensorListener> listenerCaptor =
+                ArgumentCaptor.forClass(LightSensorController.LightSensorListener.class);
+        verify(mLightSensorController).setListener(listenerCaptor.capture());
+        LightSensorController.LightSensorListener listener = listenerCaptor.getValue();
+        clearInvocations(mBrightnessMappingStrategy);
 
         // Sensor reads 1000 lux,
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 1000));
+        listener.onAmbientLuxChange(1000);
+
+
+        verify(mBrightnessMappingStrategy).getBrightness(anyFloat(), any(), anyInt());
+
+        clearInvocations(mBrightnessMappingStrategy);
 
         // User sets brightness to 100
         mController.configure(AUTO_BRIGHTNESS_ENABLED, null /* configuration= */,
@@ -561,22 +522,19 @@ public class AutomaticBrightnessControllerTest {
                 /* shouldResetShortTermModel= */ true);
 
         // There should be a user data point added to the mapper.
-        verify(mBrightnessMappingStrategy, times(1)).addUserDataPoint(/* lux= */ 1000f,
+        verify(mBrightnessMappingStrategy).addUserDataPoint(/* lux= */ 1000f,
                 /* brightness= */ 0.5f);
-        verify(mBrightnessMappingStrategy, times(2)).setBrightnessConfiguration(any());
-        verify(mBrightnessMappingStrategy, times(3)).getBrightness(anyFloat(), any(), anyInt());
+        verify(mBrightnessMappingStrategy).setBrightnessConfiguration(any());
+        verify(mBrightnessMappingStrategy).getBrightness(anyFloat(), any(), anyInt());
 
+        clearInvocations(mBrightnessMappingStrategy);
         // Now let's do the same for idle mode
         mController.switchMode(AUTO_BRIGHTNESS_MODE_IDLE);
-        // Called once when switching,
-        // setAmbientLux() is called twice and once in updateAutoBrightness(),
-        // nextAmbientLightBrighteningTransition() and nextAmbientLightDarkeningTransition() are
-        // called twice each.
-        verify(mBrightnessMappingStrategy, times(8)).getMode();
-        // Called when switching.
-        verify(mBrightnessMappingStrategy, times(1)).getShortTermModelTimeout();
-        verify(mBrightnessMappingStrategy, times(1)).getUserBrightness();
-        verify(mBrightnessMappingStrategy, times(1)).getUserLux();
+
+        verify(mBrightnessMappingStrategy).getMode();
+        verify(mBrightnessMappingStrategy).getShortTermModelTimeout();
+        verify(mBrightnessMappingStrategy).getUserBrightness();
+        verify(mBrightnessMappingStrategy).getUserLux();
 
         // Ensure, after switching, original BMS is not used anymore
         verifyNoMoreInteractions(mBrightnessMappingStrategy);
@@ -588,154 +546,25 @@ public class AutomaticBrightnessControllerTest {
                 /* shouldResetShortTermModel= */ true);
 
         // Ensure we use the correct mapping strategy
-        verify(mIdleBrightnessMappingStrategy, times(1)).addUserDataPoint(/* lux= */ 1000f,
+        verify(mIdleBrightnessMappingStrategy).addUserDataPoint(/* lux= */ 1000f,
                 /* brightness= */ 0.5f);
     }
 
     @Test
-    public void testAmbientLightHorizon() throws Exception {
-        ArgumentCaptor<SensorEventListener> listenerCaptor =
-                ArgumentCaptor.forClass(SensorEventListener.class);
-        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
-                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
-
-        long increment = 500;
-        // set autobrightness to low
-        // t = 0
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 0));
-
-        // t = 500
-        mClock.fastForward(increment);
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 0));
-
-        // t = 1000
-        mClock.fastForward(increment);
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 0));
-        assertEquals(0.0f, mController.getAmbientLux(), EPSILON);
-
-        // t = 1500
-        mClock.fastForward(increment);
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 0));
-        assertEquals(0.0f, mController.getAmbientLux(), EPSILON);
-
-        // t = 2000
-        // ensure that our reading is at 0.
-        mClock.fastForward(increment);
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 0));
-        assertEquals(0.0f, mController.getAmbientLux(), EPSILON);
-
-        // t = 2500
-        // first 10000 lux sensor event reading
-        mClock.fastForward(increment);
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 10000));
-        assertTrue(mController.getAmbientLux() > 0.0f);
-        assertTrue(mController.getAmbientLux() < 10000.0f);
-
-        // t = 3000
-        // lux reading should still not yet be 10000.
-        mClock.fastForward(increment);
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 10000));
-        assertTrue(mController.getAmbientLux() > 0.0f);
-        assertTrue(mController.getAmbientLux() < 10000.0f);
-
-        // t = 3500
-        mClock.fastForward(increment);
-        // lux has been high (10000) for 1000ms.
-        // lux reading should be 10000
-        // short horizon (ambient lux) is high, long horizon is still not high
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 10000));
-        assertEquals(10000.0f, mController.getAmbientLux(), EPSILON);
-
-        // t = 4000
-        // stay high
-        mClock.fastForward(increment);
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 10000));
-        assertEquals(10000.0f, mController.getAmbientLux(), EPSILON);
-
-        // t = 4500
-        Mockito.clearInvocations(mBrightnessMappingStrategy);
-        mClock.fastForward(increment);
-        // short horizon is high, long horizon is high too
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 10000));
-        verify(mBrightnessMappingStrategy, times(1)).getBrightness(10000, null, -1);
-        assertEquals(10000.0f, mController.getAmbientLux(), EPSILON);
-
-        // t = 5000
-        mClock.fastForward(increment);
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 0));
-        assertTrue(mController.getAmbientLux() > 0.0f);
-        assertTrue(mController.getAmbientLux() < 10000.0f);
-
-        // t = 5500
-        mClock.fastForward(increment);
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 0));
-        assertTrue(mController.getAmbientLux() > 0.0f);
-        assertTrue(mController.getAmbientLux() < 10000.0f);
-
-        // t = 6000
-        mClock.fastForward(increment);
-        // ambient lux goes to 0
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 0));
-        assertEquals(0.0f, mController.getAmbientLux(), EPSILON);
-
-        // only the values within the horizon should be kept
-        assertArrayEquals(new float[] {10000, 10000, 0, 0, 0}, mController.getLastSensorValues(),
-                EPSILON);
-        assertArrayEquals(new long[] {4000, 4500, 5000, 5500, 6000},
-                mController.getLastSensorTimestamps());
-    }
-
-    @Test
-    public void testHysteresisLevels() {
-        float[] ambientBrighteningThresholds = {50, 100};
-        float[] ambientDarkeningThresholds = {10, 20};
-        float[] ambientThresholdLevels = {0, 500};
-        float ambientDarkeningMinChangeThreshold = 3.0f;
-        float ambientBrighteningMinChangeThreshold = 1.5f;
-        HysteresisLevels hysteresisLevels = new HysteresisLevels(ambientBrighteningThresholds,
-                ambientDarkeningThresholds, ambientThresholdLevels, ambientThresholdLevels,
-                ambientDarkeningMinChangeThreshold, ambientBrighteningMinChangeThreshold);
-
-        // test low, activate minimum change thresholds.
-        assertEquals(1.5f, hysteresisLevels.getBrighteningThreshold(0.0f), EPSILON);
-        assertEquals(0f, hysteresisLevels.getDarkeningThreshold(0.0f), EPSILON);
-        assertEquals(1f, hysteresisLevels.getDarkeningThreshold(4.0f), EPSILON);
-
-        // test max
-        // epsilon is x2 here, since the next floating point value about 20,000 is 0.0019531 greater
-        assertEquals(20000f, hysteresisLevels.getBrighteningThreshold(10000.0f), EPSILON * 2);
-        assertEquals(8000f, hysteresisLevels.getDarkeningThreshold(10000.0f), EPSILON);
-
-        // test just below threshold
-        assertEquals(748.5f, hysteresisLevels.getBrighteningThreshold(499f), EPSILON);
-        assertEquals(449.1f, hysteresisLevels.getDarkeningThreshold(499f), EPSILON);
-
-        // test at (considered above) threshold
-        assertEquals(1000f, hysteresisLevels.getBrighteningThreshold(500f), EPSILON);
-        assertEquals(400f, hysteresisLevels.getDarkeningThreshold(500f), EPSILON);
-    }
-
-    @Test
     public void testBrightnessGetsThrottled() throws Exception {
-        ArgumentCaptor<SensorEventListener> listenerCaptor =
-                ArgumentCaptor.forClass(SensorEventListener.class);
-        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
-                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
+        ArgumentCaptor<LightSensorController.LightSensorListener> listenerCaptor =
+                ArgumentCaptor.forClass(LightSensorController.LightSensorListener.class);
+        verify(mLightSensorController).setListener(listenerCaptor.capture());
+        LightSensorController.LightSensorListener listener = listenerCaptor.getValue();
 
         // Set up system to return max brightness at 100 lux
         final float normalizedBrightness = BRIGHTNESS_MAX_FLOAT;
         final float lux = 100.0f;
-        when(mAmbientBrightnessThresholds.getBrighteningThreshold(lux))
-                .thenReturn(lux);
-        when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux))
-                .thenReturn(lux);
         when(mBrightnessMappingStrategy.getBrightness(eq(lux), eq(null), anyInt()))
                 .thenReturn(normalizedBrightness);
 
         // Sensor reads 100 lux. We should get max brightness.
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux));
+        listener.onAmbientLuxChange(lux);
         assertEquals(BRIGHTNESS_MAX_FLOAT, mController.getAutomaticScreenBrightness(), 0.0f);
         assertEquals(BRIGHTNESS_MAX_FLOAT, mController.getRawAutomaticScreenBrightness(), 0.0f);
 
@@ -763,94 +592,6 @@ public class AutomaticBrightnessControllerTest {
     }
 
     @Test
-    public void testGetSensorReadings() throws Exception {
-        ArgumentCaptor<SensorEventListener> listenerCaptor =
-                ArgumentCaptor.forClass(SensorEventListener.class);
-        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
-                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
-
-        // Choose values such that the ring buffer's capacity is extended and the buffer is pruned
-        int increment = 11;
-        int lux = 5000;
-        for (int i = 0; i < 1000; i++) {
-            lux += increment;
-            mClock.fastForward(increment);
-            listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, lux));
-        }
-
-        int valuesCount = (int) Math.ceil((double) AMBIENT_LIGHT_HORIZON_LONG / increment + 1);
-        float[] sensorValues = mController.getLastSensorValues();
-        long[] sensorTimestamps = mController.getLastSensorTimestamps();
-
-        // Only the values within the horizon should be kept
-        assertEquals(valuesCount, sensorValues.length);
-        assertEquals(valuesCount, sensorTimestamps.length);
-
-        long sensorTimestamp = mClock.now();
-        for (int i = valuesCount - 1; i >= 1; i--) {
-            assertEquals(lux, sensorValues[i], EPSILON);
-            assertEquals(sensorTimestamp, sensorTimestamps[i]);
-            lux -= increment;
-            sensorTimestamp -= increment;
-        }
-        assertEquals(lux, sensorValues[0], EPSILON);
-        assertEquals(mClock.now() - AMBIENT_LIGHT_HORIZON_LONG, sensorTimestamps[0]);
-    }
-
-    @Test
-    public void testGetSensorReadingsFullBuffer() throws Exception {
-        ArgumentCaptor<SensorEventListener> listenerCaptor =
-                ArgumentCaptor.forClass(SensorEventListener.class);
-        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
-                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
-        int initialCapacity = 150;
-
-        // Choose values such that the ring buffer is pruned
-        int increment1 = 200;
-        int lux = 5000;
-        for (int i = 0; i < 20; i++) {
-            lux += increment1;
-            mClock.fastForward(increment1);
-            listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, lux));
-        }
-
-        int valuesCount = (int) Math.ceil((double) AMBIENT_LIGHT_HORIZON_LONG / increment1 + 1);
-
-        // Choose values such that the buffer becomes full
-        int increment2 = 1;
-        for (int i = 0; i < initialCapacity - valuesCount; i++) {
-            lux += increment2;
-            mClock.fastForward(increment2);
-            listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, lux));
-        }
-
-        float[] sensorValues = mController.getLastSensorValues();
-        long[] sensorTimestamps = mController.getLastSensorTimestamps();
-
-        // The buffer should be full
-        assertEquals(initialCapacity, sensorValues.length);
-        assertEquals(initialCapacity, sensorTimestamps.length);
-
-        long sensorTimestamp = mClock.now();
-        for (int i = initialCapacity - 1; i >= 1; i--) {
-            assertEquals(lux, sensorValues[i], EPSILON);
-            assertEquals(sensorTimestamp, sensorTimestamps[i]);
-
-            if (i >= valuesCount) {
-                lux -= increment2;
-                sensorTimestamp -= increment2;
-            } else {
-                lux -= increment1;
-                sensorTimestamp -= increment1;
-            }
-        }
-        assertEquals(lux, sensorValues[0], EPSILON);
-        assertEquals(mClock.now() - AMBIENT_LIGHT_HORIZON_LONG, sensorTimestamps[0]);
-    }
-
-    @Test
     public void testResetShortTermModelWhenConfigChanges() {
         when(mBrightnessMappingStrategy.setBrightnessConfiguration(any())).thenReturn(true);
 
@@ -875,179 +616,22 @@ public class AutomaticBrightnessControllerTest {
         float userNits = 500;
         float userBrightness = 0.3f;
         when(mBrightnessMappingStrategy.getBrightnessFromNits(userNits)).thenReturn(userBrightness);
-        setupController(userLux, userNits, /* applyDebounce= */ true,
-                /* useHorizon= */ false);
+        setupController(userLux, userNits);
         verify(mBrightnessMappingStrategy).addUserDataPoint(userLux, userBrightness);
     }
 
     @Test
-    public void testBrighteningLightDebounce() throws Exception {
-        clearInvocations(mSensorManager);
-        setupController(BrightnessMappingStrategy.INVALID_LUX,
-                BrightnessMappingStrategy.INVALID_NITS, /* applyDebounce= */ true,
-                /* useHorizon= */ false);
-
-        ArgumentCaptor<SensorEventListener> listenerCaptor =
-                ArgumentCaptor.forClass(SensorEventListener.class);
-        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
-                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
-
-        // t = 0
-        // Initial lux
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 500));
-        assertEquals(500, mController.getAmbientLux(), EPSILON);
-
-        // t = 1000
-        // Lux isn't steady yet
-        mClock.fastForward(1000);
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 1200));
-        assertEquals(500, mController.getAmbientLux(), EPSILON);
-
-        // t = 1500
-        // Lux isn't steady yet
-        mClock.fastForward(500);
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 1200));
-        assertEquals(500, mController.getAmbientLux(), EPSILON);
-
-        // t = 2500
-        // Lux is steady now
-        mClock.fastForward(1000);
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 1200));
-        assertEquals(1200, mController.getAmbientLux(), EPSILON);
-    }
-
-    @Test
-    public void testDarkeningLightDebounce() throws Exception {
-        clearInvocations(mSensorManager);
-        when(mAmbientBrightnessThresholds.getBrighteningThreshold(anyFloat()))
-                .thenReturn(10000f);
-        when(mAmbientBrightnessThresholds.getDarkeningThreshold(anyFloat()))
-                .thenReturn(10000f);
-        setupController(BrightnessMappingStrategy.INVALID_LUX,
-                BrightnessMappingStrategy.INVALID_NITS, /* applyDebounce= */ true,
-                /* useHorizon= */ false);
-
-        ArgumentCaptor<SensorEventListener> listenerCaptor =
-                ArgumentCaptor.forClass(SensorEventListener.class);
-        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
-                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
-
-        // t = 0
-        // Initial lux
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 1200));
-        assertEquals(1200, mController.getAmbientLux(), EPSILON);
-
-        // t = 2000
-        // Lux isn't steady yet
-        mClock.fastForward(2000);
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 500));
-        assertEquals(1200, mController.getAmbientLux(), EPSILON);
-
-        // t = 2500
-        // Lux isn't steady yet
-        mClock.fastForward(500);
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 500));
-        assertEquals(1200, mController.getAmbientLux(), EPSILON);
-
-        // t = 4500
-        // Lux is steady now
-        mClock.fastForward(2000);
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 500));
-        assertEquals(500, mController.getAmbientLux(), EPSILON);
-    }
-
-    @Test
-    public void testBrighteningLightDebounceIdle() throws Exception {
-        clearInvocations(mSensorManager);
-        setupController(BrightnessMappingStrategy.INVALID_LUX,
-                BrightnessMappingStrategy.INVALID_NITS, /* applyDebounce= */ true,
-                /* useHorizon= */ false);
-
-        mController.switchMode(AUTO_BRIGHTNESS_MODE_IDLE);
-
-        ArgumentCaptor<SensorEventListener> listenerCaptor =
-                ArgumentCaptor.forClass(SensorEventListener.class);
-        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
-                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
-
-        // t = 0
-        // Initial lux
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 500));
-        assertEquals(500, mController.getAmbientLux(), EPSILON);
-
-        // t = 500
-        // Lux isn't steady yet
-        mClock.fastForward(500);
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 1200));
-        assertEquals(500, mController.getAmbientLux(), EPSILON);
-
-        // t = 1500
-        // Lux is steady now
-        mClock.fastForward(1000);
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 1200));
-        assertEquals(1200, mController.getAmbientLux(), EPSILON);
-    }
-
-    @Test
-    public void testDarkeningLightDebounceIdle() throws Exception {
-        clearInvocations(mSensorManager);
-        when(mAmbientBrightnessThresholdsIdle.getBrighteningThreshold(anyFloat()))
-                .thenReturn(10000f);
-        when(mAmbientBrightnessThresholdsIdle.getDarkeningThreshold(anyFloat()))
-                .thenReturn(10000f);
-        setupController(BrightnessMappingStrategy.INVALID_LUX,
-                BrightnessMappingStrategy.INVALID_NITS, /* applyDebounce= */ true,
-                /* useHorizon= */ false);
-
-        mController.switchMode(AUTO_BRIGHTNESS_MODE_IDLE);
-
-        ArgumentCaptor<SensorEventListener> listenerCaptor =
-                ArgumentCaptor.forClass(SensorEventListener.class);
-        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
-                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
-
-        // t = 0
-        // Initial lux
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 1200));
-        assertEquals(1200, mController.getAmbientLux(), EPSILON);
-
-        // t = 1000
-        // Lux isn't steady yet
-        mClock.fastForward(1000);
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 500));
-        assertEquals(1200, mController.getAmbientLux(), EPSILON);
-
-        // t = 2500
-        // Lux is steady now
-        mClock.fastForward(1500);
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 500));
-        assertEquals(500, mController.getAmbientLux(), EPSILON);
-    }
-
-    @Test
     public void testBrightnessBasedOnLastObservedLux() throws Exception {
-        ArgumentCaptor<SensorEventListener> listenerCaptor =
-                ArgumentCaptor.forClass(SensorEventListener.class);
-        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
-                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
-
         // Set up system to return 0.3f as a brightness value
         float lux = 100.0f;
         // Brightness as float (from 0.0f to 1.0f)
         float normalizedBrightness = 0.3f;
-        when(mAmbientBrightnessThresholds.getBrighteningThreshold(lux)).thenReturn(lux);
-        when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux)).thenReturn(lux);
+        when(mLightSensorController.getLastObservedLux()).thenReturn(lux);
         when(mBrightnessMappingStrategy.getBrightness(eq(lux), /* packageName= */ eq(null),
                 /* category= */ anyInt())).thenReturn(normalizedBrightness);
         when(mBrightnessThrottler.getBrightnessCap()).thenReturn(BRIGHTNESS_MAX_FLOAT);
 
         // Send a new sensor value, disable the sensor and verify
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux));
         mController.configure(AUTO_BRIGHTNESS_DISABLED, /* configuration= */ null,
                 /* brightness= */ 0, /* userChangedBrightness= */ false, /* adjustment= */ 0,
                 /* userChanged= */ false, DisplayPowerRequest.POLICY_BRIGHT, Display.STATE_ON,
@@ -1059,21 +643,19 @@ public class AutomaticBrightnessControllerTest {
 
     @Test
     public void testAutoBrightnessInDoze() throws Exception {
-        ArgumentCaptor<SensorEventListener> listenerCaptor =
-                ArgumentCaptor.forClass(SensorEventListener.class);
-        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
-                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
+        ArgumentCaptor<LightSensorController.LightSensorListener> listenerCaptor =
+                ArgumentCaptor.forClass(LightSensorController.LightSensorListener.class);
+        verify(mLightSensorController).setListener(listenerCaptor.capture());
+        LightSensorController.LightSensorListener listener = listenerCaptor.getValue();
 
         // Set up system to return 0.3f as a brightness value
         float lux = 100.0f;
         // Brightness as float (from 0.0f to 1.0f)
         float normalizedBrightness = 0.3f;
-        when(mAmbientBrightnessThresholds.getBrighteningThreshold(lux)).thenReturn(lux);
-        when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux)).thenReturn(lux);
         when(mBrightnessMappingStrategy.getBrightness(eq(lux), /* packageName= */ eq(null),
                 /* category= */ anyInt())).thenReturn(normalizedBrightness);
         when(mBrightnessThrottler.getBrightnessCap()).thenReturn(BRIGHTNESS_MAX_FLOAT);
+        when(mLightSensorController.getLastObservedLux()).thenReturn(lux);
 
         // Set policy to DOZE
         mController.configure(AUTO_BRIGHTNESS_ENABLED, /* configuration= */ null,
@@ -1082,7 +664,7 @@ public class AutomaticBrightnessControllerTest {
                 /* shouldResetShortTermModel= */ true);
 
         // Send a new sensor value
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux));
+        listener.onAmbientLuxChange(lux);
 
         // The brightness should be scaled by the doze factor
         assertEquals(normalizedBrightness * DOZE_SCALE_FACTOR,
@@ -1095,21 +677,19 @@ public class AutomaticBrightnessControllerTest {
 
     @Test
     public void testAutoBrightnessInDoze_ShouldNotScaleIfUsingDozeCurve() throws Exception {
-        ArgumentCaptor<SensorEventListener> listenerCaptor =
-                ArgumentCaptor.forClass(SensorEventListener.class);
-        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
-                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
+        ArgumentCaptor<LightSensorController.LightSensorListener> listenerCaptor =
+                ArgumentCaptor.forClass(LightSensorController.LightSensorListener.class);
+        verify(mLightSensorController).setListener(listenerCaptor.capture());
+        LightSensorController.LightSensorListener listener = listenerCaptor.getValue();
 
         // Set up system to return 0.3f as a brightness value
         float lux = 100.0f;
         // Brightness as float (from 0.0f to 1.0f)
         float normalizedBrightness = 0.3f;
-        when(mAmbientBrightnessThresholds.getBrighteningThreshold(lux)).thenReturn(lux);
-        when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux)).thenReturn(lux);
         when(mDozeBrightnessMappingStrategy.getBrightness(eq(lux), /* packageName= */ eq(null),
                 /* category= */ anyInt())).thenReturn(normalizedBrightness);
         when(mBrightnessThrottler.getBrightnessCap()).thenReturn(BRIGHTNESS_MAX_FLOAT);
+        when(mLightSensorController.getLastObservedLux()).thenReturn(lux);
 
         // Switch mode to DOZE
         mController.switchMode(AUTO_BRIGHTNESS_MODE_DOZE);
@@ -1121,7 +701,7 @@ public class AutomaticBrightnessControllerTest {
                 /* shouldResetShortTermModel= */ true);
 
         // Send a new sensor value
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux));
+        listener.onAmbientLuxChange(lux);
 
         // The brightness should not be scaled by the doze factor
         assertEquals(normalizedBrightness,
@@ -1133,21 +713,19 @@ public class AutomaticBrightnessControllerTest {
 
     @Test
     public void testAutoBrightnessInDoze_ShouldNotScaleIfScreenOn() throws Exception {
-        ArgumentCaptor<SensorEventListener> listenerCaptor =
-                ArgumentCaptor.forClass(SensorEventListener.class);
-        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
-                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
+        ArgumentCaptor<LightSensorController.LightSensorListener> listenerCaptor =
+                ArgumentCaptor.forClass(LightSensorController.LightSensorListener.class);
+        verify(mLightSensorController).setListener(listenerCaptor.capture());
+        LightSensorController.LightSensorListener listener = listenerCaptor.getValue();
 
         // Set up system to return 0.3f as a brightness value
         float lux = 100.0f;
         // Brightness as float (from 0.0f to 1.0f)
         float normalizedBrightness = 0.3f;
-        when(mAmbientBrightnessThresholds.getBrighteningThreshold(lux)).thenReturn(lux);
-        when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux)).thenReturn(lux);
         when(mBrightnessMappingStrategy.getBrightness(eq(lux), /* packageName= */ eq(null),
                 /* category= */ anyInt())).thenReturn(normalizedBrightness);
         when(mBrightnessThrottler.getBrightnessCap()).thenReturn(BRIGHTNESS_MAX_FLOAT);
+        when(mLightSensorController.getLastObservedLux()).thenReturn(lux);
 
         // Set policy to DOZE
         mController.configure(AUTO_BRIGHTNESS_ENABLED, /* configuration= */ null,
@@ -1156,7 +734,7 @@ public class AutomaticBrightnessControllerTest {
                 /* shouldResetShortTermModel= */ true);
 
         // Send a new sensor value
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux));
+        listener.onAmbientLuxChange(lux);
 
         // The brightness should not be scaled by the doze factor
         assertEquals(normalizedBrightness,

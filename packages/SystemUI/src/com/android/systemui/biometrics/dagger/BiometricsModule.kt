@@ -39,6 +39,7 @@ import com.android.systemui.biometrics.udfps.EllipseOverlapDetector
 import com.android.systemui.biometrics.udfps.OverlapDetector
 import com.android.systemui.biometrics.ui.binder.SideFpsOverlayViewBinder
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.ui.binder.AlternateBouncerViewBinder
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
 import com.android.systemui.util.concurrency.ThreadFactory
 import dagger.Binds
@@ -68,6 +69,11 @@ interface BiometricsModule {
     @IntoMap
     @ClassKey(SideFpsOverlayViewBinder::class)
     fun bindsSideFpsOverlayViewBinder(viewBinder: SideFpsOverlayViewBinder): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(AlternateBouncerViewBinder::class)
+    fun bindAlternateBouncerViewBinder(viewBinder: AlternateBouncerViewBinder): CoreStartable
 
     @Binds
     @SysUISingleton

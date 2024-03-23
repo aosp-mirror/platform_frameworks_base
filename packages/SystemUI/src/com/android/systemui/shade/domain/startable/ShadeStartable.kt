@@ -21,6 +21,11 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.dagger.ShadeTouchLog
+import com.android.systemui.shade.ShadeController
+import com.android.systemui.shade.ShadeHeaderController
+import com.android.systemui.shade.TouchLogger.Companion.logTouchesTo
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.policy.SplitShadeStateController
@@ -36,13 +41,25 @@ class ShadeStartable
 constructor(
     @Application private val applicationScope: CoroutineScope,
     @Application private val applicationContext: Context,
+    @ShadeTouchLog private val touchLog: LogBuffer,
     private val configurationRepository: ConfigurationRepository,
     private val shadeRepository: ShadeRepository,
     private val controller: SplitShadeStateController,
+    private val shadeController: ShadeController,
+    private val shadeHeaderController: ShadeHeaderController,
 ) : CoreStartable {
 
     override fun start() {
         hydrateShadeMode()
+        logTouchesTo(touchLog)
+        initHeaderController()
+    }
+
+    private fun initHeaderController() {
+        shadeHeaderController.init()
+        shadeHeaderController.shadeCollapseAction = Runnable {
+            shadeController.animateCollapseShade()
+        }
     }
 
     private fun hydrateShadeMode() {

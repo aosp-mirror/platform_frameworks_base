@@ -961,16 +961,37 @@ final class AccessibilityController {
                 populateTransformationMatrix(windowState, matrix);
                 Region touchableRegion = mTempRegion3;
                 windowState.getTouchableRegion(touchableRegion);
-                Rect touchableFrame = mTempRect1;
-                touchableRegion.getBounds(touchableFrame);
-                RectF windowFrame = mTempRectF;
-                windowFrame.set(touchableFrame);
-                windowFrame.offset(-windowState.getFrame().left,
-                        -windowState.getFrame().top);
-                matrix.mapRect(windowFrame);
                 Region windowBounds = mTempRegion2;
-                windowBounds.set((int) windowFrame.left, (int) windowFrame.top,
-                        (int) windowFrame.right, (int) windowFrame.bottom);
+                if (Flags.useWindowOriginalTouchableRegionWhenMagnificationRecomputeBounds()) {
+                    // For b/323366243, if using the bounds from touchableRegion.getBounds, in
+                    // non-magnifiable windowBounds computation, part of the non-touchableRegion
+                    // may be included into nonMagnifiedBounds. This will make users lose
+                    // the magnification control on mis-included areas.
+                    // Therefore, to prevent the above issue, we change to use the window exact
+                    // touchableRegion in magnificationRegion computation.
+                    // Like the original approach, the touchableRegion is in non-magnified display
+                    // space, so first we need to offset the region by the windowFrames bounds, then
+                    // apply the transform matrix to the region to get the exact region in magnified
+                    // display space.
+                    // TODO: For a long-term plan, since touchable regions provided by WindowState
+                    //  doesn't actually reflect the real touchable regions on display, we should
+                    //  delete the WindowState dependency and migrate to use the touchableRegion
+                    //  from WindowInfoListener data. (b/330653961)
+                    touchableRegion.translate(-windowState.getFrame().left,
+                            -windowState.getFrame().top);
+                    applyMatrixToRegion(matrix, touchableRegion);
+                    windowBounds.set(touchableRegion);
+                } else {
+                    Rect touchableFrame = mTempRect1;
+                    touchableRegion.getBounds(touchableFrame);
+                    RectF windowFrame = mTempRectF;
+                    windowFrame.set(touchableFrame);
+                    windowFrame.offset(-windowState.getFrame().left,
+                            -windowState.getFrame().top);
+                    matrix.mapRect(windowFrame);
+                    windowBounds.set((int) windowFrame.left, (int) windowFrame.top,
+                            (int) windowFrame.right, (int) windowFrame.bottom);
+                }
                 // Only update new regions
                 Region portionOfWindowAlreadyAccountedFor = mTempRegion3;
                 portionOfWindowAlreadyAccountedFor.set(mMagnificationRegion);
@@ -1064,6 +1085,30 @@ final class AccessibilityController {
                     // magnification and the magnified center of window magnification could be
                     // in the bounds
                     || windowType == TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
+        }
+
+        private void applyMatrixToRegion(Matrix matrix, Region region) {
+            // Since Matrix does not support mapRegion api, so we follow the Matrix#mapRect logic
+            // to apply the matrix to the given region.
+            // In Matrix#mapRect, the internal calculation is applying the transform matrix to
+            // rect's 4 corner points with the below calculation. (see SkMatrix::mapPoints)
+            //      |A B C| |x|                               Ax+By+C   Dx+Ey+F
+            //      |D E F| |y| = |Ax+By+C Dx+Ey+F Gx+Hy+I| = ------- , -------
+            //      |G H I| |1|                               Gx+Hy+I   Gx+Hy+I
+            // For magnification usage, the matrix is created from
+            // WindowState#getTransformationMatrix. We can simplify the matrix calculation to be
+            //      |scale   0   trans_x| |x|
+            //      |  0   scale trans_y| |y| = (scale*x + trans_x, scale*y + trans_y)
+            //      |  0     0      1   | |1|
+            // So, to follow the simplified matrix computation, we first scale the region with
+            // matrix.scale, then translate the region with matrix.trans_x and matrix.trans_y.
+            float[] transformArray = sTempFloats;
+            matrix.getValues(transformArray);
+            // For magnification transform matrix, the scale_x and scale_y are equal.
+            region.scale(transformArray[Matrix.MSCALE_X]);
+            region.translate(
+                    (int) transformArray[Matrix.MTRANS_X],
+                    (int) transformArray[Matrix.MTRANS_Y]);
         }
 
         private void populateWindowsOnScreen(SparseArray<WindowState> outWindows) {

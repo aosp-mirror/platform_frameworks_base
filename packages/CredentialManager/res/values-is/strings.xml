@@ -39,9 +39,12 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Við stefnum að framtíð án aðgangsorða en aðgangsorð verða áfram í boði samhliða aðgangslyklum."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Veldu hvar þú vilt vista <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Veldu aðgangsorðastjórnun til að vista upplýsingarnar og vera fljótari að skrá þig inn næst"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Búa til aðgangslykil til að skrá þig inn á <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Vista aðgangsorð til að skrá þig inn á <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Viltu vista innskráningarupplýsingar fyrir <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for choose_create_option_passkey_title (8762295821604276511) -->
+    <skip />
+    <!-- no translation found for choose_create_option_password_title (4481366993598649224) -->
+    <skip />
+    <!-- no translation found for choose_create_option_sign_in_title (7092914088455358079) -->
+    <skip />
     <string name="passkey" msgid="632353688396759522">"aðgangslykill"</string>
     <string name="password" msgid="6738570945182936667">"aðgangsorð"</string>
     <string name="passkeys" msgid="5733880786866559847">"aðgangslykla"</string>
@@ -70,6 +73,8 @@
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Hunsa"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Nota vistaðan aðgangslykil fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Nota vistaða aðgangsorðið þitt fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for get_dialog_title_single_tap_for (2057945648748859483) -->
+    <skip />
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Nota innskráningu fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Opna fyrir innskráningarvalkosti fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Veldu vistaðan aðgangslykil fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

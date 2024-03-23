@@ -70,7 +70,6 @@ import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -109,7 +108,6 @@ import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
-import com.android.systemui.log.LogBuffer;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.notetask.NoteTaskController;
 import com.android.systemui.plugins.ActivityStarter;
@@ -423,7 +421,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mShadeController = spy(new ShadeControllerImpl(
                 mCommandQueue,
                 mMainExecutor,
-                mock(LogBuffer.class),
                 mock(WindowRootViewVisibilityInteractor.class),
                 mKeyguardStateController,
                 mStatusBarStateController,
@@ -431,7 +428,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mStatusBarWindowController,
                 mDeviceProvisionedController,
                 mNotificationShadeWindowController,
-                mContext.getSystemService(WindowManager.class),
+                0,
                 () -> mNotificationPanelViewController,
                 () -> mAssistManager,
                 () -> mNotificationGutsManager

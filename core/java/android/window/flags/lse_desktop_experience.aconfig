@@ -21,3 +21,10 @@ flag {
     description: "Enables policy for modals activities"
     bug: "319492844"
 }
+
+flag {
+    name: "enable_windowing_dynamic_initial_bounds"
+    namespace: "lse_desktop_experience"
+    description: "Enables new initial bounds for desktop windowing which adjust depending on app constraints"
+    bug: "324377962"
+}

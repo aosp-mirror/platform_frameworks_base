@@ -155,7 +155,8 @@ constructor(
                 constraintBp() &&
                 !Utils.isBiometricAllowed(promptInfo) &&
                 isDeviceCredentialAllowed(promptInfo) &&
-                promptInfo.contentView != null
+                promptInfo.contentView != null &&
+                !promptInfo.isContentViewMoreOptionsButtonUsed
         _showBpWithoutIconForCredential.value = showBpForCredential && !hasCredentialViewShown
     }
 

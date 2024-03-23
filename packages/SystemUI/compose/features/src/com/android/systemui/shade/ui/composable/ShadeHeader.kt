@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -40,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
@@ -96,6 +98,11 @@ object ShadeHeader {
     object Dimensions {
         val CollapsedHeight = 48.dp
         val ExpandedHeight = 120.dp
+    }
+
+    object Colors {
+        val ColorScheme.shadeHeaderText: Color
+            get() = Color.White
     }
 }
 
@@ -325,7 +332,10 @@ private fun SceneScope.Clock(
         val animatedScale by animateElementFloatAsState(scale, ClockScale, canOverflow = false)
         AndroidView(
             factory = { context ->
-                Clock(ContextThemeWrapper(context, R.style.TextAppearance_QS_Status), null)
+                Clock(
+                    ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings_Header),
+                    null,
+                )
             },
             modifier =
                 modifier
@@ -430,11 +440,16 @@ private fun SceneScope.StatusIcons(
 
     AndroidView(
         factory = { context ->
-            val iconContainer = StatusIconContainer(context, null)
+            val themedContext =
+                ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings_Header)
+            val iconContainer = StatusIconContainer(themedContext, null)
             val iconManager = createTintedIconManager(iconContainer, StatusBarLocation.QS)
             iconManager.setTint(
-                Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary),
-                Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimaryInverse),
+                Utils.getColorAttrDefaultColor(themedContext, android.R.attr.textColorPrimary),
+                Utils.getColorAttrDefaultColor(
+                    themedContext,
+                    android.R.attr.textColorPrimaryInverse
+                ),
             )
             statusBarIconController.addIconGroup(iconManager)
 

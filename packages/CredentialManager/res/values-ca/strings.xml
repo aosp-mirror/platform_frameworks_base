@@ -39,9 +39,12 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Tot i que avancem cap a un futur sense contrasenyes, continuaran estant disponibles juntament amb les claus d\'accés."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Tria on vols desar les <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecciona un gestor de contrasenyes per desar la teva informació i iniciar la sessió més ràpidament la pròxima vegada"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Vols crear una clau d\'accés per iniciar la sessió a <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Vols desar la contrasenya per iniciar la sessió a <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Vols desar la informació d\'inici de sessió per a <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for choose_create_option_passkey_title (8762295821604276511) -->
+    <skip />
+    <!-- no translation found for choose_create_option_password_title (4481366993598649224) -->
+    <skip />
+    <!-- no translation found for choose_create_option_sign_in_title (7092914088455358079) -->
+    <skip />
     <string name="passkey" msgid="632353688396759522">"clau d\'accés"</string>
     <string name="password" msgid="6738570945182936667">"contrasenya"</string>
     <string name="passkeys" msgid="5733880786866559847">"claus d\'accés"</string>
@@ -70,6 +73,8 @@
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Ignora"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Vols utilitzar la clau d\'accés desada per a <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Vols utilitzar la contrasenya desada per a <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for get_dialog_title_single_tap_for (2057945648748859483) -->
+    <skip />
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Vols utilitzar el teu inici de sessió per a <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Vols desbloquejar les opcions d\'inici de sessió per a <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Tria una clau d\'accés desada per a <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

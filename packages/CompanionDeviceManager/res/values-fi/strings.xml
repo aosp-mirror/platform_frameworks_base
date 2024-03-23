@@ -26,14 +26,11 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"laite"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"Tämä sovellus saa käyttää näitä lupia laitteella (<xliff:g id="DEVICE_NAME">%1$s</xliff:g>)"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Salli, että &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; saa pääsyn näihin puhelimesi tietoihin"</string>
-    <!-- no translation found for title_app_streaming_with_mirroring (3364582597581570658) -->
-    <skip />
-    <!-- no translation found for summary_app_streaming (295548145144086753) -->
-    <skip />
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"Saako &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; striimata puhelimen sovelluksia?"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s saa pääsyn kaikkeen puhelimessa näkyvään tai pelattavaan, mukaan lukien audioon, kuviin, salasanoihin ja viesteihin.&lt;br/&gt;&lt;br/&gt;%1$s voi striimata sovelluksia, kunnes poistat luvan."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Laitteidenväliset palvelut"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> pyytää laitteesi (<xliff:g id="DISPLAY_NAME">%2$s</xliff:g>) puolesta lupaa striimata sovelluksia laitteidesi välillä"</string>
-    <!-- no translation found for helper_summary_app_streaming_with_mirroring (6138581029144467467) -->
-    <skip />
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g> pyytää laitteesi (<xliff:g id="DISPLAY_NAME">%2$s</xliff:g>) puolesta lupaa näyttää ja striimata sovelluksia laitteidesi välillä"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"Salli pääsy tähän tietoon puhelimellasi: &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
@@ -41,10 +38,8 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play Palvelut"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> pyytää laitteesi (<xliff:g id="DISPLAY_NAME">%2$s</xliff:g>) puolesta lupaa päästä puhelimesi kuviin, mediaan ja ilmoituksiin"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Sallitko, että &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; voi suorittaa tämän toiminnon?"</string>
-    <!-- no translation found for title_nearby_device_streaming_with_mirroring (242855799919611657) -->
-    <skip />
-    <!-- no translation found for summary_nearby_device_streaming (4039565463149145573) -->
-    <skip />
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"Saako &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; striimata puhelimen sovelluksia ja järjestelmäominaisuuksia?"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s saa pääsyn kaikkeen puhelimessa näkyvään tai pelattavaan, mukaan lukien audioon, kuviin, maksutietoihin, salasanoihin ja viesteihin.&lt;br/&gt;&lt;br/&gt;%1$s voi striimata sovelluksia ja järjestelmäominaisuuksia, kunnes poistat luvan."</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> pyytää laitteesi (<xliff:g id="DEVICE_NAME">%2$s</xliff:g>) puolesta lupaa striimata sovelluksia ja muita järjestelmän ominaisuuksia lähellä oleviin laitteisiin."</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"laite"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Sovellus voi synkronoida tietoja (esimerkiksi soittajan nimen) puhelimesi ja valitun laitteen välillä"</string>

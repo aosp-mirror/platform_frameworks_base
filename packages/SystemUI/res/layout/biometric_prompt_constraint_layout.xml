@@ -2,6 +2,8 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    android:id="@+id/biometric_prompt_constraint_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -19,7 +21,7 @@
         android:id="@+id/panel"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="?android:attr/colorBackgroundFloating"
+        android:background="?androidprv:attr/materialColorSurfaceBright"
         android:clickable="true"
         android:clipToOutline="true"
         android:importantForAccessibility="no"
@@ -61,8 +63,9 @@
 
             <ImageView
                 android:id="@+id/logo"
-                android:layout_width="@dimen/biometric_auth_icon_size"
-                android:layout_height="@dimen/biometric_auth_icon_size"
+                android:contentDescription="@string/biometric_dialog_logo"
+                android:layout_width="@dimen/biometric_prompt_logo_size"
+                android:layout_height="@dimen/biometric_prompt_logo_size"
                 android:layout_gravity="center"
                 android:scaleType="fitXY"
                 app:layout_constraintBottom_toTopOf="@+id/logo_description"
@@ -73,20 +76,13 @@
 
             <TextView
                 android:id="@+id/logo_description"
+                style="@style/TextAppearance.AuthCredential.LogoDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="@integer/biometric_dialog_text_gravity"
-                android:singleLine="true"
                 app:layout_constraintBottom_toTopOf="@+id/title"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/logo" />
-
-            <Space
-                android:id="@+id/space_above_content"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/biometric_prompt_space_above_content"
-                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/title"
@@ -119,7 +115,7 @@
                 android:gravity="center_vertical"
                 android:orientation="vertical"
                 android:visibility="gone"
-                android:paddingTop="8dp"
+                android:paddingTop="24dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -131,7 +127,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="@integer/biometric_dialog_text_gravity"
-                android:paddingTop="16dp"
+                android:paddingTop="24dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -150,6 +146,7 @@
 
     <TextView
         android:id="@+id/indicator"
+        style="@style/TextAppearance.AuthCredential.Indicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
@@ -229,5 +226,4 @@
         app:layout_constraintEnd_toEndOf="@+id/biometric_icon"
         app:layout_constraintStart_toStartOf="@+id/biometric_icon"
         app:layout_constraintTop_toTopOf="@+id/biometric_icon" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

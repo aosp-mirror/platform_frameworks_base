@@ -86,6 +86,8 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Skrinshot olishni AT administratori taqiqlagan"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Tahrirlash"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Skrinshotni tahrirlash"</string>
+    <!-- no translation found for screenshot_share_label (1653061117238861559) -->
+    <skip />
     <string name="screenshot_share_description" msgid="2861628935812656612">"Skrinshot yuborish"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Skrinshot sohasini kengaytirish"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Skrinshotni yopish"</string>
@@ -266,7 +268,7 @@
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Yangi qurilmani ulash"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Hammasi"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth ishlatish"</string>
-    <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Ulandi"</string>
+    <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Ulangan"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Saqlangan"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"uzish"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"faollashtirish"</string>
@@ -538,7 +540,10 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Bu – ota-onangiz tomonidan boshqariladigan qurilma. Ota-onangiz siz foydalangan ilovalar, joylashuvingiz va qurilmadan foydalanish vaqti kabi axborotlarni koʻrishi va boshqarishi mumkin."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent tomonidan ochilgan"</string>
-    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"Oʻgʻirlanishdan himoya\nQurilma qulflandi, juda koʻp urinildi"</string>
+    <!-- no translation found for kg_prompt_after_adaptive_auth_lock (2587481497846342760) -->
+    <skip />
+    <!-- no translation found for keyguard_indication_after_adaptive_auth_lock (2323400645470712787) -->
+    <skip />
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Tovush sozlamalari"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Avtomatik taglavha yaratish"</string>
@@ -583,10 +588,8 @@
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Ovozsiz"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"Translatsiya"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Jiringlash ovozsizligi uchun ishlamaydi"</string>
-    <!-- no translation found for stream_alarm_unavailable (4059817189292197839) -->
-    <skip />
-    <!-- no translation found for stream_media_unavailable (6823020894438959853) -->
-    <skip />
+    <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Bezovta qilinmasin yoniqligi sababli ishlamaydi"</string>
+    <string name="stream_media_unavailable" msgid="6823020894438959853">"Bezovta qilinmasin yoniqligi sababli ishlamaydi"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Ovozini yoqish uchun ustiga bosing."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Tebranishni yoqish uchun ustiga bosing. Qulayliklar ishlamasligi mumkin."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Ovozini o‘chirish uchun ustiga bosing. Qulayliklar ishlamasligi mumkin."</string>
@@ -603,16 +606,11 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"tebranish"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s tovush balandligi tugmalari"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Chaqiruvlar va bildirishnomalar jiringlaydi (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
-    <!-- no translation found for volume_panel_enter_media_output_settings (8824244246272552669) -->
-    <skip />
-    <!-- no translation found for volume_panel_expanded_sliders (1885750987768506271) -->
-    <skip />
-    <!-- no translation found for volume_panel_collapsed_sliders (1413383759434791450) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_mute (6962563028495243738) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_unmute (7489063242934477382) -->
-    <skip />
+    <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"Chiqarish sozlamalarini kiritish"</string>
+    <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"Tovush slayderlari yoyilgan"</string>
+    <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"Tovush slayderlari yigʻilgan"</string>
+    <string name="volume_panel_hint_mute" msgid="6962563028495243738">"%sni ovozsiz qilish"</string>
+    <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"%s ovozini chiqarish"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g>da ijro etilmoqda"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"Audio ijro etiladi"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"SystemUI Tuner"</string>
@@ -759,7 +757,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Oxirgi ilovalarni oldinga varaqlash"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Oxirgi ilovalarni orqaga varaqlash"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Ilovalar roʻyxatini ochish"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Vazifalar panelini chiqarish"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Sozlamalarni ochish"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistentni ochish"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Ekran qulfi"</string>
@@ -768,6 +765,10 @@
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Oʻng tomondagi ajratilgan ekran rejimiga kirish"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Chap tomondagi ajratilgan ekran rejimiga kirish"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Ajratilgan ekran rejimidan butun ekranga almashtirish"</string>
+    <!-- no translation found for system_multitasking_splitscreen_focus_rhs (3838578650313318508) -->
+    <skip />
+    <!-- no translation found for system_multitasking_splitscreen_focus_lhs (3164261844398662518) -->
+    <skip />
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Ajratilgan rejimda ilovalarni oʻzaro almashtirish"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Kiritish"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Keyingi tilga almashtirish"</string>
@@ -1162,7 +1163,7 @@
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Joriy telefon chaqiruvi"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobil internet"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
-    <string name="mobile_data_connection_active" msgid="944490013299018227">"Ulandi"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"Ulangan"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Vaqtincha ulangan"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Aloqa beqaror"</string>
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"Mobil internetga avtomatik ulanmaydi"</string>
@@ -1266,8 +1267,7 @@
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kamera bloklangan"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Kamera va mikrofon bloklangan"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Mikrofon bloklangan"</string>
-    <!-- no translation found for priority_mode_dream_overlay_content_description (3361628029609329182) -->
-    <skip />
+    <string name="priority_mode_dream_overlay_content_description" msgid="3361628029609329182">"Bezovta qilinmasin"</string>
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"Foydalanuvchi aniqlandi"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Standart qaydlar ilovasini Sozlamalar orqali tanlang"</string>
     <string name="install_app" msgid="5066668100199613936">"Ilovani oʻrnatish"</string>

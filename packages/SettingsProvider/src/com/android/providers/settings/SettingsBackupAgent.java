@@ -75,7 +75,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.zip.CRC32;
 
 /**
@@ -103,6 +106,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     // fatal crash. Creating a backup with a different key will prevent Android 12 versions from
     // restoring this data.
     private static final String KEY_SIM_SPECIFIC_SETTINGS_2 = "sim_specific_settings_2";
+    private static final String KEY_WIFI_SETTINGS_BACKUP_DATA = "wifi_settings_backup_data";
 
     // Versioning of the state file.  Increment this version
     // number any time the set of state items is altered.
@@ -126,8 +130,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final int STATE_WIFI_NEW_CONFIG       = 9;
     private static final int STATE_DEVICE_CONFIG         = 10;
     private static final int STATE_SIM_SPECIFIC_SETTINGS = 11;
+    private static final int STATE_WIFI_SETTINGS         = 12;
 
-    private static final int STATE_SIZE                  = 12; // The current number of state items
+    private static final int STATE_SIZE                  = 13; // The current number of state items
 
     // Number of entries in the checksum array at various version numbers
     private static final int STATE_SIZES[] = {
@@ -140,7 +145,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             9,              // version 6 added STATE_NETWORK_POLICIES
             10,             // version 7 added STATE_WIFI_NEW_CONFIG
             11,             // version 8 added STATE_DEVICE_CONFIG
-            STATE_SIZE      // version 9 added STATE_SIM_SPECIFIC_SETTINGS
+            12,             // version 9 added STATE_SIM_SPECIFIC_SETTINGS
+            STATE_SIZE      // version 10 added STATE_WIFI_SETTINGS
     };
 
     private static final int FULL_BACKUP_ADDED_GLOBAL = 2;  // added the "global" entry
@@ -230,6 +236,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         byte[] wifiFullConfigData = getNewWifiConfigData();
         byte[] deviceSpecificInformation = getDeviceSpecificConfiguration();
         byte[] simSpecificSettingsData = getSimSpecificSettingsData();
+        byte[] wifiSettingsData = getWifiSettingsBackupData();
 
         long[] stateChecksums = readOldChecksums(oldState);
 
@@ -265,6 +272,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         stateChecksums[STATE_SIM_SPECIFIC_SETTINGS] =
                 writeIfChanged(stateChecksums[STATE_SIM_SPECIFIC_SETTINGS],
                         KEY_SIM_SPECIFIC_SETTINGS_2, simSpecificSettingsData, data);
+        stateChecksums[STATE_WIFI_SETTINGS] =
+                writeIfChanged(stateChecksums[STATE_WIFI_SETTINGS],
+                        KEY_WIFI_SETTINGS_BACKUP_DATA, wifiSettingsData, data);
 
         writeNewChecksums(stateChecksums, newState);
     }
@@ -413,7 +423,13 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                     data.readEntityData(restoredSimSpecificSettings, 0, size);
                     restoreSimSpecificSettings(restoredSimSpecificSettings);
                     break;
-
+                case KEY_WIFI_SETTINGS_BACKUP_DATA:
+                    byte[] restoredWifiData = new byte[size];
+                    data.readEntityData(restoredWifiData, 0, size);
+                    if (!isWatch()) {
+                        restoreWifiData(restoredWifiData);
+                    }
+                    break;
                 default :
                     data.skipEntityData();
 
@@ -1344,6 +1360,45 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             SubscriptionManager subManager = SubscriptionManager.from(getBaseContext());
             subManager.restoreAllSimSpecificSettingsFromBackup(data);
         }
+    }
+
+    private static final class Mutable<E> {
+        public volatile E value;
+
+        Mutable() {
+            value = null;
+        }
+    }
+
+    private byte[] getWifiSettingsBackupData() {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final Mutable<byte[]> backupWifiData = new Mutable<byte[]>();
+
+        try {
+            mWifiManager.retrieveWifiBackupData(getBaseContext().getMainExecutor(),
+                    new Consumer<byte[]>() {
+                        @Override
+                        public void accept(byte[] value) {
+                            backupWifiData.value = value;
+                            latch.countDown();
+                        }
+                    });
+            // cts requires B&R with 10 seconds
+            if (latch.await(10, TimeUnit.SECONDS) && backupWifiData.value != null) {
+                return backupWifiData.value;
+            }
+        } catch (InterruptedException ie) {
+            Log.e(TAG, "fail to retrieveWifiBackupData, " + ie);
+        }
+        Log.e(TAG, "fail to retrieveWifiBackupData");
+        return new byte[0];
+    }
+
+    private void restoreWifiData(byte[] data) {
+        if (DEBUG_BACKUP) {
+            Log.v(TAG, "Applying restored all wifi data");
+        }
+        mWifiManager.restoreWifiBackupData(data);
     }
 
     private void updateWindowManagerIfNeeded(Integer previousDensity) {

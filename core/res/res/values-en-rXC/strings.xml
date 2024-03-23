@@ -84,7 +84,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‎‏‏‏‏‏‏‏‏‎‎‏‎‎‏‏‏‎‏‎‏‏‏‏‏‏‏‎‎‏‎‏‎‎‏‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‎‏‎‎‏‏‏‎‎Can’t reach mobile network‎‏‎‎‏‎"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‎‏‏‏‏‎‏‎‎‏‏‎‎‎‎‏‎‎‏‎‏‎‎‎‏‎‎‏‏‏‎‎‏‎‎‏‎‎‏‏‎‎‎‏‎‏‏‎‎‎‏‏‏‏‏‎‎‎Try changing preferred network. Tap to change.‎‏‎‎‏‎"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‎‎‏‏‎‏‏‎‎‎‎‎‏‎‎‏‏‏‎‏‎‏‏‎‏‏‎‏‎‏‎‎‎‏‎‏‎‏‎‏‎‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‎Emergency calling unavailable‎‏‎‎‏‎"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‎‏‎‎‏‎‎‏‎‏‎‎‏‏‎‎‏‏‎‏‏‏‎‏‏‎‎‎‏‏‎‏‎‏‎‏‏‏‎‎‎‎‎‎‎‏‎‎‏‎‏‏‏‏‎‎‏‎Can’t make emergency calls over Wi‑Fi‎‏‎‎‏‎"</string>
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‎‎‏‎‏‎‎‏‏‏‎‏‎‎‎‏‏‏‎‎‏‏‏‏‎‎‏‎‎‏‎‏‎‎‎‎‏‏‎‎‏‏‎‏‏‏‏‎‎‎‏‏‏‎‏‎‎‎Emergency calls require a mobile network‎‏‎‎‏‎"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‎‎‏‏‏‎‎‏‎‏‎‎‏‎‏‎‎‏‏‏‎‎‏‎‏‎‎‏‏‎‏‏‎‏‎‏‎‏‎‏‎‏‏‏‎‏‏‎‏‏‏‎‎‎‎‎‏‎Alerts‎‏‎‎‏‎"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‎‎‎‏‏‏‎‎‎‏‎‎‏‎‎‏‏‎‏‎‏‎‏‏‎‎‎‏‎‏‎‏‎‏‏‎‎‏‏‏‏‎‎‏‎‏‏‎‎‏‎‎‏‎‏‏‎‎Call forwarding‎‏‎‎‏‎"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‎‎‏‏‎‎‎‎‎‎‎‎‎‏‏‏‎‎‏‏‎‎‎‏‏‏‏‎‎‏‎‏‎‏‎‏‏‎‎‏‏‏‏‏‎‎‏‎‏‏‏‏‎‏‎‏‏‏‎Emergency callback mode‎‏‎‎‏‎"</string>
@@ -1183,6 +1183,8 @@
     <string name="deleteText" msgid="4200807474529938112">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‎‎‏‎‎‏‏‎‎‎‏‎‎‎‏‎‎‎‎‏‎‎‏‎‎‎‎‏‎‏‎‎‏‎‎‏‎‏‎‎‏‏‎‏‎‏‎‏‎‏‏‎‎‎‎‎‎‎Delete‎‏‎‎‏‎"</string>
     <string name="inputMethod" msgid="1784759500516314751">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‎‏‏‎‎‎‏‎‎‏‎‏‏‏‏‎‏‎‏‎‎‏‏‏‏‎‏‎‎‎‏‎‏‏‏‎‎‎‏‏‏‎‏‎‎‏‏‏‎‎‏‏‏‏‏‏‏‎Input method‎‏‎‎‏‎"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‏‏‏‎‎‏‏‏‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‏‏‏‏‎‏‎‏‏‏‎‎‎‏‏‎‏‏‏‏‏‏‏‏‎‎‎‎‎‎‎‎‎Text actions‎‏‎‎‏‎"</string>
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‎‎‏‏‎‎‎‎‎‏‎‏‏‎‎‏‎‏‏‏‏‏‎‎‎‏‎‏‎‏‎‏‎‏‎‏‏‎‏‎‎‎‏‎‎‎‎‏‏‎‏‏‎‎‎‏‎‎Handwriting is not supported in this field‎‏‎‎‏‎"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‏‎‏‎‏‏‎‏‏‎‏‎‎‎‎‎‎‎‎‏‎‏‏‎‎‎‏‎‎‎‎‏‎‏‏‏‎‏‎‎‎‏‏‏‎‎‏‎‏‏‎‏‎‎‏‏‏‏‎Handwriting is not supported in password fields‎‏‎‎‏‎"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‎‏‎‏‏‏‏‎‎‎‎‏‎‎‏‏‎‎‎‎‎‎‎‏‏‎‏‏‏‎‎‏‎‎‏‏‏‏‏‏‏‎‎‏‎‎‎‎‏‏‎‎‎‏‎‏‏‎Back‎‏‎‎‏‎"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‏‏‏‏‏‏‎‏‎‎‎‏‎‎‏‏‎‏‎‏‎‏‎‏‏‎‎‏‎‏‏‏‏‎‎‎‏‎‏‎‏‎‏‏‏‏‏‏‎‎‏‏‎‎‏‎‏‎Switch input method‎‏‎‎‏‎"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‏‎‎‏‏‏‏‎‎‏‎‎‎‏‏‎‎‎‎‎‏‎‏‎‏‏‏‏‏‎‏‎‏‏‎‎‎‎‎‏‎‎‎‏‏‎‎‎‏‎‎‏‏‎‏‏‎‎Storage space running out‎‏‎‎‏‎"</string>

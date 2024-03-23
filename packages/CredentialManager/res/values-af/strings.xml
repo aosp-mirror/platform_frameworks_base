@@ -39,9 +39,12 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Wagwoorde sal steeds saam met toegangsleutels beskikbaar wees terwyl ons na ’n wagwoordlose toekoms beweeg."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Kies waar om jou <xliff:g id="CREATETYPES">%1$s</xliff:g> te stoor"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Kies ’n wagwoordbestuurder om jou inligting te stoor en volgende keer vinniger aan te meld"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Wil jy toegangsleutel skep om by <xliff:g id="APPNAME">%1$s</xliff:g> aan te meld?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Wil jy wagwoord stoor om by <xliff:g id="APPNAME">%1$s</xliff:g> aan te meld?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Stoor aanmeldinligting vir <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for choose_create_option_passkey_title (8762295821604276511) -->
+    <skip />
+    <!-- no translation found for choose_create_option_password_title (4481366993598649224) -->
+    <skip />
+    <!-- no translation found for choose_create_option_sign_in_title (7092914088455358079) -->
+    <skip />
     <string name="passkey" msgid="632353688396759522">"toegangsleutel"</string>
     <string name="password" msgid="6738570945182936667">"wagwoord"</string>
     <string name="passkeys" msgid="5733880786866559847">"toegangsleutels"</string>
@@ -70,6 +73,8 @@
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Maak toe"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Gebruik jou gestoorde toegangsleutel vir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Gebruik jou gestoorde wagwoord vir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for get_dialog_title_single_tap_for (2057945648748859483) -->
+    <skip />
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Gebruik jou aanmelding vir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Ontsluit aanmeldingopsies vir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Kies ’n gestoorde toegangsleutel vir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
