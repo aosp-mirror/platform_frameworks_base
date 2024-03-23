@@ -3696,27 +3696,18 @@ public class OomAdjuster {
     }
 
     @GuardedBy({"mService", "mProcLock"})
-    void setAppIdTempAllowlistStateLSP(int uid, boolean onAllowlist) {
-        boolean changed = false;
-        for (int i = mActiveUids.size() - 1; i >= 0; i--) {
-            final UidRecord uidRec = mActiveUids.valueAt(i);
-            if (uidRec.getUid() == uid && uidRec.isCurAllowListed() != onAllowlist) {
-                uidRec.setCurAllowListed(onAllowlist);
-                changed = true;
-            }
-        }
-        if (changed) {
-            updateOomAdjLSP(OOM_ADJ_REASON_ALLOWLIST);
-        }
-    }
-
-    @GuardedBy({"mService", "mProcLock"})
     void setUidTempAllowlistStateLSP(int uid, boolean onAllowlist) {
-        boolean changed = false;
         final UidRecord uidRec = mActiveUids.get(uid);
         if (uidRec != null && uidRec.isCurAllowListed() != onAllowlist) {
             uidRec.setCurAllowListed(onAllowlist);
-            updateOomAdjLSP(OOM_ADJ_REASON_ALLOWLIST);
+            if (Flags.migrateFullOomadjUpdates()) {
+                for (int i = uidRec.getNumOfProcs() - 1; i >= 0; i--) {
+                    enqueueOomAdjTargetLocked(uidRec.getProcessRecordByIndex(i));
+                }
+                updateOomAdjPendingTargetsLocked(OOM_ADJ_REASON_ALLOWLIST);
+            } else {
+                updateOomAdjLSP(OOM_ADJ_REASON_ALLOWLIST);
+            }
         }
     }
 
