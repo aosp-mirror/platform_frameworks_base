@@ -130,6 +130,17 @@ constructor(
                 initialValue = ClockLayout.SMALL_CLOCK
             )
 
+    val hasCustomPositionUpdatedAnimation: StateFlow<Boolean> =
+        combine(currentClock, isLargeClockVisible) { currentClock, isLargeClockVisible ->
+                isLargeClockVisible &&
+                    currentClock?.largeClock?.config?.hasCustomPositionUpdatedAnimation == true
+            }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false
+            )
+
     /** Calculates the top margin for the small clock. */
     fun getSmallClockTopMargin(context: Context): Int {
         var topMargin: Int

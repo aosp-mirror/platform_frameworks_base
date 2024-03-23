@@ -34,7 +34,7 @@ import kotlin.math.roundToInt
 /**
  * Draws a right-to-left fill inside of the given [framePath]. This fill is designed to exactly fill
  * the usable space inside of [framePath], given that the stroke width of the path is 1.5, and we
- * want an extra 0.25 (canvas units) of a gap between the fill and the stroke
+ * want an extra 0.5 (canvas units) of a gap between the fill and the stroke
  */
 class BatteryFillDrawable(private val framePath: Path) : Drawable() {
     private var hScale = 1f
@@ -61,7 +61,6 @@ class BatteryFillDrawable(private val framePath: Path) : Drawable() {
     private val clearPaint =
         Paint(Paint.ANTI_ALIAS_FLAG).also { p ->
             p.style = Paint.Style.STROKE
-            p.strokeWidth = 5f
             p.blendMode = BlendMode.CLEAR
         }
 
@@ -94,6 +93,9 @@ class BatteryFillDrawable(private val framePath: Path) : Drawable() {
 
         scaledLeftOffset = LeftFillOffset * hScale
         scaledRightInset = RightFillInset * hScale
+
+        // Ensure 0.5dp space between the frame stroke and the fill
+        clearPaint.strokeWidth = 2.5f * hScale
     }
 
     override fun draw(canvas: Canvas) {
@@ -155,15 +157,15 @@ class BatteryFillDrawable(private val framePath: Path) : Drawable() {
     override fun setAlpha(alpha: Int) {}
 
     companion object {
-        // 3.75f =
+        // 4f =
         //       2.75 (left-most edge of the frame path)
         //     + 0.75 (1/2 of the stroke width)
-        //     + 0.25 (padding between stroke and fill edge)
-        private const val LeftFillOffset = 3.75f
+        //     + 0.5  (padding between stroke and fill edge)
+        private const val LeftFillOffset = 4f
 
-        // 1.75, calculated the same way, but from the right edge (without the battery cap), which
+        // 2, calculated the same way, but from the right edge (without the battery cap), which
         // consumes 2 units of width.
-        private const val RightFillInset = 1.75f
+        private const val RightFillInset = 2f
 
         /** Scale this to the viewport so we fill correctly! */
         private val FillRect =

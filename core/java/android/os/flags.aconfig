@@ -98,6 +98,46 @@ flag {
 }
 
 flag {
+    name: "adpf_use_fmq_channel_fixed"
+    namespace: "game"
+    description: "Guards use of the FMQ channel for ADPF with a readonly flag"
+    is_fixed_read_only: true
+    bug: "315894228"
+}
+
+flag {
+    name: "adpf_fmq_eager_send"
+    namespace: "game"
+    description: "Guards the use of an eager-sending optimization in FMQ for low-latency messages"
+    is_fixed_read_only: true
+    bug: "315894228"
+}
+
+flag {
+    name: "adpf_hwui_gpu"
+    namespace: "game"
+    description: "Guards use of the FMQ channel for ADPF"
+    is_fixed_read_only: true
+    bug: "330922490"
+}
+
+flag {
+    name: "adpf_obtainview_boost"
+    namespace: "game"
+    description: "Guards use of a boost in response to HWUI obtainView"
+    is_fixed_read_only: true
+    bug: "328238660"
+}
+
+flag {
+    name: "adpf_platform_power_efficiency"
+    namespace: "game"
+    description: "Guards use of the ADPF power efficiency API within the platform"
+    is_fixed_read_only: true
+    bug: "277285195"
+}
+
+flag {
     name: "battery_service_support_current_adb_command"
     namespace: "backstage_power"
     description: "Whether or not BatteryService supports adb commands for Current values."

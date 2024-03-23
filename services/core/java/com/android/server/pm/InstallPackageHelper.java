@@ -36,6 +36,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_UID_CHANGED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_STAGED;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
+import static android.content.pm.PackageManager.PROPERTY_ANDROID_SAFETY_LABEL_PATH;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
 import static android.content.pm.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V4;
 import static android.content.pm.parsing.ApkLiteParseUtils.isApkFile;
@@ -45,8 +46,8 @@ import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
 
-import static com.android.internal.pm.pkg.parsing.ParsingPackageUtils.APP_METADATA_FILE_NAME;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
+import static com.android.server.pm.PackageManagerService.APP_METADATA_FILE_NAME;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.DEBUG_PACKAGE_SCANNING;
@@ -2206,8 +2207,9 @@ final class InstallPackageHelper {
                         ps.setAppMetadataSource(APP_METADATA_SOURCE_INSTALLER);
                     }
                 } else {
+                    Map<String, PackageManager.Property> properties = parsedPackage.getProperties();
                     if (Flags.aslInApkAppMetadataSource()
-                            && parsedPackage.isAppMetadataFileInApk()) {
+                            && properties.containsKey(PROPERTY_ANDROID_SAFETY_LABEL_PATH)) {
                         ps.setAppMetadataFilePath(appMetadataFile.getAbsolutePath());
                         ps.setAppMetadataSource(APP_METADATA_SOURCE_APK);
                     } else {

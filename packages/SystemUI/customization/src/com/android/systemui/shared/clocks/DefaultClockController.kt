@@ -232,6 +232,10 @@ class DefaultClockController(
         fun offsetGlyphsForStepClockAnimation(fromLeft: Int, direction: Int, fraction: Float) {
             view.offsetGlyphsForStepClockAnimation(fromLeft, direction, fraction)
         }
+
+        fun offsetGlyphsForStepClockAnimation(distance: Float, fraction: Float) {
+            view.offsetGlyphsForStepClockAnimation(distance, fraction)
+        }
     }
 
     inner class DefaultClockEvents : ClockEvents {
@@ -316,6 +320,8 @@ class DefaultClockController(
         }
 
         override fun onPositionUpdated(fromLeft: Int, direction: Int, fraction: Float) {}
+
+        override fun onPositionUpdated(distance: Float, fraction: Float) {}
     }
 
     inner class LargeClockAnimations(
@@ -325,6 +331,10 @@ class DefaultClockController(
     ) : DefaultClockAnimations(view, dozeFraction, foldFraction) {
         override fun onPositionUpdated(fromLeft: Int, direction: Int, fraction: Float) {
             largeClock.offsetGlyphsForStepClockAnimation(fromLeft, direction, fraction)
+        }
+
+        override fun onPositionUpdated(distance: Float, fraction: Float) {
+            largeClock.offsetGlyphsForStepClockAnimation(distance, fraction)
         }
     }
 

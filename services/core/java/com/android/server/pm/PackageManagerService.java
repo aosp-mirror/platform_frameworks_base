@@ -593,7 +593,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     static final char RANDOM_CODEPATH_PREFIX = '-';
 
     public static final String APP_METADATA_FILE_NAME = "app.metadata";
-    public static final String APP_METADATA_FILE_IN_APK_PATH = "assets/" + APP_METADATA_FILE_NAME;
 
     static final int DEFAULT_FILE_ACCESS_MODE = 0644;
 
@@ -5234,8 +5233,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             File file = new File(filePath);
             if (Flags.aslInApkAppMetadataSource() && !file.exists()
                     && ps.getAppMetadataSource() == APP_METADATA_SOURCE_APK) {
-                String apkPath = ps.getPkg().getSplits().get(0).getPath();
-                if (!PackageManagerServiceUtils.extractAppMetadataFromApk(apkPath, file)) {
+                AndroidPackageInternal pkg = ps.getPkg();
+                if (pkg == null) {
+                    Slog.w(TAG, "Unable to to extract app metadata for " + packageName
+                            + ". APK missing from device");
+                    return null;
+                }
+                if (!PackageManagerServiceUtils.extractAppMetadataFromApk(pkg, file)) {
                     if (file.exists()) {
                         file.delete();
                     }

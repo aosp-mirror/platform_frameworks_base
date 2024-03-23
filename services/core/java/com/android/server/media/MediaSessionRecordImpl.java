@@ -17,6 +17,7 @@
 package com.android.server.media;
 
 import android.app.ForegroundServiceDelegationOptions;
+import android.app.Notification;
 import android.media.AudioManager;
 import android.media.session.PlaybackState;
 import android.os.ResultReceiver;
@@ -152,6 +153,9 @@ public abstract class MediaSessionRecordImpl {
      * @return True if this media session can handle volume key events, false otherwise.
      */
     public abstract boolean canHandleVolumeKey();
+
+    /** Returns whether this session is linked to the passed notification. */
+    abstract boolean isLinkedToNotification(Notification notification);
 
     /**
      * Get session policies from custom policy provider set when MediaSessionRecord is instantiated.

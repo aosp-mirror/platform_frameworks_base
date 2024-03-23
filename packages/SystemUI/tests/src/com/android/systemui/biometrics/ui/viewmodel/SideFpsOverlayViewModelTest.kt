@@ -55,6 +55,7 @@ import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFingerprintAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryFingerprintAuthInteractor
 import com.android.systemui.display.data.repository.FakeDisplayRepository
 import com.android.systemui.keyguard.DismissCallbackRegistry
@@ -63,6 +64,8 @@ import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintA
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.domain.interactor.DeviceEntrySideFpsOverlayInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.viewmodel.SideFpsProgressBarViewModel
@@ -191,6 +194,9 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
                 biometricSettingsRepository,
                 FakeSystemClock(),
                 keyguardUpdateMonitor,
+                { mock(DeviceEntryFingerprintAuthInteractor::class.java) },
+                { mock(KeyguardInteractor::class.java) },
+                { mock(KeyguardTransitionInteractor::class.java) },
                 testScope.backgroundScope,
             )
 
