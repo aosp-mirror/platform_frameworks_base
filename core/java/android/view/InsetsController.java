@@ -737,15 +737,17 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
                 @Override
                 public void onIdMatch(InsetsSource source1, InsetsSource source2) {
-                    final @InsetsType int type = source1.getType();
-                    if ((type & Type.systemBars()) == 0
+                    final Rect frame1 = source1.getFrame();
+                    final Rect frame2 = source2.getFrame();
+                    if (!source1.hasFlags(InsetsSource.FLAG_ANIMATE_RESIZING)
+                            || !source2.hasFlags(InsetsSource.FLAG_ANIMATE_RESIZING)
                             || !source1.isVisible() || !source2.isVisible()
-                            || source1.getFrame().equals(source2.getFrame())
+                            || frame1.equals(frame2) || frame1.isEmpty() || frame2.isEmpty()
                             || !(Rect.intersects(mFrame, source1.getFrame())
                                     || Rect.intersects(mFrame, source2.getFrame()))) {
                         return;
                     }
-                    mTypes |= type;
+                    mTypes |= source1.getType();
                     if (mToState == null) {
                         mToState = new InsetsState();
                     }
@@ -877,7 +879,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             return false;
         }
         if (DEBUG) Log.d(TAG, "onStateChanged: " + state);
-        mLastDispatchedState.set(state, true /* copySources */);
 
         final InsetsState lastState = new InsetsState(mState, true /* copySources */);
         updateState(state);
@@ -888,10 +889,13 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 true /* excludesInvisibleIme */)) {
             if (DEBUG) Log.d(TAG, "onStateChanged, notifyInsetsChanged");
             mHost.notifyInsetsChanged();
-            if (lastState.getDisplayFrame().equals(mState.getDisplayFrame())) {
-                InsetsState.traverse(lastState, mState, mStartResizingAnimationIfNeeded);
+            if (mLastDispatchedState.getDisplayFrame().equals(state.getDisplayFrame())) {
+                // Here compares the raw states instead of the overridden ones because we don't want
+                // to animate an insets source that its mServerVisible is false.
+                InsetsState.traverse(mLastDispatchedState, state, mStartResizingAnimationIfNeeded);
             }
         }
+        mLastDispatchedState.set(state, true /* copySources */);
         return true;
     }
 

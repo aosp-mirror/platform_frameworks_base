@@ -98,7 +98,7 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"Aplikace <xliff:g id="APPNAME">%1$s</xliff:g> objevila tento snímek obrazovky."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> a ostatní otevřené aplikace objevily tento snímek obrazovky."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Přidat do poznámky"</string>
-    <string name="screenrecord_title" msgid="4257171601439507792">"Rekordér obrazovky"</string>
+    <string name="screenrecord_title" msgid="4257171601439507792">"Nahrávání obrazovky"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Záznam obrazovky se zpracovává"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Trvalé oznámení o relaci nahrávání"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Začít nahrávat?"</string>
@@ -288,7 +288,7 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Uživatel"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internet"</string>
-    <string name="quick_settings_networks_available" msgid="1875138606855420438">"Sítě jsou k dispozici"</string>
+    <string name="quick_settings_networks_available" msgid="1875138606855420438">"Sítě k dispozici"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Sítě nejsou k dispozici"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Žádné sítě Wi-Fi nejsou k dispozici"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"Zapínání…"</string>
@@ -338,7 +338,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC je vypnuto"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC je zapnuto"</string>
-    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Rekordér obrazovky"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Nahrávání obrazovky"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Spustit"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Ukončit"</string>
     <string name="qs_record_issue_label" msgid="8166290137285529059">"Zaznamenat problém"</string>

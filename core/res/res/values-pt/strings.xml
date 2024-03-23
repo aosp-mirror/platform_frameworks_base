@@ -1972,7 +1972,7 @@
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"Adicionar usuário supervisionado"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Adicionar um idioma"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Preferência de região"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"Digitar nome do idioma"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"Digite o nome do idioma"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Sugeridos"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Sugestões"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Idiomas sugeridos"</string>

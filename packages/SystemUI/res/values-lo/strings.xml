@@ -766,7 +766,7 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"ເປີດການຕັ້ງຄ່າ"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"ເຊື່ອມຕໍ່ຊຸດຫູຟັງແລ້ວ"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"ເຊື່ອມ​ຕໍ່ຊຸດ​ຫູ​ຟັງແລ້ວ"</string>
-    <string name="data_saver" msgid="3484013368530820763">"ຕົວປະຢັດອິນເຕີເນັດ"</string>
+    <string name="data_saver" msgid="3484013368530820763">"ຕົວປະຢັດຂໍ້ມູນ"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"ເປີດຕົວປະຢັດອິນເຕີເນັດຢູ່"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"ເປີດ"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"ປິດ"</string>
