@@ -1589,7 +1589,8 @@ public class VibratorManagerServiceTest {
         assertEquals(1f, ((PrimitiveSegment) segments.get(2)).getScale(), 1e-5);
         verify(mVibratorFrameworkStatsLoggerMock).logVibrationAdaptiveHapticScale(UID, 0.7f);
         verify(mVibratorFrameworkStatsLoggerMock).logVibrationAdaptiveHapticScale(UID, 0.4f);
-        verify(mVibratorFrameworkStatsLoggerMock).logVibrationAdaptiveHapticScale(UID, 1f);
+        verify(mVibratorFrameworkStatsLoggerMock,
+                timeout(TEST_TIMEOUT_MILLIS)).logVibrationAdaptiveHapticScale(UID, 1f);
     }
 
     @Test
