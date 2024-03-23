@@ -17,4 +17,7 @@
 package com.android.systemui.statusbar.notification.stack.shared.model
 
 /** Models the clipping rounded rectangle of the notification stack */
-data class ShadeScrimClipping(val bounds: ShadeScrimBounds, val rounding: ShadeScrimRounding)
+data class ShadeScrimClipping(
+    val bounds: ShadeScrimBounds = ShadeScrimBounds(),
+    val rounding: ShadeScrimRounding = ShadeScrimRounding()
+)
