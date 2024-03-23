@@ -20,17 +20,23 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardClockSwitch
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
 import com.android.systemui.keyguard.data.repository.keyguardClockRepository
 import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.plugins.clocks.ClockFaceConfig
+import com.android.systemui.plugins.clocks.ClockFaceController
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.testKosmos
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import org.mockito.Mockito.mock
 
 @SmallTest
 @RunWith(JUnit4::class)
@@ -98,4 +104,49 @@ class KeyguardClockViewModelWithKosmosTest : SysuiTestCase() {
             val currentClockLayout by collectLastValue(underTest.currentClockLayout)
             assertThat(currentClockLayout).isEqualTo(KeyguardClockViewModel.ClockLayout.LARGE_CLOCK)
         }
+
+    @Test
+    fun hasCustomPositionUpdatedAnimation_withConfigTrue_isTrue() =
+        testScope.runTest {
+            with(kosmos) {
+                keyguardClockRepository.setClockSize(KeyguardClockSwitch.LARGE)
+                fakeKeyguardClockRepository.setCurrentClock(
+                    buildClockController(hasCustomPositionUpdatedAnimation = true)
+                )
+            }
+
+            val hasCustomPositionUpdatedAnimation by
+                collectLastValue(underTest.hasCustomPositionUpdatedAnimation)
+            assertThat(hasCustomPositionUpdatedAnimation).isEqualTo(true)
+        }
+
+    @Test
+    fun hasCustomPositionUpdatedAnimation_withConfigFalse_isFalse() =
+        testScope.runTest {
+            with(kosmos) {
+                keyguardClockRepository.setClockSize(KeyguardClockSwitch.LARGE)
+                fakeKeyguardClockRepository.setCurrentClock(
+                    buildClockController(hasCustomPositionUpdatedAnimation = false)
+                )
+            }
+
+            val hasCustomPositionUpdatedAnimation by
+                collectLastValue(underTest.hasCustomPositionUpdatedAnimation)
+            assertThat(hasCustomPositionUpdatedAnimation).isEqualTo(false)
+        }
+
+    private fun buildClockController(
+        hasCustomPositionUpdatedAnimation: Boolean = false
+    ): ClockController {
+        val clockController = mock(ClockController::class.java)
+        val largeClock = mock(ClockFaceController::class.java)
+        val config = mock(ClockFaceConfig::class.java)
+
+        whenever(clockController.largeClock).thenReturn(largeClock)
+        whenever(largeClock.config).thenReturn(config)
+        whenever(config.hasCustomPositionUpdatedAnimation)
+            .thenReturn(hasCustomPositionUpdatedAnimation)
+
+        return clockController
+    }
 }

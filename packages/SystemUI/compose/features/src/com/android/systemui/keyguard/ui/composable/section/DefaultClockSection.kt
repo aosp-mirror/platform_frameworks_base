@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.composable.section
 
+import android.content.res.Resources
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -23,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -36,6 +38,8 @@ import com.android.systemui.customization.R as customizationR
 import com.android.systemui.customization.R
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockElementKeys.largeClockElementKey
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockElementKeys.smallClockElementKey
+import com.android.systemui.keyguard.ui.composable.blueprint.ClockScenes.largeClockScene
+import com.android.systemui.keyguard.ui.composable.blueprint.ClockScenes.splitShadeLargeClockScene
 import com.android.systemui.keyguard.ui.composable.modifier.burnInAware
 import com.android.systemui.keyguard.ui.composable.modifier.onTopPlacementChanged
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
@@ -95,6 +99,36 @@ constructor(
         if (currentClock?.largeClock?.view == null) {
             return
         }
+
+        // Centering animation for clocks that have custom position animations.
+        LaunchedEffect(layoutState.currentTransition?.progress) {
+            val transition = layoutState.currentTransition ?: return@LaunchedEffect
+            if (currentClock?.largeClock?.config?.hasCustomPositionUpdatedAnimation != true) {
+                return@LaunchedEffect
+            }
+
+            // If we are not doing the centering animation, do not animate.
+            val progress =
+                if (transition.isTransitioningBetween(largeClockScene, splitShadeLargeClockScene)) {
+                    transition.progress
+                } else {
+                    1f
+                }
+
+            val distance =
+                if (transition.toScene == splitShadeLargeClockScene) {
+                        -getClockCenteringDistance()
+                    } else {
+                        getClockCenteringDistance()
+                    }
+                    .toFloat()
+            val largeClock = checkNotNull(currentClock).largeClock
+            largeClock.animations.onPositionUpdated(
+                distance = distance,
+                fraction = progress,
+            )
+        }
+
         MovableElement(key = largeClockElementKey, modifier = modifier) {
             content {
                 AndroidView(
@@ -119,5 +153,9 @@ constructor(
         removeAllViews()
         (clockView.parent as? ViewGroup)?.removeView(clockView)
         addView(clockView)
+    }
+
+    fun getClockCenteringDistance(): Float {
+        return Resources.getSystem().displayMetrics.widthPixels / 4f
     }
 }

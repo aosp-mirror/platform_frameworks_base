@@ -517,29 +517,68 @@ class AnimatableClockView @JvmOverloads constructor(
         val currentMoveAmount = left - clockStartLeft
         val digitOffsetDirection = if (isLayoutRtl) -1 else 1
         for (i in 0 until NUM_DIGITS) {
-            // The delay for the digit, in terms of fraction (i.e. the digit should not move
-            // during 0.0 - 0.1).
-            val digitInitialDelay =
-                    if (isMovingToCenter) {
-                        moveToCenterDelays[i] * MOVE_DIGIT_STEP
-                    } else {
-                        moveToSideDelays[i] * MOVE_DIGIT_STEP
-                    }
             val digitFraction =
-                    MOVE_INTERPOLATOR.getInterpolation(
-                            constrainedMap(
-                                    0.0f,
-                                    1.0f,
-                                    digitInitialDelay,
-                                    digitInitialDelay + AVAILABLE_ANIMATION_TIME,
-                                    moveFraction
-                            )
-                    )
+                getDigitFraction(
+                    digit = i,
+                    isMovingToCenter = isMovingToCenter,
+                    fraction = moveFraction,
+                )
             val moveAmountForDigit = currentMoveAmount * digitFraction
             val moveAmountDeltaForDigit = moveAmountForDigit - currentMoveAmount
             glyphOffsets[i] = digitOffsetDirection * moveAmountDeltaForDigit
         }
         invalidate()
+    }
+
+    /**
+     * Offsets the glyphs of the clock for the step clock animation.
+     *
+     * The animation makes the glyphs of the clock move at different speeds, when the clock is
+     * moving horizontally. This method uses direction, distance, and fraction to determine offset.
+     *
+     * @param distance is the total distance in pixels to offset the glyphs when animation
+     *   completes. Negative distance means we are animating the position towards the center.
+     * @param fraction fraction of the clock movement. 0 means it is at the beginning, and 1
+     *   means it finished moving.
+     */
+    fun offsetGlyphsForStepClockAnimation(
+        distance: Float,
+        fraction: Float,
+    ) {
+        for (i in 0 until NUM_DIGITS) {
+            val dir = if (isLayoutRtl) -1 else 1
+            val digitFraction =
+                getDigitFraction(digit = i, isMovingToCenter = distance > 0, fraction = fraction)
+            val moveAmountForDigit = dir * distance * digitFraction
+            glyphOffsets[i] = moveAmountForDigit
+
+            if (distance > 0) {
+                // If distance > 0 then we are moving from the left towards the center.
+                // We need ensure that the glyphs are offset to the initial position.
+                glyphOffsets -= dir * distance
+            }
+        }
+        invalidate()
+    }
+
+    private fun getDigitFraction(digit: Int, isMovingToCenter: Boolean, fraction: Float): Float {
+        // The delay for the digit, in terms of fraction (i.e. the digit should not move
+        // during 0.0 - 0.1).
+        val digitInitialDelay =
+            if (isMovingToCenter) {
+                moveToCenterDelays[digit] * MOVE_DIGIT_STEP
+            } else {
+                moveToSideDelays[digit] * MOVE_DIGIT_STEP
+            }
+        return MOVE_INTERPOLATOR.getInterpolation(
+                constrainedMap(
+                    0.0f,
+                    1.0f,
+                    digitInitialDelay,
+                    digitInitialDelay + AVAILABLE_ANIMATION_TIME,
+                    fraction,
+                )
+            )
     }
 
     // DateFormat.getBestDateTimePattern is extremely expensive, and refresh is called often.
