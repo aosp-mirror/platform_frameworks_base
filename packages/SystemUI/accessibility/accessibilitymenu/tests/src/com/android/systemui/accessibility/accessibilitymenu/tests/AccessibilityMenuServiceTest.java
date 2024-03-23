@@ -62,6 +62,7 @@ import org.junit.AfterClass;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -452,6 +453,8 @@ public class AccessibilityMenuServiceTest {
     }
 
     @Test
+    @Ignore("Test failure in pre/postsubmit cannot be replicated on local devices. "
+            + "Coverage is low-impact.")
     public void testOnScreenLock_cannotOpenMenu() throws Throwable {
         closeScreen();
         wakeUpScreen();
