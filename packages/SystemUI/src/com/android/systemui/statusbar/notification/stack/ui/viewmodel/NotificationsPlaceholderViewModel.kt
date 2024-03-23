@@ -24,8 +24,8 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
-import com.android.systemui.statusbar.notification.stack.shared.model.StackBounds
-import com.android.systemui.statusbar.notification.stack.shared.model.StackRounding
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimRounding
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
@@ -66,20 +66,20 @@ constructor(
         keyguardInteractor.setNotificationContainerBounds(
             NotificationContainerBounds(top = top, bottom = bottom)
         )
-        interactor.setStackBounds(
-            StackBounds(top = top, bottom = bottom, left = left, right = right)
+        interactor.setShadeScrimBounds(
+            ShadeScrimBounds(top = top, bottom = bottom, left = left, right = right)
         )
     }
 
     /** Corner rounding of the stack */
-    val stackRounding: Flow<StackRounding> = interactor.stackRounding
+    val shadeScrimRounding: Flow<ShadeScrimRounding> = interactor.shadeScrimRounding
 
     /**
      * The height in px of the contents of notification stack. Depending on the number of
      * notifications, this can exceed the space available on screen to show notifications, at which
      * point the notification stack should become scrollable.
      */
-    val intrinsicContentHeight = interactor.intrinsicContentHeight
+    val stackHeight = interactor.stackHeight
 
     /**
      * The amount [0-1] that the shade has been opened. At 0, the shade is closed; at 1, the shade
@@ -96,7 +96,7 @@ constructor(
 
     /** Sets the y-coord in px of the top of the contents of the notification stack. */
     fun onContentTopChanged(padding: Float) {
-        interactor.setContentTop(padding)
+        interactor.setStackTop(padding)
     }
 
     /** Sets whether the notification stack is scrolled to the top. */

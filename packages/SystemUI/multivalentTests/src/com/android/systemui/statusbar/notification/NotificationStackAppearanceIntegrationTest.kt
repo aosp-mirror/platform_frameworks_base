@@ -30,7 +30,7 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
-import com.android.systemui.statusbar.notification.stack.shared.model.StackBounds
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationStackAppearanceViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.testKosmos
@@ -64,7 +64,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
     @Test
     fun updateBounds() =
         testScope.runTest {
-            val clipping by collectLastValue(appearanceViewModel.stackClipping)
+            val clipping by collectLastValue(appearanceViewModel.shadeScrimClipping)
 
             val top = 200f
             val left = 0f
@@ -77,7 +77,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
                 bottom = bottom
             )
             assertThat(clipping?.bounds)
-                .isEqualTo(StackBounds(left = left, top = top, right = right, bottom = bottom))
+                .isEqualTo(ShadeScrimBounds(left = left, top = top, right = right, bottom = bottom))
         }
 
     @Test

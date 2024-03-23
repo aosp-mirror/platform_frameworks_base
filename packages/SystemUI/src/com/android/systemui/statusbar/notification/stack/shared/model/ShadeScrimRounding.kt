@@ -16,5 +16,10 @@
 
 package com.android.systemui.statusbar.notification.stack.shared.model
 
-/** Models the clipping rounded rectangle of the notification stack */
-data class StackClipping(val bounds: StackBounds, val rounding: StackRounding)
+/** Models the corner rounds of the notification stack. */
+data class ShadeScrimRounding(
+    /** Whether the top corners of the notification stack should be rounded. */
+    val roundTop: Boolean = false,
+    /** Whether the bottom corners of the notification stack should be rounded. */
+    val roundBottom: Boolean = false,
+)

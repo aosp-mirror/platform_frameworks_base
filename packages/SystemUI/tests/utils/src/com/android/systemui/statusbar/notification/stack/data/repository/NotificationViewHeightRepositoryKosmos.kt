@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.stack.shared.model
+package com.android.systemui.statusbar.notification.stack.data.repository
 
-/** Models the corner rounds of the notification stack. */
-data class StackRounding(
-    /** Whether the top corners of the notification stack should be rounded. */
-    val roundTop: Boolean = false,
-    /** Whether the bottom corners of the notification stack should be rounded. */
-    val roundBottom: Boolean = false,
-)
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
+
+val Kosmos.notificationViewHeightRepository by Fixture { NotificationViewHeightRepository() }

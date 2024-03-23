@@ -1178,7 +1178,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     /** Get the y-coordinate of the top bound of the stack. */
     public float getPlaceholderTop() {
-        return mStackAppearanceInteractor.getStackBounds().getValue().getTop();
+        return mStackAppearanceInteractor.getShadeScrimBounds().getValue().getTop();
     }
 
     /**
@@ -1191,7 +1191,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     /** Set the intrinsic height of the stack content without additional padding. */
     public void setIntrinsicContentHeight(float intrinsicContentHeight) {
-        mStackAppearanceInteractor.setIntrinsicContentHeight(intrinsicContentHeight);
+        mStackAppearanceInteractor.setStackHeight(intrinsicContentHeight);
     }
 
     public void setIntrinsicPadding(int intrinsicPadding) {

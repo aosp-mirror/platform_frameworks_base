@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.notification.stack.shared.model
 
 /** Models the bounds of the notification stack. */
-data class StackBounds(
+data class ShadeScrimBounds(
     /** The position of the left of the stack in its window coordinate system, in pixels. */
     val left: Float = 0f,
     /** The position of the top of the stack in its window coordinate system, in pixels. */
