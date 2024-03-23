@@ -31,6 +31,7 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFingerprintAuthInteractor
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
@@ -108,6 +109,9 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
                 biometricSettingsRepository,
                 FakeSystemClock(),
                 keyguardUpdateMonitor,
+                { mock(DeviceEntryFingerprintAuthInteractor::class.java) },
+                { mock(KeyguardInteractor::class.java) },
+                { mock(KeyguardTransitionInteractor::class.java) },
                 testScope.backgroundScope,
             )
         underTest =

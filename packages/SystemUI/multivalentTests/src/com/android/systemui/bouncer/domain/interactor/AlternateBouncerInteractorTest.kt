@@ -24,14 +24,18 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepositoryImpl
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFingerprintAuthInteractor
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.util.time.SystemClock
+import dagger.Lazy
 import kotlinx.coroutines.test.TestScope
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -39,6 +43,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -81,8 +86,17 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
                 biometricSettingsRepository,
                 systemClock,
                 keyguardUpdateMonitor,
+                Lazy { mock(DeviceEntryFingerprintAuthInteractor::class.java) },
+                Lazy { mock(KeyguardInteractor::class.java) },
+                Lazy { mock(KeyguardTransitionInteractor::class.java) },
                 TestScope().backgroundScope,
             )
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun enableUdfpsRefactor_deprecatedShowMethod_throwsIllegalStateException() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
+        underTest.show()
     }
 
     @Test
