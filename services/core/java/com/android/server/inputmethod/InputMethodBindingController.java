@@ -74,6 +74,7 @@ final class InputMethodBindingController {
     @GuardedBy("ImfLock.class") @Nullable private IInputMethodInvoker mCurMethod;
     @GuardedBy("ImfLock.class") private int mCurMethodUid = Process.INVALID_UID;
     @GuardedBy("ImfLock.class") @Nullable private IBinder mCurToken;
+    @GuardedBy("ImfLock.class") private int mCurSeq;
     @GuardedBy("ImfLock.class") private boolean mVisibleBound;
     @GuardedBy("ImfLock.class") private boolean mSupportsStylusHw;
     @GuardedBy("ImfLock.class") private boolean mSupportsConnectionlessStylusHw;
@@ -191,6 +192,27 @@ final class InputMethodBindingController {
     @Nullable
     Intent getCurIntent() {
         return mCurIntent;
+    }
+
+    /**
+     * The current binding sequence number, incremented every time there is
+     * a new bind performed.
+     */
+    @GuardedBy("ImfLock.class")
+    int getSequenceNumber() {
+        return mCurSeq;
+    }
+
+    /**
+     * Increase the current binding sequence number by one.
+     * Reset to 1 on overflow.
+     */
+    @GuardedBy("ImfLock.class")
+    void advanceSequenceNumber() {
+        mCurSeq += 1;
+        if (mCurSeq <= 0) {
+            mCurSeq = 1;
+        }
     }
 
     /**
@@ -413,11 +435,9 @@ final class InputMethodBindingController {
             mLastBindTime = SystemClock.uptimeMillis();
 
             addFreshWindowToken();
-            final UserData monitor = UserData.getOrCreate(
-                    mService.getCurrentImeUserIdLocked());
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
-                    null, null, null, mCurId, monitor.mSequence.getSequenceNumber(), false);
+                    null, null, null, mCurId, mCurSeq, false);
         }
 
         Slog.w(InputMethodManagerService.TAG,
