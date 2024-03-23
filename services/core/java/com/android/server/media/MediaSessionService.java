@@ -32,6 +32,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ForegroundServiceDelegationOptions;
 import android.app.KeyguardManager;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.usage.UsageStatsManager;
@@ -81,6 +82,8 @@ import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.service.notification.NotificationListenerService;
+import android.service.notification.StatusBarNotification;
 import android.speech.RecognizerIntent;
 import android.text.TextUtils;
 import android.util.Log;
@@ -105,6 +108,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -136,9 +140,9 @@ public class MediaSessionService extends SystemService implements Monitor {
     /**
      * Action reported to UsageStatsManager when a media session is no longer active and user
      * engaged for a given app. If media session only pauses for a brief time the event will not
-     * necessarily be reported in case user is still "engaging" and will restart it momentarily.
+     * necessarily be reported in case user is still "engaged" and will restart it momentarily.
      * In such case, action may be reported after a short delay to ensure user is truly no longer
-     * engaging. Afterwards, the app is no longer expected to show an ongoing notification.
+     * engaged. Afterwards, the app is no longer expected to show an ongoing notification.
      */
     private static final String USAGE_STATS_ACTION_STOP = "stop";
     private static final String USAGE_STATS_CATEGORY = "android.media";
@@ -164,13 +168,34 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     private KeyguardManager mKeyguardManager;
     private AudioManager mAudioManager;
+    private NotificationListener mNotificationListener;
     private boolean mHasFeatureLeanback;
     private ActivityManagerInternal mActivityManagerInternal;
     private UsageStatsManagerInternal mUsageStatsManagerInternal;
 
-    /* Maps uid with all user engaging session tokens associated to it */
-    private final SparseArray<Set<MediaSessionRecordImpl>> mUserEngagingSessions =
+    /**
+     * Maps uid with all user engaged session records associated to it. It's used for logging start
+     * and stop events to UsageStatsManagerInternal. This collection contains MediaSessionRecord(s)
+     * and MediaSession2Record(s).
+     * When the media session is paused, the stop event is being logged immediately unlike fgs which
+     * waits for a certain timeout before considering it disengaged.
+     */
+    private final SparseArray<Set<MediaSessionRecordImpl>> mUserEngagedSessionsForUsageLogging =
             new SparseArray<>();
+
+    /**
+     * Maps uid with all user engaged session records associated to it. It's used for calling
+     * ActivityManagerInternal startFGS and stopFGS. This collection doesn't contain
+     * MediaSession2Record(s). When the media session is paused, There exists a timeout before
+     * calling stopFGS unlike usage logging which considers it disengaged immediately.
+     */
+    @GuardedBy("mLock")
+    private final Map<Integer, Set<MediaSessionRecordImpl>> mUserEngagedSessionsForFgs =
+            new HashMap<>();
+
+    /* Maps uid with all media notifications associated to it */
+    @GuardedBy("mLock")
+    private final Map<Integer, Set<Notification>> mMediaNotifications = new HashMap<>();
 
     // The FullUserRecord of the current users. (i.e. The foreground user that isn't a profile)
     // It's always not null after the MediaSessionService is started.
@@ -228,6 +253,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         mMediaEventWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "handleMediaEvent");
         mNotificationManager = mContext.getSystemService(NotificationManager.class);
         mAudioManager = mContext.getSystemService(AudioManager.class);
+        mNotificationListener = new NotificationListener();
     }
 
     @Override
@@ -283,6 +309,16 @@ public class MediaSessionService extends SystemService implements Monitor {
                 mCommunicationManager = mContext.getSystemService(MediaCommunicationManager.class);
                 mCommunicationManager.registerSessionCallback(new HandlerExecutor(mHandler),
                         mSession2TokenCallback);
+                if (Flags.enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
+                    try {
+                        mNotificationListener.registerAsSystemService(
+                                mContext,
+                                new ComponentName(mContext, NotificationListener.class),
+                                UserHandle.USER_ALL);
+                    } catch (RemoteException e) {
+                        // Intra-process call, should never happen.
+                    }
+                }
                 break;
             case PHASE_ACTIVITY_MANAGER_READY:
                 MediaSessionDeviceConfig.initialize(mContext);
@@ -630,11 +666,52 @@ public class MediaSessionService extends SystemService implements Monitor {
             return;
         }
         if (allowRunningInForeground) {
-            mActivityManagerInternal.startForegroundServiceDelegate(
-                    foregroundServiceDelegationOptions, /* connection= */ null);
+            onUserSessionEngaged(record);
         } else {
-            mActivityManagerInternal.stopForegroundServiceDelegate(
-                    foregroundServiceDelegationOptions);
+            onUserDisengaged(record);
+        }
+    }
+
+    private void onUserSessionEngaged(MediaSessionRecordImpl mediaSessionRecord) {
+        synchronized (mLock) {
+            int uid = mediaSessionRecord.getUid();
+            mUserEngagedSessionsForFgs.putIfAbsent(uid, new HashSet<>());
+            mUserEngagedSessionsForFgs.get(uid).add(mediaSessionRecord);
+            for (Notification mediaNotification : mMediaNotifications.getOrDefault(uid, Set.of())) {
+                if (mediaSessionRecord.isLinkedToNotification(mediaNotification)) {
+                    mActivityManagerInternal.startForegroundServiceDelegate(
+                            mediaSessionRecord.getForegroundServiceDelegationOptions(),
+                            /* connection= */ null);
+                    return;
+                }
+            }
+        }
+    }
+
+    private void onUserDisengaged(MediaSessionRecordImpl mediaSessionRecord) {
+        synchronized (mLock) {
+            int uid = mediaSessionRecord.getUid();
+            if (mUserEngagedSessionsForFgs.containsKey(uid)) {
+                mUserEngagedSessionsForFgs.get(uid).remove(mediaSessionRecord);
+                if (mUserEngagedSessionsForFgs.get(uid).isEmpty()) {
+                    mUserEngagedSessionsForFgs.remove(uid);
+                }
+            }
+
+            boolean shouldStopFgs = true;
+            for (MediaSessionRecordImpl sessionRecord :
+                    mUserEngagedSessionsForFgs.getOrDefault(uid, Set.of())) {
+                for (Notification mediaNotification : mMediaNotifications.getOrDefault(uid,
+                        Set.of())) {
+                    if (sessionRecord.isLinkedToNotification(mediaNotification)) {
+                        shouldStopFgs = false;
+                    }
+                }
+            }
+            if (shouldStopFgs) {
+                mActivityManagerInternal.stopForegroundServiceDelegate(
+                        mediaSessionRecord.getForegroundServiceDelegationOptions());
+            }
         }
     }
 
@@ -646,18 +723,18 @@ public class MediaSessionService extends SystemService implements Monitor {
         String packageName = record.getPackageName();
         int sessionUid = record.getUid();
         if (userEngaged) {
-            if (!mUserEngagingSessions.contains(sessionUid)) {
-                mUserEngagingSessions.put(sessionUid, new HashSet<>());
+            if (!mUserEngagedSessionsForUsageLogging.contains(sessionUid)) {
+                mUserEngagedSessionsForUsageLogging.put(sessionUid, new HashSet<>());
                 reportUserInteractionEvent(
-                    USAGE_STATS_ACTION_START, record.getUserId(), packageName);
+                        USAGE_STATS_ACTION_START, record.getUserId(), packageName);
             }
-            mUserEngagingSessions.get(sessionUid).add(record);
-        } else if (mUserEngagingSessions.contains(sessionUid)) {
-            mUserEngagingSessions.get(sessionUid).remove(record);
-            if (mUserEngagingSessions.get(sessionUid).isEmpty()) {
+            mUserEngagedSessionsForUsageLogging.get(sessionUid).add(record);
+        } else if (mUserEngagedSessionsForUsageLogging.contains(sessionUid)) {
+            mUserEngagedSessionsForUsageLogging.get(sessionUid).remove(record);
+            if (mUserEngagedSessionsForUsageLogging.get(sessionUid).isEmpty()) {
                 reportUserInteractionEvent(
-                    USAGE_STATS_ACTION_STOP, record.getUserId(), packageName);
-                mUserEngagingSessions.remove(sessionUid);
+                        USAGE_STATS_ACTION_STOP, record.getUserId(), packageName);
+                mUserEngagedSessionsForUsageLogging.remove(sessionUid);
             }
         }
     }
@@ -3041,6 +3118,90 @@ public class MediaSessionService extends SystemService implements Monitor {
                     ? MSG_SESSIONS_1_CHANGED : MSG_SESSIONS_2_CHANGED;
             removeMessages(msg, userIdInteger);
             obtainMessage(msg, userIdInteger).sendToTarget();
+        }
+    }
+
+    private final class NotificationListener extends NotificationListenerService {
+        @Override
+        public void onNotificationPosted(StatusBarNotification sbn) {
+            super.onNotificationPosted(sbn);
+            Notification postedNotification = sbn.getNotification();
+            int uid = sbn.getUid();
+
+            if (!postedNotification.isMediaNotification()) {
+                return;
+            }
+            synchronized (mLock) {
+                mMediaNotifications.putIfAbsent(uid, new HashSet<>());
+                mMediaNotifications.get(uid).add(postedNotification);
+                for (MediaSessionRecordImpl mediaSessionRecord :
+                        mUserEngagedSessionsForFgs.getOrDefault(uid, Set.of())) {
+                    ForegroundServiceDelegationOptions foregroundServiceDelegationOptions =
+                            mediaSessionRecord.getForegroundServiceDelegationOptions();
+                    if (mediaSessionRecord.isLinkedToNotification(postedNotification)
+                            && foregroundServiceDelegationOptions != null) {
+                        mActivityManagerInternal.startForegroundServiceDelegate(
+                                foregroundServiceDelegationOptions,
+                                /* connection= */ null);
+                        return;
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onNotificationRemoved(StatusBarNotification sbn) {
+            super.onNotificationRemoved(sbn);
+            Notification removedNotification = sbn.getNotification();
+            int uid = sbn.getUid();
+            if (!removedNotification.isMediaNotification()) {
+                return;
+            }
+            synchronized (mLock) {
+                Set<Notification> uidMediaNotifications = mMediaNotifications.get(uid);
+                if (uidMediaNotifications != null) {
+                    uidMediaNotifications.remove(removedNotification);
+                    if (uidMediaNotifications.isEmpty()) {
+                        mMediaNotifications.remove(uid);
+                    }
+                }
+
+                MediaSessionRecordImpl notificationRecord =
+                        getLinkedMediaSessionRecord(uid, removedNotification);
+
+                if (notificationRecord == null) {
+                    return;
+                }
+
+                boolean shouldStopFgs = true;
+                for (MediaSessionRecordImpl mediaSessionRecord :
+                        mUserEngagedSessionsForFgs.getOrDefault(uid, Set.of())) {
+                    for (Notification mediaNotification :
+                            mMediaNotifications.getOrDefault(uid, Set.of())) {
+                        if (mediaSessionRecord.isLinkedToNotification(mediaNotification)) {
+                            shouldStopFgs = false;
+                        }
+                    }
+                }
+                if (shouldStopFgs
+                        && notificationRecord.getForegroundServiceDelegationOptions() != null) {
+                    mActivityManagerInternal.stopForegroundServiceDelegate(
+                            notificationRecord.getForegroundServiceDelegationOptions());
+                }
+            }
+        }
+
+        private MediaSessionRecordImpl getLinkedMediaSessionRecord(
+                int uid, Notification notification) {
+            synchronized (mLock) {
+                for (MediaSessionRecordImpl mediaSessionRecord :
+                        mUserEngagedSessionsForFgs.getOrDefault(uid, Set.of())) {
+                    if (mediaSessionRecord.isLinkedToNotification(notification)) {
+                        return mediaSessionRecord;
+                    }
+                }
+            }
+            return null;
         }
     }
 }
