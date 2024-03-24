@@ -38,7 +38,7 @@ class CredentialSelectorActivity : Hilt_CredentialSelectorActivity() {
         setContent {
             MaterialTheme {
                 WearApp(
-                    viewModel = viewModel,
+                    flowEngine = viewModel,
                     onCloseApp = { finish() },
                 )
             }
