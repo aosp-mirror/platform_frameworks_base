@@ -19,6 +19,7 @@ package com.android.systemui.dagger;
 import android.content.BroadcastReceiver;
 
 import com.android.systemui.GuestResetOrExitSessionReceiver;
+import com.android.systemui.accessibility.hearingaid.HearingDevicesDialogReceiver;
 import com.android.systemui.media.dialog.MediaOutputDialogReceiver;
 import com.android.systemui.people.widget.PeopleSpaceWidgetPinnedReceiver;
 import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
@@ -88,4 +89,13 @@ public abstract class DefaultBroadcastReceiverBinder {
     @ClassKey(GuestResetOrExitSessionReceiver.class)
     public abstract BroadcastReceiver bindGuestResetOrExitSessionReceiver(
             GuestResetOrExitSessionReceiver broadcastReceiver);
+
+    /**
+     *
+     */
+    @Binds
+    @IntoMap
+    @ClassKey(HearingDevicesDialogReceiver.class)
+    public abstract BroadcastReceiver bindHearingDevicesDialogReceiver(
+            HearingDevicesDialogReceiver broadcastReceiver);
 }

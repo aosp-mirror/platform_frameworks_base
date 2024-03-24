@@ -25,6 +25,7 @@ import static android.view.accessibility.Flags.FLAG_SKIP_ACCESSIBILITY_WARNING_D
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
+import static com.android.server.accessibility.AccessibilityManagerService.ACTION_LAUNCH_HEARING_DEVICES_DIALOG;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -771,6 +772,7 @@ public class AccessibilityManagerServiceTest {
 
     @SmallTest
     @Test
+    @RequiresFlagsDisabled(com.android.systemui.Flags.FLAG_HEARING_AIDS_QS_TILE_DIALOG)
     public void testPerformAccessibilityShortcut_hearingAids_startActivityWithExpectedComponent() {
         final AccessibilityUserState userState = mA11yms.mUserStates.get(
                 mA11yms.getCurrentUserIdLocked());
@@ -784,6 +786,27 @@ public class AccessibilityManagerServiceTest {
 
         assertStartActivityWithExpectedComponentName(mTestableContext.getMockContext(),
                 ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
+    }
+
+    @SmallTest
+    @Test
+    @RequiresFlagsEnabled(com.android.systemui.Flags.FLAG_HEARING_AIDS_QS_TILE_DIALOG)
+    public void testPerformAccessibilityShortcut_hearingAids_sendExpectedBroadcast() {
+        final AccessibilityUserState userState = mA11yms.mUserStates.get(
+                mA11yms.getCurrentUserIdLocked());
+        mockManageAccessibilityGranted(mTestableContext);
+        userState.mAccessibilityShortcutKeyTargets.add(
+                ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
+
+        mA11yms.performAccessibilityShortcut(
+                ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
+        mTestableLooper.processAllMessages();
+
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(mTestableContext.getMockContext()).sendBroadcastAsUser(intentCaptor.capture(),
+                eq(UserHandle.SYSTEM));
+        assertThat(intentCaptor.getValue().getAction()).isEqualTo(
+                ACTION_LAUNCH_HEARING_DEVICES_DIALOG);
     }
 
     @Test
@@ -1615,6 +1638,11 @@ public class AccessibilityManagerServiceTest {
         @Override
         public void startActivityAsUser(Intent intent, Bundle options, UserHandle user) {
             mMockContext.startActivityAsUser(intent, options, user);
+        }
+
+        @Override
+        public void sendBroadcastAsUser(Intent intent, UserHandle user) {
+            mMockContext.sendBroadcastAsUser(intent, user);
         }
 
         @Override
