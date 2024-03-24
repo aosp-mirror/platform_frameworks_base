@@ -2685,8 +2685,7 @@ public class AppOpsManager {
             .setDefaultMode(getSystemAlertWindowDefault()).build(),
         new AppOpInfo.Builder(OP_ACCESS_NOTIFICATIONS, OPSTR_ACCESS_NOTIFICATIONS,
                 "ACCESS_NOTIFICATIONS")
-            .setPermission(android.Manifest.permission.ACCESS_NOTIFICATIONS)
-            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+            .setPermission(android.Manifest.permission.ACCESS_NOTIFICATIONS).build(),
         new AppOpInfo.Builder(OP_CAMERA, OPSTR_CAMERA, "CAMERA")
             .setPermission(android.Manifest.permission.CAMERA)
             .setRestriction(UserManager.DISALLOW_CAMERA)
