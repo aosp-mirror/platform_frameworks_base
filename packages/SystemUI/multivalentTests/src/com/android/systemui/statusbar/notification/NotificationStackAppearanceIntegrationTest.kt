@@ -70,7 +70,12 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
             val viewPosition = MutableStateFlow(ViewPosition(0, 0))
             val shape by collectLastValue(appearanceViewModel.shadeScrimShape(radius, viewPosition))
 
-            placeholderViewModel.onBoundsChanged(left = 0f, top = 200f, right = 100f, bottom = 550f)
+            placeholderViewModel.onScrimBoundsChanged(
+                left = 0f,
+                top = 200f,
+                right = 100f,
+                bottom = 550f
+            )
             assertThat(shape)
                 .isEqualTo(
                     ShadeScrimShape(
@@ -83,7 +88,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
 
             viewPosition.value = ViewPosition(200, 15)
             radius.value = 24
-            placeholderViewModel.onBoundsChanged(
+            placeholderViewModel.onScrimBoundsChanged(
                 left = 210f,
                 top = 200f,
                 right = 300f,

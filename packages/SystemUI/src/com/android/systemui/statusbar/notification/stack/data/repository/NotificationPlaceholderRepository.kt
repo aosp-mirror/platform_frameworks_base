@@ -44,7 +44,7 @@ class NotificationPlaceholderRepository @Inject constructor() {
     val headsUpTop = MutableStateFlow(0f)
 
     /** height made available to the notifications in the size-constrained mode of lock screen. */
-    val constrainedAvailableSpace = MutableStateFlow(0f)
+    val constrainedAvailableSpace = MutableStateFlow(0)
 
     /**
      * Whether the notification stack is scrolled to the top; i.e., it cannot be scrolled down any

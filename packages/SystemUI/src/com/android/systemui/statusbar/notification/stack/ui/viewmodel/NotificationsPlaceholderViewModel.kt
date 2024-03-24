@@ -49,26 +49,33 @@ constructor(
     /** DEBUG: whether the debug logging should be output. */
     val isDebugLoggingEnabled: Boolean = flags.isEnabled()
 
-    /**
-     * Notifies that the bounds of the notification placeholder have changed.
-     *
-     * @param top The position of the top of the container in its window coordinate system, in
-     *   pixels.
-     * @param bottom The position of the bottom of the container in its window coordinate system, in
-     *   pixels.
-     */
-    fun onBoundsChanged(
+    /** Notifies that the bounds of the notification scrim have changed. */
+    fun onScrimBoundsChanged(
         left: Float,
         top: Float,
         right: Float,
         bottom: Float,
     ) {
-        keyguardInteractor.setNotificationContainerBounds(
-            NotificationContainerBounds(top = top, bottom = bottom)
-        )
         interactor.setShadeScrimBounds(
             ShadeScrimBounds(top = top, bottom = bottom, left = left, right = right)
         )
+    }
+
+    /** Notifies that the bounds of the notification placeholder have changed. */
+    fun onStackBoundsChanged(
+        top: Float,
+        bottom: Float,
+    ) {
+        keyguardInteractor.setNotificationContainerBounds(
+            NotificationContainerBounds(top = top, bottom = bottom)
+        )
+        interactor.setStackTop(top)
+        interactor.setStackBottom(bottom)
+    }
+
+    /** Sets the available space */
+    fun onConstrainedAvailableSpaceChanged(height: Int) {
+        interactor.setConstrainedAvailableSpace(height)
     }
 
     /** Corner rounding of the stack */
@@ -93,11 +100,6 @@ constructor(
      * necessary to scroll up to keep expanding the notification.
      */
     val syntheticScroll: Flow<Float> = interactor.syntheticScroll
-
-    /** Sets the y-coord in px of the top of the contents of the notification stack. */
-    fun onContentTopChanged(padding: Float) {
-        interactor.setStackTop(padding)
-    }
 
     /** Sets whether the notification stack is scrolled to the top. */
     fun setScrolledToTop(scrolledToTop: Boolean) {

@@ -118,15 +118,20 @@ fun SceneScope.HeadsUpNotificationSpace(
 
 /** Adds the space where notification stack should appear in the scene. */
 @Composable
-fun SceneScope.NotificationStack(
+fun SceneScope.ConstrainedNotificationStack(
     viewModel: NotificationsPlaceholderViewModel,
     modifier: Modifier = Modifier,
 ) {
-    NotificationPlaceholder(
-        viewModel = viewModel,
-        form = Form.Stack,
-        modifier = modifier,
-    )
+    Box(
+        modifier =
+            modifier.onSizeChanged { viewModel.onConstrainedAvailableSpaceChanged(it.height) }
+    ) {
+        NotificationPlaceholder(
+            viewModel = viewModel,
+            form = Form.Stack,
+            modifier = Modifier.fillMaxSize(),
+        )
+    }
 }
 
 /**
@@ -235,6 +240,20 @@ fun SceneScope.NotificationScrollingStack(
                             .let { scrimRounding.value.toRoundedCornerShape(it) }
                     clip = true
                 }
+                .onGloballyPositioned { coordinates ->
+                    val boundsInWindow = coordinates.boundsInWindow()
+                    debugLog(viewModel) {
+                        "SCRIM onGloballyPositioned:" +
+                            " size=${coordinates.size}" +
+                            " bounds=$boundsInWindow"
+                    }
+                    viewModel.onScrimBoundsChanged(
+                        left = boundsInWindow.left,
+                        top = boundsInWindow.top,
+                        right = boundsInWindow.right,
+                        bottom = boundsInWindow.bottom,
+                    )
+                }
     ) {
         // Creates a cutout in the background scrim in the shape of the notifications scrim.
         // Only visible when notif scrim alpha < 1, during shade expansion.
@@ -311,7 +330,6 @@ fun SceneScope.NotificationShelfSpace(
                 debugLog(viewModel) {
                     ("SHELF onPlaced:" +
                         " size=${coordinates.size}" +
-                        " position=${coordinates.positionInWindow()}" +
                         " bounds=${coordinates.boundsInWindow()}")
                 }
             }
@@ -339,19 +357,17 @@ private fun SceneScope.NotificationPlaceholder(
                     debugLog(viewModel) { "STACK onSizeChanged: size=$size" }
                 }
                 .onGloballyPositioned { coordinates: LayoutCoordinates ->
-                    viewModel.onContentTopChanged(coordinates.positionInWindow().y)
+                    val positionInWindow = coordinates.positionInWindow()
                     debugLog(viewModel) {
                         "STACK onGloballyPositioned:" +
                             " size=${coordinates.size}" +
-                            " position=${coordinates.positionInWindow()}" +
+                            " position=$positionInWindow" +
                             " bounds=${coordinates.boundsInWindow()}"
                     }
-                    val boundsInWindow = coordinates.boundsInWindow()
-                    viewModel.onBoundsChanged(
-                        left = boundsInWindow.left,
-                        top = boundsInWindow.top,
-                        right = boundsInWindow.right,
-                        bottom = boundsInWindow.bottom,
+                    // NOTE: positionInWindow.y scrolls off screen, but boundsInWindow.top will not
+                    viewModel.onStackBoundsChanged(
+                        top = positionInWindow.y,
+                        bottom = positionInWindow.y + coordinates.size.height,
                     )
                 }
     ) {

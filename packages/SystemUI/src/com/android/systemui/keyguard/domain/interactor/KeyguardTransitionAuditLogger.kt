@@ -21,6 +21,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.core.LogLevel.VERBOSE
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
 import javax.inject.Inject
@@ -69,9 +70,11 @@ constructor(
             }
         }
 
-        scope.launch {
-            sharedNotificationContainerViewModel.bounds.collect {
-                logger.log(TAG, VERBOSE, "Notif: bounds", it)
+        if (!SceneContainerFlag.isEnabled) {
+            scope.launch {
+                sharedNotificationContainerViewModel.bounds.collect {
+                    logger.log(TAG, VERBOSE, "Notif: bounds", it)
+                }
             }
         }
 

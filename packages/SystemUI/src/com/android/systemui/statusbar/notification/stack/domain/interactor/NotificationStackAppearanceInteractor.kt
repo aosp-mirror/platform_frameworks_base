@@ -78,6 +78,10 @@ constructor(
     /** The y-coordinate in px of bottom of the contents of the notification stack. */
     val stackBottom: StateFlow<Float> = placeholderRepository.stackBottom.asStateFlow()
 
+    /** The height of the keyguard's available space bounds */
+    val constrainedAvailableSpace: StateFlow<Int> =
+        placeholderRepository.constrainedAvailableSpace.asStateFlow()
+
     /**
      * Whether the notification stack is scrolled to the top; i.e., it cannot be scrolled down any
      * further.
@@ -115,6 +119,11 @@ constructor(
         placeholderRepository.stackTop.value = startY
     }
 
+    /** Sets the y-coord in px of the bottom of the contents of the notification stack. */
+    fun setStackBottom(endY: Float) {
+        placeholderRepository.stackBottom.value = endY
+    }
+
     /** Sets whether the notification stack is scrolled to the top. */
     fun setScrolledToTop(scrolledToTop: Boolean) {
         placeholderRepository.scrolledToTop.value = scrolledToTop
@@ -123,5 +132,9 @@ constructor(
     /** Sets the amount (px) that the notification stack should scroll due to internal expansion. */
     fun setSyntheticScroll(delta: Float) {
         viewHeightRepository.syntheticScroll.value = delta
+    }
+
+    fun setConstrainedAvailableSpace(height: Int) {
+        placeholderRepository.constrainedAvailableSpace.value = height
     }
 }

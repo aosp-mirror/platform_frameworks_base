@@ -1371,6 +1371,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     @Override
     public float calculateNotificationsTopPadding(boolean isShadeExpanding,
             int keyguardNotificationStaticPadding, float expandedFraction) {
+        SceneContainerFlag.assertInLegacyMode();
         float topPadding;
         boolean keyguardShowing = mBarState == KEYGUARD;
         if (mSplitShadeEnabled) {

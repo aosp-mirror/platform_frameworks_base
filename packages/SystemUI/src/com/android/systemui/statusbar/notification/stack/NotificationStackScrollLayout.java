@@ -858,7 +858,8 @@ public class NotificationStackScrollLayout
         drawDebugInfo(canvas, y, Color.MAGENTA,
                 /* label= */ "mContentHeight = " + y);
 
-        drawDebugInfo(canvas, mRoundedRectClippingBottom, Color.DKGRAY,
+        y = mRoundedRectClippingBottom;
+        drawDebugInfo(canvas, y, Color.DKGRAY,
                 /* label= */ "mRoundedRectClippingBottom) = " + y);
     }
 

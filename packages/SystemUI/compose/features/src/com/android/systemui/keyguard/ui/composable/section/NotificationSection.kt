@@ -33,7 +33,7 @@ import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
-import com.android.systemui.notifications.ui.composable.NotificationStack
+import com.android.systemui.notifications.ui.composable.ConstrainedNotificationStack
 import com.android.systemui.res.R
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
@@ -94,7 +94,7 @@ constructor(
             return
         }
 
-        NotificationStack(
+        ConstrainedNotificationStack(
             viewModel = viewModel,
             modifier =
                 modifier.fillMaxWidth().thenIf(shouldUseSplitNotificationShade) {

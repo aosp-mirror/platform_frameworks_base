@@ -60,7 +60,9 @@ import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransition
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.util.kotlin.BooleanFlowOperators.and
 import com.android.systemui.util.kotlin.BooleanFlowOperators.or
@@ -97,6 +99,7 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val shadeInteractor: ShadeInteractor,
+    private val notificationStackAppearanceInteractor: NotificationStackAppearanceInteractor,
     private val alternateBouncerToGoneTransitionViewModel:
         AlternateBouncerToGoneTransitionViewModel,
     private val aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
@@ -364,6 +367,10 @@ constructor(
                 initialValue = NotificationContainerBounds(),
             )
             .dumpValue("bounds")
+        get() {
+            /* check if */ SceneContainerFlag.isUnexpectedlyInLegacyMode()
+            return field
+        }
 
     /**
      * Ensure view is visible when the shade/qs are expanded. Also, as QS is expanding, fade out
@@ -571,8 +578,11 @@ constructor(
             .dumpWhileCollecting("translationX")
 
     private val availableHeight: Flow<Float> =
-        bounds
-            .map { it.bottom - it.top }
+        if (SceneContainerFlag.isEnabled) {
+                notificationStackAppearanceInteractor.constrainedAvailableSpace.map { it.toFloat() }
+            } else {
+                bounds.map { it.bottom - it.top }
+            }
             .distinctUntilChanged()
             .dumpWhileCollecting("availableHeight")
 

@@ -2485,6 +2485,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     /** Returns the topPadding of notifications when on keyguard not respecting QS expansion. */
     int getKeyguardNotificationStaticPadding() {
+        SceneContainerFlag.assertInLegacyMode();
         if (!isKeyguardShowing()) {
             return 0;
         }
@@ -2526,12 +2527,14 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     void requestScrollerTopPaddingUpdate(boolean animate) {
-        float padding = mQsController.calculateNotificationsTopPadding(mIsExpandingOrCollapsing,
-                getKeyguardNotificationStaticPadding(), mExpandedFraction);
-        if (MigrateClocksToBlueprint.isEnabled()) {
-            mSharedNotificationContainerInteractor.setTopPosition(padding);
-        } else {
-            mNotificationStackScrollLayoutController.updateTopPadding(padding, animate);
+        if (!SceneContainerFlag.isEnabled()) {
+            float padding = mQsController.calculateNotificationsTopPadding(mIsExpandingOrCollapsing,
+                    getKeyguardNotificationStaticPadding(), mExpandedFraction);
+            if (MigrateClocksToBlueprint.isEnabled()) {
+                mSharedNotificationContainerInteractor.setTopPosition(padding);
+            } else {
+                mNotificationStackScrollLayoutController.updateTopPadding(padding, animate);
+            }
         }
 
         if (isKeyguardShowing()
