@@ -59,8 +59,8 @@ constructor(
                 isExpandingFromHeadsUp,
             ) { shadeMode, isExpandingFromHeadsUp ->
                 ShadeScrimRounding(
-                    roundTop = !(shadeMode == ShadeMode.Split && isExpandingFromHeadsUp),
-                    roundBottom = shadeMode != ShadeMode.Single,
+                    isTopRounded = !(shadeMode == ShadeMode.Split && isExpandingFromHeadsUp),
+                    isBottomRounded = shadeMode != ShadeMode.Single,
                 )
             }
             .distinctUntilChanged()
@@ -75,11 +75,17 @@ constructor(
     /** The y-coordinate in px of top of the contents of the notification stack. */
     val stackTop: StateFlow<Float> = placeholderRepository.stackTop.asStateFlow()
 
+    /** The y-coordinate in px of bottom of the contents of the notification stack. */
+    val stackBottom: StateFlow<Float> = placeholderRepository.stackBottom.asStateFlow()
+
     /**
      * Whether the notification stack is scrolled to the top; i.e., it cannot be scrolled down any
      * further.
      */
     val scrolledToTop: StateFlow<Boolean> = placeholderRepository.scrolledToTop.asStateFlow()
+
+    /** The y-coordinate in px of bottom of the contents of the HUN. */
+    val headsUpTop: StateFlow<Float> = placeholderRepository.headsUpTop.asStateFlow()
 
     /**
      * The amount in px that the notification stack should scroll due to internal expansion. This
@@ -97,6 +103,11 @@ constructor(
     /** Sets the height of the contents of the notification stack. */
     fun setStackHeight(height: Float) {
         viewHeightRepository.stackHeight.value = height
+    }
+
+    /** Sets the height of heads up notification. */
+    fun setHeadsUpHeight(height: Float) {
+        viewHeightRepository.headsUpHeight.value = height
     }
 
     /** Sets the y-coord in px of the top of the contents of the notification stack. */

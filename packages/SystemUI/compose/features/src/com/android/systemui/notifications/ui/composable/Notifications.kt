@@ -397,8 +397,8 @@ private fun Modifier.debugBackground(
     }
 
 fun ShadeScrimRounding.toRoundedCornerShape(radius: Dp): RoundedCornerShape {
-    val topRadius = if (roundTop) radius else 0.dp
-    val bottomRadius = if (roundBottom) radius else 0.dp
+    val topRadius = if (isTopRounded) radius else 0.dp
+    val bottomRadius = if (isBottomRounded) radius else 0.dp
     return RoundedCornerShape(
         topStart = topRadius,
         topEnd = topRadius,

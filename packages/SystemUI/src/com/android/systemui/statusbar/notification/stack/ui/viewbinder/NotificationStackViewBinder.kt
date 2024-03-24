@@ -19,35 +19,44 @@ package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.common.ui.ConfigurationState
+import com.android.systemui.common.ui.view.onLayoutChanged
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
-import com.android.systemui.statusbar.notification.stack.AmbientState
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
+import com.android.systemui.statusbar.notification.stack.shared.model.ViewPosition
+import com.android.systemui.statusbar.notification.stack.ui.view.NotificationStackView
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationStackAppearanceViewModel
+import com.android.systemui.util.kotlin.FlowDumperImpl
+import com.android.systemui.util.kotlin.launchAndDispose
 import javax.inject.Inject
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-/** Binds the NSSL/Controller/AmbientState to their ViewModel. */
+/** Binds the NotificationStackView. */
 @SysUISingleton
 class NotificationStackViewBinder
 @Inject
 constructor(
+    dumpManager: DumpManager,
     @Main private val mainImmediateDispatcher: CoroutineDispatcher,
-    private val ambientState: AmbientState,
-    private val view: NotificationStackScrollLayout,
-    private val controller: NotificationStackScrollLayoutController,
+    private val stack: NotificationStackView,
     private val viewModel: NotificationStackAppearanceViewModel,
     private val configuration: ConfigurationState,
-) {
+) : FlowDumperImpl(dumpManager) {
+    private val view = stack.asView()
+
+    private val viewPosition = MutableStateFlow(ViewPosition()).dumpValue("viewPosition")
+    private val viewTopOffset = viewPosition.map { it.top }.distinctUntilChanged()
 
     fun bindWhileAttached(): DisposableHandle {
         return view.repeatWhenAttached(mainImmediateDispatcher) {
@@ -56,48 +65,48 @@ constructor(
     }
 
     suspend fun bind() = coroutineScope {
+        launchAndDispose {
+            viewPosition.value = ViewPosition(view.left, view.top)
+            view.onLayoutChanged { viewPosition.value = ViewPosition(it.left, it.top) }
+        }
+
         launch {
-            combine(viewModel.shadeScrimClipping, clipRadius, ::Pair).collect {
-                (clipping, clipRadius) ->
-                val (bounds, rounding) = clipping
-                val viewLeft = controller.view.left
-                val viewTop = controller.view.top
-                controller.setRoundedClippingBounds(
-                    bounds.left.roundToInt() - viewLeft,
-                    bounds.top.roundToInt() - viewTop,
-                    bounds.right.roundToInt() - viewLeft,
-                    bounds.bottom.roundToInt() - viewTop,
-                    if (rounding.roundTop) clipRadius else 0,
-                    if (rounding.roundBottom) clipRadius else 0,
+            viewModel.shadeScrimShape(scrimRadius, viewPosition).collect { clipping ->
+                stack.setRoundedClippingBounds(
+                    clipping.bounds.left.roundToInt(),
+                    clipping.bounds.top.roundToInt(),
+                    clipping.bounds.right.roundToInt(),
+                    clipping.bounds.bottom.roundToInt(),
+                    clipping.topRadius,
+                    clipping.bottomRadius,
                 )
             }
         }
 
-        launch {
-            viewModel.stackTop.collect {
-                controller.updateTopPadding(it, controller.isAddOrRemoveAnimationPending)
+        launch { viewModel.stackTop.minusTopOffset().collect { stack.setStackTop(it) } }
+        launch { viewModel.stackBottom.minusTopOffset().collect { stack.setStackBottom(it) } }
+        launch { viewModel.scrolledToTop.collect { stack.setScrolledToTop(it) } }
+        launch { viewModel.headsUpTop.minusTopOffset().collect { stack.setHeadsUpTop(it) } }
+        launch { viewModel.expandFraction.collect { stack.setExpandFraction(it) } }
+        launch { viewModel.isScrollable.collect { stack.setScrollingEnabled(it) } }
+
+        launchAndDispose {
+            stack.setSyntheticScrollConsumer(viewModel.syntheticScrollConsumer)
+            stack.setStackHeightConsumer(viewModel.stackHeightConsumer)
+            stack.setHeadsUpHeightConsumer(viewModel.headsUpHeightConsumer)
+            DisposableHandle {
+                stack.setSyntheticScrollConsumer(null)
+                stack.setStackHeightConsumer(null)
+                stack.setHeadsUpHeightConsumer(null)
             }
         }
-
-        launch {
-            var wasExpanding = false
-            viewModel.expandFraction.collect { expandFraction ->
-                val nowExpanding = expandFraction != 0f && expandFraction != 1f
-                if (nowExpanding && !wasExpanding) {
-                    controller.onExpansionStarted()
-                }
-                ambientState.expansionFraction = expandFraction
-                controller.expandedHeight = expandFraction * controller.view.height
-                if (!nowExpanding && wasExpanding) {
-                    controller.onExpansionStopped()
-                }
-                wasExpanding = nowExpanding
-            }
-        }
-
-        launch { viewModel.isScrollable.collect { controller.setScrollingEnabled(it) } }
     }
 
-    private val clipRadius: Flow<Int>
+    /** Combine with the topOffset flow and subtract that value from this flow's value */
+    private fun Flow<Float>.minusTopOffset() =
+        combine(viewTopOffset) { y, topOffset -> y - topOffset }
+
+    /** flow of the scrim clipping radius */
+    private val scrimRadius: Flow<Int>
         get() = configuration.getDimensionPixelOffset(R.dimen.notification_scrim_corner_radius)
 }

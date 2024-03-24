@@ -1588,7 +1588,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
      * @param forceClockUpdate Should the clock be updated even when not on keyguard
      */
     private void positionClockAndNotifications(boolean forceClockUpdate) {
-        boolean animate = mNotificationStackScrollLayoutController.isAddOrRemoveAnimationPending();
+        boolean animate = !SceneContainerFlag.isEnabled()
+                && mNotificationStackScrollLayoutController.isAddOrRemoveAnimationPending();
         int stackScrollerPadding;
         boolean onKeyguard = isKeyguardShowing();
 
@@ -1675,7 +1676,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 mClockPositionResult.clockX, mClockPositionResult.clockY);
         }
 
-        boolean animate = mNotificationStackScrollLayoutController.isAddOrRemoveAnimationPending();
+        boolean animate = !SceneContainerFlag.isEnabled()
+                && mNotificationStackScrollLayoutController.isAddOrRemoveAnimationPending();
         boolean animateClock = (animate || mAnimateNextPositionUpdate) && shouldAnimateClockChange;
 
         if (!MigrateClocksToBlueprint.isEnabled()) {
@@ -3963,7 +3965,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             mShadeRepository.setLegacyShadeExpansion(mExpandedFraction);
             mQsController.setShadeExpansion(mExpandedHeight, mExpandedFraction);
             mExpansionDragDownAmountPx = h;
-            mAmbientState.setExpansionFraction(mExpandedFraction);
+            if (!SceneContainerFlag.isEnabled()) {
+                mAmbientState.setExpansionFraction(mExpandedFraction);
+            }
             onHeightUpdated(mExpandedHeight);
             updateExpansionAndVisibility();
         });
