@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.controls.domain.pipeline.interactor
+package com.android.systemui.media.controls.ui.viewmodel
 
 import android.content.applicationContext
-import com.android.systemui.broadcast.broadcastSender
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.media.controls.data.repository.mediaFilterRepository
-import com.android.systemui.media.controls.domain.pipeline.mediaDataProcessor
-import com.android.systemui.plugins.activityStarter
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.media.controls.domain.pipeline.interactor.mediaRecommendationsInteractor
+import com.android.systemui.media.controls.util.mediaUiEventLogger
 
-val Kosmos.mediaRecommendationsInteractor by
+val Kosmos.mediaRecommendationsViewModel by
     Kosmos.Fixture {
-        MediaRecommendationsInteractor(
-            applicationScope = applicationCoroutineScope,
+        MediaRecommendationsViewModel(
             applicationContext = applicationContext,
-            repository = mediaFilterRepository,
-            mediaDataProcessor = mediaDataProcessor,
-            broadcastSender = broadcastSender,
-            activityStarter = activityStarter,
+            backgroundDispatcher = testDispatcher,
+            interactor = mediaRecommendationsInteractor,
+            logger = mediaUiEventLogger,
         )
     }
