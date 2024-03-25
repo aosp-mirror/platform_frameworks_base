@@ -25,7 +25,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
 import androidx.constraintlayout.widget.ConstraintSet.TOP
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.res.R
@@ -51,21 +50,18 @@ constructor(
      * indication area, whichever is higher.
      */
     protected fun addNotificationPlaceholderBarrier(constraintSet: ConstraintSet) {
-        val lockId =
-            if (DeviceEntryUdfpsRefactor.isEnabled) {
-                R.id.device_entry_icon_view
-            } else {
-                R.id.lock_icon_view
-            }
-
         constraintSet.apply {
             createBarrier(
                 R.id.nssl_placeholder_barrier_bottom,
                 Barrier.TOP,
                 0,
-                *intArrayOf(lockId, R.id.ambient_indication_container)
+                *intArrayOf(
+                    R.id.device_entry_icon_view,
+                    R.id.lock_icon_view,
+                    R.id.ambient_indication_container
+                )
             )
-            connect(R.id.nssl_placeholder, BOTTOM, R.id.nssl_placeholder_barrier_bottom, TOP)
+            connect(placeHolderId, BOTTOM, R.id.nssl_placeholder_barrier_bottom, TOP)
         }
     }
 

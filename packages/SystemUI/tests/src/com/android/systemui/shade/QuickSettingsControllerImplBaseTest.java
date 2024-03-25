@@ -223,7 +223,9 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
                 mShadeRepository,
                 keyguardTransitionInteractor,
                 () -> sceneInteractor,
-                () -> mKosmos.getFromGoneTransitionInteractor());
+                () -> mKosmos.getFromGoneTransitionInteractor(),
+                () -> mKosmos.getSharedNotificationContainerInteractor(),
+                mTestScope);
 
         mFromLockscreenTransitionInteractor = mKosmos.getFromLockscreenTransitionInteractor();
         mFromPrimaryBouncerTransitionInteractor =

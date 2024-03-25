@@ -498,7 +498,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             showLockscreen()
 
             keyguardInteractor.setNotificationContainerBounds(
-                NotificationContainerBounds(top = 1f, bottom = 2f)
+                NotificationContainerBounds(top = 1f, bottom = 52f)
             )
             runCurrent()
 
@@ -526,7 +526,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             showLockscreen()
 
             keyguardInteractor.setNotificationContainerBounds(
-                NotificationContainerBounds(top = 1f, bottom = 2f)
+                NotificationContainerBounds(top = 1f, bottom = 52f)
             )
             runCurrent()
 
