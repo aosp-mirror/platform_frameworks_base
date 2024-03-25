@@ -3532,7 +3532,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     && userState.isMagnificationTwoFingerTripleTapEnabledLocked()));
 
         final boolean createConnectionForCurrentCapability =
-                com.android.window.flags.Flags.magnificationAlwaysDrawFullscreenBorder()
+                com.android.window.flags.Flags.alwaysDrawMagnificationFullscreenBorder()
                         || (userState.getMagnificationCapabilitiesLocked()
                                 != Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
 

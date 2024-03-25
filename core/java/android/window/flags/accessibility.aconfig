@@ -8,7 +8,7 @@ flag {
 }
 
 flag {
-  name: "magnification_always_draw_fullscreen_border"
+  name: "always_draw_magnification_fullscreen_border"
   namespace: "accessibility"
   description: "Always draw fullscreen orange border in fullscreen magnification"
   bug: "291891390"
