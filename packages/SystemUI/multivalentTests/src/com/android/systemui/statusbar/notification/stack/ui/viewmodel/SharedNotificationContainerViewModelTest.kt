@@ -585,6 +585,12 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             notificationCount = 25
             sharedNotificationContainerInteractor.notificationStackChanged()
             assertThat(maxNotifications).isEqualTo(25)
+
+            // Also ensure another collection starts with the same value. As an example, folding
+            // then unfolding will restart the coroutine and it must get the last value immediately.
+            val newMaxNotifications by
+                collectLastValue(underTest.getMaxNotifications(calculateSpace))
+            assertThat(newMaxNotifications).isEqualTo(25)
         }
 
     @Test
