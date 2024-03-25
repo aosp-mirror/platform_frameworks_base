@@ -924,8 +924,7 @@ public class NotificationManagerService extends SystemService {
         final List<UserInfo> activeUsers = mUm.getUsers();
         for (UserInfo userInfo : activeUsers) {
             int userId = userInfo.getUserHandle().getIdentifier();
-            if (isNASMigrationDone(userId)
-                    || userInfo.isManagedProfile() || userInfo.isCloneProfile()) {
+            if (isNASMigrationDone(userId) || isProfileUser(userInfo)) {
                 continue;
             }
             List<ComponentName> allowedComponents = mAssistants.getAllowedComponents(userId);
@@ -954,6 +953,17 @@ public class NotificationManagerService extends SystemService {
     boolean isNASMigrationDone(int userId) {
         return (Settings.Secure.getIntForUser(getContext().getContentResolver(),
                 Settings.Secure.NAS_SETTINGS_UPDATED, 0, userId) == 1);
+    }
+
+    boolean isProfileUser(UserInfo userInfo) {
+        if (privateSpaceFlagsEnabled()) {
+            return userInfo.isProfile() && hasParent(userInfo);
+        }
+        return userInfo.isManagedProfile() || userInfo.isCloneProfile();
+    }
+
+    boolean hasParent(UserInfo profile) {
+        return mUmInternal.getProfileParentId(profile.id) != profile.id;
     }
 
     protected void setDefaultAssistantForUser(int userId) {
@@ -1064,8 +1074,7 @@ public class NotificationManagerService extends SystemService {
         XmlUtils.beginDocument(parser, TAG_NOTIFICATION_POLICY);
         boolean migratedManagedServices = false;
         UserInfo userInfo = mUmInternal.getUserInfo(userId);
-        boolean ineligibleForManagedServices = forRestore &&
-                (userInfo.isManagedProfile() || userInfo.isCloneProfile());
+        boolean ineligibleForManagedServices = forRestore && isProfileUser(userInfo);
         int outerDepth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, outerDepth)) {
             if (ZenModeConfig.ZEN_TAG.equals(parser.getName())) {
@@ -1172,7 +1181,7 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private static boolean privateSpaceFlagsEnabled() {
+    protected static boolean privateSpaceFlagsEnabled() {
         return allowPrivateProfile() && android.multiuser.Flags.enablePrivateSpaceFeatures();
     }
 
@@ -1985,7 +1994,7 @@ public class NotificationManagerService extends SystemService {
             } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
                 mUserProfiles.updateCache(context);
-                if (!mUserProfiles.isProfileUser(userId)) {
+                if (!mUserProfiles.isProfileUser(userId, context)) {
                     // reload per-user settings
                     mSettingsObserver.update(null);
                     // Refresh managed services
@@ -2000,7 +2009,7 @@ public class NotificationManagerService extends SystemService {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
                 if (userId != USER_NULL) {
                     mUserProfiles.updateCache(context);
-                    if (!mUserProfiles.isProfileUser(userId)) {
+                    if (!mUserProfiles.isProfileUser(userId, context)) {
                         allowDefaultApprovedServices(userId);
                     }
                     mHistoryManager.onUserAdded(userId);
@@ -2021,7 +2030,7 @@ public class NotificationManagerService extends SystemService {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
                 mUserProfiles.updateCache(context);
                 mAssistants.onUserUnlocked(userId);
-                if (!mUserProfiles.isProfileUser(userId)) {
+                if (!mUserProfiles.isProfileUser(userId, context)) {
                     mConditionProviders.onUserUnlocked(userId);
                     mListeners.onUserUnlocked(userId);
                     if (!android.app.Flags.modesApi()) {
