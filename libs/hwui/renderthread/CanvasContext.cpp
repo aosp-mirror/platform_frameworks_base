@@ -35,8 +35,8 @@
 #include "Properties.h"
 #include "RenderThread.h"
 #include "hwui/Canvas.h"
-#include "pipeline/skia/SkiaGpuPipeline.h"
 #include "pipeline/skia/SkiaOpenGLPipeline.h"
+#include "pipeline/skia/SkiaPipeline.h"
 #include "pipeline/skia/SkiaVulkanPipeline.h"
 #include "thread/CommonPool.h"
 #include "utils/GLUtils.h"
@@ -108,7 +108,7 @@ void CanvasContext::invokeFunctor(const RenderThread& thread, Functor* functor) 
 }
 
 void CanvasContext::prepareToDraw(const RenderThread& thread, Bitmap* bitmap) {
-    skiapipeline::SkiaGpuPipeline::prepareToDraw(thread, bitmap);
+    skiapipeline::SkiaPipeline::prepareToDraw(thread, bitmap);
 }
 
 CanvasContext::CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,

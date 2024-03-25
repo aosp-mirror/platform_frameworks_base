@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,24 @@
 
 #pragma once
 
-#include "pipeline/skia/SkiaPipeline.h"
+#include <EGL/egl.h>
+#include <system/window.h>
+
+#include "SkiaPipeline.h"
+#include "renderstate/RenderState.h"
+#include "renderthread/HardwareBufferRenderParams.h"
 
 namespace android {
+
+class Bitmap;
 
 namespace uirenderer {
 namespace skiapipeline {
 
-class SkiaCpuPipeline : public SkiaPipeline {
+class SkiaOpenGLPipeline : public SkiaPipeline, public IGpuContextCallback {
 public:
-    SkiaCpuPipeline(renderthread::RenderThread& thread) : SkiaPipeline(thread) {}
-    ~SkiaCpuPipeline() {}
-
-    bool pinImages(std::vector<SkImage*>& mutableImages) override { return false; }
-    bool pinImages(LsaVector<sk_sp<Bitmap>>& images) override { return false; }
-    void unpinImages() override {}
-
-    // If the given node didn't have a layer surface, or had one of the wrong size, this method
-    // creates a new one and returns true. Otherwise does nothing and returns false.
-    bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
-                             ErrorHandler* errorHandler) override;
-    void renderLayersImpl(const LayerUpdateQueue& layers, bool opaque) override;
-    void setHardwareBuffer(AHardwareBuffer* hardwareBuffer) override {}
-    bool hasHardwareBuffer() override { return false; }
+    SkiaOpenGLPipeline(renderthread::RenderThread& thread);
+    virtual ~SkiaOpenGLPipeline();
 
     renderthread::MakeCurrentResult makeCurrent() override;
     renderthread::Frame getFrame() override;
@@ -46,30 +41,38 @@ public:
             const renderthread::Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
             const LightGeometry& lightGeometry, LayerUpdateQueue* layerUpdateQueue,
             const Rect& contentDrawBounds, bool opaque, const LightInfo& lightInfo,
-            const std::vector<sp<RenderNode>>& renderNodes, FrameInfoVisualizer* profiler,
+            const std::vector<sp<RenderNode> >& renderNodes, FrameInfoVisualizer* profiler,
             const renderthread::HardwareBufferRenderParams& bufferParams,
             std::mutex& profilerLock) override;
+    GrSurfaceOrigin getSurfaceOrigin() override { return kBottomLeft_GrSurfaceOrigin; }
     bool swapBuffers(const renderthread::Frame& frame, IRenderPipeline::DrawResult& drawResult,
                      const SkRect& screenDirty, FrameInfo* currentFrameInfo,
-                     bool* requireSwap) override {
-        return false;
-    }
-    DeferredLayerUpdater* createTextureLayer() override { return nullptr; }
+                     bool* requireSwap) override;
+    DeferredLayerUpdater* createTextureLayer() override;
     bool setSurface(ANativeWindow* surface, renderthread::SwapBehavior swapBehavior) override;
-    [[nodiscard]] android::base::unique_fd flush() override {
-        return android::base::unique_fd(-1);
-    };
-    void onStop() override {}
-    bool isSurfaceReady() override { return mSurface.get() != nullptr; }
-    bool isContextReady() override { return true; }
+    [[nodiscard]] android::base::unique_fd flush() override;
+    void onStop() override;
+    bool isSurfaceReady() override;
+    bool isContextReady() override;
 
     const SkM44& getPixelSnapMatrix() const override {
-        static const SkM44 sSnapMatrix = SkM44();
+        // Small (~1/16th) nudge to ensure that pixel-aligned non-AA'd draws fill the
+        // desired fragment
+        static const SkScalar kOffset = 0.063f;
+        static const SkM44 sSnapMatrix = SkM44::Translate(kOffset, kOffset);
         return sSnapMatrix;
     }
 
+    static void invokeFunctor(const renderthread::RenderThread& thread, Functor* functor);
+
+protected:
+    void onContextDestroyed() override;
+
 private:
-    sk_sp<SkSurface> mSurface;
+    renderthread::EglManager& mEglManager;
+    EGLSurface mEglSurface = EGL_NO_SURFACE;
+    sp<ANativeWindow> mNativeWindow;
+    renderthread::SwapBehavior mSwapBehavior = renderthread::SwapBehavior::kSwap_discardBuffer;
 };
 
 } /* namespace skiapipeline */

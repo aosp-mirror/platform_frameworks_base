@@ -78,13 +78,13 @@ cc_defaults {
     include_dirs: [
         "external/skia/include/private",
         "external/skia/src/core",
-        "external/skia/src/utils",
     ],
 
     target: {
         android: {
             include_dirs: [
                 "external/skia/src/image",
+                "external/skia/src/utils",
                 "external/skia/src/gpu",
                 "external/skia/src/shaders",
             ],
@@ -529,9 +529,7 @@ cc_defaults {
         "effects/GainmapRenderer.cpp",
         "pipeline/skia/BackdropFilterDrawable.cpp",
         "pipeline/skia/HolePunch.cpp",
-        "pipeline/skia/SkiaCpuPipeline.cpp",
         "pipeline/skia/SkiaDisplayList.cpp",
-        "pipeline/skia/SkiaPipeline.cpp",
         "pipeline/skia/SkiaRecordingCanvas.cpp",
         "pipeline/skia/StretchMask.cpp",
         "pipeline/skia/RenderNodeDrawable.cpp",
@@ -570,7 +568,6 @@ cc_defaults {
         "HWUIProperties.sysprop",
         "Interpolator.cpp",
         "JankTracker.cpp",
-        "LayerUpdateQueue.cpp",
         "LightingInfo.cpp",
         "Matrix.cpp",
         "Mesh.cpp",
@@ -607,9 +604,9 @@ cc_defaults {
                 "pipeline/skia/GLFunctorDrawable.cpp",
                 "pipeline/skia/LayerDrawable.cpp",
                 "pipeline/skia/ShaderCache.cpp",
-                "pipeline/skia/SkiaGpuPipeline.cpp",
                 "pipeline/skia/SkiaMemoryTracer.cpp",
                 "pipeline/skia/SkiaOpenGLPipeline.cpp",
+                "pipeline/skia/SkiaPipeline.cpp",
                 "pipeline/skia/SkiaProfileRenderer.cpp",
                 "pipeline/skia/SkiaVulkanPipeline.cpp",
                 "pipeline/skia/VkFunctorDrawable.cpp",
@@ -633,6 +630,7 @@ cc_defaults {
                 "DeferredLayerUpdater.cpp",
                 "HardwareBitmapUploader.cpp",
                 "Layer.cpp",
+                "LayerUpdateQueue.cpp",
                 "ProfileDataContainer.cpp",
                 "Readback.cpp",
                 "TreeInfo.cpp",
