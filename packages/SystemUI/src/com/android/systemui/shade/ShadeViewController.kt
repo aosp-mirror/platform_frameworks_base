@@ -143,10 +143,11 @@ interface ShadeHeadsUpTracker {
 }
 
 /** Handles the lifecycle of the shade's animation that happens when folding a foldable. */
-@Deprecated("This interface should not be used in scene container.")
+@Deprecated("This interface should not be used in scene container. Needs flexiglass equivalent.")
 interface ShadeFoldAnimator {
     /** Updates the views to the initial state for the fold to AOD animation. */
-    @Deprecated("Not used when migrateClocksToBlueprint enabled") fun prepareFoldToAodAnimation()
+    @Deprecated("Used by the Keyguard Fold Transition. Needs flexiglass equivalent.")
+    fun prepareFoldToAodAnimation()
 
     /**
      * Starts fold to AOD animation.
@@ -155,14 +156,15 @@ interface ShadeFoldAnimator {
      * @param endAction invoked when the animation finishes, also if it was cancelled.
      * @param cancelAction invoked when the animation is cancelled, before endAction.
      */
-    @Deprecated("Not used when migrateClocksToBlueprint enabled")
+    @Deprecated("Not used when migrateClocksToBlueprint enabled.")
     fun startFoldToAodAnimation(startAction: Runnable, endAction: Runnable, cancelAction: Runnable)
 
     /** Cancels fold to AOD transition and resets view state. */
-    @Deprecated("Not used when migrateClocksToBlueprint enabled") fun cancelFoldToAodAnimation()
+    @Deprecated("Used by the Keyguard Fold Transition. Needs flexiglass equivalent.")
+    fun cancelFoldToAodAnimation()
 
     /** Returns the main view of the shade. */
-    @Deprecated("Not used in Scene Container") val view: ViewGroup?
+    @Deprecated("Not used when migrateClocksToBlueprint enabled.") val view: ViewGroup?
 }
 
 /**
