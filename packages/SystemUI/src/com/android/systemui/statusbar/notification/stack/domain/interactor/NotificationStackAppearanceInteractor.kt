@@ -72,6 +72,9 @@ constructor(
      */
     val stackHeight: StateFlow<Float> = viewHeightRepository.stackHeight.asStateFlow()
 
+    /** The height in px of the contents of the HUN. */
+    val headsUpHeight: StateFlow<Float> = viewHeightRepository.headsUpHeight.asStateFlow()
+
     /** The y-coordinate in px of top of the contents of the notification stack. */
     val stackTop: StateFlow<Float> = placeholderRepository.stackTop.asStateFlow()
 
@@ -115,13 +118,13 @@ constructor(
     }
 
     /** Sets the y-coord in px of the top of the contents of the notification stack. */
-    fun setStackTop(startY: Float) {
-        placeholderRepository.stackTop.value = startY
+    fun setStackTop(stackTop: Float) {
+        placeholderRepository.stackTop.value = stackTop
     }
 
     /** Sets the y-coord in px of the bottom of the contents of the notification stack. */
-    fun setStackBottom(endY: Float) {
-        placeholderRepository.stackBottom.value = endY
+    fun setStackBottom(stackBottom: Float) {
+        placeholderRepository.stackBottom.value = stackBottom
     }
 
     /** Sets whether the notification stack is scrolled to the top. */
@@ -136,5 +139,9 @@ constructor(
 
     fun setConstrainedAvailableSpace(height: Int) {
         placeholderRepository.constrainedAvailableSpace.value = height
+    }
+
+    fun setHeadsUpTop(headsUpTop: Float) {
+        placeholderRepository.headsUpTop.value = headsUpTop
     }
 }

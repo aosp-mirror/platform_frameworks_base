@@ -28,6 +28,7 @@ import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrim
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimRounding
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * ViewModel used by the Notification placeholders inside the scene container to update the
@@ -78,6 +79,10 @@ constructor(
         interactor.setConstrainedAvailableSpace(height)
     }
 
+    fun onHeadsUpTopChanged(headsUpTop: Float) {
+        interactor.setHeadsUpTop(headsUpTop)
+    }
+
     /** Corner rounding of the stack */
     val shadeScrimRounding: Flow<ShadeScrimRounding> = interactor.shadeScrimRounding
 
@@ -86,7 +91,10 @@ constructor(
      * notifications, this can exceed the space available on screen to show notifications, at which
      * point the notification stack should become scrollable.
      */
-    val stackHeight = interactor.stackHeight
+    val stackHeight: StateFlow<Float> = interactor.stackHeight
+
+    /** The height in px of the contents of the HUN. */
+    val headsUpHeight: StateFlow<Float> = interactor.headsUpHeight
 
     /**
      * The amount [0-1] that the shade has been opened. At 0, the shade is closed; at 1, the shade
