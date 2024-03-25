@@ -396,7 +396,7 @@ constructor(
             }
             if (view is ExpandableNotificationRow) {
                 // Only drag down on sensitive views, otherwise the ExpandHelper will take this
-                return view.entry.isSensitive
+                return view.entry.isSensitive.value
             }
         }
         return false

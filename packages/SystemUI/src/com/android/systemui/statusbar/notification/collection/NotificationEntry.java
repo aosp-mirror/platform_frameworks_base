@@ -76,6 +76,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import kotlinx.coroutines.flow.MutableStateFlow;
+import kotlinx.coroutines.flow.StateFlow;
+import kotlinx.coroutines.flow.StateFlowKt;
+
 /**
  * Represents a notification that the system UI knows about
  *
@@ -162,8 +166,8 @@ public final class NotificationEntry extends ListEntry {
      */
     private boolean hasSentReply;
 
-    private boolean mSensitive = true;
-    private ListenerSet<OnSensitivityChangedListener> mOnSensitivityChangedListeners =
+    private final MutableStateFlow<Boolean> mSensitive = StateFlowKt.MutableStateFlow(true);
+    private final ListenerSet<OnSensitivityChangedListener> mOnSensitivityChangedListeners =
             new ListenerSet<>();
 
     private boolean mPulseSupressed;
@@ -934,6 +938,11 @@ public final class NotificationEntry extends ListEntry {
         return Objects.equals(n.category, category);
     }
 
+    /** @see #setSensitive(boolean, boolean)  */
+    public StateFlow<Boolean> isSensitive() {
+        return mSensitive;
+    }
+
     /**
      * Set this notification to be sensitive.
      *
@@ -942,17 +951,13 @@ public final class NotificationEntry extends ListEntry {
      */
     public void setSensitive(boolean sensitive, boolean deviceSensitive) {
         getRow().setSensitive(sensitive, deviceSensitive);
-        if (sensitive != mSensitive) {
-            mSensitive = sensitive;
+        if (sensitive != mSensitive.getValue()) {
+            mSensitive.setValue(sensitive);
             for (NotificationEntry.OnSensitivityChangedListener listener :
                     mOnSensitivityChangedListeners) {
                 listener.onSensitivityChanged(this);
             }
         }
-    }
-
-    public boolean isSensitive() {
-        return mSensitive;
     }
 
     /** Add a listener to be notified when the entry's sensitivity changes. */

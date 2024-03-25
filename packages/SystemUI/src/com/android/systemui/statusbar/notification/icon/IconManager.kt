@@ -39,13 +39,13 @@ import com.android.systemui.statusbar.notification.InflationException
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
-import java.util.concurrent.ConcurrentHashMap
-import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Inflates and updates icons associated with notifications
@@ -206,7 +206,7 @@ constructor(
     private fun getIconDescriptors(entry: NotificationEntry): Pair<StatusBarIcon, StatusBarIcon> {
         val iconDescriptor = getIconDescriptor(entry, redact = false)
         val sensitiveDescriptor =
-            if (entry.isSensitive) {
+            if (entry.isSensitive.value) {
                 getIconDescriptor(entry, redact = true)
             } else {
                 iconDescriptor
@@ -376,7 +376,7 @@ constructor(
         val isSmallIcon = iconDescriptor.icon.equals(entry.sbn.notification.smallIcon)
         return isImportantConversation(entry) &&
             !isSmallIcon &&
-            (!usedInSensitiveContext || !entry.isSensitive)
+            (!usedInSensitiveContext || !entry.isSensitive.value)
     }
 
     private fun isImportantConversation(entry: NotificationEntry): Boolean {
