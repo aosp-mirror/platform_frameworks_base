@@ -225,6 +225,26 @@ public class WindowStateTests extends WindowTestsBase {
         assertTrue(window.isOnScreen());
         window.hide(false /* doAnimation */, false /* requestAnim */);
         assertFalse(window.isOnScreen());
+
+        // Verifies that a window without animation can be hidden even if its parent is animating.
+        window.show(false /* doAnimation */, false /* requestAnim */);
+        assertTrue(window.isVisibleByPolicy());
+        window.getParent().startAnimation(mTransaction, mock(AnimationAdapter.class),
+                false /* hidden */, SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION);
+        window.mAttrs.windowAnimations = 0;
+        window.hide(true /* doAnimation */, true /* requestAnim */);
+        assertFalse(window.isSelfAnimating(0, SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION));
+        assertFalse(window.isVisibleByPolicy());
+        assertFalse(window.isOnScreen());
+
+        // Verifies that a window with animation can be hidden after the hide animation is finished.
+        window.show(false /* doAnimation */, false /* requestAnim */);
+        window.mAttrs.windowAnimations = android.R.style.Animation_Dialog;
+        window.hide(true /* doAnimation */, true /* requestAnim */);
+        assertTrue(window.isSelfAnimating(0, SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION));
+        assertTrue(window.isVisibleByPolicy());
+        window.cancelAnimation();
+        assertFalse(window.isVisibleByPolicy());
     }
 
     @Test
