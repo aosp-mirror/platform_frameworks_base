@@ -71,5 +71,5 @@ fun BackAnimationSpec.Companion.floatingSystemSurfacesForSysUi(
         displayMetrics = displayMetrics,
         maxMarginXdp = 8f,
         maxMarginYdp = 8f,
-        minScale = 0.8f,
+        minScale = 0.9f,
     )
