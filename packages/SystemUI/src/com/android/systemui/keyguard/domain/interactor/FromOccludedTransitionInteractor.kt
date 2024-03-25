@@ -218,5 +218,6 @@ constructor(
         private val DEFAULT_DURATION = 500.milliseconds
         val TO_LOCKSCREEN_DURATION = 933.milliseconds
         val TO_AOD_DURATION = DEFAULT_DURATION
+        val TO_DOZING_DURATION = DEFAULT_DURATION
     }
 }

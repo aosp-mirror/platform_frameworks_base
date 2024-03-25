@@ -33,6 +33,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.StatusBarState.SHADE
 import com.android.systemui.keyguard.shared.model.StatusBarState.SHADE_LOCKED
@@ -61,6 +62,8 @@ import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToLockscreenTran
 import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
+import com.android.systemui.util.kotlin.BooleanFlowOperators.and
+import com.android.systemui.util.kotlin.BooleanFlowOperators.or
 import com.android.systemui.util.kotlin.FlowDumperImpl
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 import javax.inject.Inject
@@ -123,6 +126,7 @@ constructor(
 ) : FlowDumperImpl(dumpManager) {
     private val statesForConstrainedNotifications: Set<KeyguardState> =
         setOf(AOD, LOCKSCREEN, DOZING, ALTERNATE_BOUNCER, PRIMARY_BOUNCER)
+    private val statesForHiddenKeyguard: Set<KeyguardState> = setOf(GONE, OCCLUDED)
 
     /**
      * Is either shade/qs expanded? This intentionally does not use the [ShadeInteractor] version,
@@ -385,31 +389,54 @@ constructor(
             .onStart { emit(1f) }
             .dumpWhileCollecting("alphaForShadeAndQsExpansion")
 
-    private val isGoneTransitionRunning: Flow<Boolean> =
+    private fun toFlowArray(
+        states: Set<KeyguardState>,
+        flow: (KeyguardState) -> Flow<Boolean>
+    ): Array<Flow<Boolean>> {
+        return states.map { flow(it) }.toTypedArray()
+    }
+
+    private val isTransitioningToHiddenKeyguard: Flow<Boolean> =
         flow {
                 while (currentCoroutineContext().isActive) {
                     emit(false)
-                    // Ensure start where GONE is inactive
-                    keyguardTransitionInteractor.transitionValue(GONE).first { it == 0f }
-                    // Wait for a GONE transition to begin
-                    keyguardTransitionInteractor.transitionStepsToState(GONE).first {
-                        it.value > 0f && it.transitionState == RUNNING
-                    }
+                    // Ensure states are inactive to start
+                    and(
+                            *toFlowArray(statesForHiddenKeyguard) { state ->
+                                keyguardTransitionInteractor.transitionValue(state).map { it == 0f }
+                            }
+                        )
+                        .first { it }
+                    // Wait for a qualifying transition to begin
+                    or(
+                            *toFlowArray(statesForHiddenKeyguard) { state ->
+                                keyguardTransitionInteractor
+                                    .transitionStepsToState(state)
+                                    .map { it.value > 0f && it.transitionState == RUNNING }
+                                    .onStart { emit(false) }
+                            }
+                        )
+                        .first { it }
                     emit(true)
-                    // Now await the signal that SHADE state has been reached or the GONE transition
-                    // was reversed. Until SHADE state has been replaced and merged with GONE, it is
-                    // the only source of when it is considered safe to reset alpha to 1f for HUNs.
+                    // Now await the signal that SHADE state has been reached or the transition was
+                    // reversed. Until SHADE state has been replaced it is the only source of when
+                    // it is considered safe to reset alpha to 1f for HUNs.
                     combine(
                             keyguardInteractor.statusBarState,
-                            // Emit -1f on start to make sure the flow runs
-                            keyguardTransitionInteractor.transitionValue(GONE).onStart { emit(-1f) }
-                        ) { statusBarState, goneValue ->
-                            statusBarState == SHADE || goneValue == 0f
+                            and(
+                                *toFlowArray(statesForHiddenKeyguard) { state ->
+                                    keyguardTransitionInteractor.transitionValue(state).map {
+                                        it == 0f
+                                    }
+                                }
+                            )
+                        ) { statusBarState, stateIsReversed ->
+                            statusBarState == SHADE || stateIsReversed
                         }
                         .first { it }
                 }
             }
-            .dumpWhileCollecting("goneTransitionInProgress")
+            .dumpWhileCollecting("isTransitioningToHiddenKeyguard")
 
     fun keyguardAlpha(viewState: ViewStateAccessor): Flow<Float> {
         // All transition view models are mututally exclusive, and safe to merge
@@ -440,7 +467,7 @@ constructor(
                 // shade expansion or swipe to dismiss
                 combineTransform(
                     isOnLockscreenWithoutShade,
-                    isGoneTransitionRunning,
+                    isTransitioningToHiddenKeyguard,
                     shadeCollapseFadeIn,
                     alphaForShadeAndQsExpansion,
                     keyguardInteractor.dismissAlpha.dumpWhileCollecting(
@@ -448,7 +475,7 @@ constructor(
                     ),
                 ) {
                     isOnLockscreenWithoutShade,
-                    isGoneTransitionRunning,
+                    isTransitioningToHiddenKeyguard,
                     shadeCollapseFadeIn,
                     alphaForShadeAndQsExpansion,
                     dismissAlpha ->
@@ -456,7 +483,7 @@ constructor(
                         if (!shadeCollapseFadeIn && dismissAlpha != null) {
                             emit(dismissAlpha)
                         }
-                    } else if (!isGoneTransitionRunning) {
+                    } else if (!isTransitioningToHiddenKeyguard) {
                         emit(alphaForShadeAndQsExpansion)
                     }
                 },
