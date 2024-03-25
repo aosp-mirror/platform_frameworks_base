@@ -40,7 +40,8 @@ import com.android.settingslib.spa.framework.theme.toMediumWeight
 
 data class BottomAppBarButton(
     val text: String,
-    val onClick: () -> Unit,
+    val enabled: Boolean = true,
+    val onClick: () -> Unit
 )
 
 @Composable
@@ -122,13 +123,13 @@ private fun BottomBar(
 ) {
     Row(modifier = Modifier.padding(SettingsDimension.itemPaddingAround)) {
         dismissButton?.apply {
-            TextButton(onClick) {
+            TextButton(onClick = onClick, enabled = enabled) {
                 ActionText(text)
             }
         }
         Spacer(modifier = Modifier.weight(1f))
         actionButton?.apply {
-            Button(onClick) {
+            Button(onClick = onClick, enabled = enabled) {
                 ActionText(text)
             }
         }
