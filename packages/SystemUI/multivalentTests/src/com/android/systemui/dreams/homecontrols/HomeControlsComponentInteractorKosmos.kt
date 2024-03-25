@@ -15,6 +15,7 @@
  */
 package com.android.systemui.dreams.homecontrols
 
+import android.os.powerManager
 import android.service.dream.dreamManager
 import com.android.systemui.common.domain.interactor.packageChangeInteractor
 import com.android.systemui.controls.dagger.ControlsComponent
@@ -37,6 +38,7 @@ val Kosmos.homeControlsComponentInteractor by
             userRepository = fakeUserRepository,
             bgScope = applicationCoroutineScope,
             systemClock = fakeSystemClock,
+            powerManager = powerManager,
             dreamManager = dreamManager,
             packageChangeInteractor = packageChangeInteractor,
         )

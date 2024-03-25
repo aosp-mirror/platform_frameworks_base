@@ -20,7 +20,9 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.ServiceInfo
 import android.content.pm.UserInfo
+import android.os.PowerManager
 import android.os.UserHandle
+import android.os.powerManager
 import android.service.dream.dreamManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -50,6 +52,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 
@@ -196,7 +200,7 @@ class HomeControlsComponentInteractorTest : SysuiTestCase() {
                 )
                 fakeSystemClock.advanceTime(MAX_UPDATE_CORRELATION_DELAY.inWholeMilliseconds)
                 // Task fragment becomes empty as a result of the update.
-                underTest.onTaskFragmentEmpty()
+                underTest.onDreamEndUnexpectedly()
 
                 runCurrent()
                 verify(dreamManager, never()).startDream()
@@ -240,7 +244,7 @@ class HomeControlsComponentInteractorTest : SysuiTestCase() {
                 )
                 fakeSystemClock.advanceTime(MAX_UPDATE_CORRELATION_DELAY.inWholeMilliseconds + 100)
                 // Task fragment becomes empty as a result of the update.
-                underTest.onTaskFragmentEmpty()
+                underTest.onDreamEndUnexpectedly()
 
                 runCurrent()
                 verify(dreamManager, never()).startDream()
@@ -255,6 +259,25 @@ class HomeControlsComponentInteractorTest : SysuiTestCase() {
                 runCurrent()
                 verify(dreamManager, never()).startDream()
                 job.cancel()
+            }
+        }
+
+    @Test
+    fun testDreamUnexpectedlyEnds_triggersUserActivity() =
+        with(kosmos) {
+            testScope.runTest {
+                fakeSystemClock.setUptimeMillis(100000L)
+                verify(powerManager, never()).userActivity(anyLong(), anyInt(), anyInt())
+
+                // Dream ends unexpectedly
+                underTest.onDreamEndUnexpectedly()
+
+                verify(powerManager)
+                    .userActivity(
+                        100000L,
+                        PowerManager.USER_ACTIVITY_EVENT_OTHER,
+                        PowerManager.USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS
+                    )
             }
         }
 

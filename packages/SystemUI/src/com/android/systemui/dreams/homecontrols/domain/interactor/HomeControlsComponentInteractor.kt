@@ -19,6 +19,7 @@ package com.android.systemui.dreams.homecontrols.domain.interactor
 import android.annotation.SuppressLint
 import android.app.DreamManager
 import android.content.ComponentName
+import android.os.PowerManager
 import android.os.UserHandle
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.common.domain.interactor.PackageChangeInteractor
@@ -66,6 +67,7 @@ constructor(
     userRepository: UserRepository,
     private val packageChangeInteractor: PackageChangeInteractor,
     private val systemClock: SystemClock,
+    private val powerManager: PowerManager,
     private val dreamManager: DreamManager,
     @Background private val bgScope: CoroutineScope
 ) {
@@ -135,7 +137,12 @@ constructor(
     private val taskFragmentFinished =
         MutableSharedFlow<Long>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
-    fun onTaskFragmentEmpty() {
+    fun onDreamEndUnexpectedly() {
+        powerManager.userActivity(
+            systemClock.uptimeMillis(),
+            PowerManager.USER_ACTIVITY_EVENT_OTHER,
+            PowerManager.USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS,
+        )
         taskFragmentFinished.tryEmit(systemClock.currentTimeMillis())
     }
 
