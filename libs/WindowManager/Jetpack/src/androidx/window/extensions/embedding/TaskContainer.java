@@ -88,10 +88,6 @@ class TaskContainer {
      */
     final Set<IBinder> mFinishedContainer = new ArraySet<>();
 
-    // TODO(b/293654166): move DividerPresenter to SplitController.
-    @NonNull
-    final DividerPresenter mDividerPresenter;
-
     /**
      * The {@link TaskContainer} constructor
      *
@@ -113,7 +109,6 @@ class TaskContainer {
         // the host task is visible and has an activity in the task.
         mIsVisible = true;
         mHasDirectActivity = true;
-        mDividerPresenter = new DividerPresenter();
     }
 
     int getTaskId() {
@@ -149,6 +144,11 @@ class TaskContainer {
         mIsVisible = info.isVisible();
         mHasDirectActivity = info.hasDirectActivity();
         mTaskFragmentParentInfo = info;
+    }
+
+    @Nullable
+    TaskFragmentParentInfo getTaskFragmentParentInfo() {
+        return mTaskFragmentParentInfo;
     }
 
     /**
@@ -398,16 +398,22 @@ class TaskContainer {
         return mContainers;
     }
 
-    void updateDivider(@NonNull WindowContainerTransaction wct) {
-        if (mTaskFragmentParentInfo != null) {
-            // Update divider only if TaskFragmentParentInfo is available.
-            mDividerPresenter.updateDivider(
-                    wct, mTaskFragmentParentInfo, getTopNonFinishingSplitContainer());
+    void updateTopSplitContainerForDivider(@NonNull DividerPresenter dividerPresenter) {
+        final SplitContainer topSplitContainer = getTopNonFinishingSplitContainer();
+        if (topSplitContainer == null) {
+            return;
         }
+
+        final float newRatio = dividerPresenter.calculateNewSplitRatio(topSplitContainer);
+        topSplitContainer.updateDefaultSplitAttributes(
+                new SplitAttributes.Builder(topSplitContainer.getDefaultSplitAttributes())
+                        .setSplitType(new SplitAttributes.SplitType.RatioSplitType(newRatio))
+                        .build()
+        );
     }
 
     @Nullable
-    private SplitContainer getTopNonFinishingSplitContainer() {
+    SplitContainer getTopNonFinishingSplitContainer() {
         for (int i = mSplitContainers.size() - 1; i >= 0; i--) {
             final SplitContainer splitContainer = mSplitContainers.get(i);
             if (!splitContainer.getPrimaryContainer().isFinished()

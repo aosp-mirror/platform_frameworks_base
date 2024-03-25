@@ -165,7 +165,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     /**
      * Expands an existing TaskFragment to fill parent.
      * @param wct WindowContainerTransaction in which the task fragment should be resized.
-     * @param fragmentToken token of an existing TaskFragment.
+     * @param container the {@link TaskFragmentContainer} to be expanded.
      */
     void expandTaskFragment(@NonNull WindowContainerTransaction wct,
             @NonNull TaskFragmentContainer container) {
@@ -174,8 +174,6 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
         clearAdjacentTaskFragments(wct, fragmentToken);
         updateWindowingMode(wct, fragmentToken, WINDOWING_MODE_UNDEFINED);
         updateAnimationParams(wct, fragmentToken, TaskFragmentAnimationParams.DEFAULT);
-
-        container.getTaskContainer().updateDivider(wct);
     }
 
     /**
