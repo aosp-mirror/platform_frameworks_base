@@ -122,7 +122,7 @@ public class ClientTransactionListenerController {
         }
         for (Object activityWindowInfoChangedListener : activityWindowInfoChangedListeners) {
             ((BiConsumer<IBinder, ActivityWindowInfo>) activityWindowInfoChangedListener)
-                    .accept(activityToken, activityWindowInfo);
+                    .accept(activityToken, new ActivityWindowInfo(activityWindowInfo));
         }
     }
 
