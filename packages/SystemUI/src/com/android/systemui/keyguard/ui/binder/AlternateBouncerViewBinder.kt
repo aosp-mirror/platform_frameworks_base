@@ -19,14 +19,16 @@ package com.android.systemui.keyguard.ui.binder
 import android.graphics.PixelFormat
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.window.OnBackInvokedCallback
+import android.window.OnBackInvokedDispatcher
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.CoreStartable
-import com.android.systemui.biometrics.Utils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
@@ -70,8 +72,9 @@ constructor(
                     WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG,
-                    Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS,
-                    PixelFormat.TRANSLUCENT
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                        WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+                    PixelFormat.TRANSLUCENT,
                 )
                 .apply {
                     title = "AlternateBouncerView"
@@ -113,7 +116,35 @@ constructor(
         }
 
         windowManager.get().removeView(alternateBouncerView)
+        alternateBouncerView!!.removeOnAttachStateChangeListener(onAttachAddBackGestureHandler)
+        alternateBouncerView = null
     }
+
+    private val onAttachAddBackGestureHandler =
+        object : View.OnAttachStateChangeListener {
+            private val onBackInvokedCallback: OnBackInvokedCallback = OnBackInvokedCallback {
+                onBackRequested()
+            }
+
+            override fun onViewAttachedToWindow(view: View) {
+                view
+                    .findOnBackInvokedDispatcher()
+                    ?.registerOnBackInvokedCallback(
+                        OnBackInvokedDispatcher.PRIORITY_OVERLAY,
+                        onBackInvokedCallback,
+                    )
+            }
+
+            override fun onViewDetachedFromWindow(view: View) {
+                view
+                    .findOnBackInvokedDispatcher()
+                    ?.unregisterOnBackInvokedCallback(onBackInvokedCallback)
+            }
+
+            fun onBackRequested() {
+                alternateBouncerDependencies.get().viewModel.hideAlternateBouncer()
+            }
+        }
 
     private fun addViewToWindowManager() {
         if (alternateBouncerView?.isAttachedToWindow == true) {
@@ -125,6 +156,7 @@ constructor(
                 as ConstraintLayout
 
         windowManager.get().addView(alternateBouncerView, layoutParams)
+        alternateBouncerView!!.addOnAttachStateChangeListener(onAttachAddBackGestureHandler)
     }
 
     /** Binds the view to the view-model, continuing to update the former based on the latter. */
