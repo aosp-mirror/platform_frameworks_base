@@ -40,6 +40,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -276,7 +277,7 @@ public final class DeviceStateManagerGlobalTest {
                     new DeviceState.Configuration.Builder(mergedBaseState, "" /* name */).build());
             final DeviceState state = new DeviceState(
                     new DeviceState.Configuration.Builder(mergedState, "" /* name */).build());
-            return new DeviceStateInfo(mSupportedDeviceStates, baseState, state);
+            return new DeviceStateInfo(new ArrayList<>(mSupportedDeviceStates), baseState, state);
         }
 
         private void notifyDeviceStateInfoChanged() {
