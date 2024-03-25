@@ -39,6 +39,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
 import android.content.Context;
@@ -207,7 +208,7 @@ public final class PermissionsUtils {
     /**
      * Require the caller to hold necessary permission to observe device presence by UUID.
      */
-    public static void enforceCallerCanObserveDevicePresenceByUuid(@NonNull Context context) {
+    public static void enforceCallerCanObservingDevicePresenceByUuid(@NonNull Context context) {
         if (context.checkCallingPermission(REQUEST_OBSERVE_DEVICE_UUID_PRESENCE)
                 != PERMISSION_GRANTED) {
             throw new SecurityException("Caller (uid=" + getCallingUid() + ") does not have "
@@ -232,6 +233,23 @@ public final class PermissionsUtils {
         if (!checkCallerCanInteractWithUserId(context, userId)) return false;
 
         return checkCallerCanManageCompanionDevice(context);
+    }
+
+    /**
+     * Check if CDM can trust the context to process the association.
+     */
+    @Nullable
+    public static AssociationInfo sanitizeWithCallerChecks(@NonNull Context context,
+            @Nullable AssociationInfo association) {
+        if (association == null) return null;
+
+        final int userId = association.getUserId();
+        final String packageName = association.getPackageName();
+        if (!checkCallerCanManageAssociationsForPackage(context, userId, packageName)) {
+            return null;
+        }
+
+        return association;
     }
 
     private static boolean checkPackage(@UserIdInt int uid, @NonNull String packageName) {
