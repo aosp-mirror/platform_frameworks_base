@@ -1569,23 +1569,6 @@ public final class Settings {
             "android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS";
 
     /**
-     * Activity Action: Show screen for controlling any background restrictions imposed on
-     * an app. If the system returns true for
-     * {@link android.app.ActivityManager#isBackgroundRestricted()}, and the app is not able to
-     * satisfy user requests due to being restricted in the background, then this intent can be
-     * used to request the user to unrestrict the app.
-     * <p>
-     * Input: The Intent's data URI must specify the application package name
-     *        to be shown, with the "package" scheme, such as "package:com.my.app".
-     * <p>
-     * Output: Nothing.
-     */
-    @FlaggedApi(android.app.Flags.FLAG_APP_RESTRICTIONS_API)
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_BACKGROUND_RESTRICTIONS_SETTINGS =
-            "android.settings.BACKGROUND_RESTRICTIONS_SETTINGS";
-
-    /**
      * Activity Action: Open the advanced power usage details page of an associated app.
      * <p>
      * Input: Intent's data URI set with an application name, using the
