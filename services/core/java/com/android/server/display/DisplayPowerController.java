@@ -1336,12 +1336,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 && (mAutomaticBrightnessStrategy.getAutoBrightnessAdjustmentChanged()
                 || userSetBrightnessChanged);
 
-        mBrightnessRangeController.setAutoBrightnessEnabled(
-                mAutomaticBrightnessStrategy.isAutoBrightnessEnabled()
+        final int autoBrightnessState = mAutomaticBrightnessStrategy.isAutoBrightnessEnabled()
                 ? AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED
                 : mAutomaticBrightnessStrategy.isAutoBrightnessDisabledDueToDisplayOff()
                         ? AutomaticBrightnessController.AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE
-                        : AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED);
+                        : AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED;
+
+        mBrightnessRangeController.setAutoBrightnessEnabled(autoBrightnessState);
+        mBrightnessClamperController.setAutoBrightnessState(autoBrightnessState);
 
         boolean updateScreenBrightnessSetting =
                 displayBrightnessState.shouldUpdateScreenBrightnessSetting();

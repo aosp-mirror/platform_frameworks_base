@@ -35,6 +35,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.server.display.DisplayBrightnessState;
+import com.android.server.display.DisplayDeviceConfig;
 import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
 import com.android.server.display.feature.DisplayManagerFlags;
@@ -280,7 +281,8 @@ public class BrightnessClamperControllerTest {
 
         @Override
         List<BrightnessStateModifier> getModifiers(DisplayManagerFlags flags, Context context,
-                Handler handler, BrightnessClamperController.ClamperChangeListener listener) {
+                Handler handler, BrightnessClamperController.ClamperChangeListener listener,
+                DisplayDeviceConfig displayDeviceConfig) {
             return mModifiers;
         }
     }

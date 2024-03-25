@@ -1097,13 +1097,34 @@ public class DisplayDeviceConfig {
         return mBrightnessToBacklightSpline.interpolate(brightness);
     }
 
-    private float getBrightnessFromBacklight(float brightness) {
+    /**
+     * Calculates the screen brightness value - as used among the system from the HAL backlight
+     * level
+     * @param backlight value from 0-1 HAL scale
+     * @return brightness value from 0-1 framework scale
+     */
+    public float getBrightnessFromBacklight(float backlight) {
         if (mLowBrightnessData != null) {
-            return mLowBrightnessData.mBacklightToBrightness.interpolate(brightness);
+            return mLowBrightnessData.mBacklightToBrightness.interpolate(backlight);
         }
-        return mBacklightToBrightnessSpline.interpolate(brightness);
+        return mBacklightToBrightnessSpline.interpolate(backlight);
     }
 
+    /**
+     *
+     * @return low brightness mode transition point
+     */
+    public float getLowBrightnessTransitionPoint() {
+        if (mLowBrightnessData == null) {
+            return PowerManager.BRIGHTNESS_MIN;
+        }
+        return mLowBrightnessData.mTransitionPoint;
+    }
+
+    /**
+     *
+     * @return HAL backlight mapping to framework brightness
+     */
     private Spline getBacklightToBrightnessSpline() {
         if (mLowBrightnessData != null) {
             return mLowBrightnessData.mBacklightToBrightness;
@@ -1133,7 +1154,12 @@ public class DisplayDeviceConfig {
         return mBacklightToNitsSpline.interpolate(backlight);
     }
 
-    private float getBacklightFromNits(float nits) {
+    /**
+     *
+     * @param nits - display brightness
+     * @return corresponding HAL backlight value
+     */
+    public float getBacklightFromNits(float nits) {
         if (mLowBrightnessData != null) {
             return mLowBrightnessData.mNitsToBacklight.interpolate(nits);
         }
@@ -1145,6 +1171,18 @@ public class DisplayDeviceConfig {
             return mLowBrightnessData.mNitsToBacklight;
         }
         return mNitsToBacklightSpline;
+    }
+
+    /**
+     *
+     * @param lux - ambient brightness
+     * @return minimum allowed nits, given the lux.
+     */
+    public float getMinNitsFromLux(float lux) {
+        if (mLowBrightnessData == null) {
+            return INVALID_NITS;
+        }
+        return mLowBrightnessData.mMinLuxToNits.interpolate(lux);
     }
 
     /**
