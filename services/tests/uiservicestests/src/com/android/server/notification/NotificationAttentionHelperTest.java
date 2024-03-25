@@ -210,7 +210,6 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         assertTrue(mAccessibilityManager.isEnabled());
 
         // TODO (b/291907312): remove feature flag
-        mSetFlagsRule.enableFlags(Flags.FLAG_REFACTOR_ATTENTION_HELPER);
         // Disable feature flags by default. Tests should enable as needed.
         mSetFlagsRule.disableFlags(Flags.FLAG_POLITE_NOTIFICATIONS,
                 Flags.FLAG_CROSS_APP_POLITE_NOTIFICATIONS, Flags.FLAG_VIBRATE_WHILE_UNLOCKED);
