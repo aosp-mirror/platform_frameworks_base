@@ -124,11 +124,22 @@ public class MediaOutputBroadcastDialogTest extends SysuiTestCase {
         when(mLocalBluetoothLeBroadcast.getBroadcastCode()).thenReturn(
                 BROADCAST_CODE_TEST.getBytes(StandardCharsets.UTF_8));
 
-        mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
-                mMediaSessionManager, mLocalBluetoothManager, mStarter,
-                mNotifCollection, mDialogTransitionAnimator,
-                mNearbyMediaDevicesManager, mAudioManager, mPowerExemptionManager,
-                mKeyguardManager, mFlags, mUserTracker);
+        mMediaOutputController =
+                new MediaOutputController(
+                        mContext,
+                        TEST_PACKAGE,
+                        mContext.getUser(),
+                        mMediaSessionManager,
+                        mLocalBluetoothManager,
+                        mStarter,
+                        mNotifCollection,
+                        mDialogTransitionAnimator,
+                        mNearbyMediaDevicesManager,
+                        mAudioManager,
+                        mPowerExemptionManager,
+                        mKeyguardManager,
+                        mFlags,
+                        mUserTracker);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         mMediaOutputBroadcastDialog = new MediaOutputBroadcastDialog(mContext, false,
                 mBroadcastSender, mMediaOutputController);

@@ -52,6 +52,7 @@ import android.media.MediaRoute2Info;
 import android.media.RouteListingPreference;
 import android.media.RoutingSessionInfo;
 import android.os.Build;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -131,6 +132,7 @@ public abstract class InfoMediaManager {
     protected final List<MediaDevice> mMediaDevices = new CopyOnWriteArrayList<>();
     @NonNull protected final Context mContext;
     @NonNull protected final String mPackageName;
+    @NonNull protected final UserHandle mUserHandle;
     private final Collection<MediaDeviceCallback> mCallbacks = new CopyOnWriteArrayList<>();
     private MediaDevice mCurrentConnectedDevice;
     private final LocalBluetoothManager mBluetoothManager;
@@ -140,16 +142,19 @@ public abstract class InfoMediaManager {
     /* package */ InfoMediaManager(
             @NonNull Context context,
             @NonNull String packageName,
+            @NonNull UserHandle userHandle,
             @NonNull LocalBluetoothManager localBluetoothManager) {
         mContext = context;
         mBluetoothManager = localBluetoothManager;
         mPackageName = packageName;
+        mUserHandle = userHandle;
     }
 
     /** Creates an instance of InfoMediaManager. */
     public static InfoMediaManager createInstance(
             Context context,
             @Nullable String packageName,
+            @Nullable UserHandle userHandle,
             LocalBluetoothManager localBluetoothManager) {
 
         // The caller is only interested in system routes (headsets, built-in speakers, etc), and is
@@ -159,16 +164,23 @@ public abstract class InfoMediaManager {
             packageName = context.getPackageName();
         }
 
+        if (userHandle == null) {
+            userHandle = android.os.Process.myUserHandle();
+        }
+
         if (Flags.useMediaRouter2ForInfoMediaManager()) {
             try {
-                return new RouterInfoMediaManager(context, packageName, localBluetoothManager);
+                return new RouterInfoMediaManager(
+                        context, packageName, userHandle, localBluetoothManager);
             } catch (PackageNotAvailableException ex) {
                 // TODO: b/293578081 - Propagate this exception to callers for proper handling.
                 Log.w(TAG, "Returning a no-op InfoMediaManager for package " + packageName);
-                return new NoOpInfoMediaManager(context, packageName, localBluetoothManager);
+                return new NoOpInfoMediaManager(
+                        context, packageName, userHandle, localBluetoothManager);
             }
         } else {
-            return new ManagerInfoMediaManager(context, packageName, localBluetoothManager);
+            return new ManagerInfoMediaManager(
+                    context, packageName, userHandle, localBluetoothManager);
         }
     }
 

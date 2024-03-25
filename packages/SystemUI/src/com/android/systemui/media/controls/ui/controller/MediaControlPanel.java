@@ -738,8 +738,11 @@ public class MediaControlPanel {
                                     mPackageName, mMediaViewHolder.getSeamlessButton());
                         } else {
                             mLogger.logOpenOutputSwitcher(mUid, mPackageName, mInstanceId);
-                            mMediaOutputDialogManager.createAndShow(mPackageName, true,
-                                    mMediaViewHolder.getSeamlessButton());
+                            // TODO: b/321969740 - Populate the userHandle parameter. The user
+                            // handle is necessary to disambiguate the same package running on
+                            // different users.
+                            mMediaOutputDialogManager.createAndShow(
+                                    mPackageName, true, mMediaViewHolder.getSeamlessButton(), null);
                         }
                     } else {
                         mLogger.logOpenOutputSwitcher(mUid, mPackageName, mInstanceId);
@@ -767,8 +770,11 @@ public class MediaControlPanel {
                                 Log.w(TAG, "Device pending intent is not an activity.");
                             }
                         } else {
-                            mMediaOutputDialogManager.createAndShow(mPackageName, true,
-                                    mMediaViewHolder.getSeamlessButton());
+                            // TODO: b/321969740 - Populate the userHandle parameter. The user
+                            // handle is necessary to disambiguate the same package running on
+                            // different users.
+                            mMediaOutputDialogManager.createAndShow(
+                                    mPackageName, true, mMediaViewHolder.getSeamlessButton(), null);
                         }
                     }
                 });

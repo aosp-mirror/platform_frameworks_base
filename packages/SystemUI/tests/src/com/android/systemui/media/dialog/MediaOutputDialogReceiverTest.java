@@ -18,6 +18,7 @@ package com.android.systemui.media.dialog;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -61,7 +62,7 @@ public class MediaOutputDialogReceiverTest extends SysuiTestCase {
         mMediaOutputDialogReceiver.onReceive(getContext(), intent);
 
         verify(mMockMediaOutputDialogManager, times(1))
-                .createAndShow(getContext().getPackageName(), false, null);
+                .createAndShow(eq(getContext().getPackageName()), eq(false), any(), any());
         verify(mMockMediaOutputBroadcastDialogManager, never())
                 .createAndShow(any(), anyBoolean(), any());
     }
@@ -72,7 +73,8 @@ public class MediaOutputDialogReceiverTest extends SysuiTestCase {
         intent.putExtra("Wrong Package Name Key", getContext().getPackageName());
         mMediaOutputDialogReceiver.onReceive(getContext(), intent);
 
-        verify(mMockMediaOutputDialogManager, never()).createAndShow(any(), anyBoolean(), any());
+        verify(mMockMediaOutputDialogManager, never())
+                .createAndShow(any(), anyBoolean(), any(), any());
         verify(mMockMediaOutputBroadcastDialogManager, never())
                 .createAndShow(any(), anyBoolean(), any());
     }
@@ -82,7 +84,8 @@ public class MediaOutputDialogReceiverTest extends SysuiTestCase {
         Intent intent = new Intent(MediaOutputConstants.ACTION_LAUNCH_MEDIA_OUTPUT_DIALOG);
         mMediaOutputDialogReceiver.onReceive(getContext(), intent);
 
-        verify(mMockMediaOutputDialogManager, never()).createAndShow(any(), anyBoolean(), any());
+        verify(mMockMediaOutputDialogManager, never())
+                .createAndShow(any(), anyBoolean(), any(), any());
         verify(mMockMediaOutputBroadcastDialogManager, never())
                 .createAndShow(any(), anyBoolean(), any());
     }
@@ -95,7 +98,8 @@ public class MediaOutputDialogReceiverTest extends SysuiTestCase {
         intent.putExtra(MediaOutputConstants.EXTRA_PACKAGE_NAME, getContext().getPackageName());
         mMediaOutputDialogReceiver.onReceive(getContext(), intent);
 
-        verify(mMockMediaOutputDialogManager, never()).createAndShow(any(), anyBoolean(), any());
+        verify(mMockMediaOutputDialogManager, never())
+                .createAndShow(any(), anyBoolean(), any(), any());
         verify(mMockMediaOutputBroadcastDialogManager, never())
                 .createAndShow(any(), anyBoolean(), any());
     }
@@ -108,9 +112,10 @@ public class MediaOutputDialogReceiverTest extends SysuiTestCase {
         intent.putExtra(MediaOutputConstants.EXTRA_PACKAGE_NAME, getContext().getPackageName());
         mMediaOutputDialogReceiver.onReceive(getContext(), intent);
 
-        verify(mMockMediaOutputDialogManager, never()).createAndShow(any(), anyBoolean(), any());
+        verify(mMockMediaOutputDialogManager, never())
+                .createAndShow(any(), anyBoolean(), any(), any());
         verify(mMockMediaOutputBroadcastDialogManager, times(1))
-                .createAndShow(getContext().getPackageName(), true, null);
+                .createAndShow(eq(getContext().getPackageName()), eq(true), any());
     }
 
     @Test
@@ -121,7 +126,8 @@ public class MediaOutputDialogReceiverTest extends SysuiTestCase {
         intent.putExtra("Wrong Package Name Key", getContext().getPackageName());
         mMediaOutputDialogReceiver.onReceive(getContext(), intent);
 
-        verify(mMockMediaOutputDialogManager, never()).createAndShow(any(), anyBoolean(), any());
+        verify(mMockMediaOutputDialogManager, never())
+                .createAndShow(any(), anyBoolean(), any(), any());
         verify(mMockMediaOutputBroadcastDialogManager, never())
                 .createAndShow(any(), anyBoolean(), any());
     }
@@ -133,7 +139,8 @@ public class MediaOutputDialogReceiverTest extends SysuiTestCase {
                 MediaOutputConstants.ACTION_LAUNCH_MEDIA_OUTPUT_BROADCAST_DIALOG);
         mMediaOutputDialogReceiver.onReceive(getContext(), intent);
 
-        verify(mMockMediaOutputDialogManager, never()).createAndShow(any(), anyBoolean(), any());
+        verify(mMockMediaOutputDialogManager, never())
+                .createAndShow(any(), anyBoolean(), any(), any());
         verify(mMockMediaOutputBroadcastDialogManager, never())
                 .createAndShow(any(), anyBoolean(), any());
     }
@@ -145,7 +152,8 @@ public class MediaOutputDialogReceiverTest extends SysuiTestCase {
         intent.putExtra(MediaOutputConstants.EXTRA_PACKAGE_NAME, getContext().getPackageName());
         mMediaOutputDialogReceiver.onReceive(getContext(), intent);
 
-        verify(mMockMediaOutputDialogManager, never()).createAndShow(any(), anyBoolean(), any());
+        verify(mMockMediaOutputDialogManager, never())
+                .createAndShow(any(), anyBoolean(), any(), any());
         verify(mMockMediaOutputBroadcastDialogManager, never())
                 .createAndShow(any(), anyBoolean(), any());
     }
@@ -155,7 +163,8 @@ public class MediaOutputDialogReceiverTest extends SysuiTestCase {
         Intent intent = new Intent("UnKnown Action");
         mMediaOutputDialogReceiver.onReceive(getContext(), intent);
 
-        verify(mMockMediaOutputDialogManager, never()).createAndShow(any(), anyBoolean(), any());
+        verify(mMockMediaOutputDialogManager, never())
+                .createAndShow(any(), anyBoolean(), any(), any());
         verify(mMockMediaOutputBroadcastDialogManager, never())
                 .createAndShow(any(), anyBoolean(), any());
     }

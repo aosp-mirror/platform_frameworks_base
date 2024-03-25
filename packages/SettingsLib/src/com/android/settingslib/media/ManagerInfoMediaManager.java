@@ -21,6 +21,7 @@ import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 import android.media.RouteListingPreference;
 import android.media.RoutingSessionInfo;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -53,8 +54,9 @@ public class ManagerInfoMediaManager extends InfoMediaManager {
     /* package */ ManagerInfoMediaManager(
             Context context,
             @NonNull String packageName,
+            @NonNull UserHandle userHandle,
             LocalBluetoothManager localBluetoothManager) {
-        super(context, packageName, localBluetoothManager);
+        super(context, packageName, userHandle, localBluetoothManager);
 
         mRouterManager = MediaRouter2Manager.getInstance(context);
     }
@@ -87,8 +89,7 @@ public class ManagerInfoMediaManager extends InfoMediaManager {
 
     @Override
     protected void transferToRoute(@NonNull MediaRoute2Info route) {
-        // TODO: b/279555229 - provide real user handle of a caller.
-        mRouterManager.transfer(mPackageName, route, android.os.Process.myUserHandle());
+        mRouterManager.transfer(mPackageName, route, mUserHandle);
     }
 
     @Override

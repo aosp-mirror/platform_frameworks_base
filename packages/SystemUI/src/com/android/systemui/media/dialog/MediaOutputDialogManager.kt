@@ -17,6 +17,7 @@
 package com.android.systemui.media.dialog
 
 import android.content.Context
+import android.os.UserHandle
 import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
@@ -41,7 +42,15 @@ constructor(
     }
 
     /** Creates a [MediaOutputDialog] for the given package. */
-    open fun createAndShow(packageName: String, aboveStatusBar: Boolean, view: View? = null) {
+    // TODO: b/321969740 - Make the userHandle non-optional, and place the parameter next to the
+    // package name. The user handle is necessary to disambiguate the same package running on
+    // different users.
+    open fun createAndShow(
+        packageName: String,
+        aboveStatusBar: Boolean,
+        view: View? = null,
+        userHandle: UserHandle? = null
+    ) {
         createAndShowWithController(
             packageName,
             aboveStatusBar,
@@ -55,20 +64,26 @@ constructor(
                         )
                     )
                 },
+            userHandle = userHandle,
         )
     }
 
     /** Creates a [MediaOutputDialog] for the given package. */
+    // TODO: b/321969740 - Make the userHandle non-optional, and place the parameter next to the
+    // package name. The user handle is necessary to disambiguate the same package running on
+    // different users.
     open fun createAndShowWithController(
         packageName: String,
         aboveStatusBar: Boolean,
         controller: DialogTransitionAnimator.Controller?,
+        userHandle: UserHandle? = null,
     ) {
         createAndShow(
             packageName,
             aboveStatusBar,
             dialogTransitionAnimatorController = controller,
-            includePlaybackAndAppMetadata = true
+            includePlaybackAndAppMetadata = true,
+            userHandle = userHandle,
         )
     }
 
@@ -79,20 +94,25 @@ constructor(
             packageName = null,
             aboveStatusBar = false,
             dialogTransitionAnimatorController = null,
-            includePlaybackAndAppMetadata = false
+            includePlaybackAndAppMetadata = false,
+            userHandle = null,
         )
     }
 
+    // TODO: b/321969740 - Make the userHandle non-optional, and place the parameter next to the
+    // package name. The user handle is necessary to disambiguate the same package running on
+    // different users.
     private fun createAndShow(
         packageName: String?,
         aboveStatusBar: Boolean,
         dialogTransitionAnimatorController: DialogTransitionAnimator.Controller?,
-        includePlaybackAndAppMetadata: Boolean = true
+        includePlaybackAndAppMetadata: Boolean = true,
+        userHandle: UserHandle? = null,
     ) {
         // Dismiss the previous dialog, if any.
         mediaOutputDialog?.dismiss()
 
-        val controller = mediaOutputControllerFactory.create(packageName)
+        val controller = mediaOutputControllerFactory.create(packageName, userHandle)
 
         val mediaOutputDialog =
             MediaOutputDialog(
