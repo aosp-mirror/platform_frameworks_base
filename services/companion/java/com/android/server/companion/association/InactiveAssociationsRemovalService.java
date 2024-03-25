@@ -30,7 +30,7 @@ import com.android.server.LocalServices;
 import com.android.server.companion.CompanionDeviceManagerServiceInternal;
 
 /**
- * A Job Service responsible for clean up idle self-managed associations.
+ * A Job Service responsible for clean up self-managed associations if it's idle for 90 days.
  *
  * The job will be executed only if the device is charging and in idle mode due to the application
  * will be killed if association/role are revoked. See {@link DisassociationProcessor}
@@ -45,10 +45,10 @@ public class InactiveAssociationsRemovalService extends JobService {
     @Override
     public boolean onStartJob(final JobParameters params) {
         Slog.i(TAG, "Execute the Association Removal job");
-        // Special policy for selfManaged that need to revoke associations if the device
-        // does not connect for 90 days.
+
         LocalServices.getService(CompanionDeviceManagerServiceInternal.class)
                 .removeInactiveSelfManagedAssociations();
+
         jobFinished(params, false);
         return true;
     }

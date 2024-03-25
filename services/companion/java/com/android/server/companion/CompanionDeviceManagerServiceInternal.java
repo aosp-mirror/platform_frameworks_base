@@ -27,8 +27,9 @@ import java.util.Collection;
  * Companion Device Manager Local System Service Interface.
  */
 public interface CompanionDeviceManagerServiceInternal {
+
     /**
-     * @see CompanionDeviceManagerService#removeInactiveSelfManagedAssociations
+     * Remove idle self-managed associations.
      */
     void removeInactiveSelfManagedAssociations();
 
