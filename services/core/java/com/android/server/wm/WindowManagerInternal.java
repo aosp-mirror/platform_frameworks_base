@@ -160,7 +160,7 @@ public abstract class WindowManagerInternal {
 
         /**
          * Called when the windows for accessibility changed. This is called if
-         * {@link com.android.server.accessibility.Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y} is
+         * {@link com.android.server.accessibility.Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y_V2} is
          * false.
          *
          * @param forceSend Send the windows for accessibility even if they haven't changed.
@@ -173,7 +173,7 @@ public abstract class WindowManagerInternal {
 
         /**
          * Called when the windows for accessibility changed. This is called if
-         * {@link com.android.server.accessibility.Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y} is
+         * {@link com.android.server.accessibility.Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y_V2} is
          * true.
          * TODO(b/322444245): Remove screenSize parameter by getting it from
          *  DisplayManager#getDisplay(int).getRealSize() on the a11y side.

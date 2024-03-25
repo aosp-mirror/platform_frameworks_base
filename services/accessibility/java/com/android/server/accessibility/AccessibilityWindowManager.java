@@ -445,7 +445,7 @@ public class AccessibilityWindowManager {
         public void onWindowsForAccessibilityChanged(boolean forceSend, int topFocusedDisplayId,
                 IBinder topFocusedWindowToken, @NonNull List<WindowInfo> windows) {
             synchronized (mLock) {
-                if (!Flags.computeWindowChangesOnA11y()) {
+                if (!Flags.computeWindowChangesOnA11yV2()) {
                     // If the flag is enabled, it's already done in #createWindowInfoListLocked.
                     updateWindowsByWindowAttributesLocked(windows);
                 }
@@ -491,7 +491,7 @@ public class AccessibilityWindowManager {
 
         /**
          * Called when the windows for accessibility changed. This is called if
-         * {@link com.android.server.accessibility.Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y} is
+         * {@link com.android.server.accessibility.Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y_V2} is
          * true.
          *
          * @param forceSend             Send the windows for accessibility even if they haven't
@@ -996,7 +996,7 @@ public class AccessibilityWindowManager {
             final int windowId = findWindowIdLocked(userId, window.token);
 
             // With the flag enabled, createWindowInfoListLocked() already removes invalid windows.
-            if (!Flags.computeWindowChangesOnA11y()) {
+            if (!Flags.computeWindowChangesOnA11yV2()) {
                 if (windowId < 0) {
                     return null;
                 }
