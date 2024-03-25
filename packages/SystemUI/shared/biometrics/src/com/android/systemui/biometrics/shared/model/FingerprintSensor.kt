@@ -16,6 +16,7 @@
 
 package com.android.systemui.biometrics.shared.model
 
+import android.graphics.Rect
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 
 /** Fingerprint sensor property. Represents [FingerprintSensorPropertiesInternal]. */
@@ -23,12 +24,23 @@ data class FingerprintSensor(
     val sensorId: Int,
     val sensorStrength: SensorStrength,
     val maxEnrollmentsPerUser: Int,
-    val sensorType: FingerprintSensorType
+    val sensorType: FingerprintSensorType,
+    val sensorBounds: Rect,
+    val sensorRadius: Int,
 )
 
 /** Convert [FingerprintSensorPropertiesInternal] to corresponding [FingerprintSensor] */
 fun FingerprintSensorPropertiesInternal.toFingerprintSensor(): FingerprintSensor {
     val sensorStrength: SensorStrength = this.sensorStrength.toSensorStrength()
     val sensorType: FingerprintSensorType = this.sensorType.toSensorType()
-    return FingerprintSensor(this.sensorId, sensorStrength, this.maxEnrollmentsPerUser, sensorType)
+    val sensorBounds: Rect = this.location.rect
+    val sensorRadius = this.location.sensorRadius
+    return FingerprintSensor(
+        this.sensorId,
+        sensorStrength,
+        this.maxEnrollmentsPerUser,
+        sensorType,
+        sensorBounds,
+        sensorRadius,
+    )
 }

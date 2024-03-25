@@ -33,3 +33,10 @@ fun Int.toSensorStrength(): SensorStrength =
         SensorProperties.STRENGTH_STRONG -> SensorStrength.STRONG
         else -> throw IllegalArgumentException("Invalid SensorStrength value: $this")
     }
+/** Convert [SensorStrength] to corresponding [Int] */
+fun SensorStrength.toInt(): Int =
+    when (this) {
+        SensorStrength.CONVENIENCE -> SensorProperties.STRENGTH_CONVENIENCE
+        SensorStrength.WEAK -> SensorProperties.STRENGTH_WEAK
+        SensorStrength.STRONG -> SensorProperties.STRENGTH_STRONG
+    }
