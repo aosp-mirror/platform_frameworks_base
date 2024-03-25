@@ -173,13 +173,18 @@ public class PromptInfo implements Parcelable {
 
     /**
      * Returns whether SET_BIOMETRIC_DIALOG_ADVANCED is contained.
+     *
+     * Currently, logo res, logo bitmap, logo description, PromptContentViewWithMoreOptions needs
+     * this permission.
      */
-    public boolean containsSetLogoApiConfigurations() {
+    public boolean containsAdvancedApiConfigurations() {
         if (mLogoRes != -1) {
             return true;
         } else if (mLogoBitmap != null) {
             return true;
         } else if (mLogoDescription != null) {
+            return true;
+        } else if (mContentView != null && isContentViewMoreOptionsButtonUsed()) {
             return true;
         }
         return false;

@@ -70,6 +70,7 @@ import javax.crypto.Mac;
 public class BiometricPrompt implements BiometricAuthenticator, BiometricConstants {
 
     private static final String TAG = "BiometricPrompt";
+    private static final int MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER = 30;
 
     /**
      * Error/help message will show for this amount of time.
@@ -222,11 +223,19 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          *
          * @param logoDescription The logo description text that will be shown on the prompt.
          * @return This builder.
+         * @throws IllegalStateException If logo description is null or exceeds certain character
+         *                               limit.
          */
         @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
         @RequiresPermission(SET_BIOMETRIC_DIALOG_ADVANCED)
         @NonNull
         public BiometricPrompt.Builder setLogoDescription(@NonNull String logoDescription) {
+            if (logoDescription == null
+                    || logoDescription.length() > MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER) {
+                throw new IllegalStateException(
+                        "Logo description passed in can not be null or exceed "
+                                + MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER + " character number.");
+            }
             mPromptInfo.setLogoDescription(logoDescription);
             return this;
         }
@@ -814,7 +823,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
 
     /**
      * Gets the logo description for the prompt, as set by
-     * {@link Builder#setDescription(CharSequence)}.
+     * {@link Builder#setLogoDescription(String)}.
      * Currently for system applications use only.
      *
      * @return The logo description of the prompt, or null if the prompt has no logo description

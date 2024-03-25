@@ -6778,7 +6778,7 @@
                 android:protectionLevel="signature" />
 
     <!-- Allows an application to set the advanced features on BiometricDialog (SystemUI), including
-         logo, logo description.
+         logo, logo description, and content view with more options button.
          <p>Not for use by third-party applications.
          @FlaggedApi("android.hardware.biometrics.custom_biometric_prompt")
     -->

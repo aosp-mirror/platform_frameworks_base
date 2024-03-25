@@ -40,9 +40,12 @@ import java.util.concurrent.Executor;
  * or if the user has already selected the appropriate account to use before invoking
  * BiometricPrompt because it will create additional steps that the user must navigate through.
  * Clicking the more options button will dismiss the prompt, provide the app an opportunity to ask
- * the user for the correct account, &finally allow the app to decide how to proceed once selected.
+ * the user for the correct account, and finally allow the app to decide how to proceed once
+ * selected.
+ *
  * <p>
- * Here's how you'd set a <code>PromptContentViewWithMoreOptionsButton</code> on a Biometric Prompt:
+ * Here's how you'd set a <code>PromptContentViewWithMoreOptionsButton</code> on a Biometric
+ * Prompt:
  * <pre class="prettyprint">
  * BiometricPrompt biometricPrompt = new BiometricPrompt.Builder(...)
  *     .setTitle(...)
@@ -56,6 +59,7 @@ import java.util.concurrent.Executor;
  */
 @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
 public final class PromptContentViewWithMoreOptionsButton implements PromptContentViewParcelable {
+    private static final int MAX_DESCRIPTION_CHARACTER_NUMBER = 225;
 
     private final String mDescription;
     private DialogInterface.OnClickListener mListener;
@@ -139,10 +143,15 @@ public final class PromptContentViewWithMoreOptionsButton implements PromptConte
          *
          * @param description The description to display.
          * @return This builder.
+         * @throws IllegalArgumentException If description exceeds certain character limit.
          */
         @NonNull
         @RequiresPermission(SET_BIOMETRIC_DIALOG_ADVANCED)
         public Builder setDescription(@NonNull String description) {
+            if (description.length() > MAX_DESCRIPTION_CHARACTER_NUMBER) {
+                throw new IllegalStateException("The character number of description exceeds "
+                        + MAX_DESCRIPTION_CHARACTER_NUMBER);
+            }
             mDescription = description;
             return this;
         }
@@ -150,14 +159,6 @@ public final class PromptContentViewWithMoreOptionsButton implements PromptConte
         /**
          * Required: Sets the executor and click listener for the more options button on the
          * prompt content.
-         * This button should be used to provide more options for sign in or other purposes, such
-         * as when a user needs to select between multiple app-specific accounts or profiles that
-         * are available for sign in. This is not common and apps should avoid using it if there
-         * is only one choice available or if the user has already selected the appropriate
-         * account to use before invoking BiometricPrompt because it will create additional steps
-         * that the user must navigate through. Clicking the more options button will dismiss the
-         * prompt, provide the app an opportunity to ask the user for the correct account, &finally
-         * allow the app to decide how to proceed once selected.
          *
          * @param executor Executor that will be used to run the on click callback.
          * @param listener Listener containing a callback to be run when the button is pressed.
@@ -167,12 +168,6 @@ public final class PromptContentViewWithMoreOptionsButton implements PromptConte
         @RequiresPermission(SET_BIOMETRIC_DIALOG_ADVANCED)
         public Builder setMoreOptionsButtonListener(@NonNull @CallbackExecutor Executor executor,
                 @NonNull DialogInterface.OnClickListener listener) {
-            if (executor == null) {
-                throw new IllegalArgumentException("Executor must not be null");
-            }
-            if (listener == null) {
-                throw new IllegalArgumentException("Listener must not be null");
-            }
             mExecutor = executor;
             mListener = listener;
             return this;
@@ -183,14 +178,22 @@ public final class PromptContentViewWithMoreOptionsButton implements PromptConte
          * Creates a {@link PromptContentViewWithMoreOptionsButton}.
          *
          * @return An instance of {@link PromptContentViewWithMoreOptionsButton}.
+         * @throws IllegalArgumentException If the executor of more options button is null, or the
+         *                                  listener of more options button is null.
          */
         @NonNull
         @RequiresPermission(SET_BIOMETRIC_DIALOG_ADVANCED)
         public PromptContentViewWithMoreOptionsButton build() {
+            if (mExecutor == null) {
+                throw new IllegalArgumentException(
+                        "The executor for the listener of more options button on prompt content "
+                                + "must be set and non-null if "
+                                + "PromptContentViewWithMoreOptionsButton is used.");
+            }
             if (mListener == null) {
                 throw new IllegalArgumentException(
-                        "The listener of more options button on prompt content must be set if "
-                                + "PromptContentViewWithMoreOptionsButton is used.");
+                        "The listener of more options button on prompt content must be set and "
+                                + "non-null if PromptContentViewWithMoreOptionsButton is used.");
             }
             return new PromptContentViewWithMoreOptionsButton(mDescription, mExecutor, mListener);
         }
