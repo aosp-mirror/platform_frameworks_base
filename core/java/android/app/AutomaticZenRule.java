@@ -676,7 +676,7 @@ public final class AutomaticZenRule implements Parcelable {
         private ComponentName mConfigurationActivity = null;
         private ZenPolicy mPolicy = null;
         private ZenDeviceEffects mDeviceEffects = null;
-        private int mType;
+        private int mType = TYPE_UNKNOWN;
         private String mDescription;
         private int mIconResId;
         private boolean mAllowManualInvocation;
