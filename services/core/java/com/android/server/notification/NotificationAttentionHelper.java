@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import static android.app.Flags.updateRankingTime;
 import static android.app.Notification.FLAG_INSISTENT;
 import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
@@ -495,6 +496,11 @@ public final class NotificationAttentionHelper {
                 if (DEBUG_INTERRUPTIVENESS) {
                     Slog.v(TAG, "INTERRUPTIVENESS: "
                             + record.getKey() + " is interruptive: alerted");
+                }
+                if (updateRankingTime()) {
+                    if (buzz || beep) {
+                        record.resetRankingTime();
+                    }
                 }
             }
         }

@@ -2485,6 +2485,17 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         }
     }
 
+    @Test
+    public void testSoundResetsRankingTime() throws Exception {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_UPDATE_RANKING_TIME);
+        TestableFlagResolver flagResolver = new TestableFlagResolver();
+        initAttentionHelper(flagResolver);
+
+        NotificationRecord r = getBuzzyBeepyNotification();
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        assertThat(r.getRankingTimeMs()).isEqualTo(r.getSbn().getPostTime());
+    }
+
     static class VibrateRepeatMatcher implements ArgumentMatcher<VibrationEffect> {
         private final int mRepeatIndex;
 

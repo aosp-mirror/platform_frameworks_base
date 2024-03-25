@@ -15,6 +15,7 @@
  */
 package com.android.server.notification;
 
+import static android.app.Flags.updateRankingTime;
 import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
@@ -65,14 +66,12 @@ import android.util.Log;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.widget.RemoteViews;
-
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.uri.UriGrantsManagerInternal;
-
 import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.PrintWriter;
@@ -1090,8 +1089,14 @@ public final class NotificationRecord {
     private long calculateRankingTimeMs(long previousRankingTimeMs) {
         Notification n = getNotification();
         // Take developer provided 'when', unless it's in the future.
-        if (n.when != 0 && n.when <= getSbn().getPostTime()) {
-            return n.when;
+        if (updateRankingTime()) {
+            if (n.when != n.creationTime && n.when <= getSbn().getPostTime()){
+                return n.when;
+            }
+        } else {
+            if (n.when != 0 && n.when <= getSbn().getPostTime()) {
+                return n.when;
+            }
         }
         // If we've ranked a previous instance with a timestamp, inherit it. This case is
         // important in order to have ranking stability for updating notifications.
@@ -1191,6 +1196,12 @@ public final class NotificationRecord {
 
     public ArrayList<String> getPeopleOverride() {
         return mPeopleOverride;
+    }
+
+    public void resetRankingTime() {
+        if (updateRankingTime()) {
+            mRankingTimeMs = calculateRankingTimeMs(getSbn().getPostTime());
+        }
     }
 
     public void setInterruptive(boolean interruptive) {
