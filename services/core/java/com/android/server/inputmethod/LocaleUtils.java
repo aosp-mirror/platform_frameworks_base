@@ -46,29 +46,44 @@ final class LocaleUtils {
      * @param desired The locale preferred by user.
      * @return A score based on the locale matching for the default subtype enabling.
      */
-    @IntRange(from = 1, to = 3)
+    @IntRange(from = 1, to = 4)
     private static byte calculateMatchingSubScore(@NonNull final ULocale supported,
             @NonNull final ULocale desired) {
         // Assuming supported/desired is fully expanded.
         if (supported.equals(desired)) {
-            return 3;  // Exact match.
+            return 4;  // Exact match.
         }
+
+        // addLikelySubtags is a maximization process as per
+        // https://www.unicode.org/reports/tr35/#Likely_Subtags
+        ULocale maxDesired = ULocale.addLikelySubtags(desired);
 
         // Skip language matching since it was already done in calculateMatchingScore.
 
         final String supportedScript = supported.getScript();
-        if (supportedScript.isEmpty() || !supportedScript.equals(desired.getScript())) {
+        if (supportedScript.isEmpty() || !supportedScript.equals(maxDesired.getScript())) {
             // TODO: Need subscript matching. For example, Hanb should match with Bopo.
             return 1;
         }
 
         final String supportedCountry = supported.getCountry();
-        if (supportedCountry.isEmpty() || !supportedCountry.equals(desired.getCountry())) {
+        if (supportedCountry.isEmpty() || !supportedCountry.equals(maxDesired.getCountry())) {
             return 2;
         }
 
         // Ignore others e.g. variants, extensions.
-        return 3;
+
+        // Since addLikelySubtags can canonicalize subtags, e.g. the deprecated country codes
+        // an locale with an identical script and country before addLikelySubtags is in favour,
+        // and a score of 4 is returned.
+        String desiredScript = desired.getScript();
+        String desiredCountry = desired.getCountry();
+        if ((desiredScript.isEmpty() || desiredScript.equals(maxDesired.getScript()))
+                && (desiredCountry.isEmpty() || desiredCountry.equals(maxDesired.getCountry()))) {
+            return 4;
+        } else {
+            return 3;
+        }
     }
 
     private static final class ScoreEntry implements Comparable<ScoreEntry> {
@@ -180,8 +195,7 @@ final class LocaleUtils {
                             ULocale.forLocale(preferredLocale));
                 }
                 score[j] = calculateMatchingSubScore(
-                        preferredULocaleCache[j],
-                        ULocale.addLikelySubtags(ULocale.forLocale(locale)));
+                        preferredULocaleCache[j], ULocale.forLocale(locale));
                 if (canSkip && score[j] != 0) {
                     canSkip = false;
                 }
