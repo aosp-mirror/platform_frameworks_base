@@ -520,7 +520,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 Flags.streamlinedBatteryStats());
         mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
                 Flags.streamlinedConnectivityBatteryStats());
-        mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(Flags.streamlinedBatteryStats());
+        mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
+                BatteryConsumer.POWER_COMPONENT_CPU,
+                Flags.streamlinedBatteryStats());
+        mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
+                BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
+                Flags.streamlinedConnectivityBatteryStats());
         mWorker.systemServicesReady();
         mStats.systemServicesReady(mContext);
         mCpuWakeupStats.systemServicesReady();

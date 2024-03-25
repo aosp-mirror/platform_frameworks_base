@@ -72,16 +72,17 @@ public abstract class PowerStatsCollector {
         private static final String EXTRA_UID_POWER_POSITION = "up";
 
         protected static final double MILLI_TO_NANO_MULTIPLIER = 1000000.0;
+        protected static final int UNSUPPORTED = -1;
 
         private int mDeviceStatsArrayLength;
         private int mStateStatsArrayLength;
         private int mUidStatsArrayLength;
 
-        protected int mDeviceDurationPosition;
+        protected int mDeviceDurationPosition = UNSUPPORTED;
         private int mDeviceEnergyConsumerPosition;
         private int mDeviceEnergyConsumerCount;
-        private int mDevicePowerEstimatePosition;
-        private int mUidPowerEstimatePosition;
+        private int mDevicePowerEstimatePosition = UNSUPPORTED;
+        private int mUidPowerEstimatePosition = UNSUPPORTED;
 
         public StatsArrayLayout() {
         }
@@ -197,6 +198,13 @@ public abstract class PowerStatsCollector {
          */
         public void addUidSectionPowerEstimate() {
             mUidPowerEstimatePosition = addUidSection(1);
+        }
+
+        /**
+         * Returns true if power for this component is attributed to UIDs (apps).
+         */
+        public boolean isUidPowerAttributionSupported() {
+            return mUidPowerEstimatePosition != UNSUPPORTED;
         }
 
         /**
