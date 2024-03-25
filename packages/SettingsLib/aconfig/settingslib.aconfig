@@ -51,3 +51,13 @@ flag {
   description: "Hide exclusively managed Bluetooth devices in BT settings menu."
   bug: "324475542"
 }
+
+flag {
+    name: "enable_set_preferred_transport_for_le_audio_device"
+    namespace: "bluetooth"
+    description: "Enable setting preferred transport for Le Audio device"
+    bug: "330581926"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

@@ -15,6 +15,8 @@
  */
 package com.android.settingslib.bluetooth;
 
+import static com.android.settingslib.flags.Flags.FLAG_ENABLE_SET_PREFERRED_TRANSPORT_FOR_LE_AUDIO_DEVICE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -86,6 +88,9 @@ public class CachedBluetoothDeviceTest {
     private HapClientProfile mHapClientProfile;
     @Mock
     private LeAudioProfile mLeAudioProfile;
+
+    @Mock
+    private HidProfile mHidProfile;
     @Mock
     private BluetoothDevice mDevice;
     @Mock
@@ -104,6 +109,7 @@ public class CachedBluetoothDeviceTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_TV_MEDIA_OUTPUT_DIALOG);
+        mSetFlagsRule.enableFlags(FLAG_ENABLE_SET_PREFERRED_TRANSPORT_FOR_LE_AUDIO_DEVICE);
         mContext = RuntimeEnvironment.application;
         mAudioManager = mContext.getSystemService(AudioManager.class);
         mShadowBluetoothAdapter = Shadow.extract(BluetoothAdapter.getDefaultAdapter());
@@ -118,6 +124,8 @@ public class CachedBluetoothDeviceTest {
         when(mHearingAidProfile.getProfileId()).thenReturn(BluetoothProfile.HEARING_AID);
         when(mLeAudioProfile.isProfileReady()).thenReturn(true);
         when(mLeAudioProfile.getProfileId()).thenReturn(BluetoothProfile.LE_AUDIO);
+        when(mHidProfile.isProfileReady()).thenReturn(true);
+        when(mHidProfile.getProfileId()).thenReturn(BluetoothProfile.HID_HOST);
         mCachedDevice = spy(new CachedBluetoothDevice(mContext, mProfileManager, mDevice));
         mSubCachedDevice = spy(new CachedBluetoothDevice(mContext, mProfileManager, mSubDevice));
         doAnswer((invocation) -> mBatteryLevel).when(mCachedDevice).getBatteryLevel();
@@ -1817,6 +1825,32 @@ public class CachedBluetoothDeviceTest {
         updateProfileStatus(mLeAudioProfile, BluetoothProfile.STATE_DISCONNECTED);
 
         assertThat(mCachedDevice.isConnectedHearingAidDevice()).isFalse();
+    }
+
+    @Test
+    public void leAudioHidDevice_leAudioEnabled_setPreferredTransportToLE() {
+
+        when(mProfileManager.getHidProfile()).thenReturn(mHidProfile);
+        when(mProfileManager.getLeAudioProfile()).thenReturn(mLeAudioProfile);
+        when(mLeAudioProfile.isEnabled(mDevice)).thenReturn(true);
+
+        updateProfileStatus(mHidProfile, BluetoothProfile.STATE_CONNECTED);
+        updateProfileStatus(mLeAudioProfile, BluetoothProfile.STATE_CONNECTED);
+
+        verify(mHidProfile).setPreferredTransport(mDevice, BluetoothDevice.TRANSPORT_LE);
+    }
+
+    @Test
+    public void leAudioHidDevice_leAudioDisabled_setPreferredTransportToBredr() {
+        when(mProfileManager.getHidProfile()).thenReturn(mHidProfile);
+        when(mProfileManager.getLeAudioProfile()).thenReturn(mLeAudioProfile);
+        when(mLeAudioProfile.isEnabled(mDevice)).thenReturn(false);
+
+        updateProfileStatus(mLeAudioProfile, BluetoothProfile.STATE_CONNECTED);
+        updateProfileStatus(mLeAudioProfile, BluetoothProfile.STATE_DISCONNECTED);
+        updateProfileStatus(mHidProfile, BluetoothProfile.STATE_CONNECTED);
+
+        verify(mHidProfile).setPreferredTransport(mDevice, BluetoothDevice.TRANSPORT_BREDR);
     }
 
     private HearingAidInfo getLeftAshaHearingAidInfo() {
