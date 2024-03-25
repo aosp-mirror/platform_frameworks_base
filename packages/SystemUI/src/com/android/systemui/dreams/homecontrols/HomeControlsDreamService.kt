@@ -81,7 +81,7 @@ constructor(
                     activity = activity,
                     onCreateCallback = this::onTaskFragmentCreated,
                     onInfoChangedCallback = this::onTaskFragmentInfoChanged,
-                    hide = { finish() }
+                    hide = { endDream() }
                 )
                 .apply { createTaskFragment() }
 
@@ -91,9 +91,13 @@ constructor(
     private fun onTaskFragmentInfoChanged(taskFragmentInfo: TaskFragmentInfo) {
         if (taskFragmentInfo.isEmpty) {
             logger.d("Finishing dream due to TaskFragment being empty")
-            finish()
-            homeControlsComponentInteractor.onTaskFragmentEmpty()
+            endDream()
         }
+    }
+
+    private fun endDream() {
+        homeControlsComponentInteractor.onDreamEndUnexpectedly()
+        wakeUp()
     }
 
     private fun onTaskFragmentCreated(taskFragmentInfo: TaskFragmentInfo) {
