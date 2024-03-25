@@ -613,7 +613,7 @@ public final class MediaRouter2 {
         mImpl = new LocalMediaRouter2Impl(mContext.getPackageName());
         mHandler = new Handler(Looper.getMainLooper());
 
-        loadSystemRoutes();
+        loadSystemRoutes(/* isProxyRouter */ false);
 
         RoutingSessionInfo currentSystemSessionInfo = mImpl.getSystemSessionInfo();
         if (currentSystemSessionInfo == null) {
@@ -631,21 +631,22 @@ public final class MediaRouter2 {
                 IMediaRouterService.Stub.asInterface(
                         ServiceManager.getService(Context.MEDIA_ROUTER_SERVICE));
 
-        loadSystemRoutes();
+        loadSystemRoutes(/* isProxyRouter */ true);
 
         mSystemController =
                 new SystemRoutingController(
                         ProxyMediaRouter2Impl.getSystemSessionInfoImpl(
-                                mMediaRouterService, clientPackageName));
+                                mMediaRouterService, mContext.getPackageName(), clientPackageName));
 
         mImpl = new ProxyMediaRouter2Impl(context, clientPackageName, user);
     }
 
     @GuardedBy("mLock")
-    private void loadSystemRoutes() {
+    private void loadSystemRoutes(boolean isProxyRouter) {
         List<MediaRoute2Info> currentSystemRoutes = null;
         try {
-            currentSystemRoutes = mMediaRouterService.getSystemRoutes();
+            currentSystemRoutes = mMediaRouterService.getSystemRoutes(mContext.getPackageName(),
+                    isProxyRouter);
         } catch (RemoteException ex) {
             ex.rethrowFromSystemServer();
         }
@@ -2644,7 +2645,8 @@ public final class MediaRouter2 {
 
         @Override
         public RoutingSessionInfo getSystemSessionInfo() {
-            return getSystemSessionInfoImpl(mMediaRouterService, mClientPackageName);
+            return getSystemSessionInfoImpl(
+                    mMediaRouterService, mContext.getPackageName(), mClientPackageName);
         }
 
         /**
@@ -3049,9 +3051,11 @@ public final class MediaRouter2 {
          * <p>Extracted into a static method to allow calling this from the constructor.
          */
         /* package */ static RoutingSessionInfo getSystemSessionInfoImpl(
-                @NonNull IMediaRouterService service, @NonNull String clientPackageName) {
+                @NonNull IMediaRouterService service,
+                @NonNull String callerPackageName,
+                @NonNull String clientPackageName) {
             try {
-                return service.getSystemSessionInfoForPackage(clientPackageName);
+                return service.getSystemSessionInfoForPackage(callerPackageName, clientPackageName);
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }

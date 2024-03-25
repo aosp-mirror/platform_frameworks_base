@@ -50,7 +50,7 @@ interface IMediaRouterService {
     // MediaRouterService.java for readability.
 
     // Methods for MediaRouter2
-    List<MediaRoute2Info> getSystemRoutes();
+    List<MediaRoute2Info> getSystemRoutes(String callerPackageName, boolean isProxyRouter);
     RoutingSessionInfo getSystemSessionInfo();
 
     void registerRouter2(IMediaRouter2 router, String packageName);
@@ -75,7 +75,8 @@ interface IMediaRouterService {
 
     // Methods for MediaRouter2Manager
     List<RoutingSessionInfo> getRemoteSessions(IMediaRouter2Manager manager);
-    RoutingSessionInfo getSystemSessionInfoForPackage(String packageName);
+    RoutingSessionInfo getSystemSessionInfoForPackage(String callerPackageName,
+        String targetPackageName);
     void registerManager(IMediaRouter2Manager manager, String packageName);
     void registerProxyRouter(IMediaRouter2Manager manager, String callingPackageName, String targetPackageName, in UserHandle targetUser);
     void unregisterManager(IMediaRouter2Manager manager);
