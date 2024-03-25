@@ -196,8 +196,7 @@ public final class FadeManagerConfigurationUnitTest {
         FadeManagerConfiguration fmcObj = new FadeManagerConfiguration
                 .Builder(TEST_FADE_OUT_DURATION_MS, TEST_FADE_IN_DURATION_MS).build();
 
-        FadeManagerConfiguration fmc = new FadeManagerConfiguration
-                .Builder(fmcObj).build();
+        FadeManagerConfiguration fmc = new FadeManagerConfiguration.Builder(fmcObj).build();
 
         expect.withMessage("Fade state for copy builder").that(fmc.getFadeState())
                 .isEqualTo(fmcObj.getFadeState());
@@ -246,6 +245,45 @@ public final class FadeManagerConfigurationUnitTest {
         expect.withMessage("Fade in duration for game audio attributes")
                 .that(fmc.getFadeInDurationForAudioAttributes(TEST_GAME_AUDIO_ATTRIBUTE))
                 .isEqualTo(fmcObj.getFadeInDurationForAudioAttributes(TEST_GAME_AUDIO_ATTRIBUTE));
+    }
+
+    @Test
+    public void build_withCopyConstructor_doesnotChangeOriginal() {
+        FadeManagerConfiguration copyConstructedFmc = new FadeManagerConfiguration.Builder(mFmc)
+                .setFadeOutDurationForUsage(AudioAttributes.USAGE_MEDIA, TEST_FADE_OUT_DURATION_MS)
+                .setFadeInDurationForUsage(AudioAttributes.USAGE_MEDIA, TEST_FADE_IN_DURATION_MS)
+                .build();
+
+        expect.withMessage("Fade out duration for media usage of default constructor")
+                .that(mFmc.getFadeOutDurationForUsage(AudioAttributes.USAGE_MEDIA))
+                .isEqualTo(DEFAULT_FADE_OUT_DURATION_MS);
+        expect.withMessage("Fade out duration for media usage of default constructor")
+                .that(mFmc.getFadeInDurationForUsage(AudioAttributes.USAGE_MEDIA))
+                .isEqualTo(DEFAULT_FADE_IN_DURATION_MS);
+        expect.withMessage("Fade out duration for media usage of copy constructor")
+                .that(copyConstructedFmc.getFadeOutDurationForUsage(AudioAttributes.USAGE_MEDIA))
+                .isEqualTo(TEST_FADE_OUT_DURATION_MS);
+        expect.withMessage("Fade out duration for media usage of copy constructor")
+                .that(copyConstructedFmc.getFadeInDurationForUsage(AudioAttributes.USAGE_MEDIA))
+                .isEqualTo(TEST_FADE_IN_DURATION_MS);
+    }
+
+    @Test
+    public void build_withCopyConstructor_equals() {
+        FadeManagerConfiguration fmc = new FadeManagerConfiguration.Builder()
+                .setFadeableUsages(List.of(AudioAttributes.USAGE_MEDIA,
+                        AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE,
+                        AudioAttributes.USAGE_ASSISTANT,
+                        AudioAttributes.USAGE_EMERGENCY))
+                .setFadeOutDurationForUsage(AudioAttributes.USAGE_MEDIA, TEST_FADE_OUT_DURATION_MS)
+                .setFadeInDurationForUsage(AudioAttributes.USAGE_MEDIA, TEST_FADE_IN_DURATION_MS)
+                .build();
+
+        FadeManagerConfiguration copyConstructedFmc =
+                new FadeManagerConfiguration.Builder(fmc).build();
+
+        expect.withMessage("Fade manager config constructed using copy constructor").that(fmc)
+                .isEqualTo(copyConstructedFmc);
     }
 
     @Test
