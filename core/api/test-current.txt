@@ -3107,6 +3107,14 @@ package android.service.notification {
 
 }
 
+package android.service.ondeviceintelligence {
+
+  @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public abstract class OnDeviceIntelligenceService extends android.app.Service {
+    method public void onReady();
+  }
+
+}
+
 package android.service.quickaccesswallet {
 
   public interface QuickAccessWalletClient extends java.io.Closeable {
