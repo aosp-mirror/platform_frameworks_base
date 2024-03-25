@@ -33,6 +33,7 @@ import android.os.PowerManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.server.display.AutomaticBrightnessController;
 import com.android.server.display.config.HdrBrightnessData;
 import com.android.server.testutils.OffsettableClock;
 import com.android.server.testutils.TestHandler;
@@ -230,6 +231,11 @@ public class HdrClamperTest {
     }
 
     private void configureClamper() {
+        // AutoBrightnessController sends ambientLux values *only* when auto brightness enabled.
+        // HdrClamper is temporary disabled  if auto brightness is off.
+        // Temporary setting AutoBrightnessState to enabled for this test
+        // The issue is tracked here: b/322445088
+        mHdrClamper.setAutoBrightnessState(AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED);
         mHdrClamper.resetHdrConfig(TEST_HDR_DATA, WIDTH, HEIGHT, MIN_HDR_PERCENT, mMockBinder);
         mHdrChangeListener.onHdrVisible(true);
     }
