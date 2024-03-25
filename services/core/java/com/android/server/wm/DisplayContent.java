@@ -2705,7 +2705,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * Returns true if the specified UID has access to this display.
      */
     boolean hasAccess(int uid) {
-        return mDisplay.hasAccess(uid);
+        int userId = UserHandle.getUserId(uid);
+        boolean isUserVisibleOnDisplay = mWmService.mUmInternal.isUserVisible(
+                userId, mDisplayId);
+        return mDisplay.hasAccess(uid)
+                && (userId == UserHandle.USER_SYSTEM || isUserVisibleOnDisplay);
     }
 
     boolean isPrivate() {

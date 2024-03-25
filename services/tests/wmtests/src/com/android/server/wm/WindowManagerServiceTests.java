@@ -101,6 +101,7 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.view.WindowManagerGlobal;
 import android.window.ActivityWindowInfo;
 import android.window.ClientWindowFrames;
 import android.window.InputTransferToken;
@@ -555,6 +556,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
                 .hasListener(eq(windowContextToken));
         doReturn(TYPE_INPUT_METHOD).when(mWm.mWindowContextListenerController)
                 .getWindowType(eq(windowContextToken));
+        doReturn(true).when(mWm.mUmInternal).isUserVisible(anyInt(), anyInt());
 
         mWm.addWindow(session, new TestIWindow(), params, View.VISIBLE, DEFAULT_DISPLAY,
                 UserHandle.USER_SYSTEM, WindowInsets.Type.defaultVisible(), null, new InsetsState(),
@@ -1274,6 +1276,24 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final ActivityWindowInfo activityWindowInfo = outBundle.getParcelable(
                 IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO, ActivityWindowInfo.class);
         assertEquals(win.mActivityRecord.getActivityWindowInfo(), activityWindowInfo);
+    }
+
+    @Test
+    public void testAddOverlayWindowToUnassignedDisplay_notAllowed() {
+        int uid = 100000; // uid for non-system user
+        Session session = createTestSession(mAtm, 1234 /* pid */, uid);
+        DisplayContent dc = createNewDisplay();
+        int displayId = dc.getDisplayId();
+        int userId = UserHandle.getUserId(uid);
+        doReturn(false).when(mWm.mUmInternal).isUserVisible(eq(userId), eq(displayId));
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                LayoutParams.TYPE_APPLICATION_OVERLAY);
+
+        int result = mWm.addWindow(session, new TestIWindow(), params, View.VISIBLE, displayId,
+                userId, WindowInsets.Type.defaultVisible(), null, new InsetsState(),
+                new InsetsSourceControl.Array(), new Rect(), new float[1]);
+
+        assertThat(result).isEqualTo(WindowManagerGlobal.ADD_INVALID_DISPLAY);
     }
 
     class TestResultReceiver implements IResultReceiver {
