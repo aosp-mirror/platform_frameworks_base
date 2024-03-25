@@ -1090,7 +1090,7 @@ public class OomAdjuster {
         mNumNonCachedProcs = 0;
         mNumCachedHiddenProcs = 0;
 
-        final boolean allChanged = updateAndTrimProcessLSP(now, nowElapsed, oldTime, activeUids,
+        updateAndTrimProcessLSP(now, nowElapsed, oldTime, activeUids,
                 oomAdjReason, doingAll);
         mNumServiceProcs = mNewNumServiceProcs;
 
@@ -1098,11 +1098,6 @@ public class OomAdjuster {
             // Need to do this on its own message because the stack may not
             // be in a consistent state at this point.
             mService.mAtmInternal.scheduleDestroyAllActivities("always-finish");
-        }
-
-        if (allChanged) {
-            mService.mAppProfiler.requestPssAllProcsLPr(now, false,
-                    mService.mProcessStats.isMemFactorLowered());
         }
 
         updateUidsLSP(activeUids, nowElapsed);
@@ -1300,7 +1295,7 @@ public class OomAdjuster {
     }
 
     @GuardedBy({"mService", "mProcLock"})
-    private boolean updateAndTrimProcessLSP(final long now, final long nowElapsed,
+    private void updateAndTrimProcessLSP(final long now, final long nowElapsed,
             final long oldTime, final ActiveUids activeUids, @OomAdjReason int oomAdjReason,
             boolean doingAll) {
         ArrayList<ProcessRecord> lruList = mProcessList.getLruProcessesLOSP();
@@ -1450,7 +1445,7 @@ public class OomAdjuster {
 
         mLastFreeSwapPercent = freeSwapPercent;
 
-        return mService.mAppProfiler.updateLowMemStateLSP(numCached, numEmpty, numTrimming, now);
+        mService.mAppProfiler.updateLowMemStateLSP(numCached, numEmpty, numTrimming, now);
     }
 
     @GuardedBy({"mService", "mProcLock"})

@@ -210,7 +210,6 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         assertTrue(mAccessibilityManager.isEnabled());
 
         // TODO (b/291907312): remove feature flag
-        mSetFlagsRule.enableFlags(Flags.FLAG_REFACTOR_ATTENTION_HELPER);
         // Disable feature flags by default. Tests should enable as needed.
         mSetFlagsRule.disableFlags(Flags.FLAG_POLITE_NOTIFICATIONS,
                 Flags.FLAG_CROSS_APP_POLITE_NOTIFICATIONS, Flags.FLAG_VIBRATE_WHILE_UNLOCKED);
@@ -2484,6 +2483,17 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
             // Check that avalanche strategy is inactive
             assertThat(mAttentionHelper.getPolitenessStrategy().isActive()).isFalse();
         }
+    }
+
+    @Test
+    public void testSoundResetsRankingTime() throws Exception {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_UPDATE_RANKING_TIME);
+        TestableFlagResolver flagResolver = new TestableFlagResolver();
+        initAttentionHelper(flagResolver);
+
+        NotificationRecord r = getBuzzyBeepyNotification();
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        assertThat(r.getRankingTimeMs()).isEqualTo(r.getSbn().getPostTime());
     }
 
     static class VibrateRepeatMatcher implements ArgumentMatcher<VibrationEffect> {

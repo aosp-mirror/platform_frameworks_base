@@ -1717,20 +1717,26 @@ public class UserManagerService extends IUserManager.Stub {
                         return false;
                     }
 
-                    if (android.multiuser.Flags.showSetScreenLockDialog()) {
-                        // Show the prompt to set a new screen lock if the device does not have one
-                        final KeyguardManager km = mContext.getSystemService(KeyguardManager.class);
-                        if (km != null && !km.isDeviceSecure()) {
-                            Intent setScreenLockPromptIntent =
-                                    SetScreenLockDialogActivity
-                                            .createBaseIntent(LAUNCH_REASON_DISABLE_QUIET_MODE);
-                            setScreenLockPromptIntent.putExtra(EXTRA_ORIGIN_USER_ID, userId);
-                            mContext.startActivity(setScreenLockPromptIntent);
-                            return false;
-                        }
+                    final KeyguardManager km = mContext.getSystemService(KeyguardManager.class);
+                    if (km != null && km.isDeviceSecure()) {
+                        showConfirmCredentialToDisableQuietMode(userId, target, callingPackage);
+                        return false;
+                    } else if (km != null && !km.isDeviceSecure()
+                            && android.multiuser.Flags.showSetScreenLockDialog()
+                            // TODO(b/330720545): Add a better way to accomplish this, also use it
+                            //  to block profile creation w/o device credentials present.
+                            && Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                                Settings.Secure.USER_SETUP_COMPLETE, 0, userId) == 1) {
+                        Intent setScreenLockPromptIntent =
+                                SetScreenLockDialogActivity
+                                        .createBaseIntent(LAUNCH_REASON_DISABLE_QUIET_MODE);
+                        setScreenLockPromptIntent.putExtra(EXTRA_ORIGIN_USER_ID, userId);
+                        mContext.startActivity(setScreenLockPromptIntent);
+                        return false;
+                    } else {
+                        Slog.w(LOG_TAG, "Allowing profile unlock even when device credentials "
+                                + "are not set for user " + userId);
                     }
-                    showConfirmCredentialToDisableQuietMode(userId, target, callingPackage);
-                    return false;
                 }
             }
             final boolean hasUnifiedChallenge =

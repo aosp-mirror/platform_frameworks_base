@@ -607,9 +607,9 @@ public final class ActivityThread extends ClientTransactionHandler
         Configuration createdConfig;
         Configuration overrideConfig;
         @NonNull
-        private ActivityWindowInfo mActivityWindowInfo;
-        @Nullable
-        private ActivityWindowInfo mLastReportedActivityWindowInfo;
+        private final ActivityWindowInfo mActivityWindowInfo = new ActivityWindowInfo();
+        @NonNull
+        private final ActivityWindowInfo mLastReportedActivityWindowInfo = new ActivityWindowInfo();
 
         // Used for consolidating configs before sending on to Activity.
         private final Configuration tmpConfig = new Configuration();
@@ -700,7 +700,7 @@ public final class ActivityThread extends ClientTransactionHandler
             mSceneTransitionInfo = sceneTransitionInfo;
             mLaunchedFromBubble = launchedFromBubble;
             mTaskFragmentToken = taskFragmentToken;
-            mActivityWindowInfo = activityWindowInfo;
+            mActivityWindowInfo.set(activityWindowInfo);
             init();
         }
 
@@ -720,7 +720,7 @@ public final class ActivityThread extends ClientTransactionHandler
                         throw new IllegalStateException(
                                 "Received config update for non-existing activity");
                     }
-                    if (activityWindowInfoFlag() && activityWindowInfo == null) {
+                    if (activityWindowInfo == null) {
                         Log.w(TAG, "Received empty ActivityWindowInfo update for r=" + activity);
                         activityWindowInfo = mActivityWindowInfo;
                     }
@@ -6063,7 +6063,7 @@ public final class ActivityThread extends ClientTransactionHandler
             target.createdConfig = config.getGlobalConfiguration();
             target.overrideConfig = config.getOverrideConfiguration();
             target.pendingConfigChanges |= configChanges;
-            target.mActivityWindowInfo = activityWindowInfo;
+            target.mActivityWindowInfo.set(activityWindowInfo);
         }
 
         return scheduleRelaunch ? target : null;
@@ -6257,7 +6257,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
         r.startsNotResumed = startsNotResumed;
         r.overrideConfig = overrideConfig;
-        r.mActivityWindowInfo = activityWindowInfo;
+        r.mActivityWindowInfo.set(activityWindowInfo);
 
         handleLaunchActivity(r, pendingActions, mLastReportedDeviceId, customIntent);
     }
@@ -6759,7 +6759,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
         // Perform updates.
         r.overrideConfig = overrideConfig;
-        r.mActivityWindowInfo = activityWindowInfo;
+        r.mActivityWindowInfo.set(activityWindowInfo);
 
         final ViewRootImpl viewRoot = r.activity.mDecor != null
             ? r.activity.mDecor.getViewRootImpl() : null;
@@ -6792,11 +6792,10 @@ public final class ActivityThread extends ClientTransactionHandler
         if (!activityWindowInfoFlag()) {
             return;
         }
-        if (r.mActivityWindowInfo == null
-                || r.mActivityWindowInfo.equals(r.mLastReportedActivityWindowInfo)) {
+        if (r.mActivityWindowInfo.equals(r.mLastReportedActivityWindowInfo)) {
             return;
         }
-        r.mLastReportedActivityWindowInfo = r.mActivityWindowInfo;
+        r.mLastReportedActivityWindowInfo.set(r.mActivityWindowInfo);
         ClientTransactionListenerController.getInstance().onActivityWindowInfoChanged(r.token,
                 r.mActivityWindowInfo);
     }

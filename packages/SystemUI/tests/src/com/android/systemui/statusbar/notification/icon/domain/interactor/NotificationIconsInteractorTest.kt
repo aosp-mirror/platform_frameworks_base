@@ -21,6 +21,7 @@ import com.android.systemui.SysUITestComponent
 import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.TestMocksModule
+import com.android.systemui.biometrics.domain.BiometricsDomainLayerModule
 import com.android.systemui.collectLastValue
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
@@ -155,7 +156,7 @@ class AlwaysOnDisplayNotificationIconsInteractorTest : SysuiTestCase() {
 
     private val bubbles: Bubbles = mock()
 
-    @Component(modules = [SysUITestModule::class])
+    @Component(modules = [SysUITestModule::class, BiometricsDomainLayerModule::class])
     @SysUISingleton
     interface TestComponent : SysUITestComponent<AlwaysOnDisplayNotificationIconsInteractor> {
 

@@ -17,6 +17,8 @@
 package com.android.settingslib.spa.gallery.page
 
 import android.os.Bundle
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -32,6 +34,7 @@ import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.navigator
+import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
@@ -72,10 +75,11 @@ object LoadingBarPageProvider : SettingsPageProvider {
                     Text(text = "Resume")
                 }
             }
+            Spacer(modifier = Modifier.height(SettingsDimension.itemPaddingVertical))
+            LinearLoadingBar(isLoading = loading)
+            Spacer(modifier = Modifier.height(SettingsDimension.itemPaddingVertical))
+            CircularLoadingBar(isLoading = loading)
         }
-
-        LinearLoadingBar(isLoading = loading, yOffset = 104.dp)
-        CircularLoadingBar(isLoading = loading)
     }
 }
 

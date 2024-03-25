@@ -20,6 +20,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.domain.BiometricsDomainLayerModule
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.ui.view.InWindowLauncherUnlockAnimationManager
 import com.android.systemui.shared.system.smartspace.ILauncherUnlockAnimationController
@@ -118,6 +119,7 @@ class InWindowLauncherUnlockAnimationManagerTest : SysuiTestCase() {
         modules =
             [
                 SysUITestModule::class,
+                BiometricsDomainLayerModule::class,
             ]
     )
     interface TestComponent {

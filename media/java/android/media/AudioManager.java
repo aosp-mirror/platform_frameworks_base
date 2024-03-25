@@ -3465,7 +3465,7 @@ public class AudioManager {
 
     /* modes for setMode/getMode/setRoute/getRoute */
     /**
-     * Audio harware modes.
+     * Audio hardware modes.
      */
     /**
      * Invalid audio mode.

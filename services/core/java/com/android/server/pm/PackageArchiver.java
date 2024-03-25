@@ -293,9 +293,26 @@ public class PackageArchiver {
             return START_PERMISSION_DENIED;
         }
 
-        Slog.i(TAG, TextUtils.formatSimple("Unarchival is starting for: %s", packageName));
-
         try {
+            boolean openAppDetailsIfOngoingUnarchival = getAppOpsManager().checkOp(
+                    AppOpsManager.OP_UNARCHIVAL_CONFIRMATION, callingUid, callerPackageName)
+                    == MODE_ALLOWED;
+            if (openAppDetailsIfOngoingUnarchival) {
+                PackageInstaller.SessionInfo activeUnarchivalSession = getActiveUnarchivalSession(
+                        packageName, userId);
+                if (activeUnarchivalSession != null) {
+                    mPm.mHandler.post(() -> {
+                        Slog.i(TAG, "Opening app details page for ongoing unarchival of: "
+                                + packageName);
+                        getLauncherApps().startPackageInstallerSessionDetailsActivity(
+                                activeUnarchivalSession, null, null);
+                    });
+                    return START_ABORTED;
+                }
+            }
+
+            Slog.i(TAG, TextUtils.formatSimple("Unarchival is starting for: %s", packageName));
+
             requestUnarchive(packageName, callerPackageName,
                     getOrCreateLauncherListener(userId, packageName),
                     UserHandle.of(userId),
@@ -793,8 +810,27 @@ public class PackageArchiver {
             }
         }
 
-        mPm.mHandler.post(
-                () -> unarchiveInternal(packageName, userHandle, installerPackage, draftSessionId));
+        mPm.mHandler.post(() -> {
+            Slog.i(TAG, "Starting app unarchival for: " + packageName);
+            unarchiveInternal(packageName, userHandle, installerPackage,
+                    draftSessionId);
+        });
+    }
+
+    @Nullable
+    private PackageInstaller.SessionInfo getActiveUnarchivalSession(String packageName,
+            int userId) {
+        List<PackageInstaller.SessionInfo> activeSessions =
+                mPm.mInstallerService.getAllSessions(userId).getList();
+        for (int idx = 0; idx < activeSessions.size(); idx++) {
+            PackageInstaller.SessionInfo activeSession = activeSessions.get(idx);
+            if (activeSession.appPackageName.equals(packageName)
+                    && activeSession.userId == userId && activeSession.active
+                    && activeSession.isUnarchival()) {
+                return activeSession;
+            }
+        }
+        return null;
     }
 
     private void requestUnarchiveConfirmation(String packageName, IntentSender statusReceiver,

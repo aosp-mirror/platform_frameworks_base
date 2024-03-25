@@ -345,6 +345,7 @@ cc_defaults {
         "jni/android_nio_utils.cpp",
         "jni/android_util_PathParser.cpp",
 
+        "jni/AnimatedImageDrawable.cpp",
         "jni/Bitmap.cpp",
         "jni/BitmapRegionDecoder.cpp",
         "jni/BufferUtils.cpp",
@@ -418,7 +419,6 @@ cc_defaults {
     target: {
         android: {
             srcs: [ // sources that depend on android only libraries
-                "jni/AnimatedImageDrawable.cpp",
                 "jni/android_graphics_TextureLayer.cpp",
                 "jni/android_graphics_HardwareRenderer.cpp",
                 "jni/android_graphics_HardwareBufferRenderer.cpp",
@@ -539,6 +539,7 @@ cc_defaults {
         "renderthread/RenderTask.cpp",
         "renderthread/TimeLord.cpp",
         "hwui/AnimatedImageDrawable.cpp",
+        "hwui/AnimatedImageThread.cpp",
         "hwui/Bitmap.cpp",
         "hwui/BlurDrawLooper.cpp",
         "hwui/Canvas.cpp",
@@ -599,7 +600,6 @@ cc_defaults {
             local_include_dirs: ["platform/android"],
 
             srcs: [
-                "hwui/AnimatedImageThread.cpp",
                 "pipeline/skia/ATraceMemoryDump.cpp",
                 "pipeline/skia/GLFunctorDrawable.cpp",
                 "pipeline/skia/LayerDrawable.cpp",

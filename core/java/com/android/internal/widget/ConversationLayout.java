@@ -1297,6 +1297,17 @@ public class ConversationLayout extends FrameLayout
      */
     @Nullable
     private Drawable resolveAvatarImageForOneToOne(Icon conversationIcon) {
+        final Drawable conversationIconDrawable =
+                tryLoadingSizeRestrictedIconForOneToOne(conversationIcon);
+        if (conversationIconDrawable != null) {
+            return conversationIconDrawable;
+        }
+        // when size restricted icon loading fails, we fallback to icons load drawable.
+        return loadDrawableFromIcon(conversationIcon);
+    }
+
+    @Nullable
+    private Drawable tryLoadingSizeRestrictedIconForOneToOne(Icon conversationIcon) {
         try {
             return mConversationIconView.loadSizeRestrictedIcon(conversationIcon);
         } catch (Exception ex) {
@@ -1309,6 +1320,11 @@ public class ConversationLayout extends FrameLayout
      */
     @Nullable
     private Drawable resolveAvatarImageForFacePile(Icon conversationIcon) {
+        return loadDrawableFromIcon(conversationIcon);
+    }
+
+    @Nullable
+    private Drawable loadDrawableFromIcon(Icon conversationIcon) {
         try {
             return conversationIcon.loadDrawable(getContext());
         } catch (Exception ex) {

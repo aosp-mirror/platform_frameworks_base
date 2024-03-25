@@ -555,7 +555,7 @@ class AnimatableClockView @JvmOverloads constructor(
             if (distance > 0) {
                 // If distance > 0 then we are moving from the left towards the center.
                 // We need ensure that the glyphs are offset to the initial position.
-                glyphOffsets -= dir * distance
+                glyphOffsets[i] -= dir * distance
             }
         }
         invalidate()

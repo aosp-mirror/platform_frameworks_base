@@ -19,6 +19,7 @@ package androidx.window.extensions.embedding;
 import static android.content.pm.PackageManager.MATCH_ALL;
 
 import static androidx.window.extensions.embedding.DividerPresenter.getBoundsOffsetForDivider;
+import static androidx.window.extensions.embedding.SplitAttributesHelper.isReversedLayout;
 import static androidx.window.extensions.embedding.WindowAttributes.DIM_AREA_ON_TASK;
 
 import android.app.Activity;
@@ -33,7 +34,6 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.LayoutDirection;
 import android.util.Pair;
 import android.util.Size;
 import android.view.View;
@@ -368,7 +368,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         updateTaskFragmentWindowingModeIfRegistered(wct, secondaryContainer, windowingMode);
         updateAnimationParams(wct, primaryContainer.getTaskFragmentToken(), splitAttributes);
         updateAnimationParams(wct, secondaryContainer.getTaskFragmentToken(), splitAttributes);
-        taskContainer.updateDivider(wct);
+        mController.updateDivider(wct, taskContainer);
     }
 
     private void setAdjacentTaskFragments(@NonNull WindowContainerTransaction wct,
@@ -695,6 +695,17 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             return RESULT_EXPANDED;
         }
         return RESULT_NOT_EXPANDED;
+    }
+
+    /**
+     * Expands an existing TaskFragment to fill parent.
+     * @param wct WindowContainerTransaction in which the task fragment should be resized.
+     * @param container the {@link TaskFragmentContainer} to be expanded.
+     */
+    void expandTaskFragment(@NonNull WindowContainerTransaction wct,
+            @NonNull TaskFragmentContainer container) {
+        super.expandTaskFragment(wct, container);
+        mController.updateDivider(wct, container.getTaskContainer());
     }
 
     static boolean shouldShowSplit(@NonNull SplitContainer splitContainer) {
@@ -1108,7 +1119,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
      */
     private SplitType computeSplitType(@NonNull SplitAttributes splitAttributes,
             @NonNull Configuration taskConfiguration, @Nullable FoldingFeature foldingFeature) {
-        final int layoutDirection = splitAttributes.getLayoutDirection();
         final SplitType splitType = splitAttributes.getSplitType();
         if (splitType instanceof ExpandContainersSplitType) {
             return splitType;
@@ -1117,19 +1127,9 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             // Reverse the ratio for RIGHT_TO_LEFT and BOTTOM_TO_TOP to make the boundary
             // computation have the same direction, which is from (top, left) to (bottom, right).
             final SplitType reversedSplitType = new RatioSplitType(1 - splitRatio.getRatio());
-            switch (layoutDirection) {
-                case SplitAttributes.LayoutDirection.LEFT_TO_RIGHT:
-                case SplitAttributes.LayoutDirection.TOP_TO_BOTTOM:
-                    return splitType;
-                case SplitAttributes.LayoutDirection.RIGHT_TO_LEFT:
-                case SplitAttributes.LayoutDirection.BOTTOM_TO_TOP:
-                    return reversedSplitType;
-                case LayoutDirection.LOCALE: {
-                    boolean isLtr = taskConfiguration.getLayoutDirection()
-                            == View.LAYOUT_DIRECTION_LTR;
-                    return isLtr ? splitType : reversedSplitType;
-                }
-            }
+            return isReversedLayout(splitAttributes, taskConfiguration)
+                    ? reversedSplitType
+                    : splitType;
         } else if (splitType instanceof HingeSplitType) {
             final HingeSplitType hinge = (HingeSplitType) splitType;
             @WindowingMode

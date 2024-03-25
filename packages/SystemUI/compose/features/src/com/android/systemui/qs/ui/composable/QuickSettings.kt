@@ -146,7 +146,7 @@ fun SceneScope.QuickSettings(
             modifier.fillMaxWidth().layout { measurable, constraints ->
                 val placeable = measurable.measure(constraints)
                 // Use the height of the correct view based on the scene it is being composed in
-                val height = heightProvider()
+                val height = heightProvider().coerceAtLeast(0)
 
                 layout(placeable.width, height) { placeable.placeRelative(0, 0) }
             }

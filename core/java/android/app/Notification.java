@@ -24,6 +24,7 @@ import static android.app.admin.DevicePolicyResources.UNDEFINED;
 import static android.graphics.drawable.Icon.TYPE_URI;
 import static android.graphics.drawable.Icon.TYPE_URI_ADAPTIVE_BITMAP;
 import static android.app.Flags.evenlyDividedCallStyleActionLayout;
+import static android.app.Flags.updateRankingTime;
 
 import static java.util.Objects.requireNonNull;
 
@@ -339,8 +340,9 @@ public class Notification implements Parcelable
 
     /**
      * The creation time of the notification
+     * @hide
      */
-    private long creationTime;
+    public long creationTime;
 
     /**
      * The resource id of a drawable to use as the icon in the status bar.
@@ -2578,7 +2580,11 @@ public class Notification implements Parcelable
     public Notification()
     {
         this.when = System.currentTimeMillis();
-        this.creationTime = System.currentTimeMillis();
+        if (updateRankingTime()) {
+            creationTime = when;
+        } else {
+            this.creationTime = System.currentTimeMillis();
+        }
         this.priority = PRIORITY_DEFAULT;
     }
 
@@ -2589,6 +2595,9 @@ public class Notification implements Parcelable
     public Notification(Context context, int icon, CharSequence tickerText, long when,
             CharSequence contentTitle, CharSequence contentText, Intent contentIntent)
     {
+        if (updateRankingTime()) {
+            creationTime = when;
+        }
         new Builder(context)
                 .setWhen(when)
                 .setSmallIcon(icon)
@@ -2618,7 +2627,11 @@ public class Notification implements Parcelable
         this.icon = icon;
         this.tickerText = tickerText;
         this.when = when;
-        this.creationTime = System.currentTimeMillis();
+        if (updateRankingTime()) {
+            creationTime = when;
+        } else {
+            this.creationTime = System.currentTimeMillis();
+        }
     }
 
     /**
@@ -6843,7 +6856,9 @@ public class Notification implements Parcelable
                 }
             }
 
-            mN.creationTime = System.currentTimeMillis();
+            if (!updateRankingTime()) {
+                mN.creationTime = System.currentTimeMillis();
+            }
 
             // lazy stuff from mContext; see comment in Builder(Context, Notification)
             Notification.addFieldsFromContext(mContext, mN);
