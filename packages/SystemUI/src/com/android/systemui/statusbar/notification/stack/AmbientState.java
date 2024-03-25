@@ -414,7 +414,7 @@ public class AmbientState implements Dumpable {
         return mLayoutMaxHeight;
     }
 
-    public float getTopPadding() {
+    public int getTopPadding() {
         return mTopPadding;
     }
 
