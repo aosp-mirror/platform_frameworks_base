@@ -405,8 +405,7 @@ public class MobileRadioAggregatedPowerStatsProcessor extends AggregatedPowerSta
         return "idle: " + mStatsLayout.getDeviceIdleTime(stats)
                 + " sleep: " + mStatsLayout.getDeviceSleepTime(stats)
                 + " scan: " + mStatsLayout.getDeviceScanTime(stats)
-                + " power-data: " + mStatsLayout.getDevicePowerEstimate(stats)
-                + " power-call: " + mStatsLayout.getDeviceCallPowerEstimate(stats);
+                + " power: " + mStatsLayout.getDevicePowerEstimate(stats);
     }
 
     @Override

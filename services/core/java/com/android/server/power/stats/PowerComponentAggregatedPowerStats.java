@@ -52,10 +52,12 @@ class PowerComponentAggregatedPowerStats {
     private static final long UNKNOWN = -1;
 
     public final int powerComponentId;
-    private final MultiStateStats.States[] mDeviceStateConfig;
-    private final MultiStateStats.States[] mUidStateConfig;
+    @NonNull
+    private final AggregatedPowerStats mAggregatedPowerStats;
     @NonNull
     private final AggregatedPowerStatsConfig.PowerComponent mConfig;
+    private final MultiStateStats.States[] mDeviceStateConfig;
+    private final MultiStateStats.States[] mUidStateConfig;
     private final int[] mDeviceStates;
 
     private MultiStateStats.Factory mStatsFactory;
@@ -72,13 +74,20 @@ class PowerComponentAggregatedPowerStats {
         public MultiStateStats stats;
     }
 
-    PowerComponentAggregatedPowerStats(AggregatedPowerStatsConfig.PowerComponent config) {
+    PowerComponentAggregatedPowerStats(@NonNull AggregatedPowerStats aggregatedPowerStats,
+            @NonNull AggregatedPowerStatsConfig.PowerComponent config) {
+        mAggregatedPowerStats = aggregatedPowerStats;
         mConfig = config;
         powerComponentId = config.getPowerComponentId();
         mDeviceStateConfig = config.getDeviceStateConfig();
         mUidStateConfig = config.getUidStateConfig();
         mDeviceStates = new int[mDeviceStateConfig.length];
         mPowerStatsTimestamp = UNKNOWN;
+    }
+
+    @NonNull
+    AggregatedPowerStats getAggregatedPowerStats() {
+        return mAggregatedPowerStats;
     }
 
     @NonNull
@@ -89,6 +98,10 @@ class PowerComponentAggregatedPowerStats {
     @Nullable
     public PowerStats.Descriptor getPowerStatsDescriptor() {
         return mPowerStatsDescriptor;
+    }
+
+    public void setPowerStatsDescriptor(PowerStats.Descriptor powerStatsDescriptor) {
+        mPowerStatsDescriptor = powerStatsDescriptor;
     }
 
     void setState(@AggregatedPowerStatsConfig.TrackedState int stateId, int state,
@@ -143,6 +156,9 @@ class PowerComponentAggregatedPowerStats {
     }
 
     void setDeviceStats(@AggregatedPowerStatsConfig.TrackedState int[] states, long[] values) {
+        if (mDeviceStats == null) {
+            createDeviceStats(0);
+        }
         mDeviceStats.setStats(states, values);
     }
 

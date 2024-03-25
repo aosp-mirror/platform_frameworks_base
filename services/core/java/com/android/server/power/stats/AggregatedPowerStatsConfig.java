@@ -85,6 +85,9 @@ public class AggregatedPowerStatsConfig {
          * Configures which states should be tracked as separate dimensions for the entire device.
          */
         public PowerComponent trackDeviceStates(@TrackedState int... states) {
+            if (mTrackedDeviceStates != null) {
+                throw new IllegalStateException("Component is already configured");
+            }
             mTrackedDeviceStates = states;
             return this;
         }
@@ -93,6 +96,9 @@ public class AggregatedPowerStatsConfig {
          * Configures which states should be tracked as separate dimensions on a per-UID basis.
          */
         public PowerComponent trackUidStates(@TrackedState int... states) {
+            if (mTrackedUidStates != null) {
+                throw new IllegalStateException("Component is already configured");
+            }
             mTrackedUidStates = states;
             return this;
         }
@@ -153,6 +159,7 @@ public class AggregatedPowerStatsConfig {
             }
             return false;
         }
+
     }
 
     private final List<PowerComponent> mPowerComponents = new ArrayList<>();
@@ -166,6 +173,33 @@ public class AggregatedPowerStatsConfig {
         PowerComponent builder = new PowerComponent(powerComponentId);
         mPowerComponents.add(builder);
         return builder;
+    }
+
+    /**
+     * Creates a configuration for the specified power component, which is a subcomponent
+     * of a different power component.  The tracked states will be the same as the parent
+     * component's.
+     */
+    public PowerComponent trackPowerComponent(int powerComponentId,
+            int parentPowerComponentId) {
+        PowerComponent parent = null;
+        for (int i = 0; i < mPowerComponents.size(); i++) {
+            PowerComponent powerComponent = mPowerComponents.get(i);
+            if (powerComponent.getPowerComponentId() == parentPowerComponentId) {
+                parent = powerComponent;
+                break;
+            }
+        }
+
+        if (parent == null) {
+            throw new IllegalArgumentException(
+                    "Parent component " + parentPowerComponentId + " is not configured");
+        }
+
+        PowerComponent powerComponent = trackPowerComponent(powerComponentId);
+        powerComponent.mTrackedDeviceStates = parent.mTrackedDeviceStates;
+        powerComponent.mTrackedUidStates = parent.mTrackedUidStates;
+        return powerComponent;
     }
 
     public List<PowerComponent> getPowerComponentsAggregatedStatsConfigs() {

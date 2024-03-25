@@ -69,7 +69,7 @@ class AggregatedPowerStats {
                 aggregatedPowerStatsConfig.getPowerComponentsAggregatedStatsConfigs();
         mPowerComponentStats = new PowerComponentAggregatedPowerStats[configs.size()];
         for (int i = 0; i < configs.size(); i++) {
-            mPowerComponentStats[i] = new PowerComponentAggregatedPowerStats(configs.get(i));
+            mPowerComponentStats[i] = new PowerComponentAggregatedPowerStats(this, configs.get(i));
         }
     }
 

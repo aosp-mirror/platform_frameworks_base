@@ -83,6 +83,13 @@ public abstract class PowerStatsCollector {
         private int mDevicePowerEstimatePosition;
         private int mUidPowerEstimatePosition;
 
+        public StatsArrayLayout() {
+        }
+
+        public StatsArrayLayout(PowerStats.Descriptor descriptor) {
+            fromExtras(descriptor.extras);
+        }
+
         public int getDeviceStatsArrayLength() {
             return mDeviceStatsArrayLength;
         }

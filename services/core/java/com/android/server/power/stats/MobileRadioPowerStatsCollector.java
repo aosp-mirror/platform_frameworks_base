@@ -140,7 +140,7 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
         MobileRadioStatsArrayLayout() {}
 
         MobileRadioStatsArrayLayout(@NonNull PowerStats.Descriptor descriptor) {
-            fromExtras(descriptor.extras);
+            super(descriptor);
         }
 
         void addDeviceMobileActivity() {

@@ -178,7 +178,8 @@ public class MobileRadioAggregatedPowerStatsProcessorTest {
                         .setProcessor(processor);
 
         PowerComponentAggregatedPowerStats aggregatedStats =
-                new PowerComponentAggregatedPowerStats(config);
+                new PowerComponentAggregatedPowerStats(
+                        new AggregatedPowerStats(mock(AggregatedPowerStatsConfig.class)), config);
 
         aggregatedStats.setState(STATE_POWER, POWER_STATE_OTHER, 0);
         aggregatedStats.setState(STATE_SCREEN, SCREEN_STATE_ON, 0);
@@ -323,7 +324,8 @@ public class MobileRadioAggregatedPowerStatsProcessorTest {
                         .setProcessor(processor);
 
         PowerComponentAggregatedPowerStats aggregatedStats =
-                new PowerComponentAggregatedPowerStats(config);
+                new PowerComponentAggregatedPowerStats(
+                        new AggregatedPowerStats(mock(AggregatedPowerStatsConfig.class)), config);
 
         aggregatedStats.setState(STATE_POWER, POWER_STATE_OTHER, 0);
         aggregatedStats.setState(STATE_SCREEN, SCREEN_STATE_ON, 0);

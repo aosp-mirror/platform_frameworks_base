@@ -45,6 +45,7 @@ filegroup {
         "src/com/android/server/power/stats/MobileRadioPowerCalculatorTest.java",
         "src/com/android/server/power/stats/MobileRadioPowerStatsCollectorTest.java",
         "src/com/android/server/power/stats/MultiStateStatsTest.java",
+        "src/com/android/server/power/stats/PhoneCallAggregatedPowerStatsProcessorTest.java",
         "src/com/android/server/power/stats/PowerStatsAggregatorTest.java",
         "src/com/android/server/power/stats/PowerStatsCollectorTest.java",
         "src/com/android/server/power/stats/PowerStatsExporterTest.java",

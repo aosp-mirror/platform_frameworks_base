@@ -30,6 +30,7 @@ import static com.android.server.power.stats.AggregatedPowerStatsConfig.STATE_SC
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 
 import android.os.BatteryConsumer;
 import android.os.PersistableBundle;
@@ -207,7 +208,7 @@ public class CpuAggregatedPowerStatsProcessorTest {
 
         MockPowerComponentAggregatedPowerStats(AggregatedPowerStatsConfig.PowerComponent config,
                 boolean useEnergyConsumers) {
-            super(config);
+            super(new AggregatedPowerStats(mock(AggregatedPowerStatsConfig.class)), config);
             mStatsLayout = new CpuPowerStatsCollector.CpuStatsArrayLayout();
             mStatsLayout.addDeviceSectionCpuTimeByScalingStep(3);
             mStatsLayout.addDeviceSectionCpuTimeByCluster(2);
