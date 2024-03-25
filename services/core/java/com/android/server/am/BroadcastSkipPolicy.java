@@ -289,21 +289,22 @@ public class BroadcastSkipPolicy {
 
         if (info.activityInfo.applicationInfo.uid != Process.SYSTEM_UID &&
                 r.requiredPermissions != null && r.requiredPermissions.length > 0) {
-            final AttributionSource attributionSource;
+            final AttributionSource[] attributionSources;
             if (usePermissionManagerForBroadcastDeliveryCheck()) {
-                attributionSource =
-                        new AttributionSource.Builder(info.activityInfo.applicationInfo.uid)
-                                .setPackageName(info.activityInfo.packageName)
-                                .build();
+                attributionSources = createAttributionSourcesForResolveInfo(info);
             } else {
-                attributionSource = null;
+                attributionSources = null;
             }
             for (int i = 0; i < r.requiredPermissions.length; i++) {
                 String requiredPermission = r.requiredPermissions[i];
                 try {
                     if (usePermissionManagerForBroadcastDeliveryCheck()) {
-                        perm = checkPermissionForDataDelivery(
-                                requiredPermission, attributionSource, null /* message */);
+                        perm = hasPermissionForDataDelivery(
+                                requiredPermission,
+                                "Broadcast delivered to " + info.activityInfo.name,
+                                attributionSources)
+                                        ? PackageManager.PERMISSION_GRANTED
+                                        : PackageManager.PERMISSION_DENIED;
                     } else {
                         perm = AppGlobals.getPackageManager()
                                 .checkPermission(
@@ -466,10 +467,12 @@ public class BroadcastSkipPolicy {
                 String requiredPermission = r.requiredPermissions[i];
                 final int perm;
                 if (usePermissionManagerForBroadcastDeliveryCheck()) {
-                    perm = checkPermissionForDataDelivery(
+                    perm = hasPermissionForDataDelivery(
                             requiredPermission,
-                            attributionSource,
-                            "Broadcast delivered to registered receiver " + filter.receiverId);
+                            "Broadcast delivered to registered receiver " + filter.receiverId,
+                            attributionSource)
+                                    ? PackageManager.PERMISSION_GRANTED
+                                    : PackageManager.PERMISSION_DENIED;
                 } else {
                     perm = checkComponentPermission(
                             requiredPermission,
@@ -743,6 +746,7 @@ public class BroadcastSkipPolicy {
         return false;
     }
 
+    @Nullable
     private PermissionManager getPermissionManager() {
         if (mPermissionManager == null) {
             mPermissionManager = mService.mContext.getSystemService(PermissionManager.class);
@@ -750,13 +754,46 @@ public class BroadcastSkipPolicy {
         return mPermissionManager;
     }
 
-    private int checkPermissionForDataDelivery(
-            String permission, AttributionSource attributionSource, String message) {
+    private boolean hasPermissionForDataDelivery(
+            @NonNull String permission,
+            @NonNull String message,
+            @NonNull AttributionSource... attributionSources) {
         final PermissionManager permissionManager = getPermissionManager();
-        if (permissionManager != null) {
-            return permissionManager.checkPermissionForDataDelivery(
-                    permission, attributionSource, message);
+        if (permissionManager == null) {
+            return false;
         }
-        return PackageManager.PERMISSION_DENIED;
+
+        for (AttributionSource attributionSource : attributionSources) {
+            final int permissionCheckResult =
+                    permissionManager.checkPermissionForDataDelivery(
+                            permission, attributionSource, message);
+            if (permissionCheckResult != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private AttributionSource[] createAttributionSourcesForResolveInfo(ResolveInfo info) {
+        final String[] attributionTags = info.activityInfo.attributionTags;
+        if (ArrayUtils.isEmpty(attributionTags)) {
+            return new AttributionSource[] {
+                    new AttributionSource.Builder(info.activityInfo.applicationInfo.uid)
+                            .setPackageName(info.activityInfo.packageName)
+                            .build()
+            };
+        }
+
+        final AttributionSource[] attributionSources =
+                new AttributionSource[attributionTags.length];
+        for (int i = 0; i < attributionTags.length; i++) {
+            attributionSources[i] =
+                    new AttributionSource.Builder(info.activityInfo.applicationInfo.uid)
+                            .setPackageName(info.activityInfo.packageName)
+                            .setAttributionTag(attributionTags[i])
+                            .build();
+        }
+        return attributionSources;
     }
 }
