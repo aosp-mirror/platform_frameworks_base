@@ -836,7 +836,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mLightRevealScrimViewModelLazy = lightRevealScrimViewModelLazy;
         mLightRevealScrim = lightRevealScrim;
 
-        // Based on teamfood flag, turn predictive back dispatch on at runtime.
         if (predictiveBackSysui()) {
             mContext.getApplicationInfo().setEnableOnBackInvokedCallback(true);
         }
@@ -3060,6 +3059,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         public void onConfigChanged(Configuration newConfig) {
             updateResources();
             updateDisplaySize(); // populates mDisplayMetrics
+            if (predictiveBackSysui()) {
+                mContext.getApplicationInfo().setEnableOnBackInvokedCallback(true);
+            }
 
             if (DEBUG) {
                 Log.v(TAG, "configuration changed: " + mContext.getResources().getConfiguration());
