@@ -158,6 +158,8 @@ final class InstallRequest {
     @Nullable
     private DomainSet mPreVerifiedDomains;
 
+    private int mInstallerUidForInstallExisting = INVALID_UID;
+
     // New install
     InstallRequest(InstallingSession params) {
         mUserId = params.getUser().getIdentifier();
@@ -180,7 +182,7 @@ final class InstallRequest {
 
     // Install existing package as user
     InstallRequest(int userId, int returnCode, AndroidPackage pkg, int[] newUsers,
-            Runnable runnable) {
+            Runnable runnable, int appId, int installerUid, boolean isSystem) {
         mUserId = userId;
         mInstallArgs = null;
         mReturnCode = returnCode;
@@ -191,6 +193,9 @@ final class InstallRequest {
         mIsInstallForUsers = true;
         mSessionId = -1;
         mRequireUserAction = USER_ACTION_UNSPECIFIED;
+        mAppId = appId;
+        mInstallerUidForInstallExisting = installerUid;
+        mSystem = isSystem;
     }
 
     // addForInit
@@ -381,7 +386,8 @@ final class InstallRequest {
 
     public int getInstallerPackageUid() {
         return (mInstallArgs != null && mInstallArgs.mInstallSource != null)
-                ? mInstallArgs.mInstallSource.mInstallerPackageUid : INVALID_UID;
+                ? mInstallArgs.mInstallSource.mInstallerPackageUid
+                : mInstallerUidForInstallExisting;
     }
 
     public int getDataLoaderType() {
