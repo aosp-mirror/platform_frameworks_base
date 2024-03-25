@@ -16,7 +16,7 @@
 
 package android.app.activity;
 
-import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
+import static android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
 import static android.content.Context.OVERRIDABLE_COMPONENT_CALLBACKS;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -67,7 +67,7 @@ public class RegisterComponentCallbacksTest {
         config.windowConfiguration.setWindowingMode(
                 WindowConfiguration.WINDOWING_MODE_FREEFORM);
         config.windowConfiguration.setBounds(new Rect(0, 0, 100, 100));
-        final int trimMemoryLevel = TRIM_MEMORY_RUNNING_LOW;
+        final int trimMemoryLevel = TRIM_MEMORY_BACKGROUND;
 
         scenario.onActivity(activity -> {
             // It should be no-op to unregister a ComponentCallbacks without registration.
@@ -98,7 +98,7 @@ public class RegisterComponentCallbacksTest {
         config.windowConfiguration.setWindowingMode(
                 WindowConfiguration.WINDOWING_MODE_FREEFORM);
         config.windowConfiguration.setBounds(new Rect(0, 0, 100, 100));
-        final int trimMemoryLevel = TRIM_MEMORY_RUNNING_LOW;
+        final int trimMemoryLevel = TRIM_MEMORY_BACKGROUND;
 
         scenario.onActivity(activity -> {
             // It should be no-op to unregister a ComponentCallbacks without registration.
