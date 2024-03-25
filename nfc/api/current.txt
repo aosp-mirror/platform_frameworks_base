@@ -194,13 +194,13 @@ package android.nfc {
 package android.nfc.cardemulation {
 
   public final class CardEmulation {
-    method @Deprecated public boolean categoryAllowsForegroundPreference(String);
+    method public boolean categoryAllowsForegroundPreference(String);
     method @Nullable @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public java.util.List<java.lang.String> getAidsForPreferredPaymentService();
     method public java.util.List<java.lang.String> getAidsForService(android.content.ComponentName, String);
-    method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public CharSequence getDescriptionForPreferredPaymentService();
+    method @Nullable @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public CharSequence getDescriptionForPreferredPaymentService();
     method public static android.nfc.cardemulation.CardEmulation getInstance(android.nfc.NfcAdapter);
-    method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public String getRouteDestinationForPreferredPaymentService();
-    method @Deprecated public int getSelectionModeForCategory(String);
+    method @Nullable @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public String getRouteDestinationForPreferredPaymentService();
+    method public int getSelectionModeForCategory(String);
     method public boolean isDefaultServiceForAid(android.content.ComponentName, String);
     method public boolean isDefaultServiceForCategory(android.content.ComponentName, String);
     method public boolean registerAidsForService(android.content.ComponentName, String, java.util.List<java.lang.String>);
