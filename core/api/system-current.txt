@@ -13483,12 +13483,12 @@ package android.service.voice {
     method public static int getMaxBundleSize();
     method public static int getMaxHotwordPhraseId();
     method public static int getMaxScore();
-    method @FlaggedApi("android.service.voice.flags.allow_speaker_id_egress") public static int getMaxSpeakerId();
+    method public static int getMaxSpeakerId();
     method @Nullable public android.media.MediaSyncEvent getMediaSyncEvent();
     method public int getPersonalizedScore();
     method public int getProximity();
     method public int getScore();
-    method @FlaggedApi("android.service.voice.flags.allow_speaker_id_egress") public int getSpeakerId();
+    method public int getSpeakerId();
     method public boolean isHotwordDetectionPersonalized();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int AUDIO_CHANNEL_UNSET = -1; // 0xffffffff
@@ -13522,7 +13522,7 @@ package android.service.voice {
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setMediaSyncEvent(@NonNull android.media.MediaSyncEvent);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setPersonalizedScore(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setScore(int);
-    method @FlaggedApi("android.service.voice.flags.allow_speaker_id_egress") @NonNull public android.service.voice.HotwordDetectedResult.Builder setSpeakerId(int);
+    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setSpeakerId(int);
   }
 
   public abstract class HotwordDetectionService extends android.app.Service implements android.service.voice.SandboxedDetectionInitializer {
@@ -13621,7 +13621,7 @@ package android.service.voice {
     field public static final int ERROR_CODE_UNKNOWN = 0; // 0x0
   }
 
-  @FlaggedApi("android.service.voice.flags.allow_various_attention_types") public final class VisualQueryAttentionResult implements android.os.Parcelable {
+  public final class VisualQueryAttentionResult implements android.os.Parcelable {
     method public int describeContents();
     method @IntRange(from=1, to=100) public int getEngagementLevel();
     method public int getInteractionIntention();
@@ -13638,7 +13638,7 @@ package android.service.voice {
     method @NonNull public android.service.voice.VisualQueryAttentionResult.Builder setInteractionIntention(int);
   }
 
-  @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public final class VisualQueryDetectedResult implements android.os.Parcelable {
+  public final class VisualQueryDetectedResult implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public byte[] getAccessibilityDetectionData();
     method public static int getMaxSpeakerId();
@@ -13660,16 +13660,16 @@ package android.service.voice {
     ctor public VisualQueryDetectionService();
     method public final void finishQuery() throws java.lang.IllegalStateException;
     method public final void gainedAttention();
-    method @FlaggedApi("android.service.voice.flags.allow_various_attention_types") public final void gainedAttention(@NonNull android.service.voice.VisualQueryAttentionResult);
+    method public final void gainedAttention(@NonNull android.service.voice.VisualQueryAttentionResult);
     method public final void lostAttention();
-    method @FlaggedApi("android.service.voice.flags.allow_various_attention_types") public final void lostAttention(int);
+    method public final void lostAttention(int);
     method @Nullable public android.os.IBinder onBind(@NonNull android.content.Intent);
     method public void onStartDetection();
     method public void onStopDetection();
     method public void onUpdateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, long, @Nullable java.util.function.IntConsumer);
     method public final void rejectQuery() throws java.lang.IllegalStateException;
     method public final void streamQuery(@NonNull String) throws java.lang.IllegalStateException;
-    method @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public final void streamQuery(@NonNull android.service.voice.VisualQueryDetectedResult);
+    method public final void streamQuery(@NonNull android.service.voice.VisualQueryDetectedResult);
     field public static final String SERVICE_INTERFACE = "android.service.voice.VisualQueryDetectionService";
   }
 
@@ -13689,10 +13689,10 @@ package android.service.voice {
   }
 
   public class VisualQueryDetector {
-    method @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public void clearAccessibilityDetectionEnabledListener();
+    method public void clearAccessibilityDetectionEnabledListener();
     method public void destroy();
-    method @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public boolean isAccessibilityDetectionEnabled();
-    method @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public void setAccessibilityDetectionEnabledListener(@NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method public boolean isAccessibilityDetectionEnabled();
+    method public void setAccessibilityDetectionEnabledListener(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @RequiresPermission(allOf={android.Manifest.permission.CAMERA, android.Manifest.permission.RECORD_AUDIO}) public boolean startRecognition();
     method @RequiresPermission(allOf={android.Manifest.permission.CAMERA, android.Manifest.permission.RECORD_AUDIO}) public boolean stopRecognition();
     method public void updateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory);
@@ -13701,7 +13701,7 @@ package android.service.voice {
   public static interface VisualQueryDetector.Callback {
     method public void onFailure(@NonNull android.service.voice.VisualQueryDetectionServiceFailure);
     method public void onQueryDetected(@NonNull String);
-    method @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public default void onQueryDetected(@NonNull android.service.voice.VisualQueryDetectedResult);
+    method public default void onQueryDetected(@NonNull android.service.voice.VisualQueryDetectedResult);
     method public void onQueryFinished();
     method public void onQueryRejected();
     method public void onUnknownFailure(@NonNull String);
