@@ -30,7 +30,6 @@ import com.android.systemui.screenshot.RequestProcessor;
 import com.android.systemui.screenshot.ScreenshotActionsProvider;
 import com.android.systemui.screenshot.ScreenshotPolicy;
 import com.android.systemui.screenshot.ScreenshotPolicyImpl;
-import com.android.systemui.screenshot.ScreenshotProxyService;
 import com.android.systemui.screenshot.ScreenshotRequestProcessor;
 import com.android.systemui.screenshot.ScreenshotShelfViewProxy;
 import com.android.systemui.screenshot.ScreenshotSoundController;
@@ -38,6 +37,8 @@ import com.android.systemui.screenshot.ScreenshotSoundControllerImpl;
 import com.android.systemui.screenshot.ScreenshotSoundProvider;
 import com.android.systemui.screenshot.ScreenshotSoundProviderImpl;
 import com.android.systemui.screenshot.ScreenshotViewProxy;
+import com.android.systemui.screenshot.TakeScreenshotExecutor;
+import com.android.systemui.screenshot.TakeScreenshotExecutorImpl;
 import com.android.systemui.screenshot.TakeScreenshotService;
 import com.android.systemui.screenshot.appclips.AppClipsScreenshotHelperService;
 import com.android.systemui.screenshot.appclips.AppClipsService;
@@ -61,9 +62,9 @@ public abstract class ScreenshotModule {
     abstract Service bindTakeScreenshotService(TakeScreenshotService service);
 
     @Binds
-    @IntoMap
-    @ClassKey(ScreenshotProxyService.class)
-    abstract Service bindScreenshotProxyService(ScreenshotProxyService service);
+    @SysUISingleton
+    abstract TakeScreenshotExecutor bindTakeScreenshotExecutor(
+            TakeScreenshotExecutorImpl impl);
 
     @Binds
     abstract ScreenshotPolicy bindScreenshotPolicyImpl(ScreenshotPolicyImpl impl);
