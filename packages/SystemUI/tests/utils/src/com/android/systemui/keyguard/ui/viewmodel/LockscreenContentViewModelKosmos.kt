@@ -20,6 +20,7 @@ import com.android.systemui.biometrics.authController
 import com.android.systemui.keyguard.domain.interactor.keyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 
 val Kosmos.lockscreenContentViewModel by
@@ -30,5 +31,6 @@ val Kosmos.lockscreenContentViewModel by
             authController = authController,
             longPress = keyguardLongPressViewModel,
             shadeInteractor = shadeInteractor,
+            applicationScope = applicationCoroutineScope,
         )
     }

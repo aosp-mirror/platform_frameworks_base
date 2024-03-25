@@ -86,6 +86,7 @@ constructor(
         val burnIn = rememberBurnIn(clockInteractor)
         val resources = LocalContext.current.resources
         val currentClockState = clockViewModel.currentClock.collectAsState()
+        val areNotificationsVisible by viewModel.areNotificationsVisible.collectAsState()
         LockscreenLongPress(
             viewModel = viewModel.longPress,
             modifier = modifier,
@@ -145,7 +146,7 @@ constructor(
 
                         with(mediaCarouselSection) { MediaCarousel() }
 
-                        if (viewModel.areNotificationsVisible) {
+                        if (areNotificationsVisible) {
                             with(notificationSection) {
                                 Notifications(
                                     modifier = Modifier.fillMaxWidth().weight(weight = 1f)
