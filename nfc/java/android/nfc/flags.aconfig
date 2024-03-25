@@ -76,3 +76,11 @@ flag {
     description: "Enable NFC vendor command support"
     bug: "289879306"
 }
+
+flag {
+    name: "nfc_oem_extension"
+    is_exported: true
+    namespace: "nfc"
+    description: "Enable NFC OEM extension support"
+    bug: "331206243"
+}
