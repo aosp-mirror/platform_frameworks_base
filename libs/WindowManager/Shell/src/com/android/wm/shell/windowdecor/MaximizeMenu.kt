@@ -16,6 +16,9 @@
 
 package com.android.wm.shell.windowdecor
 
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.annotation.IdRes
 import android.app.ActivityManager.RunningTaskInfo
 import android.content.Context
@@ -30,16 +33,21 @@ import android.view.SurfaceControlViewHost
 import android.view.View.OnClickListener
 import android.view.View.OnGenericMotionListener
 import android.view.View.OnTouchListener
+import android.view.View.SCALE_Y
+import android.view.View.TRANSLATION_Y
+import android.view.View.TRANSLATION_Z
 import android.view.WindowManager
 import android.view.WindowlessWindowManager
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.window.TaskConstants
 import androidx.core.content.withStyledAttributes
 import com.android.internal.R.attr.colorAccentPrimary
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
+import com.android.wm.shell.animation.Interpolators.EMPHASIZED_DECELERATE
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.windowdecor.WindowDecoration.AdditionalWindow
@@ -65,14 +73,13 @@ class MaximizeMenu(
     private var maximizeMenu: AdditionalWindow? = null
     private lateinit var viewHost: SurfaceControlViewHost
     private lateinit var leash: SurfaceControl
-    private val shadowRadius = loadDimensionPixelSize(
-            R.dimen.desktop_mode_maximize_menu_shadow_radius
-    ).toFloat()
+    private val openMenuAnimatorSet = AnimatorSet()
     private val cornerRadius = loadDimensionPixelSize(
             R.dimen.desktop_mode_maximize_menu_corner_radius
     ).toFloat()
     private val menuWidth = loadDimensionPixelSize(R.dimen.desktop_mode_maximize_menu_width)
     private val menuHeight = loadDimensionPixelSize(R.dimen.desktop_mode_maximize_menu_height)
+    private val menuPadding = loadDimensionPixelSize(R.dimen.desktop_mode_menu_padding)
 
     private lateinit var snapRightButton: Button
     private lateinit var snapLeftButton: Button
@@ -91,10 +98,12 @@ class MaximizeMenu(
         if (maximizeMenu != null) return
         createMaximizeMenu()
         setupMaximizeMenu()
+        animateOpenMenu()
     }
 
     /** Closes the maximize window and releases its view. */
     fun close() {
+        openMenuAnimatorSet.cancel()
         maximizeMenu?.releaseView()
         maximizeMenu = null
     }
@@ -134,8 +143,6 @@ class MaximizeMenu(
         // Bring menu to front when open
         t.setLayer(leash, TaskConstants.TASK_CHILD_LAYER_FLOATING_MENU)
                 .setPosition(leash, menuPosition.x, menuPosition.y)
-                .setWindowCrop(leash, menuWidth, menuHeight)
-                .setShadowRadius(leash, shadowRadius)
                 .setCornerRadius(leash, cornerRadius)
                 .show(leash)
         maximizeMenu = AdditionalWindow(leash, viewHost, transactionSupplier)
@@ -144,6 +151,77 @@ class MaximizeMenu(
             transaction.merge(t)
             t.close()
         }
+    }
+
+    private fun animateOpenMenu() {
+        val viewHost = maximizeMenu?.mWindowViewHost
+        val maximizeMenuView = viewHost?.view ?: return
+        val maximizeWindowText = maximizeMenuView.requireViewById<TextView>(
+                R.id.maximize_menu_maximize_window_text)
+        val snapWindowText = maximizeMenuView.requireViewById<TextView>(
+                R.id.maximize_menu_snap_window_text)
+
+        openMenuAnimatorSet.playTogether(
+                ObjectAnimator.ofFloat(maximizeMenuView, SCALE_Y, STARTING_MENU_HEIGHT_SCALE, 1f)
+                        .apply {
+                            duration = MENU_HEIGHT_ANIMATION_DURATION_MS
+                            interpolator = EMPHASIZED_DECELERATE
+                        },
+                ValueAnimator.ofFloat(STARTING_MENU_HEIGHT_SCALE, 1f)
+                        .apply {
+                            duration = MENU_HEIGHT_ANIMATION_DURATION_MS
+                            interpolator = EMPHASIZED_DECELERATE
+                            addUpdateListener {
+                                // Animate padding so that controls stay pinned to the bottom of
+                                // the menu.
+                                val value = animatedValue as Float
+                                val topPadding = menuPadding -
+                                        ((1 - value) * menuHeight).toInt()
+                                maximizeMenuView.setPadding(menuPadding, topPadding,
+                                        menuPadding, menuPadding)
+                            }
+                        },
+                ValueAnimator.ofFloat(1 / STARTING_MENU_HEIGHT_SCALE, 1f).apply {
+                            duration = MENU_HEIGHT_ANIMATION_DURATION_MS
+                            interpolator = EMPHASIZED_DECELERATE
+                            addUpdateListener {
+                                // Scale up the children of the maximize menu so that the menu
+                                // scale is cancelled out and only the background is scaled.
+                                val value = animatedValue as Float
+                                maximizeButtonLayout.scaleY = value
+                                snapButtonsLayout.scaleY = value
+                                maximizeWindowText.scaleY = value
+                                snapWindowText.scaleY = value
+                            }
+                        },
+                ObjectAnimator.ofFloat(maximizeMenuView, TRANSLATION_Y,
+                        (STARTING_MENU_HEIGHT_SCALE - 1) * menuHeight, 0f).apply {
+                    duration = MENU_HEIGHT_ANIMATION_DURATION_MS
+                    interpolator = EMPHASIZED_DECELERATE
+                },
+                ObjectAnimator.ofInt(maximizeMenuView.background, "alpha",
+                        MAX_DRAWABLE_ALPHA_VALUE).apply {
+                    duration = ALPHA_ANIMATION_DURATION_MS
+                },
+                ValueAnimator.ofFloat(0f, 1f)
+                        .apply {
+                            duration = ALPHA_ANIMATION_DURATION_MS
+                            startDelay = CONTROLS_ALPHA_ANIMATION_DELAY_MS
+                            addUpdateListener {
+                                val value = animatedValue as Float
+                                maximizeButtonLayout.alpha = value
+                                snapButtonsLayout.alpha = value
+                                maximizeWindowText.alpha = value
+                                snapWindowText.alpha = value
+                            }
+                        },
+                ObjectAnimator.ofFloat(maximizeMenuView, TRANSLATION_Z, MENU_Z_TRANSLATION)
+                        .apply {
+                            duration = ELEVATION_ANIMATION_DURATION_MS
+                            startDelay = CONTROLS_ALPHA_ANIMATION_DELAY_MS
+                        }
+        )
+        openMenuAnimatorSet.start()
     }
 
     private fun loadDimensionPixelSize(resourceId: Int): Int {
@@ -263,6 +341,14 @@ class MaximizeMenu(
     }
 
     companion object {
+        // Open menu animation constants
+        private const val ALPHA_ANIMATION_DURATION_MS = 50L
+        private const val MAX_DRAWABLE_ALPHA_VALUE = 255
+        private const val STARTING_MENU_HEIGHT_SCALE = 0.8f
+        private const val MENU_HEIGHT_ANIMATION_DURATION_MS = 300L
+        private const val ELEVATION_ANIMATION_DURATION_MS = 50L
+        private const val CONTROLS_ALPHA_ANIMATION_DELAY_MS = 33L
+        private const val MENU_Z_TRANSLATION = 1f
         fun isMaximizeMenuView(@IdRes viewId: Int): Boolean {
             return viewId == R.id.maximize_menu ||
                     viewId == R.id.maximize_menu_maximize_button ||
