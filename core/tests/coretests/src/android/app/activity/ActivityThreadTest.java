@@ -72,6 +72,7 @@ import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.MergedConfiguration;
 import android.view.Display;
 import android.view.View;
@@ -109,6 +110,9 @@ import java.util.function.Consumer;
 @MediumTest
 @Presubmit
 public class ActivityThreadTest {
+
+    private static final String TAG = "ActivityThreadTest";
+
     private static final int TIMEOUT_SEC = 10;
 
     // The first sequence number to try with. Use a large number to avoid conflicts with the first a
@@ -968,8 +972,15 @@ public class ActivityThreadTest {
     @NonNull
     private static ClientTransaction newRelaunchResumeTransaction(@NonNull Activity activity) {
         final Configuration currentConfig = activity.getResources().getConfiguration();
-        final ActivityWindowInfo activityWindowInfo = getActivityClientRecord(activity)
-                .getActivityWindowInfo();
+        final ActivityClientRecord record = getActivityClientRecord(activity);
+        final ActivityWindowInfo activityWindowInfo;
+        if (record == null) {
+            Log.d(TAG, "The ActivityClientRecord of r=" + activity + " is not created yet. "
+                    + "Likely because this call doesn't wait until activity launch.");
+            activityWindowInfo = new ActivityWindowInfo();
+        } else {
+            activityWindowInfo = record.getActivityWindowInfo();
+        }
         final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(
                 activity.getActivityToken(), null, null, 0,
                 new MergedConfiguration(currentConfig, currentConfig),
