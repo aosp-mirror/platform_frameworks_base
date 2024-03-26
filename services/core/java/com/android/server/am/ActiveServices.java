@@ -1192,7 +1192,7 @@ public final class ActiveServices {
             // Use that as a shortcut if possible to avoid having to recheck all the conditions.
             final boolean whileInUseAllowsUiJobScheduling =
                     ActivityManagerService.doesReasonCodeAllowSchedulingUserInitiatedJobs(
-                            r.getFgsAllowWiu_forStart());
+                            r.getFgsAllowWiu_forStart(), callingUid);
             r.updateAllowUiJobScheduling(whileInUseAllowsUiJobScheduling
                     || mAm.canScheduleUserInitiatedJobs(callingUid, callingPid, callingPackage));
         } else {
