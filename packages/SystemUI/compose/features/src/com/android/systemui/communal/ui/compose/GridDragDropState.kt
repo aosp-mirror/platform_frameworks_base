@@ -34,10 +34,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.toOffset
 import androidx.compose.ui.unit.toSize
@@ -235,6 +237,7 @@ fun Modifier.dragContainer(
 }
 
 /** Wrap LazyGrid item with additional modifier needed for drag and drop. */
+@OptIn(ExperimentalComposeUiApi::class)
 @ExperimentalFoundationApi
 @Composable
 fun LazyGridItemScope.DraggableItem(
@@ -269,7 +272,11 @@ fun LazyGridItemScope.DraggableItem(
     Box(modifier) {
         Box(draggingModifier) { content(dragging) }
         AnimatedVisibility(
-            modifier = Modifier.matchParentSize(),
+            modifier =
+                Modifier.matchParentSize()
+                    // Do not consume motion events in the highlighted item and pass them down to
+                    // the content.
+                    .pointerInteropFilter { false },
             visible = (dragging || selected) && !dragDropState.isDraggingToRemove,
             enter = fadeIn(),
             exit = fadeOut()
