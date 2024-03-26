@@ -6569,10 +6569,15 @@ public final class ViewRootImpl implements ViewParent,
                     // Use the newer global config and last reported override config.
                     mPendingMergedConfiguration.setConfiguration(config,
                             mLastReportedMergedConfiguration.getOverrideConfiguration());
+                    if (mPendingActivityWindowInfo != null) {
+                        mPendingActivityWindowInfo.set(mLastReportedActivityWindowInfo);
+                    }
 
                     performConfigurationChange(new MergedConfiguration(mPendingMergedConfiguration),
                             false /* force */, INVALID_DISPLAY /* same display */,
-                            mLastReportedActivityWindowInfo);
+                            mPendingActivityWindowInfo != null
+                                    ? new ActivityWindowInfo(mPendingActivityWindowInfo)
+                                    : null);
                 } break;
                 case MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST: {
                     setAccessibilityFocus(null, null);
@@ -9014,6 +9019,7 @@ public final class ViewRootImpl implements ViewParent,
                     mPendingActivityWindowInfo.set(outInfo);
                 }
             }
+            mRelayoutBundle.clear();
             mWinFrameInScreen.set(mTmpFrames.frame);
             if (mTranslator != null) {
                 mTranslator.translateRectInScreenToAppWindow(mTmpFrames.frame);
