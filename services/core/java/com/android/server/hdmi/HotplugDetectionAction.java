@@ -38,8 +38,10 @@ import java.util.List;
 final class HotplugDetectionAction extends HdmiCecFeatureAction {
     private static final String TAG = "HotPlugDetectionAction";
 
-    public static final int POLLING_INTERVAL_MS_FOR_TV = 5000;
-    public static final int POLLING_INTERVAL_MS_FOR_PLAYBACK = 60000;
+    public static final long POLLING_MESSAGE_INTERVAL_MS_FOR_TV = 0;
+    public static final long POLLING_MESSAGE_INTERVAL_MS_FOR_PLAYBACK = 500;
+    public static final int POLLING_BATCH_INTERVAL_MS_FOR_TV = 5000;
+    public static final int POLLING_BATCH_INTERVAL_MS_FOR_PLAYBACK = 60000;
     public static final int TIMEOUT_COUNT = 3;
     private static final int AVR_COUNT_MAX = 3;
 
@@ -69,8 +71,9 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
         super(source);
     }
 
-    private int getPollingInterval() {
-        return mIsTvDevice ? POLLING_INTERVAL_MS_FOR_TV : POLLING_INTERVAL_MS_FOR_PLAYBACK;
+    private int getPollingBatchInterval() {
+        return mIsTvDevice ? POLLING_BATCH_INTERVAL_MS_FOR_TV
+                           : POLLING_BATCH_INTERVAL_MS_FOR_PLAYBACK;
     }
 
     @Override
@@ -83,7 +86,7 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
         // Start timer without polling.
         // The first check for all devices will be initiated 15 seconds later for TV panels and 60
         // seconds later for playback devices.
-        addTimer(mState, getPollingInterval());
+        addTimer(mState, getPollingBatchInterval());
         return true;
     }
 
@@ -107,11 +110,11 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
                 } else if (tv().isSystemAudioActivated()) {
                     pollAudioSystem();
                 }
-                addTimer(mState, POLLING_INTERVAL_MS_FOR_TV);
+                addTimer(mState, POLLING_BATCH_INTERVAL_MS_FOR_TV);
                 return;
             }
             pollAllDevices();
-            addTimer(mState, POLLING_INTERVAL_MS_FOR_PLAYBACK);
+            addTimer(mState, POLLING_BATCH_INTERVAL_MS_FOR_PLAYBACK);
         }
     }
 
@@ -127,19 +130,24 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
         mState = STATE_WAIT_FOR_NEXT_POLLING;
         pollAllDevices();
 
-        addTimer(mState, getPollingInterval());
+        addTimer(mState, getPollingBatchInterval());
     }
 
     private void pollAllDevices() {
         Slog.v(TAG, "Poll all devices.");
 
-        pollDevices(new DevicePollingCallback() {
-            @Override
-            public void onPollingFinished(List<Integer> ackedAddress) {
-                checkHotplug(ackedAddress, false);
-            }
-        }, Constants.POLL_ITERATION_IN_ORDER
-                | Constants.POLL_STRATEGY_REMOTES_DEVICES, HdmiConfig.HOTPLUG_DETECTION_RETRY);
+        pollDevices(
+                new DevicePollingCallback() {
+                    @Override
+                    public void onPollingFinished(List<Integer> ackedAddress) {
+                        checkHotplug(ackedAddress, false);
+                        Slog.v(TAG, "Finish poll all devices.");
+                    }
+                },
+                Constants.POLL_ITERATION_IN_ORDER | Constants.POLL_STRATEGY_REMOTES_DEVICES,
+                HdmiConfig.HOTPLUG_DETECTION_RETRY,
+                mIsTvDevice ? POLLING_MESSAGE_INTERVAL_MS_FOR_TV
+                            : POLLING_MESSAGE_INTERVAL_MS_FOR_PLAYBACK);
     }
 
     private void pollAudioSystem() {

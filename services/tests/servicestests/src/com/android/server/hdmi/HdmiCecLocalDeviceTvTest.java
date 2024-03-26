@@ -829,8 +829,8 @@ public class HdmiCecLocalDeviceTvTest {
         // Playback 1 begins ACKing polls, allowing detection by HotplugDetectionAction
         mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.SUCCESS);
         for (int pollCount = 0; pollCount < HotplugDetectionAction.TIMEOUT_COUNT; pollCount++) {
-            mTestLooper.moveTimeForward(
-                    TimeUnit.SECONDS.toMillis(HotplugDetectionAction.POLLING_INTERVAL_MS_FOR_TV));
+            mTestLooper.moveTimeForward(TimeUnit.SECONDS.toMillis(
+                    HotplugDetectionAction.POLLING_BATCH_INTERVAL_MS_FOR_TV));
             mTestLooper.dispatchAll();
         }
 
@@ -872,7 +872,7 @@ public class HdmiCecLocalDeviceTvTest {
         // Assert that this device is removed from the list of devices.
         mNativeWrapper.setPollAddressResponse(Constants.ADDR_PLAYBACK_2, SendMessageResult.NACK);
         for (int pollCount = 0; pollCount < HotplugDetectionAction.TIMEOUT_COUNT; pollCount++) {
-            mTestLooper.moveTimeForward(HotplugDetectionAction.POLLING_INTERVAL_MS_FOR_TV);
+            mTestLooper.moveTimeForward(HotplugDetectionAction.POLLING_BATCH_INTERVAL_MS_FOR_TV);
             mTestLooper.dispatchAll();
         }
 
@@ -920,7 +920,7 @@ public class HdmiCecLocalDeviceTvTest {
         // Assert that this device is removed from the list of devices.
         mNativeWrapper.setPollAddressResponse(ADDR_AUDIO_SYSTEM, SendMessageResult.NACK);
         for (int pollCount = 0; pollCount < HotplugDetectionAction.TIMEOUT_COUNT; pollCount++) {
-            mTestLooper.moveTimeForward(HotplugDetectionAction.POLLING_INTERVAL_MS_FOR_TV);
+            mTestLooper.moveTimeForward(HotplugDetectionAction.POLLING_BATCH_INTERVAL_MS_FOR_TV);
             mTestLooper.dispatchAll();
         }
 
