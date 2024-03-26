@@ -235,9 +235,9 @@ class MediaControlViewModel(
                 } else {
                     applicationContext.getString(R.string.controls_media_active_session)
                 },
-            textColor = textPrimaryFromScheme(scheme),
-            buttonBackgroundColor = accentPrimaryFromScheme(scheme),
-            buttonTextColor = surfaceFromScheme(scheme),
+            textPrimaryColor = textPrimaryFromScheme(scheme),
+            accentPrimaryColor = accentPrimaryFromScheme(scheme),
+            surfaceColor = surfaceFromScheme(scheme),
             isDismissEnabled = model.isDismissible,
             onDismissClicked = {
                 onDismissMediaData(model.token, model.uid, model.packageName, model.instanceId)
