@@ -783,7 +783,7 @@ public class BackgroundActivityStartController {
         if (balShowToastsBlocked()
                 && (state.mResultForCaller.allows() || state.mResultForRealCaller.allows())) {
             // only show a toast if either caller or real caller could launch if they opted in
-            showToast("BAL blocked. go/debug-bal");
+            showToast("BAL blocked. goo.gle/android-bal");
         }
         return statsLog(BalVerdict.BLOCK, state);
     }
