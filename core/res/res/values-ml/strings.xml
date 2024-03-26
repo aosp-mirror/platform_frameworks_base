@@ -706,8 +706,8 @@
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ഫോൺ അടുത്തേക്ക് നീക്കുക"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"ഫോൺ മുകളിലേക്ക് ഉയർത്തുക"</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"ഫോൺ കൂടുതൽ താഴേക്ക് നീക്കുക"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"ഫോൺ നിങ്ങളുടെ ഇടതുവശത്തേക്ക് നീക്കുക"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"ഫോൺ നിങ്ങളുടെ വലതുവശത്തേക്ക് നീക്കുക"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"ഫോൺ ഇടതുവശത്തേക്ക് നീക്കുക"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"ഫോൺ വലതുവശത്തേക്ക് നീക്കുക"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"നിങ്ങളുടെ ഉപകരണത്തിന് നേരെ കൂടുതൽ നന്നായി നോക്കുക."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"മുഖം കാണുന്നില്ല. ഫോൺ കണ്ണിന് നേരെ പിടിക്കുക."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"വളരെയധികം ചലനം. ഫോൺ അനക്കാതെ നേരെ പിടിക്കുക."</string>

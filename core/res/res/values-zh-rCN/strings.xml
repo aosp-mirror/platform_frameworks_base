@@ -260,7 +260,7 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"错误报告"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"结束会话"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"屏幕截图"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"Bug 报告"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"错误报告"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"这会收集有关当前设备状态的信息，并以电子邮件的形式进行发送。从开始生成错误报告到准备好发送需要一点时间，请耐心等待。"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"互动式报告"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"在大多数情况下，建议您使用此选项，以便追踪报告的生成进度，输入与相应问题相关的更多详细信息，以及截取屏幕截图。系统可能会省略掉一些不常用的区段，从而缩短生成报告的时间。"</string>
@@ -1417,7 +1417,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"分享"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"拒绝"</string>
     <string name="select_input_method" msgid="3971267998568587025">"选择输入法"</string>
-    <string name="show_ime" msgid="6406112007347443383">"开启后，连接到实体键盘时，它会一直显示在屏幕上"</string>
+    <string name="show_ime" msgid="6406112007347443383">"连接到实体键盘时，在屏幕上显示一个虚拟键盘"</string>
     <string name="hardware" msgid="3611039921284836033">"使用屏幕键盘"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"配置“<xliff:g id="DEVICE_NAME">%s</xliff:g>”"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"配置物理键盘"</string>

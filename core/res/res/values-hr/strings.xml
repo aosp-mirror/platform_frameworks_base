@@ -330,7 +330,7 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"snimati zvuk"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Tjelesna aktivnost"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"pristupiti vašoj tjelesnoj aktivnosti"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"Fotoaparat"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"snimati fotografije i videozapise"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Uređaji u blizini"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"otkrivanje i povezivanje s uređajima u blizini"</string>
@@ -1059,7 +1059,7 @@
     <string name="keyguard_accessibility_widget" msgid="6776892679715699875">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> widget."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"Birač korisnika"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"Status"</string>
-    <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"Fotoaparat"</string>
+    <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"Kamera"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Nadzor medija"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"Pokrenuta je promjena redoslijeda widgeta."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"Završena je promjena redoslijeda widgeta."</string>
@@ -2119,7 +2119,7 @@
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Odbaci"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sustav"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Postavke"</string>
-    <string name="notification_appops_camera_active" msgid="8177643089272352083">"Fotoaparat"</string>
+    <string name="notification_appops_camera_active" msgid="8177643089272352083">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"prikazuje se preko drugih aplikacija na zaslonu"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Slanje povratnih informacija"</string>

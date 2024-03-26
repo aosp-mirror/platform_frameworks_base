@@ -1969,7 +1969,7 @@
     <string name="user_creation_account_exists" msgid="2239146360099708035">"អនុញ្ញាតឱ្យ <xliff:g id="APP">%1$s</xliff:g> បង្កើតអ្នកប្រើប្រាស់​ថ្មីដោយប្រើ <xliff:g id="ACCOUNT">%2$s</xliff:g> (អ្នកប្រើប្រាស់ដែលមានគណនីនេះមានរួចហើយ) ដែរឬទេ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"អនុញ្ញាតឱ្យ <xliff:g id="APP">%1$s</xliff:g> បង្កើតអ្នកប្រើប្រាស់​ថ្មីដោយប្រើ <xliff:g id="ACCOUNT">%2$s</xliff:g> ដែរឬទេ?"</string>
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"បញ្ចូលអ្នកប្រើប្រាស់ដែលស្ថិតក្រោមការគ្រប់គ្រង"</string>
-    <string name="language_selection_title" msgid="52674936078683285">"បន្ថែមភាសា"</string>
+    <string name="language_selection_title" msgid="52674936078683285">"បញ្ចូលភាសា"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"ចំណូលចិត្តតំបន់"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"វាយបញ្ចូលឈ្មោះភាសា"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"បាន​ណែនាំ"</string>
