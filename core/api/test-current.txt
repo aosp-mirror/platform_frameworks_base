@@ -803,6 +803,14 @@ package android.app.contentsuggestions {
 
 }
 
+package android.app.contextualsearch {
+
+  @FlaggedApi("android.app.contextualsearch.flags.enable_service") public final class CallbackToken implements android.os.Parcelable {
+    method @NonNull public android.os.IBinder getToken();
+  }
+
+}
+
 package android.app.job {
 
   public class JobParameters implements android.os.Parcelable {
