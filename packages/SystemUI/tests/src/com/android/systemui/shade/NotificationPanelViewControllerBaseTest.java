@@ -136,7 +136,6 @@ import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorLega
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl;
 import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl;
-import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -307,7 +306,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected NotificationListContainer mNotificationListContainer;
     @Mock protected NotificationStackSizeCalculator mNotificationStackSizeCalculator;
     @Mock protected UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
-    @Mock protected ShadeTransitionController mShadeTransitionController;
     @Mock protected QS mQs;
     @Mock protected QSFragmentLegacy mQSFragment;
     @Mock protected ViewGroup mQsHeader;
@@ -725,7 +723,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mNotificationListContainer,
                 mNotificationStackSizeCalculator,
                 mUnlockedScreenOffAnimationController,
-                mShadeTransitionController,
                 systemClock,
                 mKeyguardBottomAreaViewModel,
                 mKeyguardBottomAreaInteractor,
@@ -792,10 +789,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mNotificationPanelViewControllerLazy,
                 mView,
                 mQsFrameTranslateController,
-                mShadeTransitionController,
                 expansionHandler,
                 mNotificationRemoteInputManager,
-                mShadeExpansionStateManager,
                 mStatusBarKeyguardViewManager,
                 mLightBarController,
                 mNotificationStackScrollLayoutController,
@@ -805,7 +800,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mStatusBarTouchableRegionManager,
                 mKeyguardStateController,
                 mKeyguardBypassController,
-                mUpdateMonitor,
                 mScrimController,
                 mMediaDataManager,
                 mMediaHierarchyManager,

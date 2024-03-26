@@ -17,27 +17,55 @@
 package com.android.systemui.shade.transition
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.PanelState
 import com.android.systemui.shade.ShadeExpansionChangeEvent
+import com.android.systemui.shade.ShadeExpansionStateManager
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.statusbar.phone.ScrimController
+import dagger.Lazy
 import java.io.PrintWriter
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /** Controls the scrim properties during the shade expansion transition on non-lockscreen. */
 @SysUISingleton
 class ScrimShadeTransitionController
 @Inject
 constructor(
-    dumpManager: DumpManager,
+    @Application private val applicationScope: CoroutineScope,
+    private val shadeExpansionStateManager: ShadeExpansionStateManager,
+    private val panelExpansionInteractor: Lazy<PanelExpansionInteractor>,
+    private val dumpManager: DumpManager,
     private val scrimController: ScrimController,
 ) {
-
     private var lastExpansionFraction: Float? = null
     private var lastExpansionEvent: ShadeExpansionChangeEvent? = null
     private var currentPanelState: Int? = null
 
-    init {
+    fun init() {
+        if (SceneContainerFlag.isEnabled) {
+            applicationScope.launch {
+                panelExpansionInteractor.get().legacyPanelExpansion.collect { panelExpansion ->
+                    onPanelExpansionChanged(
+                        ShadeExpansionChangeEvent(
+                            fraction = panelExpansion,
+                            expanded = panelExpansion > 0f,
+                            tracking = true,
+                            dragDownPxAmount = 0f,
+                        )
+                    )
+                }
+            }
+        } else {
+            val currentState =
+                shadeExpansionStateManager.addExpansionListener(this::onPanelExpansionChanged)
+            onPanelExpansionChanged(currentState)
+            shadeExpansionStateManager.addStateListener(this::onPanelStateChanged)
+        }
         dumpManager.registerDumpable(
             ScrimShadeTransitionController::class.java.simpleName,
             this::dump
