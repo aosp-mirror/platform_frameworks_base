@@ -137,6 +137,27 @@ public class WallpaperCropper {
                 // This will fall into "Case 4" of this function and center the folded screen
                 return getCrop(displaySize, bitmapSize, newSuggestedCrops, rtl);
             }
+
+            // The second exception is if we're on tablet and we're on portrait mode.
+            // In that case, center the wallpaper relatively to landscape and put some parallax.
+            boolean isTablet = mWallpaperDisplayHelper.isLargeScreen()
+                    && !mWallpaperDisplayHelper.isFoldable();
+            if (isTablet && displaySize.x < displaySize.y) {
+                Point rotatedDisplaySize = new Point(displaySize.y, displaySize.x);
+                // compute the crop on landscape (without parallax)
+                Rect landscapeCrop = getCrop(rotatedDisplaySize, bitmapSize, suggestedCrops, rtl);
+                landscapeCrop = noParallax(landscapeCrop, rotatedDisplaySize, bitmapSize, rtl);
+                // compute the crop on portrait at the center of the landscape crop
+                crop = getAdjustedCrop(landscapeCrop, bitmapSize, displaySize, false, rtl, ADD);
+
+                // add some parallax (until the border of the landscape crop without parallax)
+                if (rtl) {
+                    crop.left = landscapeCrop.left;
+                } else {
+                    crop.right = landscapeCrop.right;
+                }
+            }
+
             return getAdjustedCrop(crop, bitmapSize, displaySize, true, rtl, ADD);
         }
 

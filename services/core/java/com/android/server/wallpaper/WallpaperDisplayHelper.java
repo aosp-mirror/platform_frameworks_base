@@ -59,6 +59,8 @@ class WallpaperDisplayHelper {
     }
 
     private static final String TAG = WallpaperDisplayHelper.class.getSimpleName();
+    private static final float LARGE_SCREEN_MIN_DP = 600f;
+
     private final SparseArray<DisplayData> mDisplayDatas = new SparseArray<>();
     private final DisplayManager mDisplayManager;
     private final WindowManagerInternal mWindowManagerInternal;
@@ -67,7 +69,8 @@ class WallpaperDisplayHelper {
     // related orientations pairs for foldable (folded orientation, unfolded orientation)
     private final List<Pair<Integer, Integer>> mFoldableOrientationPairs = new ArrayList<>();
 
-    private boolean mIsFoldable;
+    private final boolean mIsFoldable;
+    private boolean mIsLargeScreen = false;
 
     WallpaperDisplayHelper(
             DisplayManager displayManager,
@@ -94,6 +97,9 @@ class WallpaperDisplayHelper {
                     mDefaultDisplaySizes.put(orientation, point);
                 }
             }
+
+            mIsLargeScreen |= (displaySize.x / metric.getDensity() >= LARGE_SCREEN_MIN_DP);
+
             if (populateOrientationPairs) {
                 int orientation = WallpaperManager.getOrientation(displaySize);
                 float newSurface = displaySize.x * displaySize.y
@@ -212,6 +218,13 @@ class WallpaperDisplayHelper {
 
     boolean isFoldable() {
         return mIsFoldable;
+    }
+
+    /**
+     * Return true if any of the screens of the default display is considered large (DP >= 600)
+     */
+    boolean isLargeScreen() {
+        return mIsLargeScreen;
     }
 
     /**
