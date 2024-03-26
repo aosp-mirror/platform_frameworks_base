@@ -21,6 +21,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
@@ -33,6 +34,7 @@ import com.android.packageinstaller.v2.ui.UninstallActionListener;
  */
 public class UninstallErrorFragment extends DialogFragment {
 
+    private static final String LOG_TAG = UninstallErrorFragment.class.getSimpleName();
     private final UninstallAborted mDialogData;
     private UninstallActionListener mUninstallActionListener;
 
@@ -49,6 +51,7 @@ public class UninstallErrorFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        Log.i(LOG_TAG, "Creating " + LOG_TAG + "\n" + mDialogData);
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext())
             .setMessage(mDialogData.getDialogTextResource())
             .setNegativeButton(R.string.ok,
