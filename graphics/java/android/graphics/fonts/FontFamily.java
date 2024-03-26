@@ -120,6 +120,24 @@ public final class FontFamily {
         }
 
         /**
+         * Returns true if the passed font files can be used for building a variable font family
+         * that automatically adjust the `wght` and `ital` axes value for the requested
+         * weight/italic style values.
+         *
+         * This method can be used for checking that the provided font files can be used for
+         * building a variable font family created with {@link #buildVariableFamily()}.
+         * If this function returns false, the {@link #buildVariableFamily()} will fail and
+         * return null.
+         *
+         * @return true if a variable font can be built from the given fonts. Otherwise, false.
+         */
+        @FlaggedApi(FLAG_NEW_FONTS_FALLBACK_XML)
+        public boolean canBuildVariableFamily() {
+            int variableFamilyType = analyzeAndResolveVariableType(mFonts);
+            return variableFamilyType != VARIABLE_FONT_FAMILY_TYPE_UNKNOWN;
+        }
+
+        /**
          * Build a variable font family that automatically adjust the `wght` and `ital` axes value
          * for the requested weight/italic style values.
          *
@@ -140,7 +158,9 @@ public final class FontFamily {
          * value of the supported `wght`axis, the maximum supported `wght` value is used. The weight
          * value of the font is ignored.
          *
-         * If none of the above conditions are met, this function return {@code null}.
+         * If none of the above conditions are met, this function return {@code null}. Please check
+         * that your font files meet the above requirements or consider using the {@link #build()}
+         * method.
          *
          * @return A variable font family. null if a variable font cannot be built from the given
          *         fonts.
