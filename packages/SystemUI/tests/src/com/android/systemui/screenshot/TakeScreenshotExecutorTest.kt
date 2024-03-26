@@ -274,8 +274,8 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
             screenshotExecutor.executeScreenshots(createScreenshotRequest(), onSaved, callback)
 
             screenshotExecutor.onCloseSystemDialogsReceived()
-            verify(controller0).dismissScreenshot(any())
-            verify(controller1).dismissScreenshot(any())
+            verify(controller0).requestDismissal(any())
+            verify(controller1).requestDismissal(any())
 
             screenshotExecutor.onDestroy()
         }
@@ -290,8 +290,8 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
             screenshotExecutor.executeScreenshots(createScreenshotRequest(), onSaved, callback)
 
             screenshotExecutor.onCloseSystemDialogsReceived()
-            verify(controller0, never()).dismissScreenshot(any())
-            verify(controller1).dismissScreenshot(any())
+            verify(controller0, never()).requestDismissal(any())
+            verify(controller1).requestDismissal(any())
 
             screenshotExecutor.onDestroy()
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.screenshot;
+package com.android.systemui.screenshot.scroll;
 
 import android.annotation.Nullable;
 import android.content.ContentResolver;
@@ -35,20 +35,20 @@ import java.io.InputStream;
 import javax.inject.Inject;
 
 /** Loads images. */
-public class ImageLoader {
+class ImageLoader {
     private final ContentResolver mResolver;
 
     static class Result {
-        @Nullable Uri uri;
-        @Nullable File fileName;
-        @Nullable Bitmap bitmap;
+        @Nullable Uri mUri;
+        @Nullable File mFilename;
+        @Nullable Bitmap mBitmap;
 
         @Override
         public String toString() {
             final StringBuilder sb = new StringBuilder("Result{");
-            sb.append("uri=").append(uri);
-            sb.append(", fileName=").append(fileName);
-            sb.append(", bitmap=").append(bitmap);
+            sb.append("uri=").append(mUri);
+            sb.append(", fileName=").append(mFilename);
+            sb.append(", bitmap=").append(mBitmap);
             sb.append('}');
             return sb.toString();
         }
@@ -69,11 +69,10 @@ public class ImageLoader {
         return CallbackToFutureAdapter.getFuture(completer -> {
             Result result = new Result();
             try (InputStream in = mResolver.openInputStream(uri)) {
-                result.uri = uri;
-                result.bitmap = BitmapFactory.decodeStream(in);
+                result.mUri = uri;
+                result.mBitmap = BitmapFactory.decodeStream(in);
                 completer.set(result);
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 completer.setException(e);
             }
             return "BitmapFactory#decodeStream";
@@ -91,8 +90,8 @@ public class ImageLoader {
         return CallbackToFutureAdapter.getFuture(completer -> {
             try (InputStream in = new BufferedInputStream(new FileInputStream(file))) {
                 Result result = new Result();
-                result.fileName = file;
-                result.bitmap = BitmapFactory.decodeStream(in);
+                result.mFilename = file;
+                result.mBitmap = BitmapFactory.decodeStream(in);
                 completer.set(result);
             } catch (IOException e) {
                 completer.setException(e);
