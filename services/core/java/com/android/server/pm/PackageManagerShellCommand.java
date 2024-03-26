@@ -4412,8 +4412,31 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int runGetDomainVerificationAgent() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
+        int userId = UserHandle.USER_ALL;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+                if (userId != UserHandle.USER_ALL && userId != UserHandle.USER_CURRENT) {
+                    UserManagerInternal umi =
+                            LocalServices.getService(UserManagerInternal.class);
+                    UserInfo userInfo = umi.getUserInfo(userId);
+                    if (userInfo == null) {
+                        pw.println("Failure [user " + userId + " doesn't exist]");
+                        return 1;
+                    }
+                }
+            } else {
+                pw.println("Error: Unknown option: " + opt);
+                return 1;
+            }
+        }
+        final int translatedUserId =
+                translateUserId(userId, UserHandle.USER_SYSTEM, "runGetDomainVerificationAgent");
         try {
-            final ComponentName domainVerificationAgent = mInterface.getDomainVerificationAgent();
+            final ComponentName domainVerificationAgent =
+                    mInterface.getDomainVerificationAgent(translatedUserId);
             pw.println(domainVerificationAgent == null
                     ? "No Domain Verifier available!" : domainVerificationAgent.flattenToString());
         } catch (Exception e) {
