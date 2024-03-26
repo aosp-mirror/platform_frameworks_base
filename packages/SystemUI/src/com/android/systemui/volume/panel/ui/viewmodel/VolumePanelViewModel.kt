@@ -18,8 +18,6 @@ package com.android.systemui.volume.panel.ui.viewmodel
 
 import android.content.Context
 import android.content.res.Resources
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -33,7 +31,6 @@ import com.android.systemui.volume.panel.ui.layout.ComponentsLayout
 import com.android.systemui.volume.panel.ui.layout.ComponentsLayoutManager
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -45,13 +42,17 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
+// Can't inject a constructor here because VolumePanelComponent provides this view model for its
+// components.
 class VolumePanelViewModel(
     resources: Resources,
+    coroutineScope: CoroutineScope,
     daggerComponentFactory: VolumePanelComponentFactory,
     configurationController: ConfigurationController,
-) : ViewModel() {
+) {
 
-    private val volumePanelComponent: VolumePanelComponent = daggerComponentFactory.create(this)
+    private val volumePanelComponent: VolumePanelComponent =
+        daggerComponentFactory.create(this, coroutineScope)
 
     private val scope: CoroutineScope
         get() = volumePanelComponent.coroutineScope()
@@ -118,28 +119,21 @@ class VolumePanelViewModel(
         mutablePanelVisibility.update { false }
     }
 
-    override fun onCleared() {
-        scope.cancel()
-        super.onCleared()
-    }
-
     class Factory
     @Inject
     constructor(
         @Application private val context: Context,
         private val daggerComponentFactory: VolumePanelComponentFactory,
         private val configurationController: ConfigurationController,
-    ) : ViewModelProvider.Factory {
+    ) {
 
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            check(modelClass == VolumePanelViewModel::class.java)
+        fun create(coroutineScope: CoroutineScope): VolumePanelViewModel {
             return VolumePanelViewModel(
                 context.resources,
+                coroutineScope,
                 daggerComponentFactory,
                 configurationController,
             )
-                as T
         }
     }
 }

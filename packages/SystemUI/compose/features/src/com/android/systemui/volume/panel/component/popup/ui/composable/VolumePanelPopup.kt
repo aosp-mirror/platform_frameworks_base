@@ -65,7 +65,7 @@ constructor(
     ) {
         val dialog =
             dialogFactory.create(
-                theme = R.style.Theme_VolumePanelActivity_Popup,
+                theme = R.style.Theme_VolumePanel_Popup,
                 dialogGravity = Gravity.BOTTOM,
             ) {
                 PopupComposable(it, title, content)

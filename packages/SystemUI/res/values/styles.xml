@@ -537,6 +537,12 @@
         <item name="android:buttonBarButtonStyle">@style/Widget.Dialog.Button.Large</item>
     </style>
 
+    <style name="Theme.SystemUI.BottomSheet" parent="Theme.SystemUI.Dialog">
+        <!-- default dialog background has insets -->
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@style/Animation.Design.BottomSheetDialog</item>
+    </style>
+
     <style name="AlertDialogStyle" parent="@androidprv:style/AlertDialog.DeviceDefault">
         <item name="android:layout">@layout/alert_dialog_systemui</item>
     </style>
@@ -1012,23 +1018,11 @@
         <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
 
-    <style name="Theme.VolumePanelActivity" parent="@android:style/Theme.DeviceDefault.DayNight">
-        <item name="android:windowFullscreen">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowActionBar">false</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:windowCloseOnTouchOutside">true</item>
-        <item name="android:windowAnimationStyle">@null</item>
-    </style>
-
     <style name="Widget.SliceView.VolumePanel">
         <item name="hideHeaderRow">true</item>
     </style>
 
-    <style name="Theme.VolumePanelActivity.Popup" parent="@style/Theme.SystemUI.Dialog">
+    <style name="Theme.VolumePanel.Popup" parent="@style/Theme.SystemUI.Dialog">
         <item name="android:dialogCornerRadius">44dp</item>
         <item name="android:colorBackground">?androidprv:attr/materialColorSurfaceContainerHigh
         </item>

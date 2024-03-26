@@ -45,4 +45,8 @@ interface DialogDelegate<T : Dialog> {
 
     /** Called as part of [ViewRootImpl.ConfigChangedCallback.onConfigurationChanged]. */
     fun onConfigurationChanged(dialog: T, configuration: Configuration) {}
+
+    fun getWidth(dialog: T): Int = SystemUIDialog.getDefaultDialogWidth(dialog)
+
+    fun getHeight(dialog: T): Int = SystemUIDialog.getDefaultDialogHeight()
 }
