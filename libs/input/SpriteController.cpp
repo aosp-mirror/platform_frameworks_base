@@ -148,8 +148,9 @@ void SpriteController::doUpdateSprites() {
         if (update.state.wantSurfaceVisible()) {
             int32_t desiredWidth = update.state.icon.width();
             int32_t desiredHeight = update.state.icon.height();
-            if (update.state.surfaceWidth < desiredWidth
-                    || update.state.surfaceHeight < desiredHeight) {
+            // TODO(b/331260947): investigate using a larger surface width with smaller sprites.
+            if (update.state.surfaceWidth != desiredWidth ||
+                update.state.surfaceHeight != desiredHeight) {
                 needApplyTransaction = true;
 
                 update.state.surfaceControl->updateDefaultBufferSize(desiredWidth, desiredHeight);
