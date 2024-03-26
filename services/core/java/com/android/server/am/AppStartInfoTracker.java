@@ -464,7 +464,7 @@ public final class AppStartInfoTracker {
         addTimestampToStart(app.info.packageName, app.uid, timeNs, key);
     }
 
-    private void addTimestampToStart(String packageName, int uid, long timeNs, int key) {
+    void addTimestampToStart(String packageName, int uid, long timeNs, int key) {
         synchronized (mLock) {
             AppStartInfoContainer container = mData.get(packageName, uid);
             if (container == null) {
