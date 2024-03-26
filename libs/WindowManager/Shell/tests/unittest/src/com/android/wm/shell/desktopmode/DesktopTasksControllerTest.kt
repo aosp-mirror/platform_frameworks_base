@@ -95,9 +95,10 @@ import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import org.mockito.kotlin.times
-import org.mockito.Mockito.`when` as whenever
+import org.mockito.kotlin.atLeastOnce
+import org.mockito.kotlin.capture
 import org.mockito.quality.Strictness
+import org.mockito.Mockito.`when` as whenever
 
 /**
  * Test class for {@link DesktopTasksController}
@@ -116,13 +117,14 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Mock lateinit var shellCommandHandler: ShellCommandHandler
     @Mock lateinit var shellController: ShellController
     @Mock lateinit var displayController: DisplayController
+    @Mock lateinit var displayLayout: DisplayLayout
     @Mock lateinit var shellTaskOrganizer: ShellTaskOrganizer
     @Mock lateinit var syncQueue: SyncTransactionQueue
     @Mock lateinit var rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
     @Mock lateinit var transitions: Transitions
     @Mock lateinit var exitDesktopTransitionHandler: ExitDesktopTaskTransitionHandler
     @Mock lateinit var enterDesktopTransitionHandler: EnterDesktopTaskTransitionHandler
-    @Mock lateinit var mToggleResizeDesktopTaskTransitionHandler:
+    @Mock lateinit var toggleResizeDesktopTaskTransitionHandler:
             ToggleResizeDesktopTaskTransitionHandler
     @Mock lateinit var dragToDesktopTransitionHandler: DragToDesktopTransitionHandler
     @Mock lateinit var launchAdjacentController: LaunchAdjacentController
@@ -154,6 +156,10 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         whenever(shellTaskOrganizer.getRunningTasks(anyInt())).thenAnswer { runningTasks }
         whenever(transitions.startTransition(anyInt(), any(), isNull())).thenAnswer { Binder() }
+        whenever(displayController.getDisplayLayout(anyInt())).thenReturn(displayLayout)
+        whenever(displayLayout.getStableBounds(any())).thenAnswer { i ->
+                (i.arguments.first() as Rect).set(STABLE_BOUNDS)
+            }
 
         controller = createController()
         controller.setSplitScreenController(splitScreenController)
@@ -179,7 +185,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             transitions,
             enterDesktopTransitionHandler,
             exitDesktopTransitionHandler,
-            mToggleResizeDesktopTaskTransitionHandler,
+            toggleResizeDesktopTaskTransitionHandler,
             dragToDesktopTransitionHandler,
             desktopModeTaskRepository,
             desktopModeLoggerTransitionObserver,
@@ -929,15 +935,74 @@ class DesktopTasksControllerTest : ShellTestCase() {
         controller.enterSplit(DEFAULT_DISPLAY, false)
 
         verify(splitScreenController).requestEnterSplitSelect(
-            task2,
-            any(),
-            SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT,
-            task2.configuration.windowConfiguration.bounds
+                task2,
+                any(),
+                SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT,
+                task2.configuration.windowConfiguration.bounds
         )
     }
 
-    private fun setUpFreeformTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
-        val task = createFreeformTask(displayId)
+    @Test
+    fun toggleBounds_togglesToStableBounds() {
+        val bounds = Rect(0, 0, 100, 100)
+        val task = setUpFreeformTask(DEFAULT_DISPLAY, bounds)
+
+        controller.toggleDesktopTaskSize(task)
+        // Assert bounds set to stable bounds
+        val wct = getLatestToggleResizeDesktopTaskWct()
+        assertThat(wct.changes[task.token.asBinder()]?.configuration?.windowConfiguration?.bounds)
+                .isEqualTo(STABLE_BOUNDS)
+    }
+
+    @Test
+    fun toggleBounds_lastBoundsBeforeMaximizeSaved() {
+        val bounds = Rect(0, 0, 100, 100)
+        val task = setUpFreeformTask(DEFAULT_DISPLAY, bounds)
+
+        controller.toggleDesktopTaskSize(task)
+        assertThat(desktopModeTaskRepository.removeBoundsBeforeMaximize(task.taskId))
+                .isEqualTo(bounds)
+    }
+
+    @Test
+    fun toggleBounds_togglesFromStableBoundsToLastBoundsBeforeMaximize() {
+        val boundsBeforeMaximize = Rect(0, 0, 100, 100)
+        val task = setUpFreeformTask(DEFAULT_DISPLAY, boundsBeforeMaximize)
+
+        // Maximize
+        controller.toggleDesktopTaskSize(task)
+        task.configuration.windowConfiguration.bounds.set(STABLE_BOUNDS)
+
+        // Restore
+        controller.toggleDesktopTaskSize(task)
+
+        // Assert bounds set to last bounds before maximize
+        val wct = getLatestToggleResizeDesktopTaskWct()
+        assertThat(wct.changes[task.token.asBinder()]?.configuration?.windowConfiguration?.bounds)
+                .isEqualTo(boundsBeforeMaximize)
+    }
+
+    @Test
+    fun toggleBounds_removesLastBoundsBeforeMaximizeAfterRestoringBounds() {
+        val boundsBeforeMaximize = Rect(0, 0, 100, 100)
+        val task = setUpFreeformTask(DEFAULT_DISPLAY, boundsBeforeMaximize)
+
+        // Maximize
+        controller.toggleDesktopTaskSize(task)
+        task.configuration.windowConfiguration.bounds.set(STABLE_BOUNDS)
+
+        // Restore
+        controller.toggleDesktopTaskSize(task)
+
+        // Assert last bounds before maximize removed after use
+        assertThat(desktopModeTaskRepository.removeBoundsBeforeMaximize(task.taskId)).isNull()
+    }
+
+    private fun setUpFreeformTask(
+            displayId: Int = DEFAULT_DISPLAY,
+            bounds: Rect? = null
+    ): RunningTaskInfo {
+        val task = createFreeformTask(displayId, bounds)
         whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
         desktopModeTaskRepository.addActiveTask(displayId, task.taskId)
         desktopModeTaskRepository.addOrMoveFreeformTaskToTop(task.taskId)
@@ -1004,6 +1069,18 @@ class DesktopTasksControllerTest : ShellTestCase() {
         return arg.value
     }
 
+    private fun getLatestToggleResizeDesktopTaskWct(): WindowContainerTransaction {
+        val arg: ArgumentCaptor<WindowContainerTransaction> =
+                ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
+        if (ENABLE_SHELL_TRANSITIONS) {
+            verify(toggleResizeDesktopTaskTransitionHandler, atLeastOnce())
+                    .startTransition(capture(arg))
+        } else {
+            verify(shellTaskOrganizer).applyTransaction(capture(arg))
+        }
+        return arg.value
+    }
+
     private fun getLatestMoveToDesktopWct(): WindowContainerTransaction {
         val arg = ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
         if (ENABLE_SHELL_TRANSITIONS) {
@@ -1042,6 +1119,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     companion object {
         const val SECOND_DISPLAY = 2
+        private val STABLE_BOUNDS = Rect(0, 0, 1000, 1000)
     }
 }
 

@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.desktopmode
 
+import android.graphics.Rect
 import android.graphics.Region
 import android.util.ArrayMap
 import android.util.ArraySet
@@ -55,6 +56,8 @@ class DesktopModeTaskRepository {
     private val visibleTasksListeners = ArrayMap<VisibleTasksListener, Executor>()
     // Track corner/caption regions of desktop tasks, used to determine gesture exclusion
     private val desktopExclusionRegions = SparseArray<Region>()
+    // Track last bounds of task before toggled to stable bounds
+    private val boundsBeforeMaximizeByTaskId = SparseArray<Rect>()
     private var desktopGestureExclusionListener: Consumer<Region>? = null
     private var desktopGestureExclusionExecutor: Executor? = null
 
@@ -307,6 +310,7 @@ class DesktopModeTaskRepository {
             taskId
         )
         freeformTasksInZOrder.remove(taskId)
+        boundsBeforeMaximizeByTaskId.remove(taskId)
         KtProtoLog.d(
             WM_SHELL_DESKTOP_MODE,
             "DesktopTaskRepo: remaining freeform tasks: " + freeformTasksInZOrder.toDumpString()
@@ -355,6 +359,20 @@ class DesktopModeTaskRepository {
                 executor.execute { listener.onStashedChanged(displayId, stashed) }
             }
         }
+    }
+
+    /**
+     * Removes and returns the bounds saved before maximizing the given task.
+     */
+    fun removeBoundsBeforeMaximize(taskId: Int): Rect? {
+        return boundsBeforeMaximizeByTaskId.removeReturnOld(taskId)
+    }
+
+    /**
+     * Saves the bounds of the given task before maximizing.
+     */
+    fun saveBoundsBeforeMaximize(taskId: Int, bounds: Rect) {
+        boundsBeforeMaximizeByTaskId.set(taskId, Rect(bounds))
     }
 
     /**

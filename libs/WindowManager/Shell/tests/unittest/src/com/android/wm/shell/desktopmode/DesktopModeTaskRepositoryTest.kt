@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.desktopmode
 
+import android.graphics.Rect
 import android.testing.AndroidTestingRunner
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.Display.INVALID_DISPLAY
@@ -404,6 +405,31 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
         executor.flushAll()
         assertThat(listener.stashedOnDefaultDisplay).isFalse()
         assertThat(listener.stashedOnSecondaryDisplay).isTrue()
+    }
+
+    @Test
+    fun removeFreeformTask_removesTaskBoundsBeforeMaximize() {
+        val taskId = 1
+        repo.saveBoundsBeforeMaximize(taskId, Rect(0, 0, 200, 200))
+        repo.removeFreeformTask(taskId)
+        assertThat(repo.removeBoundsBeforeMaximize(taskId)).isNull()
+    }
+
+    @Test
+    fun saveBoundsBeforeMaximize_boundsSavedByTaskId() {
+        val taskId = 1
+        val bounds = Rect(0, 0, 200, 200)
+        repo.saveBoundsBeforeMaximize(taskId, bounds)
+        assertThat(repo.removeBoundsBeforeMaximize(taskId)).isEqualTo(bounds)
+    }
+
+    @Test
+    fun removeBoundsBeforeMaximize_returnsNullAfterBoundsRemoved() {
+        val taskId = 1
+        val bounds = Rect(0, 0, 200, 200)
+        repo.saveBoundsBeforeMaximize(taskId, bounds)
+        repo.removeBoundsBeforeMaximize(taskId)
+        assertThat(repo.removeBoundsBeforeMaximize(taskId)).isNull()
     }
 
     class TestListener : DesktopModeTaskRepository.ActiveTasksListener {
