@@ -162,7 +162,7 @@
                 <xs:element type="usiVersion" name="usiVersion">
                     <xs:annotation name="final"/>
                 </xs:element>
-                <xs:element type="lowBrightnessMode" name="lowBrightness">
+                <xs:element type="evenDimmerMode" name="evenDimmer">
                     <xs:attribute name="enabled" type="xs:boolean" use="optional"/>
                     <xs:annotation name="final"/>
                 </xs:element>
@@ -221,7 +221,7 @@
         </xs:restriction>
     </xs:simpleType>
 
-    <xs:complexType name="lowBrightnessMode">
+    <xs:complexType name="evenDimmerMode">
         <xs:sequence>
             <xs:element name="transitionPoint" type="nonNegativeDecimal" minOccurs="1"
                 maxOccurs="1">

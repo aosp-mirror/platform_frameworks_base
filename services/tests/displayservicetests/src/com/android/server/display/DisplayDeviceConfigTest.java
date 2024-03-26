@@ -913,7 +913,7 @@ public final class DisplayDeviceConfigTest {
         setupDisplayDeviceConfigFromDisplayConfigFile(getContent(getValidLuxThrottling(),
                 getValidProxSensor(), /* includeIdleMode= */ false, /* enableEvenDimmer */ true));
 
-        assertTrue(mDisplayDeviceConfig.getLbmEnabled());
+        assertTrue(mDisplayDeviceConfig.isEvenDimmerAvailable());
         assertEquals(0.0001f, mDisplayDeviceConfig.getBacklightFromBrightness(0.1f), ZERO_DELTA);
         assertEquals(0.2f, mDisplayDeviceConfig.getNitsFromBacklight(0.0f), ZERO_DELTA);
     }
@@ -1637,7 +1637,7 @@ public final class DisplayDeviceConfigTest {
     }
 
     private String evenDimmerConfig(boolean enabled) {
-        return (enabled ? "<lowBrightness enabled=\"true\">" : "<lowBrightness enabled=\"false\">")
+        return (enabled ? "<evenDimmer enabled=\"true\">" : "<evenDimmer enabled=\"false\">")
                 + "  <transitionPoint>0.1</transitionPoint>\n"
                 + "  <nits>0.2</nits>\n"
                 + "  <nits>2.0</nits>\n"
@@ -1662,7 +1662,7 @@ public final class DisplayDeviceConfigTest {
                 + "         <value>100</value> <nits>1.0</nits>\n"
                 + "     </point>\n"
                 + " </luxToMinimumNitsMap>\n"
-                + "</lowBrightness>";
+                + "</evenDimmer>";
     }
 
     private void mockDeviceConfigs() {

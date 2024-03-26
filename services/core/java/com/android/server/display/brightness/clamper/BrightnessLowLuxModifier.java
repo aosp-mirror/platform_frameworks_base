@@ -106,7 +106,7 @@ public class BrightnessLowLuxModifier extends BrightnessModifier {
                     ? BrightnessReason.MODIFIER_MIN_USER_SET_LOWER_BOUND
                     : BrightnessReason.MODIFIER_MIN_LUX;
         } else {
-            minBrightnessAllowed = mDisplayDeviceConfig.getLowBrightnessTransitionPoint();
+            minBrightnessAllowed = mDisplayDeviceConfig.getEvenDimmerTransitionPoint();
             reason = 0;
         }
 
