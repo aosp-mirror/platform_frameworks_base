@@ -4980,6 +4980,12 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 return false;
             }
 
+            if (DeviceEntryUdfpsRefactor.isEnabled()
+                    && mAlternateBouncerInteractor.isVisibleState()) {
+                // never send touches to shade if the alternate bouncer is showing
+                return false;
+            }
+
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 if (event.getDownTime() == mLastTouchDownTime) {
                     // An issue can occur when swiping down after unlock, where multiple down
