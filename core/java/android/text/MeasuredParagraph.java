@@ -700,22 +700,6 @@ public class MeasuredParagraph {
                 bidiRequest = isRtl ? Bidi.RTL : Bidi.LTR;
             }
             mBidi = new Bidi(mCopiedBuffer, 0, null, 0, mCopiedBuffer.length, bidiRequest);
-
-            if (mBidi.getParagraphIndex(mCopiedBuffer.length - 1) != 0) {
-                // Historically, the MeasuredParagraph does not treat the CR letters as paragraph
-                // breaker but ICU BiDi treats it as paragraph breaker. In the MeasureParagraph,
-                // the given range always represents a single paragraph, so if the BiDi object has
-                // multiple paragraph, it should contains a CR letters in the text. Using CR is not
-                // common in Android and also it should not penalize the easy case, e.g. all LTR,
-                // check the paragraph count here and replace the CR letters and re-calculate
-                // BiDi again.
-                for (int i = 0; i < mTextLength; ++i) {
-                    if (mCopiedBuffer[i] == '\r') {
-                        mCopiedBuffer[i] = OBJECT_REPLACEMENT_CHARACTER;
-                    }
-                }
-                mBidi = new Bidi(mCopiedBuffer, 0, null, 0, mCopiedBuffer.length, bidiRequest);
-            }
             mLevels.resize(mTextLength);
             byte[] rawArray = mLevels.getRawArray();
             for (int i = 0; i < mTextLength; ++i) {
