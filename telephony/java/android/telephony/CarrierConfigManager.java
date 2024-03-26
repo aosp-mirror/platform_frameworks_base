@@ -9828,6 +9828,19 @@ public class CarrierConfigManager {
             "satellite_entitlement_supported_bool";
 
     /**
+     * Indicates the appName that is used when querying the entitlement server for satellite.
+     *
+     * The default value is androidSatmode.
+     *
+     * Reference: GSMA TS.43-v11, 2.8.5 Fast Authentication and Token Management.
+     * `app_name` is an optional attribute in the request and may vary depending on the carrier
+     * requirement.
+     * @hide
+     */
+    public static final String KEY_SATELLITE_ENTITLEMENT_APP_NAME_STRING =
+            "satellite_entitlement_app_name_string";
+
+    /**
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
      * the default APN (i.e. internet) will be used for tethering.
      *
@@ -10945,6 +10958,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_OVERRIDE_WFC_ROAMING_MODE_WHILE_USING_NTN_BOOL, true);
         sDefaults.putInt(KEY_SATELLITE_ENTITLEMENT_STATUS_REFRESH_DAYS_INT, 30);
         sDefaults.putBoolean(KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL, false);
+        sDefaults.putString(KEY_SATELLITE_ENTITLEMENT_APP_NAME_STRING, "androidSatmode");
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
