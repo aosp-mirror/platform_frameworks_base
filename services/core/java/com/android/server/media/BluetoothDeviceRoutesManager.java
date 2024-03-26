@@ -119,6 +119,7 @@ import java.util.stream.Collectors;
                 BluetoothHearingAid.ACTION_CONNECTION_STATE_CHANGED);
         deviceStateChangedIntentFilter.addAction(
                 BluetoothLeAudio.ACTION_LE_AUDIO_CONNECTION_STATE_CHANGED);
+        deviceStateChangedIntentFilter.addAction(BluetoothDevice.ACTION_ALIAS_CHANGED);
 
         mContext.registerReceiverAsUser(mDeviceStateChangedReceiver, user,
                 deviceStateChangedIntentFilter, null, null);
@@ -138,6 +139,12 @@ import java.util.stream.Collectors;
         return bluetoothDevice != null
                 ? createBluetoothRoute(bluetoothDevice).mRoute.getId()
                 : null;
+    }
+
+    @Nullable
+    public synchronized String getNameForBluetoothAddress(@NonNull String address) {
+        BluetoothDevice bluetoothDevice = mAddressToBondedDevice.get(address);
+        return bluetoothDevice != null ? getDeviceName(bluetoothDevice) : null;
     }
 
     public synchronized void activateBluetoothDeviceWithAddress(String address) {
@@ -218,13 +225,7 @@ import java.util.stream.Collectors;
         BluetoothRouteInfo
                 newBtRoute = new BluetoothRouteInfo();
         newBtRoute.mBtDevice = device;
-        String deviceName =
-                Flags.enableUseOfBluetoothDeviceGetAliasForMr2infoGetName()
-                        ? device.getAlias()
-                        : device.getName();
-        if (TextUtils.isEmpty(deviceName)) {
-            deviceName = mContext.getResources().getText(R.string.unknownName).toString();
-        }
+        String deviceName = getDeviceName(device);
 
         String routeId = device.getAddress();
         int type = MediaRoute2Info.TYPE_BLUETOOTH_A2DP;
@@ -260,6 +261,17 @@ import java.util.stream.Collectors;
                         .setAddress(device.getAddress())
                         .build();
         return newBtRoute;
+    }
+
+    private String getDeviceName(BluetoothDevice device) {
+        String deviceName =
+                Flags.enableUseOfBluetoothDeviceGetAliasForMr2infoGetName()
+                        ? device.getAlias()
+                        : device.getName();
+        if (TextUtils.isEmpty(deviceName)) {
+            deviceName = mContext.getResources().getText(R.string.unknownName).toString();
+        }
+        return deviceName;
     }
 
     private static class BluetoothRouteInfo {
@@ -300,6 +312,7 @@ import java.util.stream.Collectors;
                 case BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED:
                 case BluetoothHearingAid.ACTION_CONNECTION_STATE_CHANGED:
                 case BluetoothLeAudio.ACTION_LE_AUDIO_CONNECTION_STATE_CHANGED:
+                case BluetoothDevice.ACTION_ALIAS_CHANGED:
                     updateBluetoothRoutes();
                     notifyBluetoothRoutesUpdated();
             }
