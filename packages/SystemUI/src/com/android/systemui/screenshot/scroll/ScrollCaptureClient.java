@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.screenshot;
+package com.android.systemui.screenshot.scroll;
 
 import static com.android.systemui.screenshot.LogConfig.DEBUG_SCROLL;
 
@@ -46,6 +46,7 @@ import androidx.concurrent.futures.CallbackToFutureAdapter.Completer;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.screenshot.LogConfig;
 
 import com.google.common.util.concurrent.ListenableFuture;
 

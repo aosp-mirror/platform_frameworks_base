@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.screenshot;
+package com.android.systemui.screenshot.scroll;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -265,7 +265,7 @@ public class CropView extends View {
                 Log.w(TAG, "No boundary selected");
                 break;
         }
-        Log.i(TAG,  "Updated mCrop: " + mCrop);
+        Log.i(TAG, "Updated mCrop: " + mCrop);
 
         invalidate();
     }
@@ -385,7 +385,7 @@ public class CropView extends View {
 
     /**
      * @param action either ACTION_DOWN, ACTION_UP or ACTION_MOVE.
-     * @param x coordinate of the relevant pointer.
+     * @param x      x-coordinate of the relevant pointer.
      */
     private void updateListener(int action, float x) {
         if (mCropInteractionListener != null && isVertical(mCurrentDraggingBoundary)) {
@@ -643,11 +643,13 @@ public class CropView extends View {
     /**
      * Listen for crop motion events and state.
      */
-    public interface CropInteractionListener {
+    interface CropInteractionListener {
         void onCropDragStarted(CropBoundary boundary, float boundaryPosition,
                 int boundaryPositionPx, float horizontalCenter, float x);
+
         void onCropDragMoved(CropBoundary boundary, float boundaryPosition,
                 int boundaryPositionPx, float horizontalCenter, float x);
+
         void onCropDragComplete();
     }
 
@@ -675,8 +677,7 @@ public class CropView extends View {
             out.writeParcelable(mCrop, 0);
         }
 
-        public static final Parcelable.Creator<SavedState> CREATOR
-                = new Parcelable.Creator<SavedState>() {
+        public static final Parcelable.Creator<SavedState> CREATOR = new Parcelable.Creator<>() {
             public SavedState createFromParcel(Parcel in) {
                 return new SavedState(in);
             }
