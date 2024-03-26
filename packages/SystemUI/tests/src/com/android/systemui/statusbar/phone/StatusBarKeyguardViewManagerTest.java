@@ -607,7 +607,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         /* verify that a predictive back callback is registered when the bouncer becomes visible */
         mBouncerExpansionCallback.onVisibilityChanged(true);
         verify(mOnBackInvokedDispatcher).registerOnBackInvokedCallback(
-                eq(OnBackInvokedDispatcher.PRIORITY_OVERLAY),
+                eq(OnBackInvokedDispatcher.PRIORITY_DEFAULT),
                 mBackCallbackCaptor.capture());
 
         /* verify that the same callback is unregistered when the bouncer becomes invisible */
@@ -622,7 +622,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         mBouncerExpansionCallback.onVisibilityChanged(true);
         /* capture the predictive back callback during registration */
         verify(mOnBackInvokedDispatcher).registerOnBackInvokedCallback(
-                eq(OnBackInvokedDispatcher.PRIORITY_OVERLAY),
+                eq(OnBackInvokedDispatcher.PRIORITY_DEFAULT),
                 mBackCallbackCaptor.capture());
 
         when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(true);
@@ -642,7 +642,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         mBouncerExpansionCallback.onVisibilityChanged(true);
         /* capture the predictive back callback during registration */
         verify(mOnBackInvokedDispatcher).registerOnBackInvokedCallback(
-                eq(OnBackInvokedDispatcher.PRIORITY_OVERLAY),
+                eq(OnBackInvokedDispatcher.PRIORITY_DEFAULT),
                 mBackCallbackCaptor.capture());
         assertTrue(mBackCallbackCaptor.getValue() instanceof OnBackAnimationCallback);
 
@@ -660,7 +660,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         mBouncerExpansionCallback.onVisibilityChanged(true);
         /* capture the predictive back callback during registration */
         verify(mOnBackInvokedDispatcher).registerOnBackInvokedCallback(
-                eq(OnBackInvokedDispatcher.PRIORITY_OVERLAY),
+                eq(OnBackInvokedDispatcher.PRIORITY_DEFAULT),
                 mBackCallbackCaptor.capture());
         assertTrue(mBackCallbackCaptor.getValue() instanceof OnBackAnimationCallback);
 
