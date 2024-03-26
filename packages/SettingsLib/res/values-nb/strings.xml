@@ -457,7 +457,7 @@
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Overstyres av <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> – Ladingen er satt på vent for å beskytte batteriet"</string>
-    <string name="power_incompatible_charging_settings_home_page" msgid="1322050766135126880">"<xliff:g id="LEVEL">%1$s</xliff:g> – Sjekk ladetilbehøret"</string>
+    <string name="power_incompatible_charging_settings_home_page" msgid="1322050766135126880">"<xliff:g id="LEVEL">%1$s</xliff:g> – sjekk ladetilbehøret"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Omtrent <xliff:g id="TIME_REMAINING">%1$s</xliff:g> igjen"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"Omtrent <xliff:g id="TIME_REMAINING">%1$s</xliff:g> igjen (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"Omtrent <xliff:g id="TIME_REMAINING">%1$s</xliff:g> igjen basert på bruken din"</string>
@@ -657,7 +657,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Slått av"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Slått på"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Enheten din må startes på nytt for at denne endringen skal tre i kraft. Start på nytt nå eller avbryt."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Hodetelefoner med kabel"</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"hodetelefoner med kabel"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"På"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Av"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Bytting av operatørnettverk"</string>

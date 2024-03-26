@@ -111,7 +111,7 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transfer de fișiere"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Dispozitiv de intrare"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Acces la internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Permite accesul la agendă și la istoric"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Oferă acces la agendă și istoric apeluri"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Informațiile se vor folosi pentru notificări de apeluri etc."</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Distribuirea conexiunii la internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Mesaje text"</string>
@@ -627,7 +627,7 @@
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Resetezi invitatul?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Excluzi invitatul?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Resetează"</string>
-    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Elimină"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Exclude"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Se resetează invitatul…"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Resetezi sesiunea pentru invitați?"</string>
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Astfel, va începe o nouă sesiune pentru invitați și se vor șterge toate aplicațiile și datele din sesiunea actuală"</string>

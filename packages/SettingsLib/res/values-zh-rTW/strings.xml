@@ -263,8 +263,8 @@
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"ADB, 偵錯, 開發"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"錯誤回報捷徑"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"在電源選單中顯示取得錯誤報告的按鈕"</string>
-    <string name="keep_screen_on" msgid="1187161672348797558">"螢幕不休眠"</string>
-    <string name="keep_screen_on_summary" msgid="1510731514101925829">"充電時螢幕不會進入休眠"</string>
+    <string name="keep_screen_on" msgid="1187161672348797558">"不鎖定螢幕"</string>
+    <string name="keep_screen_on_summary" msgid="1510731514101925829">"充電時螢幕不會鎖定"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"啟用藍牙 HCI 窺探記錄"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"擷取藍牙數據包 (變更這項設定後請切換藍牙)。"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM 解鎖"</string>
@@ -411,7 +411,7 @@
     <string name="enable_freeform_support" msgid="7599125687603914253">"啟用自由形式視窗"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"啟用實驗版自由形式視窗的支援功能。"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"電腦備份密碼"</string>
-    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"目前尚未設定密碼來保護完整的備份檔案 (透過電腦備份的檔案)"</string>
+    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"尚未設定密碼保護電腦的完整備份"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"輕觸即可變更或移除電腦完整備份的密碼"</string>
     <string name="local_backup_password_toast_success" msgid="4891666204428091604">"已設定新備份密碼"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="2994718182129097733">"新密碼與確認密碼不符。"</string>

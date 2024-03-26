@@ -106,7 +106,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Активовано, лише лівий"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Активовано, лише правий"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Активовано, лівий і правий"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Звук медіа-файлів"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Звук медіафайлів"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Телефонні дзвінки"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Передавання файлів"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Пристрій введення"</string>
@@ -265,7 +265,7 @@
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Показувати в меню живлення кнопку створення звіту про помилки"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Залишати активним"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Екран не засинатиме під час заряджання"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Журнал інтерфейсу Bluetooth"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Увімкнути журнал перехоплення даних інтерфейсу Bluetooth"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Отримання пакетів Bluetooth. (Змінивши це налаштування, увімкніть Bluetooth.)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Розблокування виробником"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Дозволити розблокування завантажувача"</string>

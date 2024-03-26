@@ -265,7 +265,7 @@
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Vidite dugme za prijavu grešaka u meniju napajanja"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Ne zaključavaj"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Ekran neće prelaziti u stanje mirovanja tokom punjenja"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Omogući Bluetooth HCI snoop zapis"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Omogući Bluetooth HCI snoop zapisnik"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Snimite Bluetooth pakete. (Uključite/isključite Bluetooth nakon što promijenite ovu postavku)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM otključavanje"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Dozvoli otključavanje bootloadera"</string>

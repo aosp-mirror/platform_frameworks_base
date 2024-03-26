@@ -106,13 +106,13 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Actif, gauche uniquement"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Actif, droit uniquement"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Actifs, gauche et droit"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Multimédia"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Audio multimédia"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Appels téléphoniques"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transfert de fichiers"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Périphérique d\'entrée"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Accès Internet"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Autoriser l\'accès aux contacts et à l\'historique des appels"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Les infos seront utilisées pour les notifications d\'appels, entre autres"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Ces infos seront utilisées pour les notifications d\'appels, entre autres"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Partage de connexion Internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"SMS"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Accès à la SIM"</string>
