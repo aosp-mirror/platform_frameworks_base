@@ -803,7 +803,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     null /* options */);
             mWindowManagerInternal.setWallpaperShowWhenLocked(
                     mToken, (wallpaper.mWhich & FLAG_LOCK) != 0);
-            if (multiCrop() && wallpaper.mSupportsMultiCrop) {
+            if (multiCrop() && mImageWallpaper.equals(wallpaper.wallpaperComponent)) {
                 mWindowManagerInternal.setWallpaperCropHints(mToken,
                         mWallpaperCropper.getRelativeCropHints(wallpaper));
             } else {
@@ -2225,7 +2225,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             checkPermission(READ_WALLPAPER_INTERNAL);
             WallpaperData wallpaper = (which == FLAG_LOCK) ? mLockWallpaperMap.get(userId)
                     : mWallpaperMap.get(userId);
-            if (wallpaper == null || !wallpaper.mSupportsMultiCrop) return null;
+            if (wallpaper == null || !mImageWallpaper.equals(wallpaper.wallpaperComponent)) {
+                return null;
+            }
             SparseArray<Rect> relativeSuggestedCrops =
                     mWallpaperCropper.getRelativeCropHints(wallpaper);
             Point croppedBitmapSize = new Point(
@@ -2913,7 +2915,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     wallpaper.fromForegroundApp = multiCrop() ? fromForegroundApp
                             : isFromForegroundApp(callingPackage);
                     if (!multiCrop()) wallpaper.cropHint.set(cropHint);
-                    if (multiCrop()) wallpaper.mSupportsMultiCrop = true;
                     if (multiCrop()) wallpaper.mCropHints = cropMap;
                     wallpaper.allowBackup = allowBackup;
                     wallpaper.mWallpaperDimAmount = getWallpaperDimAmount();
@@ -2975,7 +2976,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         WallpaperData lockWP = new WallpaperData(userId, FLAG_LOCK);
         lockWP.wallpaperId = sysWP.wallpaperId;
         lockWP.cropHint.set(sysWP.cropHint);
-        lockWP.mSupportsMultiCrop = sysWP.mSupportsMultiCrop;
         if (sysWP.mCropHints != null) {
             lockWP.mCropHints = sysWP.mCropHints.clone();
         }
@@ -3096,7 +3096,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             final long ident = Binder.clearCallingIdentity();
 
             try {
-                newWallpaper.mSupportsMultiCrop = mImageWallpaper.equals(name);
                 newWallpaper.imageWallpaperPending = false;
                 newWallpaper.mWhich = which;
                 newWallpaper.mSystemWasBoth = systemIsBoth;

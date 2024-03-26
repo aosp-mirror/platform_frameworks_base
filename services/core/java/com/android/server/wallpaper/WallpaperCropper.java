@@ -422,12 +422,11 @@ public class WallpaperCropper {
         } else {
             boolean needCrop = false;
             boolean needScale;
-            boolean multiCrop = multiCrop() && wallpaper.mSupportsMultiCrop;
 
             Point bitmapSize = new Point(options.outWidth, options.outHeight);
 
             final Rect cropHint;
-            if (multiCrop) {
+            if (multiCrop()) {
                 SparseArray<Rect> defaultDisplayCrops =
                         getDefaultCrops(wallpaper.mCropHints, bitmapSize);
                 // adapt the entries in wallpaper.mCropHints for the actual display
@@ -485,7 +484,7 @@ public class WallpaperCropper {
                     || cropHint.width() > GLHelper.getMaxTextureSize();
 
             //make sure screen aspect ratio is preserved if width is scaled under screen size
-            if (needScale && !multiCrop) {
+            if (needScale && !multiCrop()) {
                 final float scaleByHeight = (float) wpData.mHeight / (float) cropHint.height();
                 final int newWidth = (int) (cropHint.width() * scaleByHeight);
                 if (newWidth < displayInfo.logicalWidth) {
@@ -543,7 +542,7 @@ public class WallpaperCropper {
                     final Rect estimateCrop = new Rect(cropHint);
                     estimateCrop.scale(1f / options.inSampleSize);
                     float hRatio = (float) wpData.mHeight / estimateCrop.height();
-                    if (multiCrop) {
+                    if (multiCrop()) {
                         // make sure the crop height is at most the display largest dimension
                         hRatio = (float) mWallpaperDisplayHelper.getDefaultDisplayLargestDimension()
                                 / estimateCrop.height();
@@ -557,7 +556,7 @@ public class WallpaperCropper {
                         if (DEBUG) {
                             Slog.w(TAG, "Invalid crop dimensions, trying to adjust.");
                         }
-                        if (multiCrop) {
+                        if (multiCrop()) {
                             // clear custom crop guidelines, fallback to system default
                             wallpaper.mCropHints.clear();
                             generateCropInternal(wallpaper);
@@ -618,7 +617,7 @@ public class WallpaperCropper {
                         final Bitmap finalCrop = Bitmap.createScaledBitmap(cropped,
                                 safeWidth, safeHeight, true);
 
-                        if (multiCrop) {
+                        if (multiCrop()) {
                             wallpaper.mSampleSize =
                                     ((float) cropHint.height()) / finalCrop.getHeight();
                         }

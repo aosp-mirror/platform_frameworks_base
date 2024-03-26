@@ -324,10 +324,7 @@ public class WallpaperDataParser {
                 getAttributeInt(parser, "totalCropTop", 0),
                 getAttributeInt(parser, "totalCropRight", 0),
                 getAttributeInt(parser, "totalCropBottom", 0));
-        wallpaper.mSupportsMultiCrop = multiCrop() && (
-                parser.getAttributeBoolean(null, "supportsMultiCrop", false)
-                || mImageWallpaper.equals(wallpaper.wallpaperComponent));
-        if (wallpaper.mSupportsMultiCrop) {
+        if (multiCrop() && mImageWallpaper.equals(wallpaper.nextWallpaperComponent)) {
             wallpaper.mCropHints = new SparseArray<>();
             for (Pair<Integer, String> pair: screenDimensionPairs()) {
                 Rect cropHint = new Rect(
@@ -351,7 +348,7 @@ public class WallpaperDataParser {
                 wallpaper.cropHint.set(totalCropHint);
             }
             wallpaper.mSampleSize = parser.getAttributeFloat(null, "sampleSize", 1f);
-        } else {
+        } else if (!multiCrop()) {
             wallpaper.cropHint.set(legacyCropHint);
         }
         final DisplayData wpData = mWallpaperDisplayHelper
@@ -467,9 +464,7 @@ public class WallpaperDataParser {
         out.startTag(null, tag);
         out.attributeInt(null, "id", wallpaper.wallpaperId);
 
-        out.attributeBoolean(null, "supportsMultiCrop", wallpaper.mSupportsMultiCrop);
-
-        if (multiCrop() && wallpaper.mSupportsMultiCrop) {
+        if (multiCrop() && mImageWallpaper.equals(wallpaper.wallpaperComponent)) {
             if (wallpaper.mCropHints == null) {
                 Slog.e(TAG, "cropHints should not be null when saved");
                 wallpaper.mCropHints = new SparseArray<>();
