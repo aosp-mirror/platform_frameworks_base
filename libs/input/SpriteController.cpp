@@ -129,7 +129,7 @@ void SpriteController::doUpdateSprites() {
             update.state.surfaceVisible = false;
             update.state.surfaceControl =
                     obtainSurface(update.state.surfaceWidth, update.state.surfaceHeight,
-                                  update.state.displayId);
+                                  update.state.displayId, update.state.skipScreenshot);
             if (update.state.surfaceControl != NULL) {
                 update.surfaceChanged = surfaceChanged = true;
             }
@@ -209,7 +209,7 @@ void SpriteController::doUpdateSprites() {
               (update.state.dirty &
                (DIRTY_ALPHA | DIRTY_POSITION | DIRTY_TRANSFORMATION_MATRIX | DIRTY_LAYER |
                 DIRTY_VISIBILITY | DIRTY_HOTSPOT | DIRTY_DISPLAY_ID | DIRTY_ICON_STYLE |
-                DIRTY_DRAW_DROP_SHADOW))))) {
+                DIRTY_DRAW_DROP_SHADOW | DIRTY_SKIP_SCREENSHOT))))) {
             needApplyTransaction = true;
 
             if (wantSurfaceVisibleAndDrawn
@@ -258,6 +258,14 @@ void SpriteController::doUpdateSprites() {
             if (wantSurfaceVisibleAndDrawn
                     && (becomingVisible || (update.state.dirty & DIRTY_LAYER))) {
                 t.setLayer(update.state.surfaceControl, surfaceLayer);
+            }
+
+            if (wantSurfaceVisibleAndDrawn &&
+                (becomingVisible || (update.state.dirty & DIRTY_SKIP_SCREENSHOT))) {
+                int32_t flags =
+                        update.state.skipScreenshot ? ISurfaceComposerClient::eSkipScreenshot : 0;
+                t.setFlags(update.state.surfaceControl, flags,
+                           ISurfaceComposerClient::eSkipScreenshot);
             }
 
             if (becomingVisible) {
@@ -332,8 +340,8 @@ void SpriteController::ensureSurfaceComposerClient() {
     }
 }
 
-sp<SurfaceControl> SpriteController::obtainSurface(int32_t width, int32_t height,
-                                                   int32_t displayId) {
+sp<SurfaceControl> SpriteController::obtainSurface(int32_t width, int32_t height, int32_t displayId,
+                                                   bool hideOnMirrored) {
     ensureSurfaceComposerClient();
 
     const sp<SurfaceControl> parent = mParentSurfaceProvider(displayId);
@@ -341,11 +349,13 @@ sp<SurfaceControl> SpriteController::obtainSurface(int32_t width, int32_t height
         ALOGE("Failed to get the parent surface for pointers on display %d", displayId);
     }
 
+    int32_t createFlags = ISurfaceComposerClient::eHidden | ISurfaceComposerClient::eCursorWindow;
+    if (hideOnMirrored) {
+        createFlags |= ISurfaceComposerClient::eSkipScreenshot;
+    }
     const sp<SurfaceControl> surfaceControl =
             mSurfaceComposerClient->createSurface(String8("Sprite"), width, height,
-                                                  PIXEL_FORMAT_RGBA_8888,
-                                                  ISurfaceComposerClient::eHidden |
-                                                          ISurfaceComposerClient::eCursorWindow,
+                                                  PIXEL_FORMAT_RGBA_8888, createFlags,
                                                   parent ? parent->getHandle() : nullptr);
     if (surfaceControl == nullptr || !surfaceControl->isValid()) {
         ALOGE("Error creating sprite surface.");
@@ -471,6 +481,15 @@ void SpriteController::SpriteImpl::setDisplayId(int32_t displayId) {
     if (mLocked.state.displayId != displayId) {
         mLocked.state.displayId = displayId;
         invalidateLocked(DIRTY_DISPLAY_ID);
+    }
+}
+
+void SpriteController::SpriteImpl::setSkipScreenshot(bool skip) {
+    AutoMutex _l(mController.mLock);
+
+    if (mLocked.state.skipScreenshot != skip) {
+        mLocked.state.skipScreenshot = skip;
+        invalidateLocked(DIRTY_SKIP_SCREENSHOT);
     }
 }
 

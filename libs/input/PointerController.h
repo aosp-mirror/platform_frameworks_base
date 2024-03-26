@@ -67,6 +67,7 @@ public:
     void clearSpots() override;
     void updatePointerIcon(PointerIconStyle iconId) override;
     void setCustomPointerIcon(const SpriteIcon& icon) override;
+    void setSkipScreenshot(int32_t displayId, bool skip) override;
 
     virtual void setInactivityTimeout(InactivityTimeout inactivityTimeout);
     void doInactivityTimeout();
@@ -115,6 +116,7 @@ private:
 
         std::vector<gui::DisplayInfo> mDisplayInfos;
         std::unordered_map<int32_t /* displayId */, TouchSpotController> spotControllers;
+        std::unordered_set<int32_t /* displayId */> displaysToSkipScreenshot;
     } mLocked GUARDED_BY(getLock());
 
     class DisplayInfoListener : public gui::WindowInfosListener {
