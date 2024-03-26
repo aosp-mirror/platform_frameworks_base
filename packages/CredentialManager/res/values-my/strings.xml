@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"စကားဝှက်မသုံးခြင်း အနာဂတ်ဆီသို့ ရှေ့ဆက်ရာတွင် လျှို့ဝှက်ကီးများနှင့်အတူ စကားဝှက်များကို ဆက်လက်အသုံးပြုနိုင်ပါမည်။"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"သင်၏ <xliff:g id="CREATETYPES">%1$s</xliff:g> သိမ်းရန်နေရာ ရွေးခြင်း"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"သင့်အချက်အလက်သိမ်းပြီး နောက်တစ်ကြိမ်၌ ပိုမိုမြန်ဆန်စွာ လက်မှတ်ထိုးဝင်ရန် စကားဝှက်မန်နေဂျာကို ရွေးပါ"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"<xliff:g id="APPNAME">%1$s</xliff:g> သို့ လက်မှတ်ထိုးဝင်ရန် လျှို့ဝှက်ကီး ပြုလုပ်မလား။"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"<xliff:g id="APPNAME">%1$s</xliff:g> သို့ လက်မှတ်ထိုးဝင်ရန် စကားဝှက်ကို သိမ်းမလား။"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> အတွက် လက်မှတ်ထိုးဝင်သည့်အချက်အလက်ကို သိမ်းမလား။"</string>
     <string name="passkey" msgid="632353688396759522">"လျှို့ဝှက်ကီး"</string>
     <string name="password" msgid="6738570945182936667">"စကားဝှက်"</string>
