@@ -44,6 +44,12 @@ static MemEventListener memevent_listener(MemEventClient::AMS);
  * @throws java.lang.RuntimeException
  */
 static jobjectArray android_server_am_OomConnection_waitOom(JNIEnv* env, jobject) {
+    if (!memevent_listener.ok()) {
+        memevent_listener.deregisterAllEvents();
+        jniThrowRuntimeException(env, "Failed to initialize memevents listener");
+        return nullptr;
+    }
+
     if (!memevent_listener.registerEvent(MEM_EVENT_OOM_KILL)) {
         memevent_listener.deregisterAllEvents();
         jniThrowRuntimeException(env, "listener failed to register to OOM events");

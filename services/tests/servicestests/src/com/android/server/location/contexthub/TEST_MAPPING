@@ -20,12 +20,18 @@
   ],
   "postsubmit": [
     {
+      // b/331020193, Move to presubmit early april 2024
+      "name": "FrameworksServicesTests_contexthub_presubmit"
+    },
+    {
       "name": "FrameworksServicesTests",
       "options": [
         {
           "include-filter": "com.android.server.location.contexthub."
         },
         {
+          // I believe this include annotation is preventing tests from being run
+          // as there are no matching tests with the Postsubmit annotation.
           "include-annotation": "android.platform.test.annotations.Postsubmit"
         },
         {

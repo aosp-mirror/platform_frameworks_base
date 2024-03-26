@@ -24,8 +24,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.net.IpSecTransformState;
 import android.net.Network;
+import android.net.vcn.Flags;
 import android.net.vcn.VcnManager;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -71,6 +73,7 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
 
     @NonNull private final Handler mHandler;
     @NonNull private final PowerManager mPowerManager;
+    @NonNull private final ConnectivityManager mConnectivityManager;
     @NonNull private final Object mCancellationToken = new Object();
     @NonNull private final PacketLossCalculator mPacketLossCalculator;
 
@@ -98,6 +101,8 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
         mHandler = new Handler(getVcnContext().getLooper());
 
         mPowerManager = getVcnContext().getContext().getSystemService(PowerManager.class);
+        mConnectivityManager =
+                getVcnContext().getContext().getSystemService(ConnectivityManager.class);
 
         mPacketLossCalculator = deps.getPacketLossCalculator();
 
@@ -202,6 +207,18 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
         // The already scheduled event will not be affected. The followup events will be scheduled
         // with the new interval
         mPollIpSecStateIntervalMs = getPollIpSecStateIntervalMs(carrierConfig);
+    }
+
+    @Override
+    public void onLinkPropertiesOrCapabilitiesChanged() {
+        if (!isStarted()) return;
+
+        reschedulePolling();
+    }
+
+    private void reschedulePolling() {
+        mHandler.removeCallbacksAndEqualMessages(mCancellationToken);
+        mHandler.postDelayed(new PollIpSecStateRunnable(), mCancellationToken, 0L);
     }
 
     @Override
@@ -313,6 +330,13 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
         } else {
             logInfo(logMsg);
             onValidationResultReceivedInternal(true /* isFailed */);
+
+            if (Flags.validateNetworkOnIpsecLoss()) {
+                // Trigger re-validation of the underlying network; if it fails, the VCN will
+                // attempt to migrate away.
+                mConnectivityManager.reportNetworkConnectivity(
+                        getNetwork(), false /* hasConnectivity */);
+            }
         }
     }
 
