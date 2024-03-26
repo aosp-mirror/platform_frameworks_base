@@ -224,6 +224,7 @@
     <style name="TextAppearance.AuthCredential.ContentViewListItem" parent="TextAppearance.Material3.BodySmall">
         <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
         <item name="android:paddingTop">@dimen/biometric_prompt_content_list_item_padding_top</item>
+        <item name="android:breakStrategy">high_quality</item>
     </style>
 
     <style name="TextAppearance.AuthCredential.Indicator" parent="TextAppearance.Material3.BodyMedium">

@@ -24,6 +24,8 @@ import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,9 +49,12 @@ import java.util.List;
  */
 @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
 public final class PromptVerticalListContentView implements PromptContentViewParcelable {
-    private static final int MAX_ITEM_NUMBER = 20;
-    private static final int MAX_EACH_ITEM_CHARACTER_NUMBER = 640;
-    private static final int MAX_DESCRIPTION_CHARACTER_NUMBER = 225;
+    @VisibleForTesting
+    static final int MAX_ITEM_NUMBER = 20;
+    @VisibleForTesting
+    static final int MAX_EACH_ITEM_CHARACTER_NUMBER = 640;
+    @VisibleForTesting
+    static final int MAX_DESCRIPTION_CHARACTER_NUMBER = 225;
 
     private final List<PromptContentItemParcelable> mContentList;
     private final String mDescription;
@@ -155,7 +160,7 @@ public final class PromptVerticalListContentView implements PromptContentViewPar
         @NonNull
         public Builder setDescription(@NonNull String description) {
             if (description.length() > MAX_DESCRIPTION_CHARACTER_NUMBER) {
-                throw new IllegalStateException("The character number of description exceeds "
+                throw new IllegalArgumentException("The character number of description exceeds "
                         + MAX_DESCRIPTION_CHARACTER_NUMBER);
             }
             mDescription = description;
@@ -195,12 +200,12 @@ public final class PromptVerticalListContentView implements PromptContentViewPar
 
         private void checkItemLimits(@NonNull PromptContentItem listItem) {
             if (doesListItemExceedsCharLimit(listItem)) {
-                throw new IllegalStateException(
+                throw new IllegalArgumentException(
                         "The character number of list item exceeds "
                                 + MAX_EACH_ITEM_CHARACTER_NUMBER);
             }
             if (mContentList.size() > MAX_ITEM_NUMBER) {
-                throw new IllegalStateException(
+                throw new IllegalArgumentException(
                         "The number of list items exceeds " + MAX_ITEM_NUMBER);
             }
         }

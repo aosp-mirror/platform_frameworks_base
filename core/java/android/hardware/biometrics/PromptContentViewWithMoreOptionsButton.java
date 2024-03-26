@@ -29,19 +29,22 @@ import android.hardware.biometrics.BiometricPrompt.ButtonInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.concurrent.Executor;
 
 /**
- * Contains the information of the template of content view with a more options button for Biometric
- * Prompt.
+ * Contains the information of the template of content view with a more options button for
+ * Biometric Prompt.
+ * <p>
  * This button should be used to provide more options for sign in or other purposes, such as when a
  * user needs to select between multiple app-specific accounts or profiles that are available for
- * sign in. This is not common and apps should avoid using it if there is only one choice available
- * or if the user has already selected the appropriate account to use before invoking
- * BiometricPrompt because it will create additional steps that the user must navigate through.
- * Clicking the more options button will dismiss the prompt, provide the app an opportunity to ask
- * the user for the correct account, and finally allow the app to decide how to proceed once
- * selected.
+ * sign in.
+ * <p>
+ * Apps should avoid using this when possible because it will create additional steps that the user
+ * must navigate through - clicking the more options button will dismiss the prompt, provide the app
+ * an opportunity to ask the user for the correct option, and finally allow the app to decide how to
+ * proceed once selected.
  *
  * <p>
  * Here's how you'd set a <code>PromptContentViewWithMoreOptionsButton</code> on a Biometric
@@ -59,7 +62,8 @@ import java.util.concurrent.Executor;
  */
 @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
 public final class PromptContentViewWithMoreOptionsButton implements PromptContentViewParcelable {
-    private static final int MAX_DESCRIPTION_CHARACTER_NUMBER = 225;
+    @VisibleForTesting
+    static final int MAX_DESCRIPTION_CHARACTER_NUMBER = 225;
 
     private final String mDescription;
     private DialogInterface.OnClickListener mListener;
@@ -132,14 +136,16 @@ public final class PromptContentViewWithMoreOptionsButton implements PromptConte
         }
     };
 
+    /**
+     * A builder that collects arguments to be shown on the content view with more options button.
+     */
     public static final class Builder {
         private String mDescription;
         private Executor mExecutor;
         private DialogInterface.OnClickListener mListener;
 
         /**
-         * Optional: Sets a description that will be shown on the content view.  Note that there are
-         * limits on the number of characters allowed for description.
+         * Optional: Sets a description that will be shown on the content view.
          *
          * @param description The description to display.
          * @return This builder.
@@ -149,7 +155,7 @@ public final class PromptContentViewWithMoreOptionsButton implements PromptConte
         @RequiresPermission(SET_BIOMETRIC_DIALOG_ADVANCED)
         public Builder setDescription(@NonNull String description) {
             if (description.length() > MAX_DESCRIPTION_CHARACTER_NUMBER) {
-                throw new IllegalStateException("The character number of description exceeds "
+                throw new IllegalArgumentException("The character number of description exceeds "
                         + MAX_DESCRIPTION_CHARACTER_NUMBER);
             }
             mDescription = description;
