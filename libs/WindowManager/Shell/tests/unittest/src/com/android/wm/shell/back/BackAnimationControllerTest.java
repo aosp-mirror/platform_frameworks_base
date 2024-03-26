@@ -527,6 +527,23 @@ public class BackAnimationControllerTest extends ShellTestCase {
     }
 
     @Test
+    public void skipsCancelWithoutStart() throws RemoteException {
+        final int type = BackNavigationInfo.TYPE_CALLBACK;
+        final ResultListener result = new ResultListener();
+        createNavigationInfo(new BackNavigationInfo.Builder()
+                .setType(type)
+                .setOnBackInvokedCallback(mAppCallback)
+                .setOnBackNavigationDone(new RemoteCallback(result)));
+        doMotionEvent(MotionEvent.ACTION_CANCEL, 0);
+        mShellExecutor.flushAll();
+
+        verify(mAppCallback, never()).onBackStarted(any());
+        verify(mAppCallback, never()).onBackProgressed(any());
+        verify(mAppCallback, never()).onBackInvoked();
+        verify(mAppCallback, never()).onBackCancelled();
+    }
+
+    @Test
     public void testBackToActivity() throws RemoteException {
         final CrossActivityBackAnimation animation = new CrossActivityBackAnimation(mContext,
                 mAnimationBackground);

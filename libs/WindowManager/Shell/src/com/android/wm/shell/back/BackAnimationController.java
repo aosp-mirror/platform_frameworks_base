@@ -670,7 +670,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         }
     }
 
-    private void dispatchOnBackCancelled(IOnBackInvokedCallback callback) {
+    private void tryDispatchOnBackCancelled(IOnBackInvokedCallback callback) {
+        if (!mOnBackStartDispatched) {
+            Log.e(TAG, "Skipping dispatching onBackCancelled. Start was never dispatched.");
+            return;
+        }
         if (callback == null) {
             return;
         }
@@ -729,7 +733,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             if (touchTracker.getTriggerBack()) {
                 dispatchOrAnimateOnBackInvoked(callback, touchTracker);
             } else {
-                dispatchOnBackCancelled(callback);
+                tryDispatchOnBackCancelled(callback);
             }
         }
         finishBackNavigation(touchTracker.getTriggerBack());
@@ -808,7 +812,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         if (mCurrentTracker.getTriggerBack()) {
             dispatchOrAnimateOnBackInvoked(mActiveCallback, mCurrentTracker);
         } else {
-            dispatchOnBackCancelled(mActiveCallback);
+            tryDispatchOnBackCancelled(mActiveCallback);
         }
     }
 
@@ -846,7 +850,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         if (mCurrentTracker.isInInitialState()) {
             if (mBackGestureStarted) {
                 mBackGestureStarted = false;
-                dispatchOnBackCancelled(mActiveCallback);
+                tryDispatchOnBackCancelled(mActiveCallback);
                 finishBackNavigation(false);
                 ProtoLog.d(WM_SHELL_BACK_PREVIEW,
                         "resetTouchTracker -> reset an unfinished gesture");
