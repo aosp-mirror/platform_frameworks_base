@@ -20,21 +20,13 @@
   ],
   "postsubmit": [
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.pm."
-        },
-        {
-          "include-annotation": "android.platform.test.annotations.Postsubmit"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
+      // Presubmit is intentional here while testing with SLO checker.
+      // b/331020193, Move to presubmit early april 2024
+      "name": "FrameworksServicesTests_pm_presubmit"
+    },
+    {
+      // Leave postsubmit here when migrating
+      "name": "FrameworksServicesTests_pm_postsubmit"
     }
   ]
 }
