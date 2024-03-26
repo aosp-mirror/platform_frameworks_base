@@ -4783,6 +4783,10 @@ public class JobSchedulerService extends com.android.server.SystemService
      * Returns whether the app holds the {@link Manifest.permission.RUN_BACKUP_JOBS} permission.
      */
     private boolean hasRunBackupJobsPermission(@NonNull String packageName, int packageUid) {
+        // This permission is currently hidden so always return false for now (see b/331272951)
+        return false;
+
+        /**
         if (packageName == null) {
             Slog.wtfStack(TAG,
                     "Expected a non-null package name when calling hasRunBackupJobsPermission");
@@ -4793,6 +4797,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 android.Manifest.permission.RUN_BACKUP_JOBS,
                 PermissionChecker.PID_UNKNOWN, packageUid, packageName)
                     == PermissionChecker.PERMISSION_GRANTED;
+        */
     }
 
     /**

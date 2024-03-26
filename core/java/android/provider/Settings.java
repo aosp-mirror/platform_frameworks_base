@@ -696,6 +696,8 @@ public final class Settings {
      * Output: When a package data uri is passed as input, the activity result is set to
      * {@link android.app.Activity#RESULT_OK} if the permission was granted to the app. Otherwise,
      * the result is set to {@link android.app.Activity#RESULT_CANCELED}.
+     *
+     * @hide
      */
     @FlaggedApi(Flags.FLAG_BACKUP_TASKS_SETTINGS_SCREEN)
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
