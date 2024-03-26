@@ -2112,6 +2112,12 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.DOUBLE_TAP_TO_WAKE,
                 SecureSettingsProto.DOUBLE_TAP_TO_WAKE);
 
+        final long displayToken = p.start(SecureSettingsProto.DISPLAY);
+        dumpSetting(s, p,
+                Settings.Secure.SCREEN_RESOLUTION_MODE,
+                SecureSettingsProto.Display.SCREEN_RESOLUTION_MODE);
+        p.end(displayToken);
+
         final long dozeToken = p.start(SecureSettingsProto.DOZE);
         dumpSetting(s, p,
                 Settings.Secure.DOZE_ENABLED,

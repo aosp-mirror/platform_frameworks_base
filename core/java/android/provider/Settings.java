@@ -11185,6 +11185,32 @@ public final class Settings {
         public static final String DISPLAY_WHITE_BALANCE_ENABLED = "display_white_balance_enabled";
 
         /**
+         * Used by DisplayManager to backup/restore the user-selected resolution mode.
+         * @hide
+         */
+        @Readable
+        public static final String SCREEN_RESOLUTION_MODE = "screen_resolution_mode";
+
+        /**
+         * Resolution Mode Constants for SCREEN_RESOLUTION_MODE setting.
+         *
+         * @hide
+         */
+        @IntDef(prefix = { "RESOLUTION_MODE_" }, value = {
+                RESOLUTION_MODE_UNKNOWN,
+                RESOLUTION_MODE_HIGH,
+                RESOLUTION_MODE_FULL
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface ResolutionMode {}
+        /** @hide */
+        public static final int RESOLUTION_MODE_UNKNOWN = 0;
+        /** @hide */
+        public static final int RESOLUTION_MODE_HIGH = 1;
+        /** @hide */
+        public static final int RESOLUTION_MODE_FULL = 2;
+
+        /**
          * Names of the service components that the current user has explicitly allowed to
          * be a VR mode listener, separated by ':'.
          *
