@@ -1109,7 +1109,11 @@ public class DisplayModeDirector {
                 maxRefreshRate = Math.min(defaultRefreshRate, peakRefreshRate);
             }
 
-            mBrightnessObserver.onRefreshRateSettingChangedLocked(minRefreshRate, maxRefreshRate);
+            // TODO(b/310237068): Make this work for multiple displays
+            if (displayId == Display.DEFAULT_DISPLAY) {
+                mBrightnessObserver.onRefreshRateSettingChangedLocked(minRefreshRate,
+                        maxRefreshRate);
+            }
         }
 
         private void removeRefreshRateSetting(int displayId) {
