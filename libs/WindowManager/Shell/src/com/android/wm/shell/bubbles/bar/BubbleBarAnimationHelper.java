@@ -43,12 +43,12 @@ import android.widget.FrameLayout;
 import androidx.annotation.Nullable;
 
 import com.android.wm.shell.animation.Interpolators;
-import com.android.wm.shell.animation.PhysicsAnimator;
 import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
 import com.android.wm.shell.bubbles.animation.AnimatableScaleMatrix;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject.MagneticTarget;
+import com.android.wm.shell.shared.animation.PhysicsAnimator;
 
 /**
  * Helper class to animate a {@link BubbleBarExpandedView} on a bubble.

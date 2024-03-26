@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.wm.shell.animation
+package com.android.wm.shell.shared.animation
 
 import android.os.Handler
 import android.os.Looper
 import android.util.ArrayMap
 import androidx.dynamicanimation.animation.FloatPropertyCompat
-import com.android.wm.shell.animation.PhysicsAnimatorTestUtils.prepareForTest
+import com.android.wm.shell.shared.animation.PhysicsAnimatorTestUtils.prepareForTest
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.animation
+package com.android.wm.shell.shared.animation
 
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -27,11 +27,11 @@ import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringForce
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.ShellTestCase
-import com.android.wm.shell.animation.PhysicsAnimator.EndListener
-import com.android.wm.shell.animation.PhysicsAnimator.UpdateListener
-import com.android.wm.shell.animation.PhysicsAnimatorTestUtils.clearAnimationUpdateFrames
-import com.android.wm.shell.animation.PhysicsAnimatorTestUtils.getAnimationUpdateFrames
-import com.android.wm.shell.animation.PhysicsAnimatorTestUtils.verifyAnimationUpdateFrames
+import com.android.wm.shell.shared.animation.PhysicsAnimator.EndListener
+import com.android.wm.shell.shared.animation.PhysicsAnimator.UpdateListener
+import com.android.wm.shell.shared.animation.PhysicsAnimatorTestUtils.clearAnimationUpdateFrames
+import com.android.wm.shell.shared.animation.PhysicsAnimatorTestUtils.getAnimationUpdateFrames
+import com.android.wm.shell.shared.animation.PhysicsAnimatorTestUtils.verifyAnimationUpdateFrames
 import org.junit.After
 import org.junit.Assert
 import org.junit.Assert.assertEquals

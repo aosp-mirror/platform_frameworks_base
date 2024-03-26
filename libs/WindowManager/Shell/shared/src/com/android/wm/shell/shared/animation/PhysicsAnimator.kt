@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.animation
+package com.android.wm.shell.shared.animation
 
 import android.util.ArrayMap
 import android.util.Log
@@ -25,7 +25,7 @@ import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 
-import com.android.wm.shell.animation.PhysicsAnimator.Companion.getInstance
+import com.android.wm.shell.shared.animation.PhysicsAnimator.Companion.getInstance
 import java.lang.ref.WeakReference
 import java.util.WeakHashMap
 import kotlin.math.abs
@@ -874,7 +874,7 @@ class PhysicsAnimator<T> private constructor (target: T) {
      *
      * @param <T> The type of the object being animated.
     </T> */
-    interface UpdateListener<T> {
+    fun interface UpdateListener<T> {
 
         /**
          * Called on each animation frame with the target object, and a map of FloatPropertyCompat
@@ -904,7 +904,7 @@ class PhysicsAnimator<T> private constructor (target: T) {
      *
      * @param <T> The type of the object being animated.
     </T> */
-    interface EndListener<T> {
+    fun interface EndListener<T> {
 
         /**
          * Called with the final animation values as each property animation ends. This can be used

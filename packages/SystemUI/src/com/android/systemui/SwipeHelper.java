@@ -18,6 +18,7 @@ package com.android.systemui;
 
 import static androidx.dynamicanimation.animation.DynamicAnimation.TRANSLATION_X;
 import static androidx.dynamicanimation.animation.FloatPropertyCompat.createFloatPropertyCompat;
+
 import static com.android.systemui.classifier.Classifier.NOTIFICATION_DISMISS;
 import static com.android.systemui.flags.Flags.SWIPE_UNCLEARED_TRANSIENT_VIEW_FIX;
 import static com.android.systemui.statusbar.notification.NotificationUtils.logKey;
@@ -54,8 +55,8 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.wm.shell.animation.FlingAnimationUtils;
-import com.android.wm.shell.animation.PhysicsAnimator;
-import com.android.wm.shell.animation.PhysicsAnimator.SpringConfig;
+import com.android.wm.shell.shared.animation.PhysicsAnimator;
+import com.android.wm.shell.shared.animation.PhysicsAnimator.SpringConfig;
 
 import java.io.PrintWriter;
 import java.util.function.Consumer;
