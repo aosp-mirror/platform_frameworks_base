@@ -5387,4 +5387,7 @@
   <java-symbol type="bool" name="config_deviceSupportsHighPerfTransitions" />
 
   <java-symbol type="string" name="config_wearRemoteIntentAction" />
+
+  <!-- Whether desktop mode is supported on the current device  -->
+  <java-symbol type="bool" name="config_isDesktopModeSupported" />
 </resources>

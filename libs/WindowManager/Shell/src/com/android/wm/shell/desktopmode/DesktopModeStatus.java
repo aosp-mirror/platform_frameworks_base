@@ -20,9 +20,9 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.os.SystemProperties;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.window.flags.Flags;
-import com.android.wm.shell.R;
 
 /**
  * Constants for desktop mode feature
