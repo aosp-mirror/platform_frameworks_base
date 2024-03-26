@@ -163,6 +163,9 @@
                 }
             ],
             "file_patterns": ["PinnerService\\.java"]
+        },
+        {
+            "name": "SelinuxFrameworksTests"
         }
     ]
 }
