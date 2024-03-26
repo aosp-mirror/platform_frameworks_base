@@ -17,12 +17,9 @@
 package com.android.credentialmanager.ui.screens
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 
 @Composable
-fun LoadingScreen(
-    modifier: Modifier = Modifier
-) {
+fun LoadingScreen() {
     // Don't display anything, assuming that there should be minimal latency
     // to parse the Credential Manager intent and define the state of the
     // app. If latency is big, then a "loading" screen should be displayed
