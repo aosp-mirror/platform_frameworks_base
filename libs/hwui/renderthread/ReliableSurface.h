@@ -21,7 +21,9 @@
 #include <apex/window.h>
 #include <utils/Errors.h>
 #include <utils/Macros.h>
+#ifdef __ANDROID__
 #include <utils/NdkUtils.h>
+#endif
 #include <utils/StrongPointer.h>
 
 #include <memory>
@@ -62,9 +64,11 @@ private:
     mutable std::mutex mMutex;
 
     uint64_t mUsage = AHARDWAREBUFFER_USAGE_GPU_FRAMEBUFFER;
+#ifdef __ANDROID__
     AHardwareBuffer_Format mFormat = AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
     UniqueAHardwareBuffer mScratchBuffer;
     ANativeWindowBuffer* mReservedBuffer = nullptr;
+#endif
     base::unique_fd mReservedFenceFd;
     bool mHasDequeuedBuffer = false;
     int mBufferQueueState = OK;

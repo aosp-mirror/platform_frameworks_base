@@ -23,6 +23,7 @@ cc_library_host_static {
     srcs: [
         ":libui_host_common",
         "ADisplay.cpp",
+        "ANativeWindow.cpp",
         "Fence.cpp",
         "HostBufferQueue.cpp",
         "PublicFormat.cpp",

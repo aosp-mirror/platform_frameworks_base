@@ -35,6 +35,7 @@
 #include "Properties.h"
 #include "RenderThread.h"
 #include "hwui/Canvas.h"
+#include "pipeline/skia/SkiaCpuPipeline.h"
 #include "pipeline/skia/SkiaGpuPipeline.h"
 #include "pipeline/skia/SkiaOpenGLPipeline.h"
 #include "pipeline/skia/SkiaVulkanPipeline.h"
@@ -84,6 +85,12 @@ CanvasContext* CanvasContext::create(RenderThread& thread, bool translucent,
             return new CanvasContext(thread, translucent, rootRenderNode, contextFactory,
                                      std::make_unique<skiapipeline::SkiaVulkanPipeline>(thread),
                                      uiThreadId, renderThreadId);
+#ifndef __ANDROID__
+        case RenderPipelineType::SkiaCpu:
+            return new CanvasContext(thread, translucent, rootRenderNode, contextFactory,
+                                     std::make_unique<skiapipeline::SkiaCpuPipeline>(thread),
+                                     uiThreadId, renderThreadId);
+#endif
         default:
             LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t)renderType);
             break;
@@ -182,6 +189,7 @@ static void setBufferCount(ANativeWindow* window) {
 }
 
 void CanvasContext::setHardwareBuffer(AHardwareBuffer* buffer) {
+#ifdef __ANDROID__
     if (mHardwareBuffer) {
         AHardwareBuffer_release(mHardwareBuffer);
         mHardwareBuffer = nullptr;
@@ -192,6 +200,7 @@ void CanvasContext::setHardwareBuffer(AHardwareBuffer* buffer) {
         mHardwareBuffer = buffer;
     }
     mRenderPipeline->setHardwareBuffer(mHardwareBuffer);
+#endif
 }
 
 void CanvasContext::setSurface(ANativeWindow* window, bool enableTimeout) {
@@ -561,6 +570,7 @@ Frame CanvasContext::getFrame() {
 }
 
 void CanvasContext::draw(bool solelyTextureViewUpdates) {
+#ifdef __ANDROID__
     if (auto grContext = getGrContext()) {
         if (grContext->abandoned()) {
             if (grContext->isDeviceLost()) {
@@ -571,6 +581,7 @@ void CanvasContext::draw(bool solelyTextureViewUpdates) {
             return;
         }
     }
+#endif
     SkRect dirty;
     mDamageAccumulator.finish(&dirty);
 
@@ -594,11 +605,13 @@ void CanvasContext::draw(bool solelyTextureViewUpdates) {
     if (skippedFrameReason) {
         mCurrentFrameInfo->setSkippedFrameReason(*skippedFrameReason);
 
+#ifdef __ANDROID__
         if (auto grContext = getGrContext()) {
             // Submit to ensure that any texture uploads complete and Skia can
             // free its staging buffers.
             grContext->flushAndSubmit();
         }
+#endif
 
         // Notify the callbacks, even if there's nothing to draw so they aren't waiting
         // indefinitely

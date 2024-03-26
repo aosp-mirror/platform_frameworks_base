@@ -96,6 +96,7 @@ cc_defaults {
             ],
             cflags: [
                 "-Wno-unused-variable",
+                "-D__INTRODUCED_IN(n)=",
             ],
         },
     },
@@ -539,6 +540,7 @@ cc_defaults {
         "pipeline/skia/ReorderBarrierDrawables.cpp",
         "pipeline/skia/TransformCanvas.cpp",
         "renderstate/RenderState.cpp",
+        "renderthread/CanvasContext.cpp",
         "renderthread/Frame.cpp",
         "renderthread/RenderTask.cpp",
         "renderthread/TimeLord.cpp",
@@ -589,6 +591,7 @@ cc_defaults {
         "SkiaCanvas.cpp",
         "SkiaInterpolator.cpp",
         "Tonemapper.cpp",
+        "TreeInfo.cpp",
         "VectorDrawable.cpp",
     ],
 
@@ -617,7 +620,6 @@ cc_defaults {
                 "pipeline/skia/VkFunctorDrawable.cpp",
                 "pipeline/skia/VkInteropFunctorDrawable.cpp",
                 "renderthread/CacheManager.cpp",
-                "renderthread/CanvasContext.cpp",
                 "renderthread/DrawFrameTask.cpp",
                 "renderthread/EglManager.cpp",
                 "renderthread/ReliableSurface.cpp",
@@ -636,7 +638,6 @@ cc_defaults {
                 "Layer.cpp",
                 "ProfileDataContainer.cpp",
                 "Readback.cpp",
-                "TreeInfo.cpp",
                 "WebViewFunctorManager.cpp",
                 "protos/graphicsstats.proto",
             ],
@@ -654,6 +655,8 @@ cc_defaults {
 
             srcs: [
                 "platform/host/renderthread/CacheManager.cpp",
+                "platform/host/renderthread/HintSessionWrapper.cpp",
+                "platform/host/renderthread/ReliableSurface.cpp",
                 "platform/host/renderthread/RenderThread.cpp",
                 "platform/host/ProfileDataContainer.cpp",
                 "platform/host/Readback.cpp",

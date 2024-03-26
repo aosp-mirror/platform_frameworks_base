@@ -164,8 +164,10 @@ static vector<string> parseCsv(JNIEnv* env, jstring csvJString) {
 } // namespace android
 
 using namespace android;
+using namespace android::uirenderer;
 
 void init_android_graphics() {
+    Properties::overrideRenderPipelineType(RenderPipelineType::SkiaCpu);
     SkGraphics::Init();
 }
 
