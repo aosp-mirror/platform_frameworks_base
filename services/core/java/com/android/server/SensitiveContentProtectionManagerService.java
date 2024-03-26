@@ -20,6 +20,11 @@ import static android.permission.flags.Flags.sensitiveNotificationAppProtection;
 import static android.provider.Settings.Global.DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS;
 import static android.view.flags.Flags.sensitiveContentAppProtection;
 
+import static com.android.internal.util.FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION;
+import static com.android.internal.util.FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__SOURCE__FRAMEWORKS;
+import static com.android.internal.util.FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__START;
+import static com.android.internal.util.FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__STOP;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
@@ -86,9 +91,11 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
     private static class MediaProjectionSession {
         final int mUid;
         final long mSessionId;
+        final boolean mIsExempted;
 
-        MediaProjectionSession(int uid, long sessionId) {
+        MediaProjectionSession(int uid, boolean isExempted, long sessionId) {
             mUid = uid;
+            mIsExempted = isExempted;
             mSessionId = sessionId;
         }
     }
@@ -105,11 +112,28 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
                     } finally {
                         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
                     }
+                    FrameworkStatsLog.write(
+                            SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION,
+                            mMediaProjectionSession.mSessionId,
+                            mMediaProjectionSession.mUid,
+                            mMediaProjectionSession.mIsExempted,
+                            SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__START,
+                            SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__SOURCE__FRAMEWORKS
+                    );
                 }
 
                 @Override
                 public void onStop(MediaProjectionInfo info) {
                     if (DEBUG) Log.d(TAG, "onStop projection: " + info);
+                    FrameworkStatsLog.write(
+                            SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION,
+                            mMediaProjectionSession.mSessionId,
+                            mMediaProjectionSession.mUid,
+                            mMediaProjectionSession.mIsExempted,
+                            SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__STOP,
+                            SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__SOURCE__FRAMEWORKS
+                    );
+
                     Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
                             "SensitiveContentProtectionManagerService.onProjectionStop");
                     try {
@@ -207,28 +231,25 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
     }
 
     private void onProjectionStart(MediaProjectionInfo projectionInfo) {
-        // exempt on device screen recorder as well.
-        if ((mExemptedPackages != null && mExemptedPackages.contains(
+        int uid = mPackageManagerInternal.getPackageUid(projectionInfo.getPackageName(), 0,
+                projectionInfo.getUserHandle().getIdentifier());
+        boolean isPackageExempted = (mExemptedPackages != null && mExemptedPackages.contains(
                 projectionInfo.getPackageName()))
-                || canRecordSensitiveContent(projectionInfo.getPackageName())) {
-            Log.w(TAG, projectionInfo.getPackageName() + " is exempted.");
-            return;
-        }
+                || canRecordSensitiveContent(projectionInfo.getPackageName());
         // TODO(b/324447419): move GlobalSettings lookup to background thread
-        boolean disableScreenShareProtections =
-                Settings.Global.getInt(getContext().getContentResolver(),
-                        DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS, 0) != 0;
-        if (disableScreenShareProtections) {
-            Log.w(TAG, "Screen share protections disabled, ignoring projection start");
+        boolean isFeatureDisabled = Settings.Global.getInt(getContext().getContentResolver(),
+                DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS, 0) != 0;
+        mMediaProjectionSession = new MediaProjectionSession(
+                uid, isPackageExempted || isFeatureDisabled, new Random().nextLong());
+
+        if (isPackageExempted || isFeatureDisabled) {
+            Log.w(TAG, "projection session is exempted, package ="
+                    + projectionInfo.getPackageName() + ", isFeatureDisabled=" + isFeatureDisabled);
             return;
         }
 
         synchronized (mSensitiveContentProtectionLock) {
             mProjectionActive = true;
-            int uid = mPackageManagerInternal.getPackageUid(projectionInfo.getPackageName(), 0,
-                    projectionInfo.getUserHandle().getIdentifier());
-            // TODO review sessionId, whether to use a sequence generator or random is good?
-            mMediaProjectionSession = new MediaProjectionSession(uid, new Random().nextLong());
             if (sensitiveNotificationAppProtection()) {
                 updateAppsThatShouldBlockScreenCapture();
             }
