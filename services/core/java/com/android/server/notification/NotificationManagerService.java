@@ -2793,10 +2793,10 @@ public class NotificationManagerService extends SystemService {
         return new GroupHelper(getContext(), getContext().getPackageManager(),
                 mAutoGroupAtCount, new GroupHelper.Callback() {
             @Override
-            public void addAutoGroup(String key) {
-                synchronized (mNotificationLock) {
-                    addAutogroupKeyLocked(key);
-                }
+            public void addAutoGroup(String key, boolean requestSort) {
+                        synchronized (mNotificationLock) {
+                            addAutogroupKeyLocked(key, requestSort);
+                        }
             }
 
             @Override
@@ -6538,7 +6538,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     @GuardedBy("mNotificationLock")
-    void addAutogroupKeyLocked(String key) {
+    void addAutogroupKeyLocked(String key, boolean requestSort) {
         NotificationRecord r = mNotificationsByKey.get(key);
         if (r == null) {
             return;
@@ -6546,7 +6546,9 @@ public class NotificationManagerService extends SystemService {
         if (r.getSbn().getOverrideGroupKey() == null) {
             addAutoGroupAdjustment(r, GroupHelper.AUTOGROUP_KEY);
             EventLogTags.writeNotificationAutogrouped(key);
-            mRankingHandler.requestSort();
+            if (!android.app.Flags.checkAutogroupBeforePost() || requestSort) {
+                mRankingHandler.requestSort();
+            }
         }
     }
 
@@ -8609,6 +8611,29 @@ public class NotificationManagerService extends SystemService {
                         notification.flags |= FLAG_NO_CLEAR;
                     }
 
+                    // Posts the notification if it has a small icon, and potentially autogroup
+                    // the new notification.
+                    if (android.app.Flags.checkAutogroupBeforePost()) {
+                        if (notification.getSmallIcon() != null && !isCritical(r)) {
+                            StatusBarNotification oldSbn = (old != null) ? old.getSbn() : null;
+                            if (oldSbn == null || !Objects.equals(oldSbn.getGroup(), n.getGroup())
+                                    || oldSbn.getNotification().flags
+                                    != n.getNotification().flags) {
+                                synchronized (mNotificationLock) {
+                                    boolean willBeAutogrouped = mGroupHelper.onNotificationPosted(n,
+                                            hasAutoGroupSummaryLocked(n));
+                                    if (willBeAutogrouped) {
+                                        // The newly posted notification will be autogrouped, but
+                                        // was not autogrouped onPost, to avoid an unnecessary sort.
+                                        // We add the autogroup key to the notification without a
+                                        // sort here, and it'll be sorted below with extractSignals.
+                                        addAutogroupKeyLocked(key, /*requestSort=*/false);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     mRankingHelper.extractSignals(r);
                     mRankingHelper.sort(mNotificationList);
                     final int position = mRankingHelper.indexOf(mNotificationList, r);
@@ -8629,17 +8654,20 @@ public class NotificationManagerService extends SystemService {
                         notifyListenersPostedAndLogLocked(r, old, mTracker, maybeReport);
                         posted = true;
 
-                        StatusBarNotification oldSbn = (old != null) ? old.getSbn() : null;
-                        if (oldSbn == null
-                                || !Objects.equals(oldSbn.getGroup(), n.getGroup())
-                                || oldSbn.getNotification().flags != n.getNotification().flags) {
-                            if (!isCritical(r)) {
-                                mHandler.post(() -> {
-                                    synchronized (mNotificationLock) {
-                                        mGroupHelper.onNotificationPosted(
-                                                n, hasAutoGroupSummaryLocked(n));
-                                    }
-                                });
+                        if (!android.app.Flags.checkAutogroupBeforePost()) {
+                            StatusBarNotification oldSbn = (old != null) ? old.getSbn() : null;
+                            if (oldSbn == null
+                                    || !Objects.equals(oldSbn.getGroup(), n.getGroup())
+                                    || oldSbn.getNotification().flags
+                                        != n.getNotification().flags) {
+                                if (!isCritical(r)) {
+                                    mHandler.post(() -> {
+                                        synchronized (mNotificationLock) {
+                                            mGroupHelper.onNotificationPosted(
+                                                    n, hasAutoGroupSummaryLocked(n));
+                                        }
+                                    });
+                                }
                             }
                         }
                     } else {
