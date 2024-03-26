@@ -25,6 +25,13 @@ flag {
 }
 
 flag {
+    name: "notification_heads_up_cycling"
+    namespace: "systemui"
+    description: "Heads-up notification cycling animation for the Notification Avalanche feature."
+    bug: "316404716"
+}
+
+flag {
    name: "notification_minimalism_prototype"
    namespace: "systemui"
    description: "Prototype of notification minimalism; the new 'Intermediate' lockscreen customization proposal."
