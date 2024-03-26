@@ -43,7 +43,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 
@@ -66,11 +65,9 @@ constructor(
 
     // Only widgets are editable. The CTA tile comes last in the list and remains visible.
     override val communalContent: Flow<List<CommunalContentModel>> =
-        communalInteractor.widgetContent
-            .map { widgets -> widgets + listOf(CommunalContentModel.CtaTileInEditMode()) }
-            .onEach { models ->
-                logger.d({ "Content updated: $str1" }) { str1 = models.joinToString { it.key } }
-            }
+        communalInteractor.widgetContent.onEach { models ->
+            logger.d({ "Content updated: $str1" }) { str1 = models.joinToString { it.key } }
+        }
 
     private val _reorderingWidgets = MutableStateFlow(false)
 

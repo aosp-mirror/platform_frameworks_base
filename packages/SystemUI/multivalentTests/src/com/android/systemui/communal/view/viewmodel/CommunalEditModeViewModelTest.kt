@@ -149,13 +149,11 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             val communalContent by collectLastValue(underTest.communalContent)
 
             // Only Widgets and CTA tile are shown.
-            assertThat(communalContent?.size).isEqualTo(3)
+            assertThat(communalContent?.size).isEqualTo(2)
             assertThat(communalContent?.get(0))
                 .isInstanceOf(CommunalContentModel.WidgetContent::class.java)
             assertThat(communalContent?.get(1))
                 .isInstanceOf(CommunalContentModel.WidgetContent::class.java)
-            assertThat(communalContent?.get(2))
-                .isInstanceOf(CommunalContentModel.CtaTileInEditMode::class.java)
         }
 
     @Test
@@ -195,24 +193,20 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             val communalContent by collectLastValue(underTest.communalContent)
 
             // Widgets and CTA tile are shown.
-            assertThat(communalContent?.size).isEqualTo(3)
+            assertThat(communalContent?.size).isEqualTo(2)
             assertThat(communalContent?.get(0))
                 .isInstanceOf(CommunalContentModel.WidgetContent::class.java)
             assertThat(communalContent?.get(1))
                 .isInstanceOf(CommunalContentModel.WidgetContent::class.java)
-            assertThat(communalContent?.get(2))
-                .isInstanceOf(CommunalContentModel.CtaTileInEditMode::class.java)
 
             underTest.onDeleteWidget(widgets.get(0).appWidgetId)
 
             // Only one widget and CTA tile remain.
-            assertThat(communalContent?.size).isEqualTo(2)
+            assertThat(communalContent?.size).isEqualTo(1)
             val item = communalContent?.get(0)
             val appWidgetId =
                 if (item is CommunalContentModel.WidgetContent) item.appWidgetId else null
             assertThat(appWidgetId).isEqualTo(widgets.get(1).appWidgetId)
-            assertThat(communalContent?.get(1))
-                .isInstanceOf(CommunalContentModel.CtaTileInEditMode::class.java)
         }
 
     @Test
