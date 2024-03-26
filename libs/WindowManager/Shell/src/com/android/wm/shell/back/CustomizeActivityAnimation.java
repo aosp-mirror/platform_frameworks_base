@@ -285,6 +285,11 @@ public class CustomizeActivityAnimation extends ShellBackAnimation {
     private final class Callback extends IOnBackInvokedCallback.Default {
         @Override
         public void onBackStarted(BackMotionEvent backEvent) {
+            // in case we're still animating an onBackCancelled event, let's remove the finish-
+            // callback from the progress animator to prevent calling finishAnimation() before
+            // restarting a new animation
+            mProgressAnimator.removeOnBackCancelledFinishCallback();
+
             mProgressAnimator.onBackStarted(backEvent,
                     CustomizeActivityAnimation.this::onGestureProgress);
         }

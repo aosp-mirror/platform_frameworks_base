@@ -155,6 +155,14 @@ public class BackProgressAnimator {
         mSpring.animateToFinalPosition(0);
     }
 
+    /**
+     * Removes the finishCallback passed into {@link #onBackCancelled}
+     */
+    public void removeOnBackCancelledFinishCallback() {
+        mSpring.removeEndListener(mOnAnimationEndListener);
+        mBackCancelledFinishRunnable = null;
+    }
+
     /** Returns true if the back animation is in progress. */
     boolean isBackAnimationInProgress() {
         return mBackAnimationInProgress;
