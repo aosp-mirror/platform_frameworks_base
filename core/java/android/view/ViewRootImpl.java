@@ -1066,11 +1066,6 @@ public final class ViewRootImpl implements ViewParent,
     // Used to check if there is a message in the message queue
     // for idleness handling.
     private boolean mHasIdledMessage = false;
-    // Used to allow developers to opt out Toolkit dVRR feature.
-    // This feature allows device to adjust refresh rate
-    // as needed and can be useful for power saving.
-    // Should not enable the dVRR feature if the value is false.
-    private boolean mIsFrameRatePowerSavingsBalanced = true;
     // Used to check if there is a conflict between different frame rate voting.
     // Take 24 and 30 as an example, 24 is not a divisor of 30.
     // We consider there is a conflict.
@@ -12777,7 +12772,10 @@ public final class ViewRootImpl implements ViewParent,
      */
     @VisibleForTesting
     public boolean isFrameRatePowerSavingsBalanced() {
-        return mIsFrameRatePowerSavingsBalanced;
+        if (sToolkitSetFrameRateReadOnlyFlagValue) {
+            return mWindowAttributes.isFrameRatePowerSavingsBalanced();
+        }
+        return true;
     }
 
     /**
@@ -12789,19 +12787,9 @@ public final class ViewRootImpl implements ViewParent,
         return mIsFrameRateConflicted;
     }
 
-    /**
-     * Set the value of mIsFrameRatePowerSavingsBalanced
-     * Can be used to checked if toolkit dVRR feature is enabled.
-     */
-    public void setFrameRatePowerSavingsBalanced(boolean enabled) {
-        if (sToolkitSetFrameRateReadOnlyFlagValue) {
-            mIsFrameRatePowerSavingsBalanced = enabled;
-        }
-    }
-
     private boolean shouldEnableDvrr() {
         // uncomment this when we are ready for enabling dVRR
-        // return sToolkitSetFrameRateReadOnlyFlagValue && mIsFrameRatePowerSavingsBalanced;
+        // return sToolkitSetFrameRateReadOnlyFlagValue && isFrameRatePowerSavingsBalanced();
         return false;
 
     }
