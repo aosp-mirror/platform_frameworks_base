@@ -27,6 +27,7 @@ import android.annotation.WorkerThread;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.Flags;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -960,6 +961,9 @@ class Rollback {
         ipw.println("-stateDescription: " + mStateDescription);
         ipw.println("-timestamp: " + getTimestamp());
         ipw.println("-rollbackLifetimeMillis: " + getRollbackLifetimeMillis());
+        if (Flags.recoverabilityDetection()) {
+            ipw.println("-rollbackImpactLevel: " + info.getRollbackImpactLevel());
+        }
         ipw.println("-isStaged: " + isStaged());
         ipw.println("-originalSessionId: " + getOriginalSessionId());
         ipw.println("-packages:");

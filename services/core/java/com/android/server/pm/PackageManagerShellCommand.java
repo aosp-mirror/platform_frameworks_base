@@ -28,7 +28,6 @@ import static android.content.pm.PackageManager.RESTRICTION_HIDE_NOTIFICATIONS;
 import static android.content.pm.PackageManager.RESTRICTION_NONE;
 
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
-import static com.android.server.pm.PackageManagerService.DEFAULT_FILE_ACCESS_MODE;
 
 import android.accounts.IAccountManager;
 import android.annotation.NonNull;
@@ -45,6 +44,7 @@ import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.FeatureInfo;
+import android.content.pm.Flags;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageManager;
@@ -3387,6 +3387,18 @@ class PackageManagerShellCommand extends ShellCommand {
                     }
                     sessionParams.setEnableRollback(true, rollbackStrategy);
                     break;
+                case "--rollback-impact-level":
+                    if (!Flags.recoverabilityDetection()) {
+                        throw new IllegalArgumentException("Unknown option " + opt);
+                    }
+                    int rollbackImpactLevel = Integer.parseInt(peekNextArg());
+                    if (rollbackImpactLevel < PackageManager.ROLLBACK_USER_IMPACT_LOW
+                            || rollbackImpactLevel
+                                    > PackageManager.ROLLBACK_USER_IMPACT_ONLY_MANUAL) {
+                        throw new IllegalArgumentException(
+                            rollbackImpactLevel + " is not a valid rollback impact level.");
+                    }
+                    sessionParams.setRollbackImpactLevel(rollbackImpactLevel);
                 case "--staged-ready-timeout":
                     params.stagedReadyTimeoutMs = Long.parseLong(getNextArgRequired());
                     break;
@@ -4546,6 +4558,11 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      --full: cause the app to be installed as a non-ephemeral full app");
         pw.println("      --enable-rollback: enable rollbacks for the upgrade.");
         pw.println("          0=restore (default), 1=wipe, 2=retain");
+        if (Flags.recoverabilityDetection()) {
+            pw.println(
+                    "      --rollback-impact-level: set device impact required for rollback.");
+            pw.println("          0=low (default), 1=high, 2=manual only");
+        }
         pw.println("      --install-location: force the install location:");
         pw.println("          0=auto, 1=internal only, 2=prefer external");
         pw.println("      --install-reason: indicates why the app is being installed:");
