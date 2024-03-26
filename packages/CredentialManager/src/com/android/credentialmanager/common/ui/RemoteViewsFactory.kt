@@ -17,6 +17,8 @@
 package com.android.credentialmanager.common.ui
 
 import android.content.Context
+import android.util.Log
+import com.android.credentialmanager.common.Constants
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
 import com.android.credentialmanager.model.get.CredentialEntryInfo
@@ -29,7 +31,8 @@ class RemoteViewsFactory {
         private const val SET_ADJUST_VIEW_BOUNDS_METHOD_NAME = "setAdjustViewBounds"
         private const val SET_MAX_HEIGHT_METHOD_NAME = "setMaxHeight"
         private const val SET_BACKGROUND_RESOURCE_METHOD_NAME = "setBackgroundResource"
-        private const val BULLET_POINT = "\u2022"
+        private const val SEPARATOR = " " + "\u2022" + " "
+
         // TODO(jbabs): RemoteViews#setViewPadding renders this as 8dp on the display. Debug why.
         private const val END_ITEMS_PADDING = 28
 
@@ -43,20 +46,14 @@ class RemoteViewsFactory {
             var layoutId: Int = com.android.credentialmanager.R.layout
                     .credman_dropdown_presentation_layout
             val remoteViews = RemoteViews(context.packageName, layoutId)
-            if (credentialEntryInfo.credentialType == CredentialType.UNKNOWN) {
-                return remoteViews
-            }
             val displayName = credentialEntryInfo.displayName ?: credentialEntryInfo.userName
             remoteViews.setTextViewText(android.R.id.text1, displayName)
-            val secondaryText =
-                if (credentialEntryInfo.displayName != null
-                    && (credentialEntryInfo.displayName != credentialEntryInfo.userName))
-                    (credentialEntryInfo.userName + " " + BULLET_POINT + " "
-                            + credentialEntryInfo.credentialTypeDisplayName
-                            + " " + BULLET_POINT + " " + credentialEntryInfo.providerDisplayName)
-                else (credentialEntryInfo.credentialTypeDisplayName + " " + BULLET_POINT + " "
-                        + credentialEntryInfo.providerDisplayName)
-            remoteViews.setTextViewText(android.R.id.text2, secondaryText)
+            val secondaryText = getSecondaryText(credentialEntryInfo)
+            if (secondaryText.isNullOrBlank()) {
+                Log.w(Constants.LOG_TAG, "Secondary text for dropdown is null")
+            } else {
+                remoteViews.setTextViewText(android.R.id.text2, secondaryText)
+            }
             remoteViews.setImageViewIcon(android.R.id.icon1, icon);
             remoteViews.setBoolean(
                 android.R.id.icon1, SET_ADJUST_VIEW_BOUNDS_METHOD_NAME, true);
@@ -86,6 +83,26 @@ class RemoteViewsFactory {
                 /* right=*/0,
                 /* bottom=*/END_ITEMS_PADDING)
             return remoteViews
+        }
+
+        /**
+         * Computes the secondary text for dropdown presentation based on available fields.
+         *
+         * <p> Format for secondary text is [username] . [credentialType] . [providerDisplayName]
+         * If display name and username are the same, we do not display username
+         * If credential type is missing as in the case with SiwG, we just display
+         * providerDisplayName. Both credential type and provider display name should not be empty.
+         */
+        private fun getSecondaryText(credentialEntryInfo: CredentialEntryInfo): String? {
+            return listOf(if (credentialEntryInfo.displayName != null
+                && (credentialEntryInfo.displayName != credentialEntryInfo.userName))
+                (credentialEntryInfo.userName) else null,
+                credentialEntryInfo.credentialTypeDisplayName,
+                credentialEntryInfo.providerDisplayName).filterNot { it.isNullOrBlank() }
+                    .let { itemsToDisplay ->
+                        if (itemsToDisplay.isEmpty()) null
+                        else itemsToDisplay.joinToString(separator = SEPARATOR)
+                    }
         }
 
         fun createMoreSignInOptionsPresentation(context: Context): RemoteViews {
