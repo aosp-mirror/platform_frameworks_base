@@ -387,16 +387,20 @@ import java.util.Objects;
     private MediaRoute2Info createMediaRoute2InfoFromAudioDeviceInfo(
             AudioDeviceInfo audioDeviceInfo) {
         String address = audioDeviceInfo.getAddress();
+
         // Passing a null route id means we want to get the default id for the route. Generally, we
         // only expect to pass null for non-Bluetooth routes.
-        String routeId =
-                TextUtils.isEmpty(address)
-                        ? null
-                        : mBluetoothRouteController.getRouteIdForBluetoothAddress(address);
+        String routeId = null;
+
         // We use the name from the port instead AudioDeviceInfo#getProductName because the latter
         // replaces empty names with the name of the device (example: Pixel 8). In that case we want
         // to derive a name ourselves from the type instead.
         String deviceName = audioDeviceInfo.getPort().name();
+
+        if (!TextUtils.isEmpty(address)) {
+            routeId = mBluetoothRouteController.getRouteIdForBluetoothAddress(address);
+            deviceName = mBluetoothRouteController.getNameForBluetoothAddress(address);
+        }
         return createMediaRoute2Info(routeId, audioDeviceInfo.getType(), deviceName, address);
     }
 
