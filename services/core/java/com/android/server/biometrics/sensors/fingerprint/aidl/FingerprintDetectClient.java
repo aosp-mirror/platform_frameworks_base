@@ -23,7 +23,6 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricRequestConstants;
 import android.hardware.biometrics.common.ICancellationSignal;
-import android.hardware.biometrics.common.OperationState;
 import android.hardware.fingerprint.FingerprintAuthenticateOptions;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
@@ -31,7 +30,6 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
-import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.OperationContextExt;
@@ -106,13 +104,8 @@ public class FingerprintDetectClient extends AcquisitionClient<AidlSession>
         resetIgnoreDisplayTouches();
         mSensorOverlays.show(getSensorId(), BiometricRequestConstants.REASON_AUTH_KEYGUARD,
                 this);
-
         try {
-            if (Flags.deHidl()) {
-                startDetectInteraction();
-            } else {
-                mCancellationSignal = doDetectInteraction();
-            }
+            doDetectInteraction();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting finger detect", e);
             mSensorOverlays.hide(getSensorId());
@@ -120,33 +113,7 @@ public class FingerprintDetectClient extends AcquisitionClient<AidlSession>
         }
     }
 
-    private ICancellationSignal doDetectInteraction() throws RemoteException {
-        final AidlSession session = getFreshDaemon();
-
-        if (session.hasContextMethods()) {
-            final OperationContextExt opContext = getOperationContext();
-            final ICancellationSignal cancel = session.getSession().detectInteractionWithContext(
-                    opContext.toAidlContext(mOptions));
-            getBiometricContext().subscribe(opContext, ctx -> {
-                try {
-                    session.getSession().onContextChanged(ctx);
-                    // TODO(b/317414324): Deprecate setIgnoreDisplayTouches
-                    if (ctx.operationState != null && ctx.operationState.getTag()
-                            == OperationState.fingerprintOperationState) {
-                        session.getSession().setIgnoreDisplayTouches(
-                                ctx.operationState.getFingerprintOperationState().isHardwareIgnoringTouches);
-                    }
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Unable to notify context changed", e);
-                }
-            });
-            return cancel;
-        } else {
-            return session.getSession().detectInteraction();
-        }
-    }
-
-    private void startDetectInteraction() throws RemoteException {
+    private void doDetectInteraction() throws RemoteException {
         final AidlSession session = getFreshDaemon();
 
         if (session.hasContextMethods()) {

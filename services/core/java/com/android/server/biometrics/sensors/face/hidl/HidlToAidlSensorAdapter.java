@@ -173,9 +173,14 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
     }
 
     private AidlResponseHandler getAidlResponseHandler() {
-        return new AidlResponseHandler(getContext(), getScheduler(), getSensorProperties().sensorId,
-                mCurrentUserId, mLockoutTracker, mLockoutResetDispatcher,
-                mAuthSessionCoordinator, () -> {}, mAidlResponseHandlerCallback);
+        return new AidlResponseHandler(getContext(),
+                getScheduler(),
+                getSensorProperties().sensorId,
+                mCurrentUserId,
+                mLockoutTracker,
+                mLockoutResetDispatcher,
+                mAuthSessionCoordinator,
+                mAidlResponseHandlerCallback);
     }
 
     private IBiometricsFace getIBiometricsFace() {

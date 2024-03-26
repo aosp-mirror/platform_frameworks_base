@@ -24,7 +24,6 @@ import static org.mockito.ArgumentMatchers.anyByte;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verify;
@@ -38,8 +37,6 @@ import android.hardware.face.FaceEnrollOptions;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.testing.TestableContext;
@@ -47,7 +44,6 @@ import android.testing.TestableContext;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.OperationContextExt;
@@ -60,7 +56,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -124,45 +119,6 @@ public class FaceEnrollClientTest {
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_DE_HIDL)
-    public void enrollWithContext_v2() throws RemoteException {
-        final FaceEnrollClient client = createClient(2);
-        client.start(mCallback);
-
-        InOrder order = inOrder(mHal, mBiometricContext);
-        order.verify(mBiometricContext).updateContext(
-                mOperationContextCaptor.capture(), anyBoolean());
-
-        final OperationContext aidlContext = mOperationContextCaptor.getValue().toAidlContext();
-        order.verify(mHal).enrollWithContext(any(), anyByte(), any(), any(), same(aidlContext));
-        verify(mHal, never()).enroll(any(), anyByte(), any(), any());
-    }
-
-    @Test
-    @RequiresFlagsDisabled(Flags.FLAG_DE_HIDL)
-    public void notifyHalWhenContextChanges() throws RemoteException {
-        final FaceEnrollClient client = createClient(3);
-        client.start(mCallback);
-
-        final ArgumentCaptor<OperationContext> captor =
-                ArgumentCaptor.forClass(OperationContext.class);
-        verify(mHal).enrollWithContext(any(), anyByte(), any(), any(), captor.capture());
-        OperationContext opContext = captor.getValue();
-
-        // fake an update to the context
-        verify(mBiometricContext).subscribe(
-                mOperationContextCaptor.capture(), mContextInjector.capture());
-        assertThat(opContext).isSameInstanceAs(
-                mOperationContextCaptor.getValue().toAidlContext());
-        mContextInjector.getValue().accept(opContext);
-        verify(mHal).onContextChanged(same(opContext));
-
-        client.stopHalOperation();
-        verify(mBiometricContext).unsubscribe(same(mOperationContextCaptor.getValue()));
-    }
-
-    @Test
-    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
     public void subscribeContextAndStartHal() throws RemoteException {
         final FaceEnrollClient client = createClient(3);
         client.start(mCallback);
@@ -192,16 +148,6 @@ public class FaceEnrollClientTest {
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_DE_HIDL)
-    public void enrollWithFaceOptions() throws RemoteException {
-        final FaceEnrollClient client = createClient(4);
-        client.start(mCallback);
-
-        verify(mHal).enrollWithOptions(any());
-    }
-
-    @Test
-    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
     public void enrollWithFaceOptionsAfterSubscribingContext() throws RemoteException {
         final FaceEnrollClient client = createClient(4);
         client.start(mCallback);

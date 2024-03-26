@@ -47,21 +47,17 @@ import android.hardware.fingerprint.FingerprintAuthenticateOptions;
 import android.hardware.fingerprint.HidlFingerprintSensorConfig;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserManager;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.biometrics.BiometricHandlerProvider;
-import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.AuthenticationStateListeners;
@@ -136,13 +132,8 @@ public class FingerprintProviderTest {
         when(mBiometricContext.getAuthSessionCoordinator()).thenReturn(mAuthSessionCoordinator);
         when(mBiometricHandlerProvider.getBiometricCallbackHandler()).thenReturn(
                 mBiometricCallbackHandler);
-        if (Flags.deHidl()) {
-            when(mBiometricHandlerProvider.getFingerprintHandler()).thenReturn(
-                    new Handler(mLooper.getLooper()));
-        } else {
-            when(mBiometricHandlerProvider.getFingerprintHandler()).thenReturn(
-                    new Handler(Looper.getMainLooper()));
-        }
+        when(mBiometricHandlerProvider.getFingerprintHandler()).thenReturn(
+                new Handler(mLooper.getLooper()));
 
         final SensorProps sensor1 = new SensorProps();
         sensor1.commonProps = new CommonProps();
@@ -176,7 +167,6 @@ public class FingerprintProviderTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
     public void testAddingHidlSensors() {
         when(mResources.getIntArray(anyInt())).thenReturn(new int[]{});
         when(mResources.getBoolean(anyInt())).thenReturn(false);
@@ -252,7 +242,6 @@ public class FingerprintProviderTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
     public void testScheduleAuthenticate() {
         waitForIdle();
 
@@ -302,10 +291,6 @@ public class FingerprintProviderTest {
     }
 
     private void waitForIdle() {
-        if (Flags.deHidl()) {
-            mLooper.dispatchAll();
-        } else {
-            InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-        }
+        mLooper.dispatchAll();
     }
 }
