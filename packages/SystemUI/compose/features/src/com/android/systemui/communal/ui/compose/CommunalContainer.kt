@@ -8,12 +8,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.FixedSizeEdgeDetector
 import com.android.compose.animation.scene.LowestZIndexScenePicker
+import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.SceneTransitionLayout
@@ -21,12 +24,13 @@ import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.compose.animation.scene.transitions
-import com.android.compose.animation.scene.updateSceneTransitionLayoutState
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
+import com.android.systemui.scene.ui.composable.SceneTransitionLayoutDataSource
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 
 object Communal {
@@ -63,27 +67,35 @@ val sceneTransitions = transitions {
 fun CommunalContainer(
     modifier: Modifier = Modifier,
     viewModel: CommunalViewModel,
+    dataSourceDelegator: SceneDataSourceDelegator,
     dialogFactory: SystemUIDialogFactory,
 ) {
-    val currentScene: SceneKey by viewModel.currentScene.collectAsState(CommunalScenes.Blank)
-    val sceneTransitionLayoutState =
-        updateSceneTransitionLayoutState(
-            currentScene,
-            onChangeScene = { viewModel.onSceneChanged(it) },
+    val coroutineScope = rememberCoroutineScope()
+    val currentSceneKey: SceneKey by viewModel.currentScene.collectAsState(CommunalScenes.Blank)
+    val touchesAllowed by viewModel.touchesAllowed.collectAsState(initial = false)
+    val state: MutableSceneTransitionLayoutState = remember {
+        MutableSceneTransitionLayoutState(
+            initialScene = currentSceneKey,
             transitions = sceneTransitions,
             enableInterruptions = false,
         )
-    val touchesAllowed by viewModel.touchesAllowed.collectAsState(initial = false)
+    }
+
+    DisposableEffect(state) {
+        val dataSource = SceneTransitionLayoutDataSource(state, coroutineScope)
+        dataSourceDelegator.setDelegate(dataSource)
+        onDispose { dataSourceDelegator.setDelegate(null) }
+    }
 
     // This effect exposes the SceneTransitionLayout's observable transition state to the rest of
     // the system, and unsets it when the view is disposed to avoid a memory leak.
-    DisposableEffect(viewModel, sceneTransitionLayoutState) {
-        viewModel.setTransitionState(sceneTransitionLayoutState.observableTransitionState())
+    DisposableEffect(viewModel, state) {
+        viewModel.setTransitionState(state.observableTransitionState())
         onDispose { viewModel.setTransitionState(null) }
     }
 
     SceneTransitionLayout(
-        state = sceneTransitionLayoutState,
+        state = state,
         modifier = modifier.fillMaxSize(),
         swipeSourceDetector =
             FixedSizeEdgeDetector(

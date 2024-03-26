@@ -49,8 +49,8 @@ abstract class BaseCommunalViewModel(
         communalInteractor.signalUserInteraction()
     }
 
-    fun onSceneChanged(scene: SceneKey) {
-        communalInteractor.onSceneChanged(scene)
+    fun changeScene(scene: SceneKey) {
+        communalInteractor.changeScene(scene)
     }
 
     /**

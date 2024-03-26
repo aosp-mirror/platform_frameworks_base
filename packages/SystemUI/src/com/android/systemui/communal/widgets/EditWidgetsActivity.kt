@@ -31,7 +31,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
-import com.android.app.tracing.coroutines.launch
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.logging.UiEventLogger
@@ -144,7 +143,7 @@ constructor(
 
     private fun onEditDone() {
         try {
-            communalViewModel.onSceneChanged(CommunalScenes.Communal)
+            communalViewModel.changeScene(CommunalScenes.Communal)
             checkNotNull(windowManagerService).lockNow(/* options */ null)
             finish()
         } catch (e: RemoteException) {

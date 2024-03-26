@@ -25,6 +25,7 @@ import android.os.UserManager
 import android.provider.Settings
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.communal.data.repository.CommunalMediaRepository
 import com.android.systemui.communal.data.repository.CommunalPrefsRepository
@@ -142,13 +143,12 @@ constructor(
             )
 
     /**
-     * Target scene as requested by the underlying [SceneTransitionLayout] or through
-     * [onSceneChanged].
+     * Target scene as requested by the underlying [SceneTransitionLayout] or through [changeScene].
      *
      * If [isCommunalAvailable] is false, will return [CommunalScenes.Blank]
      */
     val desiredScene: Flow<SceneKey> =
-        communalRepository.desiredScene.combine(isCommunalAvailable) { scene, available ->
+        communalRepository.currentScene.combine(isCommunalAvailable) { scene, available ->
             if (available) scene else CommunalScenes.Blank
         }
 
@@ -254,9 +254,12 @@ constructor(
             !(it is ObservableTransitionState.Idle && it.scene == CommunalScenes.Blank)
         }
 
-    /** Callback received whenever the [SceneTransitionLayout] finishes a scene transition. */
-    fun onSceneChanged(newScene: SceneKey) {
-        communalRepository.setDesiredScene(newScene)
+    /**
+     * Asks for an asynchronous scene witch to [newScene], which will use the corresponding
+     * installed transition or the one specified by [transitionKey], if provided.
+     */
+    fun changeScene(newScene: SceneKey, transitionKey: TransitionKey? = null) {
+        communalRepository.changeScene(newScene, transitionKey)
     }
 
     fun setEditModeOpen(isOpen: Boolean) {

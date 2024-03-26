@@ -57,7 +57,7 @@ constructor(
                 !keyguardUpdateMonitor.isEncryptedOrLockdown(userTracker.userId)
         if (showGlanceableHub) {
             toGlanceableHubTransitionViewModel.startTransition()
-            communalInteractor.onSceneChanged(CommunalScenes.Communal)
+            communalInteractor.changeScene(CommunalScenes.Communal)
         } else {
             toLockscreenTransitionViewModel.startTransition()
         }

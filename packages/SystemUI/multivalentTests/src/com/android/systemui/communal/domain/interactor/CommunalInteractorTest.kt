@@ -482,7 +482,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(desiredScene()).isEqualTo(CommunalScenes.Blank)
 
             val targetScene = CommunalScenes.Communal
-            communalRepository.setDesiredScene(targetScene)
+            communalRepository.changeScene(targetScene)
             desiredScene = collectLastValue(underTest.desiredScene)
             runCurrent()
             assertThat(desiredScene()).isEqualTo(targetScene)
@@ -493,9 +493,9 @@ class CommunalInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val targetScene = CommunalScenes.Communal
 
-            underTest.onSceneChanged(targetScene)
+            underTest.changeScene(targetScene)
 
-            val desiredScene = collectLastValue(communalRepository.desiredScene)
+            val desiredScene = collectLastValue(communalRepository.currentScene)
             runCurrent()
             assertThat(desiredScene()).isEqualTo(targetScene)
         }
@@ -508,7 +508,7 @@ class CommunalInteractorTest : SysuiTestCase() {
 
             val desiredScene by collectLastValue(underTest.desiredScene)
 
-            underTest.onSceneChanged(CommunalScenes.Communal)
+            underTest.changeScene(CommunalScenes.Communal)
             assertThat(desiredScene).isEqualTo(CommunalScenes.Communal)
 
             kosmos.setCommunalAvailable(false)
@@ -659,7 +659,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             runCurrent()
             assertThat(isCommunalShowing()).isEqualTo(false)
 
-            underTest.onSceneChanged(CommunalScenes.Communal)
+            underTest.changeScene(CommunalScenes.Communal)
 
             isCommunalShowing = collectLastValue(underTest.isCommunalShowing)
             runCurrent()
@@ -683,12 +683,12 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(isCommunalShowing).isFalse()
 
             // Verify scene changes (without the flag) to communal sets the value to true
-            underTest.onSceneChanged(CommunalScenes.Communal)
+            underTest.changeScene(CommunalScenes.Communal)
             runCurrent()
             assertThat(isCommunalShowing).isTrue()
 
             // Verify scene changes (without the flag) to blank sets the value back to false
-            underTest.onSceneChanged(CommunalScenes.Blank)
+            underTest.changeScene(CommunalScenes.Blank)
             runCurrent()
             assertThat(isCommunalShowing).isFalse()
         }
@@ -704,7 +704,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(isCommunalShowing).isFalse()
 
             // Verify scene changes without the flag doesn't have any impact
-            underTest.onSceneChanged(CommunalScenes.Communal)
+            underTest.changeScene(CommunalScenes.Communal)
             runCurrent()
             assertThat(isCommunalShowing).isFalse()
 
