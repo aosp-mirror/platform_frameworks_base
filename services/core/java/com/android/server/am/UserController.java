@@ -576,6 +576,8 @@ class UserController implements Handler.Callback {
             }
             // allowDelayedLocking set here as stopping user is done without any explicit request
             // from outside.
+            Slogf.i(TAG, "Too many running users (%d). Attempting to stop user %d",
+                    currentlyRunningLru.size(), userId);
             if (stopUsersLU(userId, /* force= */ false, /* allowDelayedLocking= */ true,
                     /* stopUserCallback= */ null, /* keyEvictedCallback= */ null)
                     == USER_OP_SUCCESS) {
@@ -1540,6 +1542,7 @@ class UserController implements Handler.Callback {
         }
         if (userInfo.isGuest() || userInfo.isEphemeral()) {
             // This is a user to be stopped.
+            Slogf.i(TAG, "Stopping background guest or ephemeral user " + oldUserId);
             synchronized (mLock) {
                 stopUsersLU(oldUserId, /* force= */ true, /* allowDelayedLocking= */ false,
                         null, null);
@@ -2219,6 +2222,10 @@ class UserController implements Handler.Callback {
         mUserSwitchObservers.finishBroadcast();
     }
 
+    /**
+     * Possibly stops the given full user (or its profile) when we switch out of it, if dictated
+     * by policy.
+     */
     private void stopUserOnSwitchIfEnforced(@UserIdInt int oldUserId) {
         // Never stop system user
         if (oldUserId == UserHandle.USER_SYSTEM) {
@@ -2228,20 +2235,27 @@ class UserController implements Handler.Callback {
                 hasUserRestriction(UserManager.DISALLOW_RUN_IN_BACKGROUND, oldUserId);
         synchronized (mLock) {
             // If running in background is disabled or mStopUserOnSwitch mode, stop the user.
-            boolean disallowRunInBg = hasRestriction || shouldStopUserOnSwitch();
-            if (!disallowRunInBg) {
-                if (DEBUG_MU) {
-                    Slogf.i(TAG, "stopUserOnSwitchIfEnforced() NOT stopping %d and related users",
-                            oldUserId);
-                }
+            if (hasRestriction || shouldStopUserOnSwitch()) {
+                Slogf.i(TAG, "Stopping user %d and its profiles on user switch", oldUserId);
+                stopUsersLU(oldUserId, /* force= */ false, /* allowDelayedLocking= */ false,
+                        null, null);
                 return;
             }
-            if (DEBUG_MU) {
-                Slogf.i(TAG, "stopUserOnSwitchIfEnforced() stopping %d and related users",
-                        oldUserId);
+        }
+
+        // We didn't need to stop the parent, but perhaps one of its profiles needs to be stopped.
+        final List<UserInfo> profiles = mInjector.getUserManager().getProfiles(
+                oldUserId, /* enabledOnly= */ false);
+        final int count = profiles.size();
+        for (int i = 0; i < count; i++) {
+            final int profileUserId = profiles.get(i).id;
+            if (hasUserRestriction(UserManager.DISALLOW_RUN_IN_BACKGROUND, profileUserId)) {
+                Slogf.i(TAG, "Stopping profile %d on user switch", profileUserId);
+                synchronized (mLock) {
+                    stopUsersLU(profileUserId,
+                            /* force= */ true, /* allowDelayedLocking= */ false, null, null);
+                }
             }
-            stopUsersLU(oldUserId, /* force= */ false, /* allowDelayedLocking= */ true,
-                    null, null);
         }
     }
 
