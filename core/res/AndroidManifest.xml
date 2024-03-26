@@ -2592,6 +2592,13 @@
     <permission android:name="android.permission.VIBRATE_ALWAYS_ON"
         android:protectionLevel="signature" />
 
+    <!-- Allows access to system-only haptic feedback constants.
+         <p>Protection level: signature
+         @hide
+    -->
+    <permission android:name="android.permission.VIBRATE_SYSTEM_CONSTANTS"
+        android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows access to the vibrator state.
          <p>Protection level: signature
          @hide
