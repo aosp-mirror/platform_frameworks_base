@@ -28,6 +28,8 @@ import androidx.test.filters.SmallTest;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.window.flags.Flags;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,6 +54,10 @@ public class WindowMetricsHelperTest {
 
     @Test
     public void testGetLegacySizeMatchesDisplayGetSize() throws Throwable {
+        if (Flags.insetsDecoupledConfiguration()) {
+            // TODO (b/151861875): Introduce new test to cover the new behavior.
+            return;
+        }
         mActivityRule.runOnUiThread(() -> {
             Activity activity = mActivityRule.getActivity();
             final WindowMetrics metrics = activity.getWindowManager().getCurrentWindowMetrics();

@@ -3110,6 +3110,10 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testCloseToSquareFixedOrientation() {
+        if (Flags.insetsDecoupledConfiguration()) {
+            // No test needed as decor insets no longer affects orientation.
+            return;
+        }
         // create a square display
         final DisplayContent squareDisplay = new TestDisplayContent.Builder(mAtm, 2000, 2000)
                 .setSystemDecorations(true).build();
