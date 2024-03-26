@@ -1,7 +1,5 @@
 package com.android.systemui.scene.ui.composable
 
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.Orientation
 import com.android.compose.animation.scene.transitions
 import com.android.systemui.bouncer.ui.composable.Bouncer
@@ -32,7 +30,6 @@ import com.android.systemui.scene.ui.composable.transitions.shadeToQuickSettings
  * Please keep the list sorted alphabetically.
  */
 val SceneContainerTransitions = transitions {
-    defaultSwipeSpec = spring(Spring.DampingRatioLowBouncy, Spring.StiffnessLow)
 
     // Scene transitions
 
