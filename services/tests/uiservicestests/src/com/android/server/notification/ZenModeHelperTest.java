@@ -3634,12 +3634,11 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mTestFlagResolver.setFlagOverride(LOG_DND_STATE_EVENTS, true);
         setupZenConfig();
 
-        // Event 1: turn on manual zen mode. Manual rule will have ACTIVE_RULE_TYPE_MANUAL
-        mZenModeHelper.setManualZenMode(ZEN_MODE_IMPORTANT_INTERRUPTIONS, null,
-                UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI, "", null, Process.SYSTEM_UID);
-
         // Create bedtime rule
+        // This one has INTERRUPTION_FILTER_ALL to make sure active rules still count when zen mode
+        // (in the notification filtering sense) is not on
         AutomaticZenRule bedtime = new AutomaticZenRule.Builder("Bedtime Mode (TM)", CONDITION_ID)
+                .setInterruptionFilter(INTERRUPTION_FILTER_ALL)
                 .setType(TYPE_BEDTIME)
                 .build();
         String bedtimeRuleId = mZenModeHelper.addAutomaticZenRule(mPkg, bedtime, UPDATE_ORIGIN_APP,
@@ -3652,17 +3651,21 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         String immersiveId = mZenModeHelper.addAutomaticZenRule(mPkg, immersive, UPDATE_ORIGIN_APP,
                 "reason", CUSTOM_PKG_UID);
 
-        // Event 2: Activate bedtime rule
+        // Event 1: Activate bedtime rule. This doesn't turn on notification filtering
         mZenModeHelper.setAutomaticZenRuleState(bedtimeRuleId,
                 new Condition(bedtime.getConditionId(), "", STATE_TRUE, SOURCE_SCHEDULE),
                 UPDATE_ORIGIN_APP, CUSTOM_PKG_UID);
+
+        // Event 2: turn on manual zen mode. Manual rule will have ACTIVE_RULE_TYPE_MANUAL
+        mZenModeHelper.setManualZenMode(ZEN_MODE_IMPORTANT_INTERRUPTIONS, null,
+                UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI, "", null, Process.SYSTEM_UID);
 
         // Event 3: Turn immersive on
         mZenModeHelper.setAutomaticZenRuleState(immersiveId,
                 new Condition(immersive.getConditionId(), "", STATE_TRUE, SOURCE_SCHEDULE),
                 UPDATE_ORIGIN_APP, CUSTOM_PKG_UID);
 
-        // Event 4: Turn off bedtime mode, leaving just unknown + immersive
+        // Event 4: Turn off bedtime mode, leaving just manual + immersive
         mZenModeHelper.setAutomaticZenRuleState(bedtimeRuleId,
                 new Condition(bedtime.getConditionId(), "", STATE_FALSE, SOURCE_SCHEDULE),
                 UPDATE_ORIGIN_APP, CUSTOM_PKG_UID);
@@ -3670,19 +3673,21 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // Total of 4 events
         assertEquals(4, mZenModeEventLogger.numLoggedChanges());
 
-        // First event: DND_TURNED_ON; active rules: 1; type is ACTIVE_RULE_TYPE_MANUAL
+        // First event: active rules changed; active rules: 1; type is ACTIVE_RULE_TYPE_MANUAL
         assertThat(mZenModeEventLogger.getEventId(0)).isEqualTo(
-                ZenModeEventLogger.ZenStateChangedEvent.DND_TURNED_ON.getId());
+                ZenModeEventLogger.ZenStateChangedEvent.DND_ACTIVE_RULES_CHANGED.getId());
         assertThat(mZenModeEventLogger.getChangedRuleType(0)).isEqualTo(
-                DNDProtoEnums.MANUAL_RULE);
+                DNDProtoEnums.AUTOMATIC_RULE);
         assertThat(mZenModeEventLogger.getNumRulesActive(0)).isEqualTo(1);
         int[] ruleTypes0 = mZenModeEventLogger.getActiveRuleTypes(0);
         assertThat(ruleTypes0.length).isEqualTo(1);
-        assertThat(ruleTypes0[0]).isEqualTo(ACTIVE_RULE_TYPE_MANUAL);
+        assertThat(ruleTypes0[0]).isEqualTo(TYPE_BEDTIME);
 
         // Second event: active rules: 2; types are TYPE_MANUAL and TYPE_BEDTIME
+        assertThat(mZenModeEventLogger.getEventId(1)).isEqualTo(
+                ZenModeEventLogger.ZenStateChangedEvent.DND_TURNED_ON.getId());
         assertThat(mZenModeEventLogger.getChangedRuleType(1)).isEqualTo(
-                DNDProtoEnums.AUTOMATIC_RULE);
+                DNDProtoEnums.MANUAL_RULE);
         assertThat(mZenModeEventLogger.getNumRulesActive(1)).isEqualTo(2);
         int[] ruleTypes1 = mZenModeEventLogger.getActiveRuleTypes(1);
         assertThat(ruleTypes1.length).isEqualTo(2);
