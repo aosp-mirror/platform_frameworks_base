@@ -503,6 +503,79 @@ public final class Display {
      */
     public static final int STATE_ON_SUSPEND = ViewProtoEnums.DISPLAY_STATE_ON_SUSPEND; // 6
 
+    /**
+     * The cause of the display state change is unknown.
+     *
+     * @hide
+     */
+    public static final int STATE_REASON_UNKNOWN = ViewProtoEnums.DISPLAY_STATE_REASON_UNKNOWN;
+
+    /**
+     * The default power and display policy caused the display state.
+     *
+     * @hide
+     */
+    public static final int STATE_REASON_DEFAULT_POLICY =
+            ViewProtoEnums.DISPLAY_STATE_REASON_DEFAULT_POLICY;
+
+    /**
+     * The display state was changed due to acquiring a draw wake lock.
+     *
+     * @hide
+     */
+    public static final int STATE_REASON_DRAW_WAKE_LOCK =
+            ViewProtoEnums.DISPLAY_STATE_REASON_DRAW_WAKE_LOCK;
+
+    /**
+     * The display state was changed due to display offloading.
+     *
+     * @hide
+     */
+    public static final int STATE_REASON_OFFLOAD = ViewProtoEnums.DISPLAY_STATE_REASON_OFFLOAD;
+
+    /**
+     * The display state was changed due to a tilt event.
+     *
+     * @hide
+     */
+    public static final int STATE_REASON_TILT = ViewProtoEnums.DISPLAY_STATE_REASON_TILT;
+
+    /**
+     * The display state was changed due to the dream manager.
+     *
+     * @hide
+     */
+    public static final int STATE_REASON_DREAM_MANAGER =
+            ViewProtoEnums.DISPLAY_STATE_REASON_DREAM_MANAGER;
+
+    /**
+     * The display state was changed due to a {@link KeyEvent}.
+     *
+     * @hide
+     */
+    public static final int STATE_REASON_KEY = ViewProtoEnums.DISPLAY_STATE_REASON_KEY;
+
+    /**
+     * The display state was changed due to a {@link MotionEvent}.
+     *
+     * @hide
+     */
+    public static final int STATE_REASON_MOTION = ViewProtoEnums.DISPLAY_STATE_REASON_MOTION;
+
+    /** @hide */
+    @IntDef(prefix = {"STATE_REASON_"}, value = {
+        STATE_REASON_UNKNOWN,
+        STATE_REASON_DEFAULT_POLICY,
+        STATE_REASON_DRAW_WAKE_LOCK,
+        STATE_REASON_OFFLOAD,
+        STATE_REASON_TILT,
+        STATE_REASON_DREAM_MANAGER,
+        STATE_REASON_KEY,
+        STATE_REASON_MOTION,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface StateReason {}
+
     /* The color mode constants defined below must be kept in sync with the ones in
      * system/core/include/system/graphics-base.h */
 
@@ -1993,6 +2066,30 @@ public final class Display {
                 return "ON_SUSPEND";
             default:
                 return Integer.toString(state);
+        }
+    }
+
+    /** @hide */
+    public static String stateReasonToString(@StateReason int reason) {
+        switch (reason) {
+            case STATE_REASON_UNKNOWN:
+                return "UNKNOWN";
+            case STATE_REASON_DEFAULT_POLICY:
+                return "DEFAULT_POLICY";
+            case STATE_REASON_DRAW_WAKE_LOCK:
+                return "DRAW_WAKE_LOCK";
+            case STATE_REASON_OFFLOAD:
+                return "OFFLOAD";
+            case STATE_REASON_TILT:
+                return "TILT";
+            case STATE_REASON_DREAM_MANAGER:
+                return "DREAM_MANAGER";
+            case STATE_REASON_KEY:
+                return "KEY";
+            case STATE_REASON_MOTION:
+                return "MOTION";
+            default:
+                return Integer.toString(reason);
         }
     }
 

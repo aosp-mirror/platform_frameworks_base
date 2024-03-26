@@ -21,6 +21,7 @@ import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIG
 import android.annotation.Nullable;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.Trace;
+import android.view.Display;
 
 /**
  * An implementation of the offload session that keeps track of whether the session is active.
@@ -42,7 +43,7 @@ public class DisplayOffloadSessionImpl implements DisplayManagerInternal.Display
 
     @Override
     public void setDozeStateOverride(int displayState) {
-        mDisplayPowerController.overrideDozeScreenState(displayState);
+        mDisplayPowerController.overrideDozeScreenState(displayState, Display.STATE_REASON_OFFLOAD);
     }
 
     @Override
