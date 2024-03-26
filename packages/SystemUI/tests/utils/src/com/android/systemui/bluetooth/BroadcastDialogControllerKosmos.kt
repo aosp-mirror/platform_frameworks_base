@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui
+package com.android.systemui.bluetooth
 
-import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.util.mockito.mock
 
-val Kosmos.mockActivityIntentHelper by Kosmos.Fixture { mock<ActivityIntentHelper>() }
-var Kosmos.activityIntentHelper by Kosmos.Fixture { ActivityIntentHelper(applicationContext) }
+val Kosmos.mockBroadcastDialogController by Kosmos.Fixture { mock<BroadcastDialogController>() }
