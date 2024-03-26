@@ -872,6 +872,8 @@
     <string name="qs_record_issue_start">Start</string>
     <!-- QuickSettings: Text to prompt the user to stop an ongoing recording [CHAR LIMIT=20] -->
     <string name="qs_record_issue_stop">Stop</string>
+    <!-- QuickSettings: Should user take a bugreport or only share trace files [CHAR LIMIT=20] -->
+    <string name="qs_record_issue_bug_report">Bug Report</string>
 
     <!-- QuickSettings: Issue Type Drop down options in Record Issue Start Dialog [CHAR LIMIT=50] -->
     <string name="qs_record_issue_dropdown_header">What part of your device experience was affected?</string>

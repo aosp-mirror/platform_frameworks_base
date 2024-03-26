@@ -25,6 +25,8 @@ class IssueRecordingState @Inject constructor() {
 
     private val listeners = CopyOnWriteArrayList<Runnable>()
 
+    var takeBugReport: Boolean = false
+
     var isRecording = false
         set(value) {
             field = value

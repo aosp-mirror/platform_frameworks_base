@@ -16,6 +16,7 @@
 
 package com.android.systemui.recordissue
 
+import android.app.IActivityManager
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
@@ -51,7 +52,7 @@ class IssueRecordingService
 @Inject
 constructor(
     controller: RecordingController,
-    @LongRunning executor: Executor,
+    @LongRunning private val bgExecutor: Executor,
     @Main handler: Handler,
     uiEventLogger: UiEventLogger,
     notificationManager: NotificationManager,
@@ -60,10 +61,12 @@ constructor(
     private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val panelInteractor: PanelInteractor,
     private val issueRecordingState: IssueRecordingState,
+    private val iActivityManager: IActivityManager,
+    private val launcherApps: LauncherApps,
 ) :
     RecordingService(
         controller,
-        executor,
+        bgExecutor,
         handler,
         uiEventLogger,
         notificationManager,
@@ -103,12 +106,26 @@ constructor(
                 // ViewCapture needs to save it's data before it is disabled, or else the data will
                 // be lost. This is expected to change in the near future, and when that happens
                 // this line should be removed.
-                getSystemService(LauncherApps::class.java)?.saveViewCaptureData()
+                launcherApps.saveViewCaptureData()
                 TraceUtils.traceStop(contentResolver)
                 issueRecordingState.isRecording = false
             }
             ACTION_SHARE -> {
-                shareRecording(intent)
+                bgExecutor.execute {
+                    mNotificationManager.cancelAsUser(
+                        null,
+                        mNotificationId,
+                        UserHandle(mUserContextTracker.userContext.userId)
+                    )
+
+                    val screenRecording = intent.getParcelableExtra(EXTRA_PATH, Uri::class.java)
+                    if (issueRecordingState.takeBugReport) {
+                        iActivityManager.requestBugReportWithExtraAttachment(screenRecording)
+                    } else {
+                        shareRecording(screenRecording)
+                    }
+                }
+
                 dialogTransitionAnimator.disableAllCurrentDialogsExitAnimations()
                 panelInteractor.collapsePanels()
 
@@ -122,22 +139,16 @@ constructor(
         return super.onStartCommand(intent, flags, startId)
     }
 
-    private fun shareRecording(intent: Intent) {
+    private fun shareRecording(screenRecording: Uri?) {
         val sharableUri: Uri =
             zipAndPackageRecordings(
                 TraceUtils.traceDump(contentResolver, TRACE_FILE_NAME).get(),
-                intent.getStringExtra(EXTRA_PATH)
+                screenRecording
             )
                 ?: return
         val sendIntent =
             FileSender.buildSendIntent(this, listOf(sharableUri))
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-        mNotificationManager.cancelAsUser(
-            null,
-            mNotificationId,
-            UserHandle(mUserContextTracker.userContext.userId)
-        )
 
         // TODO: Debug why the notification shade isn't closing upon starting the BetterBug activity
         mKeyguardDismissUtil.executeWhenUnlocked(
@@ -150,7 +161,7 @@ constructor(
         )
     }
 
-    private fun zipAndPackageRecordings(traceFiles: List<File>, screenRecordingUri: String?): Uri? {
+    private fun zipAndPackageRecordings(traceFiles: List<File>, screenRecording: Uri?): Uri? {
         try {
             externalCacheDir?.mkdirs()
             val outZip: File = File.createTempFile(TEMP_FILE_PREFIX, ZIP_SUFFIX, externalCacheDir)
@@ -160,8 +171,8 @@ constructor(
                     Files.copy(file.toPath(), os)
                     os.closeEntry()
                 }
-                if (screenRecordingUri != null) {
-                    contentResolver.openInputStream(Uri.parse(screenRecordingUri))?.use {
+                if (screenRecording != null) {
+                    contentResolver.openInputStream(screenRecording)?.use {
                         os.putNextEntry(ZipEntry(SCREEN_RECORDING_ZIP_LABEL))
                         it.transferTo(os)
                         os.closeEntry()
@@ -215,7 +226,7 @@ constructor(
         fun getStartIntent(
             context: Context,
             screenRecord: Boolean,
-            winscopeTracing: Boolean
+            winscopeTracing: Boolean,
         ): Intent =
             Intent(context, IssueRecordingService::class.java)
                 .setAction(ACTION_START)

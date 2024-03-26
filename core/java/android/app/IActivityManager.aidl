@@ -499,6 +499,7 @@ interface IActivityManager {
             in String shareDescription);
 
     void requestInteractiveBugReport();
+    void requestBugReportWithExtraAttachment(in Uri extraAttachment);
     void requestFullBugReport();
     void requestRemoteBugReport(long nonce);
     boolean launchBugReportHandlerApp();
