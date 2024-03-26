@@ -60,11 +60,14 @@ constructor(
         private const val TAG = "EditWidgetsActivity"
         private const val EXTRA_IS_PENDING_WIDGET_DRAG = "is_pending_widget_drag"
         const val EXTRA_PRESELECTED_KEY = "preselected_key"
+        const val EXTRA_OPEN_WIDGET_PICKER_ON_START = "open_widget_picker_on_start"
     }
 
     private val logger = Logger(logBuffer, "EditWidgetsActivity")
 
     private val widgetConfigurator by lazy { widgetConfiguratorFactory.create(this) }
+
+    private var shouldOpenWidgetPickerOnStart = false
 
     private val addWidgetActivityLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult(StartActivityForResult()) { result ->
@@ -112,6 +115,9 @@ constructor(
         window.setDecorFitsSystemWindows(false)
 
         val preselectedKey = intent.getStringExtra(EXTRA_PRESELECTED_KEY)
+        shouldOpenWidgetPickerOnStart =
+            intent.getBooleanExtra(EXTRA_OPEN_WIDGET_PICKER_ON_START, false)
+
         communalViewModel.setSelectedKey(preselectedKey)
 
         setContent {
@@ -161,6 +167,11 @@ constructor(
 
     override fun onStart() {
         super.onStart()
+
+        if (shouldOpenWidgetPickerOnStart) {
+            onOpenWidgetPicker()
+            shouldOpenWidgetPickerOnStart = false
+        }
 
         logger.i("Starting the communal widget editor activity")
         uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_EDIT_MODE_SHOWN)
