@@ -308,9 +308,7 @@ public class Camera {
      */
     public static void getCameraInfo(int cameraId, CameraInfo cameraInfo) {
         Context context = ActivityThread.currentApplication().getApplicationContext();
-        final int rotationOverride = CameraManager.shouldOverrideToPortrait(context)
-                ? ICameraService.ROTATION_OVERRIDE_OVERRIDE_TO_PORTRAIT
-                : ICameraService.ROTATION_OVERRIDE_NONE;
+        final int rotationOverride = CameraManager.getRotationOverride(context);
         getCameraInfo(cameraId, context, rotationOverride, cameraInfo);
     }
 
@@ -443,8 +441,8 @@ public class Camera {
      */
     public static Camera open(int cameraId) {
         Context context = ActivityThread.currentApplication().getApplicationContext();
-        boolean overrideToPortrait = CameraManager.shouldOverrideToPortrait(context);
-        return open(cameraId, context, overrideToPortrait);
+        final int rotationOverride = CameraManager.getRotationOverride(context);
+        return open(cameraId, context, rotationOverride);
     }
 
     /**
@@ -454,8 +452,8 @@ public class Camera {
      */
     @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
     @TestApi
-    public static Camera open(int cameraId, @NonNull Context context, boolean overrideToPortrait) {
-        return new Camera(cameraId, context, overrideToPortrait);
+    public static Camera open(int cameraId, @NonNull Context context, int rotationOverride) {
+        return new Camera(cameraId, context, rotationOverride);
     }
 
     /**
@@ -526,7 +524,7 @@ public class Camera {
         return open(cameraId);
     }
 
-    private int cameraInit(int cameraId, Context context, boolean overrideToPortrait) {
+    private int cameraInit(int cameraId, Context context, int rotationOverride) {
         mShutterCallback = null;
         mRawImageCallback = null;
         mJpegCallback = null;
@@ -543,9 +541,6 @@ public class Camera {
         } else {
             mEventHandler = null;
         }
-        final int rotationOverride = CameraManager.shouldOverrideToPortrait(context)
-                ? ICameraService.ROTATION_OVERRIDE_OVERRIDE_TO_PORTRAIT
-                : ICameraService.ROTATION_OVERRIDE_NONE;
 
         boolean forceSlowJpegMode = shouldForceSlowJpegMode();
         return native_setup(new WeakReference<>(this), cameraId,
@@ -567,9 +562,9 @@ public class Camera {
     }
 
     /** used by Camera#open, Camera#open(int) */
-    Camera(int cameraId, @NonNull Context context, boolean overrideToPortrait) {
+    Camera(int cameraId, @NonNull Context context, int rotationOverride) {
         Objects.requireNonNull(context);
-        int err = cameraInit(cameraId, context, overrideToPortrait);
+        final int err = cameraInit(cameraId, context, rotationOverride);
         if (checkInitErrors(err)) {
             if (err == -EACCES) {
                 throw new RuntimeException("Fail to connect to camera service");
