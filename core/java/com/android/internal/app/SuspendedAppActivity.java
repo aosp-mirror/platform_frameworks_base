@@ -373,7 +373,7 @@ public class SuspendedAppActivity extends AlertActivity
                 .putExtra(Intent.EXTRA_USER_ID, userId)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        if (crossUserSuspensionEnabled()) {
+        if (crossUserSuspensionEnabled() && suspendingPackage != null) {
             intent.putExtra(EXTRA_SUSPENDING_USER, suspendingPackage.userId);
         }
         return intent;
