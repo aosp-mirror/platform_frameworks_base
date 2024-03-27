@@ -40,6 +40,7 @@ per-file IGameMode* = file:/GAME_MANAGER_OWNERS
 # ActivityThread
 per-file ActivityThread.java = file:/services/core/java/com/android/server/am/OWNERS
 per-file ActivityThread.java = file:/services/core/java/com/android/server/wm/OWNERS
+per-file ActivityThread.java = file:RESOURCES_OWNERS
 
 # Alarm
 per-file *Alarm* = file:/apex/jobscheduler/OWNERS
