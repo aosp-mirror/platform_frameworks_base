@@ -60,7 +60,7 @@ object ScreenshotShelfViewBinder {
                     }
                     launch {
                         viewModel.previewAction.collect { onClick ->
-                            previewView.setOnClickListener { onClick?.run() }
+                            previewView.setOnClickListener { onClick?.invoke() }
                         }
                     }
                     launch {
