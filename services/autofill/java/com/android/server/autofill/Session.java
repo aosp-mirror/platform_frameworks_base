@@ -170,8 +170,8 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.view.KeyEvent;
-import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillFeatureFlags;
+import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillManager.AutofillCommitReason;
 import android.view.autofill.AutofillManager.SmartSuggestionMode;
@@ -5109,7 +5109,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
         for (Dataset dataset: response.getDatasets()) {
-            if (isPinnedDataset(dataset)) {
+            if (dataset.getId() != null
+                    && dataset.getId().equals(AutofillManager.PINNED_DATASET_ID)) {
                 Slog.d(TAG, "Adding Credential Manager callback to a pinned entry");
                 addCredentialManagerCallbackForDataset(dataset, response.getRequestId());
             }

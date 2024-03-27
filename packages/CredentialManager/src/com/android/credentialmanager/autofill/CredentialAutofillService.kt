@@ -47,6 +47,7 @@ import android.service.credentials.CredentialProviderService
 import android.util.Log
 import android.content.Intent
 import android.view.autofill.AutofillId
+import android.view.autofill.AutofillManager
 import android.view.autofill.IAutoFillManagerClient
 import android.widget.RemoteViews
 import android.widget.inline.InlinePresentationSpec
@@ -372,6 +373,7 @@ class CredentialAutofillService : AutofillService() {
 
         fillResponseBuilder.addDataset(
                 Dataset.Builder()
+                        .setId(AutofillManager.PINNED_DATASET_ID)
                         .setField(
                                 autofillId,
                                 Field.Builder().setPresentations(
@@ -411,6 +413,7 @@ class CredentialAutofillService : AutofillService() {
 
         fillResponseBuilder.addDataset(
                 dataSetBuilder
+                        .setId(AutofillManager.PINNED_DATASET_ID)
                         .setField(
                                 autofillId,
                                 Field.Builder().setPresentations(
