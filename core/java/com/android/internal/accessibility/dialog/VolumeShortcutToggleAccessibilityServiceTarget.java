@@ -16,10 +16,8 @@
 
 package com.android.internal.accessibility.dialog;
 
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
-
-import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.internal.accessibility.util.AccessibilityUtils.setAccessibilityServiceState;
 import static com.android.internal.accessibility.util.ShortcutUtils.optOutValueFromSettings;
 
@@ -27,11 +25,11 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
-import android.view.accessibility.AccessibilityManager.ShortcutType;
 import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
+import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 
 /**
  * Extension for {@link AccessibilityServiceTarget} with
@@ -39,8 +37,8 @@ import com.android.internal.accessibility.common.ShortcutConstants.Accessibility
  */
 class VolumeShortcutToggleAccessibilityServiceTarget extends AccessibilityServiceTarget {
 
-    VolumeShortcutToggleAccessibilityServiceTarget(Context context, @ShortcutType int shortcutType,
-            @NonNull AccessibilityServiceInfo serviceInfo) {
+    VolumeShortcutToggleAccessibilityServiceTarget(Context context,
+            @UserShortcutType int shortcutType, @NonNull AccessibilityServiceInfo serviceInfo) {
         super(context,
                 shortcutType,
                 AccessibilityFragmentType.VOLUME_SHORTCUT_TOGGLE,
@@ -50,10 +48,10 @@ class VolumeShortcutToggleAccessibilityServiceTarget extends AccessibilityServic
     @Override
     public void onCheckedChanged(boolean isChecked) {
         switch (getShortcutType()) {
-            case ACCESSIBILITY_BUTTON:
+            case SOFTWARE:
                 onCheckedFromAccessibilityButton(isChecked);
                 return;
-            case ACCESSIBILITY_SHORTCUT_KEY:
+            case HARDWARE:
                 super.onCheckedChanged(isChecked);
                 return;
             default:

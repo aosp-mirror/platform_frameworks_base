@@ -232,7 +232,7 @@ public class MenuViewLayerTest extends SysuiTestCase {
         final List<String> stubShortcutTargets = new ArrayList<>();
         stubShortcutTargets.add(TEST_SELECT_TO_SPEAK_COMPONENT_NAME.flattenToString());
         when(mStubAccessibilityManager.getAccessibilityShortcutTargets(
-                AccessibilityManager.ACCESSIBILITY_BUTTON)).thenReturn(stubShortcutTargets);
+                ShortcutConstants.UserShortcutType.SOFTWARE)).thenReturn(stubShortcutTargets);
 
         mMenuViewLayer.mDismissMenuAction.run();
 
@@ -271,7 +271,7 @@ public class MenuViewLayerTest extends SysuiTestCase {
         final List<String> stubShortcutTargets = new ArrayList<>();
         stubShortcutTargets.add(TEST_SELECT_TO_SPEAK_COMPONENT_NAME.flattenToString());
         when(mStubAccessibilityManager.getAccessibilityShortcutTargets(
-                AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY)).thenReturn(stubShortcutTargets);
+                ShortcutConstants.UserShortcutType.HARDWARE)).thenReturn(stubShortcutTargets);
 
         mMenuViewLayer.mDismissMenuAction.run();
         final String value = Settings.Secure.getString(mSpyContext.getContentResolver(),
@@ -439,7 +439,7 @@ public class MenuViewLayerTest extends SysuiTestCase {
     private static class TestAccessibilityTarget extends AccessibilityTarget {
         TestAccessibilityTarget(Context context, int uid) {
             // Set fields unused by tests to defaults that allow test compilation.
-            super(context, AccessibilityManager.ACCESSIBILITY_BUTTON, 0, false,
+            super(context, ShortcutConstants.UserShortcutType.SOFTWARE, 0, false,
                     TEST_SELECT_TO_SPEAK_COMPONENT_NAME.flattenToString(), uid, null, null, null);
         }
     }
