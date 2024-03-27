@@ -23,7 +23,6 @@ import static android.Manifest.permission.MANAGE_COMPANION_DEVICES;
 import static android.Manifest.permission.REQUEST_COMPANION_SELF_MANAGED;
 import static android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE;
 import static android.Manifest.permission.USE_COMPANION_TRANSPORTS;
-import static android.companion.DevicePresenceEvent.EVENT_BT_CONNECTED;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
@@ -53,7 +52,6 @@ import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.bluetooth.BluetoothDevice;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.companion.IAssociationRequestCallback;
@@ -76,7 +74,6 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
-import android.os.ParcelUuid;
 import android.os.PowerExemptionManager;
 import android.os.PowerManagerInternal;
 import android.os.RemoteException;
@@ -118,9 +115,7 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -250,38 +245,9 @@ public class CompanionDeviceManagerService extends SystemService {
 
     @Override
     public void onUserUnlocked(@NonNull TargetUser user) {
+        Slog.i(TAG, "onUserUnlocked() user=" + user);
         // Notify and bind the app after the phone is unlocked.
-        final int userId = user.getUserIdentifier();
-        final Set<BluetoothDevice> blueToothDevices =
-                mDevicePresenceProcessor.getPendingConnectedDevices().get(userId);
-
-        final List<ObservableUuid> observableUuids =
-                mObservableUuidStore.getObservableUuidsForUser(userId);
-
-        if (blueToothDevices != null) {
-            for (BluetoothDevice bluetoothDevice : blueToothDevices) {
-                final ParcelUuid[] bluetoothDeviceUuids = bluetoothDevice.getUuids();
-
-                final List<ParcelUuid> deviceUuids = ArrayUtils.isEmpty(bluetoothDeviceUuids)
-                        ? Collections.emptyList() : Arrays.asList(bluetoothDeviceUuids);
-
-                for (AssociationInfo ai :
-                        mAssociationStore.getActiveAssociationsByAddress(
-                                bluetoothDevice.getAddress())) {
-                    Slog.i(TAG, "onUserUnlocked, device id( " + ai.getId() + " ) is connected");
-                    mDevicePresenceProcessor.onBluetoothCompanionDeviceConnected(ai.getId());
-                }
-
-                for (ObservableUuid observableUuid : observableUuids) {
-                    if (deviceUuids.contains(observableUuid.getUuid())) {
-                        Slog.i(TAG, "onUserUnlocked, UUID( "
-                                + observableUuid.getUuid() + " ) is connected");
-                        mDevicePresenceProcessor.onDevicePresenceEventByUuid(
-                                observableUuid, EVENT_BT_CONNECTED);
-                    }
-                }
-            }
-        }
+        mDevicePresenceProcessor.sendDevicePresenceEventOnUnlocked(user.getUserIdentifier());
     }
 
     private void onPackageRemoveOrDataClearedInternal(

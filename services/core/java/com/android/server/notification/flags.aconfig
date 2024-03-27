@@ -79,3 +79,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "polite_notifications_attn_update"
+  namespace: "systemui"
+  description: "This flag controls the polite notification attention behavior updates as per UXR feedback"
+  bug: "270456865"
+}

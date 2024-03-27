@@ -126,12 +126,7 @@ constructor(
     private fun hydrateVisibility() {
         applicationScope.launch {
             // TODO(b/296114544): Combine with some global hun state to make it visible!
-            combine(
-                    deviceProvisioningInteractor.isDeviceProvisioned,
-                    deviceProvisioningInteractor.isFactoryResetProtectionActive,
-                ) { isDeviceProvisioned, isFrpActive ->
-                    isDeviceProvisioned && !isFrpActive
-                }
+            deviceProvisioningInteractor.isDeviceProvisioned
                 .distinctUntilChanged()
                 .flatMapLatest { isAllowedToBeVisible ->
                     if (isAllowedToBeVisible) {

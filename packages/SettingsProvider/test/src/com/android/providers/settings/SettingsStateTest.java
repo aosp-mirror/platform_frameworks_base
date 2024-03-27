@@ -585,9 +585,9 @@ public class SettingsStateTest {
                 * Character.BYTES;
         assertEquals(expectedMemUsage2, settingsState.getMemoryUsage(testPackage2));
 
-        // Test system package
+        // Let system package take over testKey1 which is no longer subject to memory usage counting
         settingsState.insertSettingLocked(testKey1, testValue1, null, true, SYSTEM_PACKAGE);
-        assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
+        assertEquals(0, settingsState.getMemoryUsage(TEST_PACKAGE));
         assertEquals(expectedMemUsage2, settingsState.getMemoryUsage(testPackage2));
         assertEquals(0, settingsState.getMemoryUsage(SYSTEM_PACKAGE));
 
@@ -599,7 +599,7 @@ public class SettingsStateTest {
         } catch (IllegalStateException ex) {
             assertTrue(ex.getMessage().contains("You are adding too many system settings"));
         }
-        assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
+        assertEquals(0, settingsState.getMemoryUsage(TEST_PACKAGE));
 
         // Test invalid key
         try {
@@ -609,7 +609,7 @@ public class SettingsStateTest {
         } catch (IllegalStateException ex) {
             assertTrue(ex.getMessage().contains("You are adding too many system settings"));
         }
-        assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
+        assertEquals(0, settingsState.getMemoryUsage(TEST_PACKAGE));
     }
 
     @Test
@@ -901,5 +901,50 @@ public class SettingsStateTest {
             s = settingsState.getSettingLocked("test_namespace/flag2");
             assertEquals("false", s.getValue());
         }
+    }
+
+    @Test
+    public void testMemoryUsagePerPackage_SameSettingUsedByDifferentPackages() {
+        SettingsState settingsState =
+                new SettingsState(
+                        InstrumentationRegistry.getContext(), mLock, mSettingsFile, 1,
+                        SettingsState.MAX_BYTES_PER_APP_PACKAGE_LIMITED, Looper.getMainLooper());
+        final String testKey1 = SETTING_NAME;
+        final String testKey2 = SETTING_NAME + "_2";
+        final String testValue1 = Strings.repeat("A", 100);
+        final String testValue2 = Strings.repeat("A", 50);
+        final String package1 = "p1";
+        final String package2 = "p2";
+
+        settingsState.insertSettingLocked(testKey1, testValue1, null, false, package1);
+        settingsState.insertSettingLocked(testKey2, testValue1, null, true, package2);
+        // Package1's usage should be remain the same Package2 owns a different setting
+        int expectedMemUsageForPackage1 = (testKey1.length() + testValue1.length())
+                * Character.BYTES;
+        int expectedMemUsageForPackage2 = (testKey2.length() + testValue1.length()
+                + testValue1.length() /* size for default */) * Character.BYTES;
+        assertEquals(expectedMemUsageForPackage1, settingsState.getMemoryUsage(package1));
+        assertEquals(expectedMemUsageForPackage2, settingsState.getMemoryUsage(package2));
+
+        settingsState.insertSettingLocked(testKey1, testValue2, null, false, package2);
+        // Package1's usage should be cleared because the setting is taken over by another package
+        expectedMemUsageForPackage1 = 0;
+        assertEquals(expectedMemUsageForPackage1, settingsState.getMemoryUsage(package1));
+        // Package2 now owns two settings
+        expectedMemUsageForPackage2 = (testKey1.length() + testValue2.length()
+                + testKey2.length() + testValue1.length()
+                + testValue1.length() /* size for default */)
+                * Character.BYTES;
+        assertEquals(expectedMemUsageForPackage2, settingsState.getMemoryUsage(package2));
+
+        settingsState.insertSettingLocked(testKey1, testValue1, null, true, package1);
+        // Package1 now owns setting1
+        expectedMemUsageForPackage1 = (testKey1.length() + testValue1.length()
+                + testValue1.length() /* size for default */) * Character.BYTES;
+        assertEquals(expectedMemUsageForPackage1, settingsState.getMemoryUsage(package1));
+        // Package2 now only own setting2
+        expectedMemUsageForPackage2 = (testKey2.length() + testValue1.length()
+                + testValue1.length() /* size for default */) * Character.BYTES;
+        assertEquals(expectedMemUsageForPackage2, settingsState.getMemoryUsage(package2));
     }
 }

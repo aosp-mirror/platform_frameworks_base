@@ -22,7 +22,7 @@ import android.view.View
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.ShellTestCase
-import com.android.wm.shell.animation.PhysicsAnimatorTestUtils
+import com.android.wm.shell.shared.animation.PhysicsAnimatorTestUtils
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

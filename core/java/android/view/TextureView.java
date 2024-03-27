@@ -889,11 +889,11 @@ public class TextureView extends View {
      * @hide
      */
     @Override
-    protected int calculateFrameRateCategory(int width, int height) {
+    protected int calculateFrameRateCategory() {
         if (mMinusTwoFrameIntervalMillis > 15 && mMinusOneFrameIntervalMillis > 15) {
             return FRAME_RATE_CATEGORY_NORMAL;
         }
-        return super.calculateFrameRateCategory(width, height);
+        return super.calculateFrameRateCategory();
     }
 
     @UnsupportedAppUsage

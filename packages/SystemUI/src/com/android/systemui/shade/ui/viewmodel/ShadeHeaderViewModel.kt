@@ -30,6 +30,7 @@ import com.android.systemui.privacy.PrivacyItem
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.PrivacyChipInteractor
 import com.android.systemui.shade.domain.interactor.ShadeHeaderClockInteractor
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
 import java.util.Date
@@ -53,6 +54,7 @@ class ShadeHeaderViewModel
 constructor(
     @Application private val applicationScope: CoroutineScope,
     context: Context,
+    shadeInteractor: ShadeInteractor,
     mobileIconsInteractor: MobileIconsInteractor,
     val mobileIconsViewModel: MobileIconsViewModel,
     private val privacyChipInteractor: PrivacyChipInteractor,
@@ -84,6 +86,12 @@ constructor(
 
     /** Whether or not the privacy chip is enabled in the device privacy config. */
     val isPrivacyChipEnabled: StateFlow<Boolean> = privacyChipInteractor.isChipEnabled
+
+    /** Whether or not the Shade Header should be disabled based on disableFlags. */
+    val isDisabled: StateFlow<Boolean> =
+        shadeInteractor.isQsEnabled
+            .map { !it }
+            .stateIn(applicationScope, SharingStarted.WhileSubscribed(), false)
 
     private val longerPattern = context.getString(R.string.abbrev_wday_month_day_no_year_alarm)
     private val shorterPattern = context.getString(R.string.abbrev_month_day_no_year)

@@ -803,6 +803,14 @@ package android.app.contentsuggestions {
 
 }
 
+package android.app.contextualsearch {
+
+  @FlaggedApi("android.app.contextualsearch.flags.enable_service") public final class CallbackToken implements android.os.Parcelable {
+    method @NonNull public android.os.IBinder getToken();
+  }
+
+}
+
 package android.app.job {
 
   public class JobParameters implements android.os.Parcelable {
@@ -1519,6 +1527,13 @@ package android.graphics.fonts {
 
 package android.hardware {
 
+  @Deprecated public class Camera {
+    method @Deprecated public static void getCameraInfo(int, @NonNull android.content.Context, boolean, android.hardware.Camera.CameraInfo);
+    method @Deprecated public static int getNumberOfCameras(@NonNull android.content.Context);
+    method @Deprecated public static android.hardware.Camera open(int, @NonNull android.content.Context, boolean);
+    method @Deprecated public final void setPreviewSurface(android.view.Surface) throws java.io.IOException;
+  }
+
   public final class SensorPrivacyManager {
     method @FlaggedApi("com.android.internal.camera.flags.camera_privacy_allowlist") @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setCameraPrivacyAllowlist(@NonNull java.util.List<java.lang.String>);
     method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacy(int, int, boolean);
@@ -1551,7 +1566,7 @@ package android.hardware.biometrics {
 
   public static class BiometricPrompt.Builder {
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.TEST_BIOMETRIC, "android.permission.USE_BIOMETRIC_INTERNAL"}) public android.hardware.biometrics.BiometricPrompt.Builder setAllowBackgroundAuthentication(boolean);
-    method @FlaggedApi("android.multiuser.enable_biometrics_to_unlock_private_space") @NonNull @RequiresPermission(anyOf={android.Manifest.permission.TEST_BIOMETRIC, "android.permission.USE_BIOMETRIC_INTERNAL"}) public android.hardware.biometrics.BiometricPrompt.Builder setAllowBackgroundAuthentication(boolean, boolean);
+    method @FlaggedApi("android.os.allow_private_profile") @NonNull @RequiresPermission(anyOf={android.Manifest.permission.TEST_BIOMETRIC, "android.permission.USE_BIOMETRIC_INTERNAL"}) public android.hardware.biometrics.BiometricPrompt.Builder setAllowBackgroundAuthentication(boolean, boolean);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.TEST_BIOMETRIC, "android.permission.USE_BIOMETRIC_INTERNAL"}) public android.hardware.biometrics.BiometricPrompt.Builder setAllowedSensorIds(@NonNull java.util.List<java.lang.Integer>);
   }
 
@@ -3104,6 +3119,14 @@ package android.service.notification {
 
   public static final class ZenPolicy.Builder {
     ctor public ZenPolicy.Builder(@Nullable android.service.notification.ZenPolicy);
+  }
+
+}
+
+package android.service.ondeviceintelligence {
+
+  @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public abstract class OnDeviceIntelligenceService extends android.app.Service {
+    method public void onReady();
   }
 
 }

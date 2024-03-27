@@ -333,14 +333,12 @@ public final class DeviceState {
         private final ArraySet<@PhysicalDeviceStateProperties Integer> mPhysicalProperties;
 
         private Configuration(int identifier, @NonNull String name,
-                @NonNull Set<@SystemDeviceStateProperties Integer> systemProperties,
-                @NonNull Set<@PhysicalDeviceStateProperties Integer> physicalProperties) {
+                @NonNull ArraySet<@SystemDeviceStateProperties Integer> systemProperties,
+                @NonNull ArraySet<@PhysicalDeviceStateProperties Integer> physicalProperties) {
             mIdentifier = identifier;
             mName = name;
-            mSystemProperties = new ArraySet<@SystemDeviceStateProperties Integer>(
-                    systemProperties);
-            mPhysicalProperties = new ArraySet<@PhysicalDeviceStateProperties Integer>(
-                    physicalProperties);
+            mSystemProperties = systemProperties;
+            mPhysicalProperties = physicalProperties;
         }
 
         /** Returns the unique identifier for the device state. */
@@ -479,8 +477,8 @@ public final class DeviceState {
              */
             @NonNull
             public DeviceState.Configuration build() {
-                return new DeviceState.Configuration(mIdentifier, mName, mSystemProperties,
-                        mPhysicalProperties);
+                return new DeviceState.Configuration(mIdentifier, mName,
+                        new ArraySet<>(mSystemProperties), new ArraySet<>(mPhysicalProperties));
             }
         }
     }

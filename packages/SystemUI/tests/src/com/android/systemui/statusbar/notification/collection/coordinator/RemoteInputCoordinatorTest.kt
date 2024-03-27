@@ -98,6 +98,7 @@ class RemoteInputCoordinatorTest : SysuiTestCase() {
         `when`(rebuilder.rebuildForCanceledSmartReplies(any())).thenReturn(sbn)
         `when`(rebuilder.rebuildForRemoteInputReply(any())).thenReturn(sbn)
         `when`(rebuilder.rebuildForSendingSmartReply(any(), any())).thenReturn(sbn)
+        `when`(rebuilder.rebuildWithExistingReplies(any())).thenReturn(sbn)
     }
 
     val remoteInputActiveExtender get() = coordinator.mRemoteInputActiveExtender
@@ -208,9 +209,26 @@ class RemoteInputCoordinatorTest : SysuiTestCase() {
             it.onEntryUpdated(entry, true)
         }
 
-
         verify(rebuilder, times(1)).rebuildForCanceledSmartReplies(entry)
         verify(smartReplyController, times(1)).stopSending(entry)
+    }
+
+    @Test
+    @EnableFlags(FLAG_LIFETIME_EXTENSION_REFACTOR)
+    fun testRepeatedUpdateTriggersRebuild() {
+        // Create notification with LIFETIME_EXTENDED_BY_DIRECT_REPLY flag.
+        val entry = NotificationEntryBuilder()
+                .setId(3)
+                .setTag("entry")
+                .setFlag(mContext, Notification.FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY, true)
+                .build()
+        `when`(remoteInputManager.shouldKeepForRemoteInputHistory(entry)).thenReturn(false)
+        `when`(remoteInputManager.shouldKeepForSmartReplyHistory(entry)).thenReturn(false)
+        collectionListeners.forEach {
+            it.onEntryUpdated(entry, true)
+        }
+
+        verify(rebuilder, times(1)).rebuildWithExistingReplies(entry)
     }
 
     @Test

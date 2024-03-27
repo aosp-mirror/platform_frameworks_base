@@ -1035,15 +1035,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         verify(mStatusBarStateController).setState(SHADE);
     }
 
-    @Test
-    public void frpLockedDevice_shadeDisabled() {
-        when(mDeviceProvisionedController.isFrpActive()).thenReturn(true);
-        when(mDozeServiceHost.isPulsing()).thenReturn(true);
-        mCentralSurfaces.updateNotificationPanelTouchState();
-
-        verify(mNotificationPanelViewController).setTouchAndAnimationDisabled(true);
-    }
-
     /** Regression test for b/298355063 */
     @Test
     public void fingerprintManagerNull_noNPE() {

@@ -23,9 +23,9 @@ class BackAnimationSpecTest : SysuiTestCase() {
 
     @Test
     fun sysUi_floatingSystemSurfaces_animationValues() {
-        val maxX = 14.0f
-        val maxY = 4.0f
-        val minScale = 0.8f
+        val maxX = 19.0f
+        val maxY = 14.0f
+        val minScale = 0.9f
 
         val backAnimationSpec = BackAnimationSpec.floatingSystemSurfacesForSysUi(displayMetrics)
 

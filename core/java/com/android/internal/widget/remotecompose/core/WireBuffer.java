@@ -37,7 +37,7 @@ public class WireBuffer {
         this(BUFFER_SIZE);
     }
 
-    public void resize(int need) {
+    private void resize(int need) {
         if (mSize + need >= mMaxSize) {
             mMaxSize = Math.max(mMaxSize * 2, mSize + need);
             mBuffer = Arrays.copyOf(mBuffer, mMaxSize);
@@ -120,7 +120,7 @@ public class WireBuffer {
     }
 
     public int readByte() {
-        byte value = mBuffer[mIndex];
+        int value = 0xFF & mBuffer[mIndex];
         mIndex++;
         return value;
     }
@@ -129,6 +129,14 @@ public class WireBuffer {
         int v1 = (mBuffer[mIndex++] & 0xFF) << 8;
         int v2 = (mBuffer[mIndex++] & 0xFF) << 0;
         return v1 + v2;
+    }
+    public int peekInt() {
+        int tmp = mIndex;
+        int v1 = (mBuffer[tmp++] & 0xFF) << 24;
+        int v2 = (mBuffer[tmp++] & 0xFF) << 16;
+        int v3 = (mBuffer[tmp++] & 0xFF) << 8;
+        int v4 = (mBuffer[tmp++] & 0xFF) << 0;
+        return v1 + v2 + v3 + v4;
     }
 
     public int readInt() {

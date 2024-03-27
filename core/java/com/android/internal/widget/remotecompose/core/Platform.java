@@ -20,5 +20,8 @@ package com.android.internal.widget.remotecompose.core;
  */
 public interface Platform {
     byte[] imageToByteArray(Object image);
+    int getImageWidth(Object image);
+    int getImageHeight(Object image);
+    float[] pathToFloatArray(Object image);
 }
 

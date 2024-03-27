@@ -34,12 +34,12 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
-import com.android.wm.shell.animation.PhysicsAnimator;
 import com.android.wm.shell.bubbles.BadgedImageView;
 import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleStackView;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
+import com.android.wm.shell.shared.animation.PhysicsAnimator;
 
 import com.google.android.collect.Sets;
 

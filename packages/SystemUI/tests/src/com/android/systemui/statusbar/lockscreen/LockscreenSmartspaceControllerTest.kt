@@ -38,6 +38,7 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.BcSmartspaceConfigPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
@@ -180,6 +181,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     private lateinit var dateSmartspaceView: SmartspaceView
     private lateinit var weatherSmartspaceView: SmartspaceView
     private lateinit var smartspaceView: SmartspaceView
+    private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
 
     private val clock = FakeSystemClock()
     private val executor = FakeExecutor(clock)
@@ -225,6 +227,14 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         setAllowPrivateNotifications(userHandleSecondary, true)
         setShowNotifications(userHandlePrimary, true)
 
+        // Use the real wakefulness lifecycle instead of a mock
+        wakefulnessLifecycle = WakefulnessLifecycle(
+            context,
+            /* wallpaper= */ null,
+            clock,
+            dumpManager
+        )
+
         controller = LockscreenSmartspaceController(
                 context,
                 featureFlags,
@@ -240,6 +250,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
                 deviceProvisionedController,
                 keyguardBypassController,
                 keyguardUpdateMonitor,
+                wakefulnessLifecycle,
                 dumpManager,
                 execution,
                 executor,
@@ -771,6 +782,38 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         verify(smartspaceManager, never()).createSmartspaceSession(any())
         // THEN no listeners should be registered
         verify(configurationController, never()).addCallback(any())
+    }
+
+    @Test
+    fun testWakefulnessLifecycleDispatch_wake_setsSmartspaceScreenOnTrue() {
+        // Connect session
+        connectSession()
+
+        // Add mock views
+        val mockSmartspaceView = mock(SmartspaceView::class.java)
+        controller.smartspaceViews.add(mockSmartspaceView)
+
+        // Initiate wakefulness change
+        wakefulnessLifecycle.dispatchStartedWakingUp(0)
+
+        // Verify smartspace views receive screen on
+        verify(mockSmartspaceView).setScreenOn(true)
+    }
+
+    @Test
+    fun testWakefulnessLifecycleDispatch_sleep_setsSmartspaceScreenOnFalse() {
+        // Connect session
+        connectSession()
+
+        // Add mock views
+        val mockSmartspaceView = mock(SmartspaceView::class.java)
+        controller.smartspaceViews.add(mockSmartspaceView)
+
+        // Initiate wakefulness change
+        wakefulnessLifecycle.dispatchFinishedGoingToSleep()
+
+        // Verify smartspace views receive screen on
+        verify(mockSmartspaceView).setScreenOn(false)
     }
 
     private fun connectSession() {

@@ -514,12 +514,16 @@ public final class NotificationAttentionHelper {
             EventLogTags.writeNotificationAlert(key, buzz ? 1 : 0, beep ? 1 : 0, blink ? 1 : 0,
                     getPolitenessState(record));
         }
-        record.setAudiblyAlerted(buzz || beep);
         if (Flags.politeNotifications()) {
             // Update last alert time
             if (buzz || beep) {
                 mStrategy.setLastNotificationUpdateTimeMs(record, System.currentTimeMillis());
             }
+
+            record.setAudiblyAlerted((buzz || beep)
+                    && getPolitenessState(record) != PolitenessStrategy.POLITE_STATE_MUTED);
+        } else {
+            record.setAudiblyAlerted(buzz || beep);
         }
         return buzzBeepBlinkLoggingCode;
     }
@@ -678,7 +682,7 @@ public final class NotificationAttentionHelper {
 
         // The user can choose to apply cooldown for all apps/conversations only from the
         // Settings app
-        if (!mNotificationCooldownApplyToAll && record.getChannel().getConversationId() == null) {
+        if (!mNotificationCooldownApplyToAll && !record.isConversation()) {
             return false;
         }
 
@@ -1203,7 +1207,7 @@ public final class NotificationAttentionHelper {
             setLastNotificationUpdateTimeMs(record, 0);
         }
 
-        public final @PolitenessState int getPolitenessState(final NotificationRecord record) {
+        public @PolitenessState int getPolitenessState(final NotificationRecord record) {
             return mVolumeStates.getOrDefault(getChannelKey(record), POLITE_STATE_DEFAULT);
         }
 
@@ -1364,7 +1368,12 @@ public final class NotificationAttentionHelper {
 
                 final String key = getChannelKey(record);
                 @PolitenessState final int currState = getPolitenessState(record);
-                @PolitenessState int nextState = getNextState(currState, timeSinceLastNotif);
+                @PolitenessState int nextState;
+                if (Flags.politeNotificationsAttnUpdate()) {
+                    nextState = getNextState(currState, timeSinceLastNotif, record);
+                } else {
+                    nextState = getNextState(currState, timeSinceLastNotif);
+                }
 
                 if (DEBUG) {
                     Log.i(TAG,
@@ -1377,6 +1386,26 @@ public final class NotificationAttentionHelper {
             }
 
             mAppStrategy.onNotificationPosted(record);
+        }
+
+        @PolitenessState int getNextState(@PolitenessState final int currState,
+                final long timeSinceLastNotif, final NotificationRecord record) {
+            // Mute all except priority conversations
+            if (!isAvalancheExempted(record)) {
+                return POLITE_STATE_MUTED;
+            }
+            if (isAvalancheExemptedFullVolume(record)) {
+                return POLITE_STATE_DEFAULT;
+            }
+            return getNextState(currState, timeSinceLastNotif);
+        }
+
+        public @PolitenessState int getPolitenessState(final NotificationRecord record) {
+            if (isAvalancheActive()) {
+                return super.getPolitenessState(record);
+            } else {
+                return mAppStrategy.getPolitenessState(record);
+            }
         }
 
         @Override
@@ -1396,13 +1425,27 @@ public final class NotificationAttentionHelper {
 
         @Override
         String getChannelKey(final NotificationRecord record) {
-            // If the user explicitly changed the channel notification sound:
-            // handle as a separate channel
-            if (record.getChannel().hasUserSetSound()) {
-                return super.getChannelKey(record);
+            if (isAvalancheActive()) {
+                if (Flags.politeNotificationsAttnUpdate()) {
+                    // Treat high importance conversations independently
+                    if (isAvalancheExempted(record)) {
+                        return super.getChannelKey(record);
+                    } else {
+                        // Use one global key per user
+                        return record.getSbn().getNormalizedUserId() + ":" + COMMON_KEY;
+                    }
+                } else {
+                    // If the user explicitly changed the channel notification sound:
+                    // handle as a separate channel
+                    if (record.getChannel().hasUserSetSound()) {
+                        return super.getChannelKey(record);
+                    } else {
+                        // Use one global key per user
+                        return record.getSbn().getNormalizedUserId() + ":" + COMMON_KEY;
+                    }
+                }
             } else {
-                // Use one global key per user
-                return record.getSbn().getNormalizedUserId() + ":" + COMMON_KEY;
+                return mAppStrategy.getChannelKey(record);
             }
         }
 
@@ -1415,10 +1458,19 @@ public final class NotificationAttentionHelper {
         }
 
         long getLastNotificationUpdateTimeMs(final NotificationRecord record) {
-            if (record.getChannel().hasUserSetSound()) {
-                return super.getLastNotificationUpdateTimeMs(record);
+            if (Flags.politeNotificationsAttnUpdate()) {
+                // Mute all except priority conversations
+                if (isAvalancheExempted(record)) {
+                    return super.getLastNotificationUpdateTimeMs(record);
+                } else {
+                    return mLastNotificationTimestamp;
+                }
             } else {
-                return mLastNotificationTimestamp;
+                if (record.getChannel().hasUserSetSound()) {
+                    return super.getLastNotificationUpdateTimeMs(record);
+                } else {
+                    return mLastNotificationTimestamp;
+                }
             }
         }
 
@@ -1444,6 +1496,51 @@ public final class NotificationAttentionHelper {
 
         void setTriggerTimeMs(long timestamp) {
             mLastAvalancheTriggerTimestamp = timestamp;
+        }
+
+        private boolean isAvalancheExemptedFullVolume(final NotificationRecord record) {
+            // important conversation
+            if (record.isConversation()
+                    && (record.getImportance() > NotificationManager.IMPORTANCE_DEFAULT
+                    || record.getChannel().isImportantConversation())) {
+                return true;
+            }
+
+            // call notification
+            if (record.getNotification().isStyle(Notification.CallStyle.class)) {
+                return true;
+            }
+
+            // alarm/reminder
+            final String category = record.getNotification().category;
+            if (Notification.CATEGORY_REMINDER.equals(category)
+                    || Notification.CATEGORY_EVENT.equals(category)) {
+                return true;
+            }
+
+            return false;
+        }
+
+        private boolean isAvalancheExempted(final NotificationRecord record) {
+            if (isAvalancheExemptedFullVolume(record)) {
+                return true;
+            }
+
+            // recent conversation
+            if (record.isConversation()
+                    && record.getNotification().when > mLastAvalancheTriggerTimestamp) {
+                return true;
+            }
+
+            if (record.getNotification().fullScreenIntent != null) {
+                return true;
+            }
+
+            if (record.getNotification().isColorized()) {
+                return true;
+            }
+
+            return false;
         }
     }
 

@@ -483,6 +483,21 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun shouldHideFooterView_falseWhenQSPartiallyOpen() =
+        testScope.runTest {
+            val shouldHide by collectLastValue(underTest.shouldHideFooterView)
+
+            // WHEN QS partially open
+            fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE)
+            fakeShadeRepository.setQsExpansion(0.5f)
+            fakeShadeRepository.setLegacyShadeExpansion(0.5f)
+            runCurrent()
+
+            // THEN footer is hidden
+            assertThat(shouldHide).isFalse()
+        }
+
+    @Test
     @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
     fun pinnedHeadsUpRows_filtersForPinnedItems() =
         testScope.runTest {

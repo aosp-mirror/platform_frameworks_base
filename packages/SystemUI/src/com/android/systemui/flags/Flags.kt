@@ -394,10 +394,6 @@ object Flags {
     // TODO(b/251205791): Tracking Bug
     @JvmField val SCREENSHOT_APP_CLIPS = releasedFlag("screenshot_app_clips")
 
-    /** TODO(b/295143676): Tracking bug. When enable, captures a screenshot for each display. */
-    @JvmField
-    val MULTI_DISPLAY_SCREENSHOT = releasedFlag("multi_display_screenshot")
-
     // 1400 - columbus
     // TODO(b/254512756): Tracking Bug
     val QUICK_TAP_IN_PCC = releasedFlag("quick_tap_in_pcc")

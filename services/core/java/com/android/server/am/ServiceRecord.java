@@ -267,9 +267,13 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     int mAllowStart_byBindings = REASON_DENIED;
 
     /**
-     * Whether or not we've bumped its oom adj scores during its execution.
+     * The oom adj seq number snapshot of the host process. We're taking a snapshot
+     * before executing the service. Since we may or may not bump the host process's
+     * proc state / oom adj value before that, at the end of the execution, we could
+     * compare this seq against the current seq of the host process to see if we could
+     * skip the oom adj update from there too.
      */
-    boolean mOomAdjBumpedInExec;
+    int mAdjSeq;
 
     /**
      * Whether to use the new "while-in-use permission" logic for FGS start
@@ -1883,5 +1887,18 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             return false;
         }
         return true;
+    }
+
+    /**
+     * @return {@code true} if the host process has updated its oom adj scores.
+     */
+    boolean wasOomAdjUpdated() {
+        return app != null && app.mState.getAdjSeq() > mAdjSeq;
+    }
+
+    void updateOomAdjSeq() {
+        if (app != null) {
+            mAdjSeq = app.mState.getAdjSeq();
+        }
     }
 }

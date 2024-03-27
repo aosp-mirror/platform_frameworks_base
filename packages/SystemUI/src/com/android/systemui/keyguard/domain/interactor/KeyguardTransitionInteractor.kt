@@ -85,9 +85,11 @@ constructor(
     private fun getTransitionValueFlow(state: KeyguardState): MutableSharedFlow<Float> {
         return transitionValueCache.getOrPut(state) {
             MutableSharedFlow<Float>(
-                extraBufferCapacity = 2,
-                onBufferOverflow = BufferOverflow.DROP_OLDEST
-            )
+                    replay = 1,
+                    extraBufferCapacity = 2,
+                    onBufferOverflow = BufferOverflow.DROP_OLDEST
+                )
+                .also { it.tryEmit(0f) }
         }
     }
 

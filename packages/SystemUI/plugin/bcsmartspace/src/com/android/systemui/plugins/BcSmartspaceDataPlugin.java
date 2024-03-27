@@ -129,6 +129,11 @@ public interface BcSmartspaceDataPlugin extends Plugin {
         void setDozeAmount(float amount);
 
         /**
+         * Set if the screen is on.
+         */
+        default void setScreenOn(boolean screenOn) {}
+
+        /**
          * Set if dozing is true or false
          */
         default void setDozing(boolean dozing) {}

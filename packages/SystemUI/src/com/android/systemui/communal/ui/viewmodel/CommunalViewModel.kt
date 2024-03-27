@@ -41,8 +41,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
@@ -83,6 +85,12 @@ constructor(
                 logger.d({ "Content updated: $str1" }) { str1 = models.joinToString { it.key } }
             }
 
+    override val isEmptyState: Flow<Boolean> =
+        communalInteractor.widgetContent
+            .map { it.isEmpty() }
+            .distinctUntilChanged()
+            .onEach { logger.d("isEmptyState: $it") }
+
     private val _isPopupOnDismissCtaShowing: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val isPopupOnDismissCtaShowing: Flow<Boolean> =
         _isPopupOnDismissCtaShowing.asStateFlow()
@@ -112,8 +120,10 @@ constructor(
         }
     }
 
-    override fun onOpenWidgetEditor(preselectedKey: String?) =
-        communalInteractor.showWidgetEditor(preselectedKey)
+    override fun onOpenWidgetEditor(
+        preselectedKey: String?,
+        shouldOpenWidgetPickerOnStart: Boolean,
+    ) = communalInteractor.showWidgetEditor(preselectedKey, shouldOpenWidgetPickerOnStart)
 
     override fun onDismissCtaTile() {
         scope.launch {

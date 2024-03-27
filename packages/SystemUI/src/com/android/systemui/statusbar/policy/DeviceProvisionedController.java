@@ -50,9 +50,6 @@ public interface DeviceProvisionedController extends CallbackController<DevicePr
      */
     boolean isCurrentUserSetup();
 
-    /** Returns true when Factory Reset Protection is locking the device. */
-    boolean isFrpActive();
-
     /**
      * Interface to provide calls when the values tracked change
      */
@@ -73,10 +70,5 @@ public interface DeviceProvisionedController extends CallbackController<DevicePr
          * Call when some user changes from not provisioned to provisioned
          */
         default void onUserSetupChanged() { }
-
-        /**
-         * Called when the state of FRP changes.
-         */
-        default void onFrpActiveChanged() {}
     }
 }

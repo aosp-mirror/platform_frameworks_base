@@ -80,25 +80,6 @@ class CompanionDeviceShellCommand extends ShellCommand {
         final int associationId;
 
         try {
-            if ("simulate-device-event".equals(cmd) && Flags.devicePresence()) {
-                associationId = getNextIntArgRequired();
-                int event = getNextIntArgRequired();
-                mDevicePresenceProcessor.simulateDeviceEvent(associationId, event);
-                return 0;
-            }
-
-            if ("simulate-device-uuid-event".equals(cmd) && Flags.devicePresence()) {
-                String uuid = getNextArgRequired();
-                String packageName = getNextArgRequired();
-                int userId = getNextIntArgRequired();
-                int event = getNextIntArgRequired();
-                ObservableUuid observableUuid = new ObservableUuid(
-                        userId, ParcelUuid.fromString(uuid), packageName,
-                        System.currentTimeMillis());
-                mDevicePresenceProcessor.simulateDeviceEventByUuid(observableUuid, event);
-                return 0;
-            }
-
             switch (cmd) {
                 case "list": {
                     final int userId = getNextIntArgRequired();
@@ -166,6 +147,51 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     associationId = getNextIntArgRequired();
                     mDevicePresenceProcessor.simulateDeviceEvent(associationId, /* event */ 1);
                     break;
+
+                case "simulate-device-event": {
+                    if (Flags.devicePresence()) {
+                        associationId = getNextIntArgRequired();
+                        int event = getNextIntArgRequired();
+                        mDevicePresenceProcessor.simulateDeviceEvent(associationId, event);
+                    }
+                    break;
+                }
+
+                case "simulate-device-uuid-event": {
+                    if (Flags.devicePresence()) {
+                        String uuid = getNextArgRequired();
+                        String packageName = getNextArgRequired();
+                        int userId = getNextIntArgRequired();
+                        int event = getNextIntArgRequired();
+                        ObservableUuid observableUuid = new ObservableUuid(
+                                userId, ParcelUuid.fromString(uuid), packageName,
+                                System.currentTimeMillis());
+                        mDevicePresenceProcessor.simulateDeviceEventByUuid(observableUuid, event);
+                    }
+                    break;
+                }
+
+                case "simulate-device-event-device-locked": {
+                    if (Flags.devicePresence()) {
+                        associationId = getNextIntArgRequired();
+                        int userId = getNextIntArgRequired();
+                        int event = getNextIntArgRequired();
+                        String uuid = getNextArgRequired();
+                        ParcelUuid parcelUuid =
+                                uuid.equals("null") ? null : ParcelUuid.fromString(uuid);
+                        mDevicePresenceProcessor.simulateDeviceEventOnDeviceLocked(
+                                associationId, userId, event, parcelUuid);
+                    }
+                    break;
+                }
+
+                case "simulate-device-event-device-unlocked": {
+                    if (Flags.devicePresence()) {
+                        int userId = getNextIntArgRequired();
+                        mDevicePresenceProcessor.simulateDeviceEventOnUserUnlocked(userId);
+                    }
+                    break;
+                }
 
                 case "get-backup-payload": {
                     final int userId = getNextIntArgRequired();
@@ -478,6 +504,17 @@ class CompanionDeviceShellCommand extends ShellCommand {
             pw.println("      Make CDM act as if the given DEVICE is BT disconnected base"
                     + "on the UUID");
             pw.println("      USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
+
+            pw.println("  simulate-device-event-device-locked"
+                    + " ASSOCIATION_ID USER_ID DEVICE_EVENT PARCEL_UUID");
+            pw.println("  Simulate device event when the device is locked");
+            pw.println("  USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
+
+            pw.println("  simulate-device-event-device-unlocked USER_ID");
+            pw.println("  Simulate device unlocked for given user. This will send corresponding");
+            pw.println("  callback after simulate-device-event-device-locked");
+            pw.println("  command has been called.");
+            pw.println("  USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
         }
 
         pw.println("  remove-inactive-associations");

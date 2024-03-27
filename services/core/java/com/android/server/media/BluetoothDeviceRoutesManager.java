@@ -134,10 +134,8 @@ import java.util.stream.Collectors;
     @Nullable
     public synchronized String getRouteIdForBluetoothAddress(@Nullable String address) {
         BluetoothDevice bluetoothDevice = mAddressToBondedDevice.get(address);
-        // TODO: b/305199571 - Optimize the following statement to avoid creating the full
-        // MediaRoute2Info instance. We just need the id.
         return bluetoothDevice != null
-                ? createBluetoothRoute(bluetoothDevice).mRoute.getId()
+                ? getRouteIdForType(bluetoothDevice, getDeviceType(bluetoothDevice))
                 : null;
     }
 
@@ -227,25 +225,10 @@ import java.util.stream.Collectors;
         newBtRoute.mBtDevice = device;
         String deviceName = getDeviceName(device);
 
-        String routeId = device.getAddress();
-        int type = MediaRoute2Info.TYPE_BLUETOOTH_A2DP;
-        newBtRoute.mConnectedProfiles = new SparseBooleanArray();
-        if (mBluetoothProfileMonitor.isProfileSupported(BluetoothProfile.A2DP, device)) {
-            newBtRoute.mConnectedProfiles.put(BluetoothProfile.A2DP, true);
-        }
-        if (mBluetoothProfileMonitor.isProfileSupported(BluetoothProfile.HEARING_AID, device)) {
-            newBtRoute.mConnectedProfiles.put(BluetoothProfile.HEARING_AID, true);
-            routeId = HEARING_AID_ROUTE_ID_PREFIX
-                    + mBluetoothProfileMonitor.getGroupId(BluetoothProfile.HEARING_AID, device);
-            type = MediaRoute2Info.TYPE_HEARING_AID;
-        }
-        if (mBluetoothProfileMonitor.isProfileSupported(BluetoothProfile.LE_AUDIO, device)) {
-            newBtRoute.mConnectedProfiles.put(BluetoothProfile.LE_AUDIO, true);
-            routeId = LE_AUDIO_ROUTE_ID_PREFIX
-                    + mBluetoothProfileMonitor.getGroupId(BluetoothProfile.LE_AUDIO, device);
-            type = MediaRoute2Info.TYPE_BLE_HEADSET;
-        }
+        int type = getDeviceType(device);
+        String routeId = getRouteIdForType(device, type);
 
+        newBtRoute.mConnectedProfiles = getConnectedProfiles(device);
         // Note that volume is only relevant for active bluetooth routes, and those are managed via
         // AudioManager.
         newBtRoute.mRoute =
@@ -272,6 +255,47 @@ import java.util.stream.Collectors;
             deviceName = mContext.getResources().getText(R.string.unknownName).toString();
         }
         return deviceName;
+    }
+    private SparseBooleanArray getConnectedProfiles(@NonNull BluetoothDevice device) {
+        SparseBooleanArray connectedProfiles = new SparseBooleanArray();
+        if (mBluetoothProfileMonitor.isProfileSupported(BluetoothProfile.A2DP, device)) {
+            connectedProfiles.put(BluetoothProfile.A2DP, true);
+        }
+        if (mBluetoothProfileMonitor.isProfileSupported(BluetoothProfile.HEARING_AID, device)) {
+            connectedProfiles.put(BluetoothProfile.HEARING_AID, true);
+        }
+        if (mBluetoothProfileMonitor.isProfileSupported(BluetoothProfile.LE_AUDIO, device)) {
+            connectedProfiles.put(BluetoothProfile.LE_AUDIO, true);
+        }
+
+        return connectedProfiles;
+    }
+
+    private int getDeviceType(@NonNull BluetoothDevice device) {
+        if (mBluetoothProfileMonitor.isProfileSupported(BluetoothProfile.LE_AUDIO, device)) {
+            return MediaRoute2Info.TYPE_BLE_HEADSET;
+        }
+
+        if (mBluetoothProfileMonitor.isProfileSupported(BluetoothProfile.HEARING_AID, device)) {
+            return MediaRoute2Info.TYPE_HEARING_AID;
+        }
+
+        return MediaRoute2Info.TYPE_BLUETOOTH_A2DP;
+    }
+
+    private String getRouteIdForType(@NonNull BluetoothDevice device, int type) {
+        return switch (type) {
+            case (MediaRoute2Info.TYPE_BLE_HEADSET) ->
+                    LE_AUDIO_ROUTE_ID_PREFIX
+                            + mBluetoothProfileMonitor.getGroupId(
+                                    BluetoothProfile.LE_AUDIO, device);
+            case (MediaRoute2Info.TYPE_HEARING_AID) ->
+                    HEARING_AID_ROUTE_ID_PREFIX
+                            + mBluetoothProfileMonitor.getGroupId(
+                                    BluetoothProfile.HEARING_AID, device);
+            // TYPE_BLUETOOTH_A2DP
+            default -> device.getAddress();
+        };
     }
 
     private static class BluetoothRouteInfo {

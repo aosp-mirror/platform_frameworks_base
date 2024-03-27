@@ -717,8 +717,9 @@ public class UserRestrictionsUtils {
                     break;
                 case UserManager.DISALLOW_RUN_IN_BACKGROUND:
                     if (newValue) {
-                        int currentUser = ActivityManager.getCurrentUser();
-                        if (currentUser != userId && userId != UserHandle.USER_SYSTEM) {
+                        final ActivityManager am = context.getSystemService(ActivityManager.class);
+                        if (!am.isProfileForeground(UserHandle.of(userId))
+                                && userId != UserHandle.USER_SYSTEM) {
                             try {
                                 ActivityManager.getService().stopUser(userId, false, null);
                             } catch (RemoteException e) {

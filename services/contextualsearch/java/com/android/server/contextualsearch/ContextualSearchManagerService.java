@@ -29,6 +29,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.ActivityOptions;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.app.contextualsearch.CallbackToken;
 import android.app.contextualsearch.ContextualSearchManager;
 import android.app.contextualsearch.ContextualSearchState;
 import android.app.contextualsearch.IContextualSearchCallback;
@@ -164,7 +165,7 @@ public class ContextualSearchManagerService extends SystemService {
         }
     }
 
-    private Intent getContextualSearchIntent(int entrypoint, IBinder mToken) {
+    private Intent getContextualSearchIntent(int entrypoint, CallbackToken mToken) {
         final Intent launchIntent = getResolvedLaunchIntent();
         if (launchIntent == null) {
             return null;
@@ -256,14 +257,14 @@ public class ContextualSearchManagerService extends SystemService {
     }
 
     private class ContextualSearchManagerStub extends IContextualSearchManager.Stub {
-        private @Nullable IBinder mToken;
+        private @Nullable CallbackToken mToken;
 
         @Override
         public void startContextualSearch(int entrypoint) {
             synchronized (this) {
                 if (DEBUG_USER) Log.d(TAG, "startContextualSearch");
                 enforcePermission("startContextualSearch");
-                mToken = new Binder();
+                mToken = new CallbackToken();
                 // We get the launch intent with the system server's identity because the system
                 // server has READ_FRAME_BUFFER permission to get the screenshot and because only
                 // the system server can invoke non-exported activities.
@@ -284,7 +285,7 @@ public class ContextualSearchManagerService extends SystemService {
             if (DEBUG_USER) {
                 Log.i(TAG, "getContextualSearchState token: " + token + ", callback: " + callback);
             }
-            if (mToken == null || !mToken.equals(token)) {
+            if (mToken == null || !mToken.getToken().equals(token)) {
                 if (DEBUG_USER) {
                     Log.e(TAG, "getContextualSearchState: invalid token, returning error");
                 }

@@ -365,7 +365,7 @@ public final class ActivityThread extends ClientTransactionHandler
     @UnsupportedAppUsage
     private ContextImpl mSystemContext;
     @GuardedBy("this")
-    private SparseArray<ContextImpl> mDisplaySystemUiContexts;
+    private ArrayList<WeakReference<ContextImpl>> mDisplaySystemUiContexts;
 
     @UnsupportedAppUsage
     static volatile IPackageManager sPackageManager;
@@ -3033,14 +3033,19 @@ public final class ActivityThread extends ClientTransactionHandler
     public ContextImpl getSystemUiContext(int displayId) {
         synchronized (this) {
             if (mDisplaySystemUiContexts == null) {
-                mDisplaySystemUiContexts = new SparseArray<>();
+                mDisplaySystemUiContexts = new ArrayList<>();
             }
-            ContextImpl systemUiContext = mDisplaySystemUiContexts.get(displayId);
-            if (systemUiContext == null) {
-                systemUiContext = ContextImpl.createSystemUiContext(getSystemContext(), displayId);
-                mDisplaySystemUiContexts.put(displayId, systemUiContext);
+
+            mDisplaySystemUiContexts.removeIf(contextRef -> contextRef.refersTo(null));
+
+            ContextImpl context = getSystemUiContextNoCreateLocked(displayId);
+            if (context != null) {
+                return context;
             }
-            return systemUiContext;
+
+            context = ContextImpl.createSystemUiContext(getSystemContext(), displayId);
+            mDisplaySystemUiContexts.add(new WeakReference<>(context));
+            return context;
         }
     }
 
@@ -3048,18 +3053,30 @@ public final class ActivityThread extends ClientTransactionHandler
     @Override
     public ContextImpl getSystemUiContextNoCreate() {
         synchronized (this) {
-            if (mDisplaySystemUiContexts == null) return null;
-            return mDisplaySystemUiContexts.get(DEFAULT_DISPLAY);
+            if (mDisplaySystemUiContexts == null) {
+                return null;
+            }
+            return getSystemUiContextNoCreateLocked(DEFAULT_DISPLAY);
         }
+    }
+
+    @GuardedBy("this")
+    @Nullable
+    private ContextImpl getSystemUiContextNoCreateLocked(int displayId) {
+        for (int i = 0; i < mDisplaySystemUiContexts.size(); i++) {
+            ContextImpl context = mDisplaySystemUiContexts.get(i).get();
+            if (context != null && context.getDisplayId() == displayId) {
+                return context;
+            }
+        }
+        return null;
     }
 
     void onSystemUiContextCleanup(ContextImpl context) {
         synchronized (this) {
             if (mDisplaySystemUiContexts == null) return;
-            final int index = mDisplaySystemUiContexts.indexOfValue(context);
-            if (index >= 0) {
-                mDisplaySystemUiContexts.removeAt(index);
-            }
+            mDisplaySystemUiContexts.removeIf(
+                    contextRef -> contextRef.refersTo(null) || contextRef.refersTo(context));
         }
     }
 

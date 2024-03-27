@@ -737,6 +737,7 @@ public class OomAdjusterModernImpl extends OomAdjuster {
     @Override
     protected void performUpdateOomAdjLSP(@OomAdjReason int oomAdjReason) {
         final ProcessRecord topApp = mService.getTopApp();
+        mProcessStateCurTop = mService.mAtmInternal.getTopProcessState();
         // Clear any pending ones because we are doing a full update now.
         mPendingProcessSet.clear();
         mService.mAppProfiler.mHasPreviousProcess = mService.mAppProfiler.mHasHomeProcess = false;
@@ -763,6 +764,7 @@ public class OomAdjusterModernImpl extends OomAdjuster {
     @Override
     protected void performUpdateOomAdjPendingTargetsLocked(@OomAdjReason int oomAdjReason) {
         mLastReason = oomAdjReason;
+        mProcessStateCurTop = enqueuePendingTopAppIfNecessaryLSP();
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, oomAdjReasonToString(oomAdjReason));
         mService.mOomAdjProfiler.oomAdjStarted();
 

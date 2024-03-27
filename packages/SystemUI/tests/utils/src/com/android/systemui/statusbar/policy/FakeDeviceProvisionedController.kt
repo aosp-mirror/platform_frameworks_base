@@ -30,10 +30,6 @@ class FakeDeviceProvisionedController : DeviceProvisionedController {
         return currentUser in usersSetup
     }
 
-    override fun isFrpActive(): Boolean {
-        TODO("Not yet implemented")
-    }
-
     fun setCurrentUser(userId: Int) {
         currentUser = userId
         callbacks.toSet().forEach { it.onUserSwitched() }

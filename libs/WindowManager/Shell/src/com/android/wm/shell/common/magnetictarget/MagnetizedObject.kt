@@ -28,7 +28,7 @@ import android.view.ViewConfiguration
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringForce
-import com.android.wm.shell.animation.PhysicsAnimator
+import com.android.wm.shell.shared.animation.PhysicsAnimator
 import kotlin.math.abs
 import kotlin.math.hypot
 

@@ -34,7 +34,4 @@ constructor(
      * @see android.provider.Settings.Global.DEVICE_PROVISIONED
      */
     val isDeviceProvisioned: Flow<Boolean> = repository.isDeviceProvisioned
-
-    /** Whether Factory Reset Protection (FRP) is currently active, locking the device. */
-    val isFactoryResetProtectionActive: Flow<Boolean> = repository.isFactoryResetProtectionActive
 }

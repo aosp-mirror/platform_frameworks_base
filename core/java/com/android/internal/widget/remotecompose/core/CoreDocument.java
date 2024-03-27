@@ -331,6 +331,7 @@ public class CoreDocument {
     public void initFromBuffer(RemoteComposeBuffer buffer) {
         mOperations = new ArrayList<Operation>();
         buffer.inflateFromBuffer(mOperations);
+        mBuffer = buffer;
     }
 
     /**

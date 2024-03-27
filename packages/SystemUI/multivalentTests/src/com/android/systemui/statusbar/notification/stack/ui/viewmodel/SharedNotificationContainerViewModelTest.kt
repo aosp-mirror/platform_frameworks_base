@@ -585,6 +585,12 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             notificationCount = 25
             sharedNotificationContainerInteractor.notificationStackChanged()
             assertThat(maxNotifications).isEqualTo(25)
+
+            // Also ensure another collection starts with the same value. As an example, folding
+            // then unfolding will restart the coroutine and it must get the last value immediately.
+            val newMaxNotifications by
+                collectLastValue(underTest.getMaxNotifications(calculateSpace))
+            assertThat(newMaxNotifications).isEqualTo(25)
         }
 
     @Test
@@ -745,6 +751,41 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
                 TransitionStep(
                     from = KeyguardState.LOCKSCREEN,
                     to = KeyguardState.GONE,
+                    transitionState = TransitionState.RUNNING,
+                    value = 0.9f,
+                )
+            )
+            runCurrent()
+
+            // At this point, alpha should be zero
+            assertThat(alpha).isEqualTo(0f)
+
+            // An attempt to override by the shade should be ignored
+            shadeRepository.setQsExpansion(0.5f)
+            assertThat(alpha).isEqualTo(0f)
+        }
+
+    @Test
+    fun alphaDoesNotUpdateWhileOcclusionTransitionIsRunning() =
+        testScope.runTest {
+            val viewState = ViewStateAccessor()
+            val alpha by collectLastValue(underTest.keyguardAlpha(viewState))
+
+            showLockscreen()
+            // OCCLUDED transition gets to 90% complete
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.OCCLUDED,
+                    transitionState = TransitionState.STARTED,
+                    value = 0f,
+                )
+            )
+            runCurrent()
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.OCCLUDED,
                     transitionState = TransitionState.RUNNING,
                     value = 0.9f,
                 )

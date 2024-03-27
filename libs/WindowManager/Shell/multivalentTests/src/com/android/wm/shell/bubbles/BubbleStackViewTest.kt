@@ -34,11 +34,11 @@ import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.protolog.common.ProtoLog
 import com.android.launcher3.icons.BubbleIconFactory
 import com.android.wm.shell.R
-import com.android.wm.shell.animation.PhysicsAnimatorTestUtils
 import com.android.wm.shell.bubbles.Bubbles.SysuiProxy
 import com.android.wm.shell.bubbles.animation.AnimatableScaleMatrix
 import com.android.wm.shell.common.FloatingContentCoordinator
 import com.android.wm.shell.common.ShellExecutor
+import com.android.wm.shell.shared.animation.PhysicsAnimatorTestUtils
 import com.android.wm.shell.taskview.TaskView
 import com.android.wm.shell.taskview.TaskViewTaskController
 import com.google.common.truth.Truth.assertThat

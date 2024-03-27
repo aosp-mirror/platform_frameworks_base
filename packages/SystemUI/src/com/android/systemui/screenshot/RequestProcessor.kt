@@ -18,32 +18,11 @@ package com.android.systemui.screenshot
 
 import android.util.Log
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
-import com.android.app.tracing.coroutines.launch
-import kotlinx.coroutines.CoroutineScope
-import java.util.function.Consumer
-import javax.inject.Inject
-
-/** Processes a screenshot request sent from [ScreenshotHelper]. */
-interface ScreenshotRequestProcessor {
-    /**
-     * Inspects the incoming ScreenshotData, potentially modifying it based upon policy.
-     *
-     * @param screenshot the screenshot to process
-     */
-    suspend fun process(screenshot: ScreenshotData): ScreenshotData
-}
 
 /** Implementation of [ScreenshotRequestProcessor] */
-@SysUISingleton
-class RequestProcessor
-@Inject
-constructor(
+class RequestProcessor(
     private val capture: ImageCapture,
     private val policy: ScreenshotPolicy,
-    /** For the Java Async version, to invoke the callback. */
-    @Application private val mainScope: CoroutineScope
 ) : ScreenshotRequestProcessor {
 
     override suspend fun process(screenshot: ScreenshotData): ScreenshotData {
@@ -78,24 +57,6 @@ constructor(
 
         return result
     }
-
-    /**
-     * Note: This is for compatibility with existing Java. Prefer the suspending function when
-     * calling from a Coroutine context.
-     *
-     * @param screenshot the screenshot to process
-     * @param callback the callback to provide the processed screenshot, invoked from the main
-     *                 thread
-     */
-    fun processAsync(screenshot: ScreenshotData, callback: Consumer<ScreenshotData>) {
-        mainScope.launch({ "$TAG#processAsync" }) {
-            val result = process(screenshot)
-            callback.accept(result)
-        }
-    }
 }
 
 private const val TAG = "RequestProcessor"
-
-/** Exception thrown by [RequestProcessor] if something goes wrong. */
-class RequestProcessorException(message: String) : IllegalStateException(message)

@@ -1213,7 +1213,8 @@ public final class JobStatus {
             return ACTIVE_INDEX;
         }
 
-        final boolean isEligibleAsBackupJob = job.getTriggerContentUris() != null
+        final boolean isEligibleAsBackupJob = false // this exemption is being disabled for now.
+                && job.getTriggerContentUris() != null
                 && job.getRequiredNetwork() != null
                 && !job.hasLateConstraint()
                 && mJobSchedulerInternal.hasRunBackupJobsPermission(sourcePackageName, sourceUid);

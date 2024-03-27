@@ -86,6 +86,7 @@ import android.provider.Settings.Global;
 import android.service.notification.Condition;
 import android.service.notification.ConditionProviderService;
 import android.service.notification.DeviceEffectsApplier;
+import android.service.notification.SystemZenRules;
 import android.service.notification.ZenAdapters;
 import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenModeConfig;
@@ -214,7 +215,7 @@ public class ZenModeHelper {
         mNotificationManager = context.getSystemService(NotificationManager.class);
 
         mDefaultConfig = readDefaultConfig(mContext.getResources());
-        updateDefaultAutomaticRuleNames();
+        updateDefaultConfigAutomaticRules();
         if (Flags.modesApi()) {
             updateDefaultAutomaticRulePolicies();
         }
@@ -1020,26 +1021,40 @@ public class ZenModeHelper {
         }
     }
 
-    protected void updateDefaultZenRules(int callingUid) {
-        updateDefaultAutomaticRuleNames();
+    void updateZenRulesOnLocaleChange() {
+        updateDefaultConfigAutomaticRules();
         synchronized (mConfigLock) {
+            if (mConfig == null) {
+                return;
+            }
+            ZenModeConfig config = mConfig.copy();
+            boolean updated = false;
             for (ZenRule defaultRule : mDefaultConfig.automaticRules.values()) {
-                ZenRule currRule = mConfig.automaticRules.get(defaultRule.id);
-                // if default rule wasn't user-modified nor enabled, use localized name
+                ZenRule currRule = config.automaticRules.get(defaultRule.id);
+                // if default rule wasn't user-modified use localized name
                 // instead of previous system name
-                if (currRule != null && !currRule.modified && !currRule.enabled
+                if (currRule != null
+                        && !currRule.modified
+                        && (currRule.zenPolicyUserModifiedFields & AutomaticZenRule.FIELD_NAME) == 0
                         && !defaultRule.name.equals(currRule.name)) {
-                    if (canManageAutomaticZenRule(currRule)) {
-                        if (DEBUG) {
-                            Slog.d(TAG, "Locale change - updating default zen rule name "
-                                    + "from " + currRule.name + " to " + defaultRule.name);
-                        }
-                        // update default rule (if locale changed, name of rule will change)
-                        currRule.name = defaultRule.name;
-                        updateAutomaticZenRule(defaultRule.id, zenRuleToAutomaticZenRule(currRule),
-                                UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI, "locale changed", callingUid);
+                    if (DEBUG) {
+                        Slog.d(TAG, "Locale change - updating default zen rule name "
+                                + "from " + currRule.name + " to " + defaultRule.name);
+                    }
+                    currRule.name = defaultRule.name;
+                    updated = true;
+                }
+            }
+            if (Flags.modesApi() && Flags.modesUi()) {
+                for (ZenRule rule : config.automaticRules.values()) {
+                    if (SystemZenRules.isSystemOwnedRule(rule)) {
+                        updated |= SystemZenRules.updateTriggerDescription(mContext, rule);
                     }
                 }
+            }
+            if (updated) {
+                setConfigLocked(config, null, UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI,
+                        "updateZenRulesOnLocaleChange", Process.SYSTEM_UID);
             }
         }
     }
@@ -1631,6 +1646,10 @@ public class ZenModeHelper {
                 reason += ", reset to default rules";
             }
 
+            if (Flags.modesApi() && Flags.modesUi()) {
+                SystemZenRules.maybeUpgradeRules(mContext, config);
+            }
+
             // Resolve user id for settings.
             userId = userId == UserHandle.USER_ALL ? UserHandle.USER_SYSTEM : userId;
             if (config.version < ZenModeConfig.XML_VERSION_ZEN_UPGRADE) {
@@ -2054,7 +2073,7 @@ public class ZenModeHelper {
         }
     }
 
-    private void updateDefaultAutomaticRuleNames() {
+    private void updateDefaultConfigAutomaticRules() {
         for (ZenRule rule : mDefaultConfig.automaticRules.values()) {
             if (ZenModeConfig.EVENTS_DEFAULT_RULE_ID.equals(rule.id)) {
                 rule.name = mContext.getResources()
@@ -2062,6 +2081,9 @@ public class ZenModeHelper {
             } else if (ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID.equals(rule.id)) {
                 rule.name = mContext.getResources()
                         .getString(R.string.zen_mode_default_every_night_name);
+            }
+            if (Flags.modesApi() && Flags.modesUi()) {
+                SystemZenRules.updateTriggerDescription(mContext, rule);
             }
         }
     }

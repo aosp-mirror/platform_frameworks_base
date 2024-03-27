@@ -7986,6 +7986,7 @@
          content URI trigger and network constraint set.
          <p>This is a special access permission that can be revoked by the system or the user.
          <p>Protection level: signature|privileged|appop
+         @hide
      -->
     <permission android:name="android.permission.RUN_BACKUP_JOBS"
                 android:protectionLevel="signature|privileged|appop"/>
