@@ -16,6 +16,9 @@
 
 package android.net.wifi;
 
+import android.os.ServiceManager;
+import android.security.legacykeystore.ILegacyKeystore;
+
 import com.android.internal.net.ConnectivityBlobStore;
 
 /**
@@ -24,6 +27,7 @@ import com.android.internal.net.ConnectivityBlobStore;
  */
 public class WifiBlobStore extends ConnectivityBlobStore {
     private static final String DB_NAME = "WifiBlobStore.db";
+    private static final String LEGACY_KEYSTORE_SERVICE_NAME = "android.security.legacykeystore";
     private static WifiBlobStore sInstance;
     private WifiBlobStore() {
         super(DB_NAME);
@@ -35,5 +39,11 @@ public class WifiBlobStore extends ConnectivityBlobStore {
             sInstance = new WifiBlobStore();
         }
         return sInstance;
+    }
+
+    /** Returns an interface to access the Legacy Keystore service. */
+    public static ILegacyKeystore getLegacyKeystore() {
+        return ILegacyKeystore.Stub.asInterface(
+                ServiceManager.checkService(LEGACY_KEYSTORE_SERVICE_NAME));
     }
 }
