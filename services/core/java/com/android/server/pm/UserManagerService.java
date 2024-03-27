@@ -567,7 +567,7 @@ public class UserManagerService extends IUserManager.Stub {
                     int autoLockPreference =
                             Settings.Secure.getIntForUser(mContext.getContentResolver(),
                                     Settings.Secure.PRIVATE_SPACE_AUTO_LOCK,
-                                    Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_NEVER,
+                                    Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_AFTER_DEVICE_RESTART,
                                     getMainUserIdUnchecked());
                     Slog.i(LOG_TAG, "Auto-lock settings changed to " + autoLockPreference);
                     setOrUpdateAutoLockPreferenceForPrivateProfile(autoLockPreference);
@@ -615,7 +615,7 @@ public class UserManagerService extends IUserManager.Stub {
         int privateSpaceAutoLockPreference =
                 Settings.Secure.getIntForUser(mContext.getContentResolver(),
                         Settings.Secure.PRIVATE_SPACE_AUTO_LOCK,
-                        Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_NEVER,
+                        Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_AFTER_DEVICE_RESTART,
                         getMainUserIdUnchecked());
         if (privateSpaceAutoLockPreference
                 != Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_AFTER_INACTIVITY) {
@@ -714,7 +714,7 @@ public class UserManagerService extends IUserManager.Stub {
         if (isAutoLockForPrivateSpaceEnabled()) {
             int autoLockPreference = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                     Settings.Secure.PRIVATE_SPACE_AUTO_LOCK,
-                    Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_NEVER,
+                    Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_AFTER_DEVICE_RESTART,
                     getMainUserIdUnchecked());
             boolean isAutoLockOnDeviceLockSelected =
                     autoLockPreference == Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_ON_DEVICE_LOCK;
@@ -1052,7 +1052,8 @@ public class UserManagerService extends IUserManager.Stub {
                 setOrUpdateAutoLockPreferenceForPrivateProfile(
                         Settings.Secure.getIntForUser(mContext.getContentResolver(),
                                 Settings.Secure.PRIVATE_SPACE_AUTO_LOCK,
-                                Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_NEVER, mainUserId));
+                                Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_AFTER_DEVICE_RESTART,
+                                mainUserId));
             }
         }
 

@@ -736,9 +736,10 @@ public final class UserManagerServiceTest {
         Mockito.clearInvocations(mKeyguardManager);
         Mockito.clearInvocations(mSpiedContext);
 
-        // Finally, set the preference to don't auto-lock
+        // Finally, set the preference to auto-lock only after device restart, which is the default
+        // behaviour
         mUms.setOrUpdateAutoLockPreferenceForPrivateProfile(
-                Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_NEVER);
+                Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_AFTER_DEVICE_RESTART);
 
         // Verify that inactivity broadcasts are unregistered and keyguard listener was removed
         Mockito.verify(mSpiedContext).unregisterReceiver(any());

@@ -12415,7 +12415,7 @@ public final class Settings {
         /** @hide */
         public static final int PRIVATE_SPACE_AUTO_LOCK_AFTER_INACTIVITY = 1;
         /** @hide */
-        public static final int PRIVATE_SPACE_AUTO_LOCK_NEVER = 2;
+        public static final int PRIVATE_SPACE_AUTO_LOCK_AFTER_DEVICE_RESTART = 2;
 
         /**
          * The different auto lock options for private space.
@@ -12425,7 +12425,7 @@ public final class Settings {
         @IntDef(prefix = {"PRIVATE_SPACE_AUTO_LOCK_"}, value = {
                 PRIVATE_SPACE_AUTO_LOCK_ON_DEVICE_LOCK,
                 PRIVATE_SPACE_AUTO_LOCK_AFTER_INACTIVITY,
-                PRIVATE_SPACE_AUTO_LOCK_NEVER,
+                PRIVATE_SPACE_AUTO_LOCK_AFTER_DEVICE_RESTART,
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface PrivateSpaceAutoLockOption {
