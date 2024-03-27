@@ -51,9 +51,11 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.format.Formatter;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
@@ -990,11 +992,22 @@ public class ApplicationsState {
                 apps = new ArrayList<>(mAppEntries);
             }
 
+            ArrayMap<UserHandle, Boolean> profileHideInQuietModeStatus = new ArrayMap<>();
             ArrayList<AppEntry> filteredApps = new ArrayList<>();
             if (DEBUG) {
                 Log.i(TAG, "Rebuilding...");
             }
             for (AppEntry entry : apps) {
+                if (android.multiuser.Flags.enablePrivateSpaceFeatures()
+                        && android.multiuser.Flags.handleInterleavedSettingsForPrivateSpace()) {
+                    UserHandle userHandle = UserHandle.of(UserHandle.getUserId(entry.info.uid));
+                    if (!profileHideInQuietModeStatus.containsKey(userHandle)) {
+                        profileHideInQuietModeStatus.put(
+                                userHandle, isHideInQuietEnabledForProfile(mUm, userHandle));
+                    }
+                    filter.refreshAppEntryOnRebuild(
+                            entry, profileHideInQuietModeStatus.get(userHandle));
+                }
                 if (entry != null && (filter == null || filter.filterApp(entry))) {
                     synchronized (mEntriesMap) {
                         if (DEBUG_LOCKING) {
@@ -1648,6 +1661,11 @@ public class ApplicationsState {
          */
         public boolean isHomeApp;
 
+        /**
+         * Whether the app should be hidden for user when quiet mode is enabled.
+         */
+        public boolean hideInQuietMode;
+
         public String getNormalizedLabel() {
             if (normalizedLabel != null) {
                 return normalizedLabel;
@@ -1691,6 +1709,7 @@ public class ApplicationsState {
             UserInfo userInfo = um.getUserInfo(UserHandle.getUserId(info.uid));
             mProfileType = userInfo.userType;
             this.showInPersonalTab = shouldShowInPersonalTab(um, info.uid);
+            hideInQuietMode = shouldHideInQuietMode(um, info.uid);
         }
 
         public boolean isClonedProfile() {
@@ -1800,10 +1819,30 @@ public class ApplicationsState {
                 this.labelDescription = this.label;
             }
         }
+
+        /**
+         * Returns true if profile is in quiet mode and the profile should not be visible when the
+         * quiet mode is enabled, false otherwise.
+         */
+        private boolean shouldHideInQuietMode(@NonNull UserManager userManager, int uid) {
+            if (android.multiuser.Flags.enablePrivateSpaceFeatures()
+                    && android.multiuser.Flags.handleInterleavedSettingsForPrivateSpace()) {
+                UserHandle userHandle = UserHandle.of(UserHandle.getUserId(uid));
+                return isHideInQuietEnabledForProfile(userManager, userHandle);
+            }
+            return false;
+        }
     }
 
     private static boolean hasFlag(int flags, int flag) {
         return (flags & flag) != 0;
+    }
+
+    private static boolean isHideInQuietEnabledForProfile(
+            UserManager userManager, UserHandle userHandle) {
+        return userManager.isQuietModeEnabled(userHandle)
+                && userManager.getUserProperties(userHandle).getShowInQuietMode()
+                == UserProperties.SHOW_IN_QUIET_MODE_HIDDEN;
     }
 
     /**
@@ -1868,6 +1907,15 @@ public class ApplicationsState {
         }
 
         boolean filterApp(AppEntry info);
+
+        /**
+         * Updates AppEntry based on whether quiet mode is enabled and should not be
+         * visible for the corresponding profile.
+         */
+        default void refreshAppEntryOnRebuild(
+                @NonNull AppEntry appEntry,
+                boolean hideInQuietMode) {
+        }
     }
 
     public static final AppFilter FILTER_PERSONAL = new AppFilter() {
@@ -2007,6 +2055,25 @@ public class ApplicationsState {
         @Override
         public boolean filterApp(AppEntry entry) {
             return entry.info.enabled && !AppUtils.isInstant(entry.info);
+        }
+    };
+
+    public static final AppFilter FILTER_ENABLED_NOT_QUIET = new AppFilter() {
+        @Override
+        public void init() {
+        }
+
+        @Override
+        public boolean filterApp(@NonNull AppEntry entry) {
+            return entry.info.enabled && !AppUtils.isInstant(entry.info)
+                    && !entry.hideInQuietMode;
+        }
+
+        @Override
+        public void refreshAppEntryOnRebuild(
+                @NonNull AppEntry appEntry,
+                boolean hideInQuietMode) {
+            appEntry.hideInQuietMode = hideInQuietMode;
         }
     };
 
