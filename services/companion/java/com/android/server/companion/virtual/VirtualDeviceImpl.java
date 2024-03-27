@@ -1078,8 +1078,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             return false;
         }
 
-        if (getDevicePolicy(POLICY_TYPE_AUDIO) == VirtualDeviceParams.DEVICE_POLICY_DEFAULT) {
-            return false;
+        if (getDevicePolicy(POLICY_TYPE_AUDIO) == VirtualDeviceParams.DEVICE_POLICY_CUSTOM) {
+            return true;
         }
         final long token = Binder.clearCallingIdentity();
         try {
