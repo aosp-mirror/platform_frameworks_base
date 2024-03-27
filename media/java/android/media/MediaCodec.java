@@ -65,6 +65,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 
 /**
  MediaCodec class can be used to access low-level media codecs, i.e. encoder/decoder components.
@@ -2014,6 +2015,23 @@ final public class MediaCodec {
         }
     }
 
+    // HACKY(b/325389296): aconfig flag accessors may not work in all contexts where MediaCodec API
+    // is used, so allow accessors to fail. In those contexts use a default value, normally false.
+
+    /* package private */
+    static boolean GetFlag(Supplier<Boolean> flagValueSupplier) {
+        return GetFlag(flagValueSupplier, false /* defaultValue */);
+    }
+
+    /* package private */
+    static boolean GetFlag(Supplier<Boolean> flagValueSupplier, boolean defaultValue) {
+        try {
+            return flagValueSupplier.get();
+        } catch (java.lang.RuntimeException e) {
+            return defaultValue;
+        }
+    }
+
     private boolean mHasSurface = false;
 
     /**
@@ -2346,15 +2364,7 @@ final public class MediaCodec {
         }
 
         // at the moment no codecs support detachable surface
-
-        // HACKY: aconfig flags accessors may not work in all contexts that MediaCodec API is used,
-        // so allow accessors to fail. In those contexts the flags will just not be enabled
-        boolean nullOutputSurface = false;
-        try {
-            nullOutputSurface = android.media.codec.Flags.nullOutputSurface();
-        } catch (java.lang.RuntimeException e) { }
-
-        if (nullOutputSurface) {
+        if (GetFlag(() -> android.media.codec.Flags.nullOutputSurface())) {
             // Detached surface flag is only meaningful if surface is null. Otherwise, it is
             // ignored.
             if (surface == null && (flags & CONFIGURE_FLAG_DETACHED_SURFACE) != 0) {
