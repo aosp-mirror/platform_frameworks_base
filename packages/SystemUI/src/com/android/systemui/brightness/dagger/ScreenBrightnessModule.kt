@@ -20,8 +20,15 @@ import com.android.systemui.brightness.data.repository.BrightnessPolicyRepositor
 import com.android.systemui.brightness.data.repository.BrightnessPolicyRepositoryImpl
 import com.android.systemui.brightness.data.repository.ScreenBrightnessDisplayManagerRepository
 import com.android.systemui.brightness.data.repository.ScreenBrightnessRepository
+import com.android.systemui.brightness.shared.model.BrightnessLog
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogBufferFactory
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.TableLogBufferFactory
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 
 @Module
 interface ScreenBrightnessModule {
@@ -33,4 +40,20 @@ interface ScreenBrightnessModule {
 
     @Binds
     fun bindPolicyRepository(impl: BrightnessPolicyRepositoryImpl): BrightnessPolicyRepository
+
+    companion object {
+        @Provides
+        @SysUISingleton
+        @BrightnessLog
+        fun providesBrightnessTableLog(factory: TableLogBufferFactory): TableLogBuffer {
+            return factory.create("BrightnessTableLog", 50)
+        }
+
+        @Provides
+        @SysUISingleton
+        @BrightnessLog
+        fun providesBrightnessLog(factory: LogBufferFactory): LogBuffer {
+            return factory.create("BrightnessLog", 50)
+        }
+    }
 }

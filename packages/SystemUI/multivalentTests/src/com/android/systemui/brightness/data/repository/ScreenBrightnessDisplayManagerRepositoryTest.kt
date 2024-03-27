@@ -25,15 +25,18 @@ import android.view.Display
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.brightness.data.model.LinearBrightness
+import com.android.systemui.brightness.shared.model.LinearBrightness
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.log.core.FakeLogBuffer
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -74,6 +77,8 @@ class ScreenBrightnessDisplayManagerRepositoryTest : SysuiTestCase() {
             ScreenBrightnessDisplayManagerRepository(
                 displayId,
                 displayManager,
+                FakeLogBuffer.Factory.create(),
+                mock<TableLogBuffer>(),
                 kosmos.applicationCoroutineScope,
                 kosmos.testDispatcher,
             )

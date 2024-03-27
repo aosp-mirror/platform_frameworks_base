@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.brightness.shared
+package com.android.systemui.brightness.shared.model
 
 import androidx.annotation.IntRange
 import com.android.settingslib.display.BrightnessUtils
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.util.kotlin.pairwiseBy
+import kotlinx.coroutines.flow.Flow
 
 @JvmInline
 value class GammaBrightness(
@@ -27,3 +30,21 @@ value class GammaBrightness(
     )
     val value: Int
 )
+
+internal fun Flow<GammaBrightness>.logDiffForTable(
+    tableLogBuffer: TableLogBuffer,
+    columnPrefix: String,
+    columnName: String,
+    initialValue: GammaBrightness?,
+): Flow<GammaBrightness> {
+    val initialValueFun = {
+        tableLogBuffer.logChange(columnPrefix, columnName, initialValue?.value, isInitial = true)
+        initialValue
+    }
+    return this.pairwiseBy(initialValueFun) { prevVal: GammaBrightness?, newVal: GammaBrightness ->
+        if (prevVal != newVal) {
+            tableLogBuffer.logChange(columnPrefix, columnName, newVal.value)
+        }
+        newVal
+    }
+}
