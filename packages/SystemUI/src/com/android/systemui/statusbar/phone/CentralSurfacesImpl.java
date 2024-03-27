@@ -164,6 +164,7 @@ import com.android.systemui.qs.QSFragmentLegacy;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.settings.UserTracker;
@@ -1256,11 +1257,13 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mScreenOffAnimationController.initialize(this, mShadeSurface, mLightRevealScrim);
         updateLightRevealScrimVisibility();
 
-        mShadeSurface.initDependencies(
-                this,
-                mGestureRec,
-                mShadeController::makeExpandedInvisible,
-                mHeadsUpManager);
+        if (!SceneContainerFlag.isEnabled()) {
+            mShadeSurface.initDependencies(
+                    this,
+                    mGestureRec,
+                    mShadeController::makeExpandedInvisible,
+                    mHeadsUpManager);
+        }
 
         // Set up the quick settings tile panel
         final View container = getNotificationShadeWindowView().findViewById(R.id.qs_frame);

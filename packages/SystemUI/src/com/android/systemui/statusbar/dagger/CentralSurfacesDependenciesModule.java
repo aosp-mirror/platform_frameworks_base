@@ -35,9 +35,11 @@ import com.android.systemui.dump.DumpHandler;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeSurface;
+import com.android.systemui.shade.ShadeSurfaceImpl;
 import com.android.systemui.shade.carrier.ShadeCarrierGroupController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationClickNotifier;
@@ -58,6 +60,8 @@ import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarIconList;
 import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+
+import javax.inject.Provider;
 
 import dagger.Binds;
 import dagger.Lazy;
@@ -178,9 +182,20 @@ public interface CentralSurfacesDependenciesModule {
      * The {@link com.android.systemui.shade.ShadeViewController} interface is bound in
      * {@link com.android.systemui.shade.ShadeModule} so others can access it.
      */
-    @Binds
+    @Provides
     @SysUISingleton
-    ShadeSurface provideShadeSurface(NotificationPanelViewController impl);
+    static ShadeSurface provideShadeSurface(
+            SceneContainerFlags sceneContainerFlags,
+            Provider<ShadeSurfaceImpl> sceneContainerOn,
+            Provider<NotificationPanelViewController> sceneContainerOff) {
+        if (sceneContainerFlags.isEnabled()) {
+            return sceneContainerOn.get();
+        } else {
+            return sceneContainerOff.get();
+        }
+
+    }
+
 
     /** */
     @Binds
