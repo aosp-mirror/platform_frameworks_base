@@ -40,6 +40,7 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -81,6 +82,10 @@ class KeyguardInteractorTest : SysuiTestCase() {
             keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor,
             sceneInteractorProvider = { sceneInteractor },
             fromGoneTransitionInteractor = { fromGoneTransitionInteractor },
+            sharedNotificationContainerInteractor = {
+                kosmos.sharedNotificationContainerInteractor
+            },
+            applicationScope = testScope,
         )
     }
 

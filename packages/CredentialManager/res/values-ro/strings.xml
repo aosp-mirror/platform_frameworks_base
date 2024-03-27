@@ -39,9 +39,12 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Ne îndreptăm spre un viitor fără parole, însă acestea sunt încă disponibile, alături de cheile de acces."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Alege unde dorești să salvezi <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selectează un manager de parole pentru a salva informațiile și a te conecta mai rapid data viitoare"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Creezi o cheie de acces pentru a te conecta la <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Salvezi parola pentru a te conecta la <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Salvezi informațiile de conectare pentru <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for choose_create_option_passkey_title (8762295821604276511) -->
+    <skip />
+    <!-- no translation found for choose_create_option_password_title (4481366993598649224) -->
+    <skip />
+    <!-- no translation found for choose_create_option_sign_in_title (7092914088455358079) -->
+    <skip />
     <string name="passkey" msgid="632353688396759522">"cheia de acces"</string>
     <string name="password" msgid="6738570945182936667">"parolă"</string>
     <string name="passkeys" msgid="5733880786866559847">"cheile de acces"</string>
@@ -70,6 +73,8 @@
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Închide"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Folosești cheia de acces salvată pentru <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Folosești parola salvată pentru <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for get_dialog_title_single_tap_for (2057945648748859483) -->
+    <skip />
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Folosești datele de conectare pentru <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Deblochezi opțiunile de conectare pentru <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Alege o cheie de acces salvată pentru <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

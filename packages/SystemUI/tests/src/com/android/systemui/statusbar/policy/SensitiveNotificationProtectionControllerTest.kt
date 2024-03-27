@@ -37,6 +37,9 @@ import android.provider.Settings.Global.DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APP
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
+import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
+import com.android.dx.mockito.inline.extended.ExtendedMockito.verify
+import com.android.internal.util.FrameworkStatsLog
 import com.android.server.notification.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.logcatLogBuffer
@@ -49,6 +52,7 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.settings.FakeGlobalSettings
 import com.android.systemui.util.time.FakeSystemClock
+import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -57,14 +61,17 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.MockitoAnnotations
+import org.mockito.MockitoSession
+import org.mockito.quality.Strictness
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -83,6 +90,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
     @Mock private lateinit var listener2: Runnable
     @Mock private lateinit var listener3: Runnable
 
+    private lateinit var staticMockSession: MockitoSession
     private lateinit var executor: FakeExecutor
     private lateinit var globalSettings: FakeGlobalSettings
     private lateinit var mediaProjectionCallback: MediaProjectionManager.Callback
@@ -90,12 +98,26 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        staticMockSession =
+            mockitoSession()
+                .mockStatic(FrameworkStatsLog::class.java)
+                .strictness(Strictness.LENIENT)
+                .startMocking()
         allowTestableLooperAsMainThread() // for updating exempt packages and notifying listeners
         MockitoAnnotations.initMocks(this)
 
         setShareFullScreen()
         whenever(activityManager.bugreportWhitelistedPackages)
             .thenReturn(listOf(BUGREPORT_PACKAGE_NAME))
+        whenever(packageManager.getPackageUid(TEST_PROJECTION_PACKAGE_NAME, 0))
+            .thenReturn(TEST_PROJECTION_PACKAGE_UID)
+        whenever(packageManager.getPackageUid(BUGREPORT_PACKAGE_NAME, 0))
+            .thenReturn(BUGREPORT_PACKAGE_UID)
+        // SystemUi context package name is exempt, but in test scenarios its
+        // com.android.systemui.tests so use that instead of hardcoding. Setup packagemanager to
+        // return the correct uid in this scenario
+        whenever(packageManager.getPackageUid(mContext.packageName, 0))
+            .thenReturn(mContext.applicationInfo.uid)
 
         whenever(packageManager.checkPermission(anyString(), anyString()))
             .thenReturn(PackageManager.PERMISSION_DENIED)
@@ -121,6 +143,11 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
         mediaProjectionCallback = withArgCaptor {
             verify(mediaProjectionManager).addCallback(capture(), any())
         }
+    }
+
+    @After
+    fun tearDown() {
+        staticMockSession.finishMocking()
     }
 
     @Test
@@ -242,7 +269,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
 
     @Test
     fun isSensitiveStateActive_projectionActive_sysuiExempt_false() {
-        // SystemUi context packge name is exempt, but in test scenarios its
+        // SystemUi context package name is exempt, but in test scenarios its
         // com.android.systemui.tests so use that instead of hardcoding
         whenever(mediaProjectionInfo.packageName).thenReturn(mContext.packageName)
         mediaProjectionCallback.onStart(mediaProjectionInfo)
@@ -342,7 +369,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
 
     @Test
     fun shouldProtectNotification_projectionActive_sysuiExempt_false() {
-        // SystemUi context packge name is exempt, but in test scenarios its
+        // SystemUi context package name is exempt, but in test scenarios its
         // com.android.systemui.tests so use that instead of hardcoding
         whenever(mediaProjectionInfo.packageName).thenReturn(mContext.packageName)
         mediaProjectionCallback.onStart(mediaProjectionInfo)
@@ -426,6 +453,164 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
         assertTrue(controller.shouldProtectNotification(notificationEntry))
     }
 
+    @Test
+    fun logSensitiveContentProtectionSession() {
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+
+        verify {
+            FrameworkStatsLog.write(
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION),
+                anyLong(),
+                eq(TEST_PROJECTION_PACKAGE_UID),
+                eq(false),
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__START),
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__SOURCE__SYS_UI)
+            )
+        }
+
+        mediaProjectionCallback.onStop(mediaProjectionInfo)
+
+        verify {
+            FrameworkStatsLog.write(
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION),
+                anyLong(),
+                eq(TEST_PROJECTION_PACKAGE_UID),
+                eq(false),
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__STOP),
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__SOURCE__SYS_UI)
+            )
+        }
+    }
+
+    @Test
+    fun logSensitiveContentProtectionSession_exemptViaShareSingleApp() {
+        setShareSingleApp()
+
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+
+        verify {
+            FrameworkStatsLog.write(
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION),
+                anyLong(),
+                eq(TEST_PROJECTION_PACKAGE_UID),
+                eq(true),
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__START),
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__SOURCE__SYS_UI)
+            )
+        }
+
+        mediaProjectionCallback.onStop(mediaProjectionInfo)
+
+        verify {
+            FrameworkStatsLog.write(
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION),
+                anyLong(),
+                eq(TEST_PROJECTION_PACKAGE_UID),
+                eq(true),
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__STOP),
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__SOURCE__SYS_UI)
+            )
+        }
+    }
+
+    @Test
+    fun logSensitiveContentProtectionSession_exemptViaDeveloperOption() {
+        setDisabledViaDeveloperOption()
+
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+
+        verify {
+            FrameworkStatsLog.write(
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION),
+                anyLong(),
+                eq(TEST_PROJECTION_PACKAGE_UID),
+                eq(true),
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__START),
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__SOURCE__SYS_UI)
+            )
+        }
+
+        mediaProjectionCallback.onStop(mediaProjectionInfo)
+
+        verify {
+            FrameworkStatsLog.write(
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION),
+                anyLong(),
+                eq(TEST_PROJECTION_PACKAGE_UID),
+                eq(true),
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__STOP),
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__SOURCE__SYS_UI)
+            )
+        }
+    }
+
+    @Test
+    fun logSensitiveContentProtectionSession_exemptViaSystemUi() {
+        // SystemUi context package name is exempt, but in test scenarios its
+        // com.android.systemui.tests so use that instead of hardcoding
+        val testPackageName = mContext.packageName
+        val testUid = mContext.applicationInfo.uid
+        whenever(mediaProjectionInfo.packageName).thenReturn(testPackageName)
+
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+
+        verify {
+            FrameworkStatsLog.write(
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION),
+                anyLong(),
+                eq(testUid),
+                eq(true),
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__START),
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__SOURCE__SYS_UI)
+            )
+        }
+
+        mediaProjectionCallback.onStop(mediaProjectionInfo)
+
+        verify {
+            FrameworkStatsLog.write(
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION),
+                anyLong(),
+                eq(testUid),
+                eq(true),
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__STOP),
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__SOURCE__SYS_UI)
+            )
+        }
+    }
+
+    @Test
+    fun logSensitiveContentProtectionSession_exemptViaBugReportHandler() {
+        // Setup exempt via bugreport handler
+        whenever(mediaProjectionInfo.packageName).thenReturn(BUGREPORT_PACKAGE_NAME)
+
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+
+        verify {
+            FrameworkStatsLog.write(
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION),
+                anyLong(),
+                eq(BUGREPORT_PACKAGE_UID),
+                eq(true),
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__START),
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__SOURCE__SYS_UI)
+            )
+        }
+
+        mediaProjectionCallback.onStop(mediaProjectionInfo)
+
+        verify {
+            FrameworkStatsLog.write(
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION),
+                anyLong(),
+                eq(BUGREPORT_PACKAGE_UID),
+                eq(true),
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__STOP),
+                eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__SOURCE__SYS_UI)
+            )
+        }
+    }
+
     private fun setDisabledViaDeveloperOption() {
         globalSettings.putInt(DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS, 1)
 
@@ -492,6 +677,8 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
     }
 
     companion object {
+        private const val TEST_PROJECTION_PACKAGE_UID = 23
+        private const val BUGREPORT_PACKAGE_UID = 24
         private const val TEST_PROJECTION_PACKAGE_NAME =
             "com.android.systemui.statusbar.policy.projectionpackage"
         private const val TEST_PACKAGE_NAME = "com.android.systemui.statusbar.policy.testpackage"

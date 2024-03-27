@@ -51,6 +51,9 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.domain.interactor.BiometricUnlockInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.shared.model.KeyguardState;
+import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
@@ -59,6 +62,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.SystemClock;
 
 import dagger.Lazy;
@@ -286,7 +290,9 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             VibratorHelper vibrator,
             SystemClock systemClock,
             Lazy<SelectedUserInteractor> selectedUserInteractor,
-            BiometricUnlockInteractor biometricUnlockInteractor
+            BiometricUnlockInteractor biometricUnlockInteractor,
+            JavaAdapter javaAdapter,
+            KeyguardTransitionInteractor keyguardTransitionInteractor
     ) {
         mPowerManager = powerManager;
         mUpdateMonitor = keyguardUpdateMonitor;
@@ -317,8 +323,17 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mOrderUnlockAndWake = resources.getBoolean(
                 com.android.internal.R.bool.config_orderUnlockAndWake);
         mSelectedUserInteractor = selectedUserInteractor;
-
+        javaAdapter.alwaysCollectFlow(
+                keyguardTransitionInteractor.getStartedKeyguardTransitionStep(),
+                this::consumeTransitionStepOnStartedKeyguardState);
         dumpManager.registerDumpable(this);
+    }
+
+    @VisibleForTesting
+    protected void consumeTransitionStepOnStartedKeyguardState(TransitionStep transitionStep) {
+        if (transitionStep.getFrom() == KeyguardState.GONE) {
+            mBiometricUnlockInteractor.setBiometricUnlockState(MODE_NONE);
+        }
     }
 
     public void setKeyguardViewController(KeyguardViewController keyguardViewController) {
@@ -773,7 +788,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         for (BiometricUnlockEventsListener listener : mBiometricUnlockEventsListeners) {
             listener.onResetMode();
         }
-        mBiometricUnlockInteractor.setBiometricUnlockState(MODE_NONE);
         mNumConsecutiveFpFailures = 0;
         mLastFpFailureUptimeMillis = 0;
     }

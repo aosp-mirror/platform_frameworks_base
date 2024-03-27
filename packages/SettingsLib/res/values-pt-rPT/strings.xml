@@ -619,8 +619,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Falha ao criar um novo utilizador"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Falha ao criar um novo convidado"</string>
     <string name="user_nickname" msgid="262624187455825083">"Alcunha"</string>
-    <!-- no translation found for edit_user_info_message (6677556031419002895) -->
-    <skip />
+    <string name="edit_user_info_message" msgid="6677556031419002895">"O nome e a imagem que escolher ficam visíveis para qualquer pessoa que use este dispositivo."</string>
     <string name="user_add_user" msgid="7876449291500212468">"Adicionar utilizador"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Adicionar convidado"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Remover convidado"</string>

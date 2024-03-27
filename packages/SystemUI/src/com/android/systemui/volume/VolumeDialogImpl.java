@@ -173,9 +173,9 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     private static final String TYPE_DISMISS = "dismiss";
     /** Volume dialog slider animation. */
     private static final String TYPE_UPDATE = "update";
-    static final short PROGRESS_HAPTICS_DISABLED = 0;
-    static final short PROGRESS_HAPTICS_EAGER = 1;
-    static final short PROGRESS_HAPTICS_ANIMATED = 2;
+    static final int PROGRESS_HAPTICS_DISABLED = 0;
+    static final int PROGRESS_HAPTICS_EAGER = 1;
+    static final int PROGRESS_HAPTICS_ANIMATED = 2;
 
     /**
      *  TODO(b/290612381): remove lingering animations or tolerate them
@@ -851,10 +851,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             row.header.setFilters(new InputFilter[] {new InputFilter.LengthFilter(13)});
         }
         row.slider = row.view.findViewById(R.id.volume_row_slider);
-        if (hapticVolumeSlider()) {
-            row.createPlugin(mVibratorHelper, mSystemClock);
-            HapticSliderViewBinder.bind(row.slider, row.mHapticPlugin);
-        }
+        addSliderHapticsToRow(row);
         row.slider.setOnSeekBarChangeListener(new VolumeSeekBarChangeListener(row));
         row.number = row.view.findViewById(R.id.volume_number);
 
@@ -913,6 +910,23 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 row.icon.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
             }
         }
+    }
+
+    private void addSliderHapticsToRow(VolumeRow row) {
+        if (hapticVolumeSlider()) {
+            row.createPlugin(mVibratorHelper, mSystemClock);
+            HapticSliderViewBinder.bind(row.slider, row.mHapticPlugin);
+        }
+    }
+
+    @VisibleForTesting void addSliderHapticsToRows() {
+        for (VolumeRow row: mRows) {
+            addSliderHapticsToRow(row);
+        }
+    }
+
+    @VisibleForTesting void removeDismissMessages() {
+        mHandler.removeMessages(H.DISMISS);
     }
 
     private void setRingerMode(int newRingerMode) {
@@ -2105,7 +2119,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         }
     }
 
-    @VisibleForTesting short progressHapticsForStream(int stream) {
+    @VisibleForTesting int progressHapticsForStream(int stream) {
         for (VolumeRow row: mRows) {
             if (row.stream == stream) {
                 return row.mProgressHapticsType;
@@ -2619,7 +2633,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         private int animTargetProgress;
         private int lastAudibleLevel = 1;
         private SeekableSliderHapticPlugin mHapticPlugin;
-        private short mProgressHapticsType = PROGRESS_HAPTICS_DISABLED;
+        private int mProgressHapticsType = PROGRESS_HAPTICS_DISABLED;
 
         void setIcon(int iconRes, Resources.Theme theme) {
             if (icon != null) {
@@ -2661,7 +2675,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             slider.setOnTouchListener(null);
         }
 
-        void deliverOnProgressChangedHaptics(boolean fromUser, int progress, short hapticsType) {
+        void deliverOnProgressChangedHaptics(boolean fromUser, int progress, int hapticsType) {
             if (mHapticPlugin == null) return;
 
             mHapticPlugin.onProgressChanged(slider, progress, fromUser);

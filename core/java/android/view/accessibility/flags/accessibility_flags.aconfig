@@ -56,9 +56,12 @@ flag {
 
 flag {
     namespace: "accessibility"
-    name: "fix_merged_content_change_event"
+    name: "fix_merged_content_change_event_v2"
     description: "Fixes event type and source of content change event merged in ViewRootImpl"
     bug: "277305460"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {

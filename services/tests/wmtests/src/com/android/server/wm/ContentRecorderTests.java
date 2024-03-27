@@ -304,8 +304,7 @@ public class ContentRecorderTests extends WindowTestsBase {
         mContentRecorder.updateRecording();
 
         // Resize the output surface.
-        final Point newSurfaceSize = new Point(Math.round(mSurfaceSize.x / 2f),
-                Math.round(mSurfaceSize.y * 2));
+        final Point newSurfaceSize = new Point(Math.round(mSurfaceSize.x / 2f), mSurfaceSize.y * 2);
         doReturn(newSurfaceSize).when(mWm.mDisplayManagerInternal).getDisplaySurfaceDefaultSize(
                 anyInt());
         mContentRecorder.onConfigurationChanged(

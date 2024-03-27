@@ -21,15 +21,12 @@ import android.content.Context
 import android.hardware.devicestate.DeviceStateManager
 import android.os.PowerManager
 import android.provider.Settings
-import androidx.annotation.VisibleForTesting
 import androidx.core.view.OneShotPreDrawListener
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.repeatOnLifecycle
 import com.android.internal.util.LatencyTracker
+import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.shade.ShadeFoldAnimator
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.LightRevealScrim
@@ -40,9 +37,6 @@ import com.android.systemui.unfold.FoldAodAnimationController.FoldAodAnimationSt
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.settings.GlobalSettings
 import dagger.Lazy
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import java.util.function.Consumer
 import javax.inject.Inject
 
@@ -69,7 +63,6 @@ constructor(
     private var isFoldHandled = true
 
     private var alwaysOnEnabled: Boolean = false
-    private var isDozing: Boolean = false
     private var isScrimOpaque: Boolean = false
     private var pendingScrimReadyCallback: Runnable? = null
 
@@ -97,11 +90,6 @@ constructor(
 
         deviceStateManager.registerCallback(mainExecutor, FoldListener())
         wakefulnessLifecycle.addObserver(this)
-
-        // TODO(b/254878364): remove this call to NPVC.getView()
-        getShadeFoldAnimator().view?.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.STARTED) { listenForDozing(this) }
-        }
     }
 
     /** Returns true if we should run fold to AOD animation */
@@ -158,7 +146,8 @@ constructor(
             } else {
                 pendingScrimReadyCallback = onReady
             }
-        } else if (isFolded && !isFoldHandled && alwaysOnEnabled && isDozing) {
+        } else if (isFolded && !isFoldHandled && alwaysOnEnabled &&
+                keyguardInteractor.get().isDozing.value) {
             setAnimationState(playing = true)
             getShadeFoldAnimator().prepareFoldToAodAnimation()
 
@@ -166,8 +155,10 @@ constructor(
             // but we should wait for the initial animation preparations to be drawn
             // (setting initial alpha/translation)
             // TODO(b/254878364): remove this call to NPVC.getView()
-            getShadeFoldAnimator().view?.let {
-                OneShotPreDrawListener.add(it, onReady)
+            if (!migrateClocksToBlueprint()) {
+                getShadeFoldAnimator().view?.let {
+                    OneShotPreDrawListener.add(it, onReady)
+                }
             }
         } else {
             // No animation, call ready callback immediately
@@ -231,11 +222,6 @@ constructor(
 
     override fun removeCallback(listener: FoldAodAnimationStatus) {
         statusListeners.remove(listener)
-    }
-
-    @VisibleForTesting
-    internal suspend fun listenForDozing(scope: CoroutineScope): Job {
-        return scope.launch { keyguardInteractor.get().isDozing.collect { isDozing = it } }
     }
 
     interface FoldAodAnimationStatus {

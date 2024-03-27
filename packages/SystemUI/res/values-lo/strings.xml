@@ -86,6 +86,8 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານບລັອກການຖ່າຍຮູບໜ້າຈໍໄວ້."</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"ແກ້ໄຂ"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"ແກ້ໄຂຮູບໜ້າຈໍ"</string>
+    <!-- no translation found for screenshot_share_label (1653061117238861559) -->
+    <skip />
     <string name="screenshot_share_description" msgid="2861628935812656612">"ແບ່ງປັນຮູບໜ້າຈໍ"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"ຖ່າຍຮູບເພີ່ມເຕີມ"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ປິດຮູບໜ້າຈໍ"</string>
@@ -538,7 +540,10 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"ອຸປະກອນນີ້ແມ່ນຈັດການໂດຍພໍ່ແມ່ຂອງທ່ານ. ພໍ່ແມ່ຂອງທ່ານສາມາດເບິ່ງ ແລະ ຈັດການຂໍ້ມູນໄດ້ ເຊັ່ນ: ແອັບທີ່ທ່ານໃຊ້, ສະຖານທີ່ ແລະ ເວລາໜ້າຈໍຂອງທ່ານ."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"ປັອດລັອກປະໄວ້ໂດຍ TrustAgent"</string>
-    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"ການປ້ອງກັນການຖືກລັກ\nຂອງອຸປະກອນຖືກລັອກ, ພະຍາຍາມປົດລັອກຫຼາຍເທື່ອເກີນໄປ"</string>
+    <!-- no translation found for kg_prompt_after_adaptive_auth_lock (2587481497846342760) -->
+    <skip />
+    <!-- no translation found for keyguard_indication_after_adaptive_auth_lock (2323400645470712787) -->
+    <skip />
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"ການຕັ້ງຄ່າສຽງ"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"ສ້າງຄຳບັນຍາຍມີເດຍໂດຍອັດຕະໂນມັດ"</string>
@@ -583,10 +588,8 @@
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"ປິດ"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"ສົ່ງສັນຍານ"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"ບໍ່ມີໃຫ້ໃຊ້ເນື່ອງຈາກມີການປິດສຽງໂທເຂົ້າ"</string>
-    <!-- no translation found for stream_alarm_unavailable (4059817189292197839) -->
-    <skip />
-    <!-- no translation found for stream_media_unavailable (6823020894438959853) -->
-    <skip />
+    <string name="stream_alarm_unavailable" msgid="4059817189292197839">"ບໍ່ມີໃຫ້ຍ້ອນວ່າຫ້າມລົບກວນເປີດຢູ່"</string>
+    <string name="stream_media_unavailable" msgid="6823020894438959853">"ບໍ່ມີໃຫ້ຍ້ອນວ່າຫ້າມລົບກວນເປີດຢູ່"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. ແຕະເພື່ອເຊົາປິດສຽງ."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. ແຕະເພື່ອຕັ້ງເປັນສັ່ນ. ບໍລິການຊ່ວຍເຂົ້າເຖິງອາດຖືກປິດສຽງໄວ້."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. ແຕະເພື່ອປິດສຽງ. ບໍລິການຊ່ວຍເຂົ້າເຖິງອາດຖືກປິດສຽງໄວ້."</string>
@@ -603,16 +606,11 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"ສັ່ນເຕືອນ"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"ການຄວບຄຸມສຽງ %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"ການໂທ ແລະ ການແຈ້ງເຕືອນຈະມີສຽງດັງ (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
-    <!-- no translation found for volume_panel_enter_media_output_settings (8824244246272552669) -->
-    <skip />
-    <!-- no translation found for volume_panel_expanded_sliders (1885750987768506271) -->
-    <skip />
-    <!-- no translation found for volume_panel_collapsed_sliders (1413383759434791450) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_mute (6962563028495243738) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_unmute (7489063242934477382) -->
-    <skip />
+    <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"ໃສ່ການຄັ້ງຄ່າເອົ້າພຸດ"</string>
+    <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"ຂະຫຍາຍສະໄລເດີລະດັບສຽງແລ້ວ"</string>
+    <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"ຫຍໍ້ສະໄລເດີລະດັບສຽງລົງແລ້ວ"</string>
+    <string name="volume_panel_hint_mute" msgid="6962563028495243738">"ປິດສຽງ %s"</string>
+    <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"ເຊົາປິດສຽງ %s"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"ກຳລັງຫຼິ້ນ <xliff:g id="LABEL">%s</xliff:g> ໃນ"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"ສຽງຈະຫຼິ້ນຕໍ່ໄປ"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
@@ -759,7 +757,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"ສະຫຼັບລະຫວ່າງແອັບຫຼ້າສຸດແບບໄປໜ້າ"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"ສະຫຼັບລະຫວ່າງແອັບຫຼ້າສຸດແບບກັບຫຼັງ"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"ເປີດລາຍຊື່ແອັບ"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"ສະແດງແຖບໜ້າວຽກ"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"ເປີດການຕັ້ງຄ່າ"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"ເປີດຜູ້ຊ່ວຍ"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ໜ້າຈໍລັອກ"</string>
@@ -768,6 +765,10 @@
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"ເຂົ້າສູ່ແບ່ງໜ້າຈໍດ້ວຍແອັບປັດຈຸບັນໄປຫາ RHS"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"ເຂົ້າສູ່ແບ່ງໜ້າຈໍດ້ວຍແອັບປັດຈຸບັນໄປຫາ LHS"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"ສະຫຼັບຈາກແບ່ງໜ້າຈໍໄປເປັນເຕັມຈໍ"</string>
+    <!-- no translation found for system_multitasking_splitscreen_focus_rhs (3838578650313318508) -->
+    <skip />
+    <!-- no translation found for system_multitasking_splitscreen_focus_lhs (3164261844398662518) -->
+    <skip />
     <string name="system_multitasking_replace" msgid="7410071959803642125">"ໃນລະຫວ່າງແບ່ງໜ້າຈໍ: ໃຫ້ປ່ຽນຈາກແອັບໜຶ່ງເປັນອີກແອັບໜຶ່ງ"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"ການປ້ອນຂໍ້ມູນ"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"ສະຫຼັບເປັນພາສາຖັດໄປ"</string>
@@ -791,7 +792,7 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"ເປີດການຕັ້ງຄ່າ"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"ເຊື່ອມຕໍ່ຊຸດຫູຟັງແລ້ວ"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"ເຊື່ອມ​ຕໍ່ຊຸດ​ຫູ​ຟັງແລ້ວ"</string>
-    <string name="data_saver" msgid="3484013368530820763">"ຕົວປະຢັດອິນເຕີເນັດ"</string>
+    <string name="data_saver" msgid="3484013368530820763">"ຕົວປະຢັດຂໍ້ມູນ"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"ເປີດຕົວປະຢັດອິນເຕີເນັດຢູ່"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"ເປີດ"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"ປິດ"</string>
@@ -1266,8 +1267,7 @@
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"ກ້ອງຖ່າຍຮູບຖືກບລັອກຢູ່"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"ກ້ອງຖ່າຍຮູບ ແລະ ໄມໂຄຣໂຟນຖືກບລັອກຢູ່"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"ໄມໂຄຣໂຟນຖືກບລັອກຢູ່"</string>
-    <!-- no translation found for priority_mode_dream_overlay_content_description (3361628029609329182) -->
-    <skip />
+    <string name="priority_mode_dream_overlay_content_description" msgid="3361628029609329182">"ຫ້າມລົບກວນ"</string>
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"ກວດພົບຕົວຕົນຜູ້ໃຊ້"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ຕັ້ງຄ່າແອັບຈົດບັນທຶກເລີ່ມຕົ້ນໃນການຕັ້ງຄ່າ"</string>
     <string name="install_app" msgid="5066668100199613936">"ຕິດຕັ້ງແອັບ"</string>

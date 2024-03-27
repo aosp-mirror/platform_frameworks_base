@@ -16,12 +16,16 @@
 
 package com.android.systemui.keyguard.ui.composable.section
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -31,11 +35,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.SceneTransitionLayout
+import com.android.compose.modifiers.thenIf
 import com.android.systemui.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
-import com.android.systemui.keyguard.ui.composable.blueprint.ClockScenes
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockScenes.largeClockScene
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockScenes.smallClockScene
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockScenes.splitShadeLargeClockScene
@@ -63,6 +68,9 @@ constructor(
     ) {
         val isLargeClockVisible by clockViewModel.isLargeClockVisible.collectAsState()
         val currentClockLayout by clockViewModel.currentClockLayout.collectAsState()
+        val hasCustomPositionUpdatedAnimation by
+            clockViewModel.hasCustomPositionUpdatedAnimation.collectAsState()
+
         val currentScene =
             when (currentClockLayout) {
                 KeyguardClockViewModel.ClockLayout.SPLIT_SHADE_LARGE_CLOCK ->
@@ -94,12 +102,10 @@ constructor(
             transitions = ClockTransition.defaultClockTransitions,
             enableInterruptions = false,
         ) {
-            scene(ClockScenes.splitShadeLargeClockScene) {
-                Row(
-                    modifier = Modifier.fillMaxSize(),
-                ) {
+            scene(splitShadeLargeClockScene) {
+                Box(modifier = Modifier.fillMaxSize()) {
                     Column(
-                        modifier = Modifier.fillMaxHeight().weight(weight = 1f),
+                        modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         with(smartSpaceSection) {
@@ -108,8 +114,34 @@ constructor(
                                 onTopChanged = burnIn.onSmartspaceTopChanged,
                             )
                         }
-                        with(clockSection) { LargeClock(modifier = Modifier.fillMaxWidth()) }
+
+                        with(clockSection) {
+                            LargeClock(
+                                modifier =
+                                    Modifier.fillMaxSize().thenIf(
+                                        !hasCustomPositionUpdatedAnimation
+                                    ) {
+                                        // If we do not have a custom position animation, we want
+                                        // the clock to be on one half of the screen.
+                                        Modifier.offset {
+                                            IntOffset(
+                                                x =
+                                                    -clockSection
+                                                        .getClockCenteringDistance()
+                                                        .toInt(),
+                                                y = 0,
+                                            )
+                                        }
+                                    }
+                            )
+                        }
                     }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    Spacer(modifier = Modifier.weight(weight = 1f))
                     with(notificationSection) {
                         Notifications(
                             modifier =
@@ -121,7 +153,7 @@ constructor(
                 }
             }
 
-            scene(ClockScenes.splitShadeSmallClockScene) {
+            scene(splitShadeSmallClockScene) {
                 Row(
                     modifier = Modifier.fillMaxSize(),
                 ) {
@@ -133,7 +165,7 @@ constructor(
                             SmallClock(
                                 burnInParams = burnIn.parameters,
                                 onTopChanged = burnIn.onSmallClockTopChanged,
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.wrapContentSize()
                             )
                         }
                         with(smartSpaceSection) {
@@ -155,13 +187,13 @@ constructor(
                 }
             }
 
-            scene(ClockScenes.smallClockScene) {
+            scene(smallClockScene) {
                 Column {
                     with(clockSection) {
                         SmallClock(
                             burnInParams = burnIn.parameters,
                             onTopChanged = burnIn.onSmallClockTopChanged,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.wrapContentSize()
                         )
                     }
                     with(smartSpaceSection) {
@@ -172,15 +204,12 @@ constructor(
                     }
                     with(mediaCarouselSection) { MediaCarousel() }
                     with(notificationSection) {
-                        Notifications(
-                            modifier =
-                                androidx.compose.ui.Modifier.fillMaxWidth().weight(weight = 1f)
-                        )
+                        Notifications(modifier = Modifier.fillMaxWidth().weight(weight = 1f))
                     }
                 }
             }
 
-            scene(ClockScenes.largeClockScene) {
+            scene(largeClockScene) {
                 Column {
                     with(smartSpaceSection) {
                         SmartSpace(
@@ -188,7 +217,7 @@ constructor(
                             onTopChanged = burnIn.onSmartspaceTopChanged,
                         )
                     }
-                    with(clockSection) { LargeClock(modifier = Modifier.fillMaxWidth()) }
+                    with(clockSection) { LargeClock(modifier = Modifier.fillMaxSize()) }
                 }
             }
         }

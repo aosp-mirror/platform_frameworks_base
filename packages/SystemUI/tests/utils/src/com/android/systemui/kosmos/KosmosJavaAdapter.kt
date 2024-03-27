@@ -39,6 +39,7 @@ import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.domain.interactor.fromGoneTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.fromLockscreenTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.fromPrimaryBouncerTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.model.sceneContainerPlugin
 import com.android.systemui.plugins.statusbar.statusBarStateController
@@ -48,6 +49,7 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.sceneDataSource
+import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 import com.android.systemui.statusbar.phone.screenOffAnimationController
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvisioningRepository
@@ -100,6 +102,10 @@ class KosmosJavaAdapter(
     val fromGoneTransitionInteractor by lazy { kosmos.fromGoneTransitionInteractor }
     val globalActionsInteractor by lazy { kosmos.globalActionsInteractor }
     val sceneDataSource by lazy { kosmos.sceneDataSource }
+    val keyguardClockInteractor by lazy { kosmos.keyguardClockInteractor }
+    val sharedNotificationContainerInteractor by lazy {
+        kosmos.sharedNotificationContainerInteractor
+    }
 
     init {
         kosmos.applicationContext = testCase.context

@@ -267,6 +267,15 @@ public abstract class PackageManager {
             "android.app.PROPERTY_LEGACY_UPDATE_OWNERSHIP_DENYLIST";
 
     /**
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager
+     * .Property} for a app to inform the installer that a file containing the app's android
+     * safety label data is bundled into the APK at the given path.
+     * @hide
+     */
+    public static final String PROPERTY_ANDROID_SAFETY_LABEL_PATH =
+            "android.content.SAFETY_LABEL_PATH";
+
+    /**
      * A property value set within the manifest.
      * <p>
      * The value of a property will only have a single type, as defined by
@@ -3260,6 +3269,16 @@ public abstract class PackageManager {
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_CAR_SPLITSCREEN_MULTITASKING =
             "android.software.car.splitscreen_multitasking";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: This device is capable of launching apps in automotive display
+     * compatibility mode.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_CAR_DISPLAY_COMPATIBILITY =
+            "android.software.car.display_compatibility";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and

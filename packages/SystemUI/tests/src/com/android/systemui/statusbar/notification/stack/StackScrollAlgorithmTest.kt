@@ -886,7 +886,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     fun shadeClosed_hunShouldHaveFullShadow() {
         // Given: shade is closed, ambientState.stackTranslation == -ambientState.topPadding,
         // the height of HUN is equal to the height of QQS Panel,
-        ambientState.stackTranslation = -ambientState.topPadding
+        ambientState.stackTranslation = (-ambientState.topPadding).toFloat()
         // Mock the height of shade
         ambientState.setLayoutMinHeight(1000)
         val childHunView =
@@ -914,7 +914,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     fun draggingHunToOpenShade_hunShouldHavePartialShadow() {
         // Given: shade is closed when HUN pops up,
         // now drags down the HUN to open shade
-        ambientState.stackTranslation = -ambientState.topPadding
+        ambientState.stackTranslation = (-ambientState.topPadding).toFloat()
         // Mock the height of shade
         ambientState.setLayoutMinHeight(1000)
         val childHunView =

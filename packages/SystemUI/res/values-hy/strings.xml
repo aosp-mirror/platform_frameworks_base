@@ -86,6 +86,8 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Ձեր ՏՏ ադմինիստրատորն արգելափակել է սքրինշոթներ անելու հնարավորությունը"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Փոփոխել"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Փոփոխել սքրինշոթը"</string>
+    <!-- no translation found for screenshot_share_label (1653061117238861559) -->
+    <skip />
     <string name="screenshot_share_description" msgid="2861628935812656612">"Ուղարկել սքրինշոթ"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Մեծացնել սքրինշոթի տարածքը"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Փակել սքրինշոթը"</string>
@@ -538,7 +540,8 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Այս սարքը կառավարում է ձեր ծնողը։ Նա կարող է դիտել և փոփոխել որոշակի տեղեկություններ, օրինակ՝ հավելվածները, որոնք դուք օգտագործում եք, ձեր տեղադրությունը և սարքի օգտագործման ժամանակը։"</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Ապակողպվում է TrustAgent-ի միջոցով"</string>
-    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"Գողությունից պաշտպանություն\nՍարքը կողպվել է, ապակողպման շատ փորձեր"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"Սարքը կողպվել է․ իսկորոշման չափազանց շատ փորձեր են արվել"</string>
+    <string name="keyguard_indication_after_adaptive_auth_lock" msgid="2323400645470712787">"Սարքը կողպվել է\nՉհաջողվեց իսկորոշել"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Ձայնի կարգավորումներ"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Ավտոմատ ավելացնել ենթագրեր"</string>
@@ -583,10 +586,8 @@
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Անձայն"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"Հեռարձակում"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Հասանելի չէ, երբ զանգի ձայնն անջատված է"</string>
-    <!-- no translation found for stream_alarm_unavailable (4059817189292197839) -->
-    <skip />
-    <!-- no translation found for stream_media_unavailable (6823020894438959853) -->
-    <skip />
+    <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Հասանելի չէ․ «Չանհանգստացնել» ռեժիմը միացված է"</string>
+    <string name="stream_media_unavailable" msgid="6823020894438959853">"Հասանելի չէ․ «Չանհանգստացնել» ռեժիմը միացված է"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s: Հպեք՝ ձայնը միացնելու համար:"</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s: Հպեք՝ թրթռումը միացնելու համար: Մատչելիության ծառայությունների ձայնը կարող է անջատվել:"</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s: Հպեք՝ ձայնն անջատելու համար: Մատչելիության ծառայությունների ձայնը կարող է անջատվել:"</string>
@@ -603,16 +604,11 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"միացնել թրթռոցը"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"Ձայնի ուժգնության կառավարներ` %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Զանգերի և ծանուցումների համար հեռախոսի ձայնը միացված է (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
-    <!-- no translation found for volume_panel_enter_media_output_settings (8824244246272552669) -->
-    <skip />
-    <!-- no translation found for volume_panel_expanded_sliders (1885750987768506271) -->
-    <skip />
-    <!-- no translation found for volume_panel_collapsed_sliders (1413383759434791450) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_mute (6962563028495243738) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_unmute (7489063242934477382) -->
-    <skip />
+    <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"Բացել նվագարկման կարգավորումները"</string>
+    <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"Ձայնի ուժգնության սահիչները ծավալված են"</string>
+    <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"Ձայնի ուժգնության սահիչները ծալված են"</string>
+    <string name="volume_panel_hint_mute" msgid="6962563028495243738">"անջատել ձայնը (%s)"</string>
+    <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"միացնել ձայնը (%s)"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g>. նվագարկվում է"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"Աուդիոն կնվագարկվի"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Համակարգի ՕՄ-ի կարգավորիչ"</string>
@@ -759,7 +755,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Առաջ անցնել վերջին հավելվածների միջով"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Հետ անցնել վերջին հավելվածների միջով"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Բացել հավելվածների ցանկը"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Ցուցադրել հավելվածների վահանակը"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Բացել կարգավորումները"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Բացել Օգնականը"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Կողպէկրան"</string>
@@ -768,6 +763,10 @@
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Միացնել էկրանի տրոհումը՝ ընթացիկ հավելվածն աջ կողմում"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Միացնել էկրանի տրոհումը՝ ընթացիկ հավելվածը ձախ կողմում"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Տրոհված էկրանից անցնել լիաէկրան ռեժիմ"</string>
+    <!-- no translation found for system_multitasking_splitscreen_focus_rhs (3838578650313318508) -->
+    <skip />
+    <!-- no translation found for system_multitasking_splitscreen_focus_lhs (3164261844398662518) -->
+    <skip />
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Տրոհված էկրանի ռեժիմում մեկ հավելվածը փոխարինել մյուսով"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Ներածում"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Անցնել հաջորդ լեզվին"</string>
@@ -1266,8 +1265,7 @@
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Տեսախցիկն արգելափակված է"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Տեսախցիկն ու խոսափողը արգելափակված են"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Խոսափողն արգելափակված է"</string>
-    <!-- no translation found for priority_mode_dream_overlay_content_description (3361628029609329182) -->
-    <skip />
+    <string name="priority_mode_dream_overlay_content_description" msgid="3361628029609329182">"Չանհանգստացնել"</string>
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"Հայտնաբերվել է օգտատեր"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Կարգավորեք նշումների կանխադրված հավելված Կարգավորումներում"</string>
     <string name="install_app" msgid="5066668100199613936">"Տեղադրել հավելվածը"</string>

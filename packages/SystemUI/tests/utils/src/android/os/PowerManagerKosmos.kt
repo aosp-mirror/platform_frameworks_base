@@ -14,32 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.server.inputmethod;
+package android.os
 
-import com.android.internal.annotations.GuardedBy;
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.util.mockito.mock
 
-/**
- * A sequence number utility class that only generate positive numbers.
- */
-final class Sequence {
-
-    private final Object mLock = new Object();
-
-    private int mSequence;
-
-    int getSequenceNumber() {
-        synchronized (mLock) {
-            return mSequence;
-        }
-    }
-
-    @GuardedBy("ImfLock.class")
-    void advanceSequenceNumber() {
-        synchronized (mLock) {
-            mSequence++;
-            if (mSequence <= 0) {
-                mSequence = 1;
-            }
-        }
-    }
-}
+var Kosmos.powerManager by Kosmos.Fixture { mock<PowerManager>() }

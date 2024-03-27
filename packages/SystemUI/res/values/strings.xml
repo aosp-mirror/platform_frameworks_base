@@ -380,6 +380,8 @@
     <!-- Button name for "Cancel". [CHAR LIMIT=NONE] -->
     <string name="cancel">Cancel</string>
 
+    <!-- Content description for the app logo icon on biometric prompt. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_logo">App logo</string>
     <!-- Message shown when a biometric is authenticated, asking the user to confirm authentication [CHAR LIMIT=30] -->
     <string name="biometric_dialog_confirm">Confirm</string>
     <!-- Button name on BiometricPrompt shown when a biometric is detected but not authenticated. Tapping the button resumes authentication [CHAR LIMIT=30] -->
@@ -408,6 +410,8 @@
     <string name="biometric_dialog_authenticated">Authenticated</string>
     <!-- Talkback string when a canceling authentication [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_cancel_authentication">Cancel Authentication</string>
+    <!-- Content description for the more options button on biometric prompt content view. [CHAR LIMIT=60] -->
+    <string name="biometric_dialog_content_view_more_options_button">More Options</string>
 
     <!-- Button text shown on BiometricPrompt giving the user the option to use an alternate form of authentication (Pin) [CHAR LIMIT=30] -->
     <string name="biometric_dialog_use_pin">Use PIN</string>

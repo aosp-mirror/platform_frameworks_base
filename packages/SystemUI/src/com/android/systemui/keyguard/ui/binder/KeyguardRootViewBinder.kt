@@ -44,6 +44,7 @@ import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
+import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -97,6 +98,7 @@ object KeyguardRootViewBinder {
         deviceEntryHapticsInteractor: DeviceEntryHapticsInteractor?,
         vibratorHelper: VibratorHelper?,
         falsingManager: FalsingManager?,
+        keyguardViewMediator: KeyguardViewMediator?,
     ): DisposableHandle {
         var onLayoutChangeListener: OnLayoutChange? = null
         val childViews = mutableMapOf<Int, View>()
@@ -298,8 +300,12 @@ object KeyguardRootViewBinder {
                                         }
                                         TransitionState.CANCELED ->
                                             jankMonitor.cancel(CUJ_SCREEN_OFF_SHOW_AOD)
-                                        TransitionState.FINISHED ->
+                                        TransitionState.FINISHED -> {
+                                            if (MigrateClocksToBlueprint.isEnabled) {
+                                                keyguardViewMediator?.maybeHandlePendingLock()
+                                            }
                                             jankMonitor.end(CUJ_SCREEN_OFF_SHOW_AOD)
+                                        }
                                         TransitionState.RUNNING -> Unit
                                     }
                                 }

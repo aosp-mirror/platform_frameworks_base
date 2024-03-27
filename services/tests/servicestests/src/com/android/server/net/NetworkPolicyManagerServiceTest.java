@@ -2315,10 +2315,11 @@ public class NetworkPolicyManagerServiceTest {
         }
         waitForUidEventHandlerIdle();
         try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
-            // Doesn't cross any other threshold.
+            // Doesn't cross any threshold, but changes below TOP_THRESHOLD_STATE should always
+            // be processed
             callOnUidStatechanged(UID_A, TOP_THRESHOLD_STATE - 1, testProcStateSeq++,
                     PROCESS_CAPABILITY_NONE);
-            assertFalse(mService.mUidEventHandler.hasMessages(UID_MSG_STATE_CHANGED));
+            assertTrue(mService.mUidEventHandler.hasMessages(UID_MSG_STATE_CHANGED));
         }
         waitForUidEventHandlerIdle();
     }
@@ -2349,21 +2350,21 @@ public class NetworkPolicyManagerServiceTest {
         int testProcStateSeq = 0;
         try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
             // First callback for uid.
-            callOnUidStatechanged(UID_A, TOP_THRESHOLD_STATE, testProcStateSeq++,
+            callOnUidStatechanged(UID_A, FOREGROUND_THRESHOLD_STATE, testProcStateSeq++,
                     PROCESS_CAPABILITY_NONE);
             assertTrue(mService.mUidEventHandler.hasMessages(UID_MSG_STATE_CHANGED));
         }
         waitForUidEventHandlerIdle();
         try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
             // The same process-state with one network capability added.
-            callOnUidStatechanged(UID_A, TOP_THRESHOLD_STATE, testProcStateSeq++,
+            callOnUidStatechanged(UID_A, FOREGROUND_THRESHOLD_STATE, testProcStateSeq++,
                     PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK);
             assertTrue(mService.mUidEventHandler.hasMessages(UID_MSG_STATE_CHANGED));
         }
         waitForUidEventHandlerIdle();
         try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
             // The same process-state with another network capability added.
-            callOnUidStatechanged(UID_A, TOP_THRESHOLD_STATE, testProcStateSeq++,
+            callOnUidStatechanged(UID_A, FOREGROUND_THRESHOLD_STATE, testProcStateSeq++,
                     PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK
                             | PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK);
             assertTrue(mService.mUidEventHandler.hasMessages(UID_MSG_STATE_CHANGED));
@@ -2371,9 +2372,19 @@ public class NetworkPolicyManagerServiceTest {
         waitForUidEventHandlerIdle();
         try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
             // The same process-state with all capabilities, but no change in network capabilities.
-            callOnUidStatechanged(UID_A, TOP_THRESHOLD_STATE, testProcStateSeq++,
+            callOnUidStatechanged(UID_A, FOREGROUND_THRESHOLD_STATE, testProcStateSeq++,
                     PROCESS_CAPABILITY_ALL);
             assertFalse(mService.mUidEventHandler.hasMessages(UID_MSG_STATE_CHANGED));
+        }
+        waitForUidEventHandlerIdle();
+
+        callAndWaitOnUidStateChanged(UID_A, TOP_THRESHOLD_STATE, testProcStateSeq++,
+                PROCESS_CAPABILITY_ALL);
+        try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
+            // No change in capabilities, but TOP_THRESHOLD_STATE change should always be processed.
+            callOnUidStatechanged(UID_A, TOP_THRESHOLD_STATE, testProcStateSeq++,
+                    PROCESS_CAPABILITY_ALL);
+            assertTrue(mService.mUidEventHandler.hasMessages(UID_MSG_STATE_CHANGED));
         }
         waitForUidEventHandlerIdle();
     }

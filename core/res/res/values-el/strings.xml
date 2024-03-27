@@ -84,7 +84,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Δεν είναι δυνατή η σύνδεση στο δίκτυο κινητής τηλεφωνίας"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Δοκιμάστε να αλλάξετε το προτιμώμενο δίκτυο. Πατήστε για αλλαγή."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Οι κλήσεις έκτακτης ανάγκης δεν είναι διαθέσιμες"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Δεν είναι δυνατή η πραγματοποίηση κλήσεων έκτακτης ανάγκης μέσω Wi‑Fi"</string>
+    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Ειδοποιήσεις"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Προώθηση κλήσης"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Λειτουργία επιστροφής κλήσης έκτακτης ανάγκης"</string>
@@ -1183,6 +1184,10 @@
     <string name="deleteText" msgid="4200807474529938112">"Διαγραφή"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Μέθοδος εισόδου"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Ενέργειες κειμένου"</string>
+    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
+    <skip />
+    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
+    <skip />
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Πίσω"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Εναλλαγή μεθόδου εισαγωγής"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Ο αποθηκευτικός χώρος εξαντλείται"</string>
@@ -1900,7 +1905,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Η Εξοικονόμηση μπαταρίας ενεργοποιεί το Σκούρο θέμα και περιορίζει ή απενεργοποιεί τη δραστηριότητα στο παρασκήνιο, ορισμένα οπτικά εφέ, συγκεκριμένες λειτουργίες και κάποιες συνδέσεις δικτύου."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Η Εξοικονόμηση μπαταρίας ενεργοποιεί το Σκούρο θέμα και περιορίζει ή απενεργοποιεί τη δραστηριότητα στο παρασκήνιο, ορισμένα οπτικά εφέ, συγκεκριμένες λειτουργίες και ορισμένες συνδέσεις δικτύου."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Προκειμένου να μειωθεί η χρήση δεδομένων, η Εξοικονόμηση δεδομένων αποτρέπει την αποστολή ή λήψη δεδομένων από ορισμένες εφαρμογές στο παρασκήνιο. Μια εφαρμογή που χρησιμοποιείτε αυτήν τη στιγμή μπορεί να χρησιμοποιήσει δεδομένα αλλά με μικρότερη συχνότητα. Για παράδειγμα, οι εικόνες μπορεί να μην εμφανίζονται μέχρι να τις πατήσετε."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Προκειμένου να μειωθεί η χρήση δεδομένων, η Εξοικονόμηση δεδομένων αποτρέπει την αποστολή ή λήψη δεδομένων από ορισμένες εφαρμογές στο παρασκήνιο. Μια εφαρμογή που χρησιμοποιείτε αυτή τη στιγμή μπορεί να χρησιμοποιήσει δεδομένα αλλά με μικρότερη συχνότητα. Για παράδειγμα, οι εικόνες μπορεί να μην εμφανίζονται μέχρι να τις πατήσετε."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Ενεργ. Εξοικονόμησης δεδομένων;"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ενεργοποίηση"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Για ένα λεπτό (μέχρι τις {formattedTime})}other{Για # λεπτά (μέχρι τις {formattedTime})}}"</string>

@@ -25,7 +25,9 @@
 #include <hwui/AnimatedImageDrawable.h>
 #include <hwui/Canvas.h>
 #include <hwui/ImageDecoder.h>
+#ifdef __ANDROID__
 #include <utils/Looper.h>
+#endif
 
 #include "ColorFilter.h"
 #include "GraphicsJNI.h"
@@ -180,6 +182,23 @@ static void AnimatedImageDrawable_nSetRepeatCount(JNIEnv* env, jobject /*clazz*/
     drawable->setRepetitionCount(loopCount);
 }
 
+#ifndef __ANDROID__
+struct Message {
+    Message(int w) {}
+};
+
+class MessageHandler : public virtual RefBase {
+protected:
+    virtual ~MessageHandler() override {}
+
+public:
+    /**
+     * Handles a message.
+     */
+    virtual void handleMessage(const Message& message) = 0;
+};
+#endif
+
 class InvokeListener : public MessageHandler {
 public:
     InvokeListener(JNIEnv* env, jobject javaObject) {
@@ -204,6 +223,7 @@ private:
 };
 
 class JniAnimationEndListener : public OnAnimationEndListener {
+#ifdef __ANDROID__
 public:
     JniAnimationEndListener(sp<Looper>&& looper, JNIEnv* env, jobject javaObject) {
         mListener = new InvokeListener(env, javaObject);
@@ -215,6 +235,17 @@ public:
 private:
     sp<InvokeListener> mListener;
     sp<Looper> mLooper;
+#else
+public:
+    JniAnimationEndListener(JNIEnv* env, jobject javaObject) {
+        mListener = new InvokeListener(env, javaObject);
+    }
+
+    void onAnimationEnd() override { mListener->handleMessage(0); }
+
+private:
+    sp<InvokeListener> mListener;
+#endif
 };
 
 static void AnimatedImageDrawable_nSetOnAnimationEndListener(JNIEnv* env, jobject /*clazz*/,
@@ -223,6 +254,7 @@ static void AnimatedImageDrawable_nSetOnAnimationEndListener(JNIEnv* env, jobjec
     if (!jdrawable) {
         drawable->setOnAnimationEndListener(nullptr);
     } else {
+#ifdef __ANDROID__
         sp<Looper> looper = Looper::getForThread();
         if (!looper.get()) {
             doThrowISE(env,
@@ -233,6 +265,10 @@ static void AnimatedImageDrawable_nSetOnAnimationEndListener(JNIEnv* env, jobjec
 
         drawable->setOnAnimationEndListener(
                 std::make_unique<JniAnimationEndListener>(std::move(looper), env, jdrawable));
+#else
+        drawable->setOnAnimationEndListener(
+                std::make_unique<JniAnimationEndListener>(env, jdrawable));
+#endif
     }
 }
 

@@ -108,15 +108,20 @@ private class VolumeSliderContentMeasurePolicy(private val isEnabled: Boolean) :
             measurables
                 .fastFirst { it.layoutId == VolumeSliderContentComponent.Label }
                 .measure(constraints)
-        val layoutWidth: Int = constraints.maxWidth
+        val layoutWidth: Int =
+            if (isEnabled) {
+                labelPlaceable.width
+            } else {
+                constraints.maxWidth
+            }
         val fullLayoutWidth: Int =
             if (isEnabled) {
                 // PlatformSlider uses half of the available space for the enabled state.
                 // This is using it to allow disabled message to take whole space when animating to
                 // prevent it from jumping left to right
-                layoutWidth * 2
+                constraints.maxWidth * 2
             } else {
-                layoutWidth
+                constraints.maxWidth
             }
 
         val disabledMessagePlaceable =

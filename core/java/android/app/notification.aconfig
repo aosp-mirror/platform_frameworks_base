@@ -72,3 +72,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "update_ranking_time"
+  namespace: "systemui"
+  description: "Updates notification sorting criteria to highlight new content while maintaining stability"
+  bug: "326016985"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

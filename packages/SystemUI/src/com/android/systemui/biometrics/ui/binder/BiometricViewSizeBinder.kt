@@ -121,10 +121,6 @@ object BiometricViewSizeBinder {
 
             val largeConstraintSet = ConstraintSet()
             largeConstraintSet.clone(mediumConstraintSet)
-            largeConstraintSet.setVisibility(iconHolderView.id, View.GONE)
-            largeConstraintSet.setVisibility(R.id.biometric_icon_overlay, View.GONE)
-            largeConstraintSet.setVisibility(R.id.indicator, View.GONE)
-            largeConstraintSet.setVisibility(R.id.scrollView, View.GONE)
 
             // TODO: Investigate better way to handle 180 rotations
             val flipConstraintSet = ConstraintSet()
@@ -286,6 +282,10 @@ object BiometricViewSizeBinder {
 
                 fun setVisibilities(size: PromptSize) {
                     viewsToHideWhenSmall.forEach { it.showContentOrHide(forceHide = size.isSmall) }
+                    largeConstraintSet.setVisibility(iconHolderView.id, View.GONE)
+                    largeConstraintSet.setVisibility(R.id.biometric_icon_overlay, View.GONE)
+                    largeConstraintSet.setVisibility(R.id.indicator, View.GONE)
+                    largeConstraintSet.setVisibility(R.id.scrollView, View.GONE)
 
                     if (viewModel.showBpWithoutIconForCredential.value) {
                         smallConstraintSet.setVisibility(iconHolderView.id, View.GONE)

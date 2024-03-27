@@ -255,9 +255,11 @@ package com.android.server.display.config {
     method public java.util.List<java.lang.Float> getBacklight();
     method public java.util.List<java.lang.Float> getBrightness();
     method public boolean getEnabled();
+    method public com.android.server.display.config.NitsMap getLuxToMinimumNitsMap();
     method public java.util.List<java.lang.Float> getNits();
     method public java.math.BigDecimal getTransitionPoint();
     method public void setEnabled(boolean);
+    method public void setLuxToMinimumNitsMap(com.android.server.display.config.NitsMap);
     method public void setTransitionPoint(java.math.BigDecimal);
   }
 

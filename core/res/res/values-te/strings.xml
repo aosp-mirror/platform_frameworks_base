@@ -84,7 +84,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"మొబైల్ నెట్‌వర్క్ అందుబాటులో లేదు"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ప్రాధాన్య నెట్‌వర్క్‌ను మార్చుకోవడానికి ప్రయత్నించండి. మార్చడానికి నొక్కండి."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"అత్యవసర కాలింగ్ అందుబాటులో లేదు"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Wi-Fiతో అత్యవసర కాల్స్‌ చేయలేరు"</string>
+    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"అలర్ట్‌లు"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"కాల్ ఫార్వార్డింగ్"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"అత్యవసర కాల్‌బ్యాక్ మోడ్"</string>
@@ -278,7 +279,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"సెట్టింగ్‌లు"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"సహాయం"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"వాయిస్ అసిస్టెంట్"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"లాక్ చేయి"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"లాక్ చేయండి"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"కొత్త నోటిఫికేషన్"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"భౌతిక కీబోర్డ్"</string>
@@ -1183,6 +1184,10 @@
     <string name="deleteText" msgid="4200807474529938112">"తొలగించండి"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ఇన్‌పుట్ పద్ధతి"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"వచనానికి సంబంధించిన చర్యలు"</string>
+    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
+    <skip />
+    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
+    <skip />
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"వెనుకకు"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ఇన్‌పుట్ విధానాన్ని మార్చండి"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"స్టోరేజ్‌ ఖాళీ అయిపోతోంది"</string>

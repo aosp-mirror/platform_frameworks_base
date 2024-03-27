@@ -16,13 +16,19 @@
 
 package com.android.systemui.keyguard.ui.binder
 
-import android.view.View
+import android.graphics.PixelFormat
+import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.view.WindowManager
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.classifier.Classifier
+import com.android.systemui.CoreStartable
+import com.android.systemui.biometrics.Utils
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.deviceentry.ui.binder.UdfpsAccessibilityOverlayBinder
 import com.android.systemui.deviceentry.ui.view.UdfpsAccessibilityOverlay
@@ -30,24 +36,98 @@ import com.android.systemui.deviceentry.ui.viewmodel.AlternateBouncerUdfpsAccess
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerUdfpsIconViewModel
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerWindowViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.scrim.ScrimView
 import dagger.Lazy
+import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 
 /**
- * Binds the alternate bouncer view to its view-model.
+ * When necessary, adds the alternate bouncer window above most other windows (including the
+ * notification shade, system UI dialogs) but below the UDFPS touch overlay and SideFPS indicator.
+ * Also binds the alternate bouncer view to its view-model.
  *
- * For devices that support UDFPS, this includes a UDFPS view.
+ * For devices that support UDFPS, this view includes a UDFPS view.
  */
-@ExperimentalCoroutinesApi
-object AlternateBouncerViewBinder {
+@OptIn(ExperimentalCoroutinesApi::class)
+@SysUISingleton
+class AlternateBouncerViewBinder
+@Inject
+constructor(
+    @Application private val applicationScope: CoroutineScope,
+    private val alternateBouncerWindowViewModel: Lazy<AlternateBouncerWindowViewModel>,
+    private val alternateBouncerDependencies: Lazy<AlternateBouncerDependencies>,
+    private val windowManager: Lazy<WindowManager>,
+    private val layoutInflater: Lazy<LayoutInflater>,
+) : CoreStartable {
+    private val layoutParams: WindowManager.LayoutParams
+        get() =
+            WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG,
+                    Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS,
+                    PixelFormat.TRANSLUCENT
+                )
+                .apply {
+                    title = "AlternateBouncerView"
+                    fitInsetsTypes = 0 // overrides default, avoiding status bars during layout
+                    gravity = Gravity.TOP or Gravity.LEFT
+                    layoutInDisplayCutoutMode =
+                        WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+                    privateFlags =
+                        WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY or
+                            WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION
+                }
+    private var alternateBouncerView: ConstraintLayout? = null
+
+    override fun start() {
+        if (!DeviceEntryUdfpsRefactor.isEnabled) {
+            return
+        }
+        applicationScope.launch {
+            alternateBouncerWindowViewModel.get().alternateBouncerWindowRequired.collect {
+                addAlternateBouncerWindowView ->
+                if (addAlternateBouncerWindowView) {
+                    addViewToWindowManager()
+                    val scrim =
+                        alternateBouncerView!!.requireViewById(R.id.alternate_bouncer_scrim)
+                            as ScrimView
+                    scrim.viewAlpha = 0f
+                    bind(alternateBouncerView!!, alternateBouncerDependencies.get())
+                } else {
+                    removeViewFromWindowManager()
+                    alternateBouncerDependencies.get().viewModel.hideAlternateBouncer()
+                }
+            }
+        }
+    }
+
+    private fun removeViewFromWindowManager() {
+        if (alternateBouncerView == null || !alternateBouncerView!!.isAttachedToWindow) {
+            return
+        }
+
+        windowManager.get().removeView(alternateBouncerView)
+    }
+
+    private fun addViewToWindowManager() {
+        if (alternateBouncerView?.isAttachedToWindow == true) {
+            return
+        }
+
+        alternateBouncerView =
+            layoutInflater.get().inflate(R.layout.alternate_bouncer, null, false)
+                as ConstraintLayout
+
+        windowManager.get().addView(alternateBouncerView, layoutParams)
+    }
 
     /** Binds the view to the view-model, continuing to update the former based on the latter. */
-    @JvmStatic
     fun bind(
         view: ConstraintLayout,
         alternateBouncerDependencies: AlternateBouncerDependencies,
@@ -71,27 +151,20 @@ object AlternateBouncerViewBinder {
         val viewModel = alternateBouncerDependencies.viewModel
         val swipeUpAnywhereGestureHandler =
             alternateBouncerDependencies.swipeUpAnywhereGestureHandler
-        val falsingManager = alternateBouncerDependencies.falsingManager
         val tapGestureDetector = alternateBouncerDependencies.tapGestureDetector
         view.repeatWhenAttached { alternateBouncerViewContainer ->
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                scrim.viewAlpha = 0f
-
                 launch {
                     viewModel.registerForDismissGestures.collect { registerForDismissGestures ->
                         if (registerForDismissGestures) {
                             swipeUpAnywhereGestureHandler.addOnGestureDetectedCallback(swipeTag) { _
                                 ->
-                                if (
-                                    !falsingManager.isFalseTouch(Classifier.ALTERNATE_BOUNCER_SWIPE)
-                                ) {
-                                    viewModel.showPrimaryBouncer()
-                                }
+                                alternateBouncerDependencies.powerInteractor.onUserTouch()
+                                viewModel.showPrimaryBouncer()
                             }
                             tapGestureDetector.addOnGestureDetectedCallback(tapTag) { _ ->
-                                if (!falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-                                    viewModel.showPrimaryBouncer()
-                                }
+                                alternateBouncerDependencies.powerInteractor.onUserTouch()
+                                viewModel.showPrimaryBouncer()
                             }
                         } else {
                             swipeUpAnywhereGestureHandler.removeOnGestureDetectedCallback(swipeTag)
@@ -100,20 +173,7 @@ object AlternateBouncerViewBinder {
                     }
                 }
 
-                launch {
-                    viewModel.scrimAlpha.collect {
-                        val wasVisible = alternateBouncerViewContainer.visibility == View.VISIBLE
-                        alternateBouncerViewContainer.visibility =
-                            if (it < .1f) View.INVISIBLE else View.VISIBLE
-                        scrim.viewAlpha = it
-                        if (
-                            wasVisible && alternateBouncerViewContainer.visibility == View.INVISIBLE
-                        ) {
-                            // view is no longer visible
-                            viewModel.hideAlternateBouncer()
-                        }
-                    }
-                }
+                launch { viewModel.scrimAlpha.collect { scrim.viewAlpha = it } }
 
                 launch { viewModel.scrimColor.collect { scrim.tint = it } }
             }

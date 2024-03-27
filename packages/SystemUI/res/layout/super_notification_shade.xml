@@ -120,10 +120,6 @@
         android:inflatedId="@+id/multi_shade"
         android:layout="@layout/multi_shade" />
 
-    <include layout="@layout/alternate_bouncer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
     <com.android.systemui.biometrics.AuthRippleView
         android:id="@+id/auth_ripple"
         android:layout_width="match_parent"

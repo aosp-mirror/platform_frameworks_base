@@ -84,7 +84,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Kan nie selnetwerk bereik nie"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Probeer die voorkeurnetwerk verander. Tik om te verander."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Noodoproepe is onbeskikbaar"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Kan nie noodoproepe oor Wi-Fi maak nie"</string>
+    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Opletberigte"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Oproepaanstuur"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Noodterugbel-modus"</string>
@@ -137,7 +138,7 @@
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="8383917598312067365">"Wi-Fi-oproepe | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="6865214948822061486">"<xliff:g id="SPN">%s</xliff:g>-VoWifi"</string>
     <string name="wfcSpnFormat_wifi_calling" msgid="6178935388378661755">"Wi-Fi-oproepe"</string>
-    <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi-oproepe"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
     <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Wi-fi-oproep"</string>
@@ -1183,6 +1184,10 @@
     <string name="deleteText" msgid="4200807474529938112">"Vee uit"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Invoermetode"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Teksaksies"</string>
+    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
+    <skip />
+    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
+    <skip />
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Terug"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Wissel invoermetode"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Bergingspasie word min"</string>
@@ -1339,7 +1344,7 @@
     <string name="network_switch_metered_toast" msgid="501662047275723743">"Het oorgeskakel van <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> na <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="2255670471736226365">"mobiele data"</item>
-    <item msgid="5520925862115353992">"Wi-Fi"</item>
+    <item msgid="5520925862115353992">"Wi-fi"</item>
     <item msgid="1055487873974272842">"Bluetooth"</item>
     <item msgid="1616528372438698248">"Ethernet"</item>
     <item msgid="9177085807664964627">"VPN"</item>
@@ -1900,7 +1905,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Batterybespaarder skakel Donkertema aan en beperk of skakel agtergrondaktiwiteit, sommige visuele effekte, sekere kenmerke en sommige netwerkverbindings af"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Batterybespaarder skakel Donkertema aan en beperk of skakel agtergrondaktiwiteit, sommige visuele effekte, sekere kenmerke en sommige netwerkverbindings af"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Databespaarder verhoed sommige programme om data in die agtergrond te stuur of te aanvaar om datagebruik te help verminder. \'n Program wat jy tans gebruik kan by data ingaan, maar sal dit dalk minder gereeld doen. Dit kan byvoorbeeld beteken dat prente nie wys voordat jy op hulle tik nie."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Databespaarder verhoed sommige apps om data in die agtergrond te stuur of te aanvaar om datagebruik te help verminder. \'n App wat jy tans gebruik kan by data ingaan, maar sal dit dalk minder gereeld doen. Dit kan byvoorbeeld beteken dat prente nie wys voordat jy op hulle tik nie."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Skakel Databespaarder aan?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Skakel aan"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Een minuut lank (tot {formattedTime})}other{# minute lank (tot {formattedTime})}}"</string>

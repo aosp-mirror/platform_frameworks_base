@@ -4622,6 +4622,7 @@ public class AudioService extends IAudioService.Stub
             case AudioSystem.MODE_CALL_SCREENING:
             case AudioSystem.MODE_CALL_REDIRECT:
             case AudioSystem.MODE_COMMUNICATION_REDIRECT:
+            case AudioSystem.MODE_RINGTONE:
                 break;
             default:
                 // no-op is enough for all other values

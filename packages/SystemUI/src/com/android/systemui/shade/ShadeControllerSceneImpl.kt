@@ -70,7 +70,6 @@ constructor(
     assistManagerLazy: Lazy<AssistManager>,
 ) :
     BaseShadeControllerImpl(
-        touchLog,
         commandQueue,
         statusBarKeyguardViewManager,
         notificationShadeWindowController,

@@ -39,9 +39,12 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Kako se krećemo ka budućnosti bez lozinki, lozinke će i dalje biti dostupne uz pristupne kodove."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Odaberite gde ćete sačuvati: <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Izaberite menadžera lozinki da biste sačuvali podatke i brže se prijavili sledeći put"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Želite da napravite pristupni ključ da biste se prijavili u <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Želite da sačuvate lozinku da biste se prijavili u <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Želite da sačuvate podatke za prijavljivanje za: <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for choose_create_option_passkey_title (8762295821604276511) -->
+    <skip />
+    <!-- no translation found for choose_create_option_password_title (4481366993598649224) -->
+    <skip />
+    <!-- no translation found for choose_create_option_sign_in_title (7092914088455358079) -->
+    <skip />
     <string name="passkey" msgid="632353688396759522">"pristupni kôd"</string>
     <string name="password" msgid="6738570945182936667">"lozinka"</string>
     <string name="passkeys" msgid="5733880786866559847">"pristupni kodovi"</string>
@@ -70,6 +73,8 @@
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Odbaci"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Želite da koristite sačuvani pristupni kôd za: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Želite da koristite sačuvanu lozinku za: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for get_dialog_title_single_tap_for (2057945648748859483) -->
+    <skip />
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Želite li da koristite svoje podatke za prijavljivanje za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Želite da otključate opcije prijavljivanja za: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Izaberite sačuvan pristupni ključ za: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

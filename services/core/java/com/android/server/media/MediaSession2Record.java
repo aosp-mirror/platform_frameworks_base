@@ -17,6 +17,7 @@
 package com.android.server.media;
 
 import android.app.ForegroundServiceDelegationOptions;
+import android.app.Notification;
 import android.media.MediaController2;
 import android.media.Session2CommandGroup;
 import android.media.Session2Token;
@@ -165,6 +166,12 @@ public class MediaSession2Record extends MediaSessionRecordImpl {
     @Override
     public boolean canHandleVolumeKey() {
         // TODO: Implement when MediaSession2 starts to get key events.
+        return false;
+    }
+
+    @Override
+    boolean isLinkedToNotification(Notification notification) {
+        // Currently it's not possible to link MediaSession2 with a Notification
         return false;
     }
 

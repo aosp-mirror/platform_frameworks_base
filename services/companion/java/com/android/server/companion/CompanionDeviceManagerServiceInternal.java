@@ -27,6 +27,12 @@ import java.util.Collection;
  * Companion Device Manager Local System Service Interface.
  */
 public interface CompanionDeviceManagerServiceInternal {
+
+    /**
+     * Remove idle self-managed associations.
+     */
+    void removeInactiveSelfManagedAssociations();
+
     /**
      * Registers a callback from an InCallService / ConnectionService to CDM to process sync
      * requests and perform call control actions.

@@ -48,8 +48,8 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.fromGoneTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.fromLockscreenTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.fromPrimaryBouncerTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
-import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.FakePowerRepository
@@ -64,6 +64,7 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl
 import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl
 import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
+import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupRepository
 import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
@@ -86,8 +87,8 @@ import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -121,6 +122,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
                     { shadeInteractor },
                     { kosmos.deviceUnlockedInteractor },
                     { kosmos.sceneInteractor },
+                    { kosmos.keyguardClockInteractor },
                 ) {
                 override fun createDarkAnimator(): ObjectAnimator {
                     return mockDarkAnimator
@@ -151,6 +153,8 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
                 keyguardTransitionInteractor,
                 { kosmos.sceneInteractor },
                 { kosmos.fromGoneTransitionInteractor },
+                { kosmos.sharedNotificationContainerInteractor },
+                testScope,
             )
 
         whenever(deviceEntryUdfpsInteractor.isUdfpsSupported).thenReturn(MutableStateFlow(false))
@@ -339,10 +343,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
             assertThat(currentScene).isEqualTo(Scenes.QuickSettings)
             assertThat(statusBarState).isEqualTo(StatusBarState.SHADE_LOCKED)
 
-            kosmos.sceneInteractor.changeScene(
-                toScene = Scenes.Communal,
-                loggingReason = "reason"
-            )
+            kosmos.sceneInteractor.changeScene(toScene = Scenes.Communal, loggingReason = "reason")
             runCurrent()
             assertThat(currentScene).isEqualTo(Scenes.Communal)
             assertThat(statusBarState).isEqualTo(StatusBarState.KEYGUARD)

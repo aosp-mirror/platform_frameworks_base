@@ -232,6 +232,9 @@
             </xs:element>
             <xs:element name="brightness" type="xs:float" maxOccurs="unbounded">
             </xs:element>
+            <!-- Mapping of current lux to minimum allowed nits values. -->
+            <xs:element name="luxToMinimumNitsMap" type="nitsMap" maxOccurs="1">
+            </xs:element>
         </xs:sequence>
         <xs:attribute name="enabled" type="xs:boolean" use="optional"/>
     </xs:complexType>

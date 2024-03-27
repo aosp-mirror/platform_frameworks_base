@@ -22,6 +22,8 @@ import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PRO
 import static com.android.internal.util.CollectionUtils.any;
 import static com.android.server.companion.utils.RolesUtils.removeRoleHolderForAssociation;
 
+import static java.util.concurrent.TimeUnit.DAYS;
+
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
@@ -30,6 +32,7 @@ import android.companion.AssociationInfo;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.Slog;
 
@@ -45,6 +48,10 @@ import com.android.server.companion.transport.CompanionTransportManager;
 public class DisassociationProcessor {
 
     private static final String TAG = "CDM_DisassociationProcessor";
+
+    private static final String SYS_PROP_DEBUG_REMOVAL_TIME_WINDOW =
+            "debug.cdm.cdmservice.removal_time_window";
+    private static final long ASSOCIATION_REMOVAL_TIME_WINDOW_DEFAULT = DAYS.toMillis(90);
 
     @NonNull
     private final Context mContext;
@@ -140,7 +147,7 @@ public class DisassociationProcessor {
                 it -> it.isNotifyOnDeviceNearby()
                         && mDevicePresenceMonitor.isDevicePresent(it.getId()));
         if (!shouldStayBound) {
-            mCompanionAppController.unbindCompanionApplication(userId, packageName);
+            mCompanionAppController.unbindCompanionApp(userId, packageName);
         }
     }
 
@@ -190,6 +197,34 @@ public class DisassociationProcessor {
                     mOnPackageVisibilityChangeListener));
         } catch (IllegalArgumentException e) {
             Slog.e(TAG, "Failed to stop listening to uid importance changes.");
+        }
+    }
+
+    /**
+     * Remove idle self-managed associations.
+     */
+    public void removeIdleSelfManagedAssociations() {
+        Slog.i(TAG, "Removing idle self-managed associations.");
+
+        final long currentTime = System.currentTimeMillis();
+        long removalWindow = SystemProperties.getLong(SYS_PROP_DEBUG_REMOVAL_TIME_WINDOW, -1);
+        if (removalWindow <= 0) {
+            // 0 or negative values indicate that the sysprop was never set or should be ignored.
+            removalWindow = ASSOCIATION_REMOVAL_TIME_WINDOW_DEFAULT;
+        }
+
+        for (AssociationInfo association : mAssociationStore.getAssociations()) {
+            if (!association.isSelfManaged()) continue;
+
+            final boolean isInactive =
+                    currentTime - association.getLastTimeConnectedMs() >= removalWindow;
+            if (!isInactive) continue;
+
+            final int id = association.getId();
+
+            Slog.i(TAG, "Removing inactive self-managed association=[" + association.toShortString()
+                    + "].");
+            disassociate(id);
         }
     }
 

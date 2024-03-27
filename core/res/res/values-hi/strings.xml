@@ -84,7 +84,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"मोबाइल नेटवर्क से कनेक्ट नहीं किया जा सका"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"पसंदीदा नेटवर्क बदलकर देखें. बदलने के लिए टैप करें."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"आपातकालीन कॉल करने की सुविधा उपलब्ध नहीं है"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"वाई-फ़ाई के ज़रिए आपातकालीन कॉल नहीं किया जा सकता"</string>
+    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"सूचनाएं"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"कॉल को दूसरे नंबर पर भेजना"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"आपातकालीन कॉलबैक मोड"</string>
@@ -256,7 +257,7 @@
     <string name="global_action_power_off" msgid="4404936470711393203">"बंद करें"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"पावर"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"रीस्टार्ट करें"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"आपातकालीन"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"आपातकालीन सुविधाएं देखें"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"गड़बड़ी की रिपोर्ट"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"सत्र खत्म करें"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"स्क्रीनशॉट"</string>
@@ -1183,6 +1184,10 @@
     <string name="deleteText" msgid="4200807474529938112">"मिटाएं"</string>
     <string name="inputMethod" msgid="1784759500516314751">"इनपुट विधि"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"लेख क्रियाएं"</string>
+    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
+    <skip />
+    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
+    <skip />
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"वापस जाएं"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"इनपुट का तरीका बदलें"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"मेमोरी में जगह नहीं बची है"</string>
@@ -1923,7 +1928,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"हफ़्ते की रात"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"सप्ताहांत"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"इवेंट"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"सोते समय"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"सोने का समय"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"मैनेज करने वाला ऐप्लिकेशन: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"चालू है"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"बंद है"</string>

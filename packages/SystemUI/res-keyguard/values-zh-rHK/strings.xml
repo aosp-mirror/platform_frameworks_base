@@ -111,12 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"為提升安全性，請改用圖案"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"為提升安全性，請改用 PIN"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"為提升安全性，請改用密碼"</string>
-    <!-- no translation found for kg_prompt_added_security_pin (5487992065995475528) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_pattern (1017068086102168544) -->
-    <skip />
-    <!-- no translation found for kg_prompt_added_security_password (6053156069765029006) -->
-    <skip />
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"請務必輸入 PIN，以進一步確保安全"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"請務必畫出上鎖圖案，以進一步確保安全"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"請務必輸入密碼，以進一步確保安全"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"裝置已由管理員鎖定"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"使用者已手動將裝置上鎖"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"未能識別"</string>

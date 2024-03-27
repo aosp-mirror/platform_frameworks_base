@@ -260,7 +260,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
 
         // If last listener is unregistered, then unbind application.
         if (!shouldBindPackage(userId, packageName)) {
-            mCompanionAppBinder.unbindCompanionApplication(userId, packageName);
+            mCompanionAppBinder.unbindCompanionApp(userId, packageName);
         }
     }
 
@@ -357,7 +357,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
      */
     private void bindApplicationIfNeeded(int userId, String packageName, boolean bindImportant) {
         if (!mCompanionAppBinder.isCompanionApplicationBound(userId, packageName)) {
-            mCompanionAppBinder.bindCompanionApplication(
+            mCompanionAppBinder.bindCompanionApp(
                     userId, packageName, bindImportant, this::onBinderDied);
         } else {
             Slog.i(TAG,
@@ -645,7 +645,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
 
                 // Check if there are other devices associated to the app that are present.
                 if (!shouldBindPackage(userId, packageName)) {
-                    mCompanionAppBinder.unbindCompanionApplication(userId, packageName);
+                    mCompanionAppBinder.unbindCompanionApp(userId, packageName);
                 }
                 break;
             default:
@@ -691,7 +691,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
                 notifyDevicePresenceEvent(userId, packageName, event);
 
                 if (!shouldBindPackage(userId, packageName)) {
-                    mCompanionAppBinder.unbindCompanionApplication(userId, packageName);
+                    mCompanionAppBinder.unbindCompanionApp(userId, packageName);
                 }
                 break;
             default:

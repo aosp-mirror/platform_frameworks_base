@@ -290,9 +290,14 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val alpha by collectLastValue(underTest.glanceableHubAlpha)
 
-            // Start on dream
-            showDream()
+            // Start on lockscreen, notifications should be unhidden.
+            showLockscreen()
             assertThat(alpha).isEqualTo(1f)
+
+            // Transition to dream, notifications should be hidden so that transition
+            // from dream->hub doesn't cause notification flicker.
+            showDream()
+            assertThat(alpha).isEqualTo(0f)
 
             // Start transitioning to glanceable hub
             val progress = 0.6f
@@ -493,7 +498,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             showLockscreen()
 
             keyguardInteractor.setNotificationContainerBounds(
-                NotificationContainerBounds(top = 1f, bottom = 2f)
+                NotificationContainerBounds(top = 1f, bottom = 52f)
             )
             runCurrent()
 
@@ -521,7 +526,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             showLockscreen()
 
             keyguardInteractor.setNotificationContainerBounds(
-                NotificationContainerBounds(top = 1f, bottom = 2f)
+                NotificationContainerBounds(top = 1f, bottom = 52f)
             )
             runCurrent()
 

@@ -310,10 +310,6 @@ public class DragAndDropPolicy {
                 | FLAG_ACTIVITY_MULTIPLE_TASK);
 
         final Bundle opts = baseActivityOpts.toBundle();
-        // Put BAL flags to avoid activity start aborted.
-        opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED, true);
-        opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION, true);
-
         mStarter.startIntent(session.launchableIntent,
                 session.launchableIntent.getCreatorUserHandle().getIdentifier(),
                 null /* fillIntent */, position, opts);

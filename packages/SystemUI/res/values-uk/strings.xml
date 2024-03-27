@@ -86,6 +86,8 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Системний адміністратор заблокував можливість робити знімки екрана"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Редагувати"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Редагувати знімок екрана"</string>
+    <!-- no translation found for screenshot_share_label (1653061117238861559) -->
+    <skip />
     <string name="screenshot_share_description" msgid="2861628935812656612">"Поділитися знімком екрана"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Включити більше деталей"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Закрити знімок екрана"</string>
@@ -538,7 +540,10 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Цим пристроєм керують твої батьки. Вони можуть бачити та контролювати, якими додатками ти користуєшся, де перебуваєш і скільки часу проводиш за пристроєм."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Розблоковує довірчий агент"</string>
-    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"Захист від крадіжки\nПристрій заблоковано (забагато спроб)"</string>
+    <!-- no translation found for kg_prompt_after_adaptive_auth_lock (2587481497846342760) -->
+    <skip />
+    <!-- no translation found for keyguard_indication_after_adaptive_auth_lock (2323400645470712787) -->
+    <skip />
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Налаштування звуку"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Автоматичні субтитри (медіа)"</string>
@@ -583,10 +588,8 @@
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Без звуку"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"Трансляція"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Недоступно: звук дзвінків вимкнено"</string>
-    <!-- no translation found for stream_alarm_unavailable (4059817189292197839) -->
-    <skip />
-    <!-- no translation found for stream_media_unavailable (6823020894438959853) -->
-    <skip />
+    <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Недоступно: увімкнено режим \"Не турбувати\""</string>
+    <string name="stream_media_unavailable" msgid="6823020894438959853">"Недоступно: увімкнено режим \"Не турбувати\""</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Торкніться, щоб увімкнути звук."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Торкніться, щоб налаштувати вібросигнал. Спеціальні можливості може бути вимкнено."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Торкніться, щоб вимкнути звук. Спеціальні можливості може бути вимкнено."</string>
@@ -603,16 +606,11 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"увімкнути вібросигнал"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"Регуляторів гучності: %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Для викликів і сповіщень налаштовано звуковий сигнал (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
-    <!-- no translation found for volume_panel_enter_media_output_settings (8824244246272552669) -->
-    <skip />
-    <!-- no translation found for volume_panel_expanded_sliders (1885750987768506271) -->
-    <skip />
-    <!-- no translation found for volume_panel_collapsed_sliders (1413383759434791450) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_mute (6962563028495243738) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_unmute (7489063242934477382) -->
-    <skip />
+    <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"Відкрити налаштування відтворення"</string>
+    <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"Повзунки гучності розгорнуто"</string>
+    <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"Повзунки гучності згорнуто"</string>
+    <string name="volume_panel_hint_mute" msgid="6962563028495243738">"вимкнути звук %s"</string>
+    <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"увімкнути звук %s"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"Відтворюється <xliff:g id="LABEL">%s</xliff:g> на:"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"Аудіо гратиме на:"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
@@ -759,7 +757,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Перемикатися між нещодавніми додатками вперед"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Перемикатися між нещодавніми додатками назад"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Відкрити список додатків"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Показати панель завдань"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Відкрити налаштування"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Відкрити додаток Асистент"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Заблокувати екран"</string>
@@ -768,6 +765,10 @@
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Розділити екран із поточним додатком праворуч"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Розділити екран із поточним додатком ліворуч"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Перейти з розділення екрана на весь екран"</string>
+    <!-- no translation found for system_multitasking_splitscreen_focus_rhs (3838578650313318508) -->
+    <skip />
+    <!-- no translation found for system_multitasking_splitscreen_focus_lhs (3164261844398662518) -->
+    <skip />
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Під час розділення екрана: замінити додаток іншим"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Метод введення"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Вибрати наступну мову"</string>
@@ -1266,8 +1267,7 @@
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Камеру заблоковано"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Камеру й мікрофон заблоковано"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Мікрофон заблоковано"</string>
-    <!-- no translation found for priority_mode_dream_overlay_content_description (3361628029609329182) -->
-    <skip />
+    <string name="priority_mode_dream_overlay_content_description" msgid="3361628029609329182">"Не турбувати"</string>
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"Виявлено присутність користувача"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Призначте стандартний додаток для нотаток у налаштуваннях"</string>
     <string name="install_app" msgid="5066668100199613936">"Установити додаток"</string>

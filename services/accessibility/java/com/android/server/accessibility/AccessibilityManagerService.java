@@ -4815,7 +4815,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                                         uid, packageName);
                         final boolean ecmEnabled = mContext.getResources().getBoolean(
                                 com.android.internal.R.bool.config_enhancedConfirmationModeEnabled);
-                        return !ecmEnabled || mode == AppOpsManager.MODE_ALLOWED;
+                        return !ecmEnabled || mode == AppOpsManager.MODE_ALLOWED
+                                || mode == AppOpsManager.MODE_DEFAULT;
                     } catch (Exception e) {
                         // Fallback in case if app ops is not available in testing.
                         return false;

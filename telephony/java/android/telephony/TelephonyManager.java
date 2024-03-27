@@ -15013,7 +15013,8 @@ public class TelephonyManager {
     /**
      * Get the emergency assistance package name.
      *
-     * @return the package name of the emergency assistance app.
+     * @return the package name of the emergency assistance app, or {@code null} if no app
+     * supports emergency assistance.
      * @throws IllegalStateException if emergency assistance is not enabled or the device is
      * not voice capable.
      *
@@ -15021,16 +15022,15 @@ public class TelephonyManager {
      */
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @FlaggedApi(android.permission.flags.Flags.FLAG_GET_EMERGENCY_ROLE_HOLDER_API_ENABLED)
-    @NonNull
+    @Nullable
     @SystemApi
     public String getEmergencyAssistancePackageName() {
         if (!isEmergencyAssistanceEnabled() || !isVoiceCapable()) {
             throw new IllegalStateException("isEmergencyAssistanceEnabled() is false or device"
                 + " not voice capable.");
         }
-        String emergencyRole = mContext.getSystemService(RoleManager.class)
+        return mContext.getSystemService(RoleManager.class)
                 .getEmergencyRoleHolder(mContext.getUserId());
-        return Objects.requireNonNull(emergencyRole, "Emergency role holder must not be null");
     }
 
     /**

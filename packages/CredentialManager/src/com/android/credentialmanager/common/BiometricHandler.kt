@@ -175,7 +175,8 @@ private fun setupBiometricPrompt(
         }
         .setAllowedAuthenticators(finalAuthenticators)
         .setConfirmationRequired(true)
-        // TODO(b/326243754) : Add logo back once new permission privileges sorted out
+        .setLogoBitmap(biometricDisplayInfo.providerIcon)
+        .setLogoDescription(biometricDisplayInfo.providerName)
         .setDescription(biometricDisplayInfo.descriptionAboveBiometricButton)
         .build()
 

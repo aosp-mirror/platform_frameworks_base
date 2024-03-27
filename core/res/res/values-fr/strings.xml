@@ -85,7 +85,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Impossible d\'accéder au réseau mobile"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Essayez de changer le réseau préféré. Appuyez pour le modifier."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Appels d\'urgence non disponibles"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Impossible de passer des appels d\'urgence via le Wi-Fi"</string>
+    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertes"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Transfert d\'appel"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Mode de rappel d\'urgence"</string>
@@ -261,7 +262,7 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Rapport de bug"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Fermer la session"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Capture d\'écran"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"Rapport de bug"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"Signaler un bug"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Cela permet de recueillir des informations concernant l\'état actuel de votre appareil. Ces informations sont ensuite envoyées sous forme d\'e-mail. Merci de patienter pendant la préparation du rapport de bug. Cette opération peut prendre quelques instants."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Rapport interactif"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Utilisez cette option dans la plupart des circonstances. Elle vous permet de suivre la progression du rapport, de saisir plus d\'informations sur le problème et d\'effectuer des captures d\'écran. Certaines sections moins utilisées et dont le remplissage demande beaucoup de temps peuvent être omises."</string>
@@ -1184,6 +1185,10 @@
     <string name="deleteText" msgid="4200807474529938112">"Supprimer"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Mode de saisie"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Actions sur le texte"</string>
+    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
+    <skip />
+    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
+    <skip />
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Retour"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Changer le mode de saisie"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Espace de stockage bientôt saturé"</string>

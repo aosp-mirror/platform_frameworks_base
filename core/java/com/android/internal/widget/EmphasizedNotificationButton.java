@@ -229,7 +229,8 @@ public class EmphasizedNotificationButton extends Button {
                     + "gluedLayoutDirection = " + mGluedLayoutDirection);
         }
 
-        if (layoutDirection != mGluedLayoutDirection) {
+        final boolean alreadyGlued = mGluedLayoutDirection != LAYOUT_DIRECTION_UNDEFINED;
+        if (alreadyGlued && layoutDirection != mGluedLayoutDirection) {
             if (DEBUG_NEW_ACTION_LAYOUT) {
                 Log.d(TAG, "onRtlPropertiesChanged: layout direction changed; regluing");
             }
@@ -249,14 +250,6 @@ public class EmphasizedNotificationButton extends Button {
             return;
         }
 
-        if (mIconToGlue == null && mLabelToGlue == null) {
-            if (DEBUG_NEW_ACTION_LAYOUT) {
-                Log.v(TAG, "glueIconAndLabelIfNeeded: no icon or label to glue; doing nothing");
-            }
-            mGluePending = false;
-            return;
-        }
-
         if (!evenlyDividedCallStyleActionLayout()) {
             Log.e(TAG, "glueIconAndLabelIfNeeded: new action layout disabled; doing nothing");
             return;
@@ -269,17 +262,6 @@ public class EmphasizedNotificationButton extends Button {
                 Log.v(TAG, "glueIconAndLabelIfNeeded: "
                         + "layout direction not resolved; doing nothing");
             }
-            return;
-        }
-
-        // Ready to glue but don't have an icon *and* a label:
-        //
-        // (Note that this will *not* happen while the button is being initialized, since we won't
-        // be ready to glue. This can only happen if the button is initialized and displayed and
-        // *then* someone calls glueIcon or glueLabel.
-
-        if (mLabelToGlue == null) {
-            Log.w(TAG, "glueIconAndLabelIfNeeded: icon glued without label; doing nothing");
             return;
         }
 
@@ -313,11 +295,25 @@ public class EmphasizedNotificationButton extends Button {
     private static final String POP_DIRECTIONAL_ISOLATE = "\u2069";
 
     private void glueIconAndLabel(int layoutDirection) {
-        if (mIconToGlue == null) {
+        if (mIconToGlue == null && mLabelToGlue == null) {
+            if (DEBUG_NEW_ACTION_LAYOUT) {
+                Log.d(TAG, "glueIconAndLabel: null icon and label, setting text to empty string");
+            }
+            setText("");
+            return;
+        } else if (mIconToGlue == null) {
             if (DEBUG_NEW_ACTION_LAYOUT) {
                 Log.d(TAG, "glueIconAndLabel: null icon, setting text to label");
             }
             setText(mLabelToGlue);
+            return;
+        } else if (mLabelToGlue == null) {
+            if (DEBUG_NEW_ACTION_LAYOUT) {
+                Log.d(TAG, "glueIconAndLabel: null label, setting text to ImageSpan with icon");
+            }
+            final SpannableStringBuilder builder = new SpannableStringBuilder();
+            appendSpan(builder, IMAGE_SPAN_TEXT, new ImageSpan(mIconToGlue, ALIGN_CENTER));
+            setText(builder);
             return;
         }
 

@@ -411,15 +411,21 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public List<MediaRoute2Info> getSystemRoutes() {
-        return mService2.getSystemRoutes();
+    public List<MediaRoute2Info> getSystemRoutes(@NonNull String callerPackageName,
+            boolean isProxyRouter) {
+        if (!validatePackageName(Binder.getCallingUid(), callerPackageName)) {
+            throw new SecurityException("callerPackageName does not match calling uid.");
+        }
+        return mService2.getSystemRoutes(callerPackageName, isProxyRouter);
     }
 
     // Binder call
     @Override
     public RoutingSessionInfo getSystemSessionInfo() {
         return mService2.getSystemSessionInfo(
-                null /* packageName */, false /* setDeviceRouteSelected */);
+                /* callerPackageName */ null,
+                /* targetPackageName */ null, /* setDeviceRouteSelected */
+                false);
     }
 
     // Binder call
@@ -530,16 +536,22 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public RoutingSessionInfo getSystemSessionInfoForPackage(@Nullable String packageName) {
+    public RoutingSessionInfo getSystemSessionInfoForPackage(
+            @NonNull String callerPackageName, @Nullable String targetPackageName) {
         final int uid = Binder.getCallingUid();
         final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
+
+        if (!validatePackageName(uid, callerPackageName)) {
+            throw new SecurityException("callerPackageName does not match calling uid.");
+        }
+
         boolean setDeviceRouteSelected = false;
         synchronized (mLock) {
             UserRecord userRecord = mUserRecords.get(userId);
             List<ClientRecord> userClientRecords =
                     userRecord != null ? userRecord.mClientRecords : Collections.emptyList();
             for (ClientRecord clientRecord : userClientRecords) {
-                if (TextUtils.equals(clientRecord.mPackageName, packageName)) {
+                if (TextUtils.equals(clientRecord.mPackageName, targetPackageName)) {
                     if (mDefaultAudioRouteId.equals(clientRecord.mSelectedRouteId)) {
                         setDeviceRouteSelected = true;
                         break;
@@ -547,7 +559,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                 }
             }
         }
-        return mService2.getSystemSessionInfo(packageName, setDeviceRouteSelected);
+        return mService2.getSystemSessionInfo(
+                callerPackageName, targetPackageName, setDeviceRouteSelected);
     }
 
     // Binder call

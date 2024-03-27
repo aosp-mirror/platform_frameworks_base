@@ -781,6 +781,9 @@ public class PackageManagerBackupAgent extends BackupAgent {
                                 "Not restoring package "
                                         + key
                                         + " since it appears to have no signatures.");
+                        if (!data.readNextHeader()) {
+                            break;
+                        }
                         continue;
                     }
 
@@ -790,16 +793,13 @@ public class PackageManagerBackupAgent extends BackupAgent {
                     sigMap.put(key, new Metadata(versionCode, sigs));
                 }
 
-                boolean readNextHeader = data.readNextHeader();
-                if (!readNextHeader) {
-                    if (DEBUG) {
-                        Slog.v(
-                                TAG,
-                                "LegacyRestoreDataConsumer:"
-                                        + " we're done reading all the headers");
-                    }
+                if (!data.readNextHeader()) {
                     break;
                 }
+            }
+
+            if (DEBUG) {
+                Slog.v(TAG, "LegacyRestoreDataConsumer:" + " we're done reading all the headers");
             }
 
             // On successful completion, cache the signature map for the Backup Manager to use

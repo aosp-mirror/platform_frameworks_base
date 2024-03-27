@@ -20,7 +20,6 @@ import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.RECORD_AUDIO;
 
 import android.annotation.CallbackExecutor;
-import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -34,7 +33,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
-import android.service.voice.flags.Flags;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -187,7 +185,7 @@ public class VisualQueryDetector {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(Flags.FLAG_ALLOW_COMPLEX_RESULTS_EGRESS_FROM_VQDS)
+    @SuppressLint("UnflaggedApi") // b/325678077 flags not supported in isolated process
     public boolean isAccessibilityDetectionEnabled() {
         Slog.d(TAG, "Fetching accessibility setting");
         synchronized (mInitializationDelegate.getLock()) {
@@ -214,7 +212,7 @@ public class VisualQueryDetector {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(Flags.FLAG_ALLOW_COMPLEX_RESULTS_EGRESS_FROM_VQDS)
+    @SuppressLint("UnflaggedApi") // b/325678077 flags not supported in isolated process
     public void setAccessibilityDetectionEnabledListener(@NonNull Consumer<Boolean> listener) {
         Slog.d(TAG, "Registering Accessibility settings listener.");
         synchronized (mInitializationDelegate.getLock()) {
@@ -247,7 +245,7 @@ public class VisualQueryDetector {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(Flags.FLAG_ALLOW_COMPLEX_RESULTS_EGRESS_FROM_VQDS)
+    @SuppressLint("UnflaggedApi") // b/325678077 flags not supported in isolated process
     public void clearAccessibilityDetectionEnabledListener() {
         Slog.d(TAG, "Unregistering Accessibility settings listener.");
         synchronized (mInitializationDelegate.getLock()) {
@@ -301,8 +299,15 @@ public class VisualQueryDetector {
     }
 
     /**
-     * A class that lets a VoiceInteractionService implementation interact with
-     * visual query detection APIs.
+     * A class that lets a VoiceInteractionService implementation interact with visual query
+     * detection APIs.
+     *
+     * Note that methods in this callbacks are not thread-safe so the invocation of each
+     * methods will have different order from how they are called in the
+     * {@link VisualQueryDetectionService}. It is expected to pass a single thread executor or a
+     * serial executor as the callback executor when creating the {@link VisualQueryDetector}
+     * with {@link VoiceInteractionService#createVisualQueryDetector(
+     * PersistableBundle, SharedMemory, Executor, Callback)}.
      */
     public interface Callback {
 
@@ -320,7 +325,7 @@ public class VisualQueryDetector {
          *
          * @param partialResult The partial query in a text form being streamed.
          */
-        @FlaggedApi(Flags.FLAG_ALLOW_COMPLEX_RESULTS_EGRESS_FROM_VQDS)
+        @SuppressLint("UnflaggedApi") // b/325678077 flags not supported in isolated process
         default void onQueryDetected(@NonNull VisualQueryDetectedResult partialResult) {
             throw new UnsupportedOperationException("This emthod must be implemented for use.");
         }
@@ -456,7 +461,7 @@ public class VisualQueryDetector {
             Slog.v(TAG, "BinderCallback#onResultDetected");
             Binder.withCleanCallingIdentity(() -> {
                 synchronized (mLock) {
-                    mCallback.onQueryDetected(partialResult);
+                    mExecutor.execute(()->mCallback.onQueryDetected(partialResult));
                 }
             });
         }

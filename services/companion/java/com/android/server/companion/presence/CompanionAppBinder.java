@@ -26,23 +26,22 @@ import android.companion.DevicePresenceEvent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Handler;
-import android.os.PowerManagerInternal;
-import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
-import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.PerUser;
 import com.android.server.companion.CompanionDeviceManagerService;
-import com.android.server.companion.association.AssociationStore;
 import com.android.server.companion.utils.PackageUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Manages communication with companion applications via
@@ -57,8 +56,8 @@ import java.util.Map;
  * The following is the list of the APIs provided by {@link CompanionAppBinder} (to be
  * utilized by {@link CompanionDeviceManagerService}):
  * <ul>
- * <li> {@link #bindCompanionApplication(int, String, boolean, CompanionServiceConnector.Listener)}
- * <li> {@link #unbindCompanionApplication(int, String)}
+ * <li> {@link #bindCompanionApp(int, String, boolean, CompanionServiceConnector.Listener)}
+ * <li> {@link #unbindCompanionApp(int, String)}
  * <li> {@link #isCompanionApplicationBound(int, String)}
  * <li> {@link #isRebindingCompanionApplicationScheduled(int, String)}
  * </ul>
@@ -76,33 +75,21 @@ public class CompanionAppBinder {
     @NonNull
     private final Context mContext;
     @NonNull
-    private final AssociationStore mAssociationStore;
-    @NonNull
-    private final ObservableUuidStore mObservableUuidStore;
-    @NonNull
     private final CompanionServicesRegister mCompanionServicesRegister;
-
-    private final PowerManagerInternal mPowerManagerInternal;
 
     @NonNull
     @GuardedBy("mBoundCompanionApplications")
-    private final AndroidPackageMap<List<CompanionServiceConnector>>
+    private final Map<Pair<Integer, String>, List<CompanionServiceConnector>>
             mBoundCompanionApplications;
     @NonNull
     @GuardedBy("mScheduledForRebindingCompanionApplications")
-    private final AndroidPackageMap<Boolean> mScheduledForRebindingCompanionApplications;
+    private final Set<Pair<Integer, String>> mScheduledForRebindingCompanionApplications;
 
-    public CompanionAppBinder(@NonNull Context context,
-            @NonNull AssociationStore associationStore,
-            @NonNull ObservableUuidStore observableUuidStore,
-            @NonNull PowerManagerInternal powerManagerInternal) {
+    public CompanionAppBinder(@NonNull Context context) {
         mContext = context;
-        mAssociationStore = associationStore;
-        mObservableUuidStore = observableUuidStore;
-        mPowerManagerInternal = powerManagerInternal;
         mCompanionServicesRegister = new CompanionServicesRegister();
-        mBoundCompanionApplications = new AndroidPackageMap<>();
-        mScheduledForRebindingCompanionApplications = new AndroidPackageMap<>();
+        mBoundCompanionApplications = new HashMap<>();
+        mScheduledForRebindingCompanionApplications = new HashSet<>();
     }
 
     /**
@@ -115,7 +102,7 @@ public class CompanionAppBinder {
     /**
      * CDM binds to the companion app.
      */
-    public void bindCompanionApplication(@UserIdInt int userId, @NonNull String packageName,
+    public void bindCompanionApp(@UserIdInt int userId, @NonNull String packageName,
             boolean isSelfManaged, CompanionServiceConnector.Listener listener) {
         Slog.i(TAG, "Binding user=[" + userId + "], package=[" + packageName + "], isSelfManaged=["
                 + isSelfManaged + "]...");
@@ -133,7 +120,7 @@ public class CompanionAppBinder {
 
         final List<CompanionServiceConnector> serviceConnectors = new ArrayList<>();
         synchronized (mBoundCompanionApplications) {
-            if (mBoundCompanionApplications.containsValueForPackage(userId, packageName)) {
+            if (mBoundCompanionApplications.containsKey(new Pair<>(userId, packageName))) {
                 Slog.w(TAG, "The package is ALREADY bound.");
                 return;
             }
@@ -144,7 +131,7 @@ public class CompanionAppBinder {
                         companionServices.get(i), isSelfManaged, isPrimary));
             }
 
-            mBoundCompanionApplications.setValueForPackage(userId, packageName, serviceConnectors);
+            mBoundCompanionApplications.put(new Pair<>(userId, packageName), serviceConnectors);
         }
 
         // Set listeners for both Primary and Secondary connectors.
@@ -161,17 +148,17 @@ public class CompanionAppBinder {
     /**
      * CDM unbinds the companion app.
      */
-    public void unbindCompanionApplication(@UserIdInt int userId, @NonNull String packageName) {
+    public void unbindCompanionApp(@UserIdInt int userId, @NonNull String packageName) {
         Slog.i(TAG, "Unbinding user=[" + userId + "], package=[" + packageName + "]...");
 
         final List<CompanionServiceConnector> serviceConnectors;
 
         synchronized (mBoundCompanionApplications) {
-            serviceConnectors = mBoundCompanionApplications.removePackage(userId, packageName);
+            serviceConnectors = mBoundCompanionApplications.remove(new Pair<>(userId, packageName));
         }
 
         synchronized (mScheduledForRebindingCompanionApplications) {
-            mScheduledForRebindingCompanionApplications.removePackage(userId, packageName);
+            mScheduledForRebindingCompanionApplications.remove(new Pair<>(userId, packageName));
         }
 
         if (serviceConnectors == null) {
@@ -189,7 +176,7 @@ public class CompanionAppBinder {
      */
     public boolean isCompanionApplicationBound(@UserIdInt int userId, @NonNull String packageName) {
         synchronized (mBoundCompanionApplications) {
-            return mBoundCompanionApplications.containsValueForPackage(userId, packageName);
+            return mBoundCompanionApplications.containsKey(new Pair<>(userId, packageName));
         }
     }
 
@@ -198,7 +185,11 @@ public class CompanionAppBinder {
      */
     public void removePackage(int userId, String packageName) {
         synchronized (mBoundCompanionApplications) {
-            mBoundCompanionApplications.removePackage(userId, packageName);
+            mBoundCompanionApplications.remove(new Pair<>(userId, packageName));
+        }
+
+        synchronized (mScheduledForRebindingCompanionApplications) {
+            mScheduledForRebindingCompanionApplications.remove(new Pair<>(userId, packageName));
         }
     }
 
@@ -211,14 +202,13 @@ public class CompanionAppBinder {
 
         if (isRebindingCompanionApplicationScheduled(userId, packageName)) {
             Slog.i(TAG, "CompanionApplication rebinding has been scheduled, skipping "
-                        + serviceConnector.getComponentName());
+                    + serviceConnector.getComponentName());
             return;
         }
 
         if (serviceConnector.isPrimary()) {
             synchronized (mScheduledForRebindingCompanionApplications) {
-                mScheduledForRebindingCompanionApplications.setValueForPackage(
-                        userId, packageName, true);
+                mScheduledForRebindingCompanionApplications.add(new Pair<>(userId, packageName));
             }
         }
 
@@ -232,8 +222,8 @@ public class CompanionAppBinder {
     private boolean isRebindingCompanionApplicationScheduled(
             @UserIdInt int userId, @NonNull String packageName) {
         synchronized (mScheduledForRebindingCompanionApplications) {
-            return mScheduledForRebindingCompanionApplications.containsValueForPackage(
-                    userId, packageName);
+            return mScheduledForRebindingCompanionApplications.contains(
+                    new Pair<>(userId, packageName));
         }
     }
 
@@ -243,16 +233,16 @@ public class CompanionAppBinder {
         // Re-mark the application is bound.
         if (serviceConnector.isPrimary()) {
             synchronized (mBoundCompanionApplications) {
-                if (!mBoundCompanionApplications.containsValueForPackage(userId, packageName)) {
+                if (!mBoundCompanionApplications.containsKey(new Pair<>(userId, packageName))) {
                     List<CompanionServiceConnector> serviceConnectors =
                             Collections.singletonList(serviceConnector);
-                    mBoundCompanionApplications.setValueForPackage(userId, packageName,
+                    mBoundCompanionApplications.put(new Pair<>(userId, packageName),
                             serviceConnectors);
                 }
             }
 
             synchronized (mScheduledForRebindingCompanionApplications) {
-                mScheduledForRebindingCompanionApplications.removePackage(userId, packageName);
+                mScheduledForRebindingCompanionApplications.remove(new Pair<>(userId, packageName));
             }
         }
 
@@ -267,21 +257,32 @@ public class CompanionAppBinder {
 
         synchronized (mBoundCompanionApplications) {
             out.append("  Bound Companion Applications: ");
-            if (mBoundCompanionApplications.size() == 0) {
+            if (mBoundCompanionApplications.isEmpty()) {
                 out.append("<empty>\n");
             } else {
                 out.append("\n");
-                mBoundCompanionApplications.dump(out);
+                for (Map.Entry<Pair<Integer, String>, List<CompanionServiceConnector>> entry :
+                        mBoundCompanionApplications.entrySet()) {
+                    out.append("<u").append(String.valueOf(entry.getKey().first)).append(", ")
+                            .append(entry.getKey().second).append(">");
+                    for (CompanionServiceConnector serviceConnector : entry.getValue()) {
+                        out.append(", isPrimary=").append(
+                                String.valueOf(serviceConnector.isPrimary()));
+                    }
+                }
             }
         }
 
         out.append("  Companion Applications Scheduled For Rebinding: ");
         synchronized (mScheduledForRebindingCompanionApplications) {
-            if (mScheduledForRebindingCompanionApplications.size() == 0) {
+            if (mScheduledForRebindingCompanionApplications.isEmpty()) {
                 out.append("<empty>\n");
             } else {
                 out.append("\n");
-                mScheduledForRebindingCompanionApplications.dump(out);
+                for (Pair<Integer, String> app : mScheduledForRebindingCompanionApplications) {
+                    out.append("<u").append(String.valueOf(app.first)).append(", ")
+                            .append(app.second).append(">");
+                }
             }
         }
     }
@@ -291,7 +292,7 @@ public class CompanionAppBinder {
             @UserIdInt int userId, @NonNull String packageName) {
         final List<CompanionServiceConnector> connectors;
         synchronized (mBoundCompanionApplications) {
-            connectors = mBoundCompanionApplications.getValueForPackage(userId, packageName);
+            connectors = mBoundCompanionApplications.get(new Pair<>(userId, packageName));
         }
         return connectors != null ? connectors.get(0) : null;
     }
@@ -315,78 +316,6 @@ public class CompanionAppBinder {
         @Override
         protected final @NonNull Map<String, List<ComponentName>> create(@UserIdInt int userId) {
             return PackageUtils.getCompanionServicesForUser(mContext, userId);
-        }
-    }
-
-    /**
-     * Associates an Android package (defined by userId + packageName) with a value of type T.
-     */
-    private static class AndroidPackageMap<T> extends SparseArray<Map<String, T>> {
-
-        void setValueForPackage(
-                @UserIdInt int userId, @NonNull String packageName, @NonNull T value) {
-            Map<String, T> forUser = get(userId);
-            if (forUser == null) {
-                forUser = /* Map<String, T> */ new HashMap();
-                put(userId, forUser);
-            }
-
-            forUser.put(packageName, value);
-        }
-
-        boolean containsValueForPackage(@UserIdInt int userId, @NonNull String packageName) {
-            final Map<String, ?> forUser = get(userId);
-            return forUser != null && forUser.containsKey(packageName);
-        }
-
-        T getValueForPackage(@UserIdInt int userId, @NonNull String packageName) {
-            final Map<String, T> forUser = get(userId);
-            return forUser != null ? forUser.get(packageName) : null;
-        }
-
-        T removePackage(@UserIdInt int userId, @NonNull String packageName) {
-            final Map<String, T> forUser = get(userId);
-            if (forUser == null) return null;
-            return forUser.remove(packageName);
-        }
-
-        void dump() {
-            if (size() == 0) {
-                Log.d(TAG, "<empty>");
-                return;
-            }
-
-            for (int i = 0; i < size(); i++) {
-                final int userId = keyAt(i);
-                final Map<String, T> forUser = get(userId);
-                if (forUser.isEmpty()) {
-                    Log.d(TAG, "u" + userId + ": <empty>");
-                }
-
-                for (Map.Entry<String, T> packageValue : forUser.entrySet()) {
-                    final String packageName = packageValue.getKey();
-                    final T value = packageValue.getValue();
-                    Log.d(TAG, "u" + userId + "\\" + packageName + " -> " + value);
-                }
-            }
-        }
-
-        private void dump(@NonNull PrintWriter out) {
-            for (int i = 0; i < size(); i++) {
-                final int userId = keyAt(i);
-                final Map<String, T> forUser = get(userId);
-                if (forUser.isEmpty()) {
-                    out.append("    u").append(String.valueOf(userId)).append(": <empty>\n");
-                }
-
-                for (Map.Entry<String, T> packageValue : forUser.entrySet()) {
-                    final String packageName = packageValue.getKey();
-                    final T value = packageValue.getValue();
-                    out.append("    u").append(String.valueOf(userId)).append("\\")
-                            .append(packageName).append(" -> ")
-                            .append(value.toString()).append('\n');
-                }
-            }
         }
     }
 }

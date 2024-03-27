@@ -42,6 +42,10 @@ applications that come with the platform
         <permission name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER"/>
     </privapp-permissions>
 
+    <privapp-permissions package="com.android.credentialmanager">
+        <permission name="android.permission.SET_BIOMETRIC_DIALOG_ADVANCED" />
+    </privapp-permissions>
+
     <privapp-permissions package="com.android.externalstorage">
         <permission name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>

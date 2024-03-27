@@ -23,6 +23,7 @@ import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
+import com.android.systemui.shared.recents.utilities.Utilities.clamp
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -44,8 +45,13 @@ constructor(
     deviceEntryBackgroundViewModel: DeviceEntryBackgroundViewModel,
     fingerprintPropertyInteractor: FingerprintPropertyInteractor,
     udfpsOverlayInteractor: UdfpsOverlayInteractor,
+    alternateBouncerViewModel: AlternateBouncerViewModel,
 ) {
     private val isSupported: Flow<Boolean> = deviceEntryUdfpsInteractor.isUdfpsSupported
+    val alpha: Flow<Float> =
+        alternateBouncerViewModel.transitionToAlternateBouncerProgress.map {
+            clamp(it * 2f, 0f, 1f)
+        }
 
     /**
      * UDFPS icon location in pixels for the current display and screen resolution, in natural

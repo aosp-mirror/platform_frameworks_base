@@ -34,6 +34,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -333,6 +334,7 @@ public class IpSecPacketLossDetectorTest extends NetworkEvaluationTestBase {
     public void testHandleLossRate_validationFail() throws Exception {
         checkHandleLossRate(
                 22, true /* isLastStateExpectedToUpdate */, true /* isCallbackExpected */);
+        verify(mConnectivityManager).reportNetworkConnectivity(mNetwork, false);
     }
 
     @Test
@@ -415,5 +417,32 @@ public class IpSecPacketLossDetectorTest extends NetworkEvaluationTestBase {
         checkGetPacketLossRate(oldState, 20000, 16096, 4096, 0);
         checkGetPacketLossRate(oldState, 20000, 14000, 4096, 19);
         checkGetPacketLossRate(oldState, 20000, 14000, 3000, 10);
+    }
+
+    // Verify the polling event is scheduled with expected delays
+    private void verifyPollEventDelayAndScheduleNext(long expectedDelayMs) {
+        if (expectedDelayMs > 0) {
+            mTestLooper.dispatchAll();
+            verify(mIpSecTransform, never()).requestIpSecTransformState(any(), any());
+            mTestLooper.moveTimeForward(expectedDelayMs);
+        }
+
+        mTestLooper.dispatchAll();
+        verify(mIpSecTransform).requestIpSecTransformState(any(), any());
+        reset(mIpSecTransform);
+    }
+
+    @Test
+    public void testOnLinkPropertiesOrCapabilitiesChange() throws Exception {
+        // Start the monitor; verify the 1st poll is scheduled without delay
+        startMonitorAndCaptureStateReceiver();
+        verifyPollEventDelayAndScheduleNext(0 /* expectedDelayMs */);
+
+        // Verify the 2nd poll is rescheduled without delay
+        mIpSecPacketLossDetector.onLinkPropertiesOrCapabilitiesChanged();
+        verifyPollEventDelayAndScheduleNext(0 /* expectedDelayMs */);
+
+        // Verify the 3rd poll is scheduled with configured delay
+        verifyPollEventDelayAndScheduleNext(POLL_IPSEC_STATE_INTERVAL_MS);
     }
 }

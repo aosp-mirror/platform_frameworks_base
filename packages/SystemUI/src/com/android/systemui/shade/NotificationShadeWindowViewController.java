@@ -51,8 +51,6 @@ import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
-import com.android.systemui.keyguard.ui.binder.AlternateBouncerViewBinder;
-import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies;
 import com.android.systemui.res.R;
 import com.android.systemui.shared.animation.DisableSubpixelTextTransitionListener;
 import com.android.systemui.statusbar.DragDownHelper;
@@ -72,10 +70,7 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
-import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.SystemClock;
-
-import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.Optional;
@@ -186,8 +181,6 @@ public class NotificationShadeWindowViewController implements Dumpable {
             QuickSettingsController quickSettingsController,
             PrimaryBouncerInteractor primaryBouncerInteractor,
             AlternateBouncerInteractor alternateBouncerInteractor,
-            Lazy<JavaAdapter> javaAdapter,
-            Lazy<AlternateBouncerDependencies> alternateBouncerDependencies,
             BouncerViewBinder bouncerViewBinder) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
@@ -223,23 +216,6 @@ public class NotificationShadeWindowViewController implements Dumpable {
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
         mDisableSubpixelTextTransitionListener = new DisableSubpixelTextTransitionListener(mView);
         bouncerViewBinder.bind(mView.findViewById(R.id.keyguard_bouncer_container));
-
-        if (DeviceEntryUdfpsRefactor.isEnabled()) {
-            AlternateBouncerViewBinder.bind(
-                    mView.findViewById(R.id.alternate_bouncer),
-                    alternateBouncerDependencies.get()
-            );
-            javaAdapter.get().alwaysCollectFlow(
-                    alternateBouncerDependencies.get().getViewModel()
-                            .getForcePluginOpen(),
-                        forcePluginOpen ->
-                            mNotificationShadeWindowController.setForcePluginOpen(
-                                    forcePluginOpen,
-                                    alternateBouncerDependencies.get()
-                                            .getViewModel()
-                            )
-            );
-        }
 
         collectFlow(mView, keyguardTransitionInteractor.getLockscreenToDreamingTransition(),
                 mLockscreenToDreamingTransition);

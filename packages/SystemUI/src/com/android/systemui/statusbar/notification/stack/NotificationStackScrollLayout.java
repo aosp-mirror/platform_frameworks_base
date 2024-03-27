@@ -201,11 +201,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private float mIntrinsicContentHeight;
     private int mPaddingBetweenElements;
     private int mMaxTopPadding;
-    private int mTopPadding;
     private boolean mAnimateNextTopPaddingChange;
     private int mBottomPadding;
     @VisibleForTesting
-    int mBottomInset = 0;
+    // mImeInset=0 when IME is hidden
+    int mImeInset = 0;
     private float mQsExpansionFraction;
     private final int mSplitShadeMinContentHeight;
     private String mLastUpdateSidePaddingDumpString;
@@ -281,7 +281,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     private float mMinTopOverScrollToEscape;
     private int mIntrinsicPadding;
-    private float mStackTranslation;
     private float mTopPaddingOverflow;
     private boolean mDontReportNextOverScroll;
     private boolean mDontClampNextScroll;
@@ -396,7 +395,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 @Override
                 public WindowInsets onProgress(WindowInsets windowInsets,
                         List<WindowInsetsAnimation> list) {
-                    updateBottomInset(windowInsets);
+                    updateImeInset(windowInsets);
                     return windowInsets;
                 }
 
@@ -819,8 +818,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         int y = 0;
         drawDebugInfo(canvas, y, Color.RED, /* label= */ "y = " + y);
 
-        y = mTopPadding;
-        drawDebugInfo(canvas, y, Color.RED, /* label= */ "mTopPadding = " + y);
+        y = getTopPadding();
+        drawDebugInfo(canvas, y, Color.RED, /* label= */ "getTopPadding() = " + y);
 
         y = getLayoutHeight();
         drawDebugInfo(canvas, y, Color.YELLOW, /* label= */ "getLayoutHeight() = " + y);
@@ -1158,7 +1157,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mAmbientState.setLayoutHeight(getLayoutHeight());
         mAmbientState.setLayoutMaxHeight(mMaxLayoutHeight);
         updateAlgorithmLayoutMinHeight();
-        mAmbientState.setTopPadding(mTopPadding);
     }
 
     private void updateAlgorithmLayoutMinHeight() {
@@ -1251,13 +1249,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     public int getTopPadding() {
-        return mTopPadding;
+        return mAmbientState.getTopPadding();
     }
 
     private void setTopPadding(int topPadding, boolean animate) {
-        if (mTopPadding != topPadding) {
+        if (getTopPadding() != topPadding) {
+            mAmbientState.setTopPadding(topPadding);
             boolean shouldAnimate = animate || mAnimateNextTopPaddingChange;
-            mTopPadding = topPadding;
             updateAlgorithmHeightAndPadding();
             updateContentHeight();
             if (mAmbientState.isOnKeyguard()
@@ -1302,7 +1300,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private void updateStackPosition(boolean listenerNeedsAnimation) {
         float topOverscrollAmount = mShouldUseSplitNotificationShade
                 ? getCurrentOverScrollAmount(true /* top */) : 0f;
-        final float endTopPosition = mTopPadding + mExtraTopInsetForFullShadeTransition
+        final float endTopPosition = getTopPadding() + mExtraTopInsetForFullShadeTransition
                 + mAmbientState.getOverExpansion()
                 + topOverscrollAmount
                 - getCurrentOverScrollAmount(false /* top */);
@@ -1315,7 +1313,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         // TODO(b/322228881): Clean up scene container vs legacy behavior in NSSL
         if (SceneContainerFlag.isEnabled()) {
             // stackY should be driven by scene container, not NSSL
-            mAmbientState.setStackY(mTopPadding);
+            mAmbientState.setStackY(getTopPadding());
         } else {
             final float stackY = MathUtils.lerp(0, endTopPosition, fraction);
             mAmbientState.setStackY(stackY);
@@ -1332,7 +1330,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         final float oldStackHeight = mAmbientState.getStackHeight();
         if (mQsExpansionFraction <= 0 && !shouldSkipHeightUpdate()) {
             final float endHeight = updateStackEndHeight(
-                    getHeight(), getEmptyBottomMargin(), mTopPadding);
+                    getHeight(), getEmptyBottomMargin(), getTopPadding());
             updateStackHeight(endHeight, fraction);
         } else {
             // Always updateStackHeight to prevent jumps in the stack height when this fraction
@@ -1419,9 +1417,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (!appearing) {
             translationY = 0;
             if (mShouldShowShelfOnly) {
-                stackHeight = mTopPadding + mShelf.getIntrinsicHeight();
+                stackHeight = getTopPadding() + mShelf.getIntrinsicHeight();
             } else if (mQsFullScreen) {
-                int stackStartPosition = mContentHeight - mTopPadding + mIntrinsicPadding;
+                int stackStartPosition = mContentHeight - getTopPadding() + mIntrinsicPadding;
                 int stackEndPosition = mMaxTopPadding + mShelf.getIntrinsicHeight();
                 if (stackStartPosition <= stackEndPosition) {
                     stackHeight = stackEndPosition;
@@ -1450,7 +1448,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             stackHeight = (int) (height - translationY);
             if (isHeadsUpTransition() && appearFraction >= 0) {
                 int topSpacing = mShouldUseSplitNotificationShade
-                        ? mAmbientState.getStackTopMargin() : mTopPadding;
+                        ? mAmbientState.getStackTopMargin() : getTopPadding();
                 float startPos = mHeadsUpInset - topSpacing;
                 translationY = MathUtils.lerp(startPos, 0, appearFraction);
             }
@@ -1523,7 +1521,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * Measured relative to the resting position.
      */
     private float getExpandTranslationStart() {
-        return -mTopPadding + getMinExpansionHeight() - mShelf.getIntrinsicHeight();
+        return -getTopPadding() + getMinExpansionHeight() - mShelf.getIntrinsicHeight();
     }
 
     /**
@@ -1592,7 +1590,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         } else {
             appearPosition = mEmptyShadeView.getHeight();
         }
-        return appearPosition + (onKeyguard() ? mTopPadding : mIntrinsicPadding);
+        return appearPosition + (onKeyguard() ? getTopPadding() : mIntrinsicPadding);
     }
 
     /**
@@ -1618,7 +1616,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         } else {
             appearPosition = mEmptyShadeView.getHeight();
         }
-        return appearPosition + (onKeyguard() ? mTopPadding : mIntrinsicPadding);
+        return appearPosition + (onKeyguard() ? getTopPadding() : mIntrinsicPadding);
     }
 
     private boolean isHeadsUpTransition() {
@@ -1652,12 +1650,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     public float getStackTranslation() {
-        return mStackTranslation;
+        return mAmbientState.getStackTranslation();
     }
 
     private void setStackTranslation(float stackTranslation) {
-        if (stackTranslation != mStackTranslation) {
-            mStackTranslation = stackTranslation;
+        if (stackTranslation != getStackTranslation()) {
             mAmbientState.setStackTranslation(stackTranslation);
             requestChildrenUpdate();
         }
@@ -1792,8 +1789,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 + ((!isExpanded() && isPinnedHeadsUp(v)) ? mHeadsUpInset : getTopPadding());
     }
 
-    private void updateBottomInset(WindowInsets windowInsets) {
-        mBottomInset = windowInsets.getInsets(WindowInsets.Type.ime()).bottom;
+    private void updateImeInset(WindowInsets windowInsets) {
+        mImeInset = windowInsets.getInsets(WindowInsets.Type.ime()).bottom;
 
         if (mForcedScroll != null) {
             updateForcedScroll();
@@ -1814,7 +1811,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
         if (!mIsInsetAnimationRunning) {
             // update bottom inset e.g. after rotation
-            updateBottomInset(insets);
+            updateImeInset(insets);
         }
         return insets;
     }
@@ -2218,9 +2215,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     private int getImeInset() {
         // The NotificationStackScrollLayout does not extend all the way to the bottom of the
-        // display. Therefore, subtract that space from the mBottomInset, in order to only include
+        // display. Therefore, subtract that space from the mImeInset, in order to only include
         // the portion of the bottom inset that actually overlaps the NotificationStackScrollLayout.
-        return Math.max(0, mBottomInset
+        return Math.max(0, mImeInset
                 - (getRootView().getHeight() - getHeight() - getLocationOnScreen()[1]));
     }
 
@@ -2321,7 +2318,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
         // The topPadding can be bigger than the regular padding when qs is expanded, in that
         // state the maxPanelHeight and the contentHeight should be bigger
-        mContentHeight = (int) (height + Math.max(mIntrinsicPadding, mTopPadding) + mBottomPadding);
+        mContentHeight =
+                (int) (height + Math.max(mIntrinsicPadding, getTopPadding()) + mBottomPadding);
         updateScrollability();
         clampScrollPosition();
         updateStackPosition();
@@ -2799,7 +2797,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (mShouldUseSplitNotificationShade) {
             return mSidePaddings;
         }
-        return mTopPadding - mQsScrollBoundaryPosition;
+        return getTopPadding() - mQsScrollBoundaryPosition;
     }
 
     private int getIntrinsicHeight(View view) {
@@ -3858,7 +3856,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 // fall through
             case android.R.id.accessibilityActionScrollUp:
                 final int viewportHeight =
-                        getHeight() - mPaddingBottom - mTopPadding - mPaddingTop
+                        getHeight() - mPaddingBottom - getTopPadding() - mPaddingTop
                                 - mShelf.getIntrinsicHeight();
                 final int targetScrollY = Math.max(0,
                         Math.min(mOwnScrollY + direction * viewportHeight, getScrollRange()));
@@ -4076,7 +4074,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 if (row.isChildInGroup()) {
                     endPosition += row.getNotificationParent().getTranslationY();
                 }
-                int layoutEnd = mMaxLayoutHeight + (int) mStackTranslation;
+                int layoutEnd = mMaxLayoutHeight + (int) getStackTranslation();
                 NotificationSection lastSection = getLastVisibleSection();
                 ExpandableView lastVisibleChild =
                         lastSection == null ? null : lastSection.getLastVisibleChild();
@@ -4559,7 +4557,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 }
             }
         }
-        return touchY > mTopPadding + mStackTranslation;
+        return touchY > getTopPadding() + getStackTranslation();
     }
 
     /**
@@ -4942,7 +4940,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             println(pw, "intrinsicContentHeight", mIntrinsicContentHeight);
             println(pw, "contentHeight", mContentHeight);
             println(pw, "intrinsicPadding", mIntrinsicPadding);
-            println(pw, "topPadding", mTopPadding);
+            println(pw, "topPadding", getTopPadding());
             println(pw, "bottomPadding", mBottomPadding);
             dumpRoundedRectClipping(pw);
             println(pw, "requestedClipBounds", mRequestedClipBounds);

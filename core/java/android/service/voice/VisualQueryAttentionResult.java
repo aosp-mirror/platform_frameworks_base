@@ -16,15 +16,14 @@
 
 package android.service.voice;
 
-import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.service.voice.flags.Flags;
 
 import com.android.internal.util.DataClass;
 
@@ -45,13 +44,15 @@ import java.lang.annotation.RetentionPolicy;
         genToString = true
 )
 @SystemApi
-@FlaggedApi(Flags.FLAG_ALLOW_VARIOUS_ATTENTION_TYPES)
+@SuppressLint("UnflaggedApi") // b/325678077 flags not supported in isolated process
 public final class VisualQueryAttentionResult implements Parcelable {
 
     /** Intention type to allow the system to listen to audio-visual query interactions. */
+    @SuppressLint("UnflaggedApi") // b/325678077 flags not supported in isolated process
     public static final int INTERACTION_INTENTION_AUDIO_VISUAL = 0;
 
     /** Intention type to allow the system to listen to visual accessibility query interactions. */
+    @SuppressLint("UnflaggedApi") // b/325678077 flags not supported in isolated process
     public static final int INTERACTION_INTENTION_VISUAL_ACCESSIBILITY = 1;
 
     /**
@@ -94,6 +95,16 @@ public final class VisualQueryAttentionResult implements Parcelable {
                 .setEngagementLevel(mEngagementLevel);
     }
 
+    /**
+     * TODO(b/301491148): Remove suppressLint on generated API when fixed or sdk finalized.
+     * Codegen does not support flaggedAPI, so needs to review manually on the generated code
+     * and makes sure the following:
+     *     1. SuppressLint is added back to the API after each run of codegen
+     *     2. No unwanted method is modified due to suppressLint annotation
+     *
+     *  Run $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/service/voice/VisualQueryAttentionResult.java
+     *  for codegen on new APIs.
+     */
 
 
 
@@ -112,8 +123,8 @@ public final class VisualQueryAttentionResult implements Parcelable {
 
     /** @hide */
     @IntDef(prefix = "INTERACTION_INTENTION_", value = {
-        INTERACTION_INTENTION_AUDIO_VISUAL,
-        INTERACTION_INTENTION_VISUAL_ACCESSIBILITY
+            INTERACTION_INTENTION_AUDIO_VISUAL,
+            INTERACTION_INTENTION_VISUAL_ACCESSIBILITY
     })
     @Retention(RetentionPolicy.SOURCE)
     @DataClass.Generated.Member
@@ -124,15 +135,15 @@ public final class VisualQueryAttentionResult implements Parcelable {
     public static String interactionIntentionToString(@InteractionIntention int value) {
         switch (value) {
             case INTERACTION_INTENTION_AUDIO_VISUAL:
-                    return "INTERACTION_INTENTION_AUDIO_VISUAL";
+                return "INTERACTION_INTENTION_AUDIO_VISUAL";
             case INTERACTION_INTENTION_VISUAL_ACCESSIBILITY:
-                    return "INTERACTION_INTENTION_VISUAL_ACCESSIBILITY";
+                return "INTERACTION_INTENTION_VISUAL_ACCESSIBILITY";
             default: return Integer.toHexString(value);
         }
     }
 
     @DataClass.Generated.Member
-    /* package-private */ VisualQueryAttentionResult(
+        /* package-private */ VisualQueryAttentionResult(
             @InteractionIntention int interactionIntention,
             @IntRange(from = 1, to = 100) int engagementLevel) {
         this.mInteractionIntention = interactionIntention;
@@ -159,6 +170,7 @@ public final class VisualQueryAttentionResult implements Parcelable {
      * to after the attention signal is gained.
      */
     @DataClass.Generated.Member
+    @SuppressLint("UnflaggedApi")
     public @InteractionIntention int getInteractionIntention() {
         return mInteractionIntention;
     }
@@ -176,6 +188,7 @@ public final class VisualQueryAttentionResult implements Parcelable {
      * presentation of the device attention UI.
      */
     @DataClass.Generated.Member
+    @SuppressLint("UnflaggedApi")
     public @IntRange(from = 1, to = 100) int getEngagementLevel() {
         return mEngagementLevel;
     }
@@ -187,7 +200,7 @@ public final class VisualQueryAttentionResult implements Parcelable {
         // String fieldNameToString() { ... }
 
         return "VisualQueryAttentionResult { " +
-                "interactionIntention = " + interactionIntentionToString(mInteractionIntention) + ", " +
+                "interactionIntention = " + mInteractionIntention + ", " +
                 "engagementLevel = " + mEngagementLevel +
         " }";
     }
@@ -223,6 +236,7 @@ public final class VisualQueryAttentionResult implements Parcelable {
 
     @Override
     @DataClass.Generated.Member
+    @SuppressLint("UnflaggedApi")
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         // You can override field parcelling by defining methods like:
         // void parcelFieldName(Parcel dest, int flags) { ... }
@@ -233,6 +247,7 @@ public final class VisualQueryAttentionResult implements Parcelable {
 
     @Override
     @DataClass.Generated.Member
+    @SuppressLint("UnflaggedApi")
     public int describeContents() { return 0; }
 
     /** @hide */
@@ -246,7 +261,6 @@ public final class VisualQueryAttentionResult implements Parcelable {
         int engagementLevel = in.readInt();
 
         this.mInteractionIntention = interactionIntention;
-
         if (!(mInteractionIntention == INTERACTION_INTENTION_AUDIO_VISUAL)
                 && !(mInteractionIntention == INTERACTION_INTENTION_VISUAL_ACCESSIBILITY)) {
             throw new java.lang.IllegalArgumentException(
@@ -254,7 +268,6 @@ public final class VisualQueryAttentionResult implements Parcelable {
                             + "INTERACTION_INTENTION_AUDIO_VISUAL(" + INTERACTION_INTENTION_AUDIO_VISUAL + "), "
                             + "INTERACTION_INTENTION_VISUAL_ACCESSIBILITY(" + INTERACTION_INTENTION_VISUAL_ACCESSIBILITY + ")");
         }
-
         this.mEngagementLevel = engagementLevel;
         com.android.internal.util.AnnotationValidations.validate(
                 IntRange.class, null, mEngagementLevel,
@@ -265,6 +278,7 @@ public final class VisualQueryAttentionResult implements Parcelable {
     }
 
     @DataClass.Generated.Member
+    @SuppressLint("UnflaggedApi")
     public static final @NonNull Parcelable.Creator<VisualQueryAttentionResult> CREATOR
             = new Parcelable.Creator<VisualQueryAttentionResult>() {
         @Override
@@ -283,6 +297,7 @@ public final class VisualQueryAttentionResult implements Parcelable {
      */
     @SuppressWarnings("WeakerAccess")
     @DataClass.Generated.Member
+    @SuppressLint("UnflaggedApi")
     public static final class Builder {
 
         private @InteractionIntention int mInteractionIntention;
@@ -290,6 +305,7 @@ public final class VisualQueryAttentionResult implements Parcelable {
 
         private long mBuilderFieldsSet = 0L;
 
+        @SuppressLint("UnflaggedApi")
         public Builder() {
         }
 
@@ -298,6 +314,7 @@ public final class VisualQueryAttentionResult implements Parcelable {
          * to after the attention signal is gained.
          */
         @DataClass.Generated.Member
+        @SuppressLint("UnflaggedApi")
         public @NonNull Builder setInteractionIntention(@InteractionIntention int value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x1;
@@ -318,6 +335,7 @@ public final class VisualQueryAttentionResult implements Parcelable {
          * presentation of the device attention UI.
          */
         @DataClass.Generated.Member
+        @SuppressLint("UnflaggedApi")
         public @NonNull Builder setEngagementLevel(@IntRange(from = 1, to = 100) int value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x2;
@@ -326,6 +344,7 @@ public final class VisualQueryAttentionResult implements Parcelable {
         }
 
         /** Builds the instance. This builder should not be touched after calling this! */
+        @SuppressLint("UnflaggedApi")
         public @NonNull VisualQueryAttentionResult build() {
             checkNotUsed();
             mBuilderFieldsSet |= 0x4; // Mark builder used
@@ -351,10 +370,10 @@ public final class VisualQueryAttentionResult implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1707773691880L,
+            time = 1710979945907L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/voice/VisualQueryAttentionResult.java",
-            inputSignatures = "public static final  int INTERACTION_INTENTION_AUDIO_VISUAL\npublic static final  int INTERACTION_INTENTION_VISUAL_ACCESSIBILITY\nprivate final @android.service.voice.VisualQueryAttentionResult.InteractionIntention int mInteractionIntention\nprivate final @android.annotation.IntRange int mEngagementLevel\nprivate static @android.service.voice.VisualQueryAttentionResult.InteractionIntention int defaultInteractionIntention()\nprivate static  int defaultEngagementLevel()\npublic  android.service.voice.VisualQueryAttentionResult.Builder buildUpon()\nclass VisualQueryAttentionResult extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
+            inputSignatures = "public static final @android.annotation.SuppressLint int INTERACTION_INTENTION_AUDIO_VISUAL\npublic static final @android.annotation.SuppressLint int INTERACTION_INTENTION_VISUAL_ACCESSIBILITY\nprivate final @android.service.voice.VisualQueryAttentionResult.InteractionIntention int mInteractionIntention\nprivate final @android.annotation.IntRange int mEngagementLevel\nprivate static @android.service.voice.VisualQueryAttentionResult.InteractionIntention int defaultInteractionIntention()\nprivate static  int defaultEngagementLevel()\npublic  android.service.voice.VisualQueryAttentionResult.Builder buildUpon()\nclass VisualQueryAttentionResult extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
     @Deprecated
     private void __metadata() {}
 
