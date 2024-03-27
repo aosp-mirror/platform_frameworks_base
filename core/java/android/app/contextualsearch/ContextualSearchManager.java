@@ -43,7 +43,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 @SystemApi
 @FlaggedApi(Flags.FLAG_ENABLE_SERVICE)
-public class ContextualSearchManager {
+public final class ContextualSearchManager {
 
     /**
      * Key to get the entrypoint from the extras of the activity launched by contextual search.

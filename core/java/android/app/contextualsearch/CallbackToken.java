@@ -51,6 +51,7 @@ public final class CallbackToken implements Parcelable {
     private static final String TAG = CallbackToken.class.getSimpleName();
     private final IBinder mToken;
 
+    private final Object mLock = new Object();
     private boolean mTokenUsed = false;
 
     public CallbackToken() {
@@ -75,10 +76,14 @@ public final class CallbackToken implements Parcelable {
     public void getContextualSearchState(@NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<ContextualSearchState, Throwable> callback) {
         if (DEBUG) Log.d(TAG, "getContextualSearchState for token:" + mToken);
-        if (mTokenUsed) {
-            callback.onError(new IllegalAccessException("Token already used."));
+        boolean tokenUsed;
+        synchronized (mLock) {
+            tokenUsed = markUsedLocked();
         }
-        mTokenUsed = true;
+        if (tokenUsed) {
+            callback.onError(new IllegalAccessException("Token already used."));
+            return;
+        }
         try {
             // Get the service from the system server.
             IBinder b = ServiceManager.getService(Context.CONTEXTUAL_SEARCH_SERVICE);
@@ -94,6 +99,12 @@ public final class CallbackToken implements Parcelable {
             if (DEBUG) Log.d(TAG, "Failed to call getContextualSearchState", e);
             e.rethrowFromSystemServer();
         }
+    }
+
+    private boolean markUsedLocked() {
+        boolean oldValue = mTokenUsed;
+        mTokenUsed = true;
+        return oldValue;
     }
 
     /**
