@@ -482,7 +482,7 @@ private fun EmptyStateCta(
     Card(
         modifier = Modifier.height(Dimensions.GridHeight).padding(contentPadding),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        border = BorderStroke(3.dp, colors.primaryFixedDim),
+        border = BorderStroke(3.dp, colors.secondary),
         shape = RoundedCornerShape(size = 80.dp)
     ) {
         Column(
@@ -495,7 +495,7 @@ private fun EmptyStateCta(
                 text = stringResource(R.string.title_for_empty_state_cta),
                 style = MaterialTheme.typography.displaySmall,
                 textAlign = TextAlign.Center,
-                color = colors.secondaryFixed,
+                color = colors.secondary,
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -505,8 +505,8 @@ private fun EmptyStateCta(
                     modifier = Modifier.height(56.dp),
                     colors =
                         ButtonDefaults.buttonColors(
-                            containerColor = colors.primaryFixed,
-                            contentColor = colors.onPrimaryFixed,
+                            containerColor = colors.primary,
+                            contentColor = colors.onPrimary,
                         ),
                     onClick = {
                         viewModel.onOpenWidgetEditor(
