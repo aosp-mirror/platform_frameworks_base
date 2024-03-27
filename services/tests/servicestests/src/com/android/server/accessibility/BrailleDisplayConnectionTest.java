@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.accessibilityservice.BrailleDisplayController;
+import android.accessibilityservice.IBrailleDisplayController;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -174,6 +175,17 @@ public class BrailleDisplayConnectionTest {
         }
 
         @Test
+        public void defaultNativeScanner_getName_returnsName() {
+            String name = "My Braille Display";
+            when(mNativeInterface.getHidrawName(anyInt())).thenReturn(name);
+
+            BrailleDisplayConnection.BrailleDisplayScanner scanner =
+                    BrailleDisplayConnection.getDefaultNativeScanner(mNativeInterface);
+
+            assertThat(scanner.getName(NULL_PATH)).isEqualTo(name);
+        }
+
+        @Test
         public void write_bypassesServiceSideCheckWithLargeBuffer_disconnects() {
             Mockito.doNothing().when(mBrailleDisplayConnection).disconnect();
             mBrailleDisplayConnection.write(
@@ -201,6 +213,38 @@ public class BrailleDisplayConnectionTest {
             verify(mBrailleDisplayConnection).disconnect();
         }
 
+        @Test
+        public void connect_unableToGetUniq_usesNameFallback() throws Exception {
+            try {
+                IBrailleDisplayController controller =
+                        Mockito.mock(IBrailleDisplayController.class);
+                final Path path = Path.of("/dev/null");
+                final String macAddress = "00:11:22:33:AA:BB";
+                final String name = "My Braille Display";
+                final byte[] descriptor = {0x05, 0x41};
+                Bundle bd = new Bundle();
+                bd.putString(BrailleDisplayController.TEST_BRAILLE_DISPLAY_HIDRAW_PATH,
+                        path.toString());
+                bd.putByteArray(BrailleDisplayController.TEST_BRAILLE_DISPLAY_DESCRIPTOR,
+                        descriptor);
+                bd.putString(BrailleDisplayController.TEST_BRAILLE_DISPLAY_NAME, name);
+                bd.putBoolean(BrailleDisplayController.TEST_BRAILLE_DISPLAY_BUS_BLUETOOTH, true);
+                bd.putString(BrailleDisplayController.TEST_BRAILLE_DISPLAY_UNIQUE_ID, null);
+                BrailleDisplayConnection.BrailleDisplayScanner scanner =
+                        mBrailleDisplayConnection.setTestData(List.of(bd));
+                // Validate that the test data is set up correctly before attempting connection:
+                assertThat(scanner.getUniqueId(path)).isNull();
+                assertThat(scanner.getName(path)).isEqualTo(name);
+
+                mBrailleDisplayConnection.connectLocked(
+                        macAddress, name, BrailleDisplayConnection.BUS_BLUETOOTH, controller);
+
+                verify(controller).onConnected(eq(mBrailleDisplayConnection), eq(descriptor));
+            } finally {
+                mBrailleDisplayConnection.disconnect();
+            }
+        }
+
         // BrailleDisplayConnection#setTestData() is used to enable CTS testing with
         // test Braille display data, but its own implementation should also be tested
         // so that issues in this helper don't cause confusing failures in CTS.
@@ -220,6 +264,9 @@ public class BrailleDisplayConnectionTest {
             String uniq1 = "uniq1", uniq2 = "uniq2";
             bd1.putString(BrailleDisplayController.TEST_BRAILLE_DISPLAY_UNIQUE_ID, uniq1);
             bd2.putString(BrailleDisplayController.TEST_BRAILLE_DISPLAY_UNIQUE_ID, uniq2);
+            String name1 = "name1", name2 = "name2";
+            bd1.putString(BrailleDisplayController.TEST_BRAILLE_DISPLAY_NAME, name1);
+            bd2.putString(BrailleDisplayController.TEST_BRAILLE_DISPLAY_NAME, name2);
             int bus1 = BrailleDisplayConnection.BUS_USB, bus2 =
                     BrailleDisplayConnection.BUS_BLUETOOTH;
             bd1.putBoolean(BrailleDisplayController.TEST_BRAILLE_DISPLAY_BUS_BLUETOOTH,
@@ -235,6 +282,8 @@ public class BrailleDisplayConnectionTest {
             expect.that(scanner.getDeviceReportDescriptor(path2)).isEqualTo(desc2);
             expect.that(scanner.getUniqueId(path1)).isEqualTo(uniq1);
             expect.that(scanner.getUniqueId(path2)).isEqualTo(uniq2);
+            expect.that(scanner.getName(path1)).isEqualTo(name1);
+            expect.that(scanner.getName(path2)).isEqualTo(name2);
             expect.that(scanner.getDeviceBusType(path1)).isEqualTo(bus1);
             expect.that(scanner.getDeviceBusType(path2)).isEqualTo(bus2);
         }

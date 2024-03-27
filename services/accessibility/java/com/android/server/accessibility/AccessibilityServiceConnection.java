@@ -37,6 +37,8 @@ import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -695,6 +697,13 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             throw new IllegalArgumentException(
                     bluetoothAddress + " is not a valid Bluetooth address");
         }
+        final BluetoothManager bluetoothManager =
+                mContext.getSystemService(BluetoothManager.class);
+        final String bluetoothDeviceName = bluetoothManager == null ? null :
+                bluetoothManager.getAdapter().getBondedDevices().stream()
+                        .filter(device -> device.getAddress().equalsIgnoreCase(bluetoothAddress))
+                        .map(BluetoothDevice::getName)
+                        .findFirst().orElse(null);
         synchronized (mLock) {
             checkAccessibilityAccessLocked();
             if (mBrailleDisplayConnection != null) {
@@ -706,7 +715,10 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 connection.setTestData(mTestBrailleDisplays);
             }
             connection.connectLocked(
-                    bluetoothAddress, BrailleDisplayConnection.BUS_BLUETOOTH, controller);
+                    bluetoothAddress,
+                    bluetoothDeviceName,
+                    BrailleDisplayConnection.BUS_BLUETOOTH,
+                    controller);
         }
     }
 
@@ -763,7 +775,10 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 connection.setTestData(mTestBrailleDisplays);
             }
             connection.connectLocked(
-                    usbSerialNumber, BrailleDisplayConnection.BUS_USB, controller);
+                    usbSerialNumber,
+                    usbDevice.getProductName(),
+                    BrailleDisplayConnection.BUS_USB,
+                    controller);
         }
     }
 
