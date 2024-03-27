@@ -4734,6 +4734,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     public void setQsFullScreen(boolean qsFullScreen) {
+        if (FooterViewRefactor.isEnabled()) {
+            if (qsFullScreen == mQsFullScreen) {
+                return;  // no change
+            }
+        }
         mQsFullScreen = qsFullScreen;
         updateAlgorithmLayoutMinHeight();
         updateScrollability();

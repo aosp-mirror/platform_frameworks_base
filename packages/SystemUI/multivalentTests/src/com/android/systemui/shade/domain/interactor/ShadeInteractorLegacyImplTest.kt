@@ -95,14 +95,14 @@ class ShadeInteractorLegacyImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun shadeExpansionWhenNotInSplitShadeAndQsExpanded() =
+    fun shadeExpansionWhenNotInSplitShadeAndQsFullyExpanded() =
         testScope.runTest {
             val actual by collectLastValue(underTest.shadeExpansion)
 
             // WHEN split shade is not enabled and QS is expanded
             keyguardRepository.setStatusBarState(StatusBarState.SHADE)
             overrideResource(R.bool.config_use_split_notification_shade, false)
-            shadeRepository.setQsExpansion(.5f)
+            shadeRepository.setQsExpansion(1f)
             shadeRepository.setLegacyShadeExpansion(1f)
             runCurrent()
 
@@ -111,16 +111,34 @@ class ShadeInteractorLegacyImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun shadeExpansionWhenNotInSplitShadeAndQsPartlyExpanded() =
+        testScope.runTest {
+            val actual by collectLastValue(underTest.shadeExpansion)
+
+            // WHEN split shade is not enabled and QS partly expanded
+            keyguardRepository.setStatusBarState(StatusBarState.SHADE)
+            overrideResource(R.bool.config_use_split_notification_shade, false)
+            shadeRepository.setQsExpansion(.4f)
+            shadeRepository.setLegacyShadeExpansion(1f)
+            runCurrent()
+
+            // THEN shade expansion is the difference
+            assertThat(actual).isEqualTo(.6f)
+        }
+
+    @Test
     fun shadeExpansionWhenNotInSplitShadeAndQsCollapsed() =
         testScope.runTest {
             val actual by collectLastValue(underTest.shadeExpansion)
 
-            // WHEN split shade is not enabled and QS is expanded
+            // WHEN split shade is not enabled and QS collapsed
             keyguardRepository.setStatusBarState(StatusBarState.SHADE)
+            overrideResource(R.bool.config_use_split_notification_shade, false)
             shadeRepository.setQsExpansion(0f)
             shadeRepository.setLegacyShadeExpansion(.6f)
+            runCurrent()
 
-            // THEN shade expansion is zero
+            // THEN shade expansion is the legacy one
             assertThat(actual).isEqualTo(.6f)
         }
 
