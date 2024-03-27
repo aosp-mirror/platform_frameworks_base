@@ -123,7 +123,10 @@ constructor(
             // When the shade is closed, the footer is still present in the list, but not visible.
             // This prevents the footer from being shown when a HUN is present, while still allowing
             // the footer to be counted as part of the shade for measurements.
-            shadeInteractor.shadeExpansion.map { it == 0f }.distinctUntilChanged()
+            shadeInteractor.shadeExpansion
+                .map { it == 0f }
+                .flowOn(bgDispatcher)
+                .distinctUntilChanged()
         }
     }
 
@@ -274,5 +277,6 @@ constructor(
     // TODO(b/325936094) use it for the text displayed in the StatusBar
     fun headsUpRow(key: HeadsUpRowKey): HeadsUpRowViewModel =
         HeadsUpRowViewModel(headsUpNotificationInteractor.headsUpRow(key))
+
     fun elementKeyFor(key: HeadsUpRowKey): Any = headsUpNotificationInteractor.elementKeyFor(key)
 }
