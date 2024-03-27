@@ -104,7 +104,8 @@ public class WebViewZygote {
             sPackage = packageInfo;
 
             // If multi-process is not enabled, then do not start the zygote service.
-            if (!sMultiprocessEnabled) {
+            // Only check sMultiprocessEnabled if updateServiceV2 is not enabled.
+            if (!updateServiceV2() && !sMultiprocessEnabled) {
                 return;
             }
 
