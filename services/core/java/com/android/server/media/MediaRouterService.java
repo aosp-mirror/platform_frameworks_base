@@ -53,6 +53,7 @@ import android.media.RoutingSessionInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -70,6 +71,7 @@ import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
+import com.android.media.flags.Flags;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
 import com.android.server.pm.UserManagerInternal;
@@ -94,6 +96,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         implements Watchdog.Monitor {
     private static final String TAG = "MediaRouterService";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final String WORKER_THREAD_NAME = "MediaRouterServiceThread";
 
     /**
      * Timeout in milliseconds for a selected route to transition from a disconnected state to a
@@ -126,7 +129,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     private final IAudioService mAudioService;
     private final AudioPlayerStateMonitor mAudioPlayerStateMonitor;
-    private final Handler mHandler = new Handler();
+    private final Handler mHandler;
     private final IntArray mActivePlayerMinPriorityQueue = new IntArray();
     private final IntArray mActivePlayerUidMinPriorityQueue = new IntArray();
 
@@ -142,7 +145,14 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     @RequiresPermission(Manifest.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS)
     public MediaRouterService(Context context) {
-        mLooper = Looper.getMainLooper();
+        if (Flags.enableMr2ServiceNonMainBgThread()) {
+            HandlerThread handlerThread = new HandlerThread(WORKER_THREAD_NAME);
+            handlerThread.start();
+            mLooper = handlerThread.getLooper();
+        } else {
+            mLooper = Looper.myLooper();
+        }
+        mHandler = new Handler(mLooper);
         mService2 = new MediaRouter2ServiceImpl(context, mLooper);
         mContext = context;
         Watchdog.getInstance().addMonitor(this);

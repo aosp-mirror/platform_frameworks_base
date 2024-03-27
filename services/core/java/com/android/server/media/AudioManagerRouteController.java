@@ -136,7 +136,7 @@ import java.util.Objects;
 
         mBluetoothRouteController =
                 new BluetoothDeviceRoutesManager(
-                        mContext, btAdapter, this::rebuildAvailableRoutesAndNotify);
+                        mContext, mHandler, btAdapter, this::rebuildAvailableRoutesAndNotify);
         // Just build routes but don't notify. The caller may not expect the listener to be invoked
         // before this constructor has finished executing.
         rebuildAvailableRoutes();

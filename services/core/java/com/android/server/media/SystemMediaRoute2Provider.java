@@ -653,9 +653,11 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 return;
             }
 
-            // TODO: b/310145678 - Post this to mHandler once mHandler does not run on the main
-            // thread.
-            updateVolume();
+            if (Flags.enableMr2ServiceNonMainBgThread()) {
+                mHandler.post(SystemMediaRoute2Provider.this::updateVolume);
+            } else {
+                updateVolume();
+            }
         }
     }
 }
