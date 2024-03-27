@@ -272,7 +272,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 params,
                 DisplayManagerGlobal.getInstance(),
                 isVirtualCameraEnabled()
-                        ? new VirtualCameraController(params.getDevicePolicy(POLICY_TYPE_CAMERA))
+                        ? new VirtualCameraController(
+                                params.getDevicePolicy(POLICY_TYPE_CAMERA), deviceId)
                         : null);
     }
 

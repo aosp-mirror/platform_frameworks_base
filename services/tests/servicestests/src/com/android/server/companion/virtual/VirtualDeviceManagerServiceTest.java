@@ -2004,7 +2004,7 @@ public class VirtualDeviceManagerServiceTest {
                         mRunningAppsChangedCallback,
                         params,
                         new DisplayManagerGlobal(mIDisplayManager),
-                        new VirtualCameraController(DEVICE_POLICY_DEFAULT));
+                        new VirtualCameraController(DEVICE_POLICY_DEFAULT, virtualDeviceId));
         mVdms.addVirtualDevice(virtualDeviceImpl);
         assertThat(virtualDeviceImpl.getAssociationId()).isEqualTo(mAssociationInfo.getId());
         assertThat(virtualDeviceImpl.getPersistentDeviceId())

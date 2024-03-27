@@ -58,19 +58,21 @@ public final class VirtualCameraController implements IBinder.DeathRecipient {
     @Nullable private IVirtualCameraService mVirtualCameraService;
     @DevicePolicy
     private final int mCameraPolicy;
+    private final int mDeviceId;
 
     @GuardedBy("mCameras")
     private final Map<IBinder, CameraDescriptor> mCameras = new ArrayMap<>();
 
-    public VirtualCameraController(@DevicePolicy int cameraPolicy) {
-        this(/* virtualCameraService= */ null, cameraPolicy);
+    public VirtualCameraController(@DevicePolicy int cameraPolicy, int deviceId) {
+        this(/* virtualCameraService= */ null, cameraPolicy, deviceId);
     }
 
     @VisibleForTesting
     VirtualCameraController(IVirtualCameraService virtualCameraService,
-            @DevicePolicy int cameraPolicy) {
+            @DevicePolicy int cameraPolicy, int deviceId) {
         mVirtualCameraService = virtualCameraService;
         mCameraPolicy = cameraPolicy;
+        mDeviceId = deviceId;
     }
 
     /**
@@ -251,7 +253,7 @@ public final class VirtualCameraController implements IBinder.DeathRecipient {
         VirtualCameraConfiguration serviceConfiguration = getServiceCameraConfiguration(config);
         synchronized (mServiceLock) {
             return mVirtualCameraService.registerCamera(config.getCallback().asBinder(),
-                    serviceConfiguration);
+                    serviceConfiguration, mDeviceId);
         }
     }
 
