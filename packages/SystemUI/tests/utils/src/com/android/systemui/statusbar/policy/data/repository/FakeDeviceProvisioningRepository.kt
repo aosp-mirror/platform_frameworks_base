@@ -26,13 +26,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class FakeDeviceProvisioningRepository @Inject constructor() : DeviceProvisioningRepository {
     private val _isDeviceProvisioned = MutableStateFlow(true)
     override val isDeviceProvisioned: Flow<Boolean> = _isDeviceProvisioned
-    private val _isFactoryResetProtectionActive = MutableStateFlow(false)
-    override val isFactoryResetProtectionActive: Flow<Boolean> = _isFactoryResetProtectionActive
     fun setDeviceProvisioned(isProvisioned: Boolean) {
         _isDeviceProvisioned.value = isProvisioned
-    }
-    fun setFactoryResetProtectionActive(isActive: Boolean) {
-        _isFactoryResetProtectionActive.value = isActive
     }
 }
 

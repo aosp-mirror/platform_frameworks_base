@@ -2628,11 +2628,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         boolean goingToSleepWithoutAnimation = isGoingToSleep()
                 && !mDozeParameters.shouldControlScreenOff();
         boolean disabled = (!mDeviceInteractive && !mDozeServiceHost.isPulsing())
-                || goingToSleepWithoutAnimation
-                || mDeviceProvisionedController.isFrpActive();
+                || goingToSleepWithoutAnimation;
         mShadeLogger.logUpdateNotificationPanelTouchState(disabled, isGoingToSleep(),
                 !mDozeParameters.shouldControlScreenOff(), !mDeviceInteractive,
-                !mDozeServiceHost.isPulsing(), mDeviceProvisionedController.isFrpActive());
+                !mDozeServiceHost.isPulsing());
 
         mShadeSurface.setTouchAndAnimationDisabled(disabled);
         if (!NotificationIconContainerRefactor.isEnabled()) {
