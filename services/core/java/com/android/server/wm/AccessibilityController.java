@@ -24,6 +24,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CO
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
+import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
 
 import static com.android.internal.util.DumpUtils.dumpSparseArray;
 import static com.android.internal.util.DumpUtils.dumpSparseArrayValues;
@@ -1611,6 +1612,8 @@ final class AccessibilityController {
 
             private final Handler mHandler;
 
+            private boolean mHasDelayedNotificationForRecentsToFrontTransition;
+
             UserContextChangedNotifier(Handler handler) {
                 mHandler = handler;
             }
@@ -1619,19 +1622,47 @@ final class AccessibilityController {
                 sendUserContextChangedNotification();
             }
 
+            // For b/324949652, if the onWMTransition callback is triggered when the finger down
+            // event on navigation bar to bring the recents window to front, we'll delay the
+            // notifying of the context changed, then send it if there is a following onFocusChanged
+            // callback triggered. Before the onFocusChanged, if there are some other transitions
+            // causing the notifying, or the recents/home window is removed, then we won't need the
+            // delayed notification anymore.
             void onWMTransition(@TransitionType int type, @TransitionFlags int flags) {
-                sendUserContextChangedNotification();
+                if (Flags.delayNotificationToMagnificationWhenRecentsWindowToFrontTransition()
+                        && type == WindowManager.TRANSIT_TO_FRONT
+                        && (flags & TRANSIT_FLAG_IS_RECENTS) != 0) {
+                    // Delay the recents to front transition notification then send after if needed.
+                    mHasDelayedNotificationForRecentsToFrontTransition = true;
+                } else {
+                    sendUserContextChangedNotification();
+                }
             }
 
             void onWindowTransition(WindowState windowState, int transition) {
-                // do nothing
+                // If there is a delayed notification for recents to front transition but the
+                // home/recents window has been removed from screen, the delayed notification is not
+                // needed anymore.
+                if (transition == WindowManagerPolicy.TRANSIT_EXIT
+                        && windowState.isActivityTypeHomeOrRecents()
+                        && mHasDelayedNotificationForRecentsToFrontTransition) {
+                    mHasDelayedNotificationForRecentsToFrontTransition = false;
+                }
             }
 
             void onFocusLost(InputTarget target) {
-                // do nothing
+                // If there is a delayed notification for recents to front transition and
+                // onFocusLost is triggered, we assume that the users leave current window to
+                // the home/recents window, thus we'll need to send the delayed notification.
+                if (mHasDelayedNotificationForRecentsToFrontTransition) {
+                    sendUserContextChangedNotification();
+                }
             }
 
             private void sendUserContextChangedNotification() {
+                // Since the context changed will be notified, the delayed notification is
+                // not needed anymore.
+                mHasDelayedNotificationForRecentsToFrontTransition = false;
                 mHandler.sendEmptyMessage(MyHandler.MESSAGE_NOTIFY_USER_CONTEXT_CHANGED);
             }
         }
