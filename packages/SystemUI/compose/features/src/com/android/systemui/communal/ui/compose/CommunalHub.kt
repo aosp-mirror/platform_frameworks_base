@@ -669,8 +669,6 @@ private fun CommunalContent(
         is CommunalContentModel.WidgetContent.DisabledWidget ->
             DisabledWidgetPlaceholder(model, viewModel, modifier)
         is CommunalContentModel.CtaTileInViewMode -> CtaTileInViewModeContent(viewModel, modifier)
-        is CommunalContentModel.CtaTileInEditMode ->
-            CtaTileInEditModeContent(modifier, onOpenWidgetPicker)
         is CommunalContentModel.Smartspace -> SmartspaceContent(model, modifier)
         is CommunalContentModel.Tutorial -> TutorialContent(modifier)
         is CommunalContentModel.Umo -> Umo(viewModel, modifier)
@@ -752,45 +750,6 @@ private fun CtaTileInViewModeContent(
                     )
                 }
             }
-        }
-    }
-}
-
-/** Presents a CTA tile at the end of the hub in edit mode, to add more widgets. */
-@Composable
-private fun CtaTileInEditModeContent(
-    modifier: Modifier = Modifier,
-    onOpenWidgetPicker: (() -> Unit)? = null,
-) {
-    if (onOpenWidgetPicker == null) {
-        throw IllegalArgumentException("onOpenWidgetPicker should not be null.")
-    }
-    val colors = LocalAndroidColorScheme.current
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        border = BorderStroke(1.dp, colors.primary),
-        shape = RoundedCornerShape(200.dp),
-        onClick = onOpenWidgetPicker,
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement =
-                Arrangement.spacedBy(Dimensions.Spacing, Alignment.CenterVertically),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Widgets,
-                contentDescription = stringResource(R.string.cta_label_to_open_widget_picker),
-                tint = colors.primary,
-                modifier = Modifier.size(Dimensions.IconSize),
-            )
-            Text(
-                text = stringResource(R.string.cta_label_to_open_widget_picker),
-                style = MaterialTheme.typography.titleLarge,
-                color = colors.primary,
-                textAlign = TextAlign.Center,
-            )
         }
     }
 }

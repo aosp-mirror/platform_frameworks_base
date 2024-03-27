@@ -43,10 +43,12 @@ import android.view.ISensitiveContentProtectionManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.wm.SensitiveContentPackages.PackageInfo;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.util.Objects;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -61,8 +63,15 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
     @VisibleForTesting
     @Nullable
     NotificationListener mNotificationListener;
-    @Nullable private MediaProjectionManager mProjectionManager;
-    @Nullable private WindowManagerInternal mWindowManager;
+    @Nullable
+    private MediaProjectionManager mProjectionManager;
+    @Nullable
+    private MediaProjectionSession mMediaProjectionSession;
+
+    private PackageManagerInternal mPackageManagerInternal;
+
+    @Nullable
+    private WindowManagerInternal mWindowManager;
 
     // screen recorder packages exempted from screen share protection.
     private ArraySet<String> mExemptedPackages = null;
@@ -74,6 +83,16 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
     @GuardedBy("mSensitiveContentProtectionLock")
     private boolean mProjectionActive = false;
 
+    private static class MediaProjectionSession {
+        final int mUid;
+        final long mSessionId;
+
+        MediaProjectionSession(int uid, long sessionId) {
+            mUid = uid;
+            mSessionId = sessionId;
+        }
+    }
+
     private final MediaProjectionManager.Callback mProjectionCallback =
             new MediaProjectionManager.Callback() {
                 @Override
@@ -82,7 +101,7 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
                     Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
                             "SensitiveContentProtectionManagerService.onProjectionStart");
                     try {
-                        onProjectionStart(info.getPackageName());
+                        onProjectionStart(info);
                     } finally {
                         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
                     }
@@ -119,12 +138,13 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
 
         if (DEBUG) Log.d(TAG, "onBootPhase - PHASE_BOOT_COMPLETED");
 
+        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         init(getContext().getSystemService(MediaProjectionManager.class),
                 LocalServices.getService(WindowManagerInternal.class),
                 getExemptedPackages());
         if (sensitiveContentAppProtection()) {
             publishBinderService(Context.SENSITIVE_CONTENT_PROTECTION_SERVICE,
-                    new SensitiveContentProtectionManagerServiceBinder());
+                    new SensitiveContentProtectionManagerServiceBinder(mPackageManagerInternal));
         }
     }
 
@@ -186,11 +206,12 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
         return SystemConfig.getInstance().getBugreportWhitelistedPackages();
     }
 
-    private void onProjectionStart(String packageName) {
+    private void onProjectionStart(MediaProjectionInfo projectionInfo) {
         // exempt on device screen recorder as well.
-        if ((mExemptedPackages != null && mExemptedPackages.contains(packageName))
-                || canRecordSensitiveContent(packageName)) {
-            Log.w(TAG, packageName + " is exempted from screen share protection.");
+        if ((mExemptedPackages != null && mExemptedPackages.contains(
+                projectionInfo.getPackageName()))
+                || canRecordSensitiveContent(projectionInfo.getPackageName())) {
+            Log.w(TAG, projectionInfo.getPackageName() + " is exempted.");
             return;
         }
         // TODO(b/324447419): move GlobalSettings lookup to background thread
@@ -204,6 +225,10 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
 
         synchronized (mSensitiveContentProtectionLock) {
             mProjectionActive = true;
+            int uid = mPackageManagerInternal.getPackageUid(projectionInfo.getPackageName(), 0,
+                    projectionInfo.getUserHandle().getIdentifier());
+            // TODO review sessionId, whether to use a sequence generator or random is good?
+            mMediaProjectionSession = new MediaProjectionSession(uid, new Random().nextLong());
             if (sensitiveNotificationAppProtection()) {
                 updateAppsThatShouldBlockScreenCapture();
             }
@@ -217,6 +242,7 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
     private void onProjectionEnd() {
         synchronized (mSensitiveContentProtectionLock) {
             mProjectionActive = false;
+            mMediaProjectionSession = null;
 
             // notify windowmanager to clear any sensitive notifications observed during projection
             // session
@@ -351,9 +377,9 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
      * Block projection for a package window when the window is showing sensitive content on
      * the screen, the projection is unblocked when window no more shows sensitive content.
      *
-     * @param windowToken window where the content is shown.
-     * @param packageName package name.
-     * @param uid uid of the package.
+     * @param windowToken               window where the content is shown.
+     * @param packageName               package name.
+     * @param uid                       uid of the package.
      * @param isShowingSensitiveContent whether the window is showing sensitive content.
      */
     @VisibleForTesting
@@ -385,8 +411,22 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
             packageInfos.add(packageInfo);
             if (isShowingSensitiveContent) {
                 mWindowManager.addBlockScreenCaptureForApps(packageInfos);
+                FrameworkStatsLog.write(
+                        FrameworkStatsLog.SENSITIVE_CONTENT_APP_PROTECTION,
+                        mMediaProjectionSession.mSessionId,
+                        uid,
+                        mMediaProjectionSession.mUid,
+                        FrameworkStatsLog.SENSITIVE_CONTENT_APP_PROTECTION__STATE__BLOCKED
+                );
             } else {
                 mWindowManager.removeBlockScreenCaptureForApps(packageInfos);
+                FrameworkStatsLog.write(
+                        FrameworkStatsLog.SENSITIVE_CONTENT_APP_PROTECTION,
+                        mMediaProjectionSession.mSessionId,
+                        uid,
+                        mMediaProjectionSession.mUid,
+                        FrameworkStatsLog.SENSITIVE_CONTENT_APP_PROTECTION__STATE__UNBLOCKED
+                );
             }
         }
     }
@@ -395,8 +435,9 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
             extends ISensitiveContentProtectionManager.Stub {
         private final PackageManagerInternal mPackageManagerInternal;
 
-        SensitiveContentProtectionManagerServiceBinder() {
-            mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
+        SensitiveContentProtectionManagerServiceBinder(
+                PackageManagerInternal packageManagerInternal) {
+            mPackageManagerInternal = packageManagerInternal;
         }
 
         public void setSensitiveContentProtection(IBinder windowToken, String packageName,

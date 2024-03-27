@@ -263,7 +263,9 @@ public class DreamService extends Service implements Window.Callback {
     private boolean mCanDoze;
     private boolean mDozing;
     private boolean mWindowless;
+    private boolean mPreviewMode;
     private int mDozeScreenState = Display.STATE_UNKNOWN;
+    private @Display.StateReason int mDozeScreenStateReason = Display.STATE_REASON_UNKNOWN;
     private int mDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
 
     private boolean mDebug = false;
@@ -647,12 +649,13 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     /**
-     * Marks this dream as keeping the screen bright while dreaming.
+     * Marks this dream as keeping the screen bright while dreaming. In preview mode, the screen
+     * is always allowed to dim and overrides the value specified here.
      *
      * @param screenBright True to keep the screen bright while dreaming.
      */
     public void setScreenBright(boolean screenBright) {
-        if (mScreenBright != screenBright) {
+        if (mScreenBright != screenBright && !mPreviewMode) {
             mScreenBright = screenBright;
             int flag = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
             applyWindowFlags(mScreenBright ? flag : 0, flag);
@@ -661,7 +664,7 @@ public class DreamService extends Service implements Window.Callback {
 
     /**
      * Returns whether this dream keeps the screen bright while dreaming.
-     * Defaults to false, allowing the screen to dim if necessary.
+     * Defaults to true, preventing the screen from dimming.
      *
      * @see #setScreenBright(boolean)
      */
@@ -748,7 +751,9 @@ public class DreamService extends Service implements Window.Callback {
 
         if (mDozing) {
             try {
-                mDreamManager.startDozing(mDreamToken, mDozeScreenState, mDozeScreenBrightness);
+                mDreamManager.startDozing(
+                        mDreamToken, mDozeScreenState, mDozeScreenStateReason,
+                        mDozeScreenBrightness);
             } catch (RemoteException ex) {
                 // system server died
             }
@@ -808,6 +813,19 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     /**
+     * Same as {@link #setDozeScreenState(int, int)}, but with no screen state reason specified.
+     *
+     * <p>Use {@link #setDozeScreenState(int, int)} whenever possible to allow properly accounting
+     * for the screen state reason.
+     *
+     * @hide
+     */
+    @UnsupportedAppUsage
+    public void setDozeScreenState(int state) {
+        setDozeScreenState(state, Display.STATE_REASON_UNKNOWN);
+    }
+
+    /**
      * Sets the screen state to use while dozing.
      * <p>
      * The value of this property determines the power state of the primary display
@@ -841,13 +859,15 @@ public class DreamService extends Service implements Window.Callback {
      * {@link Display#STATE_DOZE}, {@link Display#STATE_DOZE_SUSPEND},
      * {@link Display#STATE_ON_SUSPEND}, {@link Display#STATE_OFF}, or {@link Display#STATE_UNKNOWN}
      * for the default behavior.
+     * @param reason the reason for setting the specified screen state.
      *
      * @hide For use by system UI components only.
      */
     @UnsupportedAppUsage
-    public void setDozeScreenState(int state) {
+    public void setDozeScreenState(int state, @Display.StateReason int reason) {
         if (mDozeScreenState != state) {
             mDozeScreenState = state;
+            mDozeScreenStateReason = reason;
             updateDoze();
         }
     }
@@ -1280,6 +1300,11 @@ public class DreamService extends Service implements Window.Callback {
 
         mDreamToken = dreamToken;
         mCanDoze = canDoze;
+        mPreviewMode = isPreviewMode;
+        if (mPreviewMode) {
+            // Allow screen to dim when in preview mode.
+            mScreenBright = false;
+        }
         // This is not a security check to prevent malicious dreams but a guard rail to stop
         // third-party dreams from being windowless and not working well as a result.
         if (mWindowless && !mCanDoze && !isCallerSystemUi()) {

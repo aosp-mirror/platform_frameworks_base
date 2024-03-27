@@ -6987,4 +6987,7 @@
 
     <!-- Wear devices: An intent action that is used for remote intent. -->
     <string name="config_wearRemoteIntentAction" translatable="false" />
+
+    <!-- Whether desktop mode is supported on the current device  -->
+    <bool name="config_isDesktopModeSupported">false</bool>
 </resources>

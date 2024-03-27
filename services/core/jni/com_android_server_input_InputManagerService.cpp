@@ -117,7 +117,6 @@ static struct {
     jmethodID notifySensorAccuracy;
     jmethodID notifyStickyModifierStateChanged;
     jmethodID notifyStylusGestureStarted;
-    jmethodID isInputMethodConnectionActive;
     jmethodID notifyVibratorState;
     jmethodID filterInputEvent;
     jmethodID interceptKeyBeforeQueueing;
@@ -311,6 +310,7 @@ public:
     void setStylusButtonMotionEventsEnabled(bool enabled);
     FloatPoint getMouseCursorPosition(int32_t displayId);
     void setStylusPointerIconEnabled(bool enabled);
+    void setInputMethodConnectionIsActive(bool isActive);
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -453,6 +453,9 @@ private:
 
         // True if a pointer icon should be shown for stylus pointers.
         bool stylusPointerIconEnabled{false};
+
+        // True if there is an active input method connection.
+        bool isInputMethodConnectionActive{false};
     } mLocked GUARDED_BY(mLock);
 
     std::atomic<bool> mInteractive;
@@ -1507,11 +1510,8 @@ void NativeInputManager::notifyStylusGestureStarted(int32_t deviceId, nsecs_t ev
 }
 
 bool NativeInputManager::isInputMethodConnectionActive() {
-    JNIEnv* env = jniEnv();
-    const jboolean result =
-            env->CallBooleanMethod(mServiceObj, gServiceClassInfo.isInputMethodConnectionActive);
-    checkAndClearExceptionFromCallback(env, "isInputMethodConnectionActive");
-    return result;
+    std::scoped_lock _l(mLock);
+    return mLocked.isInputMethodConnectionActive;
 }
 
 std::optional<DisplayViewport> NativeInputManager::getPointerViewportForAssociatedDisplay(
@@ -1860,6 +1860,15 @@ void NativeInputManager::setStylusPointerIconEnabled(bool enabled) {
 
     mInputManager->getReader().requestRefreshConfiguration(
             InputReaderConfiguration::Change::DISPLAY_INFO);
+}
+
+void NativeInputManager::setInputMethodConnectionIsActive(bool isActive) {
+    { // acquire lock
+        std::scoped_lock _l(mLock);
+        mLocked.isInputMethodConnectionActive = isActive;
+    } // release lock
+
+    mInputManager->getDispatcher().setInputMethodConnectionIsActive(isActive);
 }
 
 // ----------------------------------------------------------------------------
@@ -2854,6 +2863,12 @@ static void nativeSetAccessibilityStickyKeysEnabled(JNIEnv* env, jobject nativeI
     }
 }
 
+static void nativeSetInputMethodConnectionIsActive(JNIEnv* env, jobject nativeImplObj,
+                                                   jboolean isActive) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    im->setInputMethodConnectionIsActive(isActive);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -2964,6 +2979,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
          (void*)nativeSetAccessibilitySlowKeysThreshold},
         {"setAccessibilityStickyKeysEnabled", "(Z)V",
          (void*)nativeSetAccessibilityStickyKeysEnabled},
+        {"setInputMethodConnectionIsActive", "(Z)V", (void*)nativeSetInputMethodConnectionIsActive},
 };
 
 #define FIND_CLASS(var, className) \
@@ -3027,9 +3043,6 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.notifyStylusGestureStarted, clazz, "notifyStylusGestureStarted",
                   "(IJ)V");
-
-    GET_METHOD_ID(gServiceClassInfo.isInputMethodConnectionActive, clazz,
-                  "isInputMethodConnectionActive", "()Z");
 
     GET_METHOD_ID(gServiceClassInfo.notifyVibratorState, clazz, "notifyVibratorState", "(IZ)V");
 

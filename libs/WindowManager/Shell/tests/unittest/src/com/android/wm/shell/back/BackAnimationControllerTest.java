@@ -409,6 +409,32 @@ public class BackAnimationControllerTest extends ShellTestCase {
     }
 
     @Test
+    public void gestureNotQueued_WhenPreviousGestureIsPostCommitCancelling()
+            throws RemoteException {
+        registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
+        createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME,
+                /* enableAnimation = */ true,
+                /* isAnimationCallback = */ false);
+
+        doStartEvents(0, 100);
+        simulateRemoteAnimationStart();
+        releaseBackGesture();
+
+        // Check that back cancellation is dispatched.
+        verify(mAnimatorCallback).onBackCancelled();
+        verify(mBackAnimationRunner).onAnimationStart(anyInt(), any(), any(), any(), any());
+
+        reset(mAnimatorCallback);
+        reset(mBackAnimationRunner);
+
+        // Verify that a new start event is dispatched if a new gesture is started during the
+        // post-commit cancel phase
+        triggerBackGesture();
+        verify(mAnimatorCallback).onBackStarted(any());
+        verify(mBackAnimationRunner).onAnimationStart(anyInt(), any(), any(), any(), any());
+    }
+
+    @Test
     public void acceptsGesture_transitionTimeout() throws RemoteException {
         registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
         createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME,

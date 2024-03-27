@@ -164,6 +164,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IntPair;
 import com.android.internal.util.Preconditions;
+import com.android.modules.expresslog.Counter;
 import com.android.server.AccessibilityManagerInternal;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -252,6 +253,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     public static final int MAGNIFICATION_GESTURE_HANDLER_ID = 0;
 
     private static int sIdCounter = MAGNIFICATION_GESTURE_HANDLER_ID + 1;
+    /**
+     * The counter metric id tracking how many times users add qs shortcut for a11y features.
+     *
+     * <p>Defined in frameworks/proto_logging/stats/express/catalog/accessibility.cfg.
+     */
+    static final String METRIC_ID_QS_SHORTCUT_ADD = "accessibility.value_qs_shortcut_add";
+
+    /**
+     * The counter metric id tracking how many times users remove qs shortcut for a11y features.
+     *
+     * <p>Defined in frameworks/proto_logging/stats/express/catalog/accessibility.cfg.
+     */
+    static final String METRIC_ID_QS_SHORTCUT_REMOVE = "accessibility.value_qs_shortcut_remove";
+
 
     private final Context mContext;
 
@@ -1767,6 +1782,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (serviceInfo != null && isAccessibilityServiceWarningRequired(serviceInfo)) {
                     // TODO(b/314850435): show full device control warning if needed after
                     // SysUI QS Panel can update live
+                    // The user attempts to add QS shortcut in QS Panel, but we don't actually
+                    // turn on the shortcut due to lack of full device control permission
+                    logMetricForQsShortcutConfiguration(/* enable= */ true, /* numOfFeatures= */ 1);
                     continue;
                 }
                 a11yFeaturesToEnable.add(a11yFeature);
@@ -4183,6 +4201,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             );
 
             if (shortcutType == UserShortcutType.QUICK_SETTINGS) {
+                int numOfFeatureChanged = Math.abs(currentTargets.size() - validNewTargets.size());
+                logMetricForQsShortcutConfiguration(enable, numOfFeatureChanged);
                 userState.updateA11yQsTargetLocked(validNewTargets);
                 scheduleNotifyClientsOfServicesStateChangeLocked(userState);
                 onUserStateChangedLocked(userState);
@@ -6215,7 +6235,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-
     /**
      * Bypasses the timeout restriction if volume key shortcut assigned.
      */
@@ -6224,5 +6243,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 userId,
                 Settings.Secure.SKIP_ACCESSIBILITY_SHORTCUT_DIALOG_TIMEOUT_RESTRICTION,
                 /* true */ 1);
+    }
+
+    /**
+     * Log the metric when the user add/remove qs shortcut for accessibility features. Use the
+     * callingUid to know where the users configure the a11y qs shortcuts.
+     */
+    private void logMetricForQsShortcutConfiguration(boolean enable, int numOfFeatures) {
+        if (numOfFeatures <= 0) {
+            // Skip logging metric if no a11y features are configured
+            return;
+        }
+        String metricId = enable ? METRIC_ID_QS_SHORTCUT_ADD : METRIC_ID_QS_SHORTCUT_REMOVE;
+        Counter.logIncrementWithUid(metricId, Binder.getCallingUid(), numOfFeatures);
     }
 }

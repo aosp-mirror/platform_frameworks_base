@@ -69,8 +69,6 @@ import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.MathUtils;
 import android.view.HapticFeedbackConstants;
-import android.view.InputDevice;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -169,7 +167,6 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.data.repository.FlingInfo;
 import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor;
-import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.GestureRecorder;
@@ -357,7 +354,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final QuickSettingsControllerImpl mQsController;
     private final NaturalScrollingSettingObserver mNaturalScrollingSettingObserver;
     private final TouchHandler mTouchHandler = new TouchHandler();
-    private final KeyHandler mKeyHandler = new KeyHandler();
 
     private long mDownTime;
     private boolean mTouchSlopExceededBeforeDown;
@@ -746,7 +742,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             NotificationListContainer notificationListContainer,
             NotificationStackSizeCalculator notificationStackSizeCalculator,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
-            ShadeTransitionController shadeTransitionController,
             SystemClock systemClock,
             KeyguardBottomAreaViewModel keyguardBottomAreaViewModel,
             KeyguardBottomAreaInteractor keyguardBottomAreaInteractor,
@@ -818,7 +813,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
         mView.addOnLayoutChangeListener(new ShadeLayoutChangeListener());
         mView.setOnTouchListener(getTouchHandler());
-        mView.setOnKeyListener(getKeyHandler());
         mView.setOnConfigurationChangedListener(config -> loadDimens());
 
         mResources = mView.getResources();
@@ -903,7 +897,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mKeyguardBypassController = bypassController;
         mUpdateMonitor = keyguardUpdateMonitor;
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
-        shadeTransitionController.setShadeViewController(this);
         dynamicPrivacyController.addListener(this::onDynamicPrivacyChanged);
         quickSettingsController.setExpansionHeightListener(this::onQsSetExpansionHeightCalled);
         quickSettingsController.setQsStateUpdateListener(this::onQsStateUpdated);
@@ -3586,11 +3579,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         return mTouchHandler;
     }
 
-    @VisibleForTesting
-    KeyHandler getKeyHandler() {
-        return mKeyHandler;
-    }
-
     @Override
     public boolean closeUserSwitcherIfOpen() {
         if (mKeyguardUserSwitcherController != null) {
@@ -5242,21 +5230,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     break;
             }
             return !mGestureWaitForTouchSlop || isTracking();
-        }
-    }
-
-    /** Handles KeyEvents for the Shade. */
-    public final class KeyHandler implements View.OnKeyListener {
-        @Override
-        public boolean onKey(View v, int keyCode, KeyEvent event) {
-            if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                final InputDevice d = event.getDevice();
-                // Trigger user activity if the event comes from a full external keyboard
-                if (d != null && d.isFullKeyboard() && d.isExternal()) {
-                    mCentralSurfaces.userActivity();
-                }
-            }
-            return false;
         }
     }
 

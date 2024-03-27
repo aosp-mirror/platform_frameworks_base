@@ -62,7 +62,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.policy.SystemBarUtils;
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.classifier.Classifier;
@@ -80,7 +79,6 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
-import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -133,9 +131,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     private final FrameLayout mQsFrame;
 
     private final QsFrameTranslateController mQsFrameTranslateController;
-    private final ShadeTransitionController mShadeTransitionController;
     private final PulseExpansionHandler mPulseExpansionHandler;
-    private final ShadeExpansionStateManager mShadeExpansionStateManager;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final LightBarController mLightBarController;
     private final NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
@@ -147,7 +143,6 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     private final KeyguardBypassController mKeyguardBypassController;
     private final NotificationRemoteInputManager mRemoteInputManager;
     private VelocityTracker mQsVelocityTracker;
-    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final ScrimController mScrimController;
     private final MediaDataManager mMediaDataManager;
     private final MediaHierarchyManager mMediaHierarchyManager;
@@ -309,10 +304,8 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
             Lazy<NotificationPanelViewController> panelViewControllerLazy,
             NotificationPanelView panelView,
             QsFrameTranslateController qsFrameTranslateController,
-            ShadeTransitionController shadeTransitionController,
             PulseExpansionHandler pulseExpansionHandler,
             NotificationRemoteInputManager remoteInputManager,
-            ShadeExpansionStateManager shadeExpansionStateManager,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             LightBarController lightBarController,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
@@ -322,7 +315,6 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             KeyguardStateController keyguardStateController,
             KeyguardBypassController keyguardBypassController,
-            KeyguardUpdateMonitor keyguardUpdateMonitor,
             ScrimController scrimController,
             MediaDataManager mediaDataManager,
             MediaHierarchyManager mediaHierarchyManager,
@@ -353,7 +345,6 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         mSplitShadeStateController = splitShadeStateController;
         mSplitShadeEnabled = mSplitShadeStateController.shouldUseSplitNotificationShade(mResources);
         mQsFrameTranslateController = qsFrameTranslateController;
-        mShadeTransitionController = shadeTransitionController;
         mPulseExpansionHandler = pulseExpansionHandler;
         pulseExpansionHandler.setPulseExpandAbortListener(() -> {
             if (mQs != null) {
@@ -361,7 +352,6 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
             }
         });
         mRemoteInputManager = remoteInputManager;
-        mShadeExpansionStateManager = shadeExpansionStateManager;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mLightBarController = lightBarController;
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
@@ -371,7 +361,6 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
         mKeyguardStateController = keyguardStateController;
         mKeyguardBypassController = keyguardBypassController;
-        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mScrimController = scrimController;
         mMediaDataManager = mediaDataManager;
         mMediaHierarchyManager = mediaHierarchyManager;
@@ -2180,7 +2169,6 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
                 }
             });
             mLockscreenShadeTransitionController.setQS(mQs);
-            mShadeTransitionController.setQs(mQs);
             mNotificationStackScrollLayoutController.setQsHeader((ViewGroup) mQs.getHeader());
             mQs.setScrollListener(mQsScrollListener);
             updateExpansion();

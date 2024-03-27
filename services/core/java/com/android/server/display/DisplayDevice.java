@@ -26,6 +26,7 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManagerInternal.DisplayOffloadSession;
 import android.hardware.display.DisplayViewport;
 import android.os.IBinder;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayAddress;
@@ -35,6 +36,7 @@ import android.view.SurfaceControl;
 import com.android.server.display.mode.DisplayModeDirector;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 /**
  * Represents a display device such as the built-in display, an external monitor, a WiFi display,
@@ -427,6 +429,21 @@ abstract class DisplayDevice {
      */
     boolean isRotatedLocked() {
         return mCurrentOrientation == ROTATION_90 || mCurrentOrientation == ROTATION_270;
+    }
+
+    /**
+     * @return set of supported resolutions as an ascending sorted array.
+     */
+    Point[] getSupportedResolutionsLocked() {
+        ArraySet<Point> resolutions = new ArraySet<>(2);
+        Display.Mode[] supportedModes = getDisplayDeviceInfoLocked().supportedModes;
+        for (Display.Mode mode : supportedModes) {
+            resolutions.add(new Point(mode.getPhysicalWidth(), mode.getPhysicalHeight()));
+        }
+        Point[] sortedArray = new Point[resolutions.size()];
+        resolutions.toArray(sortedArray);
+        Arrays.sort(sortedArray, (p1, p2) -> p1.x * p1.y - p2.x * p2.y);
+        return sortedArray;
     }
 
     private DisplayDeviceConfig loadDisplayDeviceConfig() {

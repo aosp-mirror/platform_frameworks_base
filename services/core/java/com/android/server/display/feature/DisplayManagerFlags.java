@@ -96,6 +96,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_RESTRICT_DISPLAY_MODES,
             Flags::enableRestrictDisplayModes);
 
+    private final FlagState mResolutionBackupRestore = new FlagState(
+            Flags.FLAG_RESOLUTION_BACKUP_RESTORE,
+            Flags::resolutionBackupRestore);
+
     private final FlagState mVsyncLowPowerVote = new FlagState(
             Flags.FLAG_ENABLE_VSYNC_LOW_POWER_VOTE,
             Flags::enableVsyncLowPowerVote);
@@ -246,6 +250,10 @@ public class DisplayManagerFlags {
         return mRestrictDisplayModes.isEnabled();
     }
 
+    public boolean isResolutionBackupRestoreEnabled() {
+        return mResolutionBackupRestore.isEnabled();
+    }
+
     public boolean isVsyncLowPowerVoteEnabled() {
         return mVsyncLowPowerVote.isEnabled();
     }
@@ -309,6 +317,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mHdrClamperFlagState);
         pw.println(" " + mNbmControllerFlagState);
         pw.println(" " + mPowerThrottlingClamperFlagState);
+        pw.println(" " + mEvenDimmerFlagState);
         pw.println(" " + mSmallAreaDetectionFlagState);
         pw.println(" " + mBrightnessIntRangeUserPerceptionFlagState);
         pw.println(" " + mRestrictDisplayModes);
@@ -321,6 +330,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mSensorBasedBrightnessThrottling);
         pw.println(" " + mIdleScreenRefreshRateTimeout);
         pw.println(" " + mRefactorDisplayPowerController);
+        pw.println(" " + mResolutionBackupRestore);
     }
 
     private static class FlagState {

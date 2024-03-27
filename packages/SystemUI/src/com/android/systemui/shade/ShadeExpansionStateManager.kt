@@ -56,11 +56,6 @@ class ShadeExpansionStateManager @Inject constructor() {
         return ShadeExpansionChangeEvent(fraction, expanded, tracking, dragDownPxAmount)
     }
 
-    /** Removes an expansion listener. */
-    fun removeExpansionListener(listener: ShadeExpansionListener) {
-        expansionListeners.remove(listener)
-    }
-
     /** Adds a listener that will be notified when the panel state has changed. */
     @Deprecated("Use ShadeInteractor instead")
     fun addStateListener(listener: ShadeStateListener) {

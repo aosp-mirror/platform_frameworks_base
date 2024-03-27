@@ -141,7 +141,7 @@ class NotifUiAdjustmentProvider @Inject constructor(
             lockscreenUserManager.needsRedaction(entry) ||
                 (screenshareNotificationHiding() &&
                     sensitiveNotifProtectionController.shouldProtectNotification(entry)),
-        isChildInGroup = entry.sbn.isAppOrSystemGroupChild,
-        isGroupSummary = entry.sbn.isAppOrSystemGroupSummary,
+        isChildInGroup = entry.hasEverBeenGroupChild(),
+        isGroupSummary = entry.hasEverBeenGroupSummary(),
     )
 }

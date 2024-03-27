@@ -1293,7 +1293,10 @@ public class PowerManagerServiceTest {
 
         // Override the display state by DreamManager and verify is reacquires the blocker.
         mService.getLocalServiceInstance()
-                .setDozeOverrideFromDreamManager(Display.STATE_ON, PowerManager.BRIGHTNESS_DEFAULT);
+                .setDozeOverrideFromDreamManager(
+                        Display.STATE_ON,
+                        Display.STATE_REASON_DEFAULT_POLICY,
+                        PowerManager.BRIGHTNESS_DEFAULT);
         assertTrue(isAcquired[0]);
     }
 

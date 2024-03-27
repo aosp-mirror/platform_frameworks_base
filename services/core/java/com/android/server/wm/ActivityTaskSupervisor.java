@@ -2266,7 +2266,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
      * activity releases the top state and reports back, message about acquiring top state will be
      * sent to the new top resumed activity.
      */
-    void updateTopResumedActivityIfNeeded(String reason) {
+    ActivityRecord updateTopResumedActivityIfNeeded(String reason) {
         final ActivityRecord prevTopActivity = mTopResumedActivity;
         final Task topRootTask = mRootWindowContainer.getTopDisplayFocusedRootTask();
         if (topRootTask == null || topRootTask.getTopResumedActivity() == prevTopActivity) {
@@ -2279,7 +2279,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 // according to the current top focused activity.
                 mService.updateTopApp(null /* topResumedActivity */);
             }
-            return;
+            return mTopResumedActivity;
         }
 
         // Ask previous activity to release the top state.
@@ -2306,6 +2306,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         scheduleTopResumedActivityStateIfNeeded();
 
         mService.updateTopApp(mTopResumedActivity);
+
+        return mTopResumedActivity;
     }
 
     /** Schedule current top resumed activity state loss */

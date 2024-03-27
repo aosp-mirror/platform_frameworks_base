@@ -640,6 +640,8 @@ public final class PowerManagerService extends SystemService
     // The screen state to use while dozing.
     private int mDozeScreenStateOverrideFromDreamManager = Display.STATE_UNKNOWN;
 
+    private int mDozeScreenStateOverrideReasonFromDreamManager = Display.STATE_REASON_UNKNOWN;
+
     // The screen brightness to use while dozing.
     private int mDozeScreenBrightnessOverrideFromDreamManager = PowerManager.BRIGHTNESS_DEFAULT;
 
@@ -3574,6 +3576,7 @@ public final class PowerManagerService extends SystemService
                 boolean ready = powerGroup.updateLocked(screenBrightnessOverride,
                         shouldUseProximitySensorLocked(), shouldBoostScreenBrightness(),
                         mDozeScreenStateOverrideFromDreamManager,
+                        mDozeScreenStateOverrideReasonFromDreamManager,
                         mDozeScreenBrightnessOverrideFromDreamManagerFloat,
                         mDrawWakeLockOverrideFromSidekick,
                         mBatterySaverSupported
@@ -4383,11 +4386,12 @@ public final class PowerManagerService extends SystemService
     }
 
     private void setDozeOverrideFromDreamManagerInternal(
-            int screenState, int screenBrightness) {
+            int screenState, @Display.StateReason int reason, int screenBrightness) {
         synchronized (mLock) {
             if (mDozeScreenStateOverrideFromDreamManager != screenState
                     || mDozeScreenBrightnessOverrideFromDreamManager != screenBrightness) {
                 mDozeScreenStateOverrideFromDreamManager = screenState;
+                mDozeScreenStateOverrideReasonFromDreamManager = reason;
                 mDozeScreenBrightnessOverrideFromDreamManager = screenBrightness;
                 mDozeScreenBrightnessOverrideFromDreamManagerFloat =
                         BrightnessSynchronizer.brightnessIntToFloat(mDozeScreenBrightnessOverrideFromDreamManager);
@@ -6985,7 +6989,8 @@ public final class PowerManagerService extends SystemService
         }
 
         @Override
-        public void setDozeOverrideFromDreamManager(int screenState, int screenBrightness) {
+        public void setDozeOverrideFromDreamManager(
+                int screenState, int reason, int screenBrightness) {
             switch (screenState) {
                 case Display.STATE_UNKNOWN:
                 case Display.STATE_OFF:
@@ -7002,7 +7007,7 @@ public final class PowerManagerService extends SystemService
                     || screenBrightness > PowerManager.BRIGHTNESS_ON) {
                 screenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
             }
-            setDozeOverrideFromDreamManagerInternal(screenState, screenBrightness);
+            setDozeOverrideFromDreamManagerInternal(screenState, reason, screenBrightness);
         }
 
         @Override

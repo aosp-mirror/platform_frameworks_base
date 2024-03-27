@@ -38,7 +38,6 @@ import com.android.systemui.shared.condition.Monitor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -139,19 +138,5 @@ public class DreamClockTimeComplicationTest extends SysuiTestCase {
                         mViewController);
         assertThat(viewHolder.getView()).isEqualTo(mView);
         assertThat(viewHolder.getLayoutParams()).isEqualTo(mLayoutParams);
-    }
-
-    @Test
-    public void testClick_logUiEvent() {
-        final DreamClockTimeComplication.DreamClockTimeViewController controller =
-                new DreamClockTimeComplication.DreamClockTimeViewController(mView, mUiEventLogger);
-        controller.onViewAttached();
-
-        final ArgumentCaptor<View.OnClickListener> clickListenerCaptor =
-                ArgumentCaptor.forClass(View.OnClickListener.class);
-        verify(mView).setOnClickListener(clickListenerCaptor.capture());
-
-        clickListenerCaptor.getValue().onClick(mView);
-        verify(mUiEventLogger).log(DreamOverlayUiEvent.DREAM_CLOCK_TAPPED);
     }
 }

@@ -136,11 +136,12 @@ public abstract class PowerManagerInternal {
      *
      * @param screenState The overridden screen state, or {@link Display#STATE_UNKNOWN}
      * to disable the override.
+     * @param reason The reason for overriding the screen state.
      * @param screenBrightness The overridden screen brightness, or
      * {@link PowerManager#BRIGHTNESS_DEFAULT} to disable the override.
      */
     public abstract void setDozeOverrideFromDreamManager(
-            int screenState, int screenBrightness);
+            int screenState, @Display.StateReason int reason, int screenBrightness);
 
     /**
      * Used by sidekick manager to tell the power manager if it shouldn't change the display state

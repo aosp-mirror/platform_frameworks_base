@@ -511,13 +511,6 @@ flag {
 }
 
 flag {
-   name: "enable_contextual_tips_frequency_cap"
-   description: "Enables frequency capping for contextual tips, e.g. 1x/day, 2x/week, 3x/lifetime."
-   namespace: "systemui"
-   bug: "322891421"
-}
-
-flag {
    name: "disable_contextual_tips_frequency_check"
    description: "Disables frequency capping check for contextual tips."
    namespace: "systemui"
@@ -527,13 +520,6 @@ flag {
 flag {
    name: "disable_contextual_tips_ios_switcher_check"
    description: "Disables iOS switcher check which guard the tips designed only for iOS switchers."
-   namespace: "systemui"
-   bug: "322891421"
-}
-
-flag {
-   name: "disable_contextual_tips_first_30d_check"
-   description: "Disables condition check which only show tips within 30 days after phone setup."
    namespace: "systemui"
    bug: "322891421"
 }

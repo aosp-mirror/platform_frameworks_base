@@ -2769,6 +2769,7 @@ package android.permission {
   public final class PermissionManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.permission.PermissionGroupUsage> getIndicatorAppOpUsageData();
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.permission.PermissionGroupUsage> getIndicatorAppOpUsageData(boolean);
+    method @FlaggedApi("android.permission.flags.should_register_attribution_source") public boolean isRegisteredAttributionSource(@NonNull android.content.AttributionSource);
     method @NonNull public android.content.AttributionSource registerAttributionSource(@NonNull android.content.AttributionSource);
     method @RequiresPermission(android.Manifest.permission.REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL) public void revokePostNotificationPermissionWithoutKillForTest(@NonNull String, int);
   }

@@ -23,7 +23,6 @@ import com.android.internal.logging.UiEventLogger.UiEventEnum
 enum class DreamOverlayUiEvent(private val mId: Int) : UiEventEnum {
     @UiEvent(doc = "The home controls on the screensaver has been tapped.")
     DREAM_HOME_CONTROLS_TAPPED(1212),
-    @UiEvent(doc = "The clock on the screensaver has been tapped") DREAM_CLOCK_TAPPED(1440),
     @UiEvent(doc = "The weather on the screensaver has been tapped") DREAM_WEATHER_TAPPED(1441);
 
     override fun getId(): Int {

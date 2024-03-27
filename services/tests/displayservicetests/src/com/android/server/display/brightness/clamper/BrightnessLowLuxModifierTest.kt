@@ -32,7 +32,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.mock
 
-private const val userId = UserHandle.USER_CURRENT
+private const val USER_ID = UserHandle.USER_CURRENT
 
 class BrightnessLowLuxModifierTest {
 
@@ -85,7 +85,7 @@ class BrightnessLowLuxModifierTest {
                 .thenReturn(1.0f)
 
 
-        whenever(mockDisplayDeviceConfig.lowBrightnessTransitionPoint).thenReturn(TRANSITION_POINT)
+        whenever(mockDisplayDeviceConfig.evenDimmerTransitionPoint).thenReturn(TRANSITION_POINT)
 
         testHandler.flush()
     }
@@ -94,7 +94,7 @@ class BrightnessLowLuxModifierTest {
     fun testSettingOffDisablesModifier() {
         // test transition point ensures brightness doesn't drop when setting is off.
         Settings.Secure.putIntForUser(context.contentResolver,
-            Settings.Secure.EVEN_DIMMER_ACTIVATED, 0, userId)
+            Settings.Secure.EVEN_DIMMER_ACTIVATED, 0, USER_ID)
         modifier.setAutoBrightnessState(AUTO_BRIGHTNESS_ENABLED)
         modifier.recalculateLowerBound()
         testHandler.flush()
@@ -112,9 +112,9 @@ class BrightnessLowLuxModifierTest {
     fun testLuxRestrictsBrightnessRange() {
         // test that high lux prevents low brightness range.
         Settings.Secure.putIntForUser(context.contentResolver,
-            Settings.Secure.EVEN_DIMMER_ACTIVATED, 1, userId)
+            Settings.Secure.EVEN_DIMMER_ACTIVATED, 1, USER_ID)
         Settings.Secure.putFloatForUser(context.contentResolver,
-            Settings.Secure.EVEN_DIMMER_MIN_NITS, 0.1f, userId)
+            Settings.Secure.EVEN_DIMMER_MIN_NITS, 0.1f, USER_ID)
         modifier.setAutoBrightnessState(AUTO_BRIGHTNESS_ENABLED)
         modifier.onAmbientLuxChange(400.0f)
         testHandler.flush()
@@ -130,9 +130,9 @@ class BrightnessLowLuxModifierTest {
     fun testUserRestrictsBrightnessRange() {
         // test that user minimum nits setting prevents low brightness range.
         Settings.Secure.putIntForUser(context.contentResolver,
-            Settings.Secure.EVEN_DIMMER_ACTIVATED, 1, userId)
+            Settings.Secure.EVEN_DIMMER_ACTIVATED, 1, USER_ID)
         Settings.Secure.putFloatForUser(context.contentResolver,
-            Settings.Secure.EVEN_DIMMER_MIN_NITS, 10.0f, userId)
+            Settings.Secure.EVEN_DIMMER_MIN_NITS, 10.0f, USER_ID)
         modifier.setAutoBrightnessState(AUTO_BRIGHTNESS_ENABLED)
         modifier.recalculateLowerBound()
         testHandler.flush()
@@ -149,9 +149,9 @@ class BrightnessLowLuxModifierTest {
     fun testOnToOff() {
         // test that high lux prevents low brightness range.
         Settings.Secure.putIntForUser(context.contentResolver,
-            Settings.Secure.EVEN_DIMMER_ACTIVATED, 1, userId) // on
+            Settings.Secure.EVEN_DIMMER_ACTIVATED, 1, USER_ID) // on
         Settings.Secure.putFloatForUser(context.contentResolver,
-            Settings.Secure.EVEN_DIMMER_MIN_NITS, 1.0f, userId)
+            Settings.Secure.EVEN_DIMMER_MIN_NITS, 1.0f, USER_ID)
         modifier.setAutoBrightnessState(AUTO_BRIGHTNESS_ENABLED)
         modifier.onAmbientLuxChange(400.0f)
         testHandler.flush()
@@ -162,7 +162,7 @@ class BrightnessLowLuxModifierTest {
         assertThat(modifier.brightnessLowerBound).isEqualTo(LOW_LUX_BRIGHTNESS)
 
         Settings.Secure.putIntForUser(context.contentResolver,
-            Settings.Secure.EVEN_DIMMER_ACTIVATED, 0, userId) // off
+            Settings.Secure.EVEN_DIMMER_ACTIVATED, 0, USER_ID) // off
 
         modifier.recalculateLowerBound()
         testHandler.flush()
@@ -177,9 +177,9 @@ class BrightnessLowLuxModifierTest {
     fun testOffToOn() {
         // test that high lux prevents low brightness range.
         Settings.Secure.putIntForUser(context.contentResolver,
-            Settings.Secure.EVEN_DIMMER_ACTIVATED, 0, userId) // off
+            Settings.Secure.EVEN_DIMMER_ACTIVATED, 0, USER_ID) // off
         Settings.Secure.putFloatForUser(context.contentResolver,
-            Settings.Secure.EVEN_DIMMER_MIN_NITS, 1.0f, userId)
+            Settings.Secure.EVEN_DIMMER_MIN_NITS, 1.0f, USER_ID)
         modifier.setAutoBrightnessState(AUTO_BRIGHTNESS_ENABLED)
         modifier.onAmbientLuxChange(400.0f)
         testHandler.flush()
@@ -191,7 +191,7 @@ class BrightnessLowLuxModifierTest {
 
 
         Settings.Secure.putIntForUser(context.contentResolver,
-            Settings.Secure.EVEN_DIMMER_ACTIVATED, 1, userId) // on
+            Settings.Secure.EVEN_DIMMER_ACTIVATED, 1, USER_ID) // on
         modifier.recalculateLowerBound()
         testHandler.flush()
 
@@ -206,9 +206,9 @@ class BrightnessLowLuxModifierTest {
     fun testDisabledWhenAutobrightnessIsOff() {
         // test that high lux prevents low brightness range.
         Settings.Secure.putIntForUser(context.contentResolver,
-            Settings.Secure.EVEN_DIMMER_ACTIVATED, 1, userId) // on
+            Settings.Secure.EVEN_DIMMER_ACTIVATED, 1, USER_ID) // on
         Settings.Secure.putFloatForUser(context.contentResolver,
-            Settings.Secure.EVEN_DIMMER_MIN_NITS, 1.0f, userId)
+            Settings.Secure.EVEN_DIMMER_MIN_NITS, 1.0f, USER_ID)
 
         modifier.setAutoBrightnessState(AUTO_BRIGHTNESS_ENABLED)
         modifier.onAmbientLuxChange(400.0f)

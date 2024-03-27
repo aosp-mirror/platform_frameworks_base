@@ -498,6 +498,7 @@ public abstract class DisplayManagerInternal {
         // Overrides the policy for adjusting screen brightness and state while dozing.
         public int dozeScreenState;
         public float dozeScreenBrightness;
+        public int dozeScreenStateReason;
 
         public DisplayPowerRequest() {
             policy = POLICY_BRIGHT;
@@ -508,6 +509,7 @@ public abstract class DisplayManagerInternal {
             blockScreenOn = false;
             dozeScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             dozeScreenState = Display.STATE_UNKNOWN;
+            dozeScreenStateReason = Display.STATE_REASON_UNKNOWN;
         }
 
         public DisplayPowerRequest(DisplayPowerRequest other) {
@@ -529,6 +531,7 @@ public abstract class DisplayManagerInternal {
             boostScreenBrightness = other.boostScreenBrightness;
             dozeScreenBrightness = other.dozeScreenBrightness;
             dozeScreenState = other.dozeScreenState;
+            dozeScreenStateReason = other.dozeScreenStateReason;
         }
 
         @Override
@@ -551,7 +554,8 @@ public abstract class DisplayManagerInternal {
                     && lowPowerMode == other.lowPowerMode
                     && boostScreenBrightness == other.boostScreenBrightness
                     && floatEquals(dozeScreenBrightness, other.dozeScreenBrightness)
-                    && dozeScreenState == other.dozeScreenState;
+                    && dozeScreenState == other.dozeScreenState
+                    && dozeScreenStateReason == other.dozeScreenStateReason;
         }
 
         private boolean floatEquals(float f1, float f2) {
@@ -575,7 +579,9 @@ public abstract class DisplayManagerInternal {
                     + ", lowPowerMode=" + lowPowerMode
                     + ", boostScreenBrightness=" + boostScreenBrightness
                     + ", dozeScreenBrightness=" + dozeScreenBrightness
-                    + ", dozeScreenState=" + Display.stateToString(dozeScreenState);
+                    + ", dozeScreenState=" + Display.stateToString(dozeScreenState)
+                    + ", dozeScreenStateReason="
+                            + Display.stateReasonToString(dozeScreenStateReason);
         }
 
         public static String policyToString(int policy) {

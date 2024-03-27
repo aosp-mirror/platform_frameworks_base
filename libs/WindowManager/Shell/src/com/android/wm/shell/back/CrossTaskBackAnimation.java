@@ -275,8 +275,6 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
 
     private void onGestureProgress(@NonNull BackEvent backEvent) {
         if (!mBackInProgress) {
-            mIsRightEdge = backEvent.getSwipeEdge() == EDGE_RIGHT;
-            mInitialTouchPos.set(backEvent.getTouchX(), backEvent.getTouchY());
             mBackInProgress = true;
         }
         float progress = backEvent.getProgress();
@@ -326,6 +324,13 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
     private final class Callback extends IOnBackInvokedCallback.Default {
         @Override
         public void onBackStarted(BackMotionEvent backEvent) {
+            // in case we're still animating an onBackCancelled event, let's remove the finish-
+            // callback from the progress animator to prevent calling finishAnimation() before
+            // restarting a new animation
+            mProgressAnimator.removeOnBackCancelledFinishCallback();
+
+            mIsRightEdge = backEvent.getSwipeEdge() == EDGE_RIGHT;
+            mInitialTouchPos.set(backEvent.getTouchX(), backEvent.getTouchY());
             mProgressAnimator.onBackStarted(backEvent,
                     CrossTaskBackAnimation.this::onGestureProgress);
         }

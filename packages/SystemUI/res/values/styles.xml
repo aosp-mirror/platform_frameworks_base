@@ -987,6 +987,11 @@
         <!-- Setting a placeholder will avoid using the SystemUI icon on the splash screen -->
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_blank</item>
         <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
+
+        <!--
+            TODO(b/309578419): Make the activity handle insets properly and then remove this.
+        -->
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
 
     <style name="Theme.VolumePanelActivity" parent="@android:style/Theme.DeviceDefault.DayNight">

@@ -235,12 +235,6 @@ public abstract class InputMethodManagerInternal {
             IBinder targetWindowToken);
 
     /**
-     * Returns true if any InputConnection is currently active.
-     * {@hide}
-     */
-    public abstract boolean isAnyInputConnectionActive();
-
-    /**
      * Fake implementation of {@link InputMethodManagerInternal}. All the methods do nothing.
      */
     private static final InputMethodManagerInternal NOP =
@@ -330,11 +324,6 @@ public abstract class InputMethodManagerInternal {
                 @Override
                 public void onSwitchKeyboardLayoutShortcut(int direction, int displayId,
                         IBinder targetWindowToken) {
-                }
-
-                @Override
-                public boolean isAnyInputConnectionActive() {
-                    return false;
                 }
             };
 

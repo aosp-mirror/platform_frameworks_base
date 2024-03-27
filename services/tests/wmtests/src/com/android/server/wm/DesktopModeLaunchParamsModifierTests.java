@@ -29,7 +29,10 @@ import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_SKIP;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 import android.graphics.Rect;
 import android.platform.test.annotations.DisableFlags;
@@ -44,6 +47,7 @@ import com.android.window.flags.Flags;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 
 /**
  * Tests for desktop mode task bounds.
@@ -58,6 +62,7 @@ public class DesktopModeLaunchParamsModifierTests extends WindowTestsBase {
 
     private ActivityRecord mActivity;
 
+    @Mock
     private DesktopModeLaunchParamsModifier mTarget;
 
     private LaunchParamsController.LaunchParams mCurrent;
@@ -66,7 +71,8 @@ public class DesktopModeLaunchParamsModifierTests extends WindowTestsBase {
     @Before
     public void setUp() throws Exception {
         mActivity = new ActivityBuilder(mAtm).build();
-        mTarget = new DesktopModeLaunchParamsModifier();
+        mTarget = spy(new DesktopModeLaunchParamsModifier(mContext));
+        doReturn(true).when(mTarget).isDesktopModeSupported(any());
         mCurrent = new LaunchParamsController.LaunchParams();
         mCurrent.reset();
         mResult = new LaunchParamsController.LaunchParams();
@@ -77,6 +83,21 @@ public class DesktopModeLaunchParamsModifierTests extends WindowTestsBase {
     @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
     public void testReturnsContinueIfDesktopWindowingIsDisabled() {
         assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(null).calculate());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    public void testReturnsContinueIfDesktopWindowingIsEnabledOnUnsupportedDevice() {
+        doReturn(false).when(mTarget).isDesktopModeSupported(any());
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(null).calculate());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    public void testReturnsDoneIfDesktopWindowingIsEnabledAndUnsupportedDeviceOverridden() {
+        doReturn(false).when(mTarget).enforceDeviceRestrictions();
+        final Task task = new TaskBuilder(mSupervisor).build();
+        assertEquals(RESULT_DONE, new CalculateRequestBuilder().setTask(task).calculate());
     }
 
     @Test

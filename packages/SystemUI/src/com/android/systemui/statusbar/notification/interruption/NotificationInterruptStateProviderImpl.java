@@ -204,11 +204,6 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             return false;
         }
 
-        if (entry.getRanking().isSuspended()) {
-            mLogger.logSuspendedAppBubble(entry);
-            return false;
-        }
-
         if (entry.getBubbleMetadata() == null
                 || (entry.getBubbleMetadata().getShortcutId() == null
                     && entry.getBubbleMetadata().getIntent() == null)) {
@@ -557,6 +552,13 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
                 }
                 return false;
             }
+        }
+
+        if (entry.getRanking().isSuspended()) {
+            if (log) {
+                mLogger.logNoAlertingAppSuspended(entry);
+            }
+            return false;
         }
 
         if (mKeyguardNotificationVisibilityProvider.shouldHideNotification(entry)) {

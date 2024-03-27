@@ -736,7 +736,8 @@ public class ResourcesManager {
     private @Nullable ResourcesImpl findOrCreateResourcesImplForKeyLocked(
             @NonNull ResourcesKey key, @Nullable ApkAssetsSupplier apkSupplier) {
         ResourcesImpl impl = findResourcesImplForKeyLocked(key);
-        if (impl == null) {
+        // ResourcesImpl also need to be recreated if its shared library count is not up-to-date.
+        if (impl == null || impl.getSharedLibCount() != mSharedLibAssetsMap.size()) {
             impl = createResourcesImpl(key, apkSupplier);
             if (impl != null) {
                 mResourceImpls.put(key, new WeakReference<>(impl));

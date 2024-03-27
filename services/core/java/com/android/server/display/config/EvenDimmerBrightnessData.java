@@ -26,13 +26,13 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Brightness config for low brightness mode
+ * Brightness config for even dimmer
  */
-public class LowBrightnessData {
-    private static final String TAG = "LowBrightnessData";
+public class EvenDimmerBrightnessData {
+    private static final String TAG = "EvenDimmerBrightnessData";
 
     /**
-     * Brightness value at which lower brightness methods are used.
+     * Brightness value at which even dimmer methods are used.
      */
     public final float mTransitionPoint;
 
@@ -69,7 +69,7 @@ public class LowBrightnessData {
     public final Spline mMinLuxToNits;
 
     @VisibleForTesting
-    public LowBrightnessData(float transitionPoint, float[] nits,
+    public EvenDimmerBrightnessData(float transitionPoint, float[] nits,
             float[] backlight, float[] brightness, Spline backlightToNits,
             Spline nitsToBacklight, Spline brightnessToBacklight, Spline backlightToBrightness,
             Spline minLuxToNits) {
@@ -86,7 +86,7 @@ public class LowBrightnessData {
 
     @Override
     public String toString() {
-        return "LowBrightnessData {"
+        return "EvenDimmerBrightnessData {"
                 + "mTransitionPoint: " + mTransitionPoint
                 + ", mNits: " + Arrays.toString(mNits)
                 + ", mBacklight: " + Arrays.toString(mBacklight)
@@ -100,11 +100,11 @@ public class LowBrightnessData {
     }
 
     /**
-     * Loads LowBrightnessData from DisplayConfiguration
+     * Loads EvenDimmerBrightnessData from DisplayConfiguration
      */
     @Nullable
-    public static LowBrightnessData loadConfig(DisplayConfiguration config) {
-        final LowBrightnessMode lbm = config.getLowBrightness();
+    public static EvenDimmerBrightnessData loadConfig(DisplayConfiguration config) {
+        final EvenDimmerMode lbm = config.getEvenDimmer();
         if (lbm == null) {
             return null;
         }
@@ -122,7 +122,7 @@ public class LowBrightnessData {
         if (nitsList.isEmpty()
                 || backlightList.size() != brightnessList.size()
                 || backlightList.size() != nitsList.size()) {
-            Slog.e(TAG, "Invalid low brightness array lengths");
+            Slog.e(TAG, "Invalid even dimmer array lengths");
             return null;
         }
 
@@ -164,7 +164,7 @@ public class LowBrightnessData {
             ++i;
         }
 
-        return new LowBrightnessData(transitionPoints, nits, backlight, brightness,
+        return new EvenDimmerBrightnessData(transitionPoints, nits, backlight, brightness,
                 Spline.createSpline(backlight, nits),
                 Spline.createSpline(nits, backlight),
                 Spline.createSpline(brightness, backlight),
