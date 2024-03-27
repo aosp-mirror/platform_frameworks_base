@@ -32,6 +32,7 @@ import javax.inject.Inject
 import kotlin.time.Duration
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
@@ -61,6 +62,31 @@ constructor(
                 primaryBouncerInteractor::willRunDismissFromKeyguard
             )
         }
+    }
+
+    /**
+     * When the shade is expanded, make sure that all notifications can be seen immediately during a
+     * transition to GONE. This matters especially when the user has chosen to not show
+     * notifications on the lockscreen and then pulls down the shade, which presents them with an
+     * immediate auth prompt, followed by a notification animation.
+     */
+    fun showAllNotifications(duration: Duration, from: KeyguardState): Flow<Boolean> {
+        var leaveShadeOpen = false
+        return animationFlow
+            .setup(
+                duration = duration,
+                from = from,
+                to = GONE,
+            )
+            .sharedFlow(
+                duration = duration,
+                onStart = { leaveShadeOpen = statusBarStateController.leaveOpenOnKeyguardHide() },
+                onStep = { if (leaveShadeOpen) 1f else 0f },
+                onFinish = { 0f },
+                onCancel = { 0f },
+            )
+            .map { it == 1f }
+            .distinctUntilChanged()
     }
 
     private fun createScrimAlphaFlow(

@@ -81,6 +81,10 @@ constructor(
         )
     }
 
+    /** See [BouncerToGoneFlows#showAllNotifications] */
+    val showAllNotifications: Flow<Boolean> =
+        bouncerToGoneFlows.showAllNotifications(TO_GONE_DURATION, ALTERNATE_BOUNCER)
+
     /** Scrim alpha values */
     val scrimAlpha: Flow<ScrimAlpha> =
         bouncerToGoneFlows.scrimAlpha(TO_GONE_DURATION, ALTERNATE_BOUNCER)
