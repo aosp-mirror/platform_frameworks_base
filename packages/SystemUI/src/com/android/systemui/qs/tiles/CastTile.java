@@ -63,6 +63,7 @@ import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.DialogKt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -245,6 +246,10 @@ public class CastTile extends QSTileImpl<BooleanState> {
                             new DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
                                     INTERACTION_JANK_TAG));
                 } else {
+                    if (dialog.getWindow() != null) {
+                        DialogKt.registerAnimationOnBackInvoked(dialog,
+                                dialog.getWindow().getDecorView());
+                    }
                     dialog.show();
                 }
             });
@@ -272,7 +277,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
                 state.secondaryLabel = getDeviceName(device);
                 state.stateDescription = state.stateDescription + ","
                         + mContext.getString(
-                                R.string.accessibility_cast_name, state.label);
+                        R.string.accessibility_cast_name, state.label);
                 connecting = false;
                 break;
             } else if (device.state == CastDevice.STATE_CONNECTING) {
@@ -342,14 +347,14 @@ public class CastTile extends QSTileImpl<BooleanState> {
     };
 
     private final SignalCallback mSignalCallback = new SignalCallback() {
-                @Override
-                public void setWifiIndicators(@NonNull WifiIndicators indicators) {
-                    // statusIcon.visible has the connected status information
-                    boolean enabledAndConnected = indicators.enabled
-                            && (indicators.qsIcon != null && indicators.qsIcon.visible);
-                    setCastTransportAllowed(enabledAndConnected);
-                }
-            };
+        @Override
+        public void setWifiIndicators(@NonNull WifiIndicators indicators) {
+            // statusIcon.visible has the connected status information
+            boolean enabledAndConnected = indicators.enabled
+                    && (indicators.qsIcon != null && indicators.qsIcon.visible);
+            setCastTransportAllowed(enabledAndConnected);
+        }
+    };
 
     private final HotspotController.Callback mHotspotCallback =
             new HotspotController.Callback() {
