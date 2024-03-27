@@ -27,7 +27,9 @@ import android.text.TextUtils
 import android.text.format.DateFormat
 import android.util.AttributeSet
 import android.util.MathUtils.constrainedMap
+import android.util.TypedValue
 import android.view.View
+import android.view.View.MeasureSpec.EXACTLY
 import android.widget.TextView
 import com.android.app.animation.Interpolators
 import com.android.internal.annotations.VisibleForTesting
@@ -42,6 +44,7 @@ import java.io.PrintWriter
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
+import kotlin.math.min
 
 /**
  * Displays the time with the hour positioned above the minutes. (ie: 09 above 30 is 9:30)
@@ -85,6 +88,8 @@ class AnimatableClockView @JvmOverloads constructor(
     private var textAnimator: TextAnimator? = null
     private var onTextAnimatorInitialized: Runnable? = null
 
+    // last text size which is not constrained by view height
+    private var lastUnconstrainedTextSize: Float = Float.MAX_VALUE
     @VisibleForTesting var textAnimatorFactory: (Layout, () -> Unit) -> TextAnimator =
         { layout, invalidateCb ->
             TextAnimator(layout, NUM_CLOCK_FONT_ANIMATION_STEPS, invalidateCb) }
@@ -188,6 +193,11 @@ class AnimatableClockView @JvmOverloads constructor(
     @SuppressLint("DrawAllocation")
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         logger.d("onMeasure")
+        if (migratedClocks && !isSingleLineInternal &&
+                MeasureSpec.getMode(heightMeasureSpec) == EXACTLY) {
+            setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                    min(lastUnconstrainedTextSize, MeasureSpec.getSize(heightMeasureSpec) / 2F))
+        }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         val animator = textAnimator
         if (animator == null) {
