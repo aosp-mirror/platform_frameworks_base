@@ -940,7 +940,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             final float nits = backlightToNits(backlight);
                             final float sdrNits = backlightToNits(sdrBacklight);
 
-                            if (getFeatureFlags().isEvenDimmerEnabled()) {
+                            if (getFeatureFlags().isEvenDimmerEnabled()
+                                    && mDisplayDeviceConfig != null
+                                    && mDisplayDeviceConfig.isEvenDimmerAvailable()) {
                                 applyColorMatrixBasedDimming(brightnessState);
                             }
 
