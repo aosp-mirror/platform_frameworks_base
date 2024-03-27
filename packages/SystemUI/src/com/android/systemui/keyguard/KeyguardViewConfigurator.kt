@@ -32,8 +32,8 @@ import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.keyguard.KeyguardStatusView
 import com.android.keyguard.KeyguardStatusViewController
+import com.android.keyguard.LegacyLockIconViewController
 import com.android.keyguard.LockIconView
-import com.android.keyguard.LockIconViewController
 import com.android.keyguard.dagger.KeyguardStatusViewComponent
 import com.android.systemui.CoreStartable
 import com.android.systemui.common.ui.ConfigurationState
@@ -92,7 +92,7 @@ constructor(
     private val configuration: ConfigurationState,
     private val context: Context,
     private val keyguardIndicationController: KeyguardIndicationController,
-    private val lockIconViewController: Lazy<LockIconViewController>,
+    private val lockIconViewController: Lazy<LegacyLockIconViewController>,
     private val shadeInteractor: ShadeInteractor,
     private val interactionJankMonitor: InteractionJankMonitor,
     private val deviceEntryHapticsInteractor: DeviceEntryHapticsInteractor,

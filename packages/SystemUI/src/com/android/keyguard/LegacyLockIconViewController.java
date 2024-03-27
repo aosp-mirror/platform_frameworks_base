@@ -98,7 +98,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi;
  * icon will show a set distance from the bottom of the device.
  */
 @SysUISingleton
-public class LockIconViewController implements Dumpable {
+public class LegacyLockIconViewController implements Dumpable, LockIconViewController {
     private static final String TAG = "LockIconViewController";
     private static final float sDefaultDensity =
             (float) DisplayMetrics.DENSITY_DEVICE_STABLE / (float) DisplayMetrics.DENSITY_DEFAULT;
@@ -189,7 +189,7 @@ public class LockIconViewController implements Dumpable {
             };
 
     @Inject
-    public LockIconViewController(
+    public LegacyLockIconViewController(
             @NonNull StatusBarStateController statusBarStateController,
             @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
             @NonNull KeyguardViewController keyguardViewController,
@@ -262,6 +262,7 @@ public class LockIconViewController implements Dumpable {
 
     /** Sets the LockIconView to the controller and rebinds any that depend on it. */
     @SuppressLint("ClickableViewAccessibility")
+    @Override
     public void setLockIconView(LockIconView lockIconView) {
         mView = lockIconView;
         mView.setAccessibilityDelegate(mAccessibilityDelegate);
@@ -344,10 +345,12 @@ public class LockIconViewController implements Dumpable {
         }
     }
 
+    @Override
     public float getTop() {
         return mView.getLocationTop();
     }
 
+    @Override
     public float getBottom() {
         return mView.getLocationBottom();
     }
@@ -499,6 +502,7 @@ public class LockIconViewController implements Dumpable {
     }
 
     /** Every minute, update the aod icon's burn in offset */
+    @Override
     public void dozeTimeTick() {
         updateBurnInOffsets();
     }
@@ -774,6 +778,7 @@ public class LockIconViewController implements Dumpable {
     /**
      * Set the alpha of this view.
      */
+    @Override
     public void setAlpha(float alpha) {
         mView.setAlpha(alpha);
     }
@@ -823,6 +828,7 @@ public class LockIconViewController implements Dumpable {
     /**
      * Whether the lock icon will handle a touch while dozing.
      */
+    @Override
     public boolean willHandleTouchWhileDozing(MotionEvent event) {
         // is in lock icon area
         mView.getHitRect(mSensorTouchLocation);

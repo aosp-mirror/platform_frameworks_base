@@ -22,7 +22,7 @@ import android.view.MotionEvent
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityContainerController
-import com.android.keyguard.LockIconViewController
+import com.android.keyguard.LegacyLockIconViewController
 import com.android.keyguard.dagger.KeyguardBouncerComponent
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
@@ -101,7 +101,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock private lateinit var statusBarWindowStateController: StatusBarWindowStateController
     @Mock
     private lateinit var lockscreenShadeTransitionController: LockscreenShadeTransitionController
-    @Mock private lateinit var lockIconViewController: LockIconViewController
+    @Mock private lateinit var lockIconViewController: LegacyLockIconViewController
     @Mock private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
     @Mock private lateinit var ambientState: AmbientState
     @Mock private lateinit var shadeLogger: ShadeLogger

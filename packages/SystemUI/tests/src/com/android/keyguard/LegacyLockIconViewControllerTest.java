@@ -51,7 +51,7 @@ import org.junit.runner.RunWith;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
+public class LegacyLockIconViewControllerTest extends LegacyLockIconViewControllerBaseTest {
 
     @Override
     public void setUp() throws Exception {
