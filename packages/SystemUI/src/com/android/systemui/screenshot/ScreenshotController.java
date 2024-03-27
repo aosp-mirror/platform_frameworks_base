@@ -96,7 +96,10 @@ import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 
+import kotlin.Unit;
+
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -167,6 +170,7 @@ public class ScreenshotController {
         public Notification.Action quickShareAction;
         public UserHandle owner;
         public String subject;  // Title for sharing
+        public Long imageTime; // Time at which screenshot was saved
 
         /**
          * Used to reset the return data on error
@@ -176,6 +180,7 @@ public class ScreenshotController {
             smartActions = null;
             quickShareAction = null;
             subject = null;
+            imageTime = null;
         }
     }
 
@@ -261,11 +266,9 @@ public class ScreenshotController {
     private SaveImageInBackgroundTask mSaveInBgTask;
     private boolean mScreenshotTakenInPortrait;
     private boolean mBlockAttach;
-
-    private ScreenshotActionsProvider mActionsProvider;
-
     private Animator mScreenshotAnimation;
     private RequestCallback mCurrentRequestCallback;
+    private ScreenshotActionsProvider mActionsProvider;
     private String mPackageName = "";
     private final BroadcastReceiver mCopyBroadcastReceiver;
 
@@ -317,6 +320,7 @@ public class ScreenshotController {
             @Assisted boolean showUIOnExternalDisplay
     ) {
         mScreenshotSmartActions = screenshotSmartActions;
+        mActionsProviderFactory = actionsProviderFactory;
         mNotificationsController = screenshotNotificationsControllerFactory.create(displayId);
         mScrollCaptureClient = scrollCaptureClient;
         mUiEventLogger = uiEventLogger;
@@ -347,7 +351,6 @@ public class ScreenshotController {
         mAssistContentRequester = assistContentRequester;
 
         mViewProxy = viewProxyFactory.getProxy(mContext, mDisplayId);
-        mActionsProviderFactory = actionsProviderFactory;
 
         mScreenshotHandler.setOnTimeoutRunnable(() -> {
             if (DEBUG_UI) {
@@ -441,8 +444,19 @@ public class ScreenshotController {
             return;
         }
 
-        saveScreenshotInWorkerThread(screenshot.getUserHandle(), finisher,
-                this::showUiOnActionsReady, this::showUiOnQuickShareActionReady);
+        if (screenshotShelfUi()) {
+            final UUID requestId = UUID.randomUUID();
+            final String screenshotId = String.format("Screenshot_%s", requestId);
+            mActionsProvider = mActionsProviderFactory.create(screenshot, screenshotId,
+                    this::createWindowTransition, () -> {
+                        mViewProxy.requestDismissal(null);
+                        return Unit.INSTANCE;
+                    });
+            saveScreenshotInBackground(screenshot, requestId, finisher);
+        } else {
+            saveScreenshotInWorkerThread(screenshot.getUserHandle(), finisher,
+                    this::showUiOnActionsReady, this::showUiOnQuickShareActionReady);
+        }
 
         // The window is focusable by default
         setWindowFocusable(true);
@@ -477,7 +491,9 @@ public class ScreenshotController {
         // ignore system bar insets for the purpose of window layout
         mWindow.getDecorView().setOnApplyWindowInsetsListener(
                 (v, insets) -> WindowInsets.CONSUMED);
-        mScreenshotHandler.cancelTimeout(); // restarted after animation
+        if (!screenshotShelfUi()) {
+            mScreenshotHandler.cancelTimeout(); // restarted after animation
+        }
     }
 
     private boolean shouldShowUi() {
@@ -496,11 +512,6 @@ public class ScreenshotController {
         });
 
         mViewProxy.reset();
-
-        if (screenshotShelfUi()) {
-            mActionsProvider =
-                    mActionsProviderFactory.create(screenshot, this::createWindowTransition);
-        }
 
         if (mViewProxy.isAttachedToWindow()) {
             // if we didn't already dismiss for another reason
@@ -921,6 +932,39 @@ public class ScreenshotController {
         mScreenshotHandler.cancelTimeout();
     }
 
+    private void saveScreenshotInBackground(
+            ScreenshotData screenshot, UUID requestId, Consumer<Uri> finisher) {
+        ListenableFuture<ImageExporter.Result> future = mImageExporter.export(mBgExecutor,
+                requestId, screenshot.getBitmap(), screenshot.getUserHandle(), mDisplayId);
+        future.addListener(() -> {
+            try {
+                ImageExporter.Result result = future.get();
+                Log.d(TAG, "Saved screenshot: " + result);
+                logScreenshotResultStatus(result.uri, screenshot.getUserHandle());
+                mScreenshotHandler.resetTimeout();
+                if (result.uri != null) {
+                    final SavedImageData savedImageData = new SavedImageData();
+                    savedImageData.uri = result.uri;
+                    savedImageData.owner = screenshot.getUserHandle();
+                    savedImageData.imageTime = result.timestamp;
+                    mActionsProvider.setCompletedScreenshot(savedImageData);
+                    mViewProxy.setChipIntents(savedImageData);
+                }
+                if (DEBUG_CALLBACK) {
+                    Log.d(TAG, "finished background processing, Calling (Consumer<Uri>) "
+                            + "finisher.accept(\"" + result.uri + "\"");
+                }
+                finisher.accept(result.uri);
+            } catch (Exception e) {
+                Log.d(TAG, "Failed to store screenshot", e);
+                if (DEBUG_CALLBACK) {
+                    Log.d(TAG, "Calling (Consumer<Uri>) finisher.accept(null)");
+                }
+                finisher.accept(null);
+            }
+        }, mMainExecutor);
+    }
+
     /**
      * Creates a new worker thread and saves the screenshot to the media store.
      */
@@ -957,11 +1001,6 @@ public class ScreenshotController {
     private void showUiOnActionsReady(ScreenshotController.SavedImageData imageData) {
         logSuccessOnActionsReady(imageData);
         mScreenshotHandler.resetTimeout();
-
-        if (screenshotShelfUi()) {
-            mActionsProvider.setCompletedScreenshot(imageData);
-            return;
-        }
 
         if (imageData.uri != null) {
             if (DEBUG_UI) {
@@ -1014,18 +1053,25 @@ public class ScreenshotController {
     /**
      * Logs success/failure of the screenshot saving task, and shows an error if it failed.
      */
-    private void logSuccessOnActionsReady(ScreenshotController.SavedImageData imageData) {
-        if (imageData.uri == null) {
+    private void logScreenshotResultStatus(Uri uri, UserHandle owner) {
+        if (uri == null) {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_NOT_SAVED, 0, mPackageName);
             mNotificationsController.notifyScreenshotError(
                     R.string.screenshot_failed_to_save_text);
         } else {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED, 0, mPackageName);
-            if (mUserManager.isManagedProfile(imageData.owner.getIdentifier())) {
+            if (mUserManager.isManagedProfile(owner.getIdentifier())) {
                 mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED_TO_WORK_PROFILE, 0,
                         mPackageName);
             }
         }
+    }
+
+    /**
+     * Logs success/failure of the screenshot saving task, and shows an error if it failed.
+     */
+    private void logSuccessOnActionsReady(ScreenshotController.SavedImageData imageData) {
+        logScreenshotResultStatus(imageData.uri, imageData.owner);
     }
 
     private boolean isUserSetupComplete(UserHandle owner) {
