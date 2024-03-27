@@ -1030,13 +1030,6 @@
     <!-- Settings item title to select whether to disable cache for transcoding. [CHAR LIMIT=85] -->
     <string name="transcode_disable_cache">Disable transcoding cache</string>
 
-    <!-- Developer settings title: widevine settings screen. [CHAR LIMIT=50] -->
-    <string name="widevine_settings_title">Widevine settings</string>
-     <!-- Developer settings title: select whether to enable Force L3 fallback. [CHAR LIMIT=50] -->
-    <string name="force_l3_fallback_title">Force L3 fallback</string>
-     <!-- Developer settings summary: select whether to enable Force L3 fallback.[CHAR LIMIT=NONE] -->
-    <string name="force_l3_fallback_summary">Select to force L3 fallback</string>
-
     <!-- Services settings screen, setting option name for the user to go to the screen to view running services -->
     <string name="runningservices_settings_title">Running services</string>
     <!-- Services settings screen, setting option summary for the user to go to the screen to view running services  -->
