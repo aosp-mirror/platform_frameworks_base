@@ -77,6 +77,19 @@ java_genrule {
     ],
 }
 
+// Extract the stats file.
+genrule {
+    name: "framework-minus-apex.ravenwood.stats",
+    defaults: ["ravenwood-internal-only-visibility-genrule"],
+    cmd: "cp $(in) $(out)",
+    srcs: [
+        ":framework-minus-apex.ravenwood-base{hoststubgen_framework-minus-apex_stats.csv}",
+    ],
+    out: [
+        "hoststubgen_framework-minus-apex_stats.csv",
+    ],
+}
+
 java_library {
     name: "services.core-for-hoststubgen",
     installable: false, // host only jar.
@@ -132,6 +145,19 @@ java_genrule {
     ],
     out: [
         "services.core.ravenwood.jar",
+    ],
+}
+
+// Extract the stats file.
+genrule {
+    name: "services.core.ravenwood.stats",
+    defaults: ["ravenwood-internal-only-visibility-genrule"],
+    cmd: "cp $(in) $(out)",
+    srcs: [
+        ":services.core.ravenwood-base{hoststubgen_services.core_stats.csv}",
+    ],
+    out: [
+        "hoststubgen_services.core_stats.csv",
     ],
 }
 
