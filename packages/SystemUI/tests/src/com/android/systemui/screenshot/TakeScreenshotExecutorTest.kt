@@ -57,7 +57,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
     private val eventLogger = UiEventLoggerFake()
 
     private val screenshotExecutor =
-        TakeScreenshotExecutor(
+        TakeScreenshotExecutorImpl(
             controllerFactory,
             fakeDisplayRepository,
             testScope,
