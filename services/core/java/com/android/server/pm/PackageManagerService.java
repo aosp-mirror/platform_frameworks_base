@@ -6278,9 +6278,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     final int[] userIds = resolveUserIds(UserHandle.USER_ALL);
                     final String reason = "The mimeGroup is changed";
                     for (int i = 0; i < userIds.length; i++) {
-                        final int packageUid = UserHandle.getUid(userIds[i], appId);
-                        mBroadcastHelper.sendPackageChangedBroadcast(snapShot, packageName,
-                                true /* dontKillApp */, components, packageUid, reason);
+                        final PackageUserStateInternal pkgUserState =
+                                packageState.getUserStates().get(userIds[i]);
+                        if (pkgUserState != null && pkgUserState.isInstalled()) {
+                            final int packageUid = UserHandle.getUid(userIds[i], appId);
+                            mBroadcastHelper.sendPackageChangedBroadcast(snapShot, packageName,
+                                    true /* dontKillApp */, components, packageUid, reason);
+                        }
                     }
                 });
             }
