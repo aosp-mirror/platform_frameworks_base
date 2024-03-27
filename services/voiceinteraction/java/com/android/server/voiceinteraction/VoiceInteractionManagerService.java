@@ -16,6 +16,7 @@
 
 package com.android.server.voiceinteraction;
 
+import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
 import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
@@ -1072,8 +1073,10 @@ public class VoiceInteractionManagerService extends SystemService {
                         // If visEnabledKey is set to true (or absent), we try following VIS path.
                         String csPkgName = mContext.getResources()
                                 .getString(R.string.config_defaultContextualSearchPackageName);
-                        if (!csPkgName.equals(getCurInteractor(
-                                Binder.getCallingUserHandle().getIdentifier()).getPackageName())) {
+                        ComponentName currInteractor =
+                                getCurInteractor(Binder.getCallingUserHandle().getIdentifier());
+                        if (currInteractor == null
+                                || !csPkgName.equals(currInteractor.getPackageName())) {
                             // Check if the interactor can handle Contextual Search.
                             // If not, return failure.
                             Slog.w(TAG, "Contextual Search not supported yet. Returning failure.");
@@ -2718,7 +2721,7 @@ public class VoiceInteractionManagerService extends SystemService {
             }
             launchIntent.setComponent(resolveInfo.getComponentInfo().getComponentName());
             launchIntent.addFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_NO_ANIMATION
-                    | FLAG_ACTIVITY_NO_USER_ACTION);
+                    | FLAG_ACTIVITY_NO_USER_ACTION | FLAG_ACTIVITY_CLEAR_TASK);
             launchIntent.putExtras(args);
             boolean isAssistDataAllowed = mAtmInternal.isAssistDataAllowed();
             final List<ActivityAssistInfo> records = mAtmInternal.getTopVisibleActivities();
