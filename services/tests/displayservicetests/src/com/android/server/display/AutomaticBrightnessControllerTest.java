@@ -53,6 +53,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.display.brightness.clamper.BrightnessClamperController;
+import com.android.server.display.config.HysteresisLevels;
 import com.android.server.testutils.OffsettableClock;
 
 import org.junit.After;
