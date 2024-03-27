@@ -16,78 +16,133 @@
 
 package com.android.systemui.screenshot
 
+import android.app.ActivityOptions
+import android.app.ExitTransitionCoordinator
 import android.content.Context
 import android.content.Intent
-import android.graphics.drawable.Drawable
-import android.net.Uri
-import android.os.UserHandle
+import android.util.Log
+import android.util.Pair
 import androidx.appcompat.content.res.AppCompatResources
+import com.android.app.tracing.coroutines.launch
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.log.DebugLogger.debugLog
 import com.android.systemui.res.R
-import javax.inject.Inject
+import com.android.systemui.screenshot.ActionIntentCreator.createEdit
+import com.android.systemui.screenshot.ActionIntentCreator.createShareWithSubject
+import com.android.systemui.screenshot.ScreenshotController.SavedImageData
+import com.android.systemui.screenshot.ui.viewmodel.ActionButtonViewModel
+import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * Provides actions for screenshots. This class can be overridden by a vendor-specific SysUI
  * implementation.
  */
 interface ScreenshotActionsProvider {
-    data class ScreenshotAction(
-        val icon: Drawable? = null,
-        val text: String? = null,
-        val description: String,
-        val overrideTransition: Boolean = false,
-        val retrieveIntent: (Uri) -> Intent
-    )
-
-    interface ScreenshotActionsCallback {
-        fun setPreviewAction(overrideTransition: Boolean = false, retrieveIntent: (Uri) -> Intent)
-        fun addAction(action: ScreenshotAction) = addActions(listOf(action))
-        fun addActions(actions: List<ScreenshotAction>)
-    }
+    fun setCompletedScreenshot(result: SavedImageData)
+    fun isPendingSharedTransition(): Boolean
 
     interface Factory {
         fun create(
-            context: Context,
-            user: UserHandle?,
-            callback: ScreenshotActionsCallback
+            request: ScreenshotData,
+            windowTransition: () -> Pair<ActivityOptions, ExitTransitionCoordinator>,
         ): ScreenshotActionsProvider
     }
 }
 
-class DefaultScreenshotActionsProvider(
+class DefaultScreenshotActionsProvider
+@AssistedInject
+constructor(
     private val context: Context,
-    private val user: UserHandle?,
-    private val callback: ScreenshotActionsProvider.ScreenshotActionsCallback
+    private val viewModel: ScreenshotViewModel,
+    private val actionExecutor: ActionIntentExecutor,
+    @Application private val applicationScope: CoroutineScope,
+    @Assisted val request: ScreenshotData,
+    @Assisted val windowTransition: () -> Pair<ActivityOptions, ExitTransitionCoordinator>,
 ) : ScreenshotActionsProvider {
+    private var pendingAction: ((SavedImageData) -> Unit)? = null
+    private var result: SavedImageData? = null
+    private var isPendingSharedTransition = false
+
     init {
-        callback.setPreviewAction(true) { ActionIntentCreator.createEdit(it, context) }
-        val editAction =
-            ScreenshotActionsProvider.ScreenshotAction(
+        viewModel.setPreviewAction {
+            debugLog(LogConfig.DEBUG_ACTIONS) { "Preview tapped" }
+            onDeferrableActionTapped { result ->
+                startSharedTransition(createEdit(result.uri, context), true)
+            }
+        }
+        viewModel.addAction(
+            ActionButtonViewModel(
                 AppCompatResources.getDrawable(context, R.drawable.ic_screenshot_edit),
                 context.resources.getString(R.string.screenshot_edit_label),
                 context.resources.getString(R.string.screenshot_edit_description),
-                true
-            ) { uri ->
-                ActionIntentCreator.createEdit(uri, context)
+            ) {
+                debugLog(LogConfig.DEBUG_ACTIONS) { "Edit tapped" }
+                onDeferrableActionTapped { result ->
+                    startSharedTransition(createEdit(result.uri, context), true)
+                }
             }
-        val shareAction =
-            ScreenshotActionsProvider.ScreenshotAction(
+        )
+        viewModel.addAction(
+            ActionButtonViewModel(
                 AppCompatResources.getDrawable(context, R.drawable.ic_screenshot_share),
                 context.resources.getString(R.string.screenshot_share_label),
                 context.resources.getString(R.string.screenshot_share_description),
-                false
-            ) { uri ->
-                ActionIntentCreator.createShare(uri)
+            ) {
+                debugLog(LogConfig.DEBUG_ACTIONS) { "Share tapped" }
+                onDeferrableActionTapped { result ->
+                    startSharedTransition(createShareWithSubject(result.uri, result.subject), false)
+                }
             }
-        callback.addActions(listOf(editAction, shareAction))
+        )
     }
 
-    class Factory @Inject constructor() : ScreenshotActionsProvider.Factory {
-        override fun create(
-            context: Context,
-            user: UserHandle?,
-            callback: ScreenshotActionsProvider.ScreenshotActionsCallback
-        ): ScreenshotActionsProvider {
-            return DefaultScreenshotActionsProvider(context, user, callback)
+    override fun setCompletedScreenshot(result: SavedImageData) {
+        if (this.result != null) {
+            Log.e(TAG, "Got a second completed screenshot for existing request!")
+            return
         }
+        if (result.uri == null || result.owner == null || result.subject == null) {
+            Log.e(TAG, "Invalid result provided!")
+            return
+        }
+        this.result = result
+        pendingAction?.invoke(result)
+    }
+
+    override fun isPendingSharedTransition(): Boolean {
+        return isPendingSharedTransition
+    }
+
+    private fun onDeferrableActionTapped(onResult: (SavedImageData) -> Unit) {
+        result?.let { onResult.invoke(it) } ?: run { pendingAction = onResult }
+    }
+
+    private fun startSharedTransition(intent: Intent, overrideTransition: Boolean) {
+        val user =
+            result?.owner
+                ?: run {
+                    Log.wtf(TAG, "User handle not provided in screenshot result! Result: $result")
+                    return
+                }
+        isPendingSharedTransition = true
+        applicationScope.launch("$TAG#launchIntentAsync") {
+            actionExecutor.launchIntent(intent, windowTransition.invoke(), user, overrideTransition)
+        }
+    }
+
+    @AssistedFactory
+    interface Factory : ScreenshotActionsProvider.Factory {
+        override fun create(
+            request: ScreenshotData,
+            windowTransition: () -> Pair<ActivityOptions, ExitTransitionCoordinator>,
+        ): DefaultScreenshotActionsProvider
+    }
+
+    companion object {
+        private const val TAG = "ScreenshotActionsProvider"
     }
 }
