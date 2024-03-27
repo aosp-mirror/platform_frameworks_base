@@ -102,7 +102,7 @@ public class Device {
         }
 
         mHandler.obtainMessage(MSG_OPEN_UINPUT_DEVICE, args).sendToTarget();
-        mTimeToSendNanos = SystemClock.uptimeNanos();
+        updateTimeBase();
     }
 
     private long getTimeToSendMillis() {
@@ -132,6 +132,13 @@ public class Device {
         args.argl2 = SystemClock.uptimeNanos();
         Message msg = mHandler.obtainMessage(MSG_INJECT_EVENT, args);
         mHandler.sendMessageAtTime(msg, getTimeToSendMillis());
+    }
+
+    /**
+     * Set the reference time from which future injections are scheduled to the current time.
+     */
+    public void updateTimeBase() {
+        mTimeToSendNanos = SystemClock.uptimeNanos();
     }
 
     /**

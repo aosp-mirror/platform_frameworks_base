@@ -36,6 +36,7 @@ public class Event {
         DELAY,
         INJECT,
         SYNC,
+        UPDATE_TIME_BASE,
     }
 
     // Constants representing evdev event types, from include/uapi/linux/input-event-codes.h in the
