@@ -4160,7 +4160,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     /** Sends an external (e.g. Status Bar) intercept touch event to the Shade touch handler. */
-    boolean handleExternalInterceptTouch(MotionEvent event) {
+    @Override
+    public boolean handleExternalInterceptTouch(MotionEvent event) {
         try {
             mUseExternalTouch = true;
             return mTouchHandler.onInterceptTouchEvent(event);
