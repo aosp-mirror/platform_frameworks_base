@@ -37,6 +37,8 @@ public abstract class RemoteContext {
     public float mWidth = 0f;
     public float mHeight = 0f;
 
+    public abstract void loadPathData(int instanceId, float[] floatPath);
+
     /**
      * The context can be used in a few different mode, allowing operations to skip being executed:
      * - UNSET : all operations will get executed
