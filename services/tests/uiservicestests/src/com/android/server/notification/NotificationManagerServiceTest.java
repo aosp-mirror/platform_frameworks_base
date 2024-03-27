@@ -200,6 +200,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
+import android.content.pm.ModuleInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
@@ -450,6 +451,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     private static final String VALID_CONVO_SHORTCUT_ID = "shortcut";
     private static final String SEARCH_SELECTOR_PKG = "searchSelector";
+    private static final String ADSERVICES_MODULE_PKG = "com.android.adservices";
+    private static final String ADSERVICES_APK_PKG = "com.android.adservices.api";
+
     @Mock
     private NotificationListeners mListeners;
     @Mock
@@ -740,7 +744,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Return first true for RoleObserver main-thread check
         when(mMainLooper.isCurrentThread()).thenReturn(true).thenReturn(false);
-
+        ModuleInfo moduleInfo = new ModuleInfo();
+        moduleInfo.setApexModuleName(ADSERVICES_MODULE_PKG);
+        moduleInfo.setApkInApexPackageNames(List.of(ADSERVICES_APK_PKG));
+        when(mPackageManagerClient.getInstalledModules(anyInt()))
+                .thenReturn(List.of(moduleInfo));
         if (upToBootPhase >= SystemService.PHASE_SYSTEM_SERVICES_READY) {
             mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY, mMainLooper);
         }
@@ -13212,6 +13220,33 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // When: fix the notification with NotificationManagerService
         mService.fixNotification(n, mPkg, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE, true);
+
+        // Then: the notification's flag FLAG_NO_DISMISS should be set
+        assertNotSame(0, n.flags & Notification.FLAG_NO_DISMISS);
+    }
+
+    @Test
+    public void fixSystemNotification_defaultAdservices_withOnGoingFlag_nondismissible()
+            throws Exception {
+        final ApplicationInfo ai = new ApplicationInfo();
+        ai.packageName = ADSERVICES_APK_PKG;
+        ai.uid = mUid;
+        ai.flags |= ApplicationInfo.FLAG_SYSTEM;
+
+        when(mPackageManagerClient.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
+                .thenReturn(ai);
+        when(mAppOpsManager.checkOpNoThrow(
+                AppOpsManager.OP_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS, ai.uid,
+                ai.packageName)).thenReturn(AppOpsManager.MODE_IGNORED);
+        // Given: a notification from an app on the system partition has the flag
+        // FLAG_ONGOING_EVENT set
+        Notification n = new Notification.Builder(mContext, "test")
+                .setOngoing(true)
+                .build();
+
+        // When: fix the notification with NotificationManagerService
+        mService.fixNotification(n, ADSERVICES_APK_PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE,
+                 true);
 
         // Then: the notification's flag FLAG_NO_DISMISS should be set
         assertNotSame(0, n.flags & Notification.FLAG_NO_DISMISS);
