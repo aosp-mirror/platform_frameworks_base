@@ -27,6 +27,7 @@ import android.os.Environment
 import android.os.ParcelFileDescriptor
 import android.os.UserHandle
 import android.util.Log
+import com.android.app.tracing.traceSection
 import com.android.systemui.controls.controller.AuxiliaryPersistenceWrapper
 import com.android.systemui.controls.controller.ControlsFavoritePersistenceWrapper
 import com.android.systemui.keyguard.domain.backup.KeyguardQuickAffordanceBackupHelper
@@ -119,14 +120,22 @@ open class BackupHelper : BackupAgentHelper() {
     ) : FileBackupHelper(context, *fileNamesAndPostProcess.keys.toTypedArray()) {
 
         override fun restoreEntity(data: BackupDataInputStream) {
+            Log.d(TAG, "Starting restore for ${data.key} for user ${context.userId}")
             val file = Environment.buildPath(context.filesDir, data.key)
             if (file.exists()) {
                 Log.w(TAG, "File " + data.key + " already exists. Skipping restore.")
                 return
             }
             synchronized(lock) {
-                super.restoreEntity(data)
-                fileNamesAndPostProcess.get(data.key)?.invoke()
+                traceSection("File restore: ${data.key}") {
+                    super.restoreEntity(data)
+                }
+                Log.d(TAG, "Finishing restore for ${data.key} for user ${context.userId}. " +
+                        "Starting postProcess.")
+                traceSection("Postprocess: ${data.key}") {
+                    fileNamesAndPostProcess.get(data.key)?.invoke()
+                }
+                Log.d(TAG, "Finishing postprocess for ${data.key} for user ${context.userId}.")
             }
         }
 
