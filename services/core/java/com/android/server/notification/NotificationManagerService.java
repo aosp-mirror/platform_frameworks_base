@@ -1794,7 +1794,7 @@ public class NotificationManagerService extends SystemService {
             if (Intent.ACTION_LOCALE_CHANGED.equals(intent.getAction())) {
                 // update system notification channels
                 SystemNotificationChannels.createAll(context);
-                mZenModeHelper.updateDefaultZenRules(Binder.getCallingUid());
+                mZenModeHelper.updateZenRulesOnLocaleChange();
                 mPreferencesHelper.onLocaleChanged(context, ActivityManager.getCurrentUser());
             }
         }
