@@ -22,6 +22,9 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.inMultiWindowMode;
 
+import static androidx.window.extensions.embedding.DividerPresenter.RATIO_EXPANDED_PRIMARY;
+import static androidx.window.extensions.embedding.DividerPresenter.RATIO_EXPANDED_SECONDARY;
+
 import android.app.Activity;
 import android.app.ActivityClient;
 import android.app.WindowConfiguration;
@@ -40,6 +43,9 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.window.extensions.embedding.SplitAttributes.SplitType;
+import androidx.window.extensions.embedding.SplitAttributes.SplitType.ExpandContainersSplitType;
+import androidx.window.extensions.embedding.SplitAttributes.SplitType.RatioSplitType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,6 +93,25 @@ class TaskContainer {
      * event for them.
      */
     final Set<IBinder> mFinishedContainer = new ArraySet<>();
+
+    /**
+     * The {@link RatioSplitType} that will be applied to newly added containers. This is to ensure
+     * the required UX that, after user dragging the divider, the split ratio is persistent after
+     * launching a new activity into a new TaskFragment in the same Task.
+     */
+    private RatioSplitType mOverrideSplitType;
+
+    /**
+     * If {@code true}, suppress the placeholder rules in the {@link TaskContainer}.
+     * <p>
+     * This is used in case the user drags the divider to fully expand the primary container and
+     * dismiss the secondary container while a {@link SplitPlaceholderRule} is used. Without this
+     * flag, after dismissing the secondary container, a placeholder will be launched again.
+     * <p>
+     * This flag is set true when the primary container is fully expanded and cleared when a new
+     * split is added to the {@link TaskContainer}.
+     */
+    private boolean mPlaceholderRuleSuppressed;
 
     /**
      * The {@link TaskContainer} constructor
@@ -313,6 +338,11 @@ class TaskContainer {
     }
 
     void addSplitContainer(@NonNull SplitContainer splitContainer) {
+        // Reset the placeholder rule suppression when a new split container is added.
+        mPlaceholderRuleSuppressed = false;
+
+        applyOverrideSplitTypeIfNeeded(splitContainer);
+
         if (splitContainer instanceof SplitPinContainer) {
             mSplitPinContainer = (SplitPinContainer) splitContainer;
             mSplitContainers.add(splitContainer);
@@ -325,6 +355,39 @@ class TaskContainer {
         if (mSplitPinContainer != null) {
             mSplitContainers.add(mSplitPinContainer);
         }
+    }
+
+    boolean isPlaceholderRuleSuppressed() {
+        return mPlaceholderRuleSuppressed;
+    }
+
+    // If there is an override SplitType due to user dragging the divider, the split ratio should
+    // be applied to newly added SplitContainers.
+    private void applyOverrideSplitTypeIfNeeded(@NonNull SplitContainer splitContainer) {
+        if (mOverrideSplitType == null) {
+            return;
+        }
+        final SplitAttributes splitAttributes = splitContainer.getCurrentSplitAttributes();
+        final DividerAttributes dividerAttributes = splitAttributes.getDividerAttributes();
+        if (!(splitAttributes.getSplitType() instanceof RatioSplitType)) {
+            // Skip if the original split type is not a ratio type.
+            return;
+        }
+        if (dividerAttributes == null
+                || dividerAttributes.getDividerType() != DividerAttributes.DIVIDER_TYPE_DRAGGABLE) {
+            // Skip if the split does not have a draggable divider.
+            return;
+        }
+        updateDefaultSplitAttributes(splitContainer, mOverrideSplitType);
+    }
+
+    private static void updateDefaultSplitAttributes(
+            @NonNull SplitContainer splitContainer, @NonNull SplitType overrideSplitType) {
+        splitContainer.updateDefaultSplitAttributes(
+                new SplitAttributes.Builder(splitContainer.getDefaultSplitAttributes())
+                        .setSplitType(overrideSplitType)
+                        .build()
+        );
     }
 
     void removeSplitContainers(@NonNull List<SplitContainer> containers) {
@@ -398,18 +461,47 @@ class TaskContainer {
         return mContainers;
     }
 
-    void updateTopSplitContainerForDivider(@NonNull DividerPresenter dividerPresenter) {
+    void updateTopSplitContainerForDivider(
+            @NonNull DividerPresenter dividerPresenter,
+            @NonNull List<TaskFragmentContainer> outContainersToFinish) {
         final SplitContainer topSplitContainer = getTopNonFinishingSplitContainer();
         if (topSplitContainer == null) {
             return;
         }
-
+        final TaskFragmentContainer primaryContainer = topSplitContainer.getPrimaryContainer();
         final float newRatio = dividerPresenter.calculateNewSplitRatio(topSplitContainer);
-        topSplitContainer.updateDefaultSplitAttributes(
-                new SplitAttributes.Builder(topSplitContainer.getDefaultSplitAttributes())
-                        .setSplitType(new SplitAttributes.SplitType.RatioSplitType(newRatio))
-                        .build()
-        );
+
+        // If the primary container is fully expanded, we should finish all the associated
+        // secondary containers.
+        if (newRatio == RATIO_EXPANDED_PRIMARY) {
+            for (final SplitContainer splitContainer : mSplitContainers) {
+                if (primaryContainer == splitContainer.getPrimaryContainer()) {
+                    outContainersToFinish.add(splitContainer.getSecondaryContainer());
+                }
+            }
+
+            // Temporarily suppress the placeholder rule in the TaskContainer. This will be restored
+            // if a new split is added into the TaskContainer.
+            mPlaceholderRuleSuppressed = true;
+
+            mOverrideSplitType = null;
+            return;
+        }
+
+        final SplitType newSplitType;
+        if (newRatio == RATIO_EXPANDED_SECONDARY) {
+            newSplitType = new ExpandContainersSplitType();
+            // We do not want to apply ExpandContainersSplitType to new split containers.
+            mOverrideSplitType = null;
+        } else {
+            // We save the override RatioSplitType and apply to new split containers.
+            newSplitType = mOverrideSplitType = new RatioSplitType(newRatio);
+        }
+        for (final SplitContainer splitContainer : mSplitContainers) {
+            if (primaryContainer == splitContainer.getPrimaryContainer()) {
+                updateDefaultSplitAttributes(splitContainer, newSplitType);
+            }
+        }
     }
 
     @Nullable

@@ -2141,6 +2141,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return false;
         }
 
+        if (container != null && container.getTaskContainer().isPlaceholderRuleSuppressed()) {
+            return false;
+        }
+
         final TaskContainer.TaskProperties taskProperties = mPresenter.getTaskProperties(activity);
         final Pair<Size, Size> minDimensionsPair = getActivityIntentMinDimensionsPair(activity,
                 placeholderRule.getPlaceholderIntent());
@@ -2234,6 +2238,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
         final SplitAttributes splitAttributes = splitContainer.getCurrentSplitAttributes();
         if (SplitPresenter.shouldShowSplit(splitAttributes)) {
+            return false;
+        }
+        if (SplitPresenter.shouldShowPlaceholderWhenExpanded(splitAttributes)) {
             return false;
         }
 
@@ -3111,7 +3118,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             if (taskContainer != null) {
                 final DividerPresenter dividerPresenter =
                         mDividerPresenters.get(taskContainer.getTaskId());
-                taskContainer.updateTopSplitContainerForDivider(dividerPresenter);
+                final List<TaskFragmentContainer> containersToFinish = new ArrayList<>();
+                taskContainer.updateTopSplitContainerForDivider(
+                        dividerPresenter, containersToFinish);
+                for (final TaskFragmentContainer container : containersToFinish) {
+                    mPresenter.cleanupContainer(wct, container, false /* shouldFinishDependent */);
+                }
                 updateContainersInTask(wct, taskContainer);
             }
             action.accept(wct);
