@@ -15,7 +15,7 @@
 
 # Run all the ravenwood tests + hoststubgen unit tests.
 
-all_tests="hoststubgentest tiny-framework-dump-test hoststubgen-invoke-test"
+all_tests="hoststubgentest tiny-framework-dump-test hoststubgen-invoke-test ravenwood-stats-checker"
 
 # "echo" is to remove the newlines
 all_tests="$all_tests $(echo $(${0%/*}/list-ravenwood-tests.sh) )"
