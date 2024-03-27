@@ -57,6 +57,9 @@ interface CommunalSettingsRepository {
      * Settings.
      */
     fun getWidgetCategories(user: UserInfo): Flow<CommunalWidgetCategories>
+
+    /** Keyguard widgets enabled state by Device Policy Manager for the specified user. */
+    fun getAllowedByDevicePolicy(user: UserInfo): Flow<Boolean>
 }
 
 @SysUISingleton
@@ -115,6 +118,16 @@ constructor(
             }
             .flowOn(bgDispatcher)
 
+    override fun getAllowedByDevicePolicy(user: UserInfo): Flow<Boolean> =
+        broadcastDispatcher
+            .broadcastFlow(
+                filter =
+                    IntentFilter(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
+                user = user.userHandle
+            )
+            .emitOnStart()
+            .map { devicePolicyManager.areKeyguardWidgetsAllowed(user.id) }
+
     private fun getEnabledByUser(user: UserInfo): Flow<Boolean> =
         secureSettings
             .observerFlow(userId = user.id, names = arrayOf(Settings.Secure.GLANCEABLE_HUB_ENABLED))
@@ -127,16 +140,6 @@ constructor(
                     user.id,
                 ) == 1
             }
-
-    private fun getAllowedByDevicePolicy(user: UserInfo): Flow<Boolean> =
-        broadcastDispatcher
-            .broadcastFlow(
-                filter =
-                    IntentFilter(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
-                user = user.userHandle
-            )
-            .emitOnStart()
-            .map { devicePolicyManager.areKeyguardWidgetsAllowed(user.id) }
 
     companion object {
         const val GLANCEABLE_HUB_CONTENT_SETTING = "glanceable_hub_content_setting"
