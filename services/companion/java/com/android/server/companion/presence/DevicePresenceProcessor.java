@@ -35,7 +35,6 @@ import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.companion.AssociationInfo;
 import android.companion.DeviceNotAssociatedException;
 import android.companion.DevicePresenceEvent;
@@ -59,8 +58,10 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.companion.association.AssociationStore;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -97,6 +98,8 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
     private final BleCompanionDeviceScanner mBleScanner;
     @NonNull
     private final PowerManagerInternal mPowerManagerInternal;
+    @NonNull
+    private final UserManager mUserManager;
 
     // NOTE: Same association may appear in more than one of the following sets at the same time.
     // (E.g. self-managed devices that have MAC addresses, could be reported as present by their
@@ -129,6 +132,14 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
     private final BleDeviceDisappearedScheduler mBleDeviceDisappearedScheduler =
             new BleDeviceDisappearedScheduler();
 
+    /**
+     * A structure hold the DevicePresenceEvents that are pending to be reported to the companion
+     * app when the user unlocks the local device per userId.
+     */
+    @GuardedBy("mPendingDevicePresenceEvents")
+    public final SparseArray<List<DevicePresenceEvent>> mPendingDevicePresenceEvents =
+            new SparseArray<>();
+
     public DevicePresenceProcessor(@NonNull Context context,
             @NonNull CompanionAppBinder companionAppBinder,
             UserManager userManager,
@@ -139,6 +150,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
         mCompanionAppBinder = companionAppBinder;
         mAssociationStore = associationStore;
         mObservableUuidStore = observableUuidStore;
+        mUserManager = userManager;
         mBtConnectionListener = new BluetoothCompanionDeviceConnectionListener(userManager,
                 associationStore, mObservableUuidStore,
                 /* BluetoothCompanionDeviceConnectionListener.Callback */ this);
@@ -461,7 +473,14 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
     }
 
     @Override
-    public void onBluetoothCompanionDeviceConnected(int associationId) {
+    public void onBluetoothCompanionDeviceConnected(int associationId, int userId) {
+        Slog.i(TAG, "onBluetoothCompanionDeviceConnected: "
+                + "associationId( " + associationId + " )");
+        if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
+            onDeviceLocked(associationId, userId, EVENT_BT_CONNECTED, /* ParcelUuid */ null);
+            return;
+        }
+
         synchronized (mBtDisconnectedDevices) {
             // A device is considered reconnected within 10 seconds if a pending BLE lost report is
             // followed by a detected Bluetooth connection.
@@ -484,9 +503,15 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
     }
 
     @Override
-    public void onBluetoothCompanionDeviceDisconnected(int associationId) {
+    public void onBluetoothCompanionDeviceDisconnected(int associationId, int userId) {
         Slog.i(TAG, "onBluetoothCompanionDeviceDisconnected "
                 + "associationId( " + associationId + " )");
+
+        if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
+            onDeviceLocked(associationId, userId, EVENT_BT_DISCONNECTED, /* ParcelUuid */ null);
+            return;
+        }
+
         // Start BLE scanning when the device is disconnected.
         mBleScanner.startScan();
 
@@ -503,7 +528,13 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
 
 
     @Override
-    public void onBleCompanionDeviceFound(int associationId) {
+    public void onBleCompanionDeviceFound(int associationId, int userId) {
+        Slog.i(TAG, "onBleCompanionDeviceFound " + "associationId( " + associationId + " )");
+        if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
+            onDeviceLocked(associationId, userId, EVENT_BLE_APPEARED, /* ParcelUuid */ null);
+            return;
+        }
+
         onDevicePresenceEvent(mNearbyBleDevices, associationId, EVENT_BLE_APPEARED);
         synchronized (mBtDisconnectedDevices) {
             final boolean isCurrentPresent = mBtDisconnectedDevicesBlePresence.get(associationId);
@@ -514,7 +545,13 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
     }
 
     @Override
-    public void onBleCompanionDeviceLost(int associationId) {
+    public void onBleCompanionDeviceLost(int associationId, int userId) {
+        Slog.i(TAG, "onBleCompanionDeviceLost " + "associationId( " + associationId + " )");
+        if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
+            onDeviceLocked(associationId, userId, EVENT_BLE_APPEARED, /* ParcelUuid */ null);
+            return;
+        }
+
         onDevicePresenceEvent(mNearbyBleDevices, associationId, EVENT_BLE_DISAPPEARED);
     }
 
@@ -529,18 +566,20 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
         // Make sure the association exists.
         enforceAssociationExists(associationId);
 
+        final AssociationInfo associationInfo = mAssociationStore.getAssociationById(associationId);
+
         switch (event) {
             case EVENT_BLE_APPEARED:
                 simulateDeviceAppeared(associationId, event);
                 break;
             case EVENT_BT_CONNECTED:
-                onBluetoothCompanionDeviceConnected(associationId);
+                onBluetoothCompanionDeviceConnected(associationId, associationInfo.getUserId());
                 break;
             case EVENT_BLE_DISAPPEARED:
                 simulateDeviceDisappeared(associationId, event);
                 break;
             case EVENT_BT_DISCONNECTED:
-                onBluetoothCompanionDeviceDisconnected(associationId);
+                onBluetoothCompanionDeviceDisconnected(associationId, associationInfo.getUserId());
                 break;
             default:
                 throw new IllegalArgumentException("Event: " + event + "is not supported");
@@ -556,6 +595,29 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
         // No other caller (including SYSTEM!) should be allowed.
         enforceCallerShellOrRoot();
         onDevicePresenceEventByUuid(uuid, event);
+    }
+
+    /** FOR DEBUGGING AND/OR TESTING PURPOSES ONLY. */
+    @TestApi
+    public void simulateDeviceEventOnDeviceLocked(
+            int associationId, int userId, int event, ParcelUuid uuid) {
+        // IMPORTANT: this API should only be invoked via the
+        // 'companiondevice simulate-device-event-device-locked' Shell command,
+        // so the only uid-s allowed to make this call are SHELL and ROOT.
+        // No other caller (including SYSTEM!) should be allowed.
+        enforceCallerShellOrRoot();
+        onDeviceLocked(associationId, userId, event, uuid);
+    }
+
+    /** FOR DEBUGGING AND/OR TESTING PURPOSES ONLY. */
+    @TestApi
+    public void simulateDeviceEventOnUserUnlocked(int userId) {
+        // IMPORTANT: this API should only be invoked via the
+        // 'companiondevice simulate-device-event-device-unlocked' Shell command,
+        // so the only uid-s allowed to make this call are SHELL and ROOT.
+        // No other caller (including SYSTEM!) should be allowed.
+        enforceCallerShellOrRoot();
+        sendDevicePresenceEventOnUnlocked(userId);
     }
 
     private void simulateDeviceAppeared(int associationId, int state) {
@@ -660,8 +722,13 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
                 + "]...");
 
         final ParcelUuid parcelUuid = uuid.getUuid();
-        final String packageName = uuid.getPackageName();
         final int userId = uuid.getUserId();
+        if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
+            onDeviceLocked(/* associationId */ -1, userId, eventType, parcelUuid);
+            return;
+        }
+
+        final String packageName = uuid.getPackageName();
         final DevicePresenceEvent event = new DevicePresenceEvent(NO_ASSOCIATION, eventType,
                 parcelUuid);
 
@@ -882,14 +949,6 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
         // what's needed.
     }
 
-    /**
-     * Return a set of devices that pending to report connectivity
-     */
-    public SparseArray<Set<BluetoothDevice>> getPendingConnectedDevices() {
-        synchronized (mBtConnectionListener.mPendingConnectedDevices) {
-            return mBtConnectionListener.mPendingConnectedDevices;
-        }
-    }
 
     private static void enforceCallerShellOrRoot() {
         final int callingUid = Binder.getCallingUid();
@@ -916,6 +975,114 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
             }
         }
         return true;
+    }
+
+    /**
+     * Store the positive DevicePresenceEvent in the cache if the current device is still
+     * locked.
+     * Remove the current DevicePresenceEvent if there's a negative event occurs.
+     */
+    private void onDeviceLocked(int associationId, int userId, int event, ParcelUuid uuid) {
+        switch (event) {
+            case EVENT_BLE_APPEARED, EVENT_BT_CONNECTED -> {
+                // Try to bind and notify the app after the phone is unlocked.
+                Slog.i(TAG, "Current user is not in unlocking or unlocked stage yet. "
+                        + "Notify the application when the phone is unlocked");
+                synchronized (mPendingDevicePresenceEvents) {
+                    final DevicePresenceEvent devicePresenceEvent = new DevicePresenceEvent(
+                            associationId, event, uuid);
+                    List<DevicePresenceEvent> deviceEvents = mPendingDevicePresenceEvents.get(
+                            userId, new ArrayList<>());
+                    deviceEvents.add(devicePresenceEvent);
+                    mPendingDevicePresenceEvents.put(userId, deviceEvents);
+                }
+            }
+            case EVENT_BLE_DISAPPEARED -> {
+                synchronized (mPendingDevicePresenceEvents) {
+                    List<DevicePresenceEvent> deviceEvents = mPendingDevicePresenceEvents
+                            .get(userId);
+                    if (deviceEvents != null) {
+                        deviceEvents.removeIf(deviceEvent ->
+                                deviceEvent.getEvent() == EVENT_BLE_APPEARED
+                                && Objects.equals(deviceEvent.getUuid(), uuid)
+                                && deviceEvent.getAssociationId() == associationId);
+                    }
+                }
+            }
+            case EVENT_BT_DISCONNECTED -> {
+                // Do not need to report the event since the user is not unlock the
+                // phone so that cdm is not bind with the app yet.
+                synchronized (mPendingDevicePresenceEvents) {
+                    List<DevicePresenceEvent> deviceEvents = mPendingDevicePresenceEvents
+                            .get(userId);
+                    if (deviceEvents != null) {
+                        deviceEvents.removeIf(deviceEvent ->
+                                deviceEvent.getEvent() == EVENT_BT_CONNECTED
+                                && Objects.equals(deviceEvent.getUuid(), uuid)
+                                && deviceEvent.getAssociationId() == associationId);
+                    }
+                }
+            }
+            default -> Slog.e(TAG, "Event: " + event + "is not supported");
+        }
+    }
+
+    /**
+     * Send the device presence event by userID when the device is unlocked.
+     */
+    public void sendDevicePresenceEventOnUnlocked(int userId) {
+        final List<DevicePresenceEvent> deviceEvents = getPendingDevicePresenceEventsByUserId(
+                userId);
+        final List<ObservableUuid> observableUuids =
+                mObservableUuidStore.getObservableUuidsForUser(userId);
+        // Notify and bind the app after the phone is unlocked.
+        for (DevicePresenceEvent deviceEvent : deviceEvents) {
+            boolean isUuid = deviceEvent.getUuid() != null;
+            if (isUuid) {
+                for (ObservableUuid uuid : observableUuids) {
+                    if (uuid.getUuid().equals(deviceEvent.getUuid())) {
+                        onDevicePresenceEventByUuid(uuid, EVENT_BT_CONNECTED);
+                    }
+                }
+            } else {
+                int event = deviceEvent.getEvent();
+                int associationId = deviceEvent.getAssociationId();
+                final AssociationInfo associationInfo = mAssociationStore.getAssociationById(
+                        associationId);
+
+                if (associationInfo == null) {
+                    return;
+                }
+
+                switch(event) {
+                    case EVENT_BLE_APPEARED:
+                        onBleCompanionDeviceFound(
+                                associationInfo.getId(), associationInfo.getUserId());
+                        break;
+                    case EVENT_BT_CONNECTED:
+                        onBluetoothCompanionDeviceConnected(
+                                associationInfo.getId(), associationInfo.getUserId());
+                        break;
+                    default:
+                        Slog.e(TAG, "Event: " + event + "is not supported");
+                        break;
+                }
+            }
+        }
+
+        clearPendingDevicePresenceEventsByUserId(userId);
+    }
+
+    private List<DevicePresenceEvent> getPendingDevicePresenceEventsByUserId(int userId) {
+        synchronized (mPendingDevicePresenceEvents) {
+            return mPendingDevicePresenceEvents.get(userId, new ArrayList<>());
+        }
+    }
+
+    private void clearPendingDevicePresenceEventsByUserId(int userId) {
+        synchronized (mPendingDevicePresenceEvents) {
+            mPendingDevicePresenceEvents.get(userId).clear();
+        }
     }
 
     /**

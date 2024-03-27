@@ -34,20 +34,15 @@ import android.os.ParcelUuid;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
-import android.util.Slog;
-import android.util.SparseArray;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.companion.association.AssociationStore;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @SuppressLint("LongLogTag")
 public class BluetoothCompanionDeviceConnectionListener
@@ -56,14 +51,13 @@ public class BluetoothCompanionDeviceConnectionListener
     private static final String TAG = "CDM_BluetoothCompanionDeviceConnectionListener";
 
     interface Callback {
-        void onBluetoothCompanionDeviceConnected(int associationId);
+        void onBluetoothCompanionDeviceConnected(int associationId, int userId);
 
-        void onBluetoothCompanionDeviceDisconnected(int associationId);
+        void onBluetoothCompanionDeviceDisconnected(int associationId, int userId);
 
         void onDevicePresenceEventByUuid(ObservableUuid uuid, int event);
     }
 
-    private final UserManager mUserManager;
     private final @NonNull AssociationStore mAssociationStore;
     private final @NonNull Callback mCallback;
     /** A set of ALL connected BT device (not only companion.) */
@@ -71,21 +65,12 @@ public class BluetoothCompanionDeviceConnectionListener
 
     private final @NonNull ObservableUuidStore mObservableUuidStore;
 
-    /**
-     * A structure hold the connected BT devices that are pending to be reported to the companion
-     * app when the user unlocks the local device per userId.
-     */
-    @GuardedBy("mPendingConnectedDevices")
-    @NonNull
-    final SparseArray<Set<BluetoothDevice>> mPendingConnectedDevices = new SparseArray<>();
-
     BluetoothCompanionDeviceConnectionListener(UserManager userManager,
             @NonNull AssociationStore associationStore,
             @NonNull ObservableUuidStore observableUuidStore, @NonNull Callback callback) {
         mAssociationStore = associationStore;
         mObservableUuidStore = observableUuidStore;
         mCallback = callback;
-        mUserManager = userManager;
     }
 
     public void init(@NonNull BluetoothAdapter btAdapter) {
@@ -111,19 +96,8 @@ public class BluetoothCompanionDeviceConnectionListener
             if (DEBUG) Log.w(TAG, "Device " + btDeviceToString(device) + " is already connected.");
             return;
         }
-        // Try to bind and notify the app after the phone is unlocked.
-        if (!mUserManager.isUserUnlockingOrUnlocked(UserHandle.myUserId())) {
-            Slog.i(TAG, "Current user is not in unlocking or unlocked stage yet. Notify "
-                        + "the application when the phone is unlocked");
-            synchronized (mPendingConnectedDevices) {
-                Set<BluetoothDevice> bluetoothDevices = mPendingConnectedDevices.get(
-                        userId, new HashSet<>());
-                bluetoothDevices.add(device);
-                mPendingConnectedDevices.put(userId, bluetoothDevices);
-            }
-        } else {
-            onDeviceConnectivityChanged(device, true);
-        }
+
+        onDeviceConnectivityChanged(device, true);
     }
 
     /**
@@ -146,19 +120,6 @@ public class BluetoothCompanionDeviceConnectionListener
             if (DEBUG) {
                 Log.w(TAG, "The device wasn't tracked as connected " + btDeviceToString(device));
             }
-            return;
-        }
-
-        // Do not need to report the connectivity since the user is not unlock the phone so
-        // that cdm is not bind with the app yet.
-        if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
-            synchronized (mPendingConnectedDevices) {
-                Set<BluetoothDevice> bluetoothDevices = mPendingConnectedDevices.get(userId);
-                if (bluetoothDevices != null) {
-                    bluetoothDevices.remove(device);
-                }
-            }
-
             return;
         }
 
@@ -190,16 +151,15 @@ public class BluetoothCompanionDeviceConnectionListener
             if (!association.isNotifyOnDeviceNearby()) continue;
             final int id = association.getId();
             if (connected) {
-                mCallback.onBluetoothCompanionDeviceConnected(id);
+                mCallback.onBluetoothCompanionDeviceConnected(id, association.getUserId());
             } else {
-                mCallback.onBluetoothCompanionDeviceDisconnected(id);
+                mCallback.onBluetoothCompanionDeviceDisconnected(id, association.getUserId());
             }
         }
 
         for (ObservableUuid uuid : observableUuids) {
             if (deviceUuids.contains(uuid.getUuid())) {
-                mCallback.onDevicePresenceEventByUuid(
-                        uuid, connected ? EVENT_BT_CONNECTED
+                mCallback.onDevicePresenceEventByUuid(uuid, connected ? EVENT_BT_CONNECTED
                                 : EVENT_BT_DISCONNECTED);
             }
         }
@@ -210,7 +170,8 @@ public class BluetoothCompanionDeviceConnectionListener
         if (DEBUG) Log.d(TAG, "onAssociation_Added() " + association);
 
         if (mAllConnectedDevices.containsKey(association.getDeviceMacAddress())) {
-            mCallback.onBluetoothCompanionDeviceConnected(association.getId());
+            mCallback.onBluetoothCompanionDeviceConnected(
+                    association.getId(), association.getUserId());
         }
     }
 
