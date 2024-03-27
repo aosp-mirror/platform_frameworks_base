@@ -104,6 +104,7 @@ import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
@@ -1490,7 +1491,13 @@ public interface WindowManager extends ViewManager {
         }
 
         try {
-            return ActivityTaskManager.supportsMultiWindow(ActivityThread.currentApplication());
+            final Context context = ActivityThread.currentApplication();
+            if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+                // Watch supports multi-window to present essential system UI, but it doesn't need
+                // WM Extensions.
+                return false;
+            }
+            return ActivityTaskManager.supportsMultiWindow(context);
         } catch (Exception e) {
             // In case the PackageManager is not set up correctly in test.
             Log.e("WindowManager", "Unable to read if the device supports multi window", e);
