@@ -742,7 +742,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * These cannot be set on the managed profile's parent DPM instance
      */
     private static final int PROFILE_KEYGUARD_FEATURES_PROFILE_ONLY =
-            DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS;
+            DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS
+                    | DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL;
 
     /** Keyguard features that are allowed to be set on a managed profile */
     private static final int PROFILE_KEYGUARD_FEATURES =
