@@ -31,7 +31,12 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
  * not need to reference this class.
  *
  * @see androidx.slice.widget.SliceView
+ * @deprecated Slice framework has been deprecated, it will not receive any updates from
+ *          {@link android.os.Build.VANILLA_ICE_CREAM} and forward. If you are looking for a
+ *          framework that sends displayable data from one app to another, consider using
+ *          {@link android.app.appsearch.AppSearchManager}.
  */
+@Deprecated
 public class SliceMetrics {
 
     private static final String TAG = "SliceMetrics";
