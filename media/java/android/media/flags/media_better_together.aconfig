@@ -120,3 +120,13 @@ flag {
     description: "Enables apps owning a MediaBrowserService to disconnect all connected browsers."
     bug: "185136506"
 }
+
+flag {
+    name: "enable_prevention_of_manager_scans_when_no_apps_scan"
+    namespace: "media_solutions"
+    description: "Prevents waking up route providers when no apps are scanning, even if SysUI or Settings are scanning."
+    bug: "319604673"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
