@@ -19,10 +19,12 @@ package com.android.systemui.volume.panel.component.selector.ui.composable
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CornerSize
@@ -32,6 +34,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
@@ -108,9 +111,17 @@ fun VolumePanelRadioButtonBar(
                 horizontalArrangement = Arrangement.spacedBy(spacing)
             ) {
                 for (itemIndex in items.indices) {
-                    TextButton(
-                        modifier = Modifier.weight(1f),
-                        onClick = { items[itemIndex].onItemSelected() },
+                    Row(
+                        modifier =
+                            Modifier.height(48.dp)
+                                .weight(1f)
+                                .clickable(
+                                    interactionSource = null,
+                                    indication = null,
+                                    onClick = { items[itemIndex].onItemSelected() }
+                                ),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         val item = items[itemIndex]
                         if (item.icon !== Empty) {
@@ -246,7 +257,7 @@ object VolumePanelRadioButtonBarDefaults {
     val DefaultSpacing = 24.dp
     val DefaultLabelIndicatorBackgroundSpacing = 12.dp
     val DefaultIndicatorCornerRadius = 20.dp
-    val DefaultIndicatorBackgroundCornerRadius = 20.dp
+    val DefaultIndicatorBackgroundCornerRadius = 28.dp
 
     /**
      * Returns the default VolumePanelRadioButtonBar colors.
