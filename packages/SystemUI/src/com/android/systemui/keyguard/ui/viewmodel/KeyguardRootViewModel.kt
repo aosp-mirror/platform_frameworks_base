@@ -102,6 +102,7 @@ constructor(
     private val lockscreenToPrimaryBouncerTransitionViewModel:
         LockscreenToPrimaryBouncerTransitionViewModel,
     private val occludedToAodTransitionViewModel: OccludedToAodTransitionViewModel,
+    private val occludedToDozingTransitionViewModel: OccludedToDozingTransitionViewModel,
     private val occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
     private val primaryBouncerToAodTransitionViewModel: PrimaryBouncerToAodTransitionViewModel,
     private val primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel,
@@ -228,6 +229,7 @@ constructor(
                         lockscreenToOccludedTransitionViewModel.lockscreenAlpha,
                         lockscreenToPrimaryBouncerTransitionViewModel.lockscreenAlpha,
                         occludedToAodTransitionViewModel.lockscreenAlpha,
+                        occludedToDozingTransitionViewModel.lockscreenAlpha,
                         occludedToLockscreenTransitionViewModel.lockscreenAlpha,
                         primaryBouncerToAodTransitionViewModel.lockscreenAlpha,
                         primaryBouncerToGoneTransitionViewModel.lockscreenAlpha,
