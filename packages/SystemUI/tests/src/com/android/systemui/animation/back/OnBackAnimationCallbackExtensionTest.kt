@@ -27,7 +27,7 @@ class OnBackAnimationCallbackExtensionTest : SysuiTestCase() {
 
     private val onBackAnimationCallback =
         onBackAnimationCallbackFrom(
-            backAnimationSpec = BackAnimationSpec.floatingSystemSurfacesForSysUi(displayMetrics),
+            backAnimationSpec = BackAnimationSpec.floatingSystemSurfacesForSysUi { displayMetrics },
             displayMetrics = displayMetrics,
             onBackProgressed = onBackProgress,
             onBackStarted = onBackStart,

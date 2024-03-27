@@ -27,7 +27,7 @@ class BackAnimationSpecTest : SysuiTestCase() {
         val maxY = 4.0f
         val minScale = 0.8f
 
-        val backAnimationSpec = BackAnimationSpec.floatingSystemSurfacesForSysUi(displayMetrics)
+        val backAnimationSpec = BackAnimationSpec.floatingSystemSurfacesForSysUi { displayMetrics }
 
         assertBackTransformation(
             backAnimationSpec = backAnimationSpec,
