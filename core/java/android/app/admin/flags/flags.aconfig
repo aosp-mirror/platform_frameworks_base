@@ -186,8 +186,8 @@ flag {
   description: "Fix provisioning for single-user headless DO"
   bug: "289515470"
   metadata {
-      purpose: PURPOSE_BUGFIX
-    }
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
@@ -202,4 +202,14 @@ flag {
   namespace: "enterprise"
   description: "Guards a new flow for recursive required enterprise app list merging"
   bug: "319084618"
+}
+
+flag {
+  name: "headless_device_owner_delegate_security_logging_bug_fix"
+  namespace: "enterprise"
+  description: "Fix delegate security logging for single user headless DO."
+  bug: "289515470"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
