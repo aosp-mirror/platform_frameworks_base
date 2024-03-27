@@ -135,7 +135,13 @@ public final class SystemServiceManager implements Dumpable {
     }
 
     /**
-     * Starts a service by class name.
+     * Starts a service by class name from the current {@code SYSTEMSERVERCLASSPATH}.
+     *
+     * In general, this should only be used for services in the classpath that cannot
+     * be resolved by {@code services.jar} at build time, e.g., those defined in an apex jar from
+     * {@code PRODUCT_APEX_SYSTEM_SERVER_JARS} or a downstream jar in
+     * {@code PRODUCT_SYSTEM_SERVER_JARS}. Otherwise prefer the explicit type variant
+     * {@link #startService(Class)}.
      *
      * @return The service instance.
      */
@@ -147,7 +153,11 @@ public final class SystemServiceManager implements Dumpable {
     }
 
     /**
-     * Starts a service by class name and a path that specifies the jar where the service lives.
+     * Starts a service by class name and standalone jar path where the service lives.
+     *
+     * In general, this should only be used for services in {@code STANDALONE_SYSTEMSERVER_JARS},
+     * which in turn derives from {@code PRODUCT_STANDALONE_SYSTEM_SERVER_JARS} and
+     * {@code PRODUCT_APEX_STANDALONE_SYSTEM_SERVER_JARS}.
      *
      * @return The service instance.
      */
