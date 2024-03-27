@@ -41,7 +41,6 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.RemoteViews;
 import android.widget.RemoteViews.InteractionHandler;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -473,25 +472,7 @@ public class NotificationRemoteInputManager implements CoreStartable {
             // if we still didn't find a view that is attached, let's abort.
             return false;
         }
-        int width = view.getWidth();
-        if (view instanceof TextView) {
-            // Center the reveal on the text which might be off-center from the TextView
-            TextView tv = (TextView) view;
-            if (tv.getLayout() != null) {
-                int innerWidth = (int) tv.getLayout().getLineWidth(0);
-                innerWidth += tv.getCompoundPaddingLeft() + tv.getCompoundPaddingRight();
-                width = Math.min(width, innerWidth);
-            }
-        }
-        int cx = view.getLeft() + width / 2;
-        int cy = view.getTop() + view.getHeight() / 2;
-        int w = riv.getWidth();
-        int h = riv.getHeight();
-        int r = Math.max(
-                Math.max(cx + cy, cx + (h - cy)),
-                Math.max((w - cx) + cy, (w - cx) + (h - cy)));
 
-        riv.getController().setRevealParams(new RemoteInputView.RevealParams(cx, cy, r));
         riv.getController().setPendingIntent(pendingIntent);
         riv.getController().setRemoteInput(input);
         riv.getController().setRemoteInputs(inputs);
