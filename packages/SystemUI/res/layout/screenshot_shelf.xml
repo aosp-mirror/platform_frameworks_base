@@ -51,15 +51,7 @@
         <LinearLayout
             android:id="@+id/screenshot_actions"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-            <include layout="@layout/overlay_action_chip"
-                     android:id="@+id/screenshot_share_chip"/>
-            <include layout="@layout/overlay_action_chip"
-                     android:id="@+id/screenshot_edit_chip"/>
-            <include layout="@layout/overlay_action_chip"
-                     android:id="@+id/screenshot_scroll_chip"
-                     android:visibility="gone" />
-        </LinearLayout>
+            android:layout_height="wrap_content" />
     </HorizontalScrollView>
     <View
         android:id="@+id/screenshot_preview_border"
