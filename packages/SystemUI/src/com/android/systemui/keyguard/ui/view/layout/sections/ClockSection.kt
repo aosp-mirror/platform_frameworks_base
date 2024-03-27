@@ -25,6 +25,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
 import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.GONE
+import androidx.constraintlayout.widget.ConstraintSet.MATCH_CONSTRAINT
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
@@ -160,7 +161,7 @@ constructor(
         constraints.apply {
             connect(R.id.lockscreen_clock_view_large, START, PARENT_ID, START)
             connect(R.id.lockscreen_clock_view_large, END, guideline, END)
-            connect(R.id.lockscreen_clock_view_large, BOTTOM, R.id.lock_icon_view, TOP)
+            connect(R.id.lockscreen_clock_view_large, BOTTOM, R.id.device_entry_icon_view, TOP)
             var largeClockTopMargin =
                 context.resources.getDimensionPixelSize(R.dimen.status_bar_height) +
                     context.resources.getDimensionPixelSize(
@@ -172,7 +173,7 @@ constructor(
 
             connect(R.id.lockscreen_clock_view_large, TOP, PARENT_ID, TOP, largeClockTopMargin)
             constrainWidth(R.id.lockscreen_clock_view_large, WRAP_CONTENT)
-            constrainHeight(R.id.lockscreen_clock_view_large, WRAP_CONTENT)
+            constrainHeight(R.id.lockscreen_clock_view_large, MATCH_CONSTRAINT)
             constrainWidth(R.id.lockscreen_clock_view, WRAP_CONTENT)
             constrainHeight(
                 R.id.lockscreen_clock_view,
