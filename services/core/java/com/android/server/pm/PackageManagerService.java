@@ -1741,7 +1741,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         () -> LocalServices.getService(UserManagerInternal.class)),
                 (i, pm) -> new DisplayMetrics(),
                 (i, pm) -> new PackageParser2(pm.mSeparateProcesses, i.getDisplayMetrics(),
-                        new PackageCacher(pm.mCacheDir),
+                        new PackageCacher(pm.mCacheDir, pm.mPackageParserCallback),
                         pm.mPackageParserCallback) /* scanningCachingPackageParserProducer */,
                 (i, pm) -> new PackageParser2(pm.mSeparateProcesses, i.getDisplayMetrics(), null,
                         pm.mPackageParserCallback) /* scanningPackageParserProducer */,
