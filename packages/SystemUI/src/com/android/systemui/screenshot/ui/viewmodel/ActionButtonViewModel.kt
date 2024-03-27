@@ -22,5 +22,13 @@ data class ActionButtonViewModel(
     val icon: Drawable?,
     val name: CharSequence?,
     val description: CharSequence,
-    val onClicked: (() -> Unit)?
-)
+    val onClicked: (() -> Unit)?,
+) {
+    val id: Int = getId()
+
+    companion object {
+        private var nextId = 0
+
+        private fun getId() = nextId.also { nextId += 1 }
+    }
+}
