@@ -36,22 +36,30 @@ import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.sceneDataSourceDelegator
+import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertThrows
 import org.junit.Before
@@ -75,10 +83,11 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         }
 
     @Mock private lateinit var communalViewModel: CommunalViewModel
-    @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
-    @Mock private lateinit var shadeInteractor: ShadeInteractor
     @Mock private lateinit var powerManager: PowerManager
     @Mock private lateinit var dialogFactory: SystemUIDialogFactory
+    private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
+    private lateinit var shadeInteractor: ShadeInteractor
+    private lateinit var keyguardInteractor: KeyguardInteractor
 
     private lateinit var parentView: FrameLayout
     private lateinit var containerView: View
@@ -88,15 +97,15 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     private lateinit var communalRepository: FakeCommunalRepository
     private lateinit var underTest: GlanceableHubContainerController
 
-    private val bouncerShowingFlow = MutableStateFlow(false)
-    private val shadeShowingFlow = MutableStateFlow(false)
-
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
         communalInteractor = kosmos.communalInteractor
         communalRepository = kosmos.fakeCommunalRepository
+        keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor
+        keyguardInteractor = kosmos.keyguardInteractor
+        shadeInteractor = kosmos.shadeInteractor
 
         underTest =
             GlanceableHubContainerController(
@@ -104,15 +113,12 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 communalViewModel,
                 dialogFactory,
                 keyguardTransitionInteractor,
+                keyguardInteractor,
                 shadeInteractor,
                 powerManager,
                 kosmos.sceneDataSourceDelegator,
             )
         testableLooper = TestableLooper.get(this)
-
-        whenever(keyguardTransitionInteractor.isFinishedInStateWhere(any()))
-            .thenReturn(bouncerShowingFlow)
-        whenever(shadeInteractor.isAnyFullyExpanded).thenReturn(shadeShowingFlow)
 
         overrideResource(R.dimen.communal_right_edge_swipe_region_width, RIGHT_SWIPE_REGION_WIDTH)
         overrideResource(R.dimen.communal_top_edge_swipe_region_height, TOP_SWIPE_REGION_WIDTH)
@@ -138,116 +144,182 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun initView_calledTwice_throwsException() {
-        underTest =
-            GlanceableHubContainerController(
-                communalInteractor,
-                communalViewModel,
-                dialogFactory,
-                keyguardTransitionInteractor,
-                shadeInteractor,
-                powerManager,
-                kosmos.sceneDataSourceDelegator,
-            )
+    fun initView_calledTwice_throwsException() =
+        with(kosmos) {
+            testScope.runTest {
+                underTest =
+                    GlanceableHubContainerController(
+                        communalInteractor,
+                        communalViewModel,
+                        dialogFactory,
+                        keyguardTransitionInteractor,
+                        keyguardInteractor,
+                        shadeInteractor,
+                        powerManager,
+                        kosmos.sceneDataSourceDelegator,
+                    )
 
-        // First call succeeds.
-        underTest.initView(context)
+                // First call succeeds.
+                underTest.initView(context)
 
-        // Second call throws.
-        assertThrows(RuntimeException::class.java) { underTest.initView(context) }
-    }
-
-    @Test
-    fun onTouchEvent_communalClosed_doesNotIntercept() {
-        // Communal is closed.
-        goToScene(CommunalScenes.Blank)
-
-        assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
-    }
+                // Second call throws.
+                assertThrows(RuntimeException::class.java) { underTest.initView(context) }
+            }
+        }
 
     @Test
-    fun onTouchEvent_openGesture_interceptsTouches() {
-        // Communal is closed.
-        goToScene(CommunalScenes.Blank)
+    fun onTouchEvent_communalClosed_doesNotIntercept() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is closed.
+                goToScene(CommunalScenes.Blank)
 
-        // Initial touch down is intercepted, and so are touches outside of the region, until an
-        // up event is received.
-        assertThat(underTest.onTouchEvent(DOWN_IN_RIGHT_SWIPE_REGION_EVENT)).isTrue()
-        assertThat(underTest.onTouchEvent(MOVE_EVENT)).isTrue()
-        assertThat(underTest.onTouchEvent(UP_EVENT)).isTrue()
-        assertThat(underTest.onTouchEvent(MOVE_EVENT)).isFalse()
-    }
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
+            }
+        }
 
     @Test
-    fun onTouchEvent_communalOpen_interceptsTouches() {
-        // Communal is open.
-        goToScene(CommunalScenes.Communal)
+    fun onTouchEvent_openGesture_interceptsTouches() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is closed.
+                goToScene(CommunalScenes.Blank)
 
-        // Touch events are intercepted outside of any gesture areas.
-        assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
-        // User activity sent to PowerManager.
-        verify(powerManager).userActivity(any(), any(), any())
-    }
-
-    @Test
-    fun onTouchEvent_topSwipeWhenCommunalOpen_doesNotIntercept() {
-        // Communal is open.
-        goToScene(CommunalScenes.Communal)
-
-        // Touch event in the top swipe reqgion is not intercepted.
-        assertThat(underTest.onTouchEvent(DOWN_IN_TOP_SWIPE_REGION_EVENT)).isFalse()
-    }
+                // Initial touch down is intercepted, and so are touches outside of the region,
+                // until an
+                // up event is received.
+                assertThat(underTest.onTouchEvent(DOWN_IN_RIGHT_SWIPE_REGION_EVENT)).isTrue()
+                assertThat(underTest.onTouchEvent(MOVE_EVENT)).isTrue()
+                assertThat(underTest.onTouchEvent(UP_EVENT)).isTrue()
+                assertThat(underTest.onTouchEvent(MOVE_EVENT)).isFalse()
+            }
+        }
 
     @Test
-    fun onTouchEvent_bottomSwipeWhenCommunalOpen_doesNotIntercept() {
-        // Communal is open.
-        goToScene(CommunalScenes.Communal)
+    fun onTouchEvent_communalOpen_interceptsTouches() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
 
-        // Touch event in the bottom swipe reqgion is not intercepted.
-        assertThat(underTest.onTouchEvent(DOWN_IN_BOTTOM_SWIPE_REGION_EVENT)).isFalse()
-    }
-
-    @Test
-    fun onTouchEvent_communalAndBouncerShowing_doesNotIntercept() {
-        // Communal is open.
-        goToScene(CommunalScenes.Communal)
-
-        // Bouncer is visible.
-        bouncerShowingFlow.value = true
-        testableLooper.processAllMessages()
-
-        // Touch events are not intercepted.
-        assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
-        // User activity is not sent to PowerManager.
-        verify(powerManager, times(0)).userActivity(any(), any(), any())
-    }
+                // Touch events are intercepted outside of any gesture areas.
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
+                // User activity sent to PowerManager.
+                verify(powerManager).userActivity(any(), any(), any())
+            }
+        }
 
     @Test
-    fun onTouchEvent_communalAndShadeShowing_doesNotIntercept() {
-        // Communal is open.
-        goToScene(CommunalScenes.Communal)
+    fun onTouchEvent_topSwipeWhenCommunalOpen_doesNotIntercept() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
 
-        shadeShowingFlow.value = true
-        testableLooper.processAllMessages()
-
-        // Touch events are not intercepted.
-        assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
-    }
+                // Touch event in the top swipe region is not intercepted.
+                assertThat(underTest.onTouchEvent(DOWN_IN_TOP_SWIPE_REGION_EVENT)).isFalse()
+            }
+        }
 
     @Test
-    fun onTouchEvent_containerViewDisposed_doesNotIntercept() {
-        // Communal is open.
-        goToScene(CommunalScenes.Communal)
+    fun onTouchEvent_bottomSwipeWhenCommunalOpen_doesNotIntercept() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
 
-        // Touch events are intercepted.
-        assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
+                // Touch event in the bottom swipe region is not intercepted.
+                assertThat(underTest.onTouchEvent(DOWN_IN_BOTTOM_SWIPE_REGION_EVENT)).isFalse()
+            }
+        }
 
-        // Container view disposed.
-        underTest.disposeView()
+    @Test
+    fun onTouchEvent_topSwipeWhenDreaming_doesNotIntercept() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
 
-        // Touch events are not intercepted.
-        assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
-    }
+                // Device is dreaming.
+                fakeKeyguardRepository.setDreaming(true)
+                runCurrent()
+
+                // Touch event in the top swipe region is not intercepted.
+                assertThat(underTest.onTouchEvent(DOWN_IN_TOP_SWIPE_REGION_EVENT)).isFalse()
+            }
+        }
+
+    @Test
+    fun onTouchEvent_bottomSwipeWhenDreaming_doesNotIntercept() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
+
+                // Device is dreaming.
+                fakeKeyguardRepository.setDreaming(true)
+                runCurrent()
+
+                // Touch event in the bottom swipe region is not intercepted.
+                assertThat(underTest.onTouchEvent(DOWN_IN_BOTTOM_SWIPE_REGION_EVENT)).isFalse()
+            }
+        }
+
+    @Test
+    fun onTouchEvent_communalAndBouncerShowing_doesNotIntercept() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
+
+                // Bouncer is visible.
+                fakeKeyguardTransitionRepository.sendTransitionSteps(
+                    KeyguardState.GLANCEABLE_HUB,
+                    KeyguardState.PRIMARY_BOUNCER,
+                    testScope
+                )
+                testableLooper.processAllMessages()
+
+                // Touch events are not intercepted.
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
+                // User activity is not sent to PowerManager.
+                verify(powerManager, times(0)).userActivity(any(), any(), any())
+            }
+        }
+
+    @Test
+    fun onTouchEvent_communalAndShadeShowing_doesNotIntercept() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
+
+                // Shade shows up.
+                fakeShadeRepository.setQsExpansion(1.0f)
+                testableLooper.processAllMessages()
+
+                // Touch events are not intercepted.
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
+            }
+        }
+
+    @Test
+    fun onTouchEvent_containerViewDisposed_doesNotIntercept() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
+
+                // Touch events are intercepted.
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
+
+                // Container view disposed.
+                underTest.disposeView()
+
+                // Touch events are not intercepted.
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
+            }
+        }
 
     private fun initAndAttachContainerView() {
         containerView = View(context)
@@ -259,6 +331,8 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
 
         // Attach the view so that flows start collecting.
         ViewUtils.attachView(parentView)
+        // Attaching is async so processAllMessages is required for view.repeatWhenAttached to run.
+        testableLooper.processAllMessages()
 
         // Give the view a fixed size to simplify testing for edge swipes.
         val lp =
