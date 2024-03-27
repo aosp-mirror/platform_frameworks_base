@@ -1930,7 +1930,6 @@ public class DisplayDeviceConfig {
      *
      * @return true if even dimmer mode is enabled
      */
-    @VisibleForTesting
     public boolean isEvenDimmerAvailable() {
         return mEvenDimmerBrightnessData != null;
     }
