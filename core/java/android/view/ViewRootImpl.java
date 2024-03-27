@@ -12626,12 +12626,11 @@ public final class ViewRootImpl implements ViewParent,
         }
         mHasInvalidation = true;
         checkIdleness();
-        if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)
-                && mPreferredFrameRateCategory != oldCategory
+        if (mPreferredFrameRateCategory != oldCategory
                 && mPreferredFrameRateCategory == frameRateCategory
         ) {
             mFrameRateCategoryChangeReason = reason;
-            mFrameRateCategoryView = view.getClass().getSimpleName();
+            mFrameRateCategoryView = view == null ? "null" : view.getClass().getSimpleName();
         }
     }
 
@@ -12791,7 +12790,6 @@ public final class ViewRootImpl implements ViewParent,
         // uncomment this when we are ready for enabling dVRR
         // return sToolkitSetFrameRateReadOnlyFlagValue && isFrameRatePowerSavingsBalanced();
         return false;
-
     }
 
     private void checkIdleness() {
