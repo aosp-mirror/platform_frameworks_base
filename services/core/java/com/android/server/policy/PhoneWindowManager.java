@@ -3486,13 +3486,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return true;
                 }
                 break;
-            case KeyEvent.KEYCODE_T:
-                if (firstDown && event.isMetaPressed()) {
-                    toggleTaskbar();
-                    logKeyboardSystemsEvent(event, KeyboardLogEvent.TOGGLE_TASKBAR);
-                    return true;
-                }
-                break;
             case KeyEvent.KEYCODE_DEL:
             case KeyEvent.KEYCODE_ESCAPE:
                 if (firstDown && event.isMetaPressed()) {
@@ -4313,6 +4306,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             boolean allowDuringSetup) {
         if (allowDuringSetup || isUserSetupComplete()) {
             mContext.startActivityAsUser(intent, bundle, handle);
+            dismissKeyboardShortcutsMenu();
         } else {
             Slog.i(TAG, "Not starting activity because user setup is in progress: " + intent);
         }
@@ -4363,6 +4357,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (statusbar != null) {
             statusbar.showRecentApps(triggeredFromAltTab);
         }
+        dismissKeyboardShortcutsMenu();
     }
 
     private void toggleKeyboardShortcutsMenu(int deviceId) {

@@ -1080,7 +1080,7 @@ final class InstallPackageHelper {
                     reconciledPackages = ReconcilePackageUtils.reconcilePackages(
                             requests, Collections.unmodifiableMap(mPm.mPackages),
                             versionInfos, mSharedLibraries, mPm.mSettings.getKeySetManagerService(),
-                            mPm.mSettings);
+                            mPm.mSettings, mPm.mInjector.getSystemConfig());
                 } catch (ReconcileFailure e) {
                     for (InstallRequest request : requests) {
                         request.setError("Reconciliation failed...", e);
@@ -3598,7 +3598,8 @@ final class InstallPackageHelper {
                 continue;
             }
             if ((scanFlags & SCAN_DROP_CACHE) != 0) {
-                final PackageCacher cacher = new PackageCacher(mPm.getCacheDir());
+                final PackageCacher cacher = new PackageCacher(mPm.getCacheDir(),
+                        mPm.mPackageParserCallback);
                 Log.w(TAG, "Dropping cache of " + file.getAbsolutePath());
                 cacher.cleanCachedResult(file);
             }
@@ -3810,7 +3811,7 @@ final class InstallPackageHelper {
                                 mPm.mPackages, Collections.singletonMap(pkgName,
                                         mPm.getSettingsVersionForPackage(parsedPackage)),
                                 mSharedLibraries, mPm.mSettings.getKeySetManagerService(),
-                                mPm.mSettings);
+                                mPm.mSettings, mPm.mInjector.getSystemConfig());
                 if ((scanFlags & SCAN_AS_APEX) == 0) {
                     appIdCreated = optimisticallyRegisterAppId(installRequest);
                 } else {
