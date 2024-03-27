@@ -53,8 +53,10 @@ import static android.view.autofill.AutofillManager.FLAG_SMART_SUGGESTION_SYSTEM
 import static android.view.autofill.AutofillManager.getSmartSuggestionModeToString;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+import static com.android.server.autofill.FillRequestEventLogger.TRIGGER_REASON_EXPLICITLY_REQUESTED;
 import static com.android.server.autofill.FillRequestEventLogger.TRIGGER_REASON_NORMAL_TRIGGER;
 import static com.android.server.autofill.FillRequestEventLogger.TRIGGER_REASON_PRE_TRIGGER;
+import static com.android.server.autofill.FillRequestEventLogger.TRIGGER_REASON_RETRIGGER;
 import static com.android.server.autofill.FillRequestEventLogger.TRIGGER_REASON_SERVED_FROM_CACHED_RESPONSE;
 import static com.android.server.autofill.FillResponseEventLogger.AVAILABLE_COUNT_WHEN_FILL_REQUEST_FAILED_OR_TIMEOUT;
 import static com.android.server.autofill.FillResponseEventLogger.DETECTION_PREFER_AUTOFILL_PROVIDER;
@@ -543,6 +545,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     synchronized (mLock) {
                         int requestId = intent.getIntExtra(EXTRA_REQUEST_ID, 0);
                         FillResponse response = intent.getParcelableExtra(EXTRA_FILL_RESPONSE, android.service.autofill.FillResponse.class);
+                        mFillRequestEventLogger.maybeSetRequestTriggerReason(
+                                TRIGGER_REASON_RETRIGGER);
                         mAssistReceiver.processDelayedFillLocked(requestId, response);
                     }
                 }
@@ -1268,7 +1272,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if(mPreviouslyFillDialogPotentiallyStarted) {
             mFillRequestEventLogger.maybeSetRequestTriggerReason(TRIGGER_REASON_PRE_TRIGGER);
         } else {
-            mFillRequestEventLogger.maybeSetRequestTriggerReason(TRIGGER_REASON_NORMAL_TRIGGER);
+            if ((flags & FLAG_MANUAL_REQUEST) != 0) {
+                mFillRequestEventLogger.maybeSetRequestTriggerReason(
+                        TRIGGER_REASON_EXPLICITLY_REQUESTED);
+            } else {
+                mFillRequestEventLogger.maybeSetRequestTriggerReason(
+                        TRIGGER_REASON_NORMAL_TRIGGER);
+            }
         }
         if (existingResponse != null) {
             setViewStatesLocked(
