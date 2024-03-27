@@ -47,4 +47,5 @@ oneway interface IOnDeviceIntelligenceService {
     void registerRemoteServices(in IRemoteProcessingService remoteProcessingService);
     void notifyInferenceServiceConnected();
     void notifyInferenceServiceDisconnected();
+    void ready();
 }

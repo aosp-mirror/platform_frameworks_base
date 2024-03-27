@@ -24,6 +24,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.Service;
 import android.app.ondeviceintelligence.DownloadCallback;
 import android.app.ondeviceintelligence.Feature;
@@ -110,6 +111,11 @@ public abstract class OnDeviceIntelligenceService extends Service {
             //  thread.
             return new IOnDeviceIntelligenceService.Stub() {
                 /** {@inheritDoc} */
+                @Override
+                public void ready() {
+                    OnDeviceIntelligenceService.this.onReady();
+                }
+
                 @Override
                 public void getVersion(RemoteCallback remoteCallback) {
                     Objects.requireNonNull(remoteCallback);
@@ -207,6 +213,16 @@ public abstract class OnDeviceIntelligenceService extends Service {
         Slog.w(TAG, "Incorrect service interface, returning null.");
         return null;
     }
+
+    /**
+     * Using this signal to assertively a signal each time service binds successfully, used only in
+     * tests to get a signal that service instance is ready. This is needed because we cannot rely
+     * on {@link #onCreate} or {@link #onBind} to be invoke on each binding.
+     *
+     * @hide
+     */
+    @TestApi
+    public void onReady() {}
 
 
     /**
