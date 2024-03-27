@@ -458,9 +458,6 @@ public class PowerGroup {
                     mDisplayPowerRequest.dozeScreenStateReason =
                             Display.STATE_REASON_DRAW_WAKE_LOCK;
                 }
-            } else {
-                mDisplayPowerRequest.dozeScreenStateReason =
-                        Display.STATE_REASON_DEFAULT_POLICY;
             }
             mDisplayPowerRequest.dozeScreenBrightness = dozeScreenBrightness;
         } else {
