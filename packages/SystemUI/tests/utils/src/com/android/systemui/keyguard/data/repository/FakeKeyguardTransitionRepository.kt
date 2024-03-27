@@ -32,7 +32,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
@@ -41,10 +43,20 @@ import kotlinx.coroutines.test.runCurrent
 /** Fake implementation of [KeyguardTransitionRepository] */
 @SysUISingleton
 class FakeKeyguardTransitionRepository @Inject constructor() : KeyguardTransitionRepository {
-
     private val _transitions =
         MutableSharedFlow<TransitionStep>(replay = 3, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     override val transitions: SharedFlow<TransitionStep> = _transitions
+
+    private val _currentTransitionInfo: MutableStateFlow<TransitionInfo> =
+        MutableStateFlow(
+            TransitionInfo(
+                ownerName = "",
+                from = KeyguardState.OFF,
+                to = KeyguardState.LOCKSCREEN,
+                animator = null
+            )
+        )
+    override var currentTransitionInfoInternal = _currentTransitionInfo.asStateFlow()
 
     init {
         // Seed the fake repository with the same initial steps the actual repository uses.
@@ -159,6 +171,11 @@ class FakeKeyguardTransitionRepository @Inject constructor() : KeyguardTransitio
             ),
         validateStep: Boolean = true
     ) {
+        if (step.transitionState == TransitionState.STARTED) {
+            _currentTransitionInfo.value =
+                TransitionInfo(from = step.from, to = step.to, animator = null, ownerName = "")
+        }
+
         _transitions.replayCache.last().let { lastStep ->
             if (
                 validateStep &&
@@ -201,7 +218,8 @@ class FakeKeyguardTransitionRepository @Inject constructor() : KeyguardTransitio
         }
     }
 
-    override fun startTransition(info: TransitionInfo): UUID? {
+    override suspend fun startTransition(info: TransitionInfo): UUID? {
+        _currentTransitionInfo.value = info
         return if (info.animator == null) UUID.randomUUID() else null
     }
 

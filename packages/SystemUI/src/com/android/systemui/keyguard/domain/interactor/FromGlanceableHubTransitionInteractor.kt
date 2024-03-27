@@ -30,13 +30,11 @@ import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.util.kotlin.BooleanFlowOperators.and
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
-import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -113,46 +111,31 @@ constructor(
     private fun listenForHubToPrimaryBouncer() {
         scope.launch("$TAG#listenForHubToPrimaryBouncer") {
             keyguardInteractor.primaryBouncerShowing
-                .sample(startedKeyguardTransitionStep, ::Pair)
-                .collect { pair ->
-                    val (isBouncerShowing, lastStartedTransitionStep) = pair
-                    if (
-                        isBouncerShowing &&
-                            lastStartedTransitionStep.to == KeyguardState.GLANCEABLE_HUB
-                    ) {
-                        startTransitionTo(KeyguardState.PRIMARY_BOUNCER)
-                    }
-                }
+                .filterRelevantKeyguardStateAnd { primaryBouncerShowing -> primaryBouncerShowing }
+                .collect { startTransitionTo(KeyguardState.PRIMARY_BOUNCER) }
         }
     }
 
     private fun listenForHubToAlternateBouncer() {
         scope.launch("$TAG#listenForHubToAlternateBouncer") {
             keyguardInteractor.alternateBouncerShowing
-                .sample(startedKeyguardTransitionStep, ::Pair)
-                .collect { pair ->
-                    val (isAlternateBouncerShowing, lastStartedTransitionStep) = pair
-                    if (
-                        isAlternateBouncerShowing &&
-                            lastStartedTransitionStep.to == KeyguardState.GLANCEABLE_HUB
-                    ) {
-                        startTransitionTo(KeyguardState.ALTERNATE_BOUNCER)
-                    }
+                .filterRelevantKeyguardStateAnd { alternateBouncerShowing ->
+                    alternateBouncerShowing
                 }
+                .collect { pair -> startTransitionTo(KeyguardState.ALTERNATE_BOUNCER) }
         }
     }
 
     private fun listenForHubToDozing() {
         scope.launch {
-            powerInteractor.isAsleep.sample(startedKeyguardTransitionStep, ::Pair).collect {
-                (isAsleep, lastStartedStep) ->
-                if (lastStartedStep.to == fromState && isAsleep) {
+            powerInteractor.isAsleep
+                .filterRelevantKeyguardStateAnd { isAsleep -> isAsleep }
+                .collect {
                     startTransitionTo(
                         toState = KeyguardState.DOZING,
                         modeOnCanceled = TransitionModeOnCanceled.LAST_VALUE,
                     )
                 }
-            }
         }
     }
 
@@ -160,22 +143,17 @@ constructor(
         if (KeyguardWmStateRefactor.isEnabled) {
             scope.launch {
                 keyguardOcclusionInteractor.isShowWhenLockedActivityOnTop
-                    .filter { onTop -> onTop }
-                    .sample(startedKeyguardState)
-                    .collect {
-                        if (it == KeyguardState.GLANCEABLE_HUB) {
-                            maybeStartTransitionToOccludedOrInsecureCamera()
-                        }
-                    }
+                    .filterRelevantKeyguardStateAnd { onTop -> onTop }
+                    .collect { maybeStartTransitionToOccludedOrInsecureCamera() }
             }
         } else {
             scope.launch {
                 and(keyguardInteractor.isKeyguardOccluded, not(keyguardInteractor.isDreaming))
-                    .sample(startedKeyguardState, ::Pair)
-                    .collect { (isOccludedAndNotDreaming, keyguardState) ->
-                        if (isOccludedAndNotDreaming && keyguardState == fromState) {
-                            startTransitionTo(KeyguardState.OCCLUDED)
-                        }
+                    .filterRelevantKeyguardStateAnd { isOccludedAndNotDreaming ->
+                        isOccludedAndNotDreaming
+                    }
+                    .collect { isOccludedAndNotDreaming ->
+                        startTransitionTo(KeyguardState.OCCLUDED)
                     }
             }
         }
@@ -184,12 +162,8 @@ constructor(
     private fun listenForHubToGone() {
         scope.launch {
             keyguardInteractor.isKeyguardGoingAway
-                .sample(startedKeyguardTransitionStep, ::Pair)
-                .collect { (isKeyguardGoingAway, lastStartedStep) ->
-                    if (isKeyguardGoingAway && lastStartedStep.to == fromState) {
-                        startTransitionTo(KeyguardState.GONE)
-                    }
-                }
+                .filterRelevantKeyguardStateAnd { isKeyguardGoingAway -> isKeyguardGoingAway }
+                .collect { startTransitionTo(KeyguardState.GONE) }
         }
     }
 

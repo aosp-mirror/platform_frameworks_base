@@ -37,17 +37,14 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.shade.data.repository.FlingInfo
 import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.spy
-import org.mockito.Mockito.verify
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -125,7 +122,7 @@ class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
     fun testTransitionsToGone_whenDismissFlingWhileDismissable_flagEnabled() =
         testScope.runTest {
             underTest.start()
-            verify(transitionRepository, never()).startTransition(any())
+            assertThatRepository(transitionRepository).noTransitionsStarted()
 
             keyguardRepository.setKeyguardDismissible(true)
             runCurrent()
@@ -146,7 +143,7 @@ class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
     fun testDoesNotTransitionToGone_whenDismissFlingWhileDismissable_flagDisabled() =
         testScope.runTest {
             underTest.start()
-            verify(transitionRepository, never()).startTransition(any())
+            assertThatRepository(transitionRepository).noTransitionsStarted()
 
             keyguardRepository.setKeyguardDismissible(true)
             runCurrent()
@@ -163,7 +160,7 @@ class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
     fun testDoesNotTransitionToGone_whenDismissFling_emitsNull() =
         testScope.runTest {
             underTest.start()
-            verify(transitionRepository, never()).startTransition(any())
+            assertThatRepository(transitionRepository).noTransitionsStarted()
 
             keyguardRepository.setKeyguardDismissible(true)
             runCurrent()
