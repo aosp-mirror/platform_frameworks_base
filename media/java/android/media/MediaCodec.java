@@ -2346,7 +2346,15 @@ final public class MediaCodec {
         }
 
         // at the moment no codecs support detachable surface
-        if (android.media.codec.Flags.nullOutputSurface()) {
+
+        // HACKY: aconfig flags accessors may not work in all contexts that MediaCodec API is used,
+        // so allow accessors to fail. In those contexts the flags will just not be enabled
+        boolean nullOutputSurface = false;
+        try {
+            nullOutputSurface = android.media.codec.Flags.nullOutputSurface();
+        } catch (java.lang.RuntimeException e) { }
+
+        if (nullOutputSurface) {
             // Detached surface flag is only meaningful if surface is null. Otherwise, it is
             // ignored.
             if (surface == null && (flags & CONFIGURE_FLAG_DETACHED_SURFACE) != 0) {
