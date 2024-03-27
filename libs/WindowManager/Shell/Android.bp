@@ -45,7 +45,6 @@ filegroup {
     name: "wm_shell_util-sources",
     srcs: [
         "src/com/android/wm/shell/animation/Interpolators.java",
-        "src/com/android/wm/shell/animation/PhysicsAnimator.kt",
         "src/com/android/wm/shell/common/bubbles/*.kt",
         "src/com/android/wm/shell/common/bubbles/*.java",
         "src/com/android/wm/shell/common/magnetictarget/MagnetizedObject.kt",
@@ -169,7 +168,13 @@ java_library {
 java_library {
     name: "WindowManager-Shell-shared",
 
-    srcs: ["shared/**/*.java"],
+    srcs: [
+        "shared/**/*.java",
+        "shared/**/*.kt",
+    ],
+    static_libs: [
+        "androidx.dynamicanimation_dynamicanimation",
+    ],
 }
 
 android_library {

@@ -35,7 +35,7 @@ import androidx.core.content.ContextCompat
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringForce.DAMPING_RATIO_LOW_BOUNCY
 import androidx.dynamicanimation.animation.SpringForce.STIFFNESS_LOW
-import com.android.wm.shell.animation.PhysicsAnimator
+import com.android.wm.shell.shared.animation.PhysicsAnimator
 
 /**
  * View that handles interactions between DismissCircleView and BubbleStackView.
