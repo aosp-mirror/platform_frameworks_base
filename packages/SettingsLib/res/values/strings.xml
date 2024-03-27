@@ -222,6 +222,30 @@
     <!-- Connected device settings. Message when the left-side and right-side hearing aids device are active. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_hearing_aid_left_and_right_active">Active, left and right</string>
 
+    <!-- Connected devices settings. Message when Bluetooth is connected and active for media only, showing remote device status and battery level. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_active_media_only_battery_level">Active (media only), <xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected and active for media only, showing remote device status and battery level for untethered headset. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_active_media_only_battery_level_untethered">Active (media only), L: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g> battery, R: <xliff:g id="battery_level_as_percentage" example="25%">%2$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level, supports audio sharing. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_battery_level_lea_support">Connected (supports audio sharing), <xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level for untethered headset, supports audio sharing. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_battery_level_untethered_lea_support">Connected (supports audio sharing), L: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g> battery, R: <xliff:g id="battery_level_as_percentage" example="25%">%2$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level for the left part of the untethered headset, supports audio sharing. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_battery_level_untethered_left_lea_support">Connected (supports audio sharing), left <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g></string>
+    <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level for the right part of the untethered headset, supports audio sharing. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_battery_level_untethered_right_lea_support">Connected (supports audio sharing), right <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g></string>
+    <!-- Connected devices settings. Message when Bluetooth is connected and active for media only but no battery information, showing remote device status. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_active_media_only_no_battery_level">Active (media only)</string>
+    <!-- Connected devices settings. Message shown when bluetooth device is disconnected but is a known, previously connected device, supports audio sharing [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_saved_device_lea_support">Supports audio sharing</string>
+
+    <!-- Connected device settings. Message when the left-side hearing aid device is active for media only. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_hearing_aid_media_only_left_active">Active (media only), left only</string>
+    <!-- Connected device settings. Message when the right-side hearing aid device is active for media only. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_hearing_aid_media_only_right_active">Active (media only), right only</string>
+    <!-- Connected device settings. Message when the left-side and right-side hearing aids device are active for media only. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active">Active (media only), left and right</string>
+
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the A2DP profile. -->
     <string name="bluetooth_profile_a2dp">Media audio</string>
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the headset or handsfree profile. -->
