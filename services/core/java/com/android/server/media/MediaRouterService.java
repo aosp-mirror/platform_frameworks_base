@@ -110,6 +110,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     private static final long CONNECTED_TIMEOUT = 60000;
 
     private final Context mContext;
+    private final Looper mLooper;
 
     // State guarded by mLock.
     private final Object mLock = new Object();
@@ -141,7 +142,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     @RequiresPermission(Manifest.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS)
     public MediaRouterService(Context context) {
-        mService2 = new MediaRouter2ServiceImpl(context);
+        mLooper = Looper.getMainLooper();
+        mService2 = new MediaRouter2ServiceImpl(context, mLooper);
         mContext = context;
         Watchdog.getInstance().addMonitor(this);
         Resources res = context.getResources();
@@ -1104,7 +1106,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
         public UserRecord(int userId) {
             mUserId = userId;
-            mHandler = new UserHandler(MediaRouterService.this, this);
+            mHandler = new UserHandler(MediaRouterService.this, this, mLooper);
         }
 
         public void dump(final PrintWriter pw, String prefix) {
@@ -1212,8 +1214,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         private long mConnectionTimeoutStartTime;
         private boolean mClientStateUpdateScheduled;
 
-        public UserHandler(MediaRouterService service, UserRecord userRecord) {
-            super(Looper.getMainLooper(), null, true);
+        private UserHandler(MediaRouterService service, UserRecord userRecord, Looper looper) {
+            super(looper, null, true);
             mService = service;
             mUserRecord = userRecord;
             mWatcher = new RemoteDisplayProviderWatcher(service.mContext, this,

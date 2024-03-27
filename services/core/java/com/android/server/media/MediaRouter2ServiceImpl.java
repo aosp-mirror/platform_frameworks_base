@@ -114,6 +114,7 @@ class MediaRouter2ServiceImpl {
             };
 
     private final Context mContext;
+    private final Looper mLooper;
     private final UserManagerInternal mUserManagerInternal;
     private final Object mLock = new Object();
     private final AppOpsManager mAppOpsManager;
@@ -178,8 +179,9 @@ class MediaRouter2ServiceImpl {
                 Manifest.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS,
                 Manifest.permission.WATCH_APPOPS
             })
-    /* package */ MediaRouter2ServiceImpl(Context context) {
+    /* package */ MediaRouter2ServiceImpl(@NonNull Context context, @NonNull Looper looper) {
         mContext = context;
+        mLooper = looper;
         mActivityManager = mContext.getSystemService(ActivityManager.class);
         mActivityManager.addOnUidImportanceListener(mOnUidImportanceListener,
                 REQUIRED_PACKAGE_IMPORTANCE_FOR_SCANNING);
@@ -1891,7 +1893,7 @@ class MediaRouter2ServiceImpl {
     private UserRecord getOrCreateUserRecordLocked(int userId) {
         UserRecord userRecord = mUserRecords.get(userId);
         if (userRecord == null) {
-            userRecord = new UserRecord(userId);
+            userRecord = new UserRecord(userId, mLooper);
             mUserRecords.put(userId, userRecord);
             userRecord.init();
             if (isUserActiveLocked(userId)) {
@@ -1962,9 +1964,13 @@ class MediaRouter2ServiceImpl {
         Set<String> mActivelyScanningPackages = Set.of();
         final UserHandler mHandler;
 
-        UserRecord(int userId) {
+        UserRecord(int userId, @NonNull Looper looper) {
             mUserId = userId;
-            mHandler = new UserHandler(MediaRouter2ServiceImpl.this, this);
+            mHandler =
+                    new UserHandler(
+                            /* service= */ MediaRouter2ServiceImpl.this,
+                            /* userRecord= */ this,
+                            looper);
         }
 
         void init() {
@@ -2365,12 +2371,16 @@ class MediaRouter2ServiceImpl {
         private boolean mRunning;
 
         // TODO: (In Android S+) Pull out SystemMediaRoute2Provider out of UserHandler.
-        UserHandler(@NonNull MediaRouter2ServiceImpl service, @NonNull UserRecord userRecord) {
-            super(Looper.getMainLooper(), null, true);
+        UserHandler(
+                @NonNull MediaRouter2ServiceImpl service,
+                @NonNull UserRecord userRecord,
+                @NonNull Looper looper) {
+            super(looper, /* callback= */ null, /* async= */ true);
             mServiceRef = new WeakReference<>(service);
             mUserRecord = userRecord;
-            mSystemProvider = new SystemMediaRoute2Provider(service.mContext,
-                    UserHandle.of(userRecord.mUserId));
+            mSystemProvider =
+                    new SystemMediaRoute2Provider(
+                            service.mContext, UserHandle.of(userRecord.mUserId), looper);
             mRouteProviders.add(mSystemProvider);
             mWatcher = new MediaRoute2ProviderWatcher(service.mContext, this,
                     this, mUserRecord.mUserId);

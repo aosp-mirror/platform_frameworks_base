@@ -86,12 +86,11 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     @GuardedBy("mTransferLock")
     @Nullable private volatile SessionCreationRequest mPendingTransferRequest;
 
-    SystemMediaRoute2Provider(Context context, UserHandle user) {
+    SystemMediaRoute2Provider(Context context, UserHandle user, Looper looper) {
         super(COMPONENT_NAME);
         mIsSystemRouteProvider = true;
         mContext = context;
         mUser = user;
-        Looper looper = Looper.getMainLooper();
         mHandler = new Handler(looper);
 
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
