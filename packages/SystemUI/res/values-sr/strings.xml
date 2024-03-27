@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Додајте још виџета"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Дуги притисак за прилагођавање виџета"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Прилагоди виџете"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Икона апликације за онемогућен виџет"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Измени виџет"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Уклони"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Додај виџет"</string>
@@ -582,7 +581,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Додирните да бисте искључили звук. Звук услуга приступачности ће можда бити искључен."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Додирните да бисте подесили на вибрацију."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Додирните да бисте искључили звук."</string>
-    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Контрола шума"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Контрола буке"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Додирните да бисте променили режим звона"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"искључите звук"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"укључите звук"</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Прегледај недавно коришћене апликације унапред"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Прегледај недавно коришћене апликације уназад"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Отвори листу апликација"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Прикажи траку задатака"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Отвори подешавања"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Отвори помоћника"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Закључавање екрана"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Мени дугмета за укључивање"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_1">%1$d</xliff:g>. страна од <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Закључан екран"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"Можете да лоцирате овај телефон помоћу услуге Пронађи мој уређај чак и када је искључен"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Искључује се…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Погледајте упозорења"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Погледајте упозорења"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Искључите уређај"</string>
@@ -1153,7 +1149,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Траже се мреже…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Повезивање са мрежом није успело"</string>
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"WiFi тренутно не може да се аутоматски повеже"</string>
-    <string name="see_all_networks" msgid="3773666844913168122">"Погледајте све"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"Прикажи све"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Да бисте променили мрежу, прекините етернет везу"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Ради бољег доживљаја уређаја, апликације и услуге и даље могу да траже WiFi мреже у било ком тренутку, чак и када је WiFi искључен. То можете да промените у подешавањима WiFi скенирања. "<annotation id="link">"Промените"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Искључи режим рада у авиону"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"За већу резолуцију обрните телефон"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Уређај на преклоп се отвара"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Уређај на преклоп се обрће"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"затворено"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"отворено"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Преостало је још<xliff:g id="PERCENTAGE">%s</xliff:g> батерије"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Повежите писаљку са пуњачем"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Низак ниво батерије писаљке"</string>

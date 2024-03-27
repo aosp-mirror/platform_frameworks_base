@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"إضافة المزيد من التطبيقات المصغّرة"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"اضغط مع الاستمرار لتخصيص التطبيقات المصغّرة."</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"تخصيص التطبيقات المصغَّرة"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"رمز التطبيق المصغّر غير المفعّل"</string>
     <string name="edit_widget" msgid="9030848101135393954">"تعديل التطبيق المصغَّر"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"إزالة"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"إضافة تطبيق مصغّر"</string>
@@ -486,7 +485,7 @@
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"محو جميع الإشعارات الصامتة"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"تم إيقاف الإشعارات مؤقتًا وفقًا لإعداد \"عدم الإزعاج\""</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"البدء الآن"</string>
-    <string name="empty_shade_text" msgid="8935967157319717412">"ما مِن إشعارات."</string>
+    <string name="empty_shade_text" msgid="8935967157319717412">"ما مِن إشعارات"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"ما مِن إشعارات جديدة"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"افتَح قفل الشاشة لعرض الإشعارات الأقدم."</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"يتولّى أحد الوالدين إدارة هذا الجهاز."</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"التنقّل للأمام بين التطبيقات المُستخدَمة مؤخرًا"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"التنقّل للوراء بين التطبيقات المُستخدَمة مؤخرًا"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"فتح قائمة التطبيقات"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"عرض شريط التطبيقات"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"فتح الإعدادات"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"‏فتح \"مساعد Google\""</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"شاشة القفل"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"قائمة زر التشغيل"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"الصفحة <xliff:g id="ID_1">%1$d</xliff:g> من <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"شاشة القفل"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"يمكنك تحديد مكان هذا الهاتف باستخدام تطبيق \"العثور على جهازي\" حتى عندما يكون مُطفئًا."</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"جارٍ إيقاف التشغيل…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"الاطّلاع على خطوات العناية"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"الاطّلاع على خطوات العناية"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"افصِل جهازك"</string>
@@ -1143,7 +1139,7 @@
     <string name="mobile_data_connection_active" msgid="944490013299018227">"متصلة بالإنترنت"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"متصلة مؤقتًا"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"الاتصال ضعيف"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"لن يتم تلقائيًا الاتصال ببيانات الجوّال."</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"لن يتم تلقائيًا الاتصال ببيانات الجوّال"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"لا يتوفّر اتصال بالإنترنت"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"لا تتوفّر شبكات أخرى."</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"لا تتوفّر أي شبكات."</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"للحصول على درجة دقة أعلى، اقلِب الهاتف."</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"جهاز قابل للطي يجري فتحه"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"جهاز قابل للطي يجري قلبه"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"مطوي"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"غير مطوي"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"‫%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"النسبة المئوية المتبقية من شحن البطارية: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"عليك توصيل قلم الشاشة بشاحن."</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"بطارية قلم الشاشة منخفضة"</string>
