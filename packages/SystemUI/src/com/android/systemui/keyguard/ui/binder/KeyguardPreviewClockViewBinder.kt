@@ -18,6 +18,7 @@
 package com.android.systemui.keyguard.ui.binder
 
 import android.content.Context
+import android.util.DisplayMetrics
 import android.view.View
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
@@ -109,7 +110,7 @@ object KeyguardPreviewClockViewBinder {
     private fun applyClockDefaultConstraints(context: Context, constraints: ConstraintSet) {
         constraints.apply {
             constrainWidth(R.id.lockscreen_clock_view_large, ConstraintSet.WRAP_CONTENT)
-            constrainHeight(R.id.lockscreen_clock_view_large, ConstraintSet.WRAP_CONTENT)
+            constrainHeight(R.id.lockscreen_clock_view_large, ConstraintSet.MATCH_CONSTRAINT)
             val largeClockTopMargin =
                 context.resources.getDimensionPixelSize(R.dimen.status_bar_height) +
                     context.resources.getDimensionPixelSize(
@@ -129,7 +130,29 @@ object KeyguardPreviewClockViewBinder {
                 ConstraintSet.END
             )
 
-            connect(R.id.lockscreen_clock_view_large, BOTTOM, R.id.lock_icon_view, TOP)
+            // In preview, we'll show UDFPS icon for UDFPS devices
+            // and nothing for non-UDFPS devices,
+            // but we need position of device entry icon to constrain clock
+            if (getConstraint(R.id.lock_icon_view) != null) {
+                connect(R.id.lockscreen_clock_view_large, BOTTOM, R.id.lock_icon_view, TOP)
+            } else {
+                // Copied calculation codes from applyConstraints in DefaultDeviceEntrySection
+                val bottomPaddingPx =
+                    context.resources.getDimensionPixelSize(R.dimen.lock_icon_margin_bottom)
+                val defaultDensity =
+                    DisplayMetrics.DENSITY_DEVICE_STABLE.toFloat() /
+                        DisplayMetrics.DENSITY_DEFAULT.toFloat()
+                val lockIconRadiusPx = (defaultDensity * 36).toInt()
+                val clockBottomMargin = bottomPaddingPx + 2 * lockIconRadiusPx
+                connect(
+                    R.id.lockscreen_clock_view_large,
+                    BOTTOM,
+                    PARENT_ID,
+                    BOTTOM,
+                    clockBottomMargin
+                )
+            }
+
             constrainWidth(R.id.lockscreen_clock_view, WRAP_CONTENT)
             constrainHeight(
                 R.id.lockscreen_clock_view,
