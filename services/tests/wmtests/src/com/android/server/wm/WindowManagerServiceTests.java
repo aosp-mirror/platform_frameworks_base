@@ -1115,7 +1115,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
                 argThat(h -> (h.inputConfig & InputConfig.SPY) == InputConfig.SPY));
     }
 
-    @RequiresFlagsDisabled(Flags.FLAG_MAGNIFICATION_ALWAYS_DRAW_FULLSCREEN_BORDER)
+    @RequiresFlagsDisabled(Flags.FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER)
     @Test
     public void testDrawMagnifiedViewport() {
         final int displayId = mDisplayContent.mDisplayId;

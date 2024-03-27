@@ -587,7 +587,7 @@ public class MagnificationController implements MagnificationConnectionManager.C
 
     @Override
     public void onFullScreenMagnificationActivationState(int displayId, boolean activated) {
-        if (Flags.magnificationAlwaysDrawFullscreenBorder()) {
+        if (Flags.alwaysDrawMagnificationFullscreenBorder()) {
             getMagnificationConnectionManager()
                     .onFullscreenMagnificationActivationChanged(displayId, activated);
         }
