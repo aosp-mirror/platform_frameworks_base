@@ -993,6 +993,13 @@ class UserController implements Handler.Callback {
         if (isCurrentUserLU(userId)) {
             return USER_OP_IS_CURRENT;
         }
+        // TODO(b/324647580): Refactor the idea of "force" and clean up. In the meantime...
+        final int parentId = mUserProfileGroupIds.get(userId, UserInfo.NO_PROFILE_GROUP_ID);
+        if (parentId != UserInfo.NO_PROFILE_GROUP_ID && parentId != userId) {
+            if ((UserHandle.USER_SYSTEM == parentId || isCurrentUserLU(parentId)) && !force) {
+                return USER_OP_ERROR_RELATED_USERS_CANNOT_STOP;
+            }
+        }
         TimingsTraceAndSlog t = new TimingsTraceAndSlog();
         int[] usersToStop = getUsersToStopLU(userId);
         // If one of related users is system or current, no related users should be stopped
