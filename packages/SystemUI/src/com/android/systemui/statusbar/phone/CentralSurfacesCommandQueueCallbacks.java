@@ -52,6 +52,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.QuickSettingsController;
@@ -279,7 +280,9 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             }
         }
 
-        mShadeHeaderController.disable(state1, state2, animate);
+        if (!SceneContainerFlag.isEnabled()) {
+            mShadeHeaderController.disable(state1, state2, animate);
+        }
     }
 
     /**

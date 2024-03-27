@@ -334,6 +334,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final ScrimController mScrimController;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final TapAgainViewController mTapAgainViewController;
+    private final ShadeHeaderController mShadeHeaderController;
     private final boolean mVibrateOnOpening;
     private final VelocityTracker mVelocityTracker = VelocityTracker.obtain();
     private final FlingAnimationUtils mFlingAnimationUtilsClosing;
@@ -730,6 +731,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             FragmentService fragmentService,
             IStatusBarService statusBarService,
             ContentResolver contentResolver,
+            ShadeHeaderController shadeHeaderController,
             ScreenOffAnimationController screenOffAnimationController,
             LockscreenGestureLogger lockscreenGestureLogger,
             ShadeExpansionStateManager shadeExpansionStateManager,
@@ -874,6 +876,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mSplitShadeEnabled =
                 mSplitShadeStateController.shouldUseSplitNotificationShade(mResources);
         mView.setWillNotDraw(!DEBUG_DRAWABLE);
+        mShadeHeaderController = shadeHeaderController;
         mLayoutInflater = layoutInflater;
         mFeatureFlags = featureFlags;
         mAnimateBack = predictiveBackAnimateShade();
@@ -1107,6 +1110,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
 
         mTapAgainViewController.init();
+        mShadeHeaderController.init();
+        mShadeHeaderController.setShadeCollapseAction(
+                () -> collapse(/* delayed= */ false , /* speedUpFactor= */ 1.0f));
         mKeyguardUnfoldTransition.ifPresent(u -> u.setup(mView));
         mNotificationPanelUnfoldAnimationController.ifPresent(controller ->
                 controller.setup(mNotificationContainerParent));

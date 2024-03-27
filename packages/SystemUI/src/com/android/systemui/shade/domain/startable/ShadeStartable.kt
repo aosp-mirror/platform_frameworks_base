@@ -23,8 +23,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.dagger.ShadeTouchLog
-import com.android.systemui.shade.ShadeController
-import com.android.systemui.shade.ShadeHeaderController
 import com.android.systemui.shade.TouchLogger.Companion.logTouchesTo
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.shade.shared.model.ShadeMode
@@ -46,23 +44,13 @@ constructor(
     private val configurationRepository: ConfigurationRepository,
     private val shadeRepository: ShadeRepository,
     private val controller: SplitShadeStateController,
-    private val shadeController: ShadeController,
-    private val shadeHeaderController: ShadeHeaderController,
     private val scrimShadeTransitionController: ScrimShadeTransitionController,
 ) : CoreStartable {
 
     override fun start() {
         hydrateShadeMode()
         logTouchesTo(touchLog)
-        initHeaderController()
         scrimShadeTransitionController.init()
-    }
-
-    private fun initHeaderController() {
-        shadeHeaderController.init()
-        shadeHeaderController.shadeCollapseAction = Runnable {
-            shadeController.animateCollapseShade()
-        }
     }
 
     private fun hydrateShadeMode() {

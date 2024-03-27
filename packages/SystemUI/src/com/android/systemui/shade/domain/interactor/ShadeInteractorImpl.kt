@@ -60,6 +60,11 @@ constructor(
             .distinctUntilChanged()
             .stateIn(scope, SharingStarted.Eagerly, initialValue = false)
 
+    override val isQsEnabled: StateFlow<Boolean> =
+        disableFlagsRepository.disableFlags
+            .map { it.isQuickSettingsEnabled() }
+            .stateIn(scope, SharingStarted.Eagerly, initialValue = false)
+
     override val isAnyFullyExpanded: StateFlow<Boolean> =
         anyExpansion
             .map { it >= 1f }
