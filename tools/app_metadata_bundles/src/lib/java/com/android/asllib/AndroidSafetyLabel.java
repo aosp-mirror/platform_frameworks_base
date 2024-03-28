@@ -22,9 +22,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -78,6 +81,13 @@ public class AndroidSafetyLabel implements AslMarshallable {
         }
     }
 
+    /** Reads a {@link AndroidSafetyLabel} from a String. */
+    public static AndroidSafetyLabel readFromString(String in, Format format)
+            throws IOException, ParserConfigurationException, SAXException, MalformedXmlException {
+        InputStream stream = new ByteArrayInputStream(in.getBytes(StandardCharsets.UTF_8));
+        return readFromStream(stream, format);
+    }
+
     /** Write the content of the {@link AndroidSafetyLabel} to a {@link OutputStream}. */
     // TODO(b/329902686): Support outputting human-readable format.
     public void writeToStream(OutputStream out, Format format)
@@ -106,6 +116,14 @@ public class AndroidSafetyLabel implements AslMarshallable {
         StreamResult streamResult = new StreamResult(out); // out
         DOMSource domSource = new DOMSource(document);
         transformer.transform(domSource, streamResult);
+    }
+
+    /** Get the content of the {@link AndroidSafetyLabel} as String. */
+    public String getXmlAsString(Format format)
+            throws IOException, ParserConfigurationException, TransformerException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        this.writeToStream(out, format);
+        return out.toString(StandardCharsets.UTF_8);
     }
 
     /** Creates an on-device DOM element from an {@link AndroidSafetyLabel} */
