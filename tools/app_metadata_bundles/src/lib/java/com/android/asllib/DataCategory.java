@@ -53,6 +53,6 @@ public class DataCategory implements AslMarshallable {
         for (DataType dataType : mDataTypes.values()) {
             XmlUtils.appendChildren(dataCategoryEle, dataType.toOdDomElements(doc));
         }
-        return XmlUtils.listOf(dataCategoryEle);
+        return List.of(dataCategoryEle);
     }
 }
