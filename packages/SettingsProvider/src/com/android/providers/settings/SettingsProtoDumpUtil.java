@@ -1950,11 +1950,8 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED,
                 SecureSettingsProto.Assist.LONG_PRESS_HOME_ENABLED);
         dumpSetting(s, p,
-                Settings.Secure.SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED,
-                SecureSettingsProto.Assist.SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.SEARCH_LONG_PRESS_HOME_ENABLED,
-                SecureSettingsProto.Assist.SEARCH_LONG_PRESS_HOME_ENABLED);
+                Settings.Secure.SEARCH_ALL_ENTRYPOINTS_ENABLED,
+                SecureSettingsProto.Assist.SEARCH_ALL_ENTRYPOINTS_ENABLED);
         dumpSetting(s, p,
                 Settings.Secure.VISUAL_QUERY_ACCESSIBILITY_DETECTION_ENABLED,
                 SecureSettingsProto.Assist.VISUAL_QUERY_ACCESSIBILITY_DETECTION_ENABLED);

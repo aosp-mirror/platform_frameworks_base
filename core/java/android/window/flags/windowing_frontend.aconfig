@@ -38,6 +38,17 @@ flag {
 }
 
 flag {
+  name: "skip_sleeping_when_switching_display"
+  namespace: "windowing_frontend"
+  description: "Reduce unnecessary visibility or lifecycle changes when changing fold state"
+  bug: "303241079"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "introduce_smoother_dimmer"
   namespace: "windowing_frontend"
   description: "Refactor dim to fix flickers"
