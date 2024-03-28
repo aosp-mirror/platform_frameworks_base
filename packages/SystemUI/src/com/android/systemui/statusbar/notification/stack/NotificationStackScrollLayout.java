@@ -113,6 +113,8 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
 import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation;
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor;
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds;
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape;
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationStackView;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
@@ -136,6 +138,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
@@ -511,6 +514,9 @@ public class NotificationStackScrollLayout
     private int mRoundedRectClippingBottom;
     private int mRoundedRectClippingRight;
     private final float[] mBgCornerRadii = new float[8];
+
+    /** Shape used for defining the shade scrim with SceneContainerFlag enabled */
+    private ShadeScrimShape mShadeScrimShape = null;
 
     /**
      * Whether stackY should be animated in case the view is getting shorter than the scroll
@@ -5020,6 +5026,7 @@ public class NotificationStackScrollLayout
             println(pw, "topPadding", getTopPadding());
             println(pw, "bottomPadding", mBottomPadding);
             dumpRoundedRectClipping(pw);
+            println(pw, "shadeScrimShape", mShadeScrimShape);
             println(pw, "requestedClipBounds", mRequestedClipBounds);
             println(pw, "isClipped", mIsClipped);
             println(pw, "translationX", getTranslationX());
@@ -5582,8 +5589,40 @@ public class NotificationStackScrollLayout
     /**
      * Set rounded rect clipping bounds on this view.
      */
+    @Override
+    public void setScrimClippingShape(@Nullable ShadeScrimShape shape) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        if (Objects.equals(mShadeScrimShape, shape)) return;
+        mShadeScrimShape = shape;
+        mShouldUseRoundedRectClipping = shape != null;
+        mRoundedClipPath.reset();
+        if (shape != null) {
+            ShadeScrimBounds bounds = shape.getBounds();
+            mRoundedRectClippingLeft = (int) bounds.getLeft();
+            mRoundedRectClippingTop = (int) bounds.getTop();
+            mRoundedRectClippingRight = (int) bounds.getRight();
+            mRoundedRectClippingBottom = (int) bounds.getBottom();
+            mBgCornerRadii[0] = shape.getTopRadius();
+            mBgCornerRadii[1] = shape.getTopRadius();
+            mBgCornerRadii[2] = shape.getTopRadius();
+            mBgCornerRadii[3] = shape.getTopRadius();
+            mBgCornerRadii[4] = shape.getBottomRadius();
+            mBgCornerRadii[5] = shape.getBottomRadius();
+            mBgCornerRadii[6] = shape.getBottomRadius();
+            mBgCornerRadii[7] = shape.getBottomRadius();
+            mRoundedClipPath.addRoundRect(
+                    bounds.getLeft(), bounds.getTop(), bounds.getRight(), bounds.getBottom(),
+                    mBgCornerRadii, Path.Direction.CW);
+        }
+        invalidate();
+    }
+
+    /**
+     * Set rounded rect clipping bounds on this view.
+     */
     public void setRoundedClippingBounds(int left, int top, int right, int bottom, int topRadius,
                                          int bottomRadius) {
+        SceneContainerFlag.assertInLegacyMode();
         if (mRoundedRectClippingLeft == left && mRoundedRectClippingRight == right
                 && mRoundedRectClippingBottom == bottom && mRoundedRectClippingTop == top
                 && mBgCornerRadii[0] == topRadius && mBgCornerRadii[5] == bottomRadius) {
@@ -5661,6 +5700,7 @@ public class NotificationStackScrollLayout
      * Should we use rounded rect clipping
      */
     private void updateUseRoundedRectClipping() {
+        if (SceneContainerFlag.isEnabled()) return;
         // We don't want to clip notifications when QS is expanded, because incoming heads up on
         // the bottom would be clipped otherwise
         boolean qsAllowsClipping = mQsExpansionFraction < 0.5f || mShouldUseSplitNotificationShade;

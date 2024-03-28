@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.stack.ui.view
 
 import android.view.View
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape
 import java.util.function.Consumer
 
 /**
@@ -31,14 +32,7 @@ interface NotificationStackView {
     fun asView(): View
 
     /** Set the clipping bounds used when drawing */
-    fun setRoundedClippingBounds(
-        left: Int,
-        top: Int,
-        right: Int,
-        bottom: Int,
-        topRadius: Int,
-        bottomRadius: Int
-    )
+    fun setScrimClippingShape(shape: ShadeScrimShape?)
 
     /** set the y position in px of the top of the stack in this view's coordinates */
     fun setStackTop(stackTop: Float)

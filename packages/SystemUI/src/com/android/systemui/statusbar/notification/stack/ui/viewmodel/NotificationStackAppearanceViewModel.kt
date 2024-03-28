@@ -81,16 +81,21 @@ constructor(
             .dumpWhileCollecting("expandFraction")
 
     /** The bounds of the notification stack in the current scene. */
-    private val shadeScrimClipping: Flow<ShadeScrimClipping> =
+    private val shadeScrimClipping: Flow<ShadeScrimClipping?> =
         combine(
                 stackAppearanceInteractor.shadeScrimBounds,
                 stackAppearanceInteractor.shadeScrimRounding,
-                ::ShadeScrimClipping
-            )
+            ) { bounds, rounding ->
+                bounds?.let { ShadeScrimClipping(it, rounding) }
+            }
             .dumpWhileCollecting("stackClipping")
 
-    fun shadeScrimShape(cornerRadius: Flow<Int>, viewPosition: Flow<ViewPosition>) =
+    fun shadeScrimShape(
+        cornerRadius: Flow<Int>,
+        viewPosition: Flow<ViewPosition>
+    ): Flow<ShadeScrimShape?> =
         combine(shadeScrimClipping, cornerRadius, viewPosition) { clipping, radius, position ->
+                if (clipping == null) return@combine null
                 ShadeScrimShape(
                     bounds = clipping.bounds - position,
                     topRadius = radius.takeIf { clipping.rounding.isTopRounded } ?: 0,

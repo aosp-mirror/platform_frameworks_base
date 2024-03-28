@@ -42,7 +42,7 @@ constructor(
     shadeInteractor: ShadeInteractor,
 ) {
     /** The bounds of the notification stack in the current scene. */
-    val shadeScrimBounds: StateFlow<ShadeScrimBounds> =
+    val shadeScrimBounds: StateFlow<ShadeScrimBounds?> =
         placeholderRepository.shadeScrimBounds.asStateFlow()
 
     /**
@@ -102,8 +102,8 @@ constructor(
     val syntheticScroll: Flow<Float> = viewHeightRepository.syntheticScroll.asStateFlow()
 
     /** Sets the position of the notification stack in the current scene. */
-    fun setShadeScrimBounds(bounds: ShadeScrimBounds) {
-        check(bounds.top <= bounds.bottom) { "Invalid bounds: $bounds" }
+    fun setShadeScrimBounds(bounds: ShadeScrimBounds?) {
+        check(bounds == null || bounds.top <= bounds.bottom) { "Invalid bounds: $bounds" }
         placeholderRepository.shadeScrimBounds.value = bounds
     }
 

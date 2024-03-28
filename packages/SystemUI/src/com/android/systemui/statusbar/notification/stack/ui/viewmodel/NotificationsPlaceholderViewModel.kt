@@ -51,15 +51,8 @@ constructor(
     val isDebugLoggingEnabled: Boolean = flags.isEnabled()
 
     /** Notifies that the bounds of the notification scrim have changed. */
-    fun onScrimBoundsChanged(
-        left: Float,
-        top: Float,
-        right: Float,
-        bottom: Float,
-    ) {
-        interactor.setShadeScrimBounds(
-            ShadeScrimBounds(top = top, bottom = bottom, left = left, right = right)
-        )
+    fun onScrimBoundsChanged(bounds: ShadeScrimBounds?) {
+        interactor.setShadeScrimBounds(bounds)
     }
 
     /** Notifies that the bounds of the notification placeholder have changed. */

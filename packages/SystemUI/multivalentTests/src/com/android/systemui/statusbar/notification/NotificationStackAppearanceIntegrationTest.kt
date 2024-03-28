@@ -71,10 +71,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
             val shape by collectLastValue(appearanceViewModel.shadeScrimShape(radius, viewPosition))
 
             placeholderViewModel.onScrimBoundsChanged(
-                left = 0f,
-                top = 200f,
-                right = 100f,
-                bottom = 550f
+                ShadeScrimBounds(left = 0f, top = 200f, right = 100f, bottom = 550f)
             )
             assertThat(shape)
                 .isEqualTo(
@@ -89,10 +86,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
             viewPosition.value = ViewPosition(200, 15)
             radius.value = 24
             placeholderViewModel.onScrimBoundsChanged(
-                left = 210f,
-                top = 200f,
-                right = 300f,
-                bottom = 550f
+                ShadeScrimBounds(left = 210f, top = 200f, right = 300f, bottom = 550f)
             )
             assertThat(shape)
                 .isEqualTo(

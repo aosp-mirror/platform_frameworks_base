@@ -31,7 +31,6 @@ import com.android.systemui.statusbar.notification.stack.ui.viewmodel.Notificati
 import com.android.systemui.util.kotlin.FlowDumperImpl
 import com.android.systemui.util.kotlin.launchAndDispose
 import javax.inject.Inject
-import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.coroutineScope
@@ -71,15 +70,8 @@ constructor(
         }
 
         launch {
-            viewModel.shadeScrimShape(scrimRadius, viewPosition).collect { clipping ->
-                stack.setRoundedClippingBounds(
-                    clipping.bounds.left.roundToInt(),
-                    clipping.bounds.top.roundToInt(),
-                    clipping.bounds.right.roundToInt(),
-                    clipping.bounds.bottom.roundToInt(),
-                    clipping.topRadius,
-                    clipping.bottomRadius,
-                )
+            viewModel.shadeScrimShape(scrimRadius, viewPosition).collect {
+                stack.setScrimClippingShape(it)
             }
         }
 

@@ -36,6 +36,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -73,6 +74,7 @@ import com.android.systemui.notifications.ui.composable.Notifications.Transition
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.ui.composable.ShadeHeader
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimRounding
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import kotlin.math.roundToInt
@@ -187,6 +189,9 @@ fun SceneScope.NotificationScrollingStack(
     // entire height of the scrim is visible on screen.
     val scrimOffset = remember { mutableStateOf(0f) }
 
+    // set the bounds to null when the scrim disappears
+    DisposableEffect(Unit) { onDispose { viewModel.onScrimBoundsChanged(null) } }
+
     val minScrimTop = with(density) { ShadeHeader.Dimensions.CollapsedHeight.toPx() }
 
     // The minimum offset for the scrim. The scrim is considered fully expanded when it
@@ -261,10 +266,12 @@ fun SceneScope.NotificationScrollingStack(
                             " bounds=$boundsInWindow"
                     }
                     viewModel.onScrimBoundsChanged(
-                        left = boundsInWindow.left,
-                        top = boundsInWindow.top,
-                        right = boundsInWindow.right,
-                        bottom = boundsInWindow.bottom,
+                        ShadeScrimBounds(
+                            left = boundsInWindow.left,
+                            top = boundsInWindow.top,
+                            right = boundsInWindow.right,
+                            bottom = boundsInWindow.bottom,
+                        )
                     )
                 }
     ) {
