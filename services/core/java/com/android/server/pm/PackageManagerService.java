@@ -2446,7 +2446,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             ComponentName intentFilterVerifierComponent =
                     getIntentFilterVerifierComponentNameLPr(computer);
             ComponentName domainVerificationAgent =
-                    getDomainVerificationAgentComponentNameLPr(computer);
+                    getDomainVerificationAgentComponentNameLPr(computer, UserHandle.USER_SYSTEM);
 
             DomainVerificationProxy domainVerificationProxy = DomainVerificationProxy.makeProxy(
                     intentFilterVerifierComponent, domainVerificationAgent, mContext,
@@ -2754,12 +2754,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     @Nullable
-    private ComponentName getDomainVerificationAgentComponentNameLPr(@NonNull Computer computer) {
+    private ComponentName getDomainVerificationAgentComponentNameLPr(@NonNull Computer computer,
+            int userId) {
         Intent intent = new Intent(Intent.ACTION_DOMAINS_NEED_VERIFICATION);
         List<ResolveInfo> matches =
                 mResolveIntentHelper.queryIntentReceiversInternal(computer, intent, null,
                         MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
-                        UserHandle.USER_SYSTEM, Binder.getCallingUid());
+                        userId, Binder.getCallingUid());
         ResolveInfo best = null;
         final int N = matches.size();
         for (int i = 0; i < N; i++) {
@@ -2767,7 +2768,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             final String packageName = cur.getComponentInfo().packageName;
             if (checkPermission(
                     android.Manifest.permission.DOMAIN_VERIFICATION_AGENT, packageName,
-                    UserHandle.USER_SYSTEM) != PackageManager.PERMISSION_GRANTED) {
+                    userId) != PackageManager.PERMISSION_GRANTED) {
                 Slog.w(TAG, "Domain verification agent found but does not hold permission: "
                         + packageName);
                 continue;
@@ -2775,7 +2776,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
             if (best == null || cur.priority > best.priority) {
                 if (computer.isComponentEffectivelyEnabled(cur.getComponentInfo(),
-                        UserHandle.SYSTEM)) {
+                        UserHandle.of(userId))) {
                     best = cur;
                 } else {
                     Slog.w(TAG, "Domain verification agent found but not enabled");
@@ -6512,13 +6513,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         @Override
         @Nullable
-        public ComponentName getDomainVerificationAgent() {
+        public ComponentName getDomainVerificationAgent(int userId) {
             final int callerUid = Binder.getCallingUid();
             if (!PackageManagerServiceUtils.isRootOrShell(callerUid)) {
                 throw new SecurityException("Not allowed to query domain verification agent");
             }
             final Computer snapshot = snapshotComputer();
-            return getDomainVerificationAgentComponentNameLPr(snapshot);
+            return getDomainVerificationAgentComponentNameLPr(snapshot, userId);
         }
 
         @Override
