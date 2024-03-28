@@ -18,8 +18,10 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.res.Resources
 import com.android.keyguard.KeyguardClockSwitch
+import com.android.keyguard.KeyguardClockSwitch.SMALL
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.res.R
@@ -29,6 +31,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -42,6 +45,7 @@ constructor(
     private val authController: AuthController,
     val longPress: KeyguardLongPressViewModel,
     val shadeInteractor: ShadeInteractor,
+    @Application private val applicationScope: CoroutineScope,
 ) {
     private val clockSize = clockInteractor.clockSize
 
@@ -50,11 +54,26 @@ constructor(
     val isLargeClockVisible: Boolean
         get() = clockSize.value == KeyguardClockSwitch.LARGE
 
-    val areNotificationsVisible: Boolean
-        get() = !isLargeClockVisible || shouldUseSplitNotificationShade
+    val shouldUseSplitNotificationShade: StateFlow<Boolean> =
+        shadeInteractor.shadeMode
+            .map { it == ShadeMode.Split }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
 
-    val shouldUseSplitNotificationShade: Boolean
-        get() = shadeInteractor.shadeMode.value == ShadeMode.Split
+    val areNotificationsVisible: StateFlow<Boolean> =
+        combine(clockSize, shouldUseSplitNotificationShade) {
+                clockSize,
+                shouldUseSplitNotificationShade ->
+                clockSize == SMALL || shouldUseSplitNotificationShade
+            }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
 
     fun getSmartSpacePaddingTop(resources: Resources): Int {
         return if (isLargeClockVisible) {

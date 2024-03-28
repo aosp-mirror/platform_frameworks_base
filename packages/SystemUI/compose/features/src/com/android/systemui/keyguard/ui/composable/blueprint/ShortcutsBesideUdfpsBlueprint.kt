@@ -16,10 +16,15 @@
 
 package com.android.systemui.keyguard.ui.composable.blueprint
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.IntRect
@@ -28,6 +33,7 @@ import com.android.systemui.keyguard.ui.composable.LockscreenLongPress
 import com.android.systemui.keyguard.ui.composable.section.AmbientIndicationSection
 import com.android.systemui.keyguard.ui.composable.section.BottomAreaSection
 import com.android.systemui.keyguard.ui.composable.section.LockSection
+import com.android.systemui.keyguard.ui.composable.section.NotificationSection
 import com.android.systemui.keyguard.ui.composable.section.SettingsMenuSection
 import com.android.systemui.keyguard.ui.composable.section.StatusBarSection
 import com.android.systemui.keyguard.ui.composable.section.TopAreaSection
@@ -52,6 +58,7 @@ constructor(
     private val bottomAreaSection: BottomAreaSection,
     private val settingsMenuSection: SettingsMenuSection,
     private val topAreaSection: TopAreaSection,
+    private val notificationSection: NotificationSection,
 ) : ComposableLockscreenSceneBlueprint {
 
     override val id: String = "shortcuts-besides-udfps"
@@ -59,6 +66,8 @@ constructor(
     @Composable
     override fun SceneScope.Content(modifier: Modifier) {
         val isUdfpsVisible = viewModel.isUdfpsVisible
+        val shouldUseSplitNotificationShade by
+            viewModel.shouldUseSplitNotificationShade.collectAsState()
 
         LockscreenLongPress(
             viewModel = viewModel.longPress,
@@ -68,11 +77,27 @@ constructor(
                 content = {
                     // Constrained to above the lock icon.
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxSize(),
                     ) {
                         with(statusBarSection) { StatusBar(modifier = Modifier.fillMaxWidth()) }
-                        with(topAreaSection) { DefaultClockLayoutWithNotifications() }
 
+                        Box {
+                            with(topAreaSection) { DefaultClockLayout() }
+                            if (shouldUseSplitNotificationShade) {
+                                with(notificationSection) {
+                                    Notifications(
+                                        Modifier.fillMaxWidth(0.5f)
+                                            .fillMaxHeight()
+                                            .align(alignment = Alignment.TopEnd)
+                                    )
+                                }
+                            }
+                        }
+                        if (!shouldUseSplitNotificationShade) {
+                            with(notificationSection) {
+                                Notifications(Modifier.weight(weight = 1f))
+                            }
+                        }
                         if (!isUdfpsVisible && ambientIndicationSectionOptional.isPresent) {
                             with(ambientIndicationSectionOptional.get()) {
                                 AmbientIndication(modifier = Modifier.fillMaxWidth())

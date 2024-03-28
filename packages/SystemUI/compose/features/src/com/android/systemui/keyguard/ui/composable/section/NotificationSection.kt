@@ -17,12 +17,25 @@
 package com.android.systemui.keyguard.ui.composable.section
 
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.modifiers.thenIf
+import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import com.android.systemui.notifications.ui.composable.NotificationStack
+import com.android.systemui.res.R
+import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.SharedNotificationContainerBinder
@@ -39,6 +52,7 @@ constructor(
     sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
     stackScrollLayout: NotificationStackScrollLayout,
     sharedNotificationContainerBinder: SharedNotificationContainerBinder,
+    private val lockscreenContentViewModel: LockscreenContentViewModel,
 ) {
 
     init {
@@ -65,9 +79,27 @@ constructor(
 
     @Composable
     fun SceneScope.Notifications(modifier: Modifier = Modifier) {
+        val shouldUseSplitNotificationShade by
+            lockscreenContentViewModel.shouldUseSplitNotificationShade.collectAsState()
+        val areNotificationsVisible by
+            lockscreenContentViewModel.areNotificationsVisible.collectAsState()
+        val splitShadeTopMargin: Dp =
+            if (Flags.centralizedStatusBarHeightFix()) {
+                LargeScreenHeaderHelper.getLargeScreenHeaderHeight(LocalContext.current).dp
+            } else {
+                dimensionResource(id = R.dimen.large_screen_shade_header_height)
+            }
+
+        if (!areNotificationsVisible) {
+            return
+        }
+
         NotificationStack(
             viewModel = viewModel,
-            modifier = modifier,
+            modifier =
+                modifier.fillMaxWidth().thenIf(shouldUseSplitNotificationShade) {
+                    Modifier.padding(top = splitShadeTopMargin)
+                },
         )
     }
 }
