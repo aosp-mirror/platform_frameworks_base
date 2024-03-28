@@ -8015,6 +8015,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         return uidRecord != null && !uidRecord.isSetIdle();
     }
 
+    @Override
+    public long getUidLastIdleElapsedTime(int uid, String callingPackage) {
+        if (!hasUsageStatsPermission(callingPackage)) {
+            enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
+                    "getUidLastIdleElapsedTime");
+        }
+        synchronized (mProcLock) {
+            final UidRecord uidRecord = mProcessList.getUidRecordLOSP(uid);
+            return uidRecord != null ? uidRecord.getRealLastIdleTime() : 0;
+        }
+    }
+
     @GuardedBy("mUidFrozenStateChangedCallbackList")
     private final RemoteCallbackList<IUidFrozenStateChangedCallback>
             mUidFrozenStateChangedCallbackList = new RemoteCallbackList<>();

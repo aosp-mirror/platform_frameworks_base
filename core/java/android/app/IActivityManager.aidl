@@ -962,4 +962,12 @@ interface IActivityManager {
      */
     oneway void frozenBinderTransactionDetected(int debugPid, int code, int flags, int err);
     int getBindingUidProcessState(int uid, in String callingPackage);
+
+    /**
+     * Return the timestampe (in the elapsed timebase) when the UID became idle from active
+     * last time (regardless of if the UID is still idle, or became active again).
+     * This is useful when trying to detect whether an UID has ever became idle since a certain
+     * time in the past.
+     */
+    long getUidLastIdleElapsedTime(int uid, in String callingPackage);
 }
