@@ -60,6 +60,10 @@ public:
 
         void onRemovedFromTree() { mReference.onRemovedFromTree(); }
 
+        const std::vector<int32_t>& getRenderingThreads() const {
+            return mReference.getRenderingThreads();
+        }
+
     private:
         friend class WebViewFunctor;
 
@@ -82,6 +86,7 @@ public:
     void mergeTransaction(ASurfaceTransaction* transaction);
 
     void reportRenderingThreads(const int32_t* thread_ids, size_t size);
+    const std::vector<int32_t>& getRenderingThreads() const { return mRenderingThreads; }
 
     sp<Handle> createHandle() {
         LOG_ALWAYS_FATAL_IF(mCreatedHandle);
@@ -102,6 +107,7 @@ private:
     bool mCreatedHandle = false;
     int32_t mParentSurfaceControlGenerationId = 0;
     ASurfaceControl* mSurfaceControl = nullptr;
+    std::vector<int32_t> mRenderingThreads;
 };
 
 class WebViewFunctorManager {
@@ -113,6 +119,7 @@ public:
     void onContextDestroyed();
     void destroyFunctor(int functor);
     void reportRenderingThreads(int functor, const int32_t* thread_ids, size_t size);
+    std::vector<int32_t> getRenderingThreadsForActiveFunctors();
 
     sp<WebViewFunctor::Handle> handleFor(int functor);
 
