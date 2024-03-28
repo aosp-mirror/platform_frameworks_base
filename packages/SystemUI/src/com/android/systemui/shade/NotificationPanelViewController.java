@@ -982,6 +982,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 });
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         dumpManager.registerDumpable(this);
+        SceneContainerFlag.assertInLegacyMode();
     }
 
     private void unlockAnimationFinished() {
@@ -3555,9 +3556,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     @Override
-    public ViewPropertyAnimator fadeOut(long startDelayMs, long durationMs, Runnable endAction) {
+    public void fadeOut(long startDelayMs, long durationMs, Runnable endAction) {
         mView.animate().cancel();
-        return mView.animate().alpha(0).setStartDelay(startDelayMs).setDuration(
+        mView.animate().alpha(0).setStartDelay(startDelayMs).setDuration(
                 durationMs).setInterpolator(Interpolators.ALPHA_OUT).withLayer().withEndAction(
                 endAction);
     }
@@ -4121,9 +4122,10 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     @Override
     public void updateExpansionAndVisibility() {
-        mShadeExpansionStateManager.onPanelExpansionChanged(
-                mExpandedFraction, isExpanded(), isTracking(), mExpansionDragDownAmountPx);
-
+        if (!SceneContainerFlag.isEnabled()) {
+            mShadeExpansionStateManager.onPanelExpansionChanged(
+                    mExpandedFraction, isExpanded(), isTracking());
+        }
         updateVisibility();
     }
 
@@ -4159,7 +4161,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     /** Sends an external (e.g. Status Bar) intercept touch event to the Shade touch handler. */
-    boolean handleExternalInterceptTouch(MotionEvent event) {
+    @Override
+    public boolean handleExternalInterceptTouch(MotionEvent event) {
         try {
             mUseExternalTouch = true;
             return mTouchHandler.onInterceptTouchEvent(event);

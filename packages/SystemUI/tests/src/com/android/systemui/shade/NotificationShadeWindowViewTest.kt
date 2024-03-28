@@ -38,6 +38,7 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.statusbar.DragDownHelper
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.NotificationInsetsController
@@ -89,7 +90,8 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock private lateinit var dozeServiceHost: DozeServiceHost
     @Mock private lateinit var dozeScrimController: DozeScrimController
     @Mock private lateinit var dockManager: DockManager
-    @Mock private lateinit var notificationPanelViewController: NotificationPanelViewController
+    @Mock private lateinit var shadeViewController: ShadeViewController
+    @Mock private lateinit var panelExpansionInteractor: PanelExpansionInteractor
     @Mock private lateinit var notificationStackScrollLayout: NotificationStackScrollLayout
     @Mock private lateinit var notificationShadeDepthController: NotificationShadeDepthController
     @Mock private lateinit var notificationShadeWindowController: NotificationShadeWindowController
@@ -166,7 +168,8 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 dockManager,
                 notificationShadeDepthController,
                 underTest,
-                notificationPanelViewController,
+                shadeViewController,
+                panelExpansionInteractor,
                 ShadeExpansionStateManager(),
                 notificationStackScrollLayoutController,
                 statusBarKeyguardViewManager,

@@ -597,8 +597,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
     private static ShadeExpansionChangeEvent expansionEvent(
             float fraction, boolean expanded, boolean tracking) {
-        return new ShadeExpansionChangeEvent(
-                fraction, expanded, tracking, /* dragDownPxAmount= */ 0f);
+        return new ShadeExpansionChangeEvent(fraction, expanded, tracking);
     }
 
     @Test

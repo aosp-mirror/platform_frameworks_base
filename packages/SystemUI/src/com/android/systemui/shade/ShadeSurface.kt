@@ -15,7 +15,6 @@
  */
 package com.android.systemui.shade
 
-import android.view.ViewPropertyAnimator
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractor
 import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor
@@ -48,7 +47,7 @@ interface ShadeSurface :
     fun cancelAnimation()
 
     /** Animates the view from its current alpha to zero then runs the runnable. */
-    fun fadeOut(startDelayMs: Long, durationMs: Long, endAction: Runnable): ViewPropertyAnimator
+    fun fadeOut(startDelayMs: Long, durationMs: Long, endAction: Runnable)
 
     /** Set whether the bouncer is showing. */
     fun setBouncerShowing(bouncerShowing: Boolean)

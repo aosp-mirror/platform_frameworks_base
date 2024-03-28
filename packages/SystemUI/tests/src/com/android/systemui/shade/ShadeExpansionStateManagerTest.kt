@@ -42,17 +42,11 @@ class ShadeExpansionStateManagerTest : SysuiTestCase() {
         val tracking = true
         val dragDownAmount = 1234f
 
-        shadeExpansionStateManager.onPanelExpansionChanged(
-            fraction,
-            expanded,
-            tracking,
-            dragDownAmount
-        )
+        shadeExpansionStateManager.onPanelExpansionChanged(fraction, expanded, tracking)
 
         assertThat(listener.fraction).isEqualTo(fraction)
         assertThat(listener.expanded).isEqualTo(expanded)
         assertThat(listener.tracking).isEqualTo(tracking)
-        assertThat(listener.dragDownAmountPx).isEqualTo(dragDownAmount)
     }
 
     @Test
@@ -61,12 +55,7 @@ class ShadeExpansionStateManagerTest : SysuiTestCase() {
         val expanded = true
         val tracking = true
         val dragDownAmount = 1234f
-        shadeExpansionStateManager.onPanelExpansionChanged(
-            fraction,
-            expanded,
-            tracking,
-            dragDownAmount
-        )
+        shadeExpansionStateManager.onPanelExpansionChanged(fraction, expanded, tracking)
         val listener = TestShadeExpansionListener()
 
         val currentState = shadeExpansionStateManager.addExpansionListener(listener)
@@ -75,7 +64,6 @@ class ShadeExpansionStateManagerTest : SysuiTestCase() {
         assertThat(listener.fraction).isEqualTo(fraction)
         assertThat(listener.expanded).isEqualTo(expanded)
         assertThat(listener.tracking).isEqualTo(tracking)
-        assertThat(listener.dragDownAmountPx).isEqualTo(dragDownAmount)
     }
 
     @Test
@@ -100,8 +88,7 @@ class ShadeExpansionStateManagerTest : SysuiTestCase() {
         shadeExpansionStateManager.onPanelExpansionChanged(
             fraction = 0.5f,
             expanded = true,
-            tracking = false,
-            dragDownPxAmount = 0f
+            tracking = false
         )
 
         assertThat(listener.state).isEqualTo(STATE_OPENING)
@@ -115,8 +102,7 @@ class ShadeExpansionStateManagerTest : SysuiTestCase() {
         shadeExpansionStateManager.onPanelExpansionChanged(
             fraction = 0.5f,
             expanded = true,
-            tracking = true,
-            dragDownPxAmount = 0f
+            tracking = true
         )
 
         assertThat(listener.state).isEqualTo(STATE_OPENING)
@@ -132,8 +118,7 @@ class ShadeExpansionStateManagerTest : SysuiTestCase() {
         shadeExpansionStateManager.onPanelExpansionChanged(
             fraction = 0.5f,
             expanded = false,
-            tracking = false,
-            dragDownPxAmount = 0f
+            tracking = false
         )
 
         assertThat(listener.state).isEqualTo(STATE_CLOSED)
@@ -149,8 +134,7 @@ class ShadeExpansionStateManagerTest : SysuiTestCase() {
         shadeExpansionStateManager.onPanelExpansionChanged(
             fraction = 0.5f,
             expanded = false,
-            tracking = true,
-            dragDownPxAmount = 0f
+            tracking = true
         )
 
         assertThat(listener.state).isEqualTo(STATE_OPEN)
@@ -166,8 +150,7 @@ class ShadeExpansionStateManagerTest : SysuiTestCase() {
         shadeExpansionStateManager.onPanelExpansionChanged(
             fraction = 1f,
             expanded = true,
-            tracking = false,
-            dragDownPxAmount = 0f
+            tracking = false
         )
 
         assertThat(listener.previousState).isEqualTo(STATE_OPENING)
@@ -182,8 +165,7 @@ class ShadeExpansionStateManagerTest : SysuiTestCase() {
         shadeExpansionStateManager.onPanelExpansionChanged(
             fraction = 1f,
             expanded = true,
-            tracking = true,
-            dragDownPxAmount = 0f
+            tracking = true
         )
 
         assertThat(listener.state).isEqualTo(STATE_OPENING)
@@ -199,8 +181,7 @@ class ShadeExpansionStateManagerTest : SysuiTestCase() {
         shadeExpansionStateManager.onPanelExpansionChanged(
             fraction = 1f,
             expanded = false,
-            tracking = false,
-            dragDownPxAmount = 0f
+            tracking = false
         )
 
         assertThat(listener.state).isEqualTo(STATE_CLOSED)
@@ -216,8 +197,7 @@ class ShadeExpansionStateManagerTest : SysuiTestCase() {
         shadeExpansionStateManager.onPanelExpansionChanged(
             fraction = 1f,
             expanded = false,
-            tracking = true,
-            dragDownPxAmount = 0f
+            tracking = true
         )
 
         assertThat(listener.state).isEqualTo(STATE_OPEN)
@@ -229,13 +209,11 @@ class ShadeExpansionStateManagerTest : SysuiTestCase() {
         var fraction: Float = 0f
         var expanded: Boolean = false
         var tracking: Boolean = false
-        var dragDownAmountPx: Float = 0f
 
         override fun onPanelExpansionChanged(event: ShadeExpansionChangeEvent) {
             this.fraction = event.fraction
             this.expanded = event.expanded
             this.tracking = event.tracking
-            this.dragDownAmountPx = event.dragDownPxAmount
         }
     }
 

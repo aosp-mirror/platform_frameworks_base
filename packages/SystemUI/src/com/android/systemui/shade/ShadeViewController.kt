@@ -33,14 +33,12 @@ interface ShadeViewController {
     /** Returns whether the shade's top level view is enabled. */
     @Deprecated("No longer supported. Do not add new calls to this.") val isViewEnabled: Boolean
 
-    /** Returns whether status bar icons should be hidden when the shade is expanded. */
-    fun shouldHideStatusBarIconsWhenExpanded(): Boolean
-
     /** If the latency tracker is enabled, begins tracking expand latency. */
     @Deprecated("No longer supported. Do not add new calls to this.")
     fun startExpandLatencyTracking()
 
     /** Sets the alpha value of the shade to a value between 0 and 255. */
+    @Deprecated("No longer supported. Do not add new calls to this.")
     fun setAlpha(alpha: Int, animate: Boolean)
 
     /**
@@ -48,6 +46,7 @@ interface ShadeViewController {
      *
      * @see .setAlpha
      */
+    @Deprecated("No longer supported. Do not add new calls to this.")
     fun setAlphaChangeAnimationEndAction(r: Runnable)
 
     /** Sets Qs ScrimEnabled and updates QS state. */
@@ -61,7 +60,7 @@ interface ShadeViewController {
     @Deprecated("Does nothing when scene container is enabled.") fun updateSystemUiStateFlags()
 
     /** Ensures that the touchable region is updated. */
-    fun updateTouchableRegion()
+    @Deprecated("No longer supported. Do not add new calls to this.") fun updateTouchableRegion()
 
     /**
      * Sends an external (e.g. Status Bar) touch event to the Shade touch handler.
@@ -71,6 +70,8 @@ interface ShadeViewController {
      * threshold.
      */
     fun handleExternalTouch(event: MotionEvent): Boolean
+
+    fun handleExternalInterceptTouch(event: MotionEvent): Boolean
 
     /**
      * Triggered when an input focus transfer gesture has started.
