@@ -799,6 +799,7 @@ public class WindowContainerTests extends WindowTestsBase {
         verify(child).onConfigurationChanged(any());
     }
 
+    @SuppressWarnings("SelfComparison")
     @Test
     public void testCompareTo() {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
