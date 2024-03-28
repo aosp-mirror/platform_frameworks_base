@@ -579,7 +579,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             ViewRootImpl viewRoot = getViewRootImpl();
             if (viewRoot != null) {
                 viewRoot.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
-                        OnBackInvokedDispatcher.PRIORITY_OVERLAY, mOnBackInvokedCallback);
+                        OnBackInvokedDispatcher.PRIORITY_DEFAULT, mOnBackInvokedCallback);
                 mIsBackCallbackRegistered = true;
             } else {
                 if (DEBUG) {
