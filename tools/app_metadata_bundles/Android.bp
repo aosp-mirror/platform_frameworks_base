@@ -5,7 +5,6 @@ package {
     // to get the below license kinds:
     //   SPDX-license-identifier-Apache-2.0
     default_applicable_licenses: ["frameworks_base_license"],
-    default_team: "trendy_team_preload_safety",
 }
 
 java_library_host {
@@ -23,17 +22,5 @@ java_binary_host {
     ],
     static_libs: [
         "asllib",
-    ],
-}
-
-java_test_host {
-    name: "aslgen-test",
-    srcs: ["src/test/java/**/*.java"],
-    exclude_srcs: [
-    ],
-    java_resource_dirs: ["src/test/resources"],
-    static_libs: [
-        "aslgen",
-        "junit",
     ],
 }
