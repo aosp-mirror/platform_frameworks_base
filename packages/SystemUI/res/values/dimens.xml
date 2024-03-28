@@ -1266,6 +1266,8 @@
     <dimen name="magnifier_corner_radius">28dp</dimen>
     <dimen name="magnifier_edit_corner_radius">16dp</dimen>
     <dimen name="magnifier_edit_outer_corner_radius">18dp</dimen>
+    <dimen name="magnifier_border_width_fullscreen_with_offset">12dp</dimen>
+    <dimen name="magnifier_border_width_fullscreen">6dp</dimen>
     <dimen name="magnifier_border_width">8dp</dimen>
     <dimen name="magnifier_stroke_width">2dp</dimen>
     <dimen name="magnifier_edit_dash_gap">20dp</dimen>

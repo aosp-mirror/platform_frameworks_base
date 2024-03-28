@@ -71,6 +71,8 @@ public class IMagnificationConnectionTest extends SysuiTestCase {
     @Mock
     private WindowMagnificationController mWindowMagnificationController;
     @Mock
+    private FullscreenMagnificationController mFullscreenMagnificationController;
+    @Mock
     private MagnificationSettingsController mMagnificationSettingsController;
     @Mock
     private ModeSwitchesController mModeSwitchesController;
@@ -105,6 +107,9 @@ public class IMagnificationConnectionTest extends SysuiTestCase {
         mMagnification.mWindowMagnificationControllerSupplier =
                 new FakeWindowMagnificationControllerSupplier(
                         mContext.getSystemService(DisplayManager.class));
+        mMagnification.mFullscreenMagnificationControllerSupplier =
+                new FakeFullscreenMagnificationControllerSupplier(
+                        mContext.getSystemService(DisplayManager.class));
         mMagnification.mMagnificationSettingsSupplier = new FakeSettingsSupplier(
                 mContext.getSystemService(DisplayManager.class));
 
@@ -121,6 +126,15 @@ public class IMagnificationConnectionTest extends SysuiTestCase {
 
         verify(mWindowMagnificationController).enableWindowMagnification(eq(3.0f),
                 eq(Float.NaN), eq(Float.NaN), eq(0f), eq(0f), eq(mAnimationCallback));
+    }
+
+    @Test
+    public void onFullscreenMagnificationActivationChanged_passThrough() throws RemoteException {
+        mIMagnificationConnection.onFullscreenMagnificationActivationChanged(TEST_DISPLAY, true);
+        waitForIdleSync();
+
+        verify(mFullscreenMagnificationController)
+                .onFullscreenMagnificationActivationChanged(eq(true));
     }
 
     @Test
@@ -212,6 +226,20 @@ public class IMagnificationConnectionTest extends SysuiTestCase {
         @Override
         protected WindowMagnificationController createInstance(Display display) {
             return mWindowMagnificationController;
+        }
+    }
+
+
+    private class FakeFullscreenMagnificationControllerSupplier extends
+            DisplayIdIndexSupplier<FullscreenMagnificationController> {
+
+        FakeFullscreenMagnificationControllerSupplier(DisplayManager displayManager) {
+            super(displayManager);
+        }
+
+        @Override
+        protected FullscreenMagnificationController createInstance(Display display) {
+            return mFullscreenMagnificationController;
         }
     }
 
