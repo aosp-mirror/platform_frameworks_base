@@ -799,7 +799,7 @@ public class TaskTests extends WindowTestsBase {
         final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task).build();
         final ActivityRecord.CompatDisplayInsets compatInsets =
                 new ActivityRecord.CompatDisplayInsets(
-                        display, activity, /* letterboxedContainerBounds */ null);
+                        display, activity, /* fixedOrientationBounds= */ null);
         task.computeConfigResourceOverrides(inOutConfig, parentConfig, compatInsets);
 
         assertEquals(largerLandscapeBounds, inOutConfig.windowConfiguration.getAppBounds());
