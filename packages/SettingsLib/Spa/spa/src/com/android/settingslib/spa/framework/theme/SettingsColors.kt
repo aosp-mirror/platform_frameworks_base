@@ -33,10 +33,6 @@ data class SettingsColorScheme(
     val secondaryText: Color = Color.Unspecified,
     val primaryContainer: Color = Color.Unspecified,
     val onPrimaryContainer: Color = Color.Unspecified,
-    val spinnerHeaderContainer: Color = Color.Unspecified,
-    val onSpinnerHeaderContainer: Color = Color.Unspecified,
-    val spinnerItemContainer: Color = Color.Unspecified,
-    val onSpinnerItemContainer: Color = Color.Unspecified,
 )
 
 internal val LocalColorScheme = staticCompositionLocalOf { SettingsColorScheme() }
@@ -76,10 +72,6 @@ internal fun dynamicLightColorScheme(context: Context): SettingsColorScheme {
         secondaryText = tonalPalette.neutralVariant30,
         primaryContainer = tonalPalette.primary90,
         onPrimaryContainer = tonalPalette.neutral10,
-        spinnerHeaderContainer = tonalPalette.primary90,
-        onSpinnerHeaderContainer = tonalPalette.neutral10,
-        spinnerItemContainer = tonalPalette.secondary90,
-        onSpinnerItemContainer = tonalPalette.neutralVariant30,
     )
 }
 
@@ -103,10 +95,6 @@ internal fun dynamicDarkColorScheme(context: Context): SettingsColorScheme {
         secondaryText = tonalPalette.neutralVariant80,
         primaryContainer = tonalPalette.secondary90,
         onPrimaryContainer = tonalPalette.neutral10,
-        spinnerHeaderContainer = tonalPalette.primary90,
-        onSpinnerHeaderContainer = tonalPalette.neutral10,
-        spinnerItemContainer = tonalPalette.secondary90,
-        onSpinnerItemContainer = tonalPalette.neutralVariant30,
     )
 }
 
@@ -121,10 +109,6 @@ internal fun darkColorScheme(): SettingsColorScheme {
         secondaryText = tonalPalette.neutralVariant80,
         primaryContainer = tonalPalette.secondary90,
         onPrimaryContainer = tonalPalette.neutral10,
-        spinnerHeaderContainer = tonalPalette.primary90,
-        onSpinnerHeaderContainer = tonalPalette.neutral10,
-        spinnerItemContainer = tonalPalette.secondary90,
-        onSpinnerItemContainer = tonalPalette.neutralVariant30,
     )
 }
 
@@ -139,9 +123,5 @@ internal fun lightColorScheme(): SettingsColorScheme {
         secondaryText = tonalPalette.neutralVariant30,
         primaryContainer = tonalPalette.primary90,
         onPrimaryContainer = tonalPalette.neutral10,
-        spinnerHeaderContainer = tonalPalette.primary90,
-        onSpinnerHeaderContainer = tonalPalette.neutral10,
-        spinnerItemContainer = tonalPalette.secondary90,
-        onSpinnerItemContainer = tonalPalette.neutralVariant30,
     )
 }
