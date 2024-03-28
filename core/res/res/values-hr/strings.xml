@@ -85,8 +85,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Mobilna mreža nije dostupna"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Pokušajte promijeniti preferiranu mrežu. Dodirnite da biste je promijenili."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Hitni pozivi nisu dostupni"</string>
-    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
-    <skip />
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Za hitne pozive potrebna je mobilna mreža"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Upozorenja"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Preusmjeravanje poziva"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Način hitnog povratnog poziva"</string>
@@ -331,7 +330,7 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"snimati zvuk"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Tjelesna aktivnost"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"pristupiti vašoj tjelesnoj aktivnosti"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"Fotoaparat"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"snimati fotografije i videozapise"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Uređaji u blizini"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"otkrivanje i povezivanje s uređajima u blizini"</string>
@@ -1060,7 +1059,7 @@
     <string name="keyguard_accessibility_widget" msgid="6776892679715699875">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> widget."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"Birač korisnika"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"Status"</string>
-    <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"Fotoaparat"</string>
+    <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"Kamera"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Nadzor medija"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"Pokrenuta je promjena redoslijeda widgeta."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"Završena je promjena redoslijeda widgeta."</string>
@@ -1185,10 +1184,8 @@
     <string name="deleteText" msgid="4200807474529938112">"Izbriši"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Način unosa"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Radnje s tekstom"</string>
-    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
-    <skip />
-    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
-    <skip />
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"Rukopis nije podržan u ovom polju"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Rukopis nije podržan u poljima za zaporku"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Natrag"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Promjena načina unosa"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Ponestaje prostora za pohranu"</string>
@@ -1933,6 +1930,12 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Upravlja <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Uključeno"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Isključeno"</string>
+    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
+    <skip />
+    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
+    <skip />
+    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
+    <skip />
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> isključuje neke zvukove"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Na vašem uređaju postoji interni problem i možda neće biti stabilan dok ga ne vratite na tvorničko stanje."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Na vašem uređaju postoji interni problem. Obratite se proizvođaču za više pojedinosti."</string>
@@ -1994,7 +1997,7 @@
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Hitni slučaj"</string>
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Postavite zaključavanje zaslona"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Postavi zaključavanje zaslona"</string>
-    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Za upotrebu privatnog prostora postavite zaključavanje zaslona na ovom uređaju"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Da biste upotrebljavali privatni prostor, postavite zaključavanje zaslona na ovom uređaju"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacija nije dostupna"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> trenutačno nije dostupna."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> – nije dostupno"</string>
@@ -2124,7 +2127,7 @@
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Odbaci"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sustav"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Postavke"</string>
-    <string name="notification_appops_camera_active" msgid="8177643089272352083">"Fotoaparat"</string>
+    <string name="notification_appops_camera_active" msgid="8177643089272352083">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"prikazuje se preko drugih aplikacija na zaslonu"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Slanje povratnih informacija"</string>
@@ -2336,7 +2339,7 @@
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Uključite u Postavkama"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Odbaci"</string>
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Deblokiraj mikrofon uređaja"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Deblokiraj fotoaparat uređaja"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Deblokiraj kameru uređaja"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Za &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; i sve aplikacije i usluge"</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Deblokiraj"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Privatnost senzora"</string>

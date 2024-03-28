@@ -84,8 +84,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"เชื่อมต่อเครือข่ายมือถือไม่ได้"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ลองเปลี่ยนเครือข่ายที่ต้องการ แตะเพื่อเปลี่ยน"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"โทรหาหมายเลขฉุกเฉินไม่ได้"</string>
-    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
-    <skip />
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"การโทรหาหมายเลขฉุกเฉินต้องใช้เครือข่ายมือถือ"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"การแจ้งเตือน"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"การโอนสาย"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"โหมดติดต่อกลับฉุกเฉิน"</string>
@@ -1184,10 +1183,8 @@
     <string name="deleteText" msgid="4200807474529938112">"ลบ"</string>
     <string name="inputMethod" msgid="1784759500516314751">"วิธีป้อนข้อมูล"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"การทำงานของข้อความ"</string>
-    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
-    <skip />
-    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
-    <skip />
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"ช่องนี้ไม่รองรับการเขียนด้วยลายมือ"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"ช่องรหัสผ่านไม่รองรับการเขียนด้วยลายมือ"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"กลับ"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"สลับวิธีการป้อนข้อมูล"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"พื้นที่จัดเก็บเหลือน้อย"</string>
@@ -1300,12 +1297,12 @@
     <string name="new_app_action" msgid="547772182913269801">"เปิด <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1958903080400806644">"<xliff:g id="OLD_APP">%1$s</xliff:g> จะปิดโดยไม่บันทึก"</string>
     <string name="dump_heap_notification" msgid="5316644945404825032">"<xliff:g id="PROC">%1$s</xliff:g> เกินขีดจำกัดของหน่วยความจำ"</string>
-    <string name="dump_heap_ready_notification" msgid="2302452262927390268">"ฮีพดัมพ์ <xliff:g id="PROC">%1$s</xliff:g> พร้อมแล้ว"</string>
-    <string name="dump_heap_notification_detail" msgid="8431586843001054050">"รวบรวมฮีพดัมพ์แล้ว แตะเพื่อแชร์"</string>
-    <string name="dump_heap_title" msgid="4367128917229233901">"แชร์ฮีพดัมพ์ไหม"</string>
-    <string name="dump_heap_text" msgid="1692649033835719336">"กระบวนการ <xliff:g id="PROC">%1$s</xliff:g> ใช้หน่วยความจำเกินขีดจำกัดขนาด <xliff:g id="SIZE">%2$s</xliff:g> มีฮีพดัมพ์พร้อมให้แชร์กับนักพัฒนาซอฟต์แวร์ โปรดระวัง: ฮีพดัมพ์นี้อาจมีข้อมูลส่วนบุคคลที่มีความละเอียดอ่อนซึ่งแอปพลิเคชันเข้าถึงได้"</string>
-    <string name="dump_heap_system_text" msgid="6805155514925350849">"กระบวนการ <xliff:g id="PROC">%1$s</xliff:g> ใช้หน่วยความจำเกินขีดจำกัดขนาด <xliff:g id="SIZE">%2$s</xliff:g> มีฮีพดัมพ์พร้อมให้แชร์ โปรดระวัง: ฮีพดัมพ์นี้อาจมีข้อมูลส่วนบุคคลที่มีความละเอียดอ่อนซึ่งกระบวนการดังกล่าวเข้าถึงได้ ซึ่งอาจรวมถึงข้อมูลต่างๆ ที่คุณพิมพ์ไว้"</string>
-    <string name="dump_heap_ready_text" msgid="5849618132123045516">"มีฮีพดัมพ์ของกระบวนการ <xliff:g id="PROC">%1$s</xliff:g> พร้อมให้แชร์ โปรดระวัง: ฮีพดัมพ์นี้อาจมีข้อมูลส่วนบุคคลที่มีความละเอียดอ่อนซึ่งกระบวนการดังกล่าวเข้าถึงได้ ซึ่งอาจรวมถึงข้อมูลต่างๆ ที่คุณพิมพ์ไว้"</string>
+    <string name="dump_heap_ready_notification" msgid="2302452262927390268">"ฮีปดัมป์ <xliff:g id="PROC">%1$s</xliff:g> พร้อมแล้ว"</string>
+    <string name="dump_heap_notification_detail" msgid="8431586843001054050">"รวบรวมฮีปดัมป์แล้ว แตะเพื่อแชร์"</string>
+    <string name="dump_heap_title" msgid="4367128917229233901">"แชร์ฮีปดัมป์ไหม"</string>
+    <string name="dump_heap_text" msgid="1692649033835719336">"กระบวนการ <xliff:g id="PROC">%1$s</xliff:g> ใช้หน่วยความจำเกินขีดจำกัดขนาด <xliff:g id="SIZE">%2$s</xliff:g> มีฮีปดัมป์พร้อมให้แชร์กับนักพัฒนาซอฟต์แวร์ โปรดระวัง: ฮีปดัมป์นี้อาจมีข้อมูลส่วนบุคคลที่มีความละเอียดอ่อนซึ่งแอปพลิเคชันเข้าถึงได้"</string>
+    <string name="dump_heap_system_text" msgid="6805155514925350849">"กระบวนการ <xliff:g id="PROC">%1$s</xliff:g> ใช้หน่วยความจำเกินขีดจำกัดขนาด <xliff:g id="SIZE">%2$s</xliff:g> มีฮีปดัมป์พร้อมให้แชร์ โปรดระวัง: ฮีปดัมป์นี้อาจมีข้อมูลส่วนบุคคลที่มีความละเอียดอ่อนซึ่งกระบวนการดังกล่าวเข้าถึงได้ ซึ่งอาจรวมถึงข้อมูลต่างๆ ที่คุณพิมพ์ไว้"</string>
+    <string name="dump_heap_ready_text" msgid="5849618132123045516">"มีฮีปดัมป์ของกระบวนการ <xliff:g id="PROC">%1$s</xliff:g> พร้อมให้แชร์ โปรดระวัง: ฮีปดัมป์นี้อาจมีข้อมูลส่วนบุคคลที่มีความละเอียดอ่อนซึ่งกระบวนการดังกล่าวเข้าถึงได้ ซึ่งอาจรวมถึงข้อมูลต่างๆ ที่คุณพิมพ์ไว้"</string>
     <string name="sendText" msgid="493003724401350724">"เลือกการทำงานกับข้อความ"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"ระดับความดังเสียงเรียกเข้า"</string>
     <string name="volume_music" msgid="7727274216734955095">"ระดับเสียงของสื่อ"</string>
@@ -1932,6 +1929,12 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"จัดการโดย <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"เปิด"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ปิด"</string>
+    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
+    <skip />
+    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
+    <skip />
+    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
+    <skip />
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> กำลังปิดเสียงบางรายการ"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"อุปกรณ์ของคุณเกิดปัญหาภายในเครื่อง อุปกรณ์อาจทำงานไม่เสถียรจนกว่าคุณจะรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"อุปกรณ์ของคุณเกิดปัญหาภายในเครื่อง โปรดติดต่อผู้ผลิตเพื่อขอรายละเอียดเพิ่มเติม"</string>

@@ -84,8 +84,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Kan nie selnetwerk bereik nie"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Probeer die voorkeurnetwerk verander. Tik om te verander."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Noodoproepe is onbeskikbaar"</string>
-    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
-    <skip />
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Noodoproepe vereis ’n selnetwerk."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Opletberigte"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Oproepaanstuur"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Noodterugbel-modus"</string>
@@ -1184,10 +1183,8 @@
     <string name="deleteText" msgid="4200807474529938112">"Vee uit"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Invoermetode"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Teksaksies"</string>
-    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
-    <skip />
-    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
-    <skip />
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"Handskrif word nie in hierdie veld gesteun nie"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Handskrif word nie in wagwoordvelde gesteun nie"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Terug"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Wissel invoermetode"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Bergingspasie word min"</string>
@@ -1932,6 +1929,12 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Bestuur deur <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Aan"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Af"</string>
+    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
+    <skip />
+    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
+    <skip />
+    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
+    <skip />
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> demp sekere klanke"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Daar is \'n interne probleem met jou toestel en dit sal dalk onstabiel wees totdat jy \'n fabriekterugstelling doen."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Daar is \'n interne probleem met jou toestel. Kontak jou vervaardiger vir besonderhede."</string>
@@ -2031,7 +2034,7 @@
     <string name="pin_specific_target" msgid="7824671240625957415">"Speld <xliff:g id="LABEL">%1$s</xliff:g> vas"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Ontspeld"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"Ontspeld <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="app_info" msgid="6113278084877079851">"Programinligting"</string>
+    <string name="app_info" msgid="6113278084877079851">"Appinligting"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Begin tans demonstrasie …"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Stel toestel tans terug …"</string>
