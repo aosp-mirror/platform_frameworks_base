@@ -1856,6 +1856,14 @@ public class BatteryStatsImpl extends BatteryStats {
             FrameworkStatsLog.write(
                     FrameworkStatsLog.PHONE_SIGNAL_STRENGTH_CHANGED, strengthBin);
         }
+
+        /**
+         * Records a statsd event when the batterystats config file is written to disk.
+         */
+        public void writeCommitSysConfigFile(String fileName, long durationMs) {
+            com.android.internal.logging.EventLogTags.writeCommitSysConfigFile(fileName,
+                    durationMs);
+        }
     }
 
     private final FrameworkStatsLogger mFrameworkStatsLogger;
@@ -11396,8 +11404,7 @@ public class BatteryStatsImpl extends BatteryStats {
                                 memStream.writeTo(stream);
                                 stream.flush();
                                 mDailyFile.finishWrite(stream);
-                                com.android.internal.logging.EventLogTags.writeCommitSysConfigFile(
-                                        "batterystats-daily",
+                                mFrameworkStatsLogger.writeCommitSysConfigFile("batterystats-daily",
                                         initialTimeMs + SystemClock.uptimeMillis() - startTimeMs2);
                             } catch (IOException e) {
                                 Slog.w("BatteryStats",
@@ -14690,9 +14697,10 @@ public class BatteryStatsImpl extends BatteryStats {
                                     stream.write(parcel.marshall());
                                     stream.flush();
                                     mCheckinFile.finishWrite(stream);
-                                    com.android.internal.logging.EventLogTags.writeCommitSysConfigFile(
-                                            "batterystats-checkin", initialTimeMs
-                                            + SystemClock.uptimeMillis() - startTimeMs2);
+                                    mFrameworkStatsLogger.writeCommitSysConfigFile(
+                                            "batterystats-checkin",
+                                            initialTimeMs + SystemClock.uptimeMillis()
+                                                    - startTimeMs2);
                                 } catch (IOException e) {
                                     Slog.w("BatteryStats",
                                             "Error writing checkin battery statistics", e);
@@ -16165,7 +16173,7 @@ public class BatteryStatsImpl extends BatteryStats {
                         + " duration ms:" + (SystemClock.uptimeMillis() - startTimeMs)
                         + " bytes:" + p.dataSize());
             }
-            com.android.internal.logging.EventLogTags.writeCommitSysConfigFile(
+            mFrameworkStatsLogger.writeCommitSysConfigFile(
                     "batterystats", SystemClock.uptimeMillis() - startTimeMs);
         } catch (IOException e) {
             Slog.w(TAG, "Error writing battery statistics", e);

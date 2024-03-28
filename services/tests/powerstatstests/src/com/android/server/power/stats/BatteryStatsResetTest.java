@@ -22,18 +22,27 @@ import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 import android.os.BatteryManager;
+import android.platform.test.ravenwood.RavenwoodRule;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.io.IOException;
+import java.nio.file.Files;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class BatteryStatsResetTest {
+
+    @Rule(order = 0)
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+            .setProvideMainThread(true)
+            .build();
 
     private static final int BATTERY_NOMINAL_VOLTAGE_MV = 3700;
     private static final int BATTERY_CAPACITY_UAH = 4_000_000;
@@ -81,13 +90,11 @@ public class BatteryStatsResetTest {
     private long mBatteryChargeTimeToFullSeconds;
 
     @Before
-    public void setUp() {
-        final Context context = InstrumentationRegistry.getContext();
-
+    public void setUp() throws IOException {
         mMockClock = new MockClock();
-        mBatteryStatsImpl = new MockBatteryStatsImpl(mMockClock, context.getFilesDir());
+        mBatteryStatsImpl = new MockBatteryStatsImpl(mMockClock,
+                Files.createTempDirectory("BatteryStatsResetTest").toFile());
         mBatteryStatsImpl.onSystemReady(mock(Context.class));
-
 
         // Set up the battery state. Start off with a fully charged plugged in battery.
         mBatteryStatus = BatteryManager.BATTERY_STATUS_FULL;
