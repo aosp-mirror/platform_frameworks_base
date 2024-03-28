@@ -897,8 +897,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         mConfigurationController.onConfigurationChanged(configuration);
     }
 
-    protected void onTouchEvent(MotionEvent ev) {
-        mTouchHandler.onTouch(mView, ev);
+    protected boolean onTouchEvent(MotionEvent ev) {
+        return mTouchHandler.onTouch(mView, ev);
     }
 
     protected void setDozing(boolean dozing, boolean dozingAlwaysOn) {

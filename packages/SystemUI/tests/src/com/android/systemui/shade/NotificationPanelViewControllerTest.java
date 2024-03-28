@@ -364,6 +364,24 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    public void alternateBouncerVisible_onTouchEvent_notHandled() {
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
+        // GIVEN alternate bouncer is visible
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+
+        // WHEN touch DOWN event received; THEN touch is NOT handled
+        assertThat(onTouchEvent(MotionEvent.obtain(0L /* downTime */,
+                0L /* eventTime */, MotionEvent.ACTION_DOWN, 0f /* x */, 0f /* y */,
+                0 /* metaState */))).isFalse();
+
+        // WHEN touch MOVE event received; THEN touch is NOT handled
+        assertThat(onTouchEvent(MotionEvent.obtain(0L /* downTime */,
+                0L /* eventTime */, MotionEvent.ACTION_MOVE, 0f /* x */, 200f /* y */,
+                0 /* metaState */))).isFalse();
+
+    }
+
+    @Test
     public void test_onTouchEvent_startTracking() {
         // GIVEN device is NOT pulsing
         mNotificationPanelViewController.setPulsing(false);
