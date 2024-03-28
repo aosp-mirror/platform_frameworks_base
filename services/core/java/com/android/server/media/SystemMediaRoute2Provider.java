@@ -474,6 +474,10 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                                 .setProviderId(mUniqueId)
                                 .setSystemSession(true)
                                 .addSelectedRoute(MediaRoute2Info.ROUTE_ID_DEFAULT)
+                                .setTransferReason(newSessionInfo.getTransferReason())
+                                .setTransferInitiator(
+                                        newSessionInfo.getTransferInitiatorUserHandle(),
+                                        newSessionInfo.getTransferInitiatorPackageName())
                                 .build();
                 return true;
             }
