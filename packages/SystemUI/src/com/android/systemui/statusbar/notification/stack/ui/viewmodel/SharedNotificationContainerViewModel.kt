@@ -589,8 +589,13 @@ constructor(
             combine(
                 isOnLockscreen,
                 keyguardInteractor.statusBarState,
-            ) { isOnLockscreen, statusBarState ->
-                statusBarState == SHADE_LOCKED || !isOnLockscreen
+                merge(
+                        primaryBouncerToGoneTransitionViewModel.showAllNotifications,
+                        alternateBouncerToGoneTransitionViewModel.showAllNotifications,
+                    )
+                    .onStart { emit(false) }
+            ) { isOnLockscreen, statusBarState, showAllNotifications ->
+                statusBarState == SHADE_LOCKED || !isOnLockscreen || showAllNotifications
             }
 
         return combineTransform(
