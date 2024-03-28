@@ -8507,8 +8507,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         applySizeOverrideIfNeeded(newParentConfiguration, parentWindowingMode, resolvedConfig);
 
-        final boolean isFixedOrientationLetterboxAllowed =
-                parentWindowingMode == WINDOWING_MODE_MULTI_WINDOW
+        // Bubble activities should always fill their parent and should not be letterboxed.
+        final boolean isFixedOrientationLetterboxAllowed = !getLaunchedFromBubble()
+                && (parentWindowingMode == WINDOWING_MODE_MULTI_WINDOW
                         || parentWindowingMode == WINDOWING_MODE_FULLSCREEN
                         // When starting to switch between PiP and fullscreen, the task is pinned
                         // and the activity is fullscreen. But only allow to apply letterbox if the
@@ -8516,7 +8517,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         || (!mWaitForEnteringPinnedMode
                                 && parentWindowingMode == WINDOWING_MODE_PINNED
                                 && resolvedConfig.windowConfiguration.getWindowingMode()
-                                        == WINDOWING_MODE_FULLSCREEN);
+                                        == WINDOWING_MODE_FULLSCREEN));
         // TODO(b/181207944): Consider removing the if condition and always run
         // resolveFixedOrientationConfiguration() since this should be applied for all cases.
         if (isFixedOrientationLetterboxAllowed) {
