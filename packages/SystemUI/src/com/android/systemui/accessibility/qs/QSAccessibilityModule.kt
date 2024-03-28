@@ -23,6 +23,7 @@ import com.android.systemui.qs.tiles.ColorCorrectionTile
 import com.android.systemui.qs.tiles.ColorInversionTile
 import com.android.systemui.qs.tiles.DreamTile
 import com.android.systemui.qs.tiles.FontScalingTile
+import com.android.systemui.qs.tiles.HearingDevicesTile
 import com.android.systemui.qs.tiles.NightDisplayTile
 import com.android.systemui.qs.tiles.OneHandedModeTile
 import com.android.systemui.qs.tiles.ReduceBrightColorsTile
@@ -93,6 +94,12 @@ interface QSAccessibilityModule {
     @IntoMap
     @StringKey(FontScalingTile.TILE_SPEC)
     fun bindFontScalingTile(fontScalingTile: FontScalingTile): QSTileImpl<*>
+
+    /** Inject HearingDevicesTile into tileMap in QSModule */
+    @Binds
+    @IntoMap
+    @StringKey(HearingDevicesTile.TILE_SPEC)
+    fun bindHearingDevicesTile(hearingDevicesTile: HearingDevicesTile): QSTileImpl<*>
 
     companion object {
         const val COLOR_CORRECTION_TILE_SPEC = "color_correction"
