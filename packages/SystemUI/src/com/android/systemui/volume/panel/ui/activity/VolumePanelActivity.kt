@@ -21,8 +21,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.volume.panel.shared.flag.VolumePanelFlag
+import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import com.android.systemui.volume.panel.ui.composable.VolumePanelRoot
 import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelViewModel
 import javax.inject.Inject
@@ -34,6 +36,7 @@ constructor(
     private val volumePanelViewModelFactory: Provider<VolumePanelViewModel.Factory>,
     private val volumePanelFlag: VolumePanelFlag,
     private val configurationController: ConfigurationController,
+    private val uiEventLogger: UiEventLogger,
 ) : ComponentActivity() {
 
     private val viewModel: VolumePanelViewModel by
@@ -43,8 +46,16 @@ constructor(
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         volumePanelFlag.assertNewVolumePanel()
-
-        setContent { VolumePanelRoot(viewModel = viewModel, onDismiss = ::finish) }
+        uiEventLogger.log(VolumePanelUiEvent.VOLUME_PANEL_SHOWN)
+        setContent {
+            VolumePanelRoot(
+                viewModel = viewModel,
+                onDismiss = {
+                    uiEventLogger.log(VolumePanelUiEvent.VOLUME_PANEL_GONE)
+                    finish()
+                }
+            )
+        }
     }
 
     override fun onContentChanged() {

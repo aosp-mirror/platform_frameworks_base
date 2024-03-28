@@ -22,6 +22,7 @@ import android.media.session.PlaybackState
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.uiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
@@ -64,6 +65,7 @@ class MediaOutputViewModelTest : SysuiTestCase() {
                     mediaOutputActionsInteractor,
                     mediaDeviceSessionInteractor,
                     mediaOutputInteractor,
+                    uiEventLogger,
                 )
 
             with(context.orCreateTestableResources) {

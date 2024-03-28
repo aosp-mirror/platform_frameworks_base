@@ -24,6 +24,7 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.volume.panel.dagger.factory.KosmosVolumePanelComponentFactory
 import com.android.systemui.volume.panel.domain.ComponentAvailabilityCriteria
 import com.android.systemui.volume.panel.domain.TestComponentAvailabilityCriteria
+import com.android.systemui.volume.panel.domain.VolumePanelStartable
 import com.android.systemui.volume.panel.domain.interactor.ComponentsInteractor
 import com.android.systemui.volume.panel.domain.interactor.ComponentsInteractorImpl
 import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
@@ -44,6 +45,8 @@ val Kosmos.componentsFactory: ComponentsFactory by
 var Kosmos.componentsLayoutManager: ComponentsLayoutManager by Kosmos.Fixture()
 var Kosmos.enabledComponents: Collection<VolumePanelComponentKey> by
     Kosmos.Fixture { componentByKey.keys }
+var Kosmos.volumePanelStartables: Set<VolumePanelStartable> by
+    Kosmos.Fixture { emptySet<VolumePanelStartable>() }
 val Kosmos.unavailableCriteria: Provider<ComponentAvailabilityCriteria> by
     Kosmos.Fixture { Provider { TestComponentAvailabilityCriteria(false) } }
 val Kosmos.availableCriteria: Provider<ComponentAvailabilityCriteria> by

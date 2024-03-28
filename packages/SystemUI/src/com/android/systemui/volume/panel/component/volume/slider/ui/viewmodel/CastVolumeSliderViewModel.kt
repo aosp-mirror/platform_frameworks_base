@@ -54,6 +54,8 @@ constructor(
         }
     }
 
+    override fun onValueChangeFinished() {}
+
     override fun toggleMuted(state: SliderState) {
         // do nothing because this action isn't supported for Cast sliders.
     }

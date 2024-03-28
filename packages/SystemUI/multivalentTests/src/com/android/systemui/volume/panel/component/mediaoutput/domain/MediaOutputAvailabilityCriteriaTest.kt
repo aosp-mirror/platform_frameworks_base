@@ -46,7 +46,10 @@ class MediaOutputAvailabilityCriteriaTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        underTest = MediaOutputAvailabilityCriteria(kosmos.audioModeInteractor)
+        underTest =
+            MediaOutputAvailabilityCriteria(
+                kosmos.audioModeInteractor,
+            )
     }
 
     @Test
