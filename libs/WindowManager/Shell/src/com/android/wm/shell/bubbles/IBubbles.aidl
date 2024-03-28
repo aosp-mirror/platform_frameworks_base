@@ -19,6 +19,7 @@ package com.android.wm.shell.bubbles;
 import android.content.Intent;
 import android.graphics.Rect;
 import com.android.wm.shell.bubbles.IBubblesListener;
+import com.android.wm.shell.common.bubbles.BubbleBarLocation;
 
 /**
  * Interface that is exposed to remote callers (launcher) to manipulate the bubbles feature when
@@ -42,4 +43,5 @@ interface IBubbles {
 
     oneway void showUserEducation(in int positionX, in int positionY) = 8;
 
+    oneway void setBubbleBarLocation(in BubbleBarLocation location) = 9;
 }
