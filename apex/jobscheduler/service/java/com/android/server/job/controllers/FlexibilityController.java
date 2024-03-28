@@ -328,6 +328,9 @@ public final class FlexibilityController extends StateController {
     @GuardedBy("mLock")
     private final ArraySet<String> mPackagesToCheck = new ArraySet<>();
 
+    @GuardedBy("mLock")
+    private boolean mLocalOverride;
+
     public FlexibilityController(
             JobSchedulerService service, PrefetchController prefetchController) {
         super(service);
@@ -1923,6 +1926,27 @@ public final class FlexibilityController extends StateController {
         }
     }
 
+    /**
+     * If {@code override} is true, uses {@code appliedConstraints} for flex policy evaluation,
+     * overriding anything else that was set. If {@code override} is false, any previous calls
+     * will be discarded and the policy will be reset to the normal default policy.
+     */
+    public void setLocalPolicyForTesting(boolean override, int appliedConstraints) {
+        synchronized (mLock) {
+            final boolean recheckJobs = mLocalOverride != override
+                    || mAppliedConstraints != appliedConstraints;
+            mLocalOverride = override;
+            if (mLocalOverride) {
+                mAppliedConstraints = appliedConstraints;
+            } else {
+                mAppliedConstraints = mFcConfig.APPLIED_CONSTRAINTS;
+            }
+            if (recheckJobs) {
+                mHandler.obtainMessage(MSG_CHECK_ALL_JOBS).sendToTarget();
+            }
+        }
+    }
+
     @Override
     @GuardedBy("mLock")
     public void dumpConstants(IndentingPrintWriter pw) {
@@ -1932,6 +1956,12 @@ public final class FlexibilityController extends StateController {
     @Override
     @GuardedBy("mLock")
     public void dumpControllerStateLocked(IndentingPrintWriter pw, Predicate<JobStatus> predicate) {
+        if (mLocalOverride) {
+            pw.println("Local override active");
+        }
+        pw.print("Applied Flexible Constraints:");
+        JobStatus.dumpConstraints(pw, mAppliedConstraints);
+        pw.println();
         pw.print("Satisfied Flexible Constraints:");
         JobStatus.dumpConstraints(pw, mSatisfiedFlexibleConstraints);
         pw.println();

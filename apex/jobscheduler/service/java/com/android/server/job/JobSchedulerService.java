@@ -304,6 +304,8 @@ public class JobSchedulerService extends com.android.server.SystemService
     private final ConnectivityController mConnectivityController;
     /** Need directly for sending uid state changes */
     private final DeviceIdleJobsController mDeviceIdleJobsController;
+    /** Need direct access to this for testing. */
+    private final FlexibilityController mFlexibilityController;
     /** Needed to get next estimated launch time. */
     private final PrefetchController mPrefetchController;
     /** Needed to get remaining quota time. */
@@ -2701,17 +2703,16 @@ public class JobSchedulerService extends com.android.server.SystemService
         mControllers = new ArrayList<StateController>();
         mPrefetchController = new PrefetchController(this);
         mControllers.add(mPrefetchController);
-        final FlexibilityController flexibilityController =
-                new FlexibilityController(this, mPrefetchController);
-        mControllers.add(flexibilityController);
+        mFlexibilityController = new FlexibilityController(this, mPrefetchController);
+        mControllers.add(mFlexibilityController);
         mConnectivityController =
-                new ConnectivityController(this, flexibilityController);
+                new ConnectivityController(this, mFlexibilityController);
         mControllers.add(mConnectivityController);
         mControllers.add(new TimeController(this));
-        final IdleController idleController = new IdleController(this, flexibilityController);
+        final IdleController idleController = new IdleController(this, mFlexibilityController);
         mControllers.add(idleController);
         final BatteryController batteryController =
-                new BatteryController(this, flexibilityController);
+                new BatteryController(this, mFlexibilityController);
         mControllers.add(batteryController);
         mStorageController = new StorageController(this);
         mControllers.add(mStorageController);
@@ -5559,6 +5560,15 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         return 0;
+    }
+
+    // Shell command infrastructure: set flex policy
+    void setFlexPolicy(boolean override, int appliedConstraints) {
+        if (DEBUG) {
+            Slog.v(TAG, "setFlexPolicy(): " + override + "/" + appliedConstraints);
+        }
+
+        mFlexibilityController.setLocalPolicyForTesting(override, appliedConstraints);
     }
 
     void setMonitorBattery(boolean enabled) {
