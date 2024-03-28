@@ -6501,9 +6501,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         newIntents = null;
 
-        if (isActivityTypeHome()) {
-            mTaskSupervisor.updateHomeProcess(task.getBottomMostActivity().app);
-        }
+        mTaskSupervisor.updateHomeProcessIfNeeded(this);
 
         if (nowVisible) {
             mTaskSupervisor.stopWaitingForActivityVisible(this);
