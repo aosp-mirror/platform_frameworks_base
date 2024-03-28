@@ -165,12 +165,23 @@ java_library {
     },
 }
 
+filegroup {
+    name: "wm_shell-shared-aidls",
+
+    srcs: [
+        "shared/**/*.aidl",
+    ],
+
+    path: "shared/src",
+}
+
 java_library {
     name: "WindowManager-Shell-shared",
 
     srcs: [
         "shared/**/*.java",
         "shared/**/*.kt",
+        ":wm_shell-shared-aidls",
     ],
     static_libs: [
         "androidx.dynamicanimation_dynamicanimation",

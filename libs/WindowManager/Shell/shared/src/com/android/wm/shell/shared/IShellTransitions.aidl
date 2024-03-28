@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.transition;
+package com.android.wm.shell.shared;
 
 import android.view.SurfaceControl;
 import android.window.RemoteTransition;
 import android.window.TransitionFilter;
 
-import com.android.wm.shell.transition.IHomeTransitionListener;
+import com.android.wm.shell.shared.IHomeTransitionListener;
 
 /**
  * Interface that is exposed to remote callers to manipulate the transitions feature.
