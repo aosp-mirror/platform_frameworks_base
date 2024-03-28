@@ -5429,19 +5429,19 @@ public class AudioService extends IAudioService.Stub
 
     /** @see AudioManager#setMicrophoneMuteFromSwitch(boolean) */
     public void setMicrophoneMuteFromSwitch(boolean on) {
-        int userId = Binder.getCallingUid();
-        if (userId != android.os.Process.SYSTEM_UID) {
+        int callingUid = Binder.getCallingUid();
+        if (callingUid != android.os.Process.SYSTEM_UID) {
             Log.e(TAG, "setMicrophoneMuteFromSwitch() called from non system user!");
             return;
         }
         mMicMuteFromSwitch = on;
         new MediaMetrics.Item(MediaMetrics.Name.AUDIO_MIC)
-                .setUid(userId)
+                .setUid(callingUid)
                 .set(MediaMetrics.Property.EVENT, "setMicrophoneMuteFromSwitch")
                 .set(MediaMetrics.Property.REQUEST, on
                         ? MediaMetrics.Value.MUTE : MediaMetrics.Value.UNMUTE)
                 .record();
-        setMicrophoneMuteNoCallerCheck(userId);
+        setMicrophoneMuteNoCallerCheck(UserHandle.getCallingUserId());
     }
 
     private void setMicMuteFromSwitchInput() {
@@ -5472,9 +5472,10 @@ public class AudioService extends IAudioService.Stub
         if (DEBUG_VOL) {
             Log.d(TAG, String.format("Mic mute %b, user=%d", muted, userId));
         }
-        // only mute for the current user
-        if (getCurrentUserId() == userId || userId == android.os.Process.SYSTEM_UID) {
+        // only mute for the current user or for the system user.
+        if (getCurrentUserId() == userId || userId == UserHandle.USER_SYSTEM) {
             final boolean currentMute = mAudioSystem.isMicrophoneMuted();
+            int callingUid = Binder.getCallingUid();
             final long identity = Binder.clearCallingIdentity();
             try {
                 final int ret = mAudioSystem.muteMicrophone(muted);
@@ -5487,7 +5488,7 @@ public class AudioService extends IAudioService.Stub
                 }
 
                 new MediaMetrics.Item(MediaMetrics.Name.AUDIO_MIC)
-                        .setUid(userId)
+                        .setUid(callingUid)
                         .set(MediaMetrics.Property.EVENT, "setMicrophoneMuteNoCallerCheck")
                         .set(MediaMetrics.Property.MUTE, mMicMuteFromSystemCached
                                 ? MediaMetrics.Value.ON : MediaMetrics.Value.OFF)
