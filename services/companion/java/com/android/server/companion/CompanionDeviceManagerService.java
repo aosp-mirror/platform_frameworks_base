@@ -82,7 +82,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArraySet;
 import android.util.ExceptionUtils;
-import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.app.IAppOpsService;
@@ -121,8 +120,7 @@ import java.util.Set;
 
 @SuppressLint("LongLogTag")
 public class CompanionDeviceManagerService extends SystemService {
-    static final String TAG = "CDM_CompanionDeviceManagerService";
-    static final boolean DEBUG = false;
+    private static final String TAG = "CDM_CompanionDeviceManagerService";
 
     private static final long PAIR_WITHOUT_PROMPT_WINDOW_MS = 10 * 60 * 1000; // 10 min
 
@@ -135,7 +133,6 @@ public class CompanionDeviceManagerService extends SystemService {
     private final IAppOpsService mAppOpsManager;
     private final PowerExemptionManager mPowerExemptionManager;
     private final PackageManagerInternal mPackageManagerInternal;
-    private final PowerManagerInternal mPowerManagerInternal;
 
     private final AssociationStore mAssociationStore;
     private final SystemDataTransferRequestStore mSystemDataTransferRequestStore;
@@ -160,7 +157,8 @@ public class CompanionDeviceManagerService extends SystemService {
         mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         final UserManager userManager = context.getSystemService(UserManager.class);
-        mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
+        final PowerManagerInternal powerManagerInternal = LocalServices.getService(
+                PowerManagerInternal.class);
 
         final AssociationDiskStore associationDiskStore = new AssociationDiskStore();
         mAssociationStore = new AssociationStore(context, userManager, associationDiskStore);
@@ -178,7 +176,7 @@ public class CompanionDeviceManagerService extends SystemService {
 
         mDevicePresenceProcessor = new DevicePresenceProcessor(context,
                 mCompanionAppBinder, userManager, mAssociationStore, mObservableUuidStore,
-                mPowerManagerInternal);
+                powerManagerInternal);
 
         mTransportManager = new CompanionTransportManager(context, mAssociationStore);
 
@@ -252,11 +250,6 @@ public class CompanionDeviceManagerService extends SystemService {
 
     private void onPackageRemoveOrDataClearedInternal(
             @UserIdInt int userId, @NonNull String packageName) {
-        if (DEBUG) {
-            Log.i(TAG, "onPackageRemove_Or_DataCleared() u" + userId + "/"
-                    + packageName);
-        }
-
         // Clear all associations for the package.
         final List<AssociationInfo> associationsForPackage =
                 mAssociationStore.getAssociationsByPackage(userId, packageName);
@@ -279,8 +272,6 @@ public class CompanionDeviceManagerService extends SystemService {
     }
 
     private void onPackageModifiedInternal(@UserIdInt int userId, @NonNull String packageName) {
-        if (DEBUG) Log.i(TAG, "onPackageModified() u" + userId + "/" + packageName);
-
         final List<AssociationInfo> associationsForPackage =
                 mAssociationStore.getAssociationsByPackage(userId, packageName);
         for (AssociationInfo association : associationsForPackage) {
