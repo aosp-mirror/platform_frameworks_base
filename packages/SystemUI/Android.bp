@@ -329,7 +329,7 @@ android_library {
         "WindowManager-Shell",
         "LowLightDreamLib",
         "motion_tool_lib",
-        "androidx.core_core-animation-testing-nodeps",
+        "androidx.core_core-animation-testing",
         "androidx.compose.ui_ui",
         "flag-junit",
         "platform-test-annotations",
