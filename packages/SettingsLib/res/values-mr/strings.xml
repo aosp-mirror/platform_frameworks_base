@@ -264,7 +264,7 @@
     <string name="bugreport_in_power" msgid="8664089072534638709">"बग रिपोर्ट शॉर्टकट"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"बग रिपोर्ट घेण्यासाठी पॉवर मेनूमध्ये एक बटण दर्शवा"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"सक्रिय रहा"</string>
-    <string name="keep_screen_on_summary" msgid="1510731514101925829">"चार्ज होत असताना स्क्रीन कधीही निष्क्रिय होणार नाही"</string>
+    <string name="keep_screen_on_summary" msgid="1510731514101925829">"चार्ज होत असताना स्क्रीन कधीही स्लीप मोडवर जाणार नाही"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"ब्लूटूथ HCI स्नूप लॉग सुरू करा"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"ब्लूटूथ पॅकेट कॅप्चर करा (हे सेटिंग बदलल्यानंतर ब्ल्यूटूथ टॉगल करा)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM अनलॉक करणे"</string>
@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"असे गृहीत धरा की, ॲप्स आधुनिक फॉरमॅटना सपोर्ट करतात"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"ट्रान्सकोडिंग सूचना दाखवा"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"ट्रान्सकोडिंग कॅशे बंद करा"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine सेटिंग्ज"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"L3 फॉलबॅकची सक्ती करा"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"L3 फॉलबॅकची सक्ती करण्यासाठी निवडा"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"सुरू सेवा"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"सध्या सुरू असलेल्या सेवा पहा आणि नियंत्रित करा"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"वेबदृश्य अंमलबजावणी"</string>

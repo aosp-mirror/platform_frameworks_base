@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Колдонмолордо заманбап форматтар колдоого алынат"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Транскоддоо билдирмелерин көрсөтүү"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Транскоддоо кешин өчүрүү"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine параметрлери"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"L3 деңгээлин мажбурлап артка кайтаруу"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"L3 деңгээлин мажбурлап артка кайтаруу үчүн тандаңыз"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Иштеп жаткан кызматтар"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Учурда иштеп жаткан кызматтарды көрүп, көзөмөлдөп турасыз"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView кызматы"</string>
@@ -624,12 +621,12 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Конок кошуу"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Конокту өчүрүү"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Конок сеансын баштапкы абалга келтирүү"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Конок сеансын баштапкы абалга келтиресизби?"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Конок сеансын кайра коёсузбу?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Конокту өчүрөсүзбү?"</string>
-    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Баштапкы абалга келтирүү"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Ооба"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Өчүрүү"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Конок сеансы баштапкы абалга келтирилүүдө…"</string>
-    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Конок сеансын баштапкы абалга келтиресизби?"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Конок сеансын кайра коёсузбу?"</string>
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Бул аракет жаңы конок сеансын баштап, учурдагы сеанстагы бардык колдонмолорду жана алардагы нерселерди жок кылат"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Конок режиминен чыгасызбы?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Учурдагы конок сеансындагы бардык колдонмолор менен алардагы нерселер өчүп калат"</string>

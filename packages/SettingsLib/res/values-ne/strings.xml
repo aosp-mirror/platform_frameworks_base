@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"एपहरूमा आधुनिक फर्म्याट प्रयोग गर्न मिल्छ भनी मान्नुहोस्"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"ट्रान्सकोडिङसम्बन्धी सूचना देखाइयोस्"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"ट्रान्सकोडिङको क्यास अफ गर्नुहोस्"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine को सेटिङ"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"L3 फलब्याक बलपूर्वक अन गर्नुहोस्"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"L3 फलब्याकमा बलपूर्वक अन गर्ने कि नगर्ने भन्ने विकल्प चयन गर्नुहोस्"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"चलिरहेका सेवाहरू"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"हाल चालु भइरहेका सेवाहरू हेर्नुहोस् र नियन्त्रण गर्नुहोस्"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView कार्यान्वयन"</string>
@@ -609,7 +606,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"थप्नुहोस्"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"नयाँ प्रयोगकर्ता"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"नयाँ प्रोफाइल"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"प्रयोगकर्ता जानकारी"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"प्रयोगकर्ताको विवरण"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"प्रोफाइलको जानकारी"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"निषेधयुक्त प्रोफाइल बनाउनु अघि तपाईँको एप र व्यक्तिगत डेटा सुरक्षा गर्नाका लागि तपाईँले स्क्रिन लक सेटअप गर्नु पर्दछ ।"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"लक सेट गर्नुहोस्"</string>

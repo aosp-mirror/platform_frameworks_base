@@ -111,8 +111,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Chuyển tệp"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Thiết bị đầu vào"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Truy cập Internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Cho truy cập danh bạ và nhật ký cuộc gọi"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Thông tin được dùng cho tính năng thông báo cuộc gọi, v.v."</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Cho phép truy cập danh bạ và nhật ký cuộc gọi"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Thông tin sẽ được dùng cho tính năng thông báo cuộc gọi, v.v."</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Chia sẻ kết nối internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Tin nhắn văn bản"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Truy cập SIM"</string>
@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Giả định rằng các ứng dụng hỗ trợ định dạng hiện đại"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Hiện thông báo chuyển mã"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Vô hiệu hóa bộ nhớ đệm dùng để chuyển mã"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Cài đặt Widevine"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Buộc sử dụng mức bảo mật L3"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Chọn để buộc sử dụng mức bảo mật L3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Các dịch vụ đang chạy"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Xem và kiểm soát các dịch vụ đang chạy"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Triển khai WebView"</string>

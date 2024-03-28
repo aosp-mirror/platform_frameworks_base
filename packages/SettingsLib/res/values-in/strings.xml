@@ -112,7 +112,7 @@
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Perangkat masukan"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Akses Internet"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Izinkan akses ke kontak dan histori panggilan"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Info akan digunakan untuk pengumuman panggilan dan lainnya"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Info akan digunakan untuk pengumuman panggilan dan lain-lain"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Berbagi koneksi internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"SMS"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Akses SIM"</string>
@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Asumsikan aplikasi mendukung format modern"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Tampilkan notifikasi transcoding"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Nonaktifkan cache transcoding"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Setelan Widevine"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Paksa penggantian L3"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Pilih untuk memaksa penggantian L3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Layanan yang sedang berjalan"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Lihat dan kontrol layanan yang sedang berjalan"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Penerapan WebView"</string>
@@ -518,7 +515,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Gunakan bahasa sistem"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Gagal membuka setelan untuk <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Metode masukan ini mungkin dapat mengumpulkan semua teks yang Anda ketik, termasuk data pribadi seperti sandi dan nomor kartu kredit. Metode ini berasal dari aplikasi <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Gunakan metode masukan ini?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Catatan: Setelah boot ulang, aplikasi ini tidak dapat dimulai hingga kunci ponsel dibuka"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Catatan: Setelah perangkat dimulai ulang, aplikasi ini tidak dapat mulai berjalan hingga kunci ponsel dibuka"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"Status pendaftaran IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Terdaftar"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Tidak terdaftar"</string>

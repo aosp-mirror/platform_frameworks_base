@@ -111,7 +111,7 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Ֆայլերի փոխանցում"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Ներմուծման սարք"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Ինտերնետի հասանելիություն"</string>
-    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Տրամադրել կոնտակտները և զանգերի պատմութ․"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Կոնտակտների և զանգերի մատյանի հասանելիություն"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Տվյալները կօգտագործվեն զանգերի ծանուցումների համար և այլն"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Ինտերնետ կապի տարածում"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"SMS հաղորդագրություններ"</string>
@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Ենթադրել, որ հավելվածներն աջակցում են ժամանակակից ձևաչափեր"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Ցույց տալ տրանսկոդավորման մասին ծանուցումները"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Անջատել տրանսկոդավորման քեշը"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine-ի կարգավորումներ"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"L3 պահուստային տարբերակի ստիպողական գործարկում"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Ընտրեք՝ L3 պահուստային տարբերակը ստիպողաբար գործարկելու համար"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Աշխատող ծառայություններ"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Դիտել և վերահսկել ընթացիկ աշխատող ծառայությունները"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView ծառայություն"</string>

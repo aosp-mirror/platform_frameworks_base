@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"యాప్‌లు ఆధునిక ఫార్మాట్‌లకు సపోర్ట్ చేస్తాయని అనుకోండి"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"ట్రాన్స్‌కోడింగ్ నోటిఫికేషన్‌లను చూపండి"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"ట్రాన్స్‌కోడింగ్ కాష్‌ను డిజేబుల్ చేయండి"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine సెట్టింగ్‌లు"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"ఫోర్స్ L3 ఫాల్‌బ్యాక్"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"ఫోర్స్ L3 ఫాల్‌బ్యాక్‌ను ఎంచుకోండి"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"అమలులో ఉన్న సర్వీస్‌లు"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"ప్రస్తుతం అమలులో ఉన్న సర్వీస్‌లను చూడండి, కంట్రోల్‌ చేయండి"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"వెబ్ వీక్షణ అమలు"</string>

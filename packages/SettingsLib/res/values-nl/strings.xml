@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"De informatie wordt onder andere gebruikt voor gespreksaankondigingen"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Internetverbinding delen"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Sms-berichten"</string>
-    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Sim-toegang"</string>
+    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Simtoegang"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="2607867572569689732">"Hoortoestellen"</string>
@@ -133,7 +133,7 @@
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="3744773111299503493">"Lokale internetverbinding delen met apparaat"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="7422039765025340313">"Gebruik voor internettoegang"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="4453622103977592583">"Gebruiken voor kaart"</string>
-    <string name="bluetooth_sap_profile_summary_use_for" msgid="6204902866176714046">"Gebruiken voor sim-toegang"</string>
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="6204902866176714046">"Gebruiken voor simtoegang"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="7324694226276491807">"Gebruiken voor audio van medium"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"Gebruiken voor audio van telefoon"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Gebruiken voor bestandsoverdracht"</string>
@@ -305,7 +305,7 @@
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Uit"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automatisch"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Hostnaam van privé-DNS-provider"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Geef hostnaam van DNS-provider op"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Voer de hostnaam van de DNS-provider in"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Kan geen verbinding maken"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Toon opties voor certificering van draadloze weergave"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Verhoog het logniveau voor wifi, toon per SSID RSSI in wifi-kiezer"</string>
@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Aannemen dat apps moderne indelingen ondersteunen"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Transcoderingsmeldingen tonen"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Transcodering van cache uitzetten"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine-instellingen"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"L3-fallback afdwingen"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Selecteren om L3-fallback af te dwingen"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Actieve services"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Bekijk en beheer services die momenteel actief zijn"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView-implementatie"</string>
@@ -596,7 +593,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Gebruiker"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Beperkt profiel"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Nieuwe gebruiker toevoegen?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Je kunt dit apparaat met anderen delen door extra gebruikers toe te voegen. Elke gebruiker heeft een eigen profiel met zelf gekozen apps, achtergrond, enzovoort. Gebruikers kunnen ook apparaatinstellingen aanpassen die van invloed zijn op alle gebruikers, zoals wifi.\n\nWanneer je een nieuwe gebruiker toevoegt, moet die persoon een eigen profiel instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers. Toegankelijkheidsinstellingen en -services worden mogelijk niet overgezet naar de nieuwe gebruiker."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Je kunt dit apparaat met anderen delen door extra gebruikers toe te voegen. Elke gebruiker heeft een eigen profiel met zelf gekozen apps, achtergrond, enzovoort. Gebruikers kunnen ook apparaatinstellingen aanpassen die van invloed zijn op alle gebruikers, zoals wifi.\n\nWanneer je een nieuwe gebruiker toevoegt, moet die persoon een eigen ruimte instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers. Toegankelijkheidsinstellingen en -services worden mogelijk niet overgezet naar de nieuwe gebruiker."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Wanneer je een nieuwe gebruiker toevoegt, moet die persoon een eigen profiel instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Deze gebruiker beheerder maken?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Beheerders hebben speciale rechten die andere gebruikers niet hebben. Een beheerder kan alle gebruikers beheren, dit apparaat updaten of resetten, instellingen wijzigen, alle geïnstalleerde apps bekijken en beheerdersrechten toekennen of intrekken voor anderen."</string>
@@ -657,7 +654,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Uit"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aan"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Je apparaat moet opnieuw worden opgestart om deze wijziging toe te passen. Start nu opnieuw op of annuleer de wijziging."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Bedrade hoofdtelefoon"</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Bedrade koptelefoon"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Aan"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Uit"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Netwerk van provider wordt gewijzigd"</string>

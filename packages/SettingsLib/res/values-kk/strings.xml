@@ -106,7 +106,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Тек сол жағы қосулы"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Тек оң жағы қосулы"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Екеуі де қосулы"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Meдиа аудиосы"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Mультимeдиа дыбысы"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Телефон қоңыраулары"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Файл жіберу"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Кіріс құрылғысы"</string>
@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Қолданбалар қазіргі заманғы форматтарды қолдайды делік"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Қайта кодтау хабарландыруларын көрсету"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Қайта кодтау кэшін өшіру"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine параметрлері"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"L3 баламасын мәжбүрлі түрде пайдалану"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"L3 баламасын мәжбүрлі түрде пайдалануды таңдайсыз."</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Қосылып тұрған қызметтер"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Қазір істеп тұрған қызметтерді көру және басқару"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView қызметі"</string>
@@ -641,7 +638,7 @@
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Жою"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Сақтау"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"Қонақ режимінен шығу"</string>
-    <string name="guest_reset_button" msgid="2515069346223503479">"Қонақ режимін қалпына келтіру"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Қонақ режимін бастапқы күйге қайтару"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Қонақ режимінен шығу"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Шыққанда барлық әрекет жойылады."</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Шыққанда барлық әрекетті сақтай немесе жоя аласыз."</string>
