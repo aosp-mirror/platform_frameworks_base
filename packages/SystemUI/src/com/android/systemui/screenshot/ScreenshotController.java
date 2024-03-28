@@ -41,7 +41,6 @@ import android.app.ActivityOptions;
 import android.app.ExitTransitionCoordinator;
 import android.app.ICompatCameraControlCallback;
 import android.app.Notification;
-import android.app.assist.AssistContent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -85,7 +84,6 @@ import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.clipboardoverlay.ClipboardOverlayController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.res.R;
 import com.android.systemui.screenshot.TakeScreenshotService.RequestCallback;
 import com.android.systemui.screenshot.scroll.LongScreenshotActivity;
@@ -441,16 +439,6 @@ public class ScreenshotController {
         mScreenBitmap.prepareToDraw();
 
         prepareViewForNewScreenshot(screenshot, oldPackageName);
-
-        if (mFlags.isEnabled(Flags.SCREENSHOT_METADATA) && screenshot.getTaskId() >= 0) {
-            mAssistContentRequester.requestAssistContent(screenshot.getTaskId(),
-                    new AssistContentRequester.Callback() {
-                        @Override
-                        public void onAssistContentAvailable(AssistContent assistContent) {
-                            screenshot.setContextUrl(assistContent.getWebUri());
-                        }
-                    });
-        }
 
         if (!shouldShowUi()) {
             saveScreenshotInWorkerThread(
