@@ -643,7 +643,7 @@
     <string name="guest_exit_button" msgid="5774985819191803960">"ਮਹਿਮਾਨ ਮੋਡ ਤੋਂ ਬਾਹਰ ਜਾਓ"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"ਮਹਿਮਾਨ ਸੈਸ਼ਨ ਨੂੰ ਰੀਸੈੱਟ ਕਰੋ"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"ਮਹਿਮਾਨ ਮੋਡ ਤੋਂ ਬਾਹਰ ਜਾਓ"</string>
-    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"ਬਾਹਰ ਜਾਣ \'ਤੇ ਸਾਰੀ ਸਰਗਰਮੀ ਮਿਟਾਈ ਜਾਵੇਗੀ"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"ਬਾਹਰ ਜਾਣ \'ਤੇ ਸਾਰੀ ਸਰਗਰਮੀ ਮਿਟਾ ਦਿੱਤੀ ਜਾਵੇਗੀ"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"ਤੁਸੀਂ ਬਾਹਰ ਜਾਣ \'ਤੇ ਆਪਣੀ ਸਰਗਰਮੀ ਰੱਖਿਅਤ ਕਰ ਜਾਂ ਮਿਟਾ ਸਕਦੇ ਹੋ"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"ਸੈਸ਼ਨ ਦੀ ਸਰਗਰਮੀ ਹੁਣੇ ਮਿਟਾਉਣ ਲਈ ਰੀਸੈੱਟ ਕਰੋ ਜਾਂ ਤੁਸੀਂ ਬਾਹਰ ਜਾਣ \'ਤੇ ਸਰਗਰਮੀ ਨੂੰ ਰੱਖਿਅਤ ਕਰ ਜਾਂ ਮਿਟਾ ਸਕਦੇ ਹੋ"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ਇੱਕ ਫ਼ੋਟੋ ਖਿੱਚੋ"</string>

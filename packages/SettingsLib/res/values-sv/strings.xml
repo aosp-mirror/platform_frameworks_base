@@ -518,7 +518,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Använd systemspråk"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Det gick inte att öppna inställningarna för <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Den här inmatningsmetoden kan samla all text som du skriver, inklusive personliga uppgifter som lösenord och kreditkortsnummer. Den kommer från appen <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Vill du använda inmatningsmetoden?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Obs! När du har startat om enheten måste du låsa upp mobilen innan du kan starta den här appen"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Obs! När du har startat om enheten måste du låsa upp telefonen innan du kan starta den här appen"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS-registrering"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Registrerad"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Ej registrerad"</string>

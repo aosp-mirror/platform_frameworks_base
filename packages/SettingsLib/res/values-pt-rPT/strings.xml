@@ -111,7 +111,7 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transferência do ficheiro"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Dispositivo de entrada"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Acesso à internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Perm. acesso a contactos e histór. cham."</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Acesso a contactos e histórico de chamadas"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"As informações são usadas para anúncios de chamadas e outros"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Partilha da ligação à internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Mensagens de texto"</string>
@@ -140,7 +140,7 @@
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Usar para entrada"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="3374057355721486932">"Usar para aparelhos auditivos"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Usar para LE_AUDIO"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Sincr."</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Sincronizar"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"SINCRONIZAR"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Cancelar"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"A sincronização concede acesso aos seus contactos e ao histórico de chamadas quando tem uma ligação estabelecida."</string>
@@ -265,7 +265,7 @@
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Mostrar um botão no menu ligar/desligar para criar um relatório de erro"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Manter ativo"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"O ecrã nunca entrará em suspensão durante o carregamento"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Ativar registo de monit. Bluetooth HCI"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Ativar registo de monitorização Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Capturar os pacotes Bluetooth (ative/desative o Bluetooth após alterar esta definição)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Desbloqueio de OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Permitir o desbloqueio do carregador de arranque"</string>
@@ -305,7 +305,7 @@
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Desativado"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automático"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Nome do anfitrião do fornecedor DNS privado"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Introduza nome - anfitrião do fornecedor DNS"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Introduza o nome de anfitrião do fornecedor DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Não foi possível estabelecer ligação"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostrar opções da certificação de display sem fios"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumentar o nível de reg. de Wi-Fi, mostrar por RSSI de SSID no Selec. de Wi-Fi"</string>
@@ -518,7 +518,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Usar idiomas do sistema"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Falha ao abrir as definições para <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Este método de introdução pode permitir a recolha de todo o texto que digitar, incluindo dados pessoais como, por exemplo, palavras-passe e números de cartões de crédito. Decorre da aplicação <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Usar este método de introdução?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Nota: após reiniciar, só é possível iniciar esta aplicação quando o telemóvel for desbloqueado."</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Nota: após um reinício, só é possível iniciar esta app com o telemóvel desbloqueado."</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"Estado do registo IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Registado"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Não registado"</string>
@@ -625,7 +625,7 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"Remover convidado"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Repor convidado"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Quer repor o convidado?"</string>
-    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Remover o convidado?"</string>
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Remover convidado?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Repor"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Remover"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"A repor o convidado…"</string>

@@ -112,7 +112,7 @@
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Dispositivo de entrada"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Acceso a Internet"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Acceso a contactos e historial de llamadas"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Se usará la inf. para anuncios de llamadas y otras funciones"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Se usará la información para anuncios de llamadas y más"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Compartir conexión a Internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Mensajes de texto"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Acceso a SIM"</string>
@@ -264,7 +264,7 @@
     <string name="bugreport_in_power" msgid="8664089072534638709">"Acceso directo para informes de errores"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Muestra un botón en el menú de encendido para realizar un informe de errores"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Permanecer activo"</string>
-    <string name="keep_screen_on_summary" msgid="1510731514101925829">"La pantalla nunca quedará inactiva mientras el dispositivo se esté cargando."</string>
+    <string name="keep_screen_on_summary" msgid="1510731514101925829">"La pantalla nunca quedará inactiva mientras el dispositivo se esté cargando"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Registro de Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Capturar paquetes de Bluetooth (activa/desactiva el Bluetooth después de cambiar esta configuración)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Desbloqueo de OEM"</string>
@@ -305,7 +305,7 @@
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Desactivado"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automático"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Nombre de host del proveedor de DNS privado"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Ingresa el host del proveedor de DNS"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Ingresa el nombre de host del proveedor de DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"No se pudo establecer conexión"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Muestra opciones de certificación de pantalla inalámbrica"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumenta el nivel de registro Wi-Fi y se muestra por SSID RSSI en el selector de Wi-Fi"</string>
@@ -411,7 +411,7 @@
     <string name="enable_freeform_support" msgid="7599125687603914253">"Habilitar ventanas de forma libre"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Permite la compatibilidad con ventanas de forma libre experimentales."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Contraseñas"</string>
-    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Tus copias de seguridad de escritorio no están protegidas por contraseña."</string>
+    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Tus copias de seguridad de escritorio no están protegidas por contraseña"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Presiona para cambiar o quitar la contraseña de las copias de seguridad completas de tu escritorio."</string>
     <string name="local_backup_password_toast_success" msgid="4891666204428091604">"Nueva contraseña de copia de seguridad definida"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="2994718182129097733">"La nueva contraseña y la de confirmación no coinciden."</string>
@@ -491,7 +491,7 @@
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Carga completa"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Se detuvo la carga"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlada por el administrador"</string>
-    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Controlada por la configuración restringida"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Función controlada por configuración restringida"</string>
     <string name="disabled" msgid="8017887509554714950">"Inhabilitada"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Con permiso"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"No permitida"</string>
@@ -555,7 +555,7 @@
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Esta tablet"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Conector de la bocina"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Bocina del conector"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositivo externo"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispositivo conectado"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este teléfono"</string>
@@ -629,7 +629,7 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Restablecer"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Quitar"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Restableciendo invitado…"</string>
-    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"¿Quieres restablecer la sesión de invitado?"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"¿Restablecer la sesión de invitado?"</string>
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Esta acción comenzará una nueva sesión de invitado y borrará todas las apps y los datos de la sesión actual."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"¿Salir del modo de invitado?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Esta acción borrará todas las apps y los datos de la sesión de invitado actual."</string>
