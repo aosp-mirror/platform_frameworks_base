@@ -39,12 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"আমি পাছৱৰ্ডবিহীন ভৱিষ্যতৰ দিশে আগবঢ়াৰ লগে লগে পাছকীৰ লগতে পাছৱৰ্ডসমূহো উপলব্ধ হ’ব।"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"আপোনাৰ <xliff:g id="CREATETYPES">%1$s</xliff:g> ক’ত ছেভ কৰিব লাগে সেয়া বাছনি কৰক"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"আপোনাৰ তথ্য ছেভ কৰি পৰৱৰ্তী সময়ত দ্ৰুতভাৱে ছাইন ইন কৰিবলৈ এটা পাছৱৰ্ড পৰিচালক বাছনি কৰক"</string>
-    <!-- no translation found for choose_create_option_passkey_title (8762295821604276511) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (4481366993598649224) -->
-    <skip />
-    <!-- no translation found for choose_create_option_sign_in_title (7092914088455358079) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"<xliff:g id="APP_NAME">%1$s</xliff:g>ত ছাইন ইন কৰিবলৈ পাছকী সৃষ্টি কৰিবনে?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"<xliff:g id="APP_NAME">%1$s</xliff:g>ত ছাইন ইন কৰিবলৈ পাছৱৰ্ড ছেভ কৰিবনে?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে ছাইন ইনৰ তথ্য ছেভ কৰিবনে?"</string>
     <string name="passkey" msgid="632353688396759522">"পাছকী"</string>
     <string name="password" msgid="6738570945182936667">"পাছৱৰ্ড"</string>
     <string name="passkeys" msgid="5733880786866559847">"পাছকী"</string>
@@ -73,8 +70,7 @@
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"অগ্ৰাহ্য কৰক"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে আপোনাৰ ছেভ হৈ থকা পাছকী ব্যৱহাৰ কৰিবনে?"</string>
     <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে আপোনাৰ ছেভ কৰি থোৱা পাছৱৰ্ড ব্যৱহাৰ কৰিবনে?"</string>
-    <!-- no translation found for get_dialog_title_single_tap_for (2057945648748859483) -->
-    <skip />
+    <string name="get_dialog_title_single_tap_for" msgid="2057945648748859483">"<xliff:g id="USERNAME">%2$s</xliff:g>ৰ জৰিয়তে <xliff:g id="APP_NAME">%1$s</xliff:g>ত ছাইন ইন কৰিবলৈ আপোনাৰ স্ক্ৰীন লক ব্যৱহাৰ কৰক"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে ছাইন ইন কৰিবলৈ আপোনাৰ ক্ৰিডেনশ্বিয়েল ব্যৱহাৰ কৰিবনে?"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে ছাইন ইনৰ বিকল্পসমূহ আনলক কৰিবনে?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে ছেভ হৈ থকা এটা পাছকী বাছনি কৰক"</string>
