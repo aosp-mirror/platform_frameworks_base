@@ -4681,9 +4681,10 @@ class Task extends TaskFragment {
 
     @Override
     public void setWindowingMode(int windowingMode) {
-        // Calling Task#setWindowingMode() for leaf task since this is the a specialization of
+        // Calling Task#setWindowingMode() for leaf task since this is a specialization of
         // {@link #setWindowingMode(int)} for root task.
         if (!isRootTask()) {
+            mMultiWindowRestoreWindowingMode = INVALID_WINDOWING_MODE;
             super.setWindowingMode(windowingMode);
             return;
         }
@@ -4726,6 +4727,9 @@ class Task extends TaskFragment {
             getRequestedOverrideConfiguration().windowConfiguration.setWindowingMode(windowingMode);
             return;
         }
+
+        // Reset multi-window restore windowing mode.
+        mMultiWindowRestoreWindowingMode = INVALID_WINDOWING_MODE;
 
         final ActivityRecord topActivity = getTopNonFinishingActivity();
 
