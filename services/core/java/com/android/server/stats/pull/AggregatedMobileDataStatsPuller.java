@@ -16,6 +16,7 @@
 
 package com.android.server.stats.pull;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.StatsManager;
 import android.app.usage.NetworkStatsManager;
@@ -135,7 +136,7 @@ class AggregatedMobileDataStatsPuller {
 
     private final RateLimiter mRateLimiter;
 
-    AggregatedMobileDataStatsPuller(NetworkStatsManager networkStatsManager) {
+    AggregatedMobileDataStatsPuller(@NonNull NetworkStatsManager networkStatsManager) {
         if (DEBUG) {
             if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
                 Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
