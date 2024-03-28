@@ -21,8 +21,8 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.graphics.Rect;
 
-import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
+import com.android.wm.shell.shared.annotations.ExternalThread;
 
 import java.util.concurrent.Executor;
 

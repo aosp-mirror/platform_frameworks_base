@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.taskview;
+package com.android.wm.shell.shared.annotations;
 
-import android.annotation.UiContext;
-import android.content.Context;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-import com.android.wm.shell.shared.annotations.ExternalThread;
+import javax.inject.Qualifier;
 
-import java.util.concurrent.Executor;
-import java.util.function.Consumer;
-
-/** Interface to create TaskView. */
-@ExternalThread
-public interface TaskViewFactory {
-    /** Creates an {@link TaskView} */
-    void create(@UiContext Context context, Executor executor, Consumer<TaskView> onCreate);
-}
+/** Annotates a method or class that is called from an external thread to the Shell threads. */
+@Documented
+@Inherited
+@Qualifier
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ExternalThread {}

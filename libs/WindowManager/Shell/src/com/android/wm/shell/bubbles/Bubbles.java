@@ -37,8 +37,8 @@ import android.window.ScreenCapture.SynchronousScreenCaptureListener;
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
 
-import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.common.bubbles.BubbleBarUpdate;
+import com.android.wm.shell.shared.annotations.ExternalThread;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

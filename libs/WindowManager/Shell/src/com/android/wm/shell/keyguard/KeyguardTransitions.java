@@ -19,7 +19,7 @@ package com.android.wm.shell.keyguard;
 import android.annotation.NonNull;
 import android.window.IRemoteTransition;
 
-import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.shared.annotations.ExternalThread;
 
 /**
  * Interface exposed to SystemUI Keyguard to register handlers for running
