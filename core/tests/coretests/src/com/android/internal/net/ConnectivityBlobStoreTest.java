@@ -153,4 +153,41 @@ public class ConnectivityBlobStoreTest {
         final String[] actual = connectivityBlobStore.list(TEST_NAME /* prefix */);
         assertArrayEquals(expected, actual);
     }
+
+    @Test
+    public void testList_underscoreInPrefix() throws Exception {
+        final String prefix = TEST_NAME + "_";
+        final String[] unsortedNames = new String[] {
+                prefix + "000",
+                TEST_NAME + "123",
+        };
+        // The '_' in the prefix should not be treated as a wildcard so the only match is "000".
+        final String[] expected = new String[] {"000"};
+        final ConnectivityBlobStore connectivityBlobStore = createConnectivityBlobStore();
+
+        for (int i = 0; i < unsortedNames.length; i++) {
+            assertTrue(connectivityBlobStore.put(unsortedNames[i], TEST_BLOB));
+        }
+        final String[] actual = connectivityBlobStore.list(prefix);
+        assertArrayEquals(expected, actual);
+    }
+
+    @Test
+    public void testList_percentInPrefix() throws Exception {
+        final String prefix = "%" + TEST_NAME + "%";
+        final String[] unsortedNames = new String[] {
+                TEST_NAME + "12345",
+                prefix + "0",
+                "abc" + TEST_NAME + "987",
+        };
+        // The '%' in the prefix should not be treated as a wildcard so the only match is "0".
+        final String[] expected = new String[] {"0"};
+        final ConnectivityBlobStore connectivityBlobStore = createConnectivityBlobStore();
+
+        for (int i = 0; i < unsortedNames.length; i++) {
+            assertTrue(connectivityBlobStore.put(unsortedNames[i], TEST_BLOB));
+        }
+        final String[] actual = connectivityBlobStore.list(prefix);
+        assertArrayEquals(expected, actual);
+    }
 }
