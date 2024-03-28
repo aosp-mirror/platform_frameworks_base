@@ -21,6 +21,8 @@ import com.android.systemui.screenshot.ImageCapture
 import com.android.systemui.screenshot.RequestProcessor
 import com.android.systemui.screenshot.ScreenshotPolicy
 import com.android.systemui.screenshot.ScreenshotRequestProcessor
+import com.android.systemui.screenshot.data.repository.DisplayContentRepository
+import com.android.systemui.screenshot.data.repository.DisplayContentRepositoryImpl
 import com.android.systemui.screenshot.data.repository.ProfileTypeRepository
 import com.android.systemui.screenshot.data.repository.ProfileTypeRepositoryImpl
 import dagger.Binds
@@ -45,4 +47,8 @@ interface ScreenshotPolicyModule {
             return RequestProcessor(imageCapture, policyProvider.get())
         }
     }
+
+    @Binds
+    @SysUISingleton
+    fun bindDisplayContentRepository(impl: DisplayContentRepositoryImpl): DisplayContentRepository
 }
