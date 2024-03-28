@@ -26,6 +26,8 @@ import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobi
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.FakeDeviceBasedSatelliteRepository
 import com.android.systemui.statusbar.pipeline.satellite.domain.interactor.DeviceBasedSatelliteInteractor
+import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository
+import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisioningInteractor
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
@@ -45,6 +47,9 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
 
     private val repo = FakeDeviceBasedSatelliteRepository()
     private val mobileIconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
+    private val deviceProvisionedRepository = FakeDeviceProvisioningRepository()
+    private val deviceProvisioningInteractor =
+        DeviceProvisioningInteractor(deviceProvisionedRepository)
 
     private val testScope = TestScope()
 
@@ -57,6 +62,7 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
             DeviceBasedSatelliteInteractor(
                 repo,
                 mobileIconsInteractor,
+                deviceProvisioningInteractor,
                 testScope.backgroundScope,
             )
 
@@ -213,5 +219,38 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
 
             // THEN icon is null immediately
             assertThat(latest).isNull()
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun icon_deviceIsProvisioned() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.icon)
+
+            // GIVEN satellite is allowed
+            repo.isSatelliteAllowedForCurrentLocation.value = true
+
+            // GIVEN all icons are OOS
+            val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
+            i1.isInService.value = false
+            i1.isEmergencyOnly.value = false
+
+            // GIVEN apm is disabled
+            airplaneModeRepository.setIsAirplaneMode(false)
+
+            // GIVEN device is not provisioned
+            deviceProvisionedRepository.setDeviceProvisioned(false)
+
+            // THEN icon is null because the device is not provisioned
+            assertThat(latest).isNull()
+
+            // GIVEN device becomes provisioned
+            deviceProvisionedRepository.setDeviceProvisioned(true)
+
+            // Wait for delay to be completed
+            advanceTimeBy(10.seconds)
+
+            // THEN icon is null because the device is not provisioned
+            assertThat(latest).isInstanceOf(Icon::class.java)
         }
 }
