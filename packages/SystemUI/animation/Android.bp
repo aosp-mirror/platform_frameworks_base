@@ -41,7 +41,7 @@ android_library {
     ],
 
     static_libs: [
-        "androidx.core_core-animation-nodeps",
+        "androidx.core_core-animation",
         "androidx.core_core-ktx",
         "androidx.annotation_annotation",
         "SystemUIShaderLib",
@@ -62,7 +62,7 @@ android_library {
     ],
 
     static_libs: [
-        "androidx.core_core-animation-nodeps",
+        "androidx.core_core-animation",
         "androidx.core_core-ktx",
         "androidx.annotation_annotation",
     ],
