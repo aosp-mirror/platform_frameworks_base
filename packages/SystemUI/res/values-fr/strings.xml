@@ -86,8 +86,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"La capture d\'écran est bloquée par votre administrateur informatique"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Modifier"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Modifier la capture d\'écran"</string>
-    <!-- no translation found for screenshot_share_label (1653061117238861559) -->
-    <skip />
+    <string name="screenshot_share_label" msgid="1653061117238861559">"Partager"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Partager la capture d\'écran"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Capturer plus"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Fermer la capture d\'écran"</string>
@@ -111,7 +110,7 @@
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Lancer l\'enregistrement"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Enregistrer l\'audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio de l\'appareil"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Son provenant de l\'appareil (musique, appels et sonneries, etc.)"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Son provenant de l\'appareil (musique, appels, sonneries, etc.)"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Micro"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio de l\'appareil et micro"</string>
     <string name="screenrecord_continue" msgid="4055347133700593164">"Commencer"</string>
@@ -146,12 +145,13 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Téléphoner"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Assistance vocale"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
-    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Lecteur de code QR"</string>
+    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Lecteur code QR"</string>
     <string name="accessibility_unlock_button" msgid="3613812140816244310">"Déverrouillé"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Appareil verrouillé"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Analyse du visage en cours"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Envoyer"</string>
     <string name="cancel" msgid="1089011503403416730">"Annuler"</string>
+    <string name="biometric_dialog_logo" msgid="7681107853070774595">"Logo de l\'appli"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Confirmer"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Réessayer"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Appuyer pour annuler l\'authentification"</string>
@@ -166,6 +166,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Visage reconnu. Appuyez sur l\'icône de déverrouillage pour continuer."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Authentifié"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Annuler l\'authentification"</string>
+    <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Plus d\'options"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Utiliser un code PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Utiliser un schéma"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Utiliser un mot de passe"</string>
@@ -362,6 +363,8 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Standard"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Moyen"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Élevé"</string>
+    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Débloquer le micro de l\'appareil ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Débloquer la caméra de l\'appareil ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Débloquer l\'appareil photo et le micro de l\'appareil ?"</string>
@@ -439,6 +442,10 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Supprimer"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Ajouter un widget"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"OK"</string>
+    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
+    <skip />
+    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
+    <skip />
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Autoriser n\'importe quel widget sur l\'écran de verrouillage ?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Ouvrir les paramètres"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Réactiver les applis pro ?"</string>
@@ -463,7 +470,7 @@
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Commencer à enregistrer ou à caster ?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Le service qui fournit cette fonction aura accès à toutes les infos visibles sur votre écran ou lues depuis votre appareil pendant un enregistrement ou une diffusion de contenu. Il peut s\'agir de mots de passe, détails de mode de paiement, photos, messages ou encore contenus audio lus."</string>
     <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Tout l\'écran"</string>
-    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Une seule appli"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Uniquement l\'appli"</string>
     <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Partager ou enregistrer une appli"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Commencer à enregistrer ou à caster avec <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ?"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Lorsque vous partagez, enregistrez ou castez, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages, photos et contenus audio et vidéo."</string>
@@ -610,7 +617,7 @@
     <string name="volume_panel_hint_mute" msgid="6962563028495243738">"couper le son de %s"</string>
     <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"réactiver le son de %s"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"Diffusion de <xliff:g id="LABEL">%s</xliff:g> sur"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"L\'audio se mettra en marche"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Lecture audio sur"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
     <string name="status_bar" msgid="4357390266055077437">"Barre d\'état"</string>
     <string name="demo_mode" msgid="263484519766901593">"Mode démo de l\'UI du système"</string>
@@ -763,10 +770,8 @@
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Passer en écran partagé avec l\'appli actuelle affichée à droite"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Passer en écran partagé avec l\'appli actuelle affichée à gauche"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Passer de l\'écran partagé au plein écran"</string>
-    <!-- no translation found for system_multitasking_splitscreen_focus_rhs (3838578650313318508) -->
-    <skip />
-    <!-- no translation found for system_multitasking_splitscreen_focus_lhs (3164261844398662518) -->
-    <skip />
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Passez à l\'appli à droite ou en dessous avec l\'écran partagé"</string>
+    <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Passez à l\'appli à gauche ou au-dessus avec l\'écran partagé"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"En mode écran partagé : Remplacer une appli par une autre"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Saisie"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Passer à la langue suivante"</string>

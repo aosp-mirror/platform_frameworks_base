@@ -59,7 +59,7 @@
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Başka bir cihaz tarafından sistem dilinin değiştirilmesi istendi"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Dili değiştir"</string>
     <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"Mevcut dili koru"</string>
-    <string name="share_wifi_button_text" msgid="1285273973812029240">"Kablosuz ağı paylaşın"</string>
+    <string name="share_wifi_button_text" msgid="1285273973812029240">"Kablosuz ağı paylaş"</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Bu ağda kablosuz hata ayıklamaya izin verilsin mi?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Ağ Adı (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nKablosuz Adresi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Bu ağda her zaman izin ver"</string>
@@ -86,8 +86,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"BT yöneticiniz ekran görüntüsü almayı engelledi"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Düzenle"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Ekran görüntüsünü düzenle"</string>
-    <!-- no translation found for screenshot_share_label (1653061117238861559) -->
-    <skip />
+    <string name="screenshot_share_label" msgid="1653061117238861559">"Paylaş"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Ekranı paylaş"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Alanı genişlet"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ekran görüntüsünü kapat"</string>
@@ -152,6 +151,7 @@
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Yüz taranıyor"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Gönder"</string>
     <string name="cancel" msgid="1089011503403416730">"İptal"</string>
+    <string name="biometric_dialog_logo" msgid="7681107853070774595">"Uygulama logosu"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Onayla"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Tekrar dene"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Kimlik doğrulama işlemini iptal etmek için dokunun"</string>
@@ -166,6 +166,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Yüzünüz tanındı. Kilit açma simgesine basın."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Kimliği Doğrulandı"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Kimlik doğrulamayı iptal et"</string>
+    <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Diğer Seçenekler"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN kullan"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Deseni kullan"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Şifre kullan"</string>
@@ -265,7 +266,7 @@
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Kullanılabilir eşlenmiş cihaz yok"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Cihaz bağlamak veya cihazın bağlantısını kesmek için dokunun"</string>
-    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Yeni cihaz eşleme"</string>
+    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Yeni cihaz eşle"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Tümünü göster"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth\'u kullan"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Bağlandı"</string>
@@ -362,6 +363,8 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Standart"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Orta"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Yüksek"</string>
+    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Cihaz mikrofonunun engellemesi kaldırılsın mı?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Cihaz kamerasının engellemesi kaldırılsın mı?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Cihaz kamerası ile mikrofonunun engellemesi kaldırılsın mı?"</string>
@@ -439,6 +442,10 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Kaldır"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Widget ekle"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Bitti"</string>
+    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
+    <skip />
+    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
+    <skip />
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Kilit ekranında tüm widget\'lara izin verilsin mi?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Ayarları açın"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"İş uygulamaları devam ettirilsin mi?"</string>
@@ -540,10 +547,8 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Bu cihaz ebeveyniniz tarafından yönetiliyor. Kullandığınız uygulamalar, konumunuz ve ekran başında kalma süreniz gibi bilgiler ebeveyniniz tarafından görülüp yönetilebilir."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent tarafından kilit açık tutuldu"</string>
-    <!-- no translation found for kg_prompt_after_adaptive_auth_lock (2587481497846342760) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_after_adaptive_auth_lock (2323400645470712787) -->
-    <skip />
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"Cihaz kilitlendi. Çok fazla sayıda kimlik doğrulama denemesi yapıldı."</string>
+    <string name="keyguard_indication_after_adaptive_auth_lock" msgid="2323400645470712787">"Cihaz kilitli\nKimlik doğrulama yapılamadı"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Ses ayarları"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Otomatik medya altyazısı"</string>
@@ -765,10 +770,8 @@
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Mevcut uygulamayı sağ tarafa alarak bölünmüş ekrana geç"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Mevcut uygulamayı sol tarafa alarak bölünmüş ekrana geç"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Bölünmüş ekrandan tam ekrana geç"</string>
-    <!-- no translation found for system_multitasking_splitscreen_focus_rhs (3838578650313318508) -->
-    <skip />
-    <!-- no translation found for system_multitasking_splitscreen_focus_lhs (3164261844398662518) -->
-    <skip />
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Bölünmüş ekran kullanırken sağdaki veya alttaki uygulamaya geçiş yapın"</string>
+    <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Bölünmüş ekran kullanırken soldaki veya üstteki uygulamaya geçiş yapın"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Bölünmüş ekran etkinken: Bir uygulamayı başkasıyla değiştir"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Giriş"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Sonraki dile geç"</string>

@@ -86,8 +86,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Pořizování snímků obrazovky je blokováno administrátorem IT"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Upravit"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Upravit snímek obrazovky"</string>
-    <!-- no translation found for screenshot_share_label (1653061117238861559) -->
-    <skip />
+    <string name="screenshot_share_label" msgid="1653061117238861559">"Sdílet"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Sdílet snímek obrazovky"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Zvětšit záběr snímku"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Zavřít snímek obrazovky"</string>
@@ -107,7 +106,7 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Trvalé oznámení o relaci nahrávání"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Začít nahrávat?"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Během nahrávání má Android přístup k veškerému obsahu, který je viditelný na obrazovce nebo se přehrává v zařízení. Buďte proto opatrní s věcmi, jako jsou hesla, platební údaje, zprávy, fotografie, zvuk a video."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Během nahrávání aplikace má Android přístup k veškerému obsahu, který je v dané aplikaci zobrazen nebo přehráván. Buďte proto opatrní s věcmi, jako jsou hesla, platební údaje, zprávy, fotografie, zvuk a video."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Během nahrávání aplikace má Android přístup k veškerému obsahu, který je v dané aplikaci zobrazen nebo přehráván. Buďte proto opatrní s informacemi, jako jsou hesla, platební údaje, zprávy, fotky, zvukové záznamy nebo videa."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Začít nahrávat"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Nahrávat zvuk"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvuk zařízení"</string>
@@ -152,6 +151,7 @@
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Skenování obličeje"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Odeslat"</string>
     <string name="cancel" msgid="1089011503403416730">"Zrušit"</string>
+    <string name="biometric_dialog_logo" msgid="7681107853070774595">"Logo aplikace"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Potvrdit"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Zkusit znovu"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Klepnutím zrušíte ověření"</string>
@@ -166,6 +166,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Obličej rozpoznán. Klepněte na ikonu odemknutí."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Ověřeno"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Zrušit ověření"</string>
+    <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Další možnosti"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Použít kód PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Použít gesto"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Použít heslo"</string>
@@ -264,7 +265,7 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Nerušit"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Nejsou dostupná žádná spárovaná zařízení"</string>
-    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Klepnutím připojíte nebo odpojíte zařízení"</string>
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Klepnutím zařízení připojíte nebo odpojíte"</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Spárovat nové zařízení"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Zobrazit vše"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Použít Bluetooth"</string>
@@ -362,6 +363,8 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Standardní"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Střední"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Vysoká"</string>
+    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Odblokovat mikrofon zařízení?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Odblokovat fotoaparát zařízení?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Odblokovat fotoaparát a mikrofon zařízení?"</string>
@@ -439,6 +442,10 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Odstranit"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Přidat widget"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Hotovo"</string>
+    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
+    <skip />
+    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
+    <skip />
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Povolit jakýkoli widget na obrazovce uzamčení?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Otevřít nastavení"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Zrušit pozastavení pracovních aplikací?"</string>
@@ -472,11 +479,11 @@
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> tuto možnost zakázala"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Začít odesílat?"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Během odesílání má Android přístup ke všemu, co je viditelné na obrazovce nebo se přehrává v zařízení. Buďte proto opatrní s věcmi, jako jsou hesla, platební údaje, zprávy, fotografie, zvuk a video."</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Během odesílání aplikace má Android přístup k veškerému obsahu, který je v dané aplikaci zobrazen nebo přehráván. Buďte proto opatrní s věcmi, jako jsou hesla, platební údaje, zprávy, fotografie, zvuk a video."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Během odesílání aplikace má Android přístup k veškerému obsahu, který je v dané aplikaci zobrazen nebo přehráván. Buďte proto opatrní s informacemi, jako jsou hesla, platební údaje, zprávy, fotky, zvukové záznamy a videa."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Začít odesílat"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Začít sdílet?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Během sdílení, nahrávání nebo odesílání má Android přístup k veškerému obsahu, který je viditelný na obrazovce nebo se přehrává v zařízení. Buďte proto opatrní s věcmi, jako jsou hesla, platební údaje, zprávy, fotografie, zvuk a video."</string>
-    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Během sdílení, nahrávání nebo odesílání aplikace má Android přístup k veškerému obsahu, který je v dané aplikaci zobrazen nebo přehráván. Buďte proto opatrní s věcmi, jako jsou hesla, platební údaje, zprávy, fotografie, zvuk a video."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Během sdílení, nahrávání nebo odesílání aplikace má Android přístup k veškerému obsahu, který je v dané aplikaci zobrazen nebo přehráván. Buďte proto opatrní s informacemi, jako jsou hesla, platební údaje, zprávy, fotky, zvukové záznamy a videa."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Začít"</string>
     <string name="media_projection_task_switcher_text" msgid="590885489897412359">"Když přepnete aplikace, sdílení se pozastaví"</string>
     <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"Sdílet aplikaci"</string>
@@ -610,7 +617,7 @@
     <string name="volume_panel_hint_mute" msgid="6962563028495243738">"ztlumíte %s"</string>
     <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"zapnete zvuk %s"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"Přehrávání <xliff:g id="LABEL">%s</xliff:g> na"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Zvuk se přehraje na"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Zvuk se přehraje přes"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Nástroj na ladění uživatelského rozhraní systému"</string>
     <string name="status_bar" msgid="4357390266055077437">"Stavový řádek"</string>
     <string name="demo_mode" msgid="263484519766901593">"Ukázkový režim uživatelského rozhraní systému"</string>
@@ -763,10 +770,8 @@
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Přepnout na rozdělenou obrazovku s aktuálními aplikacemi napravo"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Přepnout na rozdělenou obrazovku s aktuálními aplikacemi nalevo"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Přepnout z rozdělené obrazovky na celou obrazovku"</string>
-    <!-- no translation found for system_multitasking_splitscreen_focus_rhs (3838578650313318508) -->
-    <skip />
-    <!-- no translation found for system_multitasking_splitscreen_focus_lhs (3164261844398662518) -->
-    <skip />
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Přechod na aplikaci vpravo nebo dole v režimu rozdělené obrazovky"</string>
+    <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Přechod na aplikaci vlevo nebo nahoře v režimu rozdělené obrazovky"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"V režimu rozdělené obrazovky: nahradit jednu aplikaci druhou"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Vstup"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Přepnout na další jazyk"</string>
@@ -1164,7 +1169,7 @@
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Připojeno"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Dočasně připojeno"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Nekvalitní připojení"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Mobilní data se nebudou připojovat automaticky"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Bez automatického připojení přes mobilní data"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Žádné připojení"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Žádné další sítě nejsou k dispozici"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Nejsou k dispozici žádné sítě"</string>

@@ -86,8 +86,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Правенето на екранни снимки е блокирано от системния ви администратор"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Редактиране"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Редактиране на екранната снимка"</string>
-    <!-- no translation found for screenshot_share_label (1653061117238861559) -->
-    <skip />
+    <string name="screenshot_share_label" msgid="1653061117238861559">"Споделяне"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Споделяне на екранната снимка"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Заснемане на още"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Отхвърляне на екранната снимка"</string>
@@ -110,10 +109,10 @@
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Докато записвате дадено приложение, Android има достъп до всичко, което се показва или възпроизвежда в него. Затова бъдете внимателни с неща като пароли, подробности за начини на плащане, съобщения, снимки, аудио и видео."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Стартиране на записването"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Записване на звук"</string>
-    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Аудио от устройството"</string>
+    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Звук от устройството"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Звук от устройството ви, като например музика, обаждания и мелодии"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Микрофон"</string>
-    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Аудио от устройството и микрофона"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Звук от устройството и микрофона"</string>
     <string name="screenrecord_continue" msgid="4055347133700593164">"Стартиране"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Екранът се записва"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Екранът и аудиото се записват"</string>
@@ -152,6 +151,7 @@
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Извършва се сканиране на лице"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Изпращане"</string>
     <string name="cancel" msgid="1089011503403416730">"Отказ"</string>
+    <string name="biometric_dialog_logo" msgid="7681107853070774595">"Лого на приложението"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Потвърждаване"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Нов опит"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Докоснете, за да анулирате удостоверяването"</string>
@@ -166,6 +166,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Лицето бе разпознато. Продължете чрез иконата за отключване."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Удостоверено"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Анулиране на удостоверяването"</string>
+    <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Още опции"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Използване на ПИН"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Използване на фигура"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Използване на парола"</string>
@@ -362,6 +363,8 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Стандартен"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Среден"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Висок"</string>
+    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Да се отблокира ли микрофонът на устройството?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Да се отблокира ли камерата на устройството?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Да се отблокират ли камерата и микрофонът на устройството?"</string>
@@ -439,6 +442,10 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Премахване"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Добавяне на приспособление"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Готово"</string>
+    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
+    <skip />
+    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
+    <skip />
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Да се разреши ли което и да е приспособление на заключения екран?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Отваряне на настройките"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Отмяна на паузата за служ. прил.?"</string>
@@ -763,10 +770,8 @@
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Преминаване към разделен екран с текущото приложение отдясно"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Преминаване към разделен екран с текущото приложение отляво"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Превключване от разделен към цял екран"</string>
-    <!-- no translation found for system_multitasking_splitscreen_focus_rhs (3838578650313318508) -->
-    <skip />
-    <!-- no translation found for system_multitasking_splitscreen_focus_lhs (3164261844398662518) -->
-    <skip />
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Превключване към приложението вдясно/отдолу в режима на разделен екран"</string>
+    <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Превключване към приложението вляво/отгоре в режима на разделен екран"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"При разделен екран: замяна на дадено приложение с друго"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Въвеждане"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Превключване към следващия език"</string>

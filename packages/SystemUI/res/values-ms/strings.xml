@@ -86,8 +86,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Pengambilan tangkapan skrin disekat oleh pentadbir IT anda"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Edit"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Edit tangkapan skrin"</string>
-    <!-- no translation found for screenshot_share_label (1653061117238861559) -->
-    <skip />
+    <string name="screenshot_share_label" msgid="1653061117238861559">"Kongsi"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Kongsi tangkapan skrin"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Tangkap imej lagi"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ketepikan tangkapan skrin"</string>
@@ -106,8 +105,8 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Memproses rakaman skrin"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pemberitahuan breterusan untuk sesi rakaman skrin"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Mulakan Rakaman?"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Apabila anda membuat rakaman, Android boleh mengakses apa-apa sahaja yang boleh dilihat pada skrin anda atau dimainkan pada peranti anda. Oleh hal yang demikian, berhati-hati dengan perkara seperti kata laluan, butiran pembayaran, mesej, foto dan audio serta video."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Semasa anda merakam apl, Android boleh mengakses apa-apa sahaja yang ditunjukan atau dimainkan pada apl itu. Oleh hal yang demikian, berhati-hati dengan perkara seperti kata laluan, butiran pembayaran, mesej, foto dan audio serta video."</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Apabila anda merakam, Android boleh mengakses apa-apa sahaja yang kelihatan pada skrin anda atau dimainkan pada peranti anda. Oleh hal yang demikian, berhati-hati apabila memasukkan kata laluan, butiran pembayaran, mesej, foto, audio dan video."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Semasa anda merakam apl, Android boleh mengakses apa-apa sahaja yang ditunjukkan atau dimainkan pada apl itu. Oleh hal yang demikian, berhati-hati ketika memasukkan kata laluan, butiran pembayaran, mesej, foto, audio dan video."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Mulakan rakaman"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Rakam audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio peranti"</string>
@@ -152,6 +151,7 @@
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Mengimbas wajah"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Hantar"</string>
     <string name="cancel" msgid="1089011503403416730">"Batal"</string>
+    <string name="biometric_dialog_logo" msgid="7681107853070774595">"Logo apl"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Sahkan"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Cuba lagi"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Ketik untuk membatalkan pengesahan"</string>
@@ -166,6 +166,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Wajah dicam. Tekan ikon buka kunci untuk meneruskan."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Disahkan"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Batalkan Pengesahan"</string>
+    <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Lagi Pilihan"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Gunakan PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Gunakan corak"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Gunakan kata laluan"</string>
@@ -328,7 +329,7 @@
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Apl kerja"</string>
     <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"Dijeda"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Cahaya Malam"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Dihidupkan pd senja"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Hidup waktu senja"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Hingga matahari terbit"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Dihidupkan pada <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Hingga <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -362,6 +363,8 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Standard"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Sederhana"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Tinggi"</string>
+    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Nyahsekat mikrofon peranti?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Nyahsekat kamera peranti?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Nyahsekat kamera dan mikrofon peranti?"</string>
@@ -439,6 +442,10 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Alih keluar"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Tambahkan widget"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Selesai"</string>
+    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
+    <skip />
+    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
+    <skip />
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Benarkan sebarang widget pada skrin kunci?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Buka tetapan"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Nyahjeda apl kerja?"</string>
@@ -471,8 +478,8 @@
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Mula"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> telah melumpuhkan pilihan ini"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Mulakan penghantaran?"</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Apabila anda membuat penghantaran, Android boleh mengakses apa-apa sahaja yang boleh dilihat pada skrin anda atau dimainkan pada peranti anda. Oleh hal yang demikian, berhati-hati dengan perkara seperti kata laluan, butiran pembayaran, mesej, foto dan audio serta video."</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Apabila anda menghantar apl, Android boleh mengakses apa-apa sahaja yang ditunjukan atau dimainkan pada apl itu. Oleh hal yang demikian, berhati-hati dengan perkara seperti kata laluan, butiran pembayaran, mesej, foto dan audio serta video."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Apabila anda membuat penghantaran, Android boleh mengakses apa-apa sahaja yang kelihatan pada skrin atau dimainkan pada peranti anda. Oleh hal yang demikian, berhati-hati apabila memasukkan kata laluan, butiran pembayaran, mesej, foto, audio dan video."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Apabila anda menghantar apl, Android boleh mengakses apa-apa sahaja yang ditunjukkan atau dimainkan pada apl itu. Oleh hal yang demikian, berhati-hati apabila memasukkan kata laluan, butiran pembayaran, mesej, foto, audio dan video."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Mulakan penghantaran"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Mulakan perkongsian?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Apabila anda membuat perkongsian, rakaman atau penghantaran, Android boleh mengakses apa-apa sahaja yang boleh dilihat pada skrin anda atau dimainkan pada peranti anda. Oleh hal yang demikian, berhati-hati dengan perkara seperti kata laluan, butiran pembayaran, mesej, foto dan audio serta video."</string>
@@ -540,10 +547,8 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Peranti ini diurus oleh ibu bapa anda. Ibu bapa anda dapat melihat dan mengurus maklumat seperti apl yang anda gunakan, lokasi dan masa skrin anda."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Dibiarkan tidak berkunci oleh TrustAgent"</string>
-    <!-- no translation found for kg_prompt_after_adaptive_auth_lock (2587481497846342760) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_after_adaptive_auth_lock (2323400645470712787) -->
-    <skip />
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"Peranti telah dikunci, terlalu banyak percubaan pengesahan"</string>
+    <string name="keyguard_indication_after_adaptive_auth_lock" msgid="2323400645470712787">"Peranti dikunci\nPengesahan gagal"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Tetapan bunyi"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Sari kata media automatik"</string>
@@ -765,10 +770,8 @@
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Masuk skrin pisah dengan apl semasa pada sisi kanan"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Masuk skrin pisah dengan apl semasa pada sisi kiri"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Beralih daripada skrin pisah kepada skrin penuh"</string>
-    <!-- no translation found for system_multitasking_splitscreen_focus_rhs (3838578650313318508) -->
-    <skip />
-    <!-- no translation found for system_multitasking_splitscreen_focus_lhs (3164261844398662518) -->
-    <skip />
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Tukar kepada apl di sebelah kanan/bawah semasa menggunakan skrin pisah"</string>
+    <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Tukar kepada apl di sebelah kiri/atas semasa menggunakan skrin pisah"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Semasa skrin pisah: gantikan apl daripada satu apl kepada apl lain"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Input"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Beralih kepada bahasa seterusnya"</string>
@@ -1240,7 +1243,7 @@
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• Sekurang-kurangnya satu peranti atau panel peranti tersedia"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Pilih apl nota lalai untuk menggunakan pintasan pengambilan nota"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Pilih apl"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Pintasan sentuh &amp; tahan"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Sentuh &amp; tahan pintasan"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Batal"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Tukar skrin sekarang"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Buka telefon"</string>
