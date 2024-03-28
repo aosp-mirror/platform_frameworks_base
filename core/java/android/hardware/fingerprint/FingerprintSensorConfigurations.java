@@ -23,18 +23,18 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.SensorProps;
+import android.os.Binder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
-import android.util.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * Provides the sensor props for fingerprint sensor, if available.
@@ -68,23 +68,10 @@ public class FingerprintSensorConfigurations implements Parcelable {
     /**
      * Process AIDL instances to extract sensor props and add it to the sensor map.
      * @param aidlInstances available face AIDL instances
-     * @param getIFingerprint function that provides the daemon for the specific instance
      */
-    public void addAidlSensors(@NonNull String[] aidlInstances,
-            @NonNull Function<String, IFingerprint> getIFingerprint) {
+    public void addAidlSensors(@NonNull String[] aidlInstances) {
         for (String aidlInstance : aidlInstances) {
-            try {
-                final String fqName = IFingerprint.DESCRIPTOR + "/" + aidlInstance;
-                final IFingerprint fp = getIFingerprint.apply(fqName);
-                if (fp != null) {
-                    SensorProps[] props = fp.getSensorProps();
-                    mSensorPropsMap.put(aidlInstance, props);
-                } else {
-                    Log.d(TAG, "IFingerprint null for instance " + aidlInstance);
-                }
-            } catch (RemoteException e) {
-                Log.d(TAG, "Unable to get sensor properties!");
-            }
+            mSensorPropsMap.put(aidlInstance, null);
         }
     }
 
@@ -133,38 +120,31 @@ public class FingerprintSensorConfigurations implements Parcelable {
     }
 
     /**
-     * Return sensor props for the given instance. If instance is not available,
-     * then null is returned.
+     * Checks if {@param instance} exists.
      */
     @Nullable
-    public Pair<String, SensorProps[]> getSensorPairForInstance(String instance) {
-        if (mSensorPropsMap.containsKey(instance)) {
-            return new Pair<>(instance, mSensorPropsMap.get(instance));
-        }
-
-        return null;
+    public boolean doesInstanceExist(String instance) {
+        return mSensorPropsMap.containsKey(instance);
     }
 
     /**
-     * Return the first pair of instance and sensor props, which does not correspond to the given
-     * If instance is not available, then null is returned.
+     * Return the first HAL instance, which does not correspond to the given {@param instance}.
+     * If another instance is not available, then null is returned.
      */
     @Nullable
-    public Pair<String, SensorProps[]> getSensorPairNotForInstance(String instance) {
+    public String getSensorNameNotForInstance(String instance) {
         Optional<String> notAVirtualInstance = mSensorPropsMap.keySet().stream().filter(
                 (instanceName) -> !instanceName.equals(instance)).findFirst();
-        return notAVirtualInstance.map(this::getSensorPairForInstance).orElseGet(
-                this::getSensorPair);
+        return notAVirtualInstance.orElse(null);
     }
 
     /**
-     * Returns the first pair of instance and sensor props that has been added to the map.
+     * Returns the first instance that has been added to the map.
      */
     @Nullable
-    public Pair<String, SensorProps[]> getSensorPair() {
+    public String getSensorInstance() {
         Optional<String> optionalInstance = mSensorPropsMap.keySet().stream().findFirst();
-        return optionalInstance.map(this::getSensorPairForInstance).orElse(null);
-
+        return optionalInstance.orElse(null);
     }
 
     public boolean getResetLockoutRequiresHardwareAuthToken() {
@@ -180,5 +160,32 @@ public class FingerprintSensorConfigurations implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeByte((byte) (mResetLockoutRequiresHardwareAuthToken ? 1 : 0));
         dest.writeMap(mSensorPropsMap);
+    }
+
+    /**
+     * Returns fingerprint sensor props for the HAL {@param instance}.
+     */
+    @Nullable
+    public SensorProps[] getSensorPropForInstance(String instance) {
+        SensorProps[] props = mSensorPropsMap.get(instance);
+
+        //Props should not be null for HIDL configs
+        if (props != null) {
+            return props;
+        }
+
+        try {
+            final String fqName = IFingerprint.DESCRIPTOR + "/" + instance;
+            final IFingerprint fp = IFingerprint.Stub.asInterface(Binder.allowBlocking(
+                    ServiceManager.waitForDeclaredService(fqName)));
+            if (fp != null) {
+                props = fp.getSensorProps();
+            } else {
+                Log.d(TAG, "IFingerprint null for instance " + instance);
+            }
+        } catch (RemoteException e) {
+            Log.d(TAG, "Unable to get sensor properties!");
+        }
+        return props;
     }
 }
