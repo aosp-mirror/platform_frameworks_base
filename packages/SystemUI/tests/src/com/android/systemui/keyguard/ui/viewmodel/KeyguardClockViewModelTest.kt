@@ -30,14 +30,16 @@ import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
+import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockFaceConfig
 import com.android.systemui.plugins.clocks.ClockFaceController
+import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shared.clocks.ClockRegistry
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
-import com.android.systemui.statusbar.policy.SplitShadeStateController
+import com.android.systemui.util.Utils
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
@@ -67,12 +69,12 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
     private lateinit var keyguardClockInteractor: KeyguardClockInteractor
     private lateinit var keyguardClockRepository: KeyguardClockRepository
     private lateinit var fakeSettings: FakeSettings
+    private val shadeMode = MutableStateFlow<ShadeMode>(ShadeMode.Single)
     @Mock private lateinit var clockRegistry: ClockRegistry
     @Mock private lateinit var clock: ClockController
     @Mock private lateinit var largeClock: ClockFaceController
     @Mock private lateinit var clockFaceConfig: ClockFaceConfig
     @Mock private lateinit var eventController: ClockEventController
-    @Mock private lateinit var splitShadeStateController: SplitShadeStateController
     @Mock private lateinit var notifsKeyguardInteractor: NotificationsKeyguardInteractor
     @Mock private lateinit var areNotificationsFullyHidden: Flow<Boolean>
     @Mock private lateinit var shadeInteractor: ShadeInteractor
@@ -100,7 +102,7 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
         keyguardClockInteractor = KeyguardClockInteractor(keyguardClockRepository)
         whenever(notifsKeyguardInteractor.areNotificationsFullyHidden)
             .thenReturn(areNotificationsFullyHidden)
-        whenever(shadeInteractor.shadeMode).thenReturn(MutableStateFlow(ShadeMode.Single))
+        whenever(shadeInteractor.shadeMode).thenReturn(shadeMode)
         underTest =
             KeyguardClockViewModel(
                 keyguardInteractor,
@@ -151,6 +153,44 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
             keyguardClockRepository.setClockSize(SMALL)
             var value = collectLastValue(underTest.isLargeClockVisible)
             assertThat(value()).isEqualTo(false)
+        }
+
+    @Test
+    fun testSmallClockTop_splitshade() =
+        scope.runTest {
+            shadeMode.value = ShadeMode.Split
+            if (!ComposeLockscreen.isEnabled) {
+                assertThat(underTest.getSmallClockTopMargin(context))
+                    .isEqualTo(
+                        context.resources.getDimensionPixelSize(
+                            R.dimen.keyguard_split_shade_top_margin
+                        )
+                    )
+            } else {
+                assertThat(underTest.getSmallClockTopMargin(context))
+                    .isEqualTo(
+                        context.resources.getDimensionPixelSize(
+                            R.dimen.keyguard_split_shade_top_margin
+                        ) - Utils.getStatusBarHeaderHeightKeyguard(context)
+                    )
+            }
+        }
+
+    @Test
+    fun testSmallClockTop_nonSplitshade() =
+        scope.runTest {
+            if (!ComposeLockscreen.isEnabled) {
+                assertThat(underTest.getSmallClockTopMargin(context))
+                    .isEqualTo(
+                        context.resources.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin) +
+                            Utils.getStatusBarHeaderHeightKeyguard(context)
+                    )
+            } else {
+                assertThat(underTest.getSmallClockTopMargin(context))
+                    .isEqualTo(
+                        context.resources.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin)
+                    )
+            }
         }
 
     private fun setupMockClock() {

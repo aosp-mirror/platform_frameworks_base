@@ -17,10 +17,12 @@
 
 package com.android.systemui.keyguard.ui.binder
 
+import android.content.Context
 import android.view.View
 import androidx.core.view.isInvisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.systemui.keyguard.shared.model.SettingsClockSize
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardPreviewSmartspaceViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import kotlinx.coroutines.launch
@@ -30,13 +32,29 @@ object KeyguardPreviewSmartspaceViewBinder {
 
     @JvmStatic
     fun bind(
+        context: Context,
         smartspace: View,
+        splitShadePreview: Boolean,
         viewModel: KeyguardPreviewSmartspaceViewModel,
     ) {
         smartspace.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch { viewModel.smartspaceTopPadding.collect { smartspace.setTopPadding(it) } }
-
+                launch {
+                    viewModel.selectedClockSize.collect {
+                        val topPadding =
+                            when (it) {
+                                SettingsClockSize.DYNAMIC ->
+                                    viewModel.getLargeClockSmartspaceTopPadding(
+                                        splitShadePreview,
+                                    )
+                                SettingsClockSize.SMALL ->
+                                    viewModel.getSmallClockSmartspaceTopPadding(
+                                        splitShadePreview,
+                                    )
+                            }
+                        smartspace.setTopPadding(topPadding)
+                    }
+                }
                 launch { viewModel.shouldHideSmartspace.collect { smartspace.isInvisible = it } }
             }
         }
