@@ -268,7 +268,7 @@ class HostStubGenOptions(
             }
             if (!ret.outStubJar.isSet && !ret.outImplJar.isSet) {
                 log.w("Neither --out-stub-jar nor --out-impl-jar is set." +
-                        " $COMMAND_NAME will not generate jar files.")
+                        " $executableName will not generate jar files.")
             }
 
             if (ret.enableNonStubMethodCallDetection.get) {

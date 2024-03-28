@@ -154,12 +154,21 @@ public class TinyFrameworkClassTest {
     }
 
     @Test
+    public void testNativeSubstitutionLong() {
+        assertThat(TinyFrameworkNative.nativeLongPlus(1L, 2L)).isEqualTo(3L);
+    }
+
+    @Test
+    public void testNativeSubstitutionByte() {
+        assertThat(TinyFrameworkNative.nativeBytePlus((byte) 3, (byte) 4)).isEqualTo(7);
+    }
+
+    @Test
     public void testNativeSubstitutionClass_nonStatic() {
         TinyFrameworkNative instance = new TinyFrameworkNative();
         instance.setValue(5);
         assertThat(instance.nativeNonStaticAddToValue(3)).isEqualTo(8);
     }
-
 
     @Test
     public void testSubstituteNativeWithThrow() throws Exception {
