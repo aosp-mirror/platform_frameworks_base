@@ -47,7 +47,11 @@ public class SafetyLabels implements AslMarshallable {
     public List<Element> toOdDomElements(Document doc) {
         Element safetyLabelsEle =
                 XmlUtils.createPbundleEleWithName(doc, XmlUtils.OD_NAME_SAFETY_LABELS);
-        XmlUtils.appendChildren(safetyLabelsEle, mDataLabels.toOdDomElements(doc));
-        return List.of(safetyLabelsEle);
+        safetyLabelsEle.appendChild(
+                XmlUtils.createOdLongEle(doc, XmlUtils.OD_NAME_VERSION, mVersion));
+        if (mDataLabels != null) {
+            XmlUtils.appendChildren(safetyLabelsEle, mDataLabels.toOdDomElements(doc));
+        }
+        return XmlUtils.listOf(safetyLabelsEle);
     }
 }

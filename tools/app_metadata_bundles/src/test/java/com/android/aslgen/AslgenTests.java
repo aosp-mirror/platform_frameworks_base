@@ -19,6 +19,7 @@ package com.android.aslgen;
 import static org.junit.Assert.assertEquals;
 
 import com.android.asllib.AndroidSafetyLabel;
+import com.android.asllib.AslConverter;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,9 +74,8 @@ public class AslgenTests {
                     getClass().getClassLoader().getResourceAsStream(odPath.toString());
             String odContents = new String(odStream.readAllBytes(), StandardCharsets.UTF_8);
             AndroidSafetyLabel asl =
-                    AndroidSafetyLabel.readFromString(
-                            hrContents, AndroidSafetyLabel.Format.HUMAN_READABLE);
-            String out = asl.getXmlAsString(AndroidSafetyLabel.Format.ON_DEVICE);
+                    AslConverter.readFromString(hrContents, AslConverter.Format.HUMAN_READABLE);
+            String out = AslConverter.getXmlAsString(asl, AslConverter.Format.ON_DEVICE);
             System.out.println("out: " + out);
 
             assertEquals(getFormattedXml(out), getFormattedXml(odContents));
