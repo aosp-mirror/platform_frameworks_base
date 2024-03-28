@@ -894,7 +894,7 @@
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"要移除「<xliff:g id="APPNAME">%s</xliff:g>」的控制項嗎？"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"已加入收藏"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"已加入收藏，位置 <xliff:g id="NUMBER">%d</xliff:g>"</string>
-    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"從收藏中移除"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"未加入收藏"</string>
     <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"加入收藏"</string>
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"從收藏中移除"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"移到位置 <xliff:g id="NUMBER">%d</xliff:g>"</string>

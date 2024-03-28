@@ -109,7 +109,7 @@
     <string name="serviceClassPAD" msgid="6850244583416306321">"PAD"</string>
     <string name="roamingText0" msgid="7793257871609854208">"Indicador de roaming activado"</string>
     <string name="roamingText1" msgid="5073028598334616445">"Indicador de roaming desactivado"</string>
-    <string name="roamingText2" msgid="2834048284153110598">"Indicador de roaming titilando"</string>
+    <string name="roamingText2" msgid="2834048284153110598">"Indicador de roaming parpadeando"</string>
     <string name="roamingText3" msgid="831690234035748988">"Fuera del vecindario"</string>
     <string name="roamingText4" msgid="2171252529065590728">"Fuera de construcción"</string>
     <string name="roamingText5" msgid="4294671587635796641">"Roaming: sistema preferido"</string>

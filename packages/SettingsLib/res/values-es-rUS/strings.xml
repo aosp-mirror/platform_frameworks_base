@@ -36,7 +36,7 @@
     <string name="wifi_security_none" msgid="7392696451280611452">"Ninguna"</string>
     <string name="wifi_security_wep" msgid="1413627788581122366">"WEP"</string>
     <string name="wifi_security_wpa" msgid="1072450904799930636">"WPA-Personal"</string>
-    <string name="wifi_security_wpa2" msgid="4038267581230425543">"WPA2 Personal"</string>
+    <string name="wifi_security_wpa2" msgid="4038267581230425543">"WPA2-Personal"</string>
     <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-Personal"</string>
     <string name="wifi_security_eap" msgid="6179633834446852269">"WPA/WPA2/WPA3-Enterprise"</string>
     <string name="wifi_security_eap_wpa" msgid="6189023812330549957">"WPA-Enterprise"</string>
@@ -163,7 +163,7 @@
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Aplicaciones eliminadas"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Aplicaciones y usuarios eliminados"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Actualizaciones del sistema"</string>
-    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Conexión a red por USB"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Conexión mediante USB"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Hotspot portátil"</string>
     <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Conexión Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Compartir conexión"</string>

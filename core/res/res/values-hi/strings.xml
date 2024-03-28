@@ -246,7 +246,7 @@
     <string name="global_action_power_off" msgid="4404936470711393203">"बंद करें"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"पावर"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"रीस्टार्ट करें"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"आपातकालीन"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"आपातकालीन सुविधाएं देखें"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"गड़बड़ी की रिपोर्ट"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"सत्र खत्म करें"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"स्क्रीनशॉट"</string>
@@ -1895,7 +1895,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"हफ़्ते की रात"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"सप्ताहांत"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"इवेंट"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"सोते समय"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"सोने का समय"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> कुछ आवाज़ें म्‍यूट कर रहा है"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"आपके डिवाइस में कोई अंदरूनी समस्या है और यह तब तक ठीक नहीं होगी जब तक आप फ़ैक्‍टरी डेटा रीसेट नहीं करते."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"आपके डिवाइस के साथ कोई आंतरिक गड़बड़ी हुई. विवरणों के लिए अपने निर्माता से संपर्क करें."</string>
