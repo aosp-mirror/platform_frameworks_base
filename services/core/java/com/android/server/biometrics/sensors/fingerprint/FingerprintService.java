@@ -1128,27 +1128,36 @@ public class FingerprintService extends SystemService {
     @NonNull
     private Pair<String, SensorProps[]> filterAvailableHalInstances(
             FingerprintSensorConfigurations fingerprintSensorConfigurations) {
-        Pair<String, SensorProps[]> finalSensorPair =
-                fingerprintSensorConfigurations.getSensorPair();
+        final String finalSensorInstance = fingerprintSensorConfigurations.getSensorInstance();
         if (fingerprintSensorConfigurations.isSingleSensorConfigurationPresent()) {
-            return finalSensorPair;
+            return new Pair<>(finalSensorInstance,
+                    fingerprintSensorConfigurations.getSensorPropForInstance(finalSensorInstance));
         }
-
-        final Pair<String, SensorProps[]> virtualSensorPropsPair = fingerprintSensorConfigurations
-                .getSensorPairForInstance("virtual");
+        final String virtualInstance = "virtual";
+        final boolean isVirtualHalPresent =
+                fingerprintSensorConfigurations.doesInstanceExist(virtualInstance);
         if (Utils.isVirtualEnabled(getContext())) {
-            if (virtualSensorPropsPair != null) {
-                return virtualSensorPropsPair;
+            if (isVirtualHalPresent) {
+                return new Pair<>(virtualInstance,
+                        fingerprintSensorConfigurations.getSensorPropForInstance(virtualInstance));
             } else {
                 Slog.e(TAG, "Could not find virtual interface while it is enabled");
-                return finalSensorPair;
+                return new Pair<>(finalSensorInstance,
+                        fingerprintSensorConfigurations.getSensorPropForInstance(
+                                finalSensorInstance));
             }
         } else {
-            if (virtualSensorPropsPair != null) {
-                return fingerprintSensorConfigurations.getSensorPairNotForInstance("virtual");
+            if (isVirtualHalPresent) {
+                final String notAVirtualInstance = fingerprintSensorConfigurations
+                        .getSensorNameNotForInstance(virtualInstance);
+                if (notAVirtualInstance != null) {
+                    return new Pair<>(notAVirtualInstance, fingerprintSensorConfigurations
+                            .getSensorPropForInstance(notAVirtualInstance));
+                }
             }
         }
-        return finalSensorPair;
+        return new Pair<>(finalSensorInstance, fingerprintSensorConfigurations
+                .getSensorPropForInstance(finalSensorInstance));
     }
 
     private Pair<List<FingerprintSensorPropertiesInternal>, List<String>>
