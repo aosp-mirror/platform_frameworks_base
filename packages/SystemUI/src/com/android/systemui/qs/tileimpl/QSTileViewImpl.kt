@@ -620,7 +620,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
                 showRippleEffect = false
                 setOnTouchListener(longPressEffect)
                 if (!longPressEffectViewBinder.isBound) {
-                    longPressEffectViewBinder.bind(this, longPressEffect)
+                    longPressEffectViewBinder.bind(this, state.spec, longPressEffect)
                 }
             } else {
                 // Long-press effects might have been enabled before but the new state does not
