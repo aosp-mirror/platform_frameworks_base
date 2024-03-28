@@ -154,8 +154,11 @@ public final class NotificationEntry extends ListEntry {
     public CharSequence remoteInputTextWhenReset;
     public long lastRemoteInputSent = NOT_LAUNCHED_YET;
     public final ArraySet<Integer> mActiveAppOps = new ArraySet<>(3);
-    public CharSequence headsUpStatusBarText;
-    public CharSequence headsUpStatusBarTextPublic;
+
+    private final MutableStateFlow<CharSequence> mHeadsUpStatusBarText =
+            StateFlowKt.MutableStateFlow(null);
+    private final MutableStateFlow<CharSequence> mHeadsUpStatusBarTextPublic =
+            StateFlowKt.MutableStateFlow(null);
 
     // indicates when this entry's view was first attached to a window
     // this value will reset when the view is completely removed from the shade (ie: filtered out)
@@ -968,6 +971,32 @@ public final class NotificationEntry extends ListEntry {
     /** Remove a listener that was registered above. */
     public void removeOnSensitivityChangedListener(OnSensitivityChangedListener listener) {
         mOnSensitivityChangedListeners.remove(listener);
+    }
+
+    /** @see #setHeadsUpStatusBarText(CharSequence) */
+    public StateFlow<CharSequence> getHeadsUpStatusBarText() {
+        return mHeadsUpStatusBarText;
+    }
+
+    /**
+     * Sets the text to be displayed on the StatusBar, when this notification is the top pinned
+     * heads up.
+     */
+    public void setHeadsUpStatusBarText(CharSequence headsUpStatusBarText) {
+        this.mHeadsUpStatusBarText.setValue(headsUpStatusBarText);
+    }
+
+    /** @see #setHeadsUpStatusBarTextPublic(CharSequence) */
+    public StateFlow<CharSequence> getHeadsUpStatusBarTextPublic() {
+        return mHeadsUpStatusBarTextPublic;
+    }
+
+    /**
+     * Sets the text to be displayed on the StatusBar, when this notification is the top pinned
+     * heads up, and its content is sensitive right now.
+     */
+    public void setHeadsUpStatusBarTextPublic(CharSequence headsUpStatusBarTextPublic) {
+        this.mHeadsUpStatusBarTextPublic.setValue(headsUpStatusBarTextPublic);
     }
 
     public boolean isPulseSuppressed() {
