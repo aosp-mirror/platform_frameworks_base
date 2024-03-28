@@ -302,8 +302,10 @@ class MobileConnectionRepositoryImpl(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), UnknownNetworkType)
 
+    override val inflateSignalStrength = systemUiCarrierConfig.shouldInflateSignalStrength
+
     override val numberOfLevels =
-        systemUiCarrierConfig.shouldInflateSignalStrength
+        inflateSignalStrength
             .map { shouldInflate ->
                 if (shouldInflate) {
                     DEFAULT_NUM_LEVELS + 1
