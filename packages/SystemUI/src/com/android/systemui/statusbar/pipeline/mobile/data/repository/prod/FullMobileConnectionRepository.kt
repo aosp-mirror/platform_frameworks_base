@@ -301,7 +301,7 @@ class FullMobileConnectionRepository(
             .flatMapLatest { it.networkName }
             .logDiffsForTable(
                 tableLogBuffer,
-                columnPrefix = "",
+                columnPrefix = "intent",
                 initialValue = activeRepo.value.networkName.value,
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.networkName.value)
@@ -311,7 +311,7 @@ class FullMobileConnectionRepository(
             .flatMapLatest { it.carrierName }
             .logDiffsForTable(
                 tableLogBuffer,
-                columnPrefix = "",
+                columnPrefix = "sub",
                 initialValue = activeRepo.value.carrierName.value,
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.carrierName.value)

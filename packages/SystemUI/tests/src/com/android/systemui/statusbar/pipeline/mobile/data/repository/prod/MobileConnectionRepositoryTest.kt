@@ -868,6 +868,24 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun networkName_usingEagerStrategy_retainsNameBetweenSubscribers() =
+        testScope.runTest {
+            // Use the [StateFlow.value] getter so we can prove that the collection happens
+            // even when there is no [Job]
+
+            // Starts out default
+            assertThat(underTest.networkName.value).isEqualTo(DEFAULT_NAME_MODEL)
+
+            val intent = spnIntent()
+            val captor = argumentCaptor<BroadcastReceiver>()
+            verify(context).registerReceiver(captor.capture(), any())
+            captor.value!!.onReceive(context, intent)
+
+            // The value is still there despite no active subscribers
+            assertThat(underTest.networkName.value).isEqualTo(intent.toNetworkNameModel(SEP))
+        }
+
+    @Test
     fun operatorAlphaShort_tracked() =
         testScope.runTest {
             var latest: String? = null
