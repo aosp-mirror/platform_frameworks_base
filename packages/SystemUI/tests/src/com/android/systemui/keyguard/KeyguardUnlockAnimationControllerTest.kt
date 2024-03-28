@@ -14,6 +14,7 @@ import android.view.SurfaceControl
 import android.view.SyncRtSurfaceTransactionApplier
 import android.view.View
 import android.view.ViewRootImpl
+import android.view.WindowManager
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
 import com.android.systemui.Flags
@@ -51,6 +52,8 @@ import java.util.function.Predicate
 class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
 
+    @Mock
+    private lateinit var windowManager: WindowManager
     @Mock
     private lateinit var keyguardViewMediator: KeyguardViewMediator
     @Mock
@@ -99,7 +102,8 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         keyguardUnlockAnimationController = KeyguardUnlockAnimationController(
-            context, keyguardStateController, { keyguardViewMediator }, keyguardViewController,
+            windowManager, context.resources,
+            keyguardStateController, { keyguardViewMediator }, keyguardViewController,
             featureFlags, { biometricUnlockController }, statusBarStateController,
             notificationShadeWindowController, powerManager, wallpaperManager
         )
