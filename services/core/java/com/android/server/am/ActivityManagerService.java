@@ -18189,6 +18189,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public boolean startUserInBackground(final int userId) {
+            return ActivityManagerService.this.startUserInBackground(userId);
+        }
+
+        @Override
         public void killForegroundAppsForUser(@UserIdInt int userId) {
             final ArrayList<ProcessRecord> procs = new ArrayList<>();
             synchronized (mProcLock) {
