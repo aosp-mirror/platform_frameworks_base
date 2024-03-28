@@ -87,3 +87,11 @@ flag {
     bug: "239979904"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "toolkit_frame_rate_function_enabling_read_only"
+    namespace: "toolkit"
+    description: "Feature flag to enable the functionality of the dVRR feature"
+    bug: "239979904"
+    is_fixed_read_only: true
+}
