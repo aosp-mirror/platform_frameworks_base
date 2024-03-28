@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.domain.interactor
+package com.android.systemui.qs.panels.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.panels.data.repository.IconTilesRepository
-import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.panels.shared.model.GridLayoutType
+import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
-/** Interactor for retrieving the list of [TileSpec] to be displayed as icons. */
 @SysUISingleton
-class IconTilesInteractor @Inject constructor(repo: IconTilesRepository) {
-    val iconTilesSpecs: Flow<Set<TileSpec>> = repo.iconTilesSpecs
+class GridLayoutTypeRepository @Inject constructor() {
+    val layout: Flow<GridLayoutType> = flowOf(InfiniteGridLayoutType)
 }

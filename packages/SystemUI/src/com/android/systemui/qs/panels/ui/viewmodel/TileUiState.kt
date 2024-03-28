@@ -14,16 +14,25 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.domain.interactor
+package com.android.systemui.qs.panels.ui.viewmodel
 
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.panels.data.repository.IconTilesRepository
-import com.android.systemui.qs.pipeline.shared.TileSpec
-import javax.inject.Inject
-import kotlinx.coroutines.flow.Flow
+import com.android.systemui.plugins.qs.QSTile
+import java.util.function.Supplier
 
-/** Interactor for retrieving the list of [TileSpec] to be displayed as icons. */
-@SysUISingleton
-class IconTilesInteractor @Inject constructor(repo: IconTilesRepository) {
-    val iconTilesSpecs: Flow<Set<TileSpec>> = repo.iconTilesSpecs
+data class TileUiState(
+    val label: CharSequence,
+    val secondaryLabel: CharSequence,
+    val colors: TileColorAttributes,
+    val icon: Supplier<QSTile.Icon>,
+    val iconOnly: Boolean,
+)
+
+fun QSTile.State.toUiState(iconOnly: Boolean): TileUiState {
+    return TileUiState(
+        label ?: "",
+        secondaryLabel ?: "",
+        colors(),
+        icon?.let { Supplier { icon } } ?: iconSupplier,
+        iconOnly,
+    )
 }
