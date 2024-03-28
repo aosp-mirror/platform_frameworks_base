@@ -9030,7 +9030,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     void sendDeviceOwnerOrProfileOwnerCommand(String action, Bundle extras, int userId) {
         if (userId == UserHandle.USER_ALL) {
-            userId = UserHandle.USER_SYSTEM;
+            if (Flags.headlessDeviceOwnerDelegateSecurityLoggingBugFix()
+                    && getHeadlessDeviceOwnerModeForDeviceOwner()
+                    == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER) {
+                userId = mOwners.getDeviceOwnerUserId();
+            } else {
+                userId = UserHandle.USER_SYSTEM;
+            }
         }
         boolean inForeground = false;
         ComponentName receiverComponent = null;
