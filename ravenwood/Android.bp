@@ -154,3 +154,15 @@ filegroup {
     srcs: ["ravenwood-services-jarjar-rules.txt"],
     visibility: ["//frameworks/base"],
 }
+
+// For collecting the *stats.csv files in a known directory under out/host/linux-x86/testcases/.
+// The "test" just shows the available stats filenames.
+sh_test_host {
+    name: "ravenwood-stats-checker",
+    src: "ravenwood-stats-checker.sh",
+    test_suites: ["general-tests"],
+    data: [
+        ":framework-minus-apex.ravenwood.stats",
+        ":services.core.ravenwood.stats",
+    ],
+}
