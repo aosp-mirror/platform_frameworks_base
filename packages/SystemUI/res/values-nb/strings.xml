@@ -84,6 +84,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Funksjonen for å ta skjermdumper er blokkert av IT-administratoren din"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Rediger"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Rediger skjermdumpen"</string>
+    <string name="screenshot_share_label" msgid="1653061117238861559">"Del"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Del skjermdumpen"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Utvidet skjermdump"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Avvis skjermdumpen"</string>
@@ -833,7 +834,7 @@
     <string name="data_connection_no_internet" msgid="691058178914184544">"Ingen internettilkobling"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Åpne <xliff:g id="ID_1">%s</xliff:g>-innstillingene."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Endre rekkefølgen på innstillingene."</string>
-    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Av/på-meny"</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"På/av-meny"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Side <xliff:g id="ID_1">%1$d</xliff:g> av <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Låseskjerm"</string>
     <string name="finder_active" msgid="7907846989716941952">"Du kan finne denne telefonen med Finn enheten min, selv når den er slått av"</string>
@@ -1214,7 +1215,7 @@
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• Minst én enhet eller ett enhetspanel er tilgjengelig"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Velg en standard notatapp du vil bruke med notatsnarveien"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Velg app"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Trykk på og hold inne snarveien"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Trykk på snarveien og hold den inne"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Avbryt"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Bytt skjerm nå"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Åpne telefonen"</string>

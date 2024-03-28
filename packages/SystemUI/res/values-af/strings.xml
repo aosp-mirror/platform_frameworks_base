@@ -84,6 +84,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Die neem van skermskote word deur jou IT-admin geblokkeer"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Wysig"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Wysig skermkiekie"</string>
+    <string name="screenshot_share_label" msgid="1653061117238861559">"Deel"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Deel skermskoot"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Vang meer vas"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Maak skermkiekie toe"</string>
@@ -276,7 +277,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Invoer"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"Gehoortoestelle"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Skakel tans aan …"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Outo-draai"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Outodraai"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Outodraai skerm"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Ligging"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Sluimerskerm"</string>
@@ -360,8 +361,8 @@
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Deblokkeer toestelmikrofoon?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Deblokkeer toestelkamera?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Deblokkeer toestelkamera en mikrofoon?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Dit deblokkeer toegang vir alle programme en dienste wat toegelaat word om jou mikrofoon te gebruik."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Dit deblokkeer toegang vir alle programme en dienste wat toegelaat word om jou kamera te gebruik."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Dit deblokkeer toegang vir alle apps en dienste wat toegelaat word om jou mikrofoon te gebruik."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Dit deblokkeer toegang vir alle apps en dienste wat toegelaat word om jou kamera te gebruik."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Dit deblokkeer toegang vir alle programme en dienste wat toegelaat word om jou kamera of mikrofoon te gebruik."</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Mikrofoon is geblokkeer"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Kamera is geblokkeer"</string>
@@ -869,12 +870,12 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> loop tans"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Program is oopgemaak sonder dat dit geïnstalleer is."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Program is oopgemaak sonder dat dit geïnstalleer is. Tik om meer te wete te kom."</string>
-    <string name="app_info" msgid="5153758994129963243">"Programinligting"</string>
+    <string name="app_info" msgid="5153758994129963243">"Appinligting"</string>
     <string name="go_to_web" msgid="636673528981366511">"Gaan na blaaier"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Mobiele data"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi is af"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-fi is af"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth is af"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Moenie Steur Nie is af"</string>
     <string name="dnd_is_on" msgid="7009368176361546279">"Moenie Steur Nie is aan"</string>
@@ -1050,7 +1051,7 @@
     <string name="controls_error_removed" msgid="6675638069846014366">"Nie gekry nie"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrole is nie beskikbaar nie"</string>
     <string name="controls_error_removed_message" msgid="2885911717034750542">"Kon nie by <xliff:g id="DEVICE">%1$s</xliff:g> ingaan nie. Gaan die <xliff:g id="APPLICATION">%2$s</xliff:g>-program na om seker te maak dat die kontrole steeds beskikbaar is en dat die programinstellings nie verander het nie."</string>
-    <string name="controls_open_app" msgid="483650971094300141">"Maak program oop"</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Maak app oop"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Kan nie status laai nie"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Fout, probeer weer"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Voeg kontroles by"</string>
@@ -1214,7 +1215,7 @@
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• Minstens een toestel of toestelpaneel is beskikbaar"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Kies ’n versteknotasapp om die notaneemkortpad te gebruik"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Kies app"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Raak en hou kortpad"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Raak-en-hou-kortpad"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Kanselleer"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Wissel skerms nou"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Ontvou foon"</string>

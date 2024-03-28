@@ -84,6 +84,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Administratorul IT a blocat crearea capturilor de ecran"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Editează"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Editează captura de ecran"</string>
+    <string name="screenshot_share_label" msgid="1653061117238861559">"Distribuie"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Trimite captura de ecran"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Surprinde mai mult"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Închide captura de ecran"</string>
@@ -442,13 +443,13 @@
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Începe din nou"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Da, continuă"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"Modul pentru invitați"</string>
-    <string name="guest_notification_session_active" msgid="5567273684713471450">"Folosește modul pentru invitați"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"Folosești modul pentru invitați"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Dacă adaugi un utilizator nou, vei ieși din modul pentru invitați și se vor șterge toate aplicațiile și datele din sesiunea actuală pentru invitați."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Ai atins limita de utilizatori"</string>
     <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{Se poate crea doar un utilizator.}few{Poți adăuga până la # utilizatori.}other{Poți adăuga până la # de utilizatori.}}"</string>
     <string name="user_remove_user_title" msgid="9124124694835811874">"Excluzi utilizatorul?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Toate aplicațiile și datele acestui utilizator vor fi șterse."</string>
-    <string name="user_remove_user_remove" msgid="8387386066949061256">"Elimină"</string>
+    <string name="user_remove_user_remove" msgid="8387386066949061256">"Exclude"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Începi să înregistrezi sau să proiectezi cu <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> va avea acces la toate informațiile vizibile pe ecran sau redate pe dispozitiv în timp ce înregistrezi sau proiectezi. Între aceste informații se numără parole, detalii de plată, fotografii, mesaje și conținutul audio pe care îl redai."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Începi să înregistrezi sau să proiectezi?"</string>

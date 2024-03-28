@@ -84,6 +84,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Vytváranie snímok obrazovky zablokoval váš správca IT"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Upraviť"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Upraviť snímku obrazovky"</string>
+    <string name="screenshot_share_label" msgid="1653061117238861559">"Zdieľať"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Zdieľať snímku obrazovky"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Zachytiť viac"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Zavrieť snímku obrazovky"</string>
@@ -323,7 +324,7 @@
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Pracovné aplikácie"</string>
     <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"Pozastavené"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Nočný režim"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Zap. pri záp. slnka"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Pri západe slnka"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Do východu slnka"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Od <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Do <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -589,7 +590,7 @@
     <string name="volume_dialog_title" msgid="6502703403483577940">"Ovládacie prvky hlasitosti %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Hovory a upozornenia spustia zvonenie (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> sa prehráva v:"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Zvuk sa prehrá v:"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Zvuk sa prehrá cez"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Tuner používateľského rozhrania systému"</string>
     <string name="status_bar" msgid="4357390266055077437">"Stavový riadok"</string>
     <string name="demo_mode" msgid="263484519766901593">"Ukážka používateľského rozhrania systému"</string>
@@ -1140,7 +1141,7 @@
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Pripojené"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Dočasne pripojené"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Slabé pripojenie"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Automatické pripojenie cez mobilné dáta nefunguje"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Mobilné dáta sa nepripájajú automaticky"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Bez pripojenia"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Nie sú k dispozícii žiadne ďalšie siete"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Nie sú k dispozícii žiadne siete"</string>
