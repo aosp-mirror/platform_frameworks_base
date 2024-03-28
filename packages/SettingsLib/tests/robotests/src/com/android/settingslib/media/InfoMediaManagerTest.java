@@ -86,6 +86,30 @@ public class InfoMediaManagerTest {
     private static final String TEST_DUPLICATED_ID_2 = "test_duplicated_id_2";
     private static final String TEST_DUPLICATED_ID_3 = "test_duplicated_id_3";
 
+    private static final String TEST_SYSTEM_ROUTE_ID = "TEST_SYSTEM_ROUTE_ID";
+    private static final String TEST_BLUETOOTH_ROUTE_ID = "TEST_BT_ROUTE_ID";
+
+    private static final RoutingSessionInfo TEST_SYSTEM_ROUTING_SESSION =
+            new RoutingSessionInfo.Builder("FAKE_SYSTEM_ROUTING_SESSION_ID", TEST_PACKAGE_NAME)
+                    .addSelectedRoute(TEST_SYSTEM_ROUTE_ID)
+                    .addTransferableRoute(TEST_BLUETOOTH_ROUTE_ID)
+                    .setSystemSession(true)
+                    .build();
+
+    private static final MediaRoute2Info TEST_SELECTED_SYSTEM_ROUTE =
+            new MediaRoute2Info.Builder(TEST_SYSTEM_ROUTE_ID, "SELECTED_SYSTEM_ROUTE")
+                    .setSystemRoute(true)
+                    .addFeature(MediaRoute2Info.FEATURE_LIVE_AUDIO)
+                    .build();
+
+    private static final MediaRoute2Info TEST_BLUETOOTH_ROUTE =
+            new MediaRoute2Info.Builder(TEST_BLUETOOTH_ROUTE_ID, "BLUETOOTH_ROUTE")
+                    .setSystemRoute(true)
+                    .addFeature(MediaRoute2Info.FEATURE_LIVE_AUDIO)
+                    .setType(TYPE_BLUETOOTH_A2DP)
+                    .setAddress("00:00:00:00:00:00")
+                    .build();
+
     @Mock
     private MediaRouter2Manager mRouterManager;
     @Mock
@@ -795,19 +819,19 @@ public class InfoMediaManagerTest {
 
         when(route2Info.getType()).thenReturn(TYPE_REMOTE_SPEAKER);
         when(route2Info.getId()).thenReturn(TEST_ID);
-        mInfoMediaManager.addMediaDevice(route2Info);
+        mInfoMediaManager.addMediaDevice(route2Info, TEST_SYSTEM_ROUTING_SESSION);
         assertThat(mInfoMediaManager.mMediaDevices.get(0) instanceof InfoMediaDevice).isTrue();
 
         when(route2Info.getType()).thenReturn(TYPE_USB_DEVICE);
         when(route2Info.getId()).thenReturn(TEST_ID);
         mInfoMediaManager.mMediaDevices.clear();
-        mInfoMediaManager.addMediaDevice(route2Info);
+        mInfoMediaManager.addMediaDevice(route2Info, TEST_SYSTEM_ROUTING_SESSION);
         assertThat(mInfoMediaManager.mMediaDevices.get(0) instanceof PhoneMediaDevice).isTrue();
 
         when(route2Info.getType()).thenReturn(TYPE_WIRED_HEADSET);
         when(route2Info.getId()).thenReturn(TEST_ID);
         mInfoMediaManager.mMediaDevices.clear();
-        mInfoMediaManager.addMediaDevice(route2Info);
+        mInfoMediaManager.addMediaDevice(route2Info, TEST_SYSTEM_ROUTING_SESSION);
         assertThat(mInfoMediaManager.mMediaDevices.get(0) instanceof PhoneMediaDevice).isTrue();
 
         when(route2Info.getType()).thenReturn(TYPE_BLUETOOTH_A2DP);
@@ -818,12 +842,12 @@ public class InfoMediaManagerTest {
         when(cachedBluetoothDeviceManager.findDevice(any(BluetoothDevice.class)))
                 .thenReturn(cachedDevice);
         mInfoMediaManager.mMediaDevices.clear();
-        mInfoMediaManager.addMediaDevice(route2Info);
+        mInfoMediaManager.addMediaDevice(route2Info, TEST_SYSTEM_ROUTING_SESSION);
         assertThat(mInfoMediaManager.mMediaDevices.get(0) instanceof BluetoothMediaDevice).isTrue();
 
         when(route2Info.getType()).thenReturn(TYPE_BUILTIN_SPEAKER);
         mInfoMediaManager.mMediaDevices.clear();
-        mInfoMediaManager.addMediaDevice(route2Info);
+        mInfoMediaManager.addMediaDevice(route2Info, TEST_SYSTEM_ROUTING_SESSION);
         assertThat(mInfoMediaManager.mMediaDevices.get(0) instanceof PhoneMediaDevice).isTrue();
     }
 
@@ -841,26 +865,27 @@ public class InfoMediaManagerTest {
                 .thenReturn(null);
 
         mInfoMediaManager.mMediaDevices.clear();
-        mInfoMediaManager.addMediaDevice(route2Info);
+        mInfoMediaManager.addMediaDevice(route2Info, TEST_SYSTEM_ROUTING_SESSION);
 
         assertThat(mInfoMediaManager.mMediaDevices.size()).isEqualTo(0);
     }
 
     @Test
     public void addMediaDevice_deviceIncludedInSelectedDevices_shouldSetAsCurrentConnected() {
-        final MediaRoute2Info route2Info = mock(MediaRoute2Info.class);
         final CachedBluetoothDeviceManager cachedBluetoothDeviceManager =
                 mock(CachedBluetoothDeviceManager.class);
-        final CachedBluetoothDevice cachedDevice = mock(CachedBluetoothDevice.class);
-        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
-        final RoutingSessionInfo sessionInfo = mock(RoutingSessionInfo.class);
-        routingSessionInfos.add(sessionInfo);
 
-        when(mRouterManager.getRoutingSessions(TEST_PACKAGE_NAME)).thenReturn(routingSessionInfos);
-        when(sessionInfo.getSelectedRoutes()).thenReturn(ImmutableList.of(TEST_ID));
-        when(route2Info.getType()).thenReturn(TYPE_BLUETOOTH_A2DP);
-        when(route2Info.getAddress()).thenReturn("00:00:00:00:00:00");
-        when(route2Info.getId()).thenReturn(TEST_ID);
+        final CachedBluetoothDevice cachedDevice = mock(CachedBluetoothDevice.class);
+        RoutingSessionInfo selectedBtSession =
+                new RoutingSessionInfo.Builder(TEST_SYSTEM_ROUTING_SESSION)
+                        .clearSelectedRoutes()
+                        .clearTransferableRoutes()
+                        .addSelectedRoute(TEST_BLUETOOTH_ROUTE_ID)
+                        .addTransferableRoute(TEST_SYSTEM_ROUTE_ID)
+                        .build();
+
+        when(mRouterManager.getRoutingSessions(TEST_PACKAGE_NAME))
+                .thenReturn(List.of(selectedBtSession));
         when(mLocalBluetoothManager.getCachedDeviceManager())
                 .thenReturn(cachedBluetoothDeviceManager);
         when(cachedBluetoothDeviceManager.findDevice(any(BluetoothDevice.class)))
@@ -868,7 +893,7 @@ public class InfoMediaManagerTest {
         mInfoMediaManager.mRouterManager = mRouterManager;
 
         mInfoMediaManager.mMediaDevices.clear();
-        mInfoMediaManager.addMediaDevice(route2Info);
+        mInfoMediaManager.addMediaDevice(TEST_BLUETOOTH_ROUTE, selectedBtSession);
 
         MediaDevice device = mInfoMediaManager.mMediaDevices.get(0);
 
