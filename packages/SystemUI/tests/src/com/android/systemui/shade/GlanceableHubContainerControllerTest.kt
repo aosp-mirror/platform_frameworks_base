@@ -41,6 +41,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.model.sceneDataSourceDelegator
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import com.android.systemui.testKosmos
@@ -104,7 +105,8 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 dialogFactory,
                 keyguardTransitionInteractor,
                 shadeInteractor,
-                powerManager
+                powerManager,
+                kosmos.sceneDataSourceDelegator,
             )
         testableLooper = TestableLooper.get(this)
 
@@ -145,6 +147,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 keyguardTransitionInteractor,
                 shadeInteractor,
                 powerManager,
+                kosmos.sceneDataSourceDelegator,
             )
 
         // First call succeeds.
@@ -268,7 +271,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     }
 
     private fun goToScene(scene: SceneKey) {
-        communalRepository.setDesiredScene(scene)
+        communalRepository.changeScene(scene)
         testableLooper.processAllMessages()
     }
 

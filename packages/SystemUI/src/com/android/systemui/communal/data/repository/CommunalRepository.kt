@@ -18,11 +18,12 @@ package com.android.systemui.communal.data.repository
 
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.TransitionKey
+import com.android.systemui.communal.dagger.Communal
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.scene.data.repository.SceneContainerRepository
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.model.SceneDataSource
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -30,7 +31,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
@@ -38,16 +38,15 @@ import kotlinx.coroutines.flow.stateIn
 /** Encapsulates the state of communal mode. */
 interface CommunalRepository {
     /**
-     * Target scene as requested by the underlying [SceneTransitionLayout] or through
-     * [setDesiredScene].
+     * Target scene as requested by the underlying [SceneTransitionLayout] or through [changeScene].
      */
-    val desiredScene: StateFlow<SceneKey>
+    val currentScene: StateFlow<SceneKey>
 
     /** Exposes the transition state of the communal [SceneTransitionLayout]. */
     val transitionState: StateFlow<ObservableTransitionState>
 
     /** Updates the requested scene. */
-    fun setDesiredScene(desiredScene: SceneKey)
+    fun changeScene(toScene: SceneKey, transitionKey: TransitionKey? = null)
 
     /**
      * Updates the transition state of the hub [SceneTransitionLayout].
@@ -63,12 +62,10 @@ class CommunalRepositoryImpl
 @Inject
 constructor(
     @Background backgroundScope: CoroutineScope,
-    sceneContainerFlags: SceneContainerFlags,
-    sceneContainerRepository: SceneContainerRepository,
+    @Communal private val sceneDataSource: SceneDataSource,
 ) : CommunalRepository {
 
-    private val _desiredScene: MutableStateFlow<SceneKey> = MutableStateFlow(CommunalScenes.Default)
-    override val desiredScene: StateFlow<SceneKey> = _desiredScene.asStateFlow()
+    override val currentScene: StateFlow<SceneKey> = sceneDataSource.currentScene
 
     private val defaultTransitionState = ObservableTransitionState.Idle(CommunalScenes.Default)
     private val _transitionState = MutableStateFlow<Flow<ObservableTransitionState>?>(null)
@@ -81,8 +78,8 @@ constructor(
                 initialValue = defaultTransitionState,
             )
 
-    override fun setDesiredScene(desiredScene: SceneKey) {
-        _desiredScene.value = desiredScene
+    override fun changeScene(toScene: SceneKey, transitionKey: TransitionKey?) {
+        sceneDataSource.changeScene(toScene, transitionKey)
     }
 
     /**
