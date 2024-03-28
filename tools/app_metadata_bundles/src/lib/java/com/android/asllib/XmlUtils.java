@@ -108,7 +108,7 @@ public class XmlUtils {
     public static List<Element> asElementList(NodeList nodeList) {
         List<Element> elementList = new ArrayList<Element>();
         for (int i = 0; i < nodeList.getLength(); i++) {
-            var elementAsNode = nodeList.item(i);
+            var elementAsNode = nodeList.item(0);
             if (elementAsNode instanceof Element) {
                 elementList.add(((Element) elementAsNode));
             }
