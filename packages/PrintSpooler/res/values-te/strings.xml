@@ -31,7 +31,7 @@
     <string name="template_all_pages" msgid="3322235982020148762">"మొత్తం <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g> పరిధి"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"ఉదా. 1—5,8,11—13"</string>
-    <string name="print_preview" msgid="8010217796057763343">"ముద్రణ ప్రివ్యూ"</string>
+    <string name="print_preview" msgid="8010217796057763343">"ప్రింట్ ప్రివ్యూ"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"ప్రివ్యూ చేయడానికి PDF వ్యూయర్‌ను ఇన్‌స్టాల్ చేయండి"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"ముద్రణ యాప్ క్రాష్ అయ్యింది"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"ముద్రణ జాబ్‌ను ఉత్పన్నం చేస్తోంది"</string>
