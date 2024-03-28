@@ -110,10 +110,12 @@ import static android.view.accessibility.Flags.reduceWindowContentChangedEventTh
 import static android.view.flags.Flags.toolkitFrameRateTypingReadOnly;
 import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
+import static android.view.flags.Flags.toolkitFrameRateFunctionEnablingReadOnly;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.IME_FOCUS_CONTROLLER;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INSETS_CONTROLLER;
 
 import static com.android.input.flags.Flags.enablePointerChoreographer;
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.window.flags.Flags.activityWindowInfoFlag;
 import static com.android.window.flags.Flags.enableBufferTransformHintFromDisplay;
 import static com.android.window.flags.Flags.setScPropertiesInClient;
@@ -941,6 +943,7 @@ public final class ViewRootImpl implements ViewParent,
                     new InputEventConsistencyVerifier(this, 0) : null;
 
     private final InsetsController mInsetsController;
+    private final ImeBackAnimationController mImeBackAnimationController;
     private final ImeFocusController mImeFocusController;
 
     private boolean mIsSurfaceOpaque;
@@ -1148,6 +1151,7 @@ public final class ViewRootImpl implements ViewParent,
     private String mLargestViewTraceName;
 
     private static boolean sToolkitSetFrameRateReadOnlyFlagValue;
+    private static boolean sToolkitFrameRateFunctionEnablingReadOnlyFlagValue;
     private static boolean sToolkitMetricsForFrameRateDecisionFlagValue;
     private static boolean sToolkitFrameRateTypingReadOnlyFlagValue;
 
@@ -1155,6 +1159,8 @@ public final class ViewRootImpl implements ViewParent,
         sToolkitSetFrameRateReadOnlyFlagValue = toolkitSetFrameRateReadOnly();
         sToolkitMetricsForFrameRateDecisionFlagValue = toolkitMetricsForFrameRateDecision();
         sToolkitFrameRateTypingReadOnlyFlagValue = toolkitFrameRateTypingReadOnly();
+        sToolkitFrameRateFunctionEnablingReadOnlyFlagValue =
+                toolkitFrameRateFunctionEnablingReadOnly();
     }
 
     // The latest input event from the gesture that was used to resolve the pointer icon.
@@ -1202,6 +1208,7 @@ public final class ViewRootImpl implements ViewParent,
         // TODO(b/222696368): remove getSfInstance usage and use vsyncId for transactions
         mChoreographer = Choreographer.getInstance();
         mInsetsController = new InsetsController(new ViewRootInsetsControllerHost(this));
+        mImeBackAnimationController = new ImeBackAnimationController(this);
         mHandwritingInitiator = new HandwritingInitiator(
                 mViewConfiguration,
                 mContext.getSystemService(InputMethodManager.class));
@@ -3177,7 +3184,7 @@ public final class ViewRootImpl implements ViewParent,
                         == LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(visibility = PACKAGE)
     public InsetsController getInsetsController() {
         return mInsetsController;
     }
@@ -10166,13 +10173,18 @@ public final class ViewRootImpl implements ViewParent,
     final class ConsumeBatchedInputRunnable implements Runnable {
         @Override
         public void run() {
-            mConsumeBatchedInputScheduled = false;
-            if (doConsumeBatchedInput(mChoreographer.getFrameTimeNanos())) {
-                // If we consumed a batch here, we want to go ahead and schedule the
-                // consumption of batched input events on the next frame. Otherwise, we would
-                // wait until we have more input events pending and might get starved by other
-                // things occurring in the process.
-                scheduleConsumeBatchedInput();
+            Trace.traceBegin(TRACE_TAG_VIEW, mTag);
+            try {
+                mConsumeBatchedInputScheduled = false;
+                if (doConsumeBatchedInput(mChoreographer.getFrameTimeNanos())) {
+                    // If we consumed a batch here, we want to go ahead and schedule the
+                    // consumption of batched input events on the next frame. Otherwise, we would
+                    // wait until we have more input events pending and might get starved by other
+                    // things occurring in the process.
+                    scheduleConsumeBatchedInput();
+                }
+            } finally {
+                Trace.traceEnd(TRACE_TAG_VIEW);
             }
         }
     }
@@ -12144,7 +12156,8 @@ public final class ViewRootImpl implements ViewParent,
                             + "IWindow:%s Session:%s",
                     mOnBackInvokedDispatcher, mBasePackageName, mWindow, mWindowSession));
         }
-        mOnBackInvokedDispatcher.attachToWindow(mWindowSession, mWindow);
+        mOnBackInvokedDispatcher.attachToWindow(mWindowSession, mWindow,
+                mImeBackAnimationController);
     }
 
     private void sendBackKeyEvent(int action) {
@@ -12788,7 +12801,9 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean shouldEnableDvrr() {
         // uncomment this when we are ready for enabling dVRR
-        // return sToolkitSetFrameRateReadOnlyFlagValue && isFrameRatePowerSavingsBalanced();
+        if (sToolkitFrameRateFunctionEnablingReadOnlyFlagValue) {
+            return sToolkitSetFrameRateReadOnlyFlagValue && isFrameRatePowerSavingsBalanced();
+        }
         return false;
     }
 

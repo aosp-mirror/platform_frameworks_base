@@ -54,7 +54,7 @@ import com.android.internal.dynamicanimation.animation.SpringForce;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
 
 import javax.inject.Inject;
 

@@ -76,6 +76,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import kotlinx.coroutines.flow.MutableStateFlow;
+import kotlinx.coroutines.flow.StateFlow;
+import kotlinx.coroutines.flow.StateFlowKt;
+
 /**
  * Represents a notification that the system UI knows about
  *
@@ -150,8 +154,11 @@ public final class NotificationEntry extends ListEntry {
     public CharSequence remoteInputTextWhenReset;
     public long lastRemoteInputSent = NOT_LAUNCHED_YET;
     public final ArraySet<Integer> mActiveAppOps = new ArraySet<>(3);
-    public CharSequence headsUpStatusBarText;
-    public CharSequence headsUpStatusBarTextPublic;
+
+    private final MutableStateFlow<CharSequence> mHeadsUpStatusBarText =
+            StateFlowKt.MutableStateFlow(null);
+    private final MutableStateFlow<CharSequence> mHeadsUpStatusBarTextPublic =
+            StateFlowKt.MutableStateFlow(null);
 
     // indicates when this entry's view was first attached to a window
     // this value will reset when the view is completely removed from the shade (ie: filtered out)
@@ -162,8 +169,8 @@ public final class NotificationEntry extends ListEntry {
      */
     private boolean hasSentReply;
 
-    private boolean mSensitive = true;
-    private ListenerSet<OnSensitivityChangedListener> mOnSensitivityChangedListeners =
+    private final MutableStateFlow<Boolean> mSensitive = StateFlowKt.MutableStateFlow(true);
+    private final ListenerSet<OnSensitivityChangedListener> mOnSensitivityChangedListeners =
             new ListenerSet<>();
 
     private boolean mPulseSupressed;
@@ -934,6 +941,11 @@ public final class NotificationEntry extends ListEntry {
         return Objects.equals(n.category, category);
     }
 
+    /** @see #setSensitive(boolean, boolean)  */
+    public StateFlow<Boolean> isSensitive() {
+        return mSensitive;
+    }
+
     /**
      * Set this notification to be sensitive.
      *
@@ -942,17 +954,13 @@ public final class NotificationEntry extends ListEntry {
      */
     public void setSensitive(boolean sensitive, boolean deviceSensitive) {
         getRow().setSensitive(sensitive, deviceSensitive);
-        if (sensitive != mSensitive) {
-            mSensitive = sensitive;
+        if (sensitive != mSensitive.getValue()) {
+            mSensitive.setValue(sensitive);
             for (NotificationEntry.OnSensitivityChangedListener listener :
                     mOnSensitivityChangedListeners) {
                 listener.onSensitivityChanged(this);
             }
         }
-    }
-
-    public boolean isSensitive() {
-        return mSensitive;
     }
 
     /** Add a listener to be notified when the entry's sensitivity changes. */
@@ -963,6 +971,32 @@ public final class NotificationEntry extends ListEntry {
     /** Remove a listener that was registered above. */
     public void removeOnSensitivityChangedListener(OnSensitivityChangedListener listener) {
         mOnSensitivityChangedListeners.remove(listener);
+    }
+
+    /** @see #setHeadsUpStatusBarText(CharSequence) */
+    public StateFlow<CharSequence> getHeadsUpStatusBarText() {
+        return mHeadsUpStatusBarText;
+    }
+
+    /**
+     * Sets the text to be displayed on the StatusBar, when this notification is the top pinned
+     * heads up.
+     */
+    public void setHeadsUpStatusBarText(CharSequence headsUpStatusBarText) {
+        this.mHeadsUpStatusBarText.setValue(headsUpStatusBarText);
+    }
+
+    /** @see #setHeadsUpStatusBarTextPublic(CharSequence) */
+    public StateFlow<CharSequence> getHeadsUpStatusBarTextPublic() {
+        return mHeadsUpStatusBarTextPublic;
+    }
+
+    /**
+     * Sets the text to be displayed on the StatusBar, when this notification is the top pinned
+     * heads up, and its content is sensitive right now.
+     */
+    public void setHeadsUpStatusBarTextPublic(CharSequence headsUpStatusBarTextPublic) {
+        this.mHeadsUpStatusBarTextPublic.setValue(headsUpStatusBarTextPublic);
     }
 
     public boolean isPulseSuppressed() {

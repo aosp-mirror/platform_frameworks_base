@@ -24,6 +24,7 @@ import android.accessibilityservice.IBrailleDisplayConnection;
 import android.accessibilityservice.IBrailleDisplayController;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.PermissionManuallyEnforced;
 import android.annotation.RequiresNoPermission;
 import android.bluetooth.BluetoothDevice;
@@ -33,6 +34,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
@@ -141,6 +143,8 @@ class BrailleDisplayConnection extends IBrailleDisplayConnection.Stub {
 
         @BusType
         int getDeviceBusType(@NonNull Path path);
+
+        String getName(@NonNull Path path);
     }
 
     /**
@@ -149,15 +153,19 @@ class BrailleDisplayConnection extends IBrailleDisplayConnection.Stub {
      * <p>If found, saves instance state for this connection and starts a thread to
      * read from the Braille display.
      *
-     * @param expectedUniqueId  The expected unique ID of the device to connect, from
-     *                          {@link UsbDevice#getSerialNumber()}
-     *                          or {@link BluetoothDevice#getAddress()}
-     * @param expectedBusType   The expected bus type from {@link BusType}.
-     * @param controller        Interface containing oneway callbacks used to communicate with the
-     *                          {@link android.accessibilityservice.BrailleDisplayController}.
+     * @param expectedUniqueId The expected unique ID of the device to connect, from
+     *                         {@link UsbDevice#getSerialNumber()} or
+     *                         {@link BluetoothDevice#getAddress()}.
+     * @param expectedName     The expected name of the device to connect, from
+     *                         {@link BluetoothDevice#getName()} or
+     *                         {@link UsbDevice#getProductName()}.
+     * @param expectedBusType  The expected bus type from {@link BusType}.
+     * @param controller       Interface containing oneway callbacks used to communicate with the
+     *                         {@link android.accessibilityservice.BrailleDisplayController}.
      */
     void connectLocked(
             @NonNull String expectedUniqueId,
+            @Nullable String expectedName,
             @BusType int expectedBusType,
             @NonNull IBrailleDisplayController controller) {
         Objects.requireNonNull(expectedUniqueId);
@@ -179,10 +187,20 @@ class BrailleDisplayConnection extends IBrailleDisplayConnection.Stub {
                 unableToGetDescriptor = true;
                 continue;
             }
+            final boolean matchesIdentifier;
             final String uniqueId = mScanner.getUniqueId(path);
+            if (uniqueId != null) {
+                matchesIdentifier = expectedUniqueId.equalsIgnoreCase(uniqueId);
+            } else {
+                // HIDIOCGRAWUNIQ was added in kernel version 5.7.
+                // If the device has an older kernel that does not support that ioctl then as a
+                // fallback we can check against the device name (from HIDIOCGRAWNAME).
+                final String name = mScanner.getName(path);
+                matchesIdentifier = !TextUtils.isEmpty(expectedName) && expectedName.equals(name);
+            }
             if (isBrailleDisplay(descriptor)
                     && mScanner.getDeviceBusType(path) == expectedBusType
-                    && expectedUniqueId.equalsIgnoreCase(uniqueId)) {
+                    && matchesIdentifier) {
                 result.add(Pair.create(path.toFile(), descriptor));
             }
         }
@@ -498,6 +516,12 @@ class BrailleDisplayConnection extends IBrailleDisplayConnection.Stub {
                 Integer busType = readFromFileDescriptor(path, nativeInterface::getHidrawBusType);
                 return busType != null ? busType : BUS_UNKNOWN;
             }
+
+            @Override
+            public String getName(@NonNull Path path) {
+                Objects.requireNonNull(path);
+                return readFromFileDescriptor(path, nativeInterface::getHidrawName);
+            }
         };
     }
 
@@ -542,6 +566,12 @@ class BrailleDisplayConnection extends IBrailleDisplayConnection.Stub {
                             BrailleDisplayController.TEST_BRAILLE_DISPLAY_BUS_BLUETOOTH)
                             ? BUS_BLUETOOTH : BUS_USB;
                 }
+
+                @Override
+                public String getName(@NonNull Path path) {
+                    return brailleDisplayMap.get(path).getString(
+                            BrailleDisplayController.TEST_BRAILLE_DISPLAY_NAME);
+                }
             };
             return mScanner;
         }
@@ -579,6 +609,8 @@ class BrailleDisplayConnection extends IBrailleDisplayConnection.Stub {
          * @return the result of ioctl(HIDIOCGRAWINFO).bustype, or -1 if the ioctl fails.
          */
         int getHidrawBusType(int fd);
+
+        String getHidrawName(int fd);
     }
 
     /** Native interface that actually calls native HIDRAW ioctls. */
@@ -602,6 +634,11 @@ class BrailleDisplayConnection extends IBrailleDisplayConnection.Stub {
         public int getHidrawBusType(int fd) {
             return nativeGetHidrawBusType(fd);
         }
+
+        @Override
+        public String getHidrawName(int fd) {
+            return nativeGetHidrawName(fd);
+        }
     }
 
     private static native int nativeGetHidrawDescSize(int fd);
@@ -611,4 +648,6 @@ class BrailleDisplayConnection extends IBrailleDisplayConnection.Stub {
     private static native String nativeGetHidrawUniq(int fd);
 
     private static native int nativeGetHidrawBusType(int fd);
+
+    private static native String nativeGetHidrawName(int fd);
 }

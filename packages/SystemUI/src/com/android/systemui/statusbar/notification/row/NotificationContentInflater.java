@@ -988,8 +988,8 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             }
         }
 
-        entry.headsUpStatusBarText = result.headsUpStatusBarText;
-        entry.headsUpStatusBarTextPublic = result.headsUpStatusBarTextPublic;
+        entry.setHeadsUpStatusBarText(result.headsUpStatusBarText);
+        entry.setHeadsUpStatusBarTextPublic(result.headsUpStatusBarTextPublic);
         Trace.endAsyncSection(APPLY_TRACE_METHOD, System.identityHashCode(row));
         if (endListener != null) {
             endListener.onAsyncInflationFinished(entry);

@@ -16,6 +16,7 @@
 
 package com.android.asllib;
 
+import com.android.asllib.util.AslgenUtil;
 import com.android.asllib.util.MalformedXmlException;
 
 import org.w3c.dom.Element;
@@ -33,6 +34,10 @@ public class DataLabelsFactory implements AslMarshallableFactory<DataLabels> {
     @Override
     public DataLabels createFromHrElements(List<Element> elements) throws MalformedXmlException {
         Element ele = XmlUtils.getSingleElement(elements);
+        if (ele == null) {
+            AslgenUtil.logI("Found no DataLabels in hr format.");
+            return null;
+        }
         Map<String, DataCategory> dataAccessed =
                 getDataCategoriesWithTag(ele, XmlUtils.HR_TAG_DATA_ACCESSED);
         Map<String, DataCategory> dataCollected =

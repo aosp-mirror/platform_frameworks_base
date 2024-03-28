@@ -26,12 +26,14 @@ import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.annotations.VisibleForTesting
+import com.android.systemui.communal.dagger.Communal
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.ui.compose.CommunalContainer
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import com.android.systemui.util.kotlin.collectFlow
@@ -52,6 +54,7 @@ constructor(
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val shadeInteractor: ShadeInteractor,
     private val powerManager: PowerManager,
+    @Communal private val dataSourceDelegator: SceneDataSourceDelegator,
 ) {
     /** The container view for the hub. This will not be initialized until [initView] is called. */
     private var communalContainerView: View? = null
@@ -125,6 +128,7 @@ constructor(
                     PlatformTheme {
                         CommunalContainer(
                             viewModel = communalViewModel,
+                            dataSourceDelegator = dataSourceDelegator,
                             dialogFactory = dialogFactory,
                         )
                     }

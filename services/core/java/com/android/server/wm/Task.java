@@ -6799,6 +6799,15 @@ class Task extends TaskFragment {
         }
     }
 
+    @Nullable
+    ActivityRecord getBottomMostActivityInSamePackage() {
+        if (realActivity == null) {
+            return null;
+        }
+        return getActivity(ar -> ar.packageName.equals(
+                realActivity.getPackageName()), false /* traverseTopToBottom */);
+    }
+
     /**
      * Associates the decor surface with the given TF, or create one if there
      * isn't one in the Task yet. The surface will be removed with the TF,

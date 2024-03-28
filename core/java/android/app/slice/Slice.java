@@ -41,7 +41,12 @@ import java.util.Objects;
  *
  * <p>They are constructed using {@link Builder} in a tree structure
  * that provides the OS some information about how the content should be displayed.
+ * @deprecated Slice framework has been deprecated, it will not receive any updates from
+ *          {@link android.os.Build.VANILLA_ICE_CREAM} and forward. If you are looking for a
+ *          framework that sends displayable data from one app to another, consider using
+ *          {@link android.app.appsearch.AppSearchManager}.
  */
+@Deprecated
 public final class Slice implements Parcelable {
 
     /**
@@ -338,7 +343,12 @@ public final class Slice implements Parcelable {
 
     /**
      * A Builder used to construct {@link Slice}s
+     * @deprecated Slice framework has been deprecated, it will not receive any updates from
+     *          {@link android.os.Build.VANILLA_ICE_CREAM} and forward. If you are looking for a
+     *          framework that sends displayable data from one app to another, consider using
+     *          {@link android.app.appsearch.AppSearchManager}.
      */
+    @Deprecated
     public static class Builder {
 
         private final Uri mUri;

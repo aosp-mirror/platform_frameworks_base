@@ -16,6 +16,7 @@
 
 package com.android.asllib;
 
+import com.android.asllib.util.AslgenUtil;
 import com.android.asllib.util.MalformedXmlException;
 
 import org.w3c.dom.Element;
@@ -28,18 +29,16 @@ public class SafetyLabelsFactory implements AslMarshallableFactory<SafetyLabels>
     @Override
     public SafetyLabels createFromHrElements(List<Element> elements) throws MalformedXmlException {
         Element safetyLabelsEle = XmlUtils.getSingleElement(elements);
-        Long version;
-        try {
-            version = Long.parseLong(safetyLabelsEle.getAttribute(XmlUtils.HR_ATTR_VERSION));
-        } catch (Exception e) {
-            throw new IllegalArgumentException(
-                    "Malformed or missing required version in safety labels.");
+        if (safetyLabelsEle == null) {
+            AslgenUtil.logI("No SafetyLabels found in hr format.");
+            return null;
         }
+        long version = XmlUtils.tryGetVersion(safetyLabelsEle);
 
         DataLabels dataLabels =
                 new DataLabelsFactory()
                         .createFromHrElements(
-                                List.of(
+                                XmlUtils.listOf(
                                         XmlUtils.getSingleChildElement(
                                                 safetyLabelsEle, XmlUtils.HR_TAG_DATA_LABELS)));
         return new SafetyLabels(version, dataLabels);

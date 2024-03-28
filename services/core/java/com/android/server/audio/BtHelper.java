@@ -235,10 +235,6 @@ public class BtHelper {
         mDeviceBroker.setForceUse_Async(AudioSystem.FOR_MEDIA, forMed, "onAudioServerDied()");
     }
 
-    /*package*/ synchronized boolean isAvrcpAbsoluteVolumeSupported() {
-        return (mA2dp != null && mAvrcpAbsVolSupported);
-    }
-
     /*package*/ synchronized void setAvrcpAbsoluteVolumeSupported(boolean supported) {
         mAvrcpAbsVolSupported = supported;
         Log.i(TAG, "setAvrcpAbsoluteVolumeSupported supported=" + supported);
@@ -648,8 +644,6 @@ public class BtHelper {
         }
     }
 
-    // @GuardedBy("mDeviceBroker.mSetModeLock")
-    @GuardedBy("AudioDeviceBroker.this.mDeviceStateLock")
     /*package*/ synchronized boolean isProfilePoxyConnected(int profile) {
         switch (profile) {
             case BluetoothProfile.HEADSET:

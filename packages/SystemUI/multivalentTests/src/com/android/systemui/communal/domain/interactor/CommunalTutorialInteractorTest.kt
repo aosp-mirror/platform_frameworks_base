@@ -158,7 +158,7 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
             kosmos.setCommunalAvailable(true)
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_NOT_STARTED)
 
-            communalInteractor.onSceneChanged(CommunalScenes.Blank)
+            communalInteractor.changeScene(CommunalScenes.Blank)
 
             assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_NOT_STARTED)
         }
@@ -171,7 +171,7 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
             goToCommunal()
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_STARTED)
 
-            communalInteractor.onSceneChanged(CommunalScenes.Blank)
+            communalInteractor.changeScene(CommunalScenes.Blank)
 
             assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_COMPLETED)
         }
@@ -184,13 +184,13 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
             goToCommunal()
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
 
-            communalInteractor.onSceneChanged(CommunalScenes.Blank)
+            communalInteractor.changeScene(CommunalScenes.Blank)
 
             assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_COMPLETED)
         }
 
     private suspend fun goToCommunal() {
         kosmos.setCommunalAvailable(true)
-        communalInteractor.onSceneChanged(CommunalScenes.Communal)
+        communalInteractor.changeScene(CommunalScenes.Communal)
     }
 }

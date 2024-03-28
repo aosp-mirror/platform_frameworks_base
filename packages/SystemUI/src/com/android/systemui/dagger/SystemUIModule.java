@@ -49,6 +49,7 @@ import com.android.systemui.common.data.CommonDataLayerModule;
 import com.android.systemui.communal.dagger.CommunalModule;
 import com.android.systemui.complication.dagger.ComplicationComponent;
 import com.android.systemui.controls.dagger.ControlsModule;
+import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.SystemUser;
 import com.android.systemui.dagger.qualifiers.UiBackground;
@@ -89,6 +90,7 @@ import com.android.systemui.qs.footer.dagger.FooterActionsModule;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recordissue.RecordIssueModule;
 import com.android.systemui.retail.dagger.RetailModeModule;
+import com.android.systemui.scene.shared.model.SceneContainerConfig;
 import com.android.systemui.scene.shared.model.SceneDataSource;
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator;
 import com.android.systemui.scene.ui.view.WindowRootViewComponent;
@@ -164,6 +166,8 @@ import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import javax.inject.Named;
+
+import kotlinx.coroutines.CoroutineScope;
 
 /**
  * A dagger module for injecting components of System UI that are required by System UI.
@@ -401,6 +405,13 @@ public abstract class SystemUIModule {
     @IntoMap
     @ClassKey(SystemUISecondaryUserService.class)
     abstract Service bindsSystemUISecondaryUserService(SystemUISecondaryUserService service);
+
+    @Provides
+    @SysUISingleton
+    static SceneDataSourceDelegator providesSceneDataSourceDelegator(
+            @Application CoroutineScope applicationScope, SceneContainerConfig config) {
+        return new SceneDataSourceDelegator(applicationScope, config);
+    }
 
     @Binds
     abstract SceneDataSource bindSceneDataSource(SceneDataSourceDelegator delegator);

@@ -161,20 +161,20 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
         }
 
         if (DEBUG) Log.d(TAG, "onBootPhase - PHASE_BOOT_COMPLETED");
-
-        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         init(getContext().getSystemService(MediaProjectionManager.class),
                 LocalServices.getService(WindowManagerInternal.class),
-                getExemptedPackages());
+                LocalServices.getService(PackageManagerInternal.class),
+                getExemptedPackages()
+        );
         if (sensitiveContentAppProtection()) {
             publishBinderService(Context.SENSITIVE_CONTENT_PROTECTION_SERVICE,
-                    new SensitiveContentProtectionManagerServiceBinder(mPackageManagerInternal));
+                    new SensitiveContentProtectionManagerServiceBinder());
         }
     }
 
     @VisibleForTesting
     void init(MediaProjectionManager projectionManager, WindowManagerInternal windowManager,
-            ArraySet<String> exemptedPackages) {
+            PackageManagerInternal packageManagerInternal, ArraySet<String> exemptedPackages) {
         if (DEBUG) Log.d(TAG, "init");
 
         Objects.requireNonNull(projectionManager);
@@ -182,6 +182,7 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
 
         mProjectionManager = projectionManager;
         mWindowManager = windowManager;
+        mPackageManagerInternal = packageManagerInternal;
         mExemptedPackages = exemptedPackages;
 
         // TODO(b/317250444): use MediaProjectionManagerService directly, reduces unnecessary
@@ -231,14 +232,16 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
     }
 
     private void onProjectionStart(MediaProjectionInfo projectionInfo) {
-        int uid = mPackageManagerInternal.getPackageUid(projectionInfo.getPackageName(), 0,
-                projectionInfo.getUserHandle().getIdentifier());
         boolean isPackageExempted = (mExemptedPackages != null && mExemptedPackages.contains(
                 projectionInfo.getPackageName()))
-                || canRecordSensitiveContent(projectionInfo.getPackageName());
+                || canRecordSensitiveContent(projectionInfo.getPackageName())
+                || isAutofillServiceRecorderPackage(projectionInfo.getUserHandle().getIdentifier(),
+                        projectionInfo.getPackageName());
         // TODO(b/324447419): move GlobalSettings lookup to background thread
         boolean isFeatureDisabled = Settings.Global.getInt(getContext().getContentResolver(),
                 DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS, 0) != 0;
+        int uid = mPackageManagerInternal.getPackageUid(projectionInfo.getPackageName(), 0,
+                projectionInfo.getUserHandle().getIdentifier());
         mMediaProjectionSession = new MediaProjectionSession(
                 uid, isPackageExempted || isFeatureDisabled, new Random().nextLong());
 
@@ -295,8 +298,9 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
         // notify windowmanager of any currently posted sensitive content notifications
         ArraySet<PackageInfo> packageInfos =
                 getSensitivePackagesFromNotifications(notifications, rankingMap);
-
-        mWindowManager.addBlockScreenCaptureForApps(packageInfos);
+        if (packageInfos.size() > 0) {
+            mWindowManager.addBlockScreenCaptureForApps(packageInfos);
+        }
     }
 
     private ArraySet<PackageInfo> getSensitivePackagesFromNotifications(
@@ -422,6 +426,7 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
             if (!mProjectionActive) {
                 return;
             }
+
             if (DEBUG) {
                 Log.d(TAG, "setSensitiveContentProtection - current package=" + packageInfo
                         + ", isShowingSensitiveContent=" + isShowingSensitiveContent
@@ -452,15 +457,29 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
         }
     }
 
-    private final class SensitiveContentProtectionManagerServiceBinder
-            extends ISensitiveContentProtectionManager.Stub {
-        private final PackageManagerInternal mPackageManagerInternal;
-
-        SensitiveContentProtectionManagerServiceBinder(
-                PackageManagerInternal packageManagerInternal) {
-            mPackageManagerInternal = packageManagerInternal;
+    // TODO: b/328251279 - Autofill service exemption is temporary and will be removed in future.
+    private boolean isAutofillServiceRecorderPackage(int userId, String projectionPackage) {
+        String autofillServiceName = Settings.Secure.getStringForUser(
+                getContext().getContentResolver(), Settings.Secure.AUTOFILL_SERVICE, userId);
+        if (DEBUG) {
+            Log.d(TAG, "autofill service for user " + userId + " is " + autofillServiceName);
         }
 
+        if (autofillServiceName == null) {
+            return false;
+        }
+        ComponentName serviceComponent = ComponentName.unflattenFromString(autofillServiceName);
+        if (serviceComponent == null) {
+            return false;
+        }
+        String autofillServicePackage = serviceComponent.getPackageName();
+
+        return autofillServicePackage != null
+                && autofillServicePackage.equals(projectionPackage);
+    }
+
+    private final class SensitiveContentProtectionManagerServiceBinder
+            extends ISensitiveContentProtectionManager.Stub {
         public void setSensitiveContentProtection(IBinder windowToken, String packageName,
                 boolean isShowingSensitiveContent) {
             Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,

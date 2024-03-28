@@ -290,6 +290,8 @@ public class AlarmManagerService extends SystemService {
 
     // List of alarms per uid deferred due to user applied background restrictions on the source app
     SparseArray<ArrayList<Alarm>> mPendingBackgroundAlarms = new SparseArray<>();
+
+    private boolean mStartUserBeforeScheduledAlarms;
     private long mNextWakeup;
     private long mNextNonWakeup;
     private long mNextWakeUpSetAt;
@@ -1382,6 +1384,7 @@ public class AlarmManagerService extends SystemService {
     @GuardedBy("mLock")
     AlarmStore mAlarmStore;
 
+    UserWakeupStore mUserWakeupStore;
     // set to non-null if in idle mode; while in this mode, any alarms we don't want
     // to run during this time are rescehduled to go off after this alarm.
     Alarm mPendingIdleUntil = null;
@@ -1882,6 +1885,7 @@ public class AlarmManagerService extends SystemService {
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
 
         mUseFrozenStateToDropListenerAlarms = Flags.useFrozenStateToDropListenerAlarms();
+        mStartUserBeforeScheduledAlarms = Flags.startUserBeforeScheduledAlarms();
         if (mUseFrozenStateToDropListenerAlarms) {
             final ActivityManager.UidFrozenStateChangedCallback callback = (uids, frozenStates) -> {
                 final int size = frozenStates.length;
@@ -2000,6 +2004,10 @@ public class AlarmManagerService extends SystemService {
                 Slog.w(TAG, "Failed to open alarm driver. Falling back to a handler.");
             }
         }
+        if (mStartUserBeforeScheduledAlarms) {
+            mUserWakeupStore = new UserWakeupStore();
+            mUserWakeupStore.init();
+        }
         publishLocalService(AlarmManagerInternal.class, new LocalService());
         publishBinderService(Context.ALARM_SERVICE, mService);
     }
@@ -2041,6 +2049,9 @@ public class AlarmManagerService extends SystemService {
     public void onUserStarting(TargetUser user) {
         super.onUserStarting(user);
         final int userId = user.getUserIdentifier();
+        if (mStartUserBeforeScheduledAlarms) {
+            mUserWakeupStore.onUserStarting(userId);
+        }
         mHandler.post(() -> {
             for (final int appId : mExactAlarmCandidates) {
                 final int uid = UserHandle.getUid(userId, appId);
@@ -3150,6 +3161,9 @@ public class AlarmManagerService extends SystemService {
             pw.increaseIndent();
             pw.print(Flags.FLAG_USE_FROZEN_STATE_TO_DROP_LISTENER_ALARMS,
                     mUseFrozenStateToDropListenerAlarms);
+            pw.println();
+            pw.print(Flags.FLAG_START_USER_BEFORE_SCHEDULED_ALARMS,
+                    mStartUserBeforeScheduledAlarms);
             pw.decreaseIndent();
             pw.println();
             pw.println();
@@ -3397,6 +3411,12 @@ public class AlarmManagerService extends SystemService {
             }
             pw.println("]");
             pw.println();
+
+            if (mStartUserBeforeScheduledAlarms) {
+                pw.println("Scheduled user wakeups:");
+                mUserWakeupStore.dump(pw, nowELAPSED);
+                pw.println();
+            }
 
             pw.println("App Alarm history:");
             mAppWakeupHistory.dump(pw, nowELAPSED);
@@ -3945,9 +3965,18 @@ public class AlarmManagerService extends SystemService {
                         formatNextAlarm(getContext(), alarmClock, userId));
             }
             mNextAlarmClockForUser.put(userId, alarmClock);
+            if (mStartUserBeforeScheduledAlarms) {
+                mUserWakeupStore.addUserWakeup(userId, convertToElapsed(
+                        mNextAlarmClockForUser.get(userId).getTriggerTime(), RTC));
+            }
         } else {
             if (DEBUG_ALARM_CLOCK) {
                 Log.v(TAG, "Next AlarmClockInfoForUser(" + userId + "): None");
+            }
+            if (mStartUserBeforeScheduledAlarms) {
+                if (mActivityManagerInternal.isUserRunning(userId, 0)) {
+                    mUserWakeupStore.removeUserWakeup(userId);
+                }
             }
             mNextAlarmClockForUser.remove(userId);
         }
@@ -4003,13 +4032,20 @@ public class AlarmManagerService extends SystemService {
                 DateFormat.format(pattern, info.getTriggerTime()).toString();
     }
 
+    @GuardedBy("mLock")
     void rescheduleKernelAlarmsLocked() {
         // Schedule the next upcoming wakeup alarm.  If there is a deliverable batch
         // prior to that which contains no wakeups, we schedule that as well.
         final long nowElapsed = mInjector.getElapsedRealtimeMillis();
         long nextNonWakeup = 0;
         if (mAlarmStore.size() > 0) {
-            final long firstWakeup = mAlarmStore.getNextWakeupDeliveryTime();
+            long firstWakeup = mAlarmStore.getNextWakeupDeliveryTime();
+            if (mStartUserBeforeScheduledAlarms) {
+                final long firstUserWakeup = mUserWakeupStore.getNextWakeupTime();
+                if (firstUserWakeup >= 0 && firstUserWakeup < firstWakeup) {
+                    firstWakeup = firstUserWakeup;
+                }
+            }
             final long first = mAlarmStore.getNextDeliveryTime();
             if (firstWakeup != 0) {
                 mNextWakeup = firstWakeup;
@@ -4716,6 +4752,16 @@ public class AlarmManagerService extends SystemService {
                                             + ", elapsed=" + nowELAPSED);
                         }
 
+                        if (mStartUserBeforeScheduledAlarms) {
+                            final int[] userIds =
+                                    mUserWakeupStore.getUserIdsToWakeup(nowELAPSED);
+                            for (int i = 0; i < userIds.length; i++) {
+                                if (!mActivityManagerInternal.startUserInBackground(
+                                        userIds[i])) {
+                                    mUserWakeupStore.removeUserWakeup(userIds[i]);
+                                }
+                            }
+                        }
                         mLastTrigger = nowELAPSED;
                         final int wakeUps = triggerAlarmsLocked(triggerList, nowELAPSED);
                         if (wakeUps == 0 && checkAllowNonWakeupDelayLocked(nowELAPSED)) {
@@ -5164,6 +5210,10 @@ public class AlarmManagerService extends SystemService {
             IntentFilter sdFilter = new IntentFilter();
             sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
             sdFilter.addAction(Intent.ACTION_USER_STOPPED);
+            if (mStartUserBeforeScheduledAlarms) {
+                sdFilter.addAction(Intent.ACTION_LOCKED_BOOT_COMPLETED);
+                sdFilter.addAction(Intent.ACTION_USER_REMOVED);
+            }
             sdFilter.addAction(Intent.ACTION_UID_REMOVED);
             getContext().registerReceiverForAllUsers(this, sdFilter,
                     /* broadcastPermission */ null, /* scheduler */ null);
@@ -5192,6 +5242,22 @@ public class AlarmManagerService extends SystemService {
                             mAllowWhileIdleHistory.removeForUser(userHandle);
                             mAllowWhileIdleCompatHistory.removeForUser(userHandle);
                             mTemporaryQuotaReserve.removeForUser(userHandle);
+                        }
+                        return;
+                    case Intent.ACTION_LOCKED_BOOT_COMPLETED:
+                        final int handle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                        if (handle >= 0) {
+                            if (mStartUserBeforeScheduledAlarms) {
+                                mUserWakeupStore.onUserStarted(handle);
+                            }
+                        }
+                        return;
+                    case Intent.ACTION_USER_REMOVED:
+                        final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                        if (user >= 0) {
+                            if (mStartUserBeforeScheduledAlarms) {
+                                mUserWakeupStore.onUserRemoved(user);
+                            }
                         }
                         return;
                     case Intent.ACTION_UID_REMOVED:

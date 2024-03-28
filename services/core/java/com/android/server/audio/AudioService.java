@@ -46,6 +46,7 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility.PACK
 import static com.android.media.audio.Flags.alarmMinVolumeZero;
 import static com.android.media.audio.Flags.disablePrescaleAbsoluteVolume;
 import static com.android.media.audio.Flags.ringerModeAffectsAlarm;
+import static com.android.media.audio.Flags.setStreamVolumeOrder;
 import static com.android.server.audio.SoundDoseHelper.ACTION_CHECK_MUSIC_ACTIVE;
 import static com.android.server.utils.EventLogger.Event.ALOGE;
 import static com.android.server.utils.EventLogger.Event.ALOGI;
@@ -4538,6 +4539,8 @@ public class AudioService extends IAudioService.Stub
                 + focusFreezeTestApi());
         pw.println("\tcom.android.media.audio.disablePrescaleAbsoluteVolume:"
                 + disablePrescaleAbsoluteVolume());
+        pw.println("\tcom.android.media.audio.setStreamVolumeOrder:"
+                + setStreamVolumeOrder());
         pw.println("\tandroid.media.audio.foregroundAudioControl:"
                 + foregroundAudioControl());
     }
@@ -4705,6 +4708,30 @@ public class AudioService extends IAudioService.Stub
 
         index = rescaleIndex(index * 10, streamType, streamTypeAlias);
 
+        if (setStreamVolumeOrder()) {
+            flags &= ~AudioManager.FLAG_FIXED_VOLUME;
+            if (streamTypeAlias == AudioSystem.STREAM_MUSIC && isFixedVolumeDevice(device)) {
+                flags |= AudioManager.FLAG_FIXED_VOLUME;
+
+                // volume is either 0 or max allowed for fixed volume devices
+                if (index != 0) {
+                    index = mSoundDoseHelper.getSafeMediaVolumeIndex(device);
+                    if (index < 0) {
+                        index = streamState.getMaxIndex();
+                    }
+                }
+            }
+
+            if (!mSoundDoseHelper.willDisplayWarningAfterCheckVolume(streamType, index, device,
+                    flags)) {
+                onSetStreamVolume(streamType, index, flags, device, caller, hasModifyAudioSettings,
+                        // ada is non-null when called from setDeviceVolume,
+                        // which shouldn't update the mute state
+                        canChangeMuteAndUpdateController /*canChangeMute*/);
+                index = mStreamStates[streamType].getIndex(device);
+            }
+        }
+
         if (streamTypeAlias == AudioSystem.STREAM_MUSIC
                 && AudioSystem.DEVICE_OUT_ALL_A2DP_SET.contains(device)
                 && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
@@ -4738,26 +4765,28 @@ public class AudioService extends IAudioService.Stub
             mDeviceBroker.postSetHearingAidVolumeIndex(index, streamType);
         }
 
-        flags &= ~AudioManager.FLAG_FIXED_VOLUME;
-        if (streamTypeAlias == AudioSystem.STREAM_MUSIC && isFixedVolumeDevice(device)) {
-            flags |= AudioManager.FLAG_FIXED_VOLUME;
+        if (!setStreamVolumeOrder()) {
+            flags &= ~AudioManager.FLAG_FIXED_VOLUME;
+            if (streamTypeAlias == AudioSystem.STREAM_MUSIC && isFixedVolumeDevice(device)) {
+                flags |= AudioManager.FLAG_FIXED_VOLUME;
 
-            // volume is either 0 or max allowed for fixed volume devices
-            if (index != 0) {
-                index = mSoundDoseHelper.getSafeMediaVolumeIndex(device);
-                if (index < 0) {
-                    index = streamState.getMaxIndex();
+                // volume is either 0 or max allowed for fixed volume devices
+                if (index != 0) {
+                    index = mSoundDoseHelper.getSafeMediaVolumeIndex(device);
+                    if (index < 0) {
+                        index = streamState.getMaxIndex();
+                    }
                 }
             }
-        }
 
-        if (!mSoundDoseHelper.willDisplayWarningAfterCheckVolume(streamType, index, device,
-                flags)) {
-            onSetStreamVolume(streamType, index, flags, device, caller, hasModifyAudioSettings,
-                    // ada is non-null when called from setDeviceVolume,
-                    // which shouldn't update the mute state
-                    canChangeMuteAndUpdateController /*canChangeMute*/);
-            index = mStreamStates[streamType].getIndex(device);
+            if (!mSoundDoseHelper.willDisplayWarningAfterCheckVolume(streamType, index, device,
+                    flags)) {
+                onSetStreamVolume(streamType, index, flags, device, caller, hasModifyAudioSettings,
+                        // ada is non-null when called from setDeviceVolume,
+                        // which shouldn't update the mute state
+                        canChangeMuteAndUpdateController /*canChangeMute*/);
+                index = mStreamStates[streamType].getIndex(device);
+            }
         }
 
         synchronized (mHdmiClientLock) {

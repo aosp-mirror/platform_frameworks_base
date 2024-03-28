@@ -59,7 +59,12 @@ import java.util.Set;
  * Class to handle interactions with {@link Slice}s.
  * <p>
  * The SliceManager manages permissions and pinned state for slices.
+ * @deprecated Slice framework has been deprecated, it will not receive any updates from
+ *          {@link android.os.Build.VANILLA_ICE_CREAM} and forward. If you are looking for a
+ *          framework that sends displayable data from one app to another, consider using
+ *          {@link android.app.appsearch.AppSearchManager}.
  */
+@Deprecated
 @SystemService(Context.SLICE_SERVICE)
 public class SliceManager {
 

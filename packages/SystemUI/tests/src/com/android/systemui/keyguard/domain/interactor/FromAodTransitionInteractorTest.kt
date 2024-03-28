@@ -48,6 +48,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.util.KeyguardTransitionRepositorySpySubject.Companion.assertThat
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
@@ -73,13 +74,17 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
         }
 
     private val testScope = kosmos.testScope
-    private val underTest = kosmos.fromAodTransitionInteractor
+    private lateinit var underTest: FromAodTransitionInteractor
 
-    private val powerInteractor = kosmos.powerInteractor
-    private val transitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private lateinit var powerInteractor: PowerInteractor
+    private lateinit var transitionRepository: FakeKeyguardTransitionRepository
 
     @Before
     fun setup() {
+        powerInteractor = kosmos.powerInteractor
+        transitionRepository = kosmos.fakeKeyguardTransitionRepository
+        underTest = kosmos.fromAodTransitionInteractor
+
         underTest.start()
 
         // Transition to AOD and set the power interactor asleep.

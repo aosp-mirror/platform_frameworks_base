@@ -29,8 +29,8 @@ import com.android.systemui.res.R;
 import com.android.systemui.util.InitializationChecker;
 import com.android.wm.shell.dagger.WMShellConcurrencyModule;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
+import com.android.wm.shell.shared.ShellTransitions;
 import com.android.wm.shell.sysui.ShellInterface;
-import com.android.wm.shell.transition.ShellTransitions;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;

@@ -46,11 +46,13 @@ import com.android.systemui.model.SysUiState
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
+import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRowRepository
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
@@ -128,6 +130,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 deviceProvisioningInteractor = kosmos.deviceProvisioningInteractor,
                 centralSurfaces = centralSurfaces,
                 headsUpInteractor = kosmos.headsUpNotificationInteractor,
+                occlusionInteractor = kosmos.sceneContainerOcclusionInteractor,
             )
     }
 
@@ -200,6 +203,28 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(isVisible).isFalse()
 
             kosmos.fakeDeviceProvisioningRepository.setDeviceProvisioned(true)
+            assertThat(isVisible).isTrue()
+        }
+
+    @Test
+    fun hydrateVisibility_basedOnOcclusion() =
+        testScope.runTest {
+            val isVisible by collectLastValue(sceneInteractor.isVisible)
+            prepareState(
+                isDeviceUnlocked = true,
+                initialSceneKey = Scenes.Lockscreen,
+            )
+
+            underTest.start()
+            assertThat(isVisible).isTrue()
+
+            kosmos.keyguardOcclusionInteractor.setWmNotifiedShowWhenLockedActivityOnTop(
+                true,
+                mock()
+            )
+            assertThat(isVisible).isFalse()
+
+            kosmos.keyguardOcclusionInteractor.setWmNotifiedShowWhenLockedActivityOnTop(false)
             assertThat(isVisible).isTrue()
         }
 

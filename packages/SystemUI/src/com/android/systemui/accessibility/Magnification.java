@@ -34,6 +34,7 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
+import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IMagnificationConnection;
@@ -134,6 +135,37 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
     @VisibleForTesting
     DisplayIdIndexSupplier<WindowMagnificationController> mWindowMagnificationControllerSupplier;
 
+    private static class FullscreenMagnificationControllerSupplier extends
+            DisplayIdIndexSupplier<FullscreenMagnificationController> {
+
+        private final Context mContext;
+
+        FullscreenMagnificationControllerSupplier(Context context, Handler handler,
+                DisplayManager displayManager, SysUiState sysUiState,
+                SecureSettings secureSettings) {
+            super(displayManager);
+            mContext = context;
+        }
+
+        @Override
+        protected FullscreenMagnificationController createInstance(Display display) {
+            final Context windowContext = mContext.createWindowContext(display,
+                    TYPE_ACCESSIBILITY_OVERLAY, /* options */ null);
+            Supplier<SurfaceControlViewHost> scvhSupplier = () -> new SurfaceControlViewHost(
+                    mContext, mContext.getDisplay(), new InputTransferToken(), TAG);
+            windowContext.setTheme(com.android.systemui.res.R.style.Theme_SystemUI);
+            return new FullscreenMagnificationController(
+                    windowContext,
+                    windowContext.getSystemService(AccessibilityManager.class),
+                    windowContext.getSystemService(WindowManager.class),
+                    scvhSupplier);
+        }
+    }
+
+    @VisibleForTesting
+    DisplayIdIndexSupplier<FullscreenMagnificationController>
+            mFullscreenMagnificationControllerSupplier;
+
     private static class SettingsSupplier extends
             DisplayIdIndexSupplier<MagnificationSettingsController> {
 
@@ -185,6 +217,8 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
         mWindowMagnificationControllerSupplier = new WindowMagnificationControllerSupplier(context,
                 mHandler, mWindowMagnifierCallback,
                 displayManager, sysUiState, secureSettings);
+        mFullscreenMagnificationControllerSupplier = new FullscreenMagnificationControllerSupplier(
+                context, mHandler, displayManager, sysUiState, secureSettings);
         mMagnificationSettingsSupplier = new SettingsSupplier(context,
                 mMagnificationSettingsControllerCallback, displayManager, secureSettings);
 
@@ -273,8 +307,13 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
         }
     }
 
+    @MainThread
     void onFullscreenMagnificationActivationChanged(int displayId, boolean activated) {
-        // Do nothing
+        final FullscreenMagnificationController fullscreenMagnificationController =
+                mFullscreenMagnificationControllerSupplier.get(displayId);
+        if (fullscreenMagnificationController != null) {
+            fullscreenMagnificationController.onFullscreenMagnificationActivationChanged(activated);
+        }
     }
 
     @MainThread

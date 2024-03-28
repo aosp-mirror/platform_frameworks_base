@@ -29,11 +29,29 @@ public class AndroidSafetyLabelFactory implements AslMarshallableFactory<Android
     public AndroidSafetyLabel createFromHrElements(List<Element> appMetadataBundles)
             throws MalformedXmlException {
         Element appMetadataBundlesEle = XmlUtils.getSingleElement(appMetadataBundles);
+        long version = XmlUtils.tryGetVersion(appMetadataBundlesEle);
+
         Element safetyLabelsEle =
                 XmlUtils.getSingleChildElement(
-                        appMetadataBundlesEle, XmlUtils.HR_TAG_SAFETY_LABELS);
+                        appMetadataBundlesEle, XmlUtils.HR_TAG_SAFETY_LABELS, false);
         SafetyLabels safetyLabels =
-                new SafetyLabelsFactory().createFromHrElements(List.of(safetyLabelsEle));
-        return new AndroidSafetyLabel(safetyLabels);
+                new SafetyLabelsFactory().createFromHrElements(XmlUtils.listOf(safetyLabelsEle));
+
+        Element systemAppSafetyLabelEle =
+                XmlUtils.getSingleChildElement(
+                        appMetadataBundlesEle, XmlUtils.HR_TAG_SYSTEM_APP_SAFETY_LABEL, false);
+        SystemAppSafetyLabel systemAppSafetyLabel =
+                new SystemAppSafetyLabelFactory()
+                        .createFromHrElements(XmlUtils.listOf(systemAppSafetyLabelEle));
+
+        Element transparencyInfoEle =
+                XmlUtils.getSingleChildElement(
+                        appMetadataBundlesEle, XmlUtils.HR_TAG_TRANSPARENCY_INFO, false);
+        TransparencyInfo transparencyInfo =
+                new TransparencyInfoFactory()
+                        .createFromHrElements(XmlUtils.listOf(transparencyInfoEle));
+
+        return new AndroidSafetyLabel(
+                version, systemAppSafetyLabel, safetyLabels, transparencyInfo);
     }
 }

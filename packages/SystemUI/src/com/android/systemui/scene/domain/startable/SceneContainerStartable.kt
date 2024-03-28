@@ -40,6 +40,7 @@ import com.android.systemui.model.updateFlags
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.FalsingManager.FalsingBeliefListener
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.logger.SceneLogger
@@ -94,6 +95,7 @@ constructor(
     private val deviceProvisioningInteractor: DeviceProvisioningInteractor,
     private val centralSurfaces: CentralSurfaces,
     private val headsUpInteractor: HeadsUpNotificationInteractor,
+    private val occlusionInteractor: SceneContainerOcclusionInteractor,
 ) : CoreStartable {
 
     override fun start() {
@@ -130,32 +132,36 @@ constructor(
                 .distinctUntilChanged()
                 .flatMapLatest { isAllowedToBeVisible ->
                     if (isAllowedToBeVisible) {
-                        sceneInteractor.transitionState
-                            .mapNotNull { state ->
-                                when (state) {
-                                    is ObservableTransitionState.Idle -> {
-                                        if (state.scene != Scenes.Gone) {
-                                            true to "scene is not Gone"
-                                        } else {
-                                            false to "scene is Gone"
+                        combine(
+                                sceneInteractor.transitionState.mapNotNull { state ->
+                                    when (state) {
+                                        is ObservableTransitionState.Idle -> {
+                                            if (state.scene != Scenes.Gone) {
+                                                true to "scene is not Gone"
+                                            } else {
+                                                false to "scene is Gone"
+                                            }
+                                        }
+                                        is ObservableTransitionState.Transition -> {
+                                            if (state.fromScene == Scenes.Gone) {
+                                                true to "scene transitioning away from Gone"
+                                            } else {
+                                                null
+                                            }
                                         }
                                     }
-                                    is ObservableTransitionState.Transition -> {
-                                        if (state.fromScene == Scenes.Gone) {
-                                            true to "scene transitioning away from Gone"
-                                        } else {
-                                            null
-                                        }
-                                    }
-                                }
-                            }
-                            .combine(headsUpInteractor.isHeadsUpOrAnimatingAway) {
+                                },
+                                headsUpInteractor.isHeadsUpOrAnimatingAway,
+                                occlusionInteractor.invisibleDueToOcclusion,
+                            ) {
                                 visibilityForTransitionState,
-                                isHeadsUpOrAnimatingAway ->
-                                if (isHeadsUpOrAnimatingAway) {
-                                    true to "showing a HUN"
-                                } else {
-                                    visibilityForTransitionState
+                                isHeadsUpOrAnimatingAway,
+                                invisibleDueToOcclusion,
+                                ->
+                                when {
+                                    isHeadsUpOrAnimatingAway -> true to "showing a HUN"
+                                    invisibleDueToOcclusion -> false to "invisible due to occlusion"
+                                    else -> visibilityForTransitionState
                                 }
                             }
                             .distinctUntilChanged()

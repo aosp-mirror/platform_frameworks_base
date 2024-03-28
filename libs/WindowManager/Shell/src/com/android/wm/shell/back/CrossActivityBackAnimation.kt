@@ -42,8 +42,8 @@ import com.android.internal.protolog.common.ProtoLog
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.animation.Interpolators
-import com.android.wm.shell.common.annotations.ShellMainThread
 import com.android.wm.shell.protolog.ShellProtoLogGroup
+import com.android.wm.shell.shared.annotations.ShellMainThread
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.max

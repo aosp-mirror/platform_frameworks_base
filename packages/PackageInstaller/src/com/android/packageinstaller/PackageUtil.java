@@ -30,6 +30,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -46,6 +48,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -135,10 +138,10 @@ public class PackageUtil {
 
     static final class AppSnippet implements Parcelable {
         @NonNull public CharSequence label;
-        @Nullable public Drawable icon;
+        @NonNull public Drawable icon;
         public int iconSize;
 
-        AppSnippet(@NonNull CharSequence label, @Nullable Drawable icon, Context context) {
+        AppSnippet(@NonNull CharSequence label, @NonNull Drawable icon, Context context) {
             this.label = label;
             this.icon = icon;
             final ActivityManager am = context.getSystemService(ActivityManager.class);
@@ -147,14 +150,15 @@ public class PackageUtil {
 
         private AppSnippet(Parcel in) {
             label = in.readString();
-            Bitmap bmp = in.readParcelable(getClass().getClassLoader(), Bitmap.class);
+            byte[] b = in.readBlob();
+            Bitmap bmp = BitmapFactory.decodeByteArray(b, 0, b.length);
             icon = new BitmapDrawable(Resources.getSystem(), bmp);
             iconSize = in.readInt();
         }
 
         @Override
         public String toString() {
-            return "AppSnippet[" + label + (icon != null ? "(has" : "(no ") + " icon)]";
+            return "AppSnippet[" + label + " (has icon)]";
         }
 
         @Override
@@ -165,16 +169,18 @@ public class PackageUtil {
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeString(label.toString());
+
             Bitmap bmp = getBitmapFromDrawable(icon);
-            dest.writeParcelable(bmp, 0);
+            dest.writeBlob(getBytesFromBitmap(bmp));
+            bmp.recycle();
+
             dest.writeInt(iconSize);
         }
 
         private Bitmap getBitmapFromDrawable(Drawable drawable) {
             // Create an empty bitmap with the dimensions of our drawable
             final Bitmap bmp = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
-                    drawable.getIntrinsicHeight(),
-                    Bitmap.Config.ARGB_8888);
+                drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
             // Associate it with a canvas. This canvas will draw the icon on the bitmap
             final Canvas canvas = new Canvas(bmp);
             // Draw the drawable in the canvas. The canvas will ultimately paint the drawable in the
@@ -190,6 +196,23 @@ public class PackageUtil {
                 return scaledBitmap;
             }
             return bmp;
+        }
+
+        private byte[] getBytesFromBitmap(Bitmap bmp) {
+            ByteArrayOutputStream baos = null;
+            try {
+                baos = new ByteArrayOutputStream();
+                bmp.compress(CompressFormat.PNG, 100, baos);
+            } finally {
+                try {
+                    if (baos != null) {
+                        baos.close();
+                    }
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "ByteArrayOutputStream was not closed");
+                }
+            }
+            return baos.toByteArray();
         }
 
         public static final Parcelable.Creator<AppSnippet> CREATOR = new Parcelable.Creator<>() {

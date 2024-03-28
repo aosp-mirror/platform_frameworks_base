@@ -445,7 +445,7 @@ constructor(
         // All transition view models are mututally exclusive, and safe to merge
         val alphaTransitions =
             merge(
-                alternateBouncerToGoneTransitionViewModel.lockscreenAlpha(viewState),
+                alternateBouncerToGoneTransitionViewModel.notificationAlpha(viewState),
                 aodToLockscreenTransitionViewModel.notificationAlpha,
                 aodToOccludedTransitionViewModel.lockscreenAlpha(viewState),
                 dozingToLockscreenTransitionViewModel.lockscreenAlpha,
@@ -455,7 +455,7 @@ constructor(
                 goneToDreamingTransitionViewModel.lockscreenAlpha,
                 goneToDozingTransitionViewModel.lockscreenAlpha,
                 lockscreenToDreamingTransitionViewModel.lockscreenAlpha,
-                lockscreenToGoneTransitionViewModel.lockscreenAlpha(viewState),
+                lockscreenToGoneTransitionViewModel.notificationAlpha(viewState),
                 lockscreenToOccludedTransitionViewModel.lockscreenAlpha,
                 lockscreenToPrimaryBouncerTransitionViewModel.lockscreenAlpha,
                 occludedToAodTransitionViewModel.lockscreenAlpha,
@@ -589,8 +589,13 @@ constructor(
             combine(
                 isOnLockscreen,
                 keyguardInteractor.statusBarState,
-            ) { isOnLockscreen, statusBarState ->
-                statusBarState == SHADE_LOCKED || !isOnLockscreen
+                merge(
+                        primaryBouncerToGoneTransitionViewModel.showAllNotifications,
+                        alternateBouncerToGoneTransitionViewModel.showAllNotifications,
+                    )
+                    .onStart { emit(false) }
+            ) { isOnLockscreen, statusBarState, showAllNotifications ->
+                statusBarState == SHADE_LOCKED || !isOnLockscreen || showAllNotifications
             }
 
         return combineTransform(

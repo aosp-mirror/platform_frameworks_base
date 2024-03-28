@@ -37,7 +37,7 @@ fun interface BackAnimationSpec {
 
 /** Create a [BackAnimationSpec] from [displayMetrics] and design specs. */
 fun BackAnimationSpec.Companion.createFloatingSurfaceAnimationSpec(
-    displayMetrics: DisplayMetrics,
+    displayMetricsProvider: () -> DisplayMetrics,
     maxMarginXdp: Float,
     maxMarginYdp: Float,
     minScale: Float,
@@ -45,18 +45,19 @@ fun BackAnimationSpec.Companion.createFloatingSurfaceAnimationSpec(
     translateYEasing: Interpolator = Interpolators.LINEAR,
     scaleEasing: Interpolator = Interpolators.STANDARD_DECELERATE,
 ): BackAnimationSpec {
-    val screenWidthPx = displayMetrics.widthPixels
-    val screenHeightPx = displayMetrics.heightPixels
-
-    val maxMarginXPx = maxMarginXdp.dpToPx(displayMetrics)
-    val maxMarginYPx = maxMarginYdp.dpToPx(displayMetrics)
-    val maxTranslationXByScale = (screenWidthPx - screenWidthPx * minScale) / 2
-    val maxTranslationX = maxTranslationXByScale - maxMarginXPx
-    val maxTranslationYByScale = (screenHeightPx - screenHeightPx * minScale) / 2
-    val maxTranslationY = maxTranslationYByScale - maxMarginYPx
-    val minScaleReversed = 1f - minScale
-
     return BackAnimationSpec { backEvent, progressY, result ->
+        val displayMetrics = displayMetricsProvider()
+        val screenWidthPx = displayMetrics.widthPixels
+        val screenHeightPx = displayMetrics.heightPixels
+
+        val maxMarginXPx = maxMarginXdp.dpToPx(displayMetrics)
+        val maxMarginYPx = maxMarginYdp.dpToPx(displayMetrics)
+        val maxTranslationXByScale = (screenWidthPx - screenWidthPx * minScale) / 2
+        val maxTranslationX = maxTranslationXByScale - maxMarginXPx
+        val maxTranslationYByScale = (screenHeightPx - screenHeightPx * minScale) / 2
+        val maxTranslationY = maxTranslationYByScale - maxMarginYPx
+        val minScaleReversed = 1f - minScale
+
         val direction = if (backEvent.swipeEdge == BackEvent.EDGE_LEFT) 1 else -1
         val progressX = backEvent.progress
 

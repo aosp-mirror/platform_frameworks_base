@@ -60,6 +60,10 @@ constructor(
     private var leaveShadeOpen: Boolean = false
     private var willRunDismissFromKeyguard: Boolean = false
 
+    /** See [BouncerToGoneFlows#showAllNotifications] */
+    val showAllNotifications: Flow<Boolean> =
+        bouncerToGoneFlows.showAllNotifications(TO_GONE_DURATION, PRIMARY_BOUNCER)
+
     val notificationAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(
             duration = 200.milliseconds,

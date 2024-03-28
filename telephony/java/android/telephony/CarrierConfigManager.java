@@ -8013,6 +8013,27 @@ public class CarrierConfigManager {
                 KEY_SCAN_LIMITED_SERVICE_AFTER_VOLTE_FAILURE_BOOL =
                     KEY_PREFIX + "scan_limited_service_after_volte_failure_bool";
 
+        /**
+         * This config defines {@link ImsReasonInfo} code with which the emergency call
+         * shall be retried.
+         *
+         * <p>
+         * If the reason code is one of the following, the emergency call shall be retried
+         * regardless of this configuration.
+         * <ul>
+         * <li>{@link ImsReasonInfo#CODE_LOCAL_CALL_CS_RETRY_REQUIRED}</li>
+         * <li>{@link ImsReasonInfo#CODE_LOCAL_NOT_REGISTERED}</li>
+         * <li>{@link ImsReasonInfo#CODE_SIP_ALTERNATE_EMERGENCY_CALL}</li>
+         * </ul>
+         * <p>
+         *
+         * This config is empty by default.
+         *
+         * @hide
+         */
+        public static final String KEY_IMS_REASONINFO_CODE_TO_RETRY_EMERGENCY_INT_ARRAY =
+                KEY_PREFIX + "ims_reasoninfo_code_to_retry_emergency_int_array";
+
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putBoolean(KEY_RETRY_EMERGENCY_ON_IMS_PDN_BOOL, false);
@@ -8085,6 +8106,8 @@ public class CarrierConfigManager {
             defaults.putBoolean(KEY_START_QUICK_CROSS_STACK_REDIAL_TIMER_WHEN_REGISTERED_BOOL,
                     true);
             defaults.putBoolean(KEY_SCAN_LIMITED_SERVICE_AFTER_VOLTE_FAILURE_BOOL, false);
+            defaults.putIntArray(KEY_IMS_REASONINFO_CODE_TO_RETRY_EMERGENCY_INT_ARRAY,
+                    new int[0]);
 
             return defaults;
         }
@@ -9854,6 +9877,19 @@ public class CarrierConfigManager {
             "satellite_entitlement_supported_bool";
 
     /**
+     * Indicates the appName that is used when querying the entitlement server for satellite.
+     *
+     * The default value is androidSatmode.
+     *
+     * Reference: GSMA TS.43-v11, 2.8.5 Fast Authentication and Token Management.
+     * `app_name` is an optional attribute in the request and may vary depending on the carrier
+     * requirement.
+     * @hide
+     */
+    public static final String KEY_SATELLITE_ENTITLEMENT_APP_NAME_STRING =
+            "satellite_entitlement_app_name_string";
+
+    /**
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
      * the default APN (i.e. internet) will be used for tethering.
      *
@@ -10997,6 +11033,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_OVERRIDE_WFC_ROAMING_MODE_WHILE_USING_NTN_BOOL, true);
         sDefaults.putInt(KEY_SATELLITE_ENTITLEMENT_STATUS_REFRESH_DAYS_INT, 30);
         sDefaults.putBoolean(KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL, false);
+        sDefaults.putString(KEY_SATELLITE_ENTITLEMENT_APP_NAME_STRING, "androidSatmode");
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);

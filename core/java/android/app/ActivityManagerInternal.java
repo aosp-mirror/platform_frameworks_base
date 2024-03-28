@@ -148,6 +148,13 @@ public abstract class ActivityManagerInternal {
     public abstract void onUserRemoved(@UserIdInt int userId);
 
     /**
+     * Start user, if it is not already running, but don't bring it to foreground.
+     * @param userId ID of the user to start
+     * @return true if the user has been successfully started
+     */
+    public abstract boolean startUserInBackground(int userId);
+
+    /**
      * Kill foreground apps from the specified user.
      */
     public abstract void killForegroundAppsForUser(@UserIdInt int userId);

@@ -29,6 +29,8 @@ import static android.view.WindowInsets.Type.all;
 import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.ime;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+
 import android.animation.AnimationHandler;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -322,7 +324,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     public static final int ANIMATION_TYPE_HIDE = 1;
 
     /** Running animation is controlled by user via {@link #controlWindowInsetsAnimation} */
-    @VisibleForTesting
+    @VisibleForTesting(visibility = PACKAGE)
     public static final int ANIMATION_TYPE_USER = 2;
 
     /** Running animation will resize insets */
@@ -1076,7 +1078,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         show(types, false /* fromIme */, null /* statsToken */);
     }
 
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    @VisibleForTesting(visibility = PACKAGE)
     public void show(@InsetsType int types, boolean fromIme,
             @Nullable ImeTracker.Token statsToken) {
         if ((types & ime()) != 0) {
@@ -1260,14 +1262,15 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             @Nullable CancellationSignal cancellationSignal,
             @NonNull WindowInsetsAnimationControlListener listener) {
         controlWindowInsetsAnimation(types, cancellationSignal, listener,
-                false /* fromIme */, durationMillis, interpolator, ANIMATION_TYPE_USER);
+                false /* fromIme */, durationMillis, interpolator, ANIMATION_TYPE_USER,
+                false /* fromPredictiveBack */);
     }
 
-    private void controlWindowInsetsAnimation(@InsetsType int types,
+    void controlWindowInsetsAnimation(@InsetsType int types,
             @Nullable CancellationSignal cancellationSignal,
             WindowInsetsAnimationControlListener listener,
             boolean fromIme, long durationMs, @Nullable Interpolator interpolator,
-            @AnimationType int animationType) {
+            @AnimationType int animationType, boolean fromPredictiveBack) {
         if ((mState.calculateUncontrollableInsetsFromFrame(mFrame) & types) != 0) {
             listener.onCancelled(null);
             return;
@@ -1279,7 +1282,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
 
         controlAnimationUnchecked(types, cancellationSignal, listener, mFrame, fromIme, durationMs,
-                interpolator, animationType, getLayoutInsetsDuringAnimationMode(types),
+                interpolator, animationType,
+                getLayoutInsetsDuringAnimationMode(types, fromPredictiveBack),
                 false /* useInsetsAnimationThread */, null /* statsToken */);
     }
 
@@ -1526,7 +1530,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     private @LayoutInsetsDuringAnimation int getLayoutInsetsDuringAnimationMode(
-            @InsetsType int types) {
+            @InsetsType int types, boolean fromPredictiveBack) {
+        if (fromPredictiveBack) {
+            // When insets are animated by predictive back, we want insets to be shown to prevent a
+            // jump cut from shown to hidden at the start of the predictive back animation
+            return LAYOUT_INSETS_DURING_ANIMATION_SHOWN;
+        }
         // Generally, we want to layout the opposite of the current state. This is to make animation
         // callbacks easy to use: The can capture the layout values and then treat that as end-state
         // during the animation.
@@ -1730,7 +1739,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         return ANIMATION_TYPE_NONE;
     }
 
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    @VisibleForTesting(visibility = PACKAGE)
     public void setRequestedVisibleTypes(@InsetsType int visibleTypes, @InsetsType int mask) {
         final @InsetsType int requestedVisibleTypes =
                 (mRequestedVisibleTypes & ~mask) | (visibleTypes & mask);

@@ -58,6 +58,7 @@ protected:
         MOCK_METHOD(void, fakeUpdateTargetWorkDuration, (APerformanceHintSession*, int64_t));
         MOCK_METHOD(void, fakeReportActualWorkDuration, (APerformanceHintSession*, int64_t));
         MOCK_METHOD(void, fakeSendHint, (APerformanceHintSession*, int32_t));
+        MOCK_METHOD(int, fakeSetThreads, (APerformanceHintSession*, const std::vector<pid_t>&));
         // Needs to be on the binding so it can be accessed from static methods
         std::promise<int> allowCreationToFinish;
     };
@@ -102,9 +103,18 @@ protected:
     static void stubSendHint(APerformanceHintSession* session, int32_t hintId) {
         sMockBinding->fakeSendHint(session, hintId);
     };
+    static int stubSetThreads(APerformanceHintSession* session, const pid_t* ids, size_t size) {
+        std::vector<pid_t> tids(ids, ids + size);
+        return sMockBinding->fakeSetThreads(session, tids);
+    }
     void waitForWrapperReady() {
         if (mWrapper->mHintSessionFuture.has_value()) {
             mWrapper->mHintSessionFuture->wait();
+        }
+    }
+    void waitForSetThreadsReady() {
+        if (mWrapper->mSetThreadsFuture.has_value()) {
+            mWrapper->mSetThreadsFuture->wait();
         }
     }
     void scheduleDelayedDestroyManaged() {
@@ -130,6 +140,7 @@ void HintSessionWrapperTests::SetUp() {
     mWrapper->mBinding = sMockBinding;
     EXPECT_CALL(*sMockBinding, fakeGetManager).WillOnce(Return(managerPtr));
     ON_CALL(*sMockBinding, fakeCreateSession).WillByDefault(Return(sessionPtr));
+    ON_CALL(*sMockBinding, fakeSetThreads).WillByDefault(Return(0));
 }
 
 void HintSessionWrapperTests::MockHintSessionBinding::init() {
@@ -141,6 +152,7 @@ void HintSessionWrapperTests::MockHintSessionBinding::init() {
     sMockBinding->updateTargetWorkDuration = &stubUpdateTargetWorkDuration;
     sMockBinding->reportActualWorkDuration = &stubReportActualWorkDuration;
     sMockBinding->sendHint = &stubSendHint;
+    sMockBinding->setThreads = &stubSetThreads;
 }
 
 void HintSessionWrapperTests::TearDown() {
@@ -337,6 +349,46 @@ TEST_F(HintSessionWrapperTests, manualSessionDestroyPlaysNiceWithDelayedDestruct
     // Ensure it didn't close again and is still dead
     Mock::VerifyAndClearExpectations(sMockBinding.get());
     EXPECT_EQ(mWrapper->alive(), false);
+}
+
+TEST_F(HintSessionWrapperTests, setThreadsUpdatesSessionThreads) {
+    EXPECT_CALL(*sMockBinding, fakeCreateSession(managerPtr, _, Gt(1), _)).Times(1);
+    EXPECT_CALL(*sMockBinding, fakeSetThreads(sessionPtr, testing::IsSupersetOf({11, 22})))
+            .Times(1);
+    mWrapper->init();
+    waitForWrapperReady();
+
+    // This changes the overall set of threads in the session, so the session wrapper should call
+    // setThreads.
+    mWrapper->setActiveFunctorThreads({11, 22});
+    waitForSetThreadsReady();
+
+    // The set of threads doesn't change, so the session wrapper should not call setThreads this
+    // time. The order of the threads shouldn't matter.
+    mWrapper->setActiveFunctorThreads({22, 11});
+    waitForSetThreadsReady();
+}
+
+TEST_F(HintSessionWrapperTests, setThreadsDoesntCrashAfterDestroy) {
+    EXPECT_CALL(*sMockBinding, fakeCloseSession(sessionPtr)).Times(1);
+
+    mWrapper->init();
+    waitForWrapperReady();
+    // Init a second time just to grab the wrapper from the promise
+    mWrapper->init();
+    EXPECT_EQ(mWrapper->alive(), true);
+
+    // Then, kill the session
+    mWrapper->destroy();
+
+    // Verify it died
+    Mock::VerifyAndClearExpectations(sMockBinding.get());
+    EXPECT_EQ(mWrapper->alive(), false);
+
+    // setActiveFunctorThreads shouldn't do anything, and shouldn't crash.
+    EXPECT_CALL(*sMockBinding, fakeSetThreads(_, _)).Times(0);
+    mWrapper->setActiveFunctorThreads({11, 22});
+    waitForSetThreadsReady();
 }
 
 }  // namespace android::uirenderer::renderthread

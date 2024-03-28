@@ -16,6 +16,7 @@
 
 package android.inputmethodservice;
 
+import static android.view.inputmethod.Flags.predictiveBackIme;
 import static android.inputmethodservice.InputMethodServiceProto.CANDIDATES_VIEW_STARTED;
 import static android.inputmethodservice.InputMethodServiceProto.CANDIDATES_VISIBILITY;
 import static android.inputmethodservice.InputMethodServiceProto.CONFIGURATION;
@@ -3098,7 +3099,7 @@ public class InputMethodService extends AbstractInputMethodService {
         cancelImeSurfaceRemoval();
         mInShowWindow = false;
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-        registerCompatOnBackInvokedCallback();
+        registerDefaultOnBackInvokedCallback();
     }
 
 
@@ -3107,18 +3108,27 @@ public class InputMethodService extends AbstractInputMethodService {
      *  back dispatching is enabled. We keep the {@link KeyEvent#KEYCODE_BACK} based legacy code
      *  around to handle back on older devices.
      */
-    private void registerCompatOnBackInvokedCallback() {
+    private void registerDefaultOnBackInvokedCallback() {
         if (mBackCallbackRegistered) {
             return;
         }
         if (mWindow != null) {
-            mWindow.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
-                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, mCompatBackCallback);
+            if (getApplicationInfo().isOnBackInvokedCallbackEnabled() && predictiveBackIme()) {
+                // Register the compat callback as system-callback if IME has opted in for
+                // predictive back (and predictiveBackIme feature flag is enabled). This indicates
+                // to the receiving process (application process) that a predictive IME dismiss
+                // animation may be played instead of invoking the callback.
+                mWindow.getOnBackInvokedDispatcher().registerSystemOnBackInvokedCallback(
+                        mCompatBackCallback);
+            } else {
+                mWindow.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                        OnBackInvokedDispatcher.PRIORITY_DEFAULT, mCompatBackCallback);
+            }
             mBackCallbackRegistered = true;
         }
     }
 
-    private void unregisterCompatOnBackInvokedCallback() {
+    private void unregisterDefaultOnBackInvokedCallback() {
         if (!mBackCallbackRegistered) {
             return;
         }
@@ -3251,7 +3261,7 @@ public class InputMethodService extends AbstractInputMethodService {
         }
         mLastWasInFullscreenMode = mIsFullscreen;
         updateFullscreenMode();
-        unregisterCompatOnBackInvokedCallback();
+        unregisterDefaultOnBackInvokedCallback();
     }
 
     /**
@@ -3328,7 +3338,7 @@ public class InputMethodService extends AbstractInputMethodService {
         // Back callback is typically unregistered in {@link #hideWindow()}, but it's possible
         // for {@link #doFinishInput()} to be called without {@link #hideWindow()} so we also
         // unregister here.
-        unregisterCompatOnBackInvokedCallback();
+        unregisterDefaultOnBackInvokedCallback();
     }
 
     void doStartInput(InputConnection ic, EditorInfo editorInfo, boolean restarting) {
@@ -4473,7 +4483,7 @@ public class InputMethodService extends AbstractInputMethodService {
     private void compatHandleBack() {
         if (!mDecorViewVisible) {
             Log.e(TAG, "Back callback invoked on a hidden IME. Removing the callback...");
-            unregisterCompatOnBackInvokedCallback();
+            unregisterDefaultOnBackInvokedCallback();
             return;
         }
         final KeyEvent downEvent = createBackKeyEvent(

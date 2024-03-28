@@ -59,7 +59,8 @@ import com.android.internal.R;
 import com.android.internal.widget.CachingIconView;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.SysuiTestableContext;
-import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.FakeFeatureFlagsClassic;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
@@ -90,13 +91,14 @@ import java.util.function.Consumer;
 @RunWithLooper
 public class ExpandableNotificationRowTest extends SysuiTestCase {
 
-    private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
+    private final FakeFeatureFlagsClassic mFeatureFlags = new FakeFeatureFlagsClassic();
     private NotificationTestHelper mNotificationTestHelper;
     @Rule public MockitoRule mockito = MockitoJUnit.rule();
 
     @Before
     public void setUp() throws Exception {
         allowTestableLooperAsMainThread();
+        mFeatureFlags.set(Flags.ENABLE_NOTIFICATIONS_SIMULATE_SLOW_MEASURE, false);
         mNotificationTestHelper = new NotificationTestHelper(
                 mContext,
                 mDependency,

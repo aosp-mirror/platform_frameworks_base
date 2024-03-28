@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.transition;
+package com.android.wm.shell.shared.annotations;
 
-import android.window.RemoteTransition;
-import android.window.TransitionFilter;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+
+import javax.inject.Qualifier;
 
 /**
- * Listener interface that Launcher attaches to SystemUI to get home activity transition callbacks
- * on the default display.
+ * Annotates a method or qualifies a provider that runs on the main-thread of the process using
+ * this library.
  */
-oneway interface IHomeTransitionListener {
-
-    /**
-     * Called when a transition changes the visibility of the home activity on the default display.
-     */
-    void onHomeVisibilityChanged(in boolean isVisible);
+@Qualifier
+@Documented
+@Retention(RUNTIME)
+public @interface ExternalMainThread {
 }
-

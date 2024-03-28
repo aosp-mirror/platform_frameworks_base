@@ -671,6 +671,14 @@ class UserController implements Handler.Callback {
     }
 
     private void sendLockedBootCompletedBroadcast(IIntentReceiver receiver, @UserIdInt int userId) {
+        if (android.os.Flags.allowPrivateProfile()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures()) {
+            final UserInfo userInfo = getUserInfo(userId);
+            if (userInfo != null && userInfo.isPrivateProfile()) {
+                Slogf.i(TAG, "Skipping LOCKED_BOOT_COMPLETED for private profile user #" + userId);
+                return;
+            }
+        }
         final Intent intent = new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED, null);
         intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
         intent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
@@ -877,6 +885,13 @@ class UserController implements Handler.Callback {
 
         mHandler.obtainMessage(USER_UNLOCKED_MSG, userId, 0).sendToTarget();
 
+        if (android.os.Flags.allowPrivateProfile()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures()) {
+            if (userInfo.isPrivateProfile()) {
+                Slogf.i(TAG, "Skipping BOOT_COMPLETED for private profile user #" + userId);
+                return;
+            }
+        }
         Slogf.i(TAG, "Posting BOOT_COMPLETED user #" + userId);
         // Do not report secondary users, runtime restarts or first boot/upgrade
         if (userId == UserHandle.USER_SYSTEM

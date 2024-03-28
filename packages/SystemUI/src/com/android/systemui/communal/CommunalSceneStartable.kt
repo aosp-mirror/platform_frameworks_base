@@ -72,7 +72,7 @@ constructor(
             .filterNotNull()
             // TODO(b/322787129): Also set a custom transition animation here to avoid the regular
             // slide-in animation when setting the scene programmatically
-            .onEach { nextScene -> communalInteractor.onSceneChanged(nextScene) }
+            .onEach { nextScene -> communalInteractor.changeScene(nextScene) }
             .launchIn(applicationScope)
 
         // TODO(b/322787129): re-enable once custom animations are in place
@@ -129,7 +129,7 @@ constructor(
                 .sample(keyguardInteractor.isDreaming, ::Pair)
                 .collect { (shouldTimeout, isDreaming) ->
                     if (isDreaming && shouldTimeout) {
-                        communalInteractor.onSceneChanged(CommunalScenes.Blank)
+                        communalInteractor.changeScene(CommunalScenes.Blank)
                     }
                 }
         }
