@@ -182,10 +182,17 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
 
     @Override
     public boolean isAvailable() {
+        if (isWalletRoleAvailable()) {
+            return !mPackageManager.hasSystemFeature(FEATURE_CHROME_OS);
+        }
         return mPackageManager.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION)
                 && !mPackageManager.hasSystemFeature(FEATURE_CHROME_OS)
                 && mSecureSettings.getStringForUser(NFC_PAYMENT_DEFAULT_COMPONENT,
                     UserHandle.USER_CURRENT) != null;
+    }
+
+    private boolean isWalletRoleAvailable() {
+        return mHost.getUserId() == UserHandle.USER_SYSTEM && mController.isWalletRoleAvailable();
     }
 
     @Nullable

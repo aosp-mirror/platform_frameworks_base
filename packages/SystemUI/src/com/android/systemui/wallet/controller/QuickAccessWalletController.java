@@ -91,15 +91,20 @@ public class QuickAccessWalletController {
             @Background Executor bgExecutor,
             SecureSettings secureSettings,
             QuickAccessWalletClient quickAccessWalletClient,
-            SystemClock clock) {
+            SystemClock clock,
+            RoleManager roleManager) {
         mContext = context;
         mExecutor = executor;
         mBgExecutor = bgExecutor;
         mSecureSettings = secureSettings;
-        mRoleManager = mContext.getSystemService(RoleManager.class);
+        mRoleManager = roleManager;
         mQuickAccessWalletClient = quickAccessWalletClient;
         mClock = clock;
         mQawClientCreatedTimeMillis = mClock.elapsedRealtime();
+    }
+
+    public boolean isWalletRoleAvailable() {
+        return mRoleManager.isRoleAvailable(RoleManager.ROLE_WALLET);
     }
 
     /**
