@@ -201,11 +201,38 @@ class AudioVolumeInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun alarmStream_isNotMutable() {
+    fun streamNotAffectedByMute_isNotMutable() {
         with(kosmos) {
-            val isMutable = underTest.isMutable(AudioStream(AudioManager.STREAM_ALARM))
+            testScope.runTest {
+                audioRepository.setIsAffectedByMute(audioStream, false)
+                val isMutable = underTest.isAffectedByMute(audioStream)
 
-            assertThat(isMutable).isFalse()
+                assertThat(isMutable).isFalse()
+            }
+        }
+    }
+
+    @Test
+    fun muteRingerStream_ringerMode_vibrate() {
+        with(kosmos) {
+            testScope.runTest {
+                val ringerMode by collectLastValue(audioRepository.ringerMode)
+                underTest.setMuted(AudioStream(AudioManager.STREAM_RING), true)
+
+                assertThat(ringerMode).isEqualTo(RingerMode(AudioManager.RINGER_MODE_VIBRATE))
+            }
+        }
+    }
+
+    @Test
+    fun unMuteRingerStream_ringerMode_normal() {
+        with(kosmos) {
+            testScope.runTest {
+                val ringerMode by collectLastValue(audioRepository.ringerMode)
+                underTest.setMuted(AudioStream(AudioManager.STREAM_RING), false)
+
+                assertThat(ringerMode).isEqualTo(RingerMode(AudioManager.RINGER_MODE_NORMAL))
+            }
         }
     }
 

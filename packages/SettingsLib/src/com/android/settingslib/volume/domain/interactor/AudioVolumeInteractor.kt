@@ -49,8 +49,14 @@ class AudioVolumeInteractor(
     suspend fun setVolume(audioStream: AudioStream, volume: Int) =
         audioRepository.setVolume(audioStream, volume)
 
-    suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean) =
+    suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean) {
+        if (audioStream.value == AudioManager.STREAM_RING) {
+            val mode =
+                if (isMuted) AudioManager.RINGER_MODE_VIBRATE else AudioManager.RINGER_MODE_NORMAL
+            audioRepository.setRingerMode(audioStream, RingerMode(mode))
+        }
         audioRepository.setMuted(audioStream, isMuted)
+    }
 
     /** Checks if the volume can be changed via the UI. */
     fun canChangeVolume(audioStream: AudioStream): Flow<Boolean> {
@@ -66,9 +72,8 @@ class AudioVolumeInteractor(
         }
     }
 
-    fun isMutable(audioStream: AudioStream): Boolean =
-        // Alarm stream doesn't support muting
-        audioStream.value != AudioManager.STREAM_ALARM
+    suspend fun isAffectedByMute(audioStream: AudioStream): Boolean =
+        audioRepository.isAffectedByMute(audioStream)
 
     private suspend fun processVolume(
         audioStreamModel: AudioStreamModel,

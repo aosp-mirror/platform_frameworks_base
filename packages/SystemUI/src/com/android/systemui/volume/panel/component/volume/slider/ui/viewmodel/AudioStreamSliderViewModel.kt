@@ -98,7 +98,7 @@ constructor(
         }
     }
 
-    private fun AudioStreamModel.toState(
+    private suspend fun AudioStreamModel.toState(
         isEnabled: Boolean,
         ringerMode: RingerMode,
     ): State {
@@ -116,7 +116,7 @@ constructor(
             isEnabled = isEnabled,
             a11yStep = volumeRange.step,
             audioStreamModel = this,
-            isMutable = audioVolumeInteractor.isMutable(audioStream),
+            isMutable = audioVolumeInteractor.isAffectedByMute(audioStream),
         )
     }
 
