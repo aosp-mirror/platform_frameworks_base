@@ -770,6 +770,20 @@ final class IInputMethodManagerGlobalInvoker {
     }
 
     @AnyThread
+    @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
+    static void finishTrackingPendingImeVisibilityRequests() {
+        final var service = getImeTrackerService();
+        if (service == null) {
+            return;
+        }
+        try {
+            service.finishTrackingPendingImeVisibilityRequests();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @AnyThread
     @Nullable
     private static IImeTracker getImeTrackerService() {
         var trackerService = sTrackerServiceCache;
