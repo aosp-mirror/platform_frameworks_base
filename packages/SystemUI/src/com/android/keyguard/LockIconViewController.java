@@ -454,6 +454,7 @@ public class LockIconViewController implements Dumpable {
         final float scaleFactor = mAuthController.getScaleFactor();
         final int scaledPadding = (int) (mDefaultPaddingPx * scaleFactor);
         if (KeyguardBottomAreaRefactor.isEnabled() || MigrateClocksToBlueprint.isEnabled()) {
+            // positioning in this case is handled by [DefaultDeviceEntrySection]
             mView.getLockIcon().setPadding(scaledPadding, scaledPadding, scaledPadding,
                     scaledPadding);
         } else {
