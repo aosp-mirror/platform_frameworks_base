@@ -1277,8 +1277,9 @@ class Task extends TaskFragment {
             final ActivityRecord top = topRunningActivity();
             final ActivityRecord resumedActivity = getResumedActivity();
             if (resumedActivity != null
-                    && (top.getTaskFragment() != this || !canBeResumed(resuming))) {
-                // Pausing the resumed activity because it is occluded by other task fragment.
+                    && (top == null || top.getTaskFragment() != this || !canBeResumed(resuming))) {
+                // Pausing the resumed activity because it is occluded by other task fragment, or
+                // should not be remained in resumed state.
                 if (startPausing(false /* uiSleeping*/, resuming, reason)) {
                     someActivityPaused[0]++;
                 }
