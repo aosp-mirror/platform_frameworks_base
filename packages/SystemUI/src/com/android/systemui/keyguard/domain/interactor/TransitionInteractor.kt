@@ -78,19 +78,26 @@ sealed class TransitionInteractor(
         // a bugreport.
         ownerReason: String = "",
     ): UUID? {
-        if (
-            fromState != transitionInteractor.startedKeyguardState.replayCache.last() &&
-                fromState != transitionInteractor.finishedKeyguardState.replayCache.last()
-        ) {
+        if (fromState != transitionInteractor.currentTransitionInfoInternal.value.to) {
             Log.e(
                 name,
-                "startTransition: We were asked to transition from " +
-                    "$fromState to $toState, however we last finished a transition to " +
-                    "${transitionInteractor.finishedKeyguardState.replayCache.last()}, " +
-                    "and last started a transition to " +
-                    "${transitionInteractor.startedKeyguardState.replayCache.last()}. " +
-                    "Ignoring startTransition, but this should never happen."
+                "Ignoring startTransition: This interactor asked to transition from " +
+                    "$fromState -> $toState, but we last transitioned to " +
+                    "${transitionInteractor.currentTransitionInfoInternal.value.to}, not " +
+                    "$fromState. This should never happen - check currentTransitionInfoInternal " +
+                    "or use filterRelevantKeyguardState before starting transitions."
             )
+
+            if (fromState == transitionInteractor.finishedKeyguardState.replayCache.last()) {
+                Log.e(
+                    name,
+                    "This transition would not have been ignored prior to ag/26681239, since we " +
+                        "are FINISHED in $fromState (but have since started another transition). " +
+                        "If ignoring this transition has caused a regression, fix it by ensuring " +
+                        "that transitions are exclusively started from the most recently started " +
+                        "state."
+                )
+            }
             return null
         }
 
