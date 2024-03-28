@@ -424,6 +424,44 @@ public class ResourcesManagerTest extends TestCase {
     @Test
     @SmallTest
     @RequiresFlagsEnabled(Flags.FLAG_REGISTER_RESOURCE_PATHS)
+    public void testExistingResourcesCreatedByConstructorAfterResourcePathsRegistration()
+            throws PackageManager.NameNotFoundException {
+        // Inject ResourcesManager instance from this test to the ResourcesManager class so that all
+        // the static method can interact with this test smoothly.
+        ResourcesManager oriResourcesManager = ResourcesManager.getInstance();
+        ResourcesManager.setInstance(mResourcesManager);
+
+        // Create a Resources through constructor directly before register resources' paths.
+        final DisplayMetrics metrics = new DisplayMetrics();
+        metrics.setToDefaults();
+        final Configuration config = new Configuration();
+        config.setToDefaults();
+        Resources resources = new Resources(new AssetManager(), metrics, config);
+        assertNotNull(resources);
+
+        ResourcesImpl oriResImpl = resources.getImpl();
+
+        ApplicationInfo appInfo = mPackageManager.getApplicationInfo(TEST_LIB, 0);
+        Resources.registerResourcePaths(TEST_LIB, appInfo);
+
+        assertNotSame(oriResImpl, resources.getImpl());
+
+        String[] resourcePaths = appInfo.getAllApkPaths();
+        resourcePaths = removeDuplicates(resourcePaths);
+        ApkAssets[] loadedAssets = resources.getAssets().getApkAssets();
+        assertTrue(allResourcePathsLoaded(resourcePaths, loadedAssets));
+
+        // Package resources' paths should be cached in ResourcesManager.
+        assertEquals(Arrays.toString(resourcePaths), Arrays.toString(ResourcesManager.getInstance()
+                .getSharedLibAssetsMap().get(TEST_LIB).getAllAssetPaths()));
+
+        // Revert the ResourcesManager instance back.
+        ResourcesManager.setInstance(oriResourcesManager);
+    }
+
+    @Test
+    @SmallTest
+    @RequiresFlagsEnabled(Flags.FLAG_REGISTER_RESOURCE_PATHS)
     public void testNewResourcesWithOutdatedImplAfterResourcePathsRegistration()
             throws PackageManager.NameNotFoundException {
         ResourcesManager oriResourcesManager = ResourcesManager.getInstance();

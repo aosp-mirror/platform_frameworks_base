@@ -339,14 +339,17 @@ public class Resources {
     public Resources(@Nullable ClassLoader classLoader) {
         mClassLoader = classLoader == null ? ClassLoader.getSystemClassLoader() : classLoader;
         sResourcesHistory.add(this);
+        ResourcesManager.getInstance().registerAllResourcesReference(this);
     }
 
     /**
-     * Only for creating the System resources.
+     * Only for creating the System resources. This is the only constructor that doesn't add
+     * Resources itself to the ResourcesManager list of all Resources references.
      */
     @UnsupportedAppUsage
     private Resources() {
-        this(null);
+        mClassLoader = ClassLoader.getSystemClassLoader();
+        sResourcesHistory.add(this);
 
         final DisplayMetrics metrics = new DisplayMetrics();
         metrics.setToDefaults();
