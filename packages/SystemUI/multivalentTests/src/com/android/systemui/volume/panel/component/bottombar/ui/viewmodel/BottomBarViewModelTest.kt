@@ -84,8 +84,17 @@ class BottomBarViewModelTest : SysuiTestCase() {
 
                 runCurrent()
 
-                verify(activityStarter).startActivity(capture(intentCaptor), eq(true),
-                        capture(activityStartedCaptor))
+                verify(activityStarter)
+                    .startActivityDismissingKeyguard(
+                        /* intent = */ capture(intentCaptor),
+                        /* onlyProvisioned = */ eq(false),
+                        /* dismissShade = */ eq(true),
+                        /* disallowEnterPictureInPictureWhileLaunching = */ eq(false),
+                        /* callback = */ capture(activityStartedCaptor),
+                        /* flags = */ eq(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT),
+                        /* animationController = */ eq(null),
+                        /* userHandle = */ eq(null),
+                    )
                 assertThat(intentCaptor.value.action).isEqualTo(Settings.ACTION_SOUND_SETTINGS)
 
                 activityStartedCaptor.value.onActivityStarted(ActivityManager.START_SUCCESS)
