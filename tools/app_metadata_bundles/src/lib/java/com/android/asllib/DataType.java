@@ -76,19 +76,19 @@ public class DataType implements AslMarshallable {
 
     private final String mDataTypeName;
 
-    private final Set<Purpose> mPurposeSet;
+    private final List<Purpose> mPurposes;
     private final Boolean mIsCollectionOptional;
     private final Boolean mIsSharingOptional;
     private final Boolean mEphemeral;
 
     public DataType(
             String dataTypeName,
-            Set<Purpose> purposeSet,
+            List<Purpose> purposes,
             Boolean isCollectionOptional,
             Boolean isSharingOptional,
             Boolean ephemeral) {
         this.mDataTypeName = dataTypeName;
-        this.mPurposeSet = purposeSet;
+        this.mPurposes = purposes;
         this.mIsCollectionOptional = isCollectionOptional;
         this.mIsSharingOptional = isSharingOptional;
         this.mEphemeral = ephemeral;
@@ -102,8 +102,8 @@ public class DataType implements AslMarshallable {
      * Returns {@link Set} of valid {@link Integer} purposes for using the associated data category
      * and type
      */
-    public Set<Purpose> getPurposeSet() {
-        return mPurposeSet;
+    public List<Purpose> getPurposes() {
+        return mPurposes;
     }
 
     /**
@@ -133,13 +133,13 @@ public class DataType implements AslMarshallable {
     @Override
     public List<Element> toOdDomElements(Document doc) {
         Element dataTypeEle = XmlUtils.createPbundleEleWithName(doc, this.getDataTypeName());
-        if (!this.getPurposeSet().isEmpty()) {
+        if (!this.getPurposes().isEmpty()) {
             dataTypeEle.appendChild(
                     XmlUtils.createOdArray(
                             doc,
                             XmlUtils.OD_TAG_INT_ARRAY,
                             XmlUtils.OD_NAME_PURPOSES,
-                            this.getPurposeSet().stream()
+                            this.getPurposes().stream()
                                     .map(p -> String.valueOf(p.getValue()))
                                     .toList()));
         }

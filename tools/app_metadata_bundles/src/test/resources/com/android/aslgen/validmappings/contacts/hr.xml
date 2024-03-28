@@ -1,4 +1,4 @@
-<app-metadata-bundles>
+<app-metadata-bundles version="123">
     <safety-labels version="12345">
         <data-labels>
             <data-shared dataCategory="contacts"
