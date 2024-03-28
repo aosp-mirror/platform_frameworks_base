@@ -81,6 +81,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 
 /** Encapsulates business-logic related to communal mode. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -239,10 +240,14 @@ constructor(
      * This will not be true while transitioning to the hub and will turn false immediately when a
      * swipe to exit the hub starts.
      */
-    val isIdleOnCommunal: Flow<Boolean> =
-        communalRepository.transitionState.map {
-            it is ObservableTransitionState.Idle && it.scene == CommunalScenes.Communal
-        }
+    val isIdleOnCommunal: StateFlow<Boolean> =
+        communalRepository.transitionState
+            .map { it is ObservableTransitionState.Idle && it.scene == CommunalScenes.Communal }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = false,
+            )
 
     /**
      * Flow that emits a boolean if any portion of the communal UI is visible at all.

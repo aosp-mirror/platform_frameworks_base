@@ -604,6 +604,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 new NotificationsKeyguardInteractor(notifsKeyguardViewStateRepository);
         NotificationWakeUpCoordinator coordinator =
                 new NotificationWakeUpCoordinator(
+                        mKosmos.getTestScope().getBackgroundScope(),
                         mDumpManager,
                         mock(HeadsUpManager.class),
                         new StatusBarStateControllerImpl(
@@ -618,7 +619,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                         mDozeParameters,
                         mScreenOffAnimationController,
                         new NotificationWakeUpCoordinatorLogger(logcatLogBuffer()),
-                        notifsKeyguardInteractor);
+                        notifsKeyguardInteractor,
+                        mKosmos.getCommunalInteractor());
         mConfigurationController = new ConfigurationControllerImpl(mContext);
         PulseExpansionHandler expansionHandler = new PulseExpansionHandler(
                 mContext,
