@@ -1559,7 +1559,7 @@
     <string name="sync_really_delete" msgid="5657871730315579051">"ਆਈਟਮਾਂ ਹਟਾਓ"</string>
     <string name="sync_undo_deletes" msgid="5786033331266418896">"ਮਿਟਾਏ ਗਏ ਨੂੰ ਅਣਕੀਤਾ ਕਰੋ"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"ਹੁਣ ਕੁਝ ਨਾ ਕਰੋ"</string>
-    <string name="choose_account_label" msgid="5557833752759831548">"ਇੱਕ ਖਾਤਾ ਚੁਣੋ"</string>
+    <string name="choose_account_label" msgid="5557833752759831548">"ਕੋਈ ਖਾਤਾ ਚੁਣੋ"</string>
     <string name="add_account_label" msgid="4067610644298737417">"ਇੱਕ ਖਾਤਾ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="add_account_button_label" msgid="322390749416414097">"ਖਾਤਾ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"ਵਧਾਓ"</string>

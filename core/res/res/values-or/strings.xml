@@ -1971,7 +1971,7 @@
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"ନିରୀକ୍ଷିତ ୟୁଜର ଯୋଗ କରନ୍ତୁ"</string>
     <string name="language_selection_title" msgid="52674936078683285">"ଏକ ଭାଷା ଯୋଗ କରନ୍ତୁ"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"ପସନ୍ଦର ଅଞ୍ଚଳ"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"ଭାଷାର ନାମ ଟାଇପ୍‍ କରନ୍ତୁ"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"ଭାଷାର ନାମ ଟାଇପ କରନ୍ତୁ"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"ପ୍ରସ୍ତାବିତ"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"ପ୍ରସ୍ତାବିତ"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"ପ୍ରସ୍ତାବିତ ଭାଷାଗୁଡ଼ିକ"</string>
