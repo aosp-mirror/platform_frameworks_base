@@ -29,6 +29,9 @@ import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
+import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.SceneTransitionLayout
+import com.android.compose.animation.scene.transitions
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.keyguard.KeyguardStatusView
 import com.android.keyguard.KeyguardStatusViewController
@@ -109,6 +112,7 @@ constructor(
 
     private var rootViewHandle: DisposableHandle? = null
     private var indicationAreaHandle: DisposableHandle? = null
+    private val sceneKey = SceneKey("root-view-scene-key")
 
     var keyguardStatusViewController: KeyguardStatusViewController? = null
         get() {
@@ -219,12 +223,25 @@ constructor(
             blueprints.mapNotNull { it as? ComposableLockscreenSceneBlueprint }.toSet()
         return ComposeView(context).apply {
             setContent {
-                LockscreenContent(
-                        viewModel = viewModel,
-                        blueprints = sceneBlueprints,
-                        clockInteractor = clockInteractor
-                    )
-                    .Content(modifier = Modifier.fillMaxSize())
+                // STL is used solely to provide a SceneScope to enable us to invoke SceneScope
+                // composables.
+                SceneTransitionLayout(
+                    currentScene = sceneKey,
+                    onChangeScene = {},
+                    transitions = transitions {},
+                ) {
+                    scene(sceneKey) {
+                        with(
+                            LockscreenContent(
+                                viewModel = viewModel,
+                                blueprints = sceneBlueprints,
+                                clockInteractor = clockInteractor
+                            )
+                        ) {
+                            Content(modifier = Modifier.fillMaxSize())
+                        }
+                    }
+                }
             }
         }
     }
