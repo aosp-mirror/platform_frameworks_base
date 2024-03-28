@@ -123,7 +123,7 @@ interface ConnectivityModule {
                         labelRes = R.string.airplane_mode,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
-                policy = QSTilePolicy.Restricted(UserManager.DISALLOW_AIRPLANE_MODE),
+                policy = QSTilePolicy.Restricted(listOf(UserManager.DISALLOW_AIRPLANE_MODE)),
             )
 
         /** Inject AirplaneModeTile into tileViewModelMap in QSModule */
