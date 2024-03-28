@@ -28,6 +28,7 @@ import android.app.NotificationManager.VISIBILITY_NO_OVERRIDE
 import android.content.pm.PackageManager
 import android.media.projection.MediaProjectionInfo
 import android.media.projection.MediaProjectionManager
+import android.os.UserHandle
 import android.permission.flags.Flags.FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.annotations.RequiresFlagsDisabled
@@ -85,7 +86,6 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
     @Mock private lateinit var activityManager: IActivityManager
     @Mock private lateinit var mediaProjectionManager: MediaProjectionManager
     @Mock private lateinit var packageManager: PackageManager
-    @Mock private lateinit var mediaProjectionInfo: MediaProjectionInfo
     @Mock private lateinit var listener1: Runnable
     @Mock private lateinit var listener2: Runnable
     @Mock private lateinit var listener3: Runnable
@@ -95,6 +95,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
     private lateinit var globalSettings: FakeGlobalSettings
     private lateinit var mediaProjectionCallback: MediaProjectionManager.Callback
     private lateinit var controller: SensitiveNotificationProtectionControllerImpl
+    private lateinit var mediaProjectionInfo: MediaProjectionInfo
 
     @Before
     fun setUp() {
@@ -109,14 +110,29 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
         setShareFullScreen()
         whenever(activityManager.bugreportWhitelistedPackages)
             .thenReturn(listOf(BUGREPORT_PACKAGE_NAME))
-        whenever(packageManager.getPackageUid(TEST_PROJECTION_PACKAGE_NAME, 0))
+        whenever(
+                packageManager.getPackageUidAsUser(
+                    TEST_PROJECTION_PACKAGE_NAME,
+                    UserHandle.CURRENT.identifier
+                )
+            )
             .thenReturn(TEST_PROJECTION_PACKAGE_UID)
-        whenever(packageManager.getPackageUid(BUGREPORT_PACKAGE_NAME, 0))
+        whenever(
+                packageManager.getPackageUidAsUser(
+                    BUGREPORT_PACKAGE_NAME,
+                    UserHandle.CURRENT.identifier
+                )
+            )
             .thenReturn(BUGREPORT_PACKAGE_UID)
         // SystemUi context package name is exempt, but in test scenarios its
         // com.android.systemui.tests so use that instead of hardcoding. Setup packagemanager to
         // return the correct uid in this scenario
-        whenever(packageManager.getPackageUid(mContext.packageName, 0))
+        whenever(
+                packageManager.getPackageUidAsUser(
+                    mContext.packageName,
+                    UserHandle.CURRENT.identifier
+                )
+            )
             .thenReturn(mContext.applicationInfo.uid)
 
         whenever(packageManager.checkPermission(anyString(), anyString()))
@@ -271,7 +287,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
     fun isSensitiveStateActive_projectionActive_sysuiExempt_false() {
         // SystemUi context package name is exempt, but in test scenarios its
         // com.android.systemui.tests so use that instead of hardcoding
-        whenever(mediaProjectionInfo.packageName).thenReturn(mContext.packageName)
+        setShareFullScreenViaSystemUi()
         mediaProjectionCallback.onStart(mediaProjectionInfo)
 
         assertFalse(controller.isSensitiveStateActive)
@@ -309,7 +325,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
 
     @Test
     fun isSensitiveStateActive_projectionActive_bugReportHandlerExempt_false() {
-        whenever(mediaProjectionInfo.packageName).thenReturn(BUGREPORT_PACKAGE_NAME)
+        setShareFullScreenViaBugReportHandler()
         mediaProjectionCallback.onStart(mediaProjectionInfo)
 
         assertFalse(controller.isSensitiveStateActive)
@@ -371,7 +387,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
     fun shouldProtectNotification_projectionActive_sysuiExempt_false() {
         // SystemUi context package name is exempt, but in test scenarios its
         // com.android.systemui.tests so use that instead of hardcoding
-        whenever(mediaProjectionInfo.packageName).thenReturn(mContext.packageName)
+        setShareFullScreenViaSystemUi()
         mediaProjectionCallback.onStart(mediaProjectionInfo)
 
         val notificationEntry = setupNotificationEntry(TEST_PACKAGE_NAME, false)
@@ -415,7 +431,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
 
     @Test
     fun shouldProtectNotification_projectionActive_bugReportHandlerExempt_false() {
-        whenever(mediaProjectionInfo.packageName).thenReturn(BUGREPORT_PACKAGE_NAME)
+        setShareFullScreenViaBugReportHandler()
         mediaProjectionCallback.onStart(mediaProjectionInfo)
 
         val notificationEntry = setupNotificationEntry(TEST_PACKAGE_NAME, false)
@@ -548,9 +564,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
     fun logSensitiveContentProtectionSession_exemptViaSystemUi() {
         // SystemUi context package name is exempt, but in test scenarios its
         // com.android.systemui.tests so use that instead of hardcoding
-        val testPackageName = mContext.packageName
-        val testUid = mContext.applicationInfo.uid
-        whenever(mediaProjectionInfo.packageName).thenReturn(testPackageName)
+        setShareFullScreenViaSystemUi()
 
         mediaProjectionCallback.onStart(mediaProjectionInfo)
 
@@ -558,7 +572,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
             FrameworkStatsLog.write(
                 eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION),
                 anyLong(),
-                eq(testUid),
+                eq(mContext.applicationInfo.uid),
                 eq(true),
                 eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__START),
                 eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__SOURCE__SYS_UI)
@@ -571,7 +585,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
             FrameworkStatsLog.write(
                 eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION),
                 anyLong(),
-                eq(testUid),
+                eq(mContext.applicationInfo.uid),
                 eq(true),
                 eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__STOP),
                 eq(FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__SOURCE__SYS_UI)
@@ -582,8 +596,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
     @Test
     fun logSensitiveContentProtectionSession_exemptViaBugReportHandler() {
         // Setup exempt via bugreport handler
-        whenever(mediaProjectionInfo.packageName).thenReturn(BUGREPORT_PACKAGE_NAME)
-
+        setShareFullScreenViaBugReportHandler()
         mediaProjectionCallback.onStart(mediaProjectionInfo)
 
         verify {
@@ -619,13 +632,26 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
     }
 
     private fun setShareFullScreen() {
-        whenever(mediaProjectionInfo.packageName).thenReturn(TEST_PROJECTION_PACKAGE_NAME)
-        whenever(mediaProjectionInfo.launchCookie).thenReturn(null)
+        setShareScreen(TEST_PROJECTION_PACKAGE_NAME, true)
+    }
+
+    private fun setShareFullScreenViaBugReportHandler() {
+        setShareScreen(BUGREPORT_PACKAGE_NAME, true)
+    }
+
+    private fun setShareFullScreenViaSystemUi() {
+        // SystemUi context package name is exempt, but in test scenarios its
+        // com.android.systemui.tests so use that instead of hardcoding
+        setShareScreen(mContext.packageName, true)
     }
 
     private fun setShareSingleApp() {
-        whenever(mediaProjectionInfo.packageName).thenReturn(TEST_PROJECTION_PACKAGE_NAME)
-        whenever(mediaProjectionInfo.launchCookie).thenReturn(ActivityOptions.LaunchCookie())
+        setShareScreen(TEST_PROJECTION_PACKAGE_NAME, false)
+    }
+
+    private fun setShareScreen(packageName: String, fullScreen: Boolean) {
+        val launchCookie = if (fullScreen) null else ActivityOptions.LaunchCookie()
+        mediaProjectionInfo = MediaProjectionInfo(packageName, UserHandle.CURRENT, launchCookie)
     }
 
     private fun setupNotificationEntry(
