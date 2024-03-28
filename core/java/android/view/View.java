@@ -42,6 +42,7 @@ import static android.view.flags.Flags.enableUseMeasureCacheDuringForceLayout;
 import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.view.flags.Flags.toolkitFrameRateBySizeReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateDefaultNormalReadOnly;
+import static android.view.flags.Flags.toolkitFrameRateSmallUsesPercentReadOnly;
 import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
 import static android.view.flags.Flags.viewVelocityApi;
@@ -2435,6 +2436,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             toolkitFrameRateDefaultNormalReadOnly();
     private static final boolean sToolkitFrameRateBySizeReadOnlyFlagValue =
             toolkitFrameRateBySizeReadOnly();
+
+    private static final boolean sToolkitFrameRateSmallUsesPercentReadOnlyFlagValue =
+            toolkitFrameRateSmallUsesPercentReadOnly();
 
     // Used to set frame rate compatibility.
     @Surface.FrameRateCompatibility int mFrameRateCompatibility =
@@ -5724,6 +5728,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * narrow Views like a progress bar.
      */
     private static final float FRAME_RATE_NARROW_SIZE_DP = 10f;
+
+    /**
+     * A threshold value to determine the frame rate category of the View based on the size.
+     */
+    private static final float FRAME_RATE_SIZE_PERCENTAGE_THRESHOLD = 0.07f;
 
     private static final int INFREQUENT_UPDATE_INTERVAL_MILLIS = 100;
     private static final int INFREQUENT_UPDATE_COUNTS = 2;
@@ -25500,11 +25509,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private void sizeChange(int newWidth, int newHeight, int oldWidth, int oldHeight) {
         if (mAttachInfo != null) {
-            float density = mAttachInfo.mDensity;
-            int narrowSize = (int) (density * FRAME_RATE_NARROW_SIZE_DP);
-            int smallSize = (int) (density * FRAME_RATE_SQUARE_SMALL_SIZE_DP);
-            if (newWidth <= narrowSize || newHeight <= narrowSize
-                    || (newWidth <= smallSize && newHeight <= smallSize)) {
+            boolean isSmall;
+            if (sToolkitFrameRateSmallUsesPercentReadOnlyFlagValue) {
+                int size = newWidth * newHeight;
+                float percent = size / mAttachInfo.mDisplayPixelCount;
+                isSmall = percent <= FRAME_RATE_SIZE_PERCENTAGE_THRESHOLD;
+            } else {
+                float density = mAttachInfo.mDensity;
+                int narrowSize = (int) (density * FRAME_RATE_NARROW_SIZE_DP);
+                int smallSize = (int) (density * FRAME_RATE_SQUARE_SMALL_SIZE_DP);
+                isSmall = newWidth <= narrowSize || newHeight <= narrowSize
+                        || (newWidth <= smallSize && newHeight <= smallSize);
+            }
+            if (isSmall) {
                 int category = sToolkitFrameRateBySizeReadOnlyFlagValue
                         ? FRAME_RATE_CATEGORY_LOW : FRAME_RATE_CATEGORY_NORMAL;
                 mSizeBasedFrameRateCategoryAndReason = category | FRAME_RATE_CATEGORY_REASON_SMALL;
@@ -32091,6 +32108,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final float mDensity;
 
         /**
+         * The number of pixels in the display (width * height).
+         */
+        final float mDisplayPixelCount;
+
+        /**
          * Creates a new set of attachment information with the specified
          * events handler and thread.
          *
@@ -32107,7 +32129,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mHandler = handler;
             mRootCallbacks = effectPlayer;
             mTreeObserver = new ViewTreeObserver(context);
-            mDensity = context.getResources().getDisplayMetrics().density;
+            DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+            mDensity = displayMetrics.density;
+            float pixelCount = (float) displayMetrics.widthPixels * displayMetrics.heightPixels;
+            mDisplayPixelCount = pixelCount == 0f ? Float.POSITIVE_INFINITY : pixelCount;
         }
 
         void increaseSensitiveViewsCount() {
@@ -33812,25 +33837,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return null;
     }
 
-    private float getSizePercentage() {
-        float alpha = mTransformationInfo != null ? mTransformationInfo.mAlpha : 1;
-        int visibility = mViewFlags & VISIBILITY_MASK;
-
-        if (mResources == null || alpha == 0 || visibility != VISIBLE) {
-            return 0;
-        }
-
-        DisplayMetrics displayMetrics = mResources.getDisplayMetrics();
-        int screenSize = displayMetrics.widthPixels
-                * displayMetrics.heightPixels;
-        int viewSize = getWidth() * getHeight();
-
-        if (screenSize == 0 || viewSize == 0) {
-            return 0f;
-        }
-        return (float) viewSize / screenSize;
-    }
-
     /**
      * Used to calculate the frame rate category of a View.
      *
@@ -33853,7 +33859,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         ViewRootImpl viewRootImpl = getViewRootImpl();
         int width = mRight - mLeft;
         int height = mBottom - mTop;
-        if (viewRootImpl != null && (width != 0 && height != 0)) {
+        float alpha = mTransformationInfo != null ? mTransformationInfo.mAlpha : 1;
+        int visibility = mViewFlags & VISIBILITY_MASK;
+
+        if (viewRootImpl != null && (width != 0 && height != 0)
+                && alpha != 0 && visibility == View.VISIBLE
+        ) {
             if (mAttachInfo.mViewVelocityApi) {
                 float velocity = mFrameContentVelocity;
                 int mask = PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN;
@@ -33870,7 +33881,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             if (!willNotDraw()) {
                 if (sToolkitMetricsForFrameRateDecisionFlagValue) {
-                    float sizePercentage = getSizePercentage();
+                    float sizePercentage = width * height / mAttachInfo.mDisplayPixelCount;
                     viewRootImpl.recordViewPercentage(sizePercentage);
                 }
 
