@@ -24,6 +24,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCE
 import com.android.systemui.keyguard.shared.model.ScrimAlpha
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
+import com.android.systemui.statusbar.SysuiStatusBarStateController
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -40,6 +41,7 @@ class AlternateBouncerToGoneTransitionViewModel
 constructor(
     bouncerToGoneFlows: BouncerToGoneFlows,
     animationFlow: KeyguardTransitionAnimationFlow,
+    private val statusBarStateController: SysuiStatusBarStateController,
 ) : DeviceEntryIconTransition {
     private val transitionAnimation =
         animationFlow.setup(
@@ -56,6 +58,26 @@ constructor(
             onStep = { MathUtils.lerp(startAlpha, 0f, it) },
             onFinish = { 0f },
             onCancel = { startAlpha },
+        )
+    }
+
+    fun notificationAlpha(viewState: ViewStateAccessor): Flow<Float> {
+        var startAlpha = 1f
+        var leaveShadeOpen = false
+
+        return transitionAnimation.sharedFlow(
+            duration = 200.milliseconds,
+            onStart = {
+                leaveShadeOpen = statusBarStateController.leaveOpenOnKeyguardHide()
+                startAlpha = viewState.alpha()
+            },
+            onStep = {
+                if (leaveShadeOpen) {
+                    1f
+                } else {
+                    MathUtils.lerp(startAlpha, 0f, it)
+                }
+            },
         )
     }
 
