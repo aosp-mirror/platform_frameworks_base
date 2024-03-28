@@ -13,6 +13,9 @@ java_library_host {
     srcs: [
         "src/lib/java/**/*.java",
     ],
+    static_libs: [
+        "guava",
+    ],
 }
 
 java_binary_host {

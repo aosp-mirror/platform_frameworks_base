@@ -16,7 +16,10 @@
 
 package com.android.asllib;
 
+import com.android.asllib.marshallable.AndroidSafetyLabel;
+import com.android.asllib.marshallable.AndroidSafetyLabelFactory;
 import com.android.asllib.util.MalformedXmlException;
+import com.android.asllib.util.XmlUtils;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
