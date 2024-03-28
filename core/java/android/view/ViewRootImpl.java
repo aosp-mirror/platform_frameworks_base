@@ -115,6 +115,7 @@ import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodCl
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INSETS_CONTROLLER;
 
 import static com.android.input.flags.Flags.enablePointerChoreographer;
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.window.flags.Flags.activityWindowInfoFlag;
 import static com.android.window.flags.Flags.enableBufferTransformHintFromDisplay;
 import static com.android.window.flags.Flags.setScPropertiesInClient;
@@ -942,6 +943,7 @@ public final class ViewRootImpl implements ViewParent,
                     new InputEventConsistencyVerifier(this, 0) : null;
 
     private final InsetsController mInsetsController;
+    private final ImeBackAnimationController mImeBackAnimationController;
     private final ImeFocusController mImeFocusController;
 
     private boolean mIsSurfaceOpaque;
@@ -1206,6 +1208,7 @@ public final class ViewRootImpl implements ViewParent,
         // TODO(b/222696368): remove getSfInstance usage and use vsyncId for transactions
         mChoreographer = Choreographer.getInstance();
         mInsetsController = new InsetsController(new ViewRootInsetsControllerHost(this));
+        mImeBackAnimationController = new ImeBackAnimationController(this);
         mHandwritingInitiator = new HandwritingInitiator(
                 mViewConfiguration,
                 mContext.getSystemService(InputMethodManager.class));
@@ -3181,7 +3184,7 @@ public final class ViewRootImpl implements ViewParent,
                         == LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(visibility = PACKAGE)
     public InsetsController getInsetsController() {
         return mInsetsController;
     }
@@ -12148,7 +12151,8 @@ public final class ViewRootImpl implements ViewParent,
                             + "IWindow:%s Session:%s",
                     mOnBackInvokedDispatcher, mBasePackageName, mWindow, mWindowSession));
         }
-        mOnBackInvokedDispatcher.attachToWindow(mWindowSession, mWindow);
+        mOnBackInvokedDispatcher.attachToWindow(mWindowSession, mWindow,
+                mImeBackAnimationController);
     }
 
     private void sendBackKeyEvent(int action) {
