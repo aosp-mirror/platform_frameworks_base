@@ -23,6 +23,7 @@ import static android.media.codec.Flags.FLAG_HLG_EDITING;
 import static android.media.codec.Flags.FLAG_IN_PROCESS_SW_AUDIO_CODEC;
 import static android.media.codec.Flags.FLAG_NULL_OUTPUT_SURFACE;
 import static android.media.codec.Flags.FLAG_REGION_OF_INTEREST;
+import static android.media.MediaCodec.GetFlag;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -827,10 +828,10 @@ public final class MediaCodecInfo {
                 features.add(new Feature(FEATURE_MultipleFrames,   (1 << 5), false));
                 features.add(new Feature(FEATURE_DynamicTimestamp, (1 << 6), false));
                 features.add(new Feature(FEATURE_LowLatency,       (1 << 7), true));
-                if (android.media.codec.Flags.dynamicColorAspects()) {
+                if (GetFlag(() -> android.media.codec.Flags.dynamicColorAspects())) {
                     features.add(new Feature(FEATURE_DynamicColorAspects, (1 << 8), true));
                 }
-                if (android.media.codec.Flags.nullOutputSurface()) {
+                if (GetFlag(() -> android.media.codec.Flags.nullOutputSurface())) {
                     features.add(new Feature(FEATURE_DetachedSurface,     (1 << 9), true));
                 }
 
@@ -851,10 +852,10 @@ public final class MediaCodecInfo {
                 features.add(new Feature(FEATURE_QpBounds, (1 << 3), false));
                 features.add(new Feature(FEATURE_EncodingStatistics, (1 << 4), false));
                 features.add(new Feature(FEATURE_HdrEditing, (1 << 5), false));
-                if (android.media.codec.Flags.hlgEditing()) {
+                if (GetFlag(() -> android.media.codec.Flags.hlgEditing())) {
                     features.add(new Feature(FEATURE_HlgEditing, (1 << 6), true));
                 }
-                if (android.media.codec.Flags.regionOfInterest()) {
+                if (GetFlag(() -> android.media.codec.Flags.regionOfInterest())) {
                     features.add(new Feature(FEATURE_Roi, (1 << 7), true));
                 }
 
