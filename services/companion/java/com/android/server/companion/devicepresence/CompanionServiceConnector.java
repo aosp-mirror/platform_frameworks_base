@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.companion.presence;
+package com.android.server.companion.devicepresence;
 
 import static android.content.Context.BIND_ALMOST_PERCEPTIBLE;
 import static android.content.Context.BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE;
