@@ -118,7 +118,7 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
 
         if (mShowingEntry != null) {
             CharSequence text = entry.headsUpStatusBarText;
-            if (entry.isSensitive()) {
+            if (entry.isSensitive().getValue()) {
                 text = entry.headsUpStatusBarTextPublic;
             }
             mTextView.setText(text);
