@@ -530,6 +530,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // TODO(b/178103325): Track sleep/requested sleep for every display.
     volatile boolean mRequestedOrSleepingDefaultDisplay;
 
+    /**
+     * This is used to check whether to invoke {@link #updateScreenOffSleepToken} when screen is
+     * turned off. E.g. if it is false when screen is turned off and the display is swapping, it
+     * is expected that the screen will be on in a short time. Then it is unnecessary to acquire
+     * screen-off-sleep-token, so it can avoid intermediate visibility or lifecycle changes.
+     */
+    volatile boolean mIsGoingToSleepDefaultDisplay;
+
     volatile boolean mRecentsVisible;
     volatile boolean mNavBarVirtualKeyHapticFeedbackEnabled = true;
     volatile boolean mPictureInPictureVisible;
@@ -5464,6 +5472,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         mRequestedOrSleepingDefaultDisplay = true;
+        mIsGoingToSleepDefaultDisplay = true;
+
+        // In case startedGoingToSleep is called after screenTurnedOff (the source caller is in
+        // order but the methods run on different threads) and updateScreenOffSleepToken was
+        // skipped. Then acquire sleep token if screen was off.
+        if (!mDefaultDisplayPolicy.isScreenOnFully() && !mDefaultDisplayPolicy.isScreenOnEarly()
+                && com.android.window.flags.Flags.skipSleepingWhenSwitchingDisplay()) {
+            updateScreenOffSleepToken(true /* acquire */, false /* isSwappingDisplay */);
+        }
 
         if (mKeyguardDelegate != null) {
             mKeyguardDelegate.onStartedGoingToSleep(pmSleepReason);
@@ -5487,6 +5504,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         MetricsLogger.histogram(mContext, "screen_timeout", mLockScreenTimeout / 1000);
 
         mRequestedOrSleepingDefaultDisplay = false;
+        mIsGoingToSleepDefaultDisplay = false;
         mDefaultDisplayPolicy.setAwake(false);
 
         // We must get this work done here because the power manager will drop
@@ -5522,7 +5540,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         EventLogTags.writeScreenToggled(1);
 
-
+        mIsGoingToSleepDefaultDisplay = false;
         mDefaultDisplayPolicy.setAwake(true);
 
         // Since goToSleep performs these functions synchronously, we must
@@ -5624,7 +5642,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (DEBUG_WAKEUP) Slog.i(TAG, "Display" + displayId + " turned off...");
 
         if (displayId == DEFAULT_DISPLAY) {
-            updateScreenOffSleepToken(true, isSwappingDisplay);
+            if (!isSwappingDisplay || mIsGoingToSleepDefaultDisplay
+                    || !com.android.window.flags.Flags.skipSleepingWhenSwitchingDisplay()) {
+                updateScreenOffSleepToken(true /* acquire */, isSwappingDisplay);
+            }
             mRequestedOrSleepingDefaultDisplay = false;
             mDefaultDisplayPolicy.screenTurnedOff();
             synchronized (mLock) {
