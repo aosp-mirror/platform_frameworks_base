@@ -112,6 +112,7 @@ import static com.android.server.am.PendingIntentRecord.FLAG_BROADCAST_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_SERVICE_SENDER;
 import static com.android.server.notification.NotificationManagerService.BITMAP_DURATION;
 import static com.android.server.notification.NotificationManagerService.DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE;
+import static com.android.server.notification.NotificationManagerService.NOTIFICATION_TTL;
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_ADJUSTED;
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_POSTED;
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_UPDATED;
@@ -14896,6 +14897,31 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         assertThat(captor.getValue().getChannel().getAudioAttributes().getUsage())
                 .isEqualTo(USAGE_NOTIFICATION);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ALL_NOTIFS_NEED_TTL)
+    public void testFixNotification_missingTtl() throws Exception {
+        Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .build();
+
+        mService.fixNotification(n, mPkg, "tag", 0, mUserId, mUid, NOT_FOREGROUND_SERVICE, true);
+
+        assertThat(n.getTimeoutAfter()).isEqualTo(NOTIFICATION_TTL);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ALL_NOTIFS_NEED_TTL)
+    public void testFixNotification_doesNotOverwriteTtl() throws Exception {
+        Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setTimeoutAfter(20)
+                .build();
+
+        mService.fixNotification(n, mPkg, "tag", 0, mUserId, mUid, NOT_FOREGROUND_SERVICE, true);
+
+        assertThat(n.getTimeoutAfter()).isEqualTo(20);
     }
 
     private NotificationRecord createAndPostCallStyleNotification(String packageName,
