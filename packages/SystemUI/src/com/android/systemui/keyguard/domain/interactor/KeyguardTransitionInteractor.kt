@@ -35,6 +35,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.KeyguardState.OFF
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
+import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.util.kotlin.pairwise
@@ -390,6 +391,31 @@ constructor(
             }
             .distinctUntilChanged()
             .shareIn(scope, SharingStarted.Eagerly, replay = 1)
+
+    /**
+     * The [TransitionInfo] of the most recent call to
+     * [KeyguardTransitionRepository.startTransition].
+     *
+     * This should only be used by keyguard transition internals (From*TransitionInteractor and
+     * related classes). Other consumers of keyguard state in System UI should use
+     * [startedKeyguardState], [currentKeyguardState], and related flows.
+     *
+     * Keyguard internals use this to determine the most up-to-date KeyguardState that we've
+     * requested a transition to, even if the animator running the transition on the main thread has
+     * not yet emitted the STARTED TransitionStep.
+     *
+     * For example: if we're finished in GONE and press the power button twice very quickly, we may
+     * request a transition to AOD, but then receive the second power button press prior to the
+     * STARTED -> AOD transition step emitting. We still need the FromAodTransitionInteractor to
+     * request a transition from AOD -> LOCKSCREEN in response to the power press, even though the
+     * main thread animator hasn't emitted STARTED > AOD yet (which means [startedKeyguardState] is
+     * still GONE, which is not relevant to FromAodTransitionInteractor). In this case, the
+     * interactor can use this current transition info to determine that a STARTED -> AOD step
+     * *will* be emitted, and therefore that it can safely request an AOD -> LOCKSCREEN transition
+     * which will subsequently cancel GONE -> AOD.
+     */
+    internal val currentTransitionInfoInternal: StateFlow<TransitionInfo> =
+        repository.currentTransitionInfoInternal
 
     /** Whether we've currently STARTED a transition and haven't yet FINISHED it. */
     val isInTransitionToAnyState = isInTransitionWhere({ true }, { true })
