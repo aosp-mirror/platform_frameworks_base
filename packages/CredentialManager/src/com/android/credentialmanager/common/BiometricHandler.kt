@@ -98,7 +98,8 @@ fun runBiometricFlow(
     context: Context,
     openMoreOptionsPage: () -> Unit,
     sendDataToProvider: (EntryInfo, BiometricPrompt.AuthenticationResult) -> Unit,
-    onCancelFlowAndFinish: (String) -> Unit,
+    onCancelFlowAndFinish: () -> Unit,
+    onIllegalStateAndFinish: (String) -> Unit,
     getRequestDisplayInfo: RequestDisplayInfo? = null,
     getProviderInfoList: List<ProviderInfo>? = null,
     getProviderDisplayInfo: ProviderDisplayInfo? = null,
@@ -131,7 +132,7 @@ fun runBiometricFlow(
 
     val callback: BiometricPrompt.AuthenticationCallback =
         setupBiometricAuthenticationCallback(sendDataToProvider, biometricEntry,
-            onCancelFlowAndFinish)
+            onCancelFlowAndFinish, onIllegalStateAndFinish)
 
     val cancellationSignal = CancellationSignal()
     cancellationSignal.setOnCancelListener {
@@ -211,7 +212,8 @@ private fun removeDeviceCredential(requestAllowedAuthenticators: Int): Int {
 private fun setupBiometricAuthenticationCallback(
     sendDataToProvider: (EntryInfo, BiometricPrompt.AuthenticationResult) -> Unit,
     selectedEntry: EntryInfo,
-    onCancelFlowAndFinish: (String) -> Unit
+    onCancelFlowAndFinish: () -> Unit,
+    onIllegalStateAndFinish: (String) -> Unit,
 ): BiometricPrompt.AuthenticationCallback {
     val callback: BiometricPrompt.AuthenticationCallback =
         object : BiometricPrompt.AuthenticationCallback() {
@@ -224,14 +226,12 @@ private fun setupBiometricAuthenticationCallback(
                     if (authResult != null) {
                         sendDataToProvider(selectedEntry, authResult)
                     } else {
-                        onCancelFlowAndFinish("The biometric flow succeeded but unexpectedly " +
+                        onIllegalStateAndFinish("The biometric flow succeeded but unexpectedly " +
                                 "returned a null value.")
-                        // TODO(b/326243754) : Propagate to provider
                     }
                 } catch (e: Exception) {
-                    onCancelFlowAndFinish("The biometric flow succeeded but failed on handling " +
+                    onIllegalStateAndFinish("The biometric flow succeeded but failed on handling " +
                             "the result. See: \n$e\n")
-                    // TODO(b/326243754) : Propagate to provider
                 }
             }
 
@@ -245,6 +245,12 @@ private fun setupBiometricAuthenticationCallback(
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence?) {
                 super.onAuthenticationError(errorCode, errString)
                 Log.d(TAG, "Authentication error-ed out: $errorCode and $errString")
+                if (errorCode == BiometricPrompt.BIOMETRIC_ERROR_USER_CANCELED) {
+                    // Note that because the biometric prompt is imbued directly
+                    // into the selector, parity applies to the selector's cancellation instead
+                    // of the provider's biometric prompt cancellation.
+                    onCancelFlowAndFinish()
+                }
                 // TODO(b/326243754) : Propagate to provider
             }
 

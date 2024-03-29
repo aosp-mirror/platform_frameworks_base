@@ -148,7 +148,8 @@ fun GetCredentialScreen(
                                 // activeEntry will always be what represents the single tap flow
                                 biometricEntry = getCredentialUiState.activeEntry,
                                 onMoreOptionSelected = viewModel::getFlowOnMoreOptionSelected,
-                                onCancelFlowAndFinish = viewModel::onIllegalUiState,
+                                onCancelFlowAndFinish = viewModel::onUserCancel,
+                                onIllegalStateAndFinish = viewModel::onIllegalUiState,
                                 requestDisplayInfo = getCredentialUiState.requestDisplayInfo,
                                 providerInfoList = getCredentialUiState.providerInfoList,
                                 providerDisplayInfo = getCredentialUiState.providerDisplayInfo,
@@ -212,7 +213,8 @@ fun GetCredentialScreen(
 @Composable
 internal fun BiometricSelectionPage(
     biometricEntry: EntryInfo?,
-    onCancelFlowAndFinish: (String) -> Unit,
+    onCancelFlowAndFinish: () -> Unit,
+    onIllegalStateAndFinish: (String) -> Unit,
     onMoreOptionSelected: () -> Unit,
     requestDisplayInfo: RequestDisplayInfo,
     providerInfoList: List<ProviderInfo>,
@@ -230,6 +232,7 @@ internal fun BiometricSelectionPage(
         openMoreOptionsPage = onMoreOptionSelected,
         sendDataToProvider = onBiometricEntrySelected,
         onCancelFlowAndFinish = onCancelFlowAndFinish,
+        onIllegalStateAndFinish = onIllegalStateAndFinish,
         getRequestDisplayInfo = requestDisplayInfo,
         getProviderInfoList = providerInfoList,
         getProviderDisplayInfo = providerDisplayInfo,
