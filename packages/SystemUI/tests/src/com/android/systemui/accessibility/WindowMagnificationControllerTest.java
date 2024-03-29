@@ -100,6 +100,7 @@ import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.FakeDisplayTracker;
+import com.android.systemui.util.FakeSharedPreferences;
 import com.android.systemui.util.leak.ReferenceTestUtils;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.utils.os.FakeHandler;
@@ -169,6 +170,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     private View.OnTouchListener mTouchListener;
     private MotionEventHelper mMotionEventHelper = new MotionEventHelper();
     private KosmosJavaAdapter mKosmos;
+    private FakeSharedPreferences mSharedPreferences;
 
     /**
      *  return whether window magnification is supported for current test context.
@@ -180,6 +182,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mContext = spy(mContext);
         mKosmos = new KosmosJavaAdapter(this);
         mContext = Mockito.spy(getContext());
         mHandler = new FakeHandler(TestableLooper.get(this).getLooper());
@@ -219,6 +222,10 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
 
         mWindowMagnificationAnimationController = new WindowMagnificationAnimationController(
                 mContext, mValueAnimator);
+        mSharedPreferences = new FakeSharedPreferences();
+        when(mContext.getSharedPreferences(
+                eq("window_magnification_preferences"), anyInt()))
+                .thenReturn(mSharedPreferences);
         mWindowMagnificationController =
                 new WindowMagnificationController(
                         mContext,
@@ -249,7 +256,9 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     @After
     public void tearDown() {
         mInstrumentation.runOnMainSync(
-                () -> mWindowMagnificationController.deleteWindowMagnification());
+                () -> {
+                    mWindowMagnificationController.deleteWindowMagnification();
+                });
         mValueAnimator.cancel();
     }
 
@@ -600,22 +609,41 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onScreenChangedToSavedDensity_enabled_restoreSavedMagnifierWindow() {
-        mContext.getResources().getConfiguration().smallestScreenWidthDp =
+    public void onScreenSizeAndDensityChanged_enabled_restoreSavedMagnifierWindow() {
+        int newSmallestScreenWidthDp =
                 mContext.getResources().getConfiguration().smallestScreenWidthDp * 2;
         int windowFrameSize = mResources.getDimensionPixelSize(
                 com.android.internal.R.dimen.accessibility_window_magnifier_min_size);
-        mWindowMagnificationController.mWindowMagnificationSizePrefs.saveSizeForCurrentDensity(
-                new Size(windowFrameSize, windowFrameSize));
-
+        Size preferredWindowSize = new Size(windowFrameSize, windowFrameSize);
+        mSharedPreferences
+                .edit()
+                .putString(String.valueOf(newSmallestScreenWidthDp),
+                        preferredWindowSize.toString())
+                .commit();
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
-                    Float.NaN);
+            mWindowMagnificationController
+                    .enableWindowMagnificationInternal(Float.NaN, Float.NaN, Float.NaN);
         });
 
+        // Change screen density and size to trigger restoring the preferred window size
+        mContext.getResources().getConfiguration().smallestScreenWidthDp = newSmallestScreenWidthDp;
+        final Rect testWindowBounds = new Rect(
+                mWindowManager.getCurrentWindowMetrics().getBounds());
+        testWindowBounds.set(testWindowBounds.left, testWindowBounds.top,
+                testWindowBounds.right + 100, testWindowBounds.bottom + 100);
+        mWindowManager.setWindowBounds(testWindowBounds);
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.onConfigurationChanged(ActivityInfo.CONFIG_SCREEN_SIZE);
+        });
+
+        // wait for rect update
+        waitForIdleSync();
         WindowManager.LayoutParams params = mWindowManager.getLayoutParamsFromAttachedView();
-        assertTrue(params.width == windowFrameSize);
-        assertTrue(params.height == windowFrameSize);
+        final int mirrorSurfaceMargin = mResources.getDimensionPixelSize(
+                R.dimen.magnification_mirror_surface_margin);
+        // The width and height of the view include the magnification frame and the margins.
+        assertTrue(params.width == (windowFrameSize + 2 * mirrorSurfaceMargin));
+        assertTrue(params.height == (windowFrameSize + 2 * mirrorSurfaceMargin));
     }
 
     @Test
