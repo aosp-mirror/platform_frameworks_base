@@ -15,6 +15,7 @@
  */
 
 #include <cutils/compiler.h>
+#include <cutils/trace.h>
 #include <jni.h>
 #include <log/log.h>
 #include <nativehelper/JNIHelp.h>
@@ -103,7 +104,9 @@ static void android_os_Trace_nativeAsyncTraceForTrackEnd(JNIEnv* env, jclass,
 }
 
 static void android_os_Trace_nativeSetAppTracingAllowed(JNIEnv*, jclass, jboolean allowed) {
-    // no-op
+    // TODO(b/331916606): this is load-bearing for an app to notice that it is
+    // traced after post-zygote-fork specialisation.
+    atrace_update_tags();
 }
 
 static void android_os_Trace_nativeSetTracingEnabled(JNIEnv*, jclass, jboolean enabled) {
