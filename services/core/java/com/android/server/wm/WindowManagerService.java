@@ -43,6 +43,7 @@ import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myPid;
 import static android.os.Process.myUid;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.permission.flags.Flags.sensitiveContentImprovements;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
@@ -306,6 +307,7 @@ import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
 import android.view.inputmethod.ImeTracker;
+import android.widget.Toast;
 import android.window.ActivityWindowInfo;
 import android.window.AddToSurfaceSyncGroupResult;
 import android.window.ClientWindowFrames;
@@ -8722,6 +8724,15 @@ public class WindowManagerService extends IWindowManager.Stub
                         mSensitiveContentPackages.addBlockScreenCaptureForApps(packageInfos);
                 if (modified) {
                     WindowManagerService.this.refreshScreenCaptureDisabled();
+                    if (sensitiveContentImprovements()) {
+                        // TODO(b/331842561): Combine this traversal with the one inside
+                        // refreshScreenCaptureDisabled above.
+                        mRoot.forAllWindows((w) -> {
+                            if (w.isVisible()) {
+                                WindowManagerService.this.showToastIfBlockingScreenCapture(w);
+                            }
+                        }, /* traverseTopToBottom= */ true);
+                    }
                 }
             }
         }
@@ -10129,5 +10140,29 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean getDisableSecureWindows() {
         return mDisableSecureWindows;
+    }
+
+    /**
+     * Called to notify WMS that the specified window has become visible. This shows a Toast if the
+     * window is deemed to hold sensitive content.
+     */
+    void onWindowVisible(@NonNull WindowState w) {
+        showToastIfBlockingScreenCapture(w);
+    }
+
+    /**
+     * Shows a Toast if the specified window is
+     * {@link LocalService#addBlockScreenCaptureForApps(ArraySet) blocked} from screen capture based
+     * on sensitive content protections.
+     */
+    private void showToastIfBlockingScreenCapture(@NonNull WindowState w) {
+        // TODO(b/323580163): Check if already shown and update shown state.
+        if (mSensitiveContentPackages.shouldBlockScreenCaptureForApp(w.getOwningPackage(),
+                w.getOwningUid(), w.getWindowToken())) {
+            Toast.makeText(mContext, Looper.getMainLooper(),
+                            mContext.getString(R.string.screen_not_shared_sensitive_content),
+                            Toast.LENGTH_SHORT)
+                    .show();
+        }
     }
 }
