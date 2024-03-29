@@ -680,7 +680,8 @@ public class StatusBarStateControllerImpl implements
             Scenes.Bouncer, StatusBarState.KEYGUARD,
             Scenes.Communal, StatusBarState.KEYGUARD,
             Scenes.Shade, StatusBarState.SHADE_LOCKED,
-            Scenes.QuickSettings, StatusBarState.SHADE_LOCKED
+            Scenes.QuickSettings, StatusBarState.SHADE_LOCKED,
+            Scenes.Gone, StatusBarState.SHADE
     );
 
     /**
