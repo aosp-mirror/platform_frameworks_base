@@ -68,7 +68,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
-public class LockIconViewControllerBaseTest extends SysuiTestCase {
+public class LegacyLockIconViewControllerBaseTest extends SysuiTestCase {
     protected static final String UNLOCKED_LABEL = "unlocked";
     protected static final String LOCKED_LABEL = "locked";
     protected static final int PADDING = 10;
@@ -98,7 +98,7 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
 
     protected @Mock PrimaryBouncerInteractor mPrimaryBouncerInteractor;
 
-    protected LockIconViewController mUnderTest;
+    protected LegacyLockIconViewController mUnderTest;
 
     // Capture listeners so that they can be used to send events
     @Captor protected ArgumentCaptor<View.OnAttachStateChangeListener> mAttachCaptor =
@@ -153,7 +153,7 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
         mFeatureFlags.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false);
         mFeatureFlags.set(LOCKSCREEN_ENABLE_LANDSCAPE, false);
 
-        mUnderTest = new LockIconViewController(
+        mUnderTest = new LegacyLockIconViewController(
                 mStatusBarStateController,
                 mKeyguardUpdateMonitor,
                 mKeyguardViewController,

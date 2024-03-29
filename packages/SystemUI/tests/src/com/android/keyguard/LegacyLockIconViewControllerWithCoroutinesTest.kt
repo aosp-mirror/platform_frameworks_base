@@ -39,7 +39,7 @@ import org.mockito.Mockito.verify
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
-class LockIconViewControllerWithCoroutinesTest : LockIconViewControllerBaseTest() {
+class LegacyLockIconViewControllerWithCoroutinesTest : LegacyLockIconViewControllerBaseTest() {
 
     /** After migration, replaces LockIconViewControllerTest version */
     @Test
