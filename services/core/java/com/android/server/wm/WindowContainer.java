@@ -3286,10 +3286,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
             if (isTaskTransitOld(transit) && getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
                 animationRunnerBuilder.setTaskBackgroundColor(getTaskAnimationBackgroundColor());
-                // TODO: Remove when we migrate to shell (b/202383002)
-                if (mWmService.mTaskTransitionSpec != null) {
-                    animationRunnerBuilder.hideInsetSourceViewOverflows();
-                }
             }
 
             // Check if the animation requests to show background color for Activity and embedded
@@ -4252,27 +4248,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 // animation but and so the surface is still animating)
                 mOnAnimationFinished.add(clearBackgroundColorHandler);
                 mOnAnimationCancelled.add(clearBackgroundColorHandler);
-            }
-        }
-
-        private void hideInsetSourceViewOverflows() {
-            final SparseArray<InsetsSourceProvider> providers =
-                    getDisplayContent().getInsetsStateController().getSourceProviders();
-            for (int i = providers.size(); i >= 0; i--) {
-                final InsetsSourceProvider insetProvider = providers.valueAt(i);
-                if (!insetProvider.getSource().hasFlags(InsetsSource.FLAG_INSETS_ROUNDED_CORNER)) {
-                    return;
-                }
-
-                // Will apply it immediately to current leash and to all future inset animations
-                // until we disable it.
-                insetProvider.setCropToProvidingInsetsBounds(getPendingTransaction());
-
-                // Only clear the size restriction of the inset once the surface animation is over
-                // and not if it's canceled to be replace by another animation.
-                mOnAnimationFinished.add(() -> {
-                    insetProvider.removeCropToProvidingInsetsBounds(getPendingTransaction());
-                });
             }
         }
 
