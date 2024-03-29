@@ -190,12 +190,20 @@ class AnimatableClockView @JvmOverloads constructor(
         refreshFormat()
     }
 
+    override fun setTextSize(type: Int, size: Float) {
+        super.setTextSize(type, size)
+        if (type == TypedValue.COMPLEX_UNIT_PX) {
+            lastUnconstrainedTextSize = size
+        }
+    }
+
     @SuppressLint("DrawAllocation")
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         logger.d("onMeasure")
         if (migratedClocks && !isSingleLineInternal &&
                 MeasureSpec.getMode(heightMeasureSpec) == EXACTLY) {
-            setTextSize(TypedValue.COMPLEX_UNIT_PX,
+            // Call straight into TextView.setTextSize to avoid setting lastUnconstrainedTextSize
+            super.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                     min(lastUnconstrainedTextSize, MeasureSpec.getSize(heightMeasureSpec) / 2F))
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
