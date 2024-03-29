@@ -48,6 +48,7 @@ import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
 import static android.provider.Settings.Global.DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH;
+import static android.service.dreams.Flags.dreamHandlesConfirmKeys;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
@@ -3420,7 +3421,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!checkCallingPermission(permission.CONTROL_KEYGUARD, "dismissKeyguard")) {
             throw new SecurityException("Requires CONTROL_KEYGUARD permission");
         }
-        if (mAtmService.mKeyguardController.isShowingDream()) {
+        if (!dreamHandlesConfirmKeys() && mAtmService.mKeyguardController.isShowingDream()) {
             mAtmService.mTaskSupervisor.wakeUp("leaveDream");
         }
         synchronized (mGlobalLock) {
