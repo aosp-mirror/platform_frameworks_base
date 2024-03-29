@@ -77,7 +77,7 @@ public class PowerStatsExporterTest {
     private PowerStatsStore mPowerStatsStore;
     private PowerStatsAggregator mPowerStatsAggregator;
     private BatteryStatsHistory mHistory;
-    private CpuPowerStatsCollector.CpuStatsArrayLayout mCpuStatsArrayLayout;
+    private CpuPowerStatsLayout mCpuStatsArrayLayout;
     private PowerStats.Descriptor mPowerStatsDescriptor;
 
     @Before
@@ -93,7 +93,7 @@ public class PowerStatsExporterTest {
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
                 .setProcessor(
-                        new CpuAggregatedPowerStatsProcessor(mStatsRule.getPowerProfile(),
+                        new CpuPowerStatsProcessor(mStatsRule.getPowerProfile(),
                                 mStatsRule.getCpuScalingPolicies()));
 
         mPowerStatsStore = new PowerStatsStore(storeDirectory, new TestHandler(), config);
@@ -102,7 +102,7 @@ public class PowerStatsExporterTest {
                 mMonotonicClock, null, null);
         mPowerStatsAggregator = new PowerStatsAggregator(config, mHistory);
 
-        mCpuStatsArrayLayout = new CpuPowerStatsCollector.CpuStatsArrayLayout();
+        mCpuStatsArrayLayout = new CpuPowerStatsLayout();
         mCpuStatsArrayLayout.addDeviceSectionCpuTimeByScalingStep(1);
         mCpuStatsArrayLayout.addDeviceSectionCpuTimeByCluster(1);
         mCpuStatsArrayLayout.addDeviceSectionUsageDuration();

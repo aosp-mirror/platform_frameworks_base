@@ -235,8 +235,8 @@ public class MobileRadioPowerStatsCollectorTest {
         assertThat(powerStats.durationMs).isEqualTo(100);
 
         PowerStats.Descriptor descriptor = powerStats.descriptor;
-        MobileRadioPowerStatsCollector.MobileRadioStatsArrayLayout layout =
-                new MobileRadioPowerStatsCollector.MobileRadioStatsArrayLayout(descriptor);
+        MobileRadioPowerStatsLayout layout =
+                new MobileRadioPowerStatsLayout(descriptor);
         assertThat(layout.getDeviceSleepTime(powerStats.stats)).isEqualTo(200);
         assertThat(layout.getDeviceIdleTime(powerStats.stats)).isEqualTo(300);
         assertThat(layout.getDeviceCallTime(powerStats.stats)).isEqualTo(40000);
@@ -291,8 +291,8 @@ public class MobileRadioPowerStatsCollectorTest {
         assertThat(powerStats.durationMs).isEqualTo(100);
 
         PowerStats.Descriptor descriptor = powerStats.descriptor;
-        MobileRadioPowerStatsCollector.MobileRadioStatsArrayLayout layout =
-                new MobileRadioPowerStatsCollector.MobileRadioStatsArrayLayout(descriptor);
+        MobileRadioPowerStatsLayout layout =
+                new MobileRadioPowerStatsLayout(descriptor);
         assertThat(layout.getDeviceSleepTime(powerStats.stats)).isEqualTo(200);
         assertThat(layout.getDeviceIdleTime(powerStats.stats)).isEqualTo(300);
         assertThat(layout.getConsumedEnergy(powerStats.stats, 0))

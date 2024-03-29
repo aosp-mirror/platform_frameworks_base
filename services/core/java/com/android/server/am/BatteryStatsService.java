@@ -124,9 +124,9 @@ import com.android.server.power.stats.BatteryExternalStatsWorker;
 import com.android.server.power.stats.BatteryStatsDumpHelperImpl;
 import com.android.server.power.stats.BatteryStatsImpl;
 import com.android.server.power.stats.BatteryUsageStatsProvider;
-import com.android.server.power.stats.CpuAggregatedPowerStatsProcessor;
-import com.android.server.power.stats.MobileRadioAggregatedPowerStatsProcessor;
-import com.android.server.power.stats.PhoneCallAggregatedPowerStatsProcessor;
+import com.android.server.power.stats.CpuPowerStatsProcessor;
+import com.android.server.power.stats.MobileRadioPowerStatsProcessor;
+import com.android.server.power.stats.PhoneCallPowerStatsProcessor;
 import com.android.server.power.stats.PowerStatsAggregator;
 import com.android.server.power.stats.PowerStatsExporter;
 import com.android.server.power.stats.PowerStatsScheduler;
@@ -479,7 +479,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
                 .setProcessor(
-                        new CpuAggregatedPowerStatsProcessor(mPowerProfile, mCpuScalingPolicies));
+                        new CpuPowerStatsProcessor(mPowerProfile, mCpuScalingPolicies));
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)
                 .trackDeviceStates(
                         AggregatedPowerStatsConfig.STATE_POWER,
@@ -489,10 +489,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
                 .setProcessor(
-                        new MobileRadioAggregatedPowerStatsProcessor(mPowerProfile));
+                        new MobileRadioPowerStatsProcessor(mPowerProfile));
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_PHONE,
                         BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)
-                .setProcessor(new PhoneCallAggregatedPowerStatsProcessor());
+                .setProcessor(new PhoneCallPowerStatsProcessor());
         return config;
     }
 

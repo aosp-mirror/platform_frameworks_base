@@ -27,7 +27,7 @@ import java.util.Collections;
 import java.util.List;
 
 /*
- * The power estimation algorithm used by AggregatedPowerStatsProcessor can roughly be
+ * The power estimation algorithm used by PowerStatsProcessor can roughly be
  * described like this:
  *
  * 1. Estimate power usage for each state combination (e.g. power-battery/screen-on) using
@@ -39,8 +39,8 @@ import java.util.List;
  * 2. For each UID, compute the proportion of the combined estimates in each state
  * and attribute the corresponding portion of the total power estimate in that state to the UID.
  */
-abstract class AggregatedPowerStatsProcessor {
-    private static final String TAG = "AggregatedPowerStatsProcessor";
+abstract class PowerStatsProcessor {
+    private static final String TAG = "PowerStatsProcessor";
 
     private static final int INDEX_DOES_NOT_EXIST = -1;
     private static final double MILLIAMPHOUR_PER_MICROCOULOMB = 1.0 / 1000.0 / 60.0 / 60.0;

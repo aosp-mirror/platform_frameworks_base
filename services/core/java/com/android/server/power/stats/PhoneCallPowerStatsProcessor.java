@@ -20,21 +20,21 @@ import android.os.PersistableBundle;
 
 import com.android.internal.os.PowerStats;
 
-public class PhoneCallAggregatedPowerStatsProcessor extends AggregatedPowerStatsProcessor {
-    private final PowerStatsCollector.StatsArrayLayout mStatsArrayLayout;
+public class PhoneCallPowerStatsProcessor extends PowerStatsProcessor {
+    private final PowerStatsLayout mStatsLayout;
     private final PowerStats.Descriptor mDescriptor;
     private final long[] mTmpDeviceStats;
     private PowerStats.Descriptor mMobileRadioStatsDescriptor;
-    private MobileRadioPowerStatsCollector.MobileRadioStatsArrayLayout mMobileRadioStatsArrayLayout;
+    private MobileRadioPowerStatsLayout mMobileRadioStatsLayout;
     private long[] mTmpMobileRadioDeviceStats;
 
-    public PhoneCallAggregatedPowerStatsProcessor() {
-        mStatsArrayLayout = new PowerStatsCollector.StatsArrayLayout();
-        mStatsArrayLayout.addDeviceSectionPowerEstimate();
+    public PhoneCallPowerStatsProcessor() {
+        mStatsLayout = new PowerStatsLayout();
+        mStatsLayout.addDeviceSectionPowerEstimate();
         PersistableBundle extras = new PersistableBundle();
-        mStatsArrayLayout.toExtras(extras);
+        mStatsLayout.toExtras(extras);
         mDescriptor = new PowerStats.Descriptor(BatteryConsumer.POWER_COMPONENT_PHONE,
-                mStatsArrayLayout.getDeviceStatsArrayLength(), null, 0, 0, extras);
+                mStatsLayout.getDeviceStatsArrayLength(), null, 0, 0, extras);
         mTmpDeviceStats = new long[mDescriptor.statsArrayLength];
     }
 
@@ -55,8 +55,8 @@ public class PhoneCallAggregatedPowerStatsProcessor extends AggregatedPowerStats
                 return;
             }
 
-            mMobileRadioStatsArrayLayout =
-                    new MobileRadioPowerStatsCollector.MobileRadioStatsArrayLayout(
+            mMobileRadioStatsLayout =
+                    new MobileRadioPowerStatsLayout(
                             mMobileRadioStatsDescriptor);
             mTmpMobileRadioDeviceStats = new long[mMobileRadioStatsDescriptor.statsArrayLength];
         }
@@ -70,16 +70,16 @@ public class PhoneCallAggregatedPowerStatsProcessor extends AggregatedPowerStats
                 states -> {
                     mobileRadioStats.getDeviceStats(mTmpMobileRadioDeviceStats, states);
                     double callPowerEstimate =
-                            mMobileRadioStatsArrayLayout.getDeviceCallPowerEstimate(
+                            mMobileRadioStatsLayout.getDeviceCallPowerEstimate(
                                     mTmpMobileRadioDeviceStats);
-                    mStatsArrayLayout.setDevicePowerEstimate(mTmpDeviceStats, callPowerEstimate);
+                    mStatsLayout.setDevicePowerEstimate(mTmpDeviceStats, callPowerEstimate);
                     stats.setDeviceStats(states, mTmpDeviceStats);
                 });
     }
 
     @Override
     String deviceStatsToString(PowerStats.Descriptor descriptor, long[] stats) {
-        return "power: " + mStatsArrayLayout.getDevicePowerEstimate(stats);
+        return "power: " + mStatsLayout.getDevicePowerEstimate(stats);
     }
 
     @Override

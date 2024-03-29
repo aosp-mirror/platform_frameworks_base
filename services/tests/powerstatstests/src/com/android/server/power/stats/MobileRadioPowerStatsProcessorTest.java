@@ -65,7 +65,7 @@ import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
-public class MobileRadioAggregatedPowerStatsProcessorTest {
+public class MobileRadioPowerStatsProcessorTest {
     @Rule(order = 0)
     public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
             .setProvideMainThread(true)
@@ -167,8 +167,8 @@ public class MobileRadioAggregatedPowerStatsProcessorTest {
 
         mStatsRule.setTestPowerProfile("power_profile_test_modem_calculator");
 
-        MobileRadioAggregatedPowerStatsProcessor processor =
-                new MobileRadioAggregatedPowerStatsProcessor(mStatsRule.getPowerProfile());
+        MobileRadioPowerStatsProcessor processor =
+                new MobileRadioPowerStatsProcessor(mStatsRule.getPowerProfile());
 
         AggregatedPowerStatsConfig.PowerComponent config =
                 new AggregatedPowerStatsConfig.PowerComponent(
@@ -225,8 +225,8 @@ public class MobileRadioAggregatedPowerStatsProcessorTest {
 
         processor.finish(aggregatedStats);
 
-        MobileRadioPowerStatsCollector.MobileRadioStatsArrayLayout statsLayout =
-                new MobileRadioPowerStatsCollector.MobileRadioStatsArrayLayout(
+        MobileRadioPowerStatsLayout statsLayout =
+                new MobileRadioPowerStatsLayout(
                         aggregatedStats.getPowerStatsDescriptor());
 
         //    720 mA * 100 ms  (level 0 TX drain rate * level 0 TX duration)
@@ -313,8 +313,8 @@ public class MobileRadioAggregatedPowerStatsProcessorTest {
         mStatsRule.setTestPowerProfile("power_profile_test_legacy_modem")
                 .initMeasuredEnergyStatsLocked();
 
-        MobileRadioAggregatedPowerStatsProcessor processor =
-                new MobileRadioAggregatedPowerStatsProcessor(mStatsRule.getPowerProfile());
+        MobileRadioPowerStatsProcessor processor =
+                new MobileRadioPowerStatsProcessor(mStatsRule.getPowerProfile());
 
         AggregatedPowerStatsConfig.PowerComponent config =
                 new AggregatedPowerStatsConfig.PowerComponent(
@@ -379,8 +379,8 @@ public class MobileRadioAggregatedPowerStatsProcessorTest {
 
         processor.finish(aggregatedStats);
 
-        MobileRadioPowerStatsCollector.MobileRadioStatsArrayLayout statsLayout =
-                new MobileRadioPowerStatsCollector.MobileRadioStatsArrayLayout(
+        MobileRadioPowerStatsLayout statsLayout =
+                new MobileRadioPowerStatsLayout(
                         aggregatedStats.getPowerStatsDescriptor());
 
         // 10_000_000 micro-Coulomb * 1/1000 milli/micro * 1/3600 hour/second = 2.77778 mAh

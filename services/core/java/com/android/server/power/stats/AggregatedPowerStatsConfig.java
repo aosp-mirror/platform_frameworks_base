@@ -75,7 +75,7 @@ public class AggregatedPowerStatsConfig {
         private final int mPowerComponentId;
         private @TrackedState int[] mTrackedDeviceStates;
         private @TrackedState int[] mTrackedUidStates;
-        private AggregatedPowerStatsProcessor mProcessor = NO_OP_PROCESSOR;
+        private PowerStatsProcessor mProcessor = NO_OP_PROCESSOR;
 
         PowerComponent(int powerComponentId) {
             this.mPowerComponentId = powerComponentId;
@@ -108,7 +108,7 @@ public class AggregatedPowerStatsConfig {
          * before giving the aggregates stats to consumers. The processor can complete the
          * aggregation process, for example by computing estimated power usage.
          */
-        public PowerComponent setProcessor(@NonNull AggregatedPowerStatsProcessor processor) {
+        public PowerComponent setProcessor(@NonNull PowerStatsProcessor processor) {
             mProcessor = processor;
             return this;
         }
@@ -143,7 +143,7 @@ public class AggregatedPowerStatsConfig {
         }
 
         @NonNull
-        public AggregatedPowerStatsProcessor getProcessor() {
+        public PowerStatsProcessor getProcessor() {
             return mProcessor;
         }
 
@@ -206,8 +206,8 @@ public class AggregatedPowerStatsConfig {
         return mPowerComponents;
     }
 
-    private static final AggregatedPowerStatsProcessor NO_OP_PROCESSOR =
-            new AggregatedPowerStatsProcessor() {
+    private static final PowerStatsProcessor NO_OP_PROCESSOR =
+            new PowerStatsProcessor() {
                 @Override
                 void finish(PowerComponentAggregatedPowerStats stats) {
                 }

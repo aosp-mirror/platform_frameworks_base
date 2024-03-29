@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class MobileRadioAggregatedPowerStatsProcessor extends AggregatedPowerStatsProcessor {
+public class MobileRadioPowerStatsProcessor extends PowerStatsProcessor {
     private static final String TAG = "MobileRadioPowerStatsProcessor";
     private static final boolean DEBUG = false;
 
@@ -53,7 +53,7 @@ public class MobileRadioAggregatedPowerStatsProcessor extends AggregatedPowerSta
     private final SparseArray<RxTxPowerEstimators> mRxTxPowerEstimators = new SparseArray<>();
 
     private PowerStats.Descriptor mLastUsedDescriptor;
-    private MobileRadioPowerStatsCollector.MobileRadioStatsArrayLayout mStatsLayout;
+    private MobileRadioPowerStatsLayout mStatsLayout;
     // Sequence of steps for power estimation and intermediate results.
     private PowerEstimationPlan mPlan;
 
@@ -61,7 +61,7 @@ public class MobileRadioAggregatedPowerStatsProcessor extends AggregatedPowerSta
     private long[] mTmpStateStatsArray;
     private long[] mTmpUidStatsArray;
 
-    public MobileRadioAggregatedPowerStatsProcessor(PowerProfile powerProfile) {
+    public MobileRadioPowerStatsProcessor(PowerProfile powerProfile) {
         final double sleepDrainRateMa = powerProfile.getAverageBatteryDrainOrDefaultMa(
                 PowerProfile.SUBSYSTEM_MODEM | ModemPowerProfile.MODEM_DRAIN_TYPE_SLEEP,
                 Double.NaN);
@@ -221,7 +221,7 @@ public class MobileRadioAggregatedPowerStatsProcessor extends AggregatedPowerSta
         }
 
         mLastUsedDescriptor = descriptor;
-        mStatsLayout = new MobileRadioPowerStatsCollector.MobileRadioStatsArrayLayout(descriptor);
+        mStatsLayout = new MobileRadioPowerStatsLayout(descriptor);
         mTmpDeviceStatsArray = new long[descriptor.statsArrayLength];
         mTmpStateStatsArray = new long[descriptor.stateStatsArrayLength];
         mTmpUidStatsArray = new long[descriptor.uidStatsArrayLength];

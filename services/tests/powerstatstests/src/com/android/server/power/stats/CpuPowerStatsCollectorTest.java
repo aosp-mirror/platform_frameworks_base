@@ -229,8 +229,8 @@ public class CpuPowerStatsCollectorTest {
         assertThat(descriptor.name).isEqualTo("cpu");
         assertThat(descriptor.statsArrayLength).isEqualTo(13);
         assertThat(descriptor.uidStatsArrayLength).isEqualTo(5);
-        CpuPowerStatsCollector.CpuStatsArrayLayout layout =
-                new CpuPowerStatsCollector.CpuStatsArrayLayout();
+        CpuPowerStatsLayout layout =
+                new CpuPowerStatsLayout();
         layout.fromExtras(descriptor.extras);
 
         long[] deviceStats = new long[descriptor.statsArrayLength];
@@ -268,8 +268,8 @@ public class CpuPowerStatsCollectorTest {
         mockEnergyConsumers();
 
         CpuPowerStatsCollector collector = createCollector(8, 0);
-        CpuPowerStatsCollector.CpuStatsArrayLayout layout =
-                new CpuPowerStatsCollector.CpuStatsArrayLayout();
+        CpuPowerStatsLayout layout =
+                new CpuPowerStatsLayout();
         layout.fromExtras(collector.getPowerStatsDescriptor().extras);
 
         mockKernelCpuStats(new long[]{1111, 2222, 3333},
@@ -403,8 +403,8 @@ public class CpuPowerStatsCollectorTest {
     }
 
     private static int[] getScalingStepToPowerBracketMap(CpuPowerStatsCollector collector) {
-        CpuPowerStatsCollector.CpuStatsArrayLayout layout =
-                new CpuPowerStatsCollector.CpuStatsArrayLayout();
+        CpuPowerStatsLayout layout =
+                new CpuPowerStatsLayout();
         layout.fromExtras(collector.getPowerStatsDescriptor().extras);
         return layout.getScalingStepToPowerBracketMap();
     }

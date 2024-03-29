@@ -52,7 +52,7 @@ import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
-public class PhoneCallAggregatedPowerStatsProcessorTest {
+public class PhoneCallPowerStatsProcessorTest {
     @Rule(order = 0)
     public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
             .setProvideMainThread(true)
@@ -151,11 +151,11 @@ public class PhoneCallAggregatedPowerStatsProcessorTest {
 
     @Test
     public void copyEstimatesFromMobileRadioPowerStats() {
-        MobileRadioAggregatedPowerStatsProcessor mobileStatsProcessor =
-                new MobileRadioAggregatedPowerStatsProcessor(mStatsRule.getPowerProfile());
+        MobileRadioPowerStatsProcessor mobileStatsProcessor =
+                new MobileRadioPowerStatsProcessor(mStatsRule.getPowerProfile());
 
-        PhoneCallAggregatedPowerStatsProcessor phoneStatsProcessor =
-                new PhoneCallAggregatedPowerStatsProcessor();
+        PhoneCallPowerStatsProcessor phoneStatsProcessor =
+                new PhoneCallPowerStatsProcessor();
 
         AggregatedPowerStatsConfig aggregatedPowerStatsConfig = new AggregatedPowerStatsConfig();
         aggregatedPowerStatsConfig.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)
@@ -204,8 +204,8 @@ public class PhoneCallAggregatedPowerStatsProcessorTest {
                 aggregatedPowerStats.getPowerComponentStats(BatteryConsumer.POWER_COMPONENT_PHONE);
         phoneStatsProcessor.finish(stats);
 
-        PowerStatsCollector.StatsArrayLayout statsLayout =
-                new PowerStatsCollector.StatsArrayLayout(stats.getPowerStatsDescriptor());
+        PowerStatsLayout statsLayout =
+                new PowerStatsLayout(stats.getPowerStatsDescriptor());
 
         long[] deviceStats = new long[stats.getPowerStatsDescriptor().statsArrayLength];
         stats.getDeviceStats(deviceStats, states(POWER_STATE_OTHER, SCREEN_STATE_ON));

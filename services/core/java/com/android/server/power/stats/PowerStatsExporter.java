@@ -139,7 +139,7 @@ public class PowerStatsExporter {
             return;
         }
 
-        PowerStatsCollector.StatsArrayLayout layout = new PowerStatsCollector.StatsArrayLayout();
+        PowerStatsLayout layout = new PowerStatsLayout();
         layout.fromExtras(descriptor.extras);
 
         long[] deviceStats = new long[descriptor.statsArrayLength];
@@ -174,7 +174,7 @@ public class PowerStatsExporter {
             BatteryUsageStats.Builder batteryUsageStatsBuilder,
             AggregatedPowerStatsConfig.PowerComponent powerComponent,
             PowerComponentAggregatedPowerStats powerComponentStats,
-            PowerStatsCollector.StatsArrayLayout layout) {
+            PowerStatsLayout layout) {
         int powerComponentId = powerComponent.getPowerComponentId();
         PowerStats.Descriptor descriptor = powerComponentStats.getPowerStatsDescriptor();
         long[] uidStats = new long[descriptor.uidStatsArrayLength];
