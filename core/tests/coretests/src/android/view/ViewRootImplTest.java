@@ -19,6 +19,7 @@ package android.view;
 import static android.view.accessibility.Flags.FLAG_FORCE_INVERT_COLOR;
 import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY;
+import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
@@ -82,7 +83,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -464,8 +464,8 @@ public class ViewRootImplTest {
      */
     @UiThreadTest
     @Test
-    @Ignore("Can be enabled only after b/330596920 is ready")
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_getDefaultValues() {
         ViewRootImpl viewRootImpl = new ViewRootImpl(sContext,
                 sContext.getDisplayNoVerify());
@@ -481,9 +481,9 @@ public class ViewRootImplTest {
      * Also, mIsFrameRateBoosting should be true when the visibility becomes visible
      */
     @Test
-    @Ignore("Can be enabled only after b/330596920 is ready")
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
-            FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_visibility_bySize() {
         View view = new View(sContext);
         attachViewToWindow(view);
@@ -515,9 +515,9 @@ public class ViewRootImplTest {
      * <7%: FRAME_RATE_CATEGORY_LOW
      */
     @Test
-    @Ignore("Can be enabled only after b/330596920 is ready")
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
-            FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_smallSize_bySize() {
         View view = new View(sContext);
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
@@ -544,9 +544,9 @@ public class ViewRootImplTest {
      * >=7% : FRAME_RATE_CATEGORY_NORMAL
      */
     @Test
-    @Ignore("Can be enabled only after b/330596920 is ready")
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
-            FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_normalSize_bySize() {
         View view = new View(sContext);
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
@@ -577,8 +577,8 @@ public class ViewRootImplTest {
      * Also, mIsFrameRateBoosting should be true when the visibility becomes visible
      */
     @Test
-    @Ignore("Can be enabled only after b/330596920 is ready")
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_visibility_defaultHigh() {
         View view = new View(sContext);
         attachViewToWindow(view);
@@ -611,8 +611,8 @@ public class ViewRootImplTest {
      * <7%: FRAME_RATE_CATEGORY_NORMAL
      */
     @Test
-    @Ignore("Can be enabled only after b/330596920 is ready")
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_smallSize_defaultHigh() {
         View view = new View(sContext);
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
@@ -639,8 +639,8 @@ public class ViewRootImplTest {
      * >=7% : FRAME_RATE_CATEGORY_HIGH
      */
     @Test
-    @Ignore("Can be enabled only after b/330596920 is ready")
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_normalSize_defaultHigh() {
         View view = new View(sContext);
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
@@ -671,8 +671,8 @@ public class ViewRootImplTest {
      * It should take the max value among all of the voted categories per frame.
      */
     @Test
-    @Ignore("Can be enabled only after b/330596920 is ready")
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_aggregate() {
         View view = new View(sContext);
         attachViewToWindow(view);
@@ -717,8 +717,8 @@ public class ViewRootImplTest {
      * prioritize 60Hz..
      */
     @Test
-    @Ignore("Can be enabled only after b/330596920 is ready")
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRate_aggregate() {
         View view = new View(sContext);
         attachViewToWindow(view);
@@ -776,8 +776,8 @@ public class ViewRootImplTest {
      * submit your preferred choice to the ViewRootImpl.
      */
     @Test
-    @Ignore("Can be enabled only after b/330596920 is ready")
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRate_category() {
         View view = new View(sContext);
         attachViewToWindow(view);
@@ -816,8 +816,8 @@ public class ViewRootImplTest {
      * Also, we shouldn't call setFrameRate.
      */
     @Test
-    @Ignore("Can be enabled only after b/330596920 is ready")
-    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY, FLAG_VIEW_VELOCITY_API})
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_VIEW_VELOCITY_API, FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_velocityToHigh() {
         View view = new View(sContext);
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
@@ -848,8 +848,8 @@ public class ViewRootImplTest {
      * We should boost the frame rate if the value of mInsetsAnimationRunning is true.
      */
     @Test
-    @Ignore("Can be enabled only after b/330596920 is ready")
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_insetsAnimation() {
         View view = new View(sContext);
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
@@ -885,8 +885,8 @@ public class ViewRootImplTest {
      * Test FrameRateBoostOnTouchEnabled API
      */
     @Test
-    @Ignore("Can be enabled only after b/330596920 is ready")
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_frameRateBoostOnTouch() {
         View view = new View(sContext);
         attachViewToWindow(view);
@@ -918,8 +918,8 @@ public class ViewRootImplTest {
      * mPreferredFrameRate should be set to 0.
      */
     @Test
-    @Ignore("Can be enabled only after b/330596920 is ready")
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateTimeOut() throws InterruptedException {
         final long delay = 200L;
 
@@ -956,8 +956,8 @@ public class ViewRootImplTest {
      * A View should either vote a frame rate or a frame rate category instead of both.
      */
     @Test
-    @Ignore("Can be enabled only after b/330596920 is ready")
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateOnly() {
         View view = new View(sContext);
         float frameRate = 20;
@@ -999,8 +999,8 @@ public class ViewRootImplTest {
      * - otherwise, use the previous category value.
      */
     @Test
-    @Ignore("Can be enabled only after b/330596920 is ready")
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_infrequentLayer_defaultHigh() throws InterruptedException {
         final long delay = 200L;
 
@@ -1068,8 +1068,8 @@ public class ViewRootImplTest {
      * Test the IsFrameRatePowerSavingsBalanced values are properly set
      */
     @Test
-    @Ignore("Can be enabled only after b/330596920 is ready")
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_isFrameRatePowerSavingsBalanced() {
         View view = new View(sContext);
         attachViewToWindow(view);
@@ -1101,8 +1101,8 @@ public class ViewRootImplTest {
      * 2. If FT2-FT1 > 15ms && FT3-FT2 > 15ms -> vote for NORMAL category
      */
     @Test
-    @Ignore("Can be enabled only after b/330596920 is ready")
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_applyTextureViewHeuristic() throws InterruptedException {
         final long delay = 30L;
 
