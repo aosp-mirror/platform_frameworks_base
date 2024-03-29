@@ -99,13 +99,29 @@ public class HorizontalScrollViewFunctionalTest {
             mMyHorizontalScrollView.setFrameContentVelocity(0);
         });
         // set setFrameContentVelocity shouldn't do anything.
-        assertEquals(mMyHorizontalScrollView.isSetVelocityCalled, false);
+        assertTrue(mMyHorizontalScrollView.isSetVelocityCalled);
+        assertEquals(0f, mMyHorizontalScrollView.velocity, 0f);
+        mMyHorizontalScrollView.isSetVelocityCalled = false;
 
         mActivityRule.runOnUiThread(() -> {
             mMyHorizontalScrollView.fling(100);
         });
         // set setFrameContentVelocity should be called when fling.
-        assertEquals(mMyHorizontalScrollView.isSetVelocityCalled, true);
+        assertTrue(mMyHorizontalScrollView.isSetVelocityCalled);
+        assertTrue(mMyHorizontalScrollView.velocity > 0f);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_VIEW_VELOCITY_API)
+    public void hasVelocityInSmoothScrollBy() throws Throwable {
+        int maxScroll = mMyHorizontalScrollView.getChildAt(0).getWidth()
+                - mMyHorizontalScrollView.getWidth();
+        mActivityRule.runOnUiThread(() -> {
+            mMyHorizontalScrollView.smoothScrollTo(maxScroll, 0);
+        });
+        PollingCheck.waitFor(() -> mMyHorizontalScrollView.getScrollX() != 0);
+        assertTrue(mMyHorizontalScrollView.isSetVelocityCalled);
+        assertTrue(mMyHorizontalScrollView.velocity > 0f);
     }
 
     static class WatchedEdgeEffect extends EdgeEffect {
@@ -122,9 +138,10 @@ public class HorizontalScrollViewFunctionalTest {
         }
     }
 
-    public static class MyHorizontalScrollView extends ScrollView {
+    public static class MyHorizontalScrollView extends HorizontalScrollView {
 
         public boolean isSetVelocityCalled;
+        public float velocity;
 
         public MyHorizontalScrollView(Context context) {
             super(context);
@@ -140,9 +157,8 @@ public class HorizontalScrollViewFunctionalTest {
 
         @Override
         public void setFrameContentVelocity(float pixelsPerSecond) {
-            if (pixelsPerSecond != 0) {
-                isSetVelocityCalled = true;
-            }
+            isSetVelocityCalled = true;
+            velocity = pixelsPerSecond;
         }
     }
 }

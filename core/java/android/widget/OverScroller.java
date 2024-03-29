@@ -299,8 +299,10 @@ public class OverScroller {
                 final int duration = mScrollerX.mDuration;
                 if (elapsedTime < duration) {
                     final float q = mInterpolator.getInterpolation(elapsedTime / (float) duration);
-                    mScrollerX.updateScroll(q);
-                    mScrollerY.updateScroll(q);
+                    final float q2 =
+                            mInterpolator.getInterpolation((elapsedTime - 1) / (float) duration);
+                    mScrollerX.updateScroll(q, q2);
+                    mScrollerY.updateScroll(q, q2);
                 } else {
                     abortAnimation();
                 }
@@ -642,8 +644,11 @@ public class OverScroller {
                     * 0.84f; // look and feel tuning
         }
 
-        void updateScroll(float q) {
-            mCurrentPosition = mStart + Math.round(q * (mFinal - mStart));
+        void updateScroll(float q, float q2) {
+            int distance = mFinal - mStart;
+            mCurrentPosition = mStart + Math.round(q * distance);
+            // q2 is 1ms before q1
+            mCurrVelocity = 1000f * (q - q2) * distance;
         }
 
         /*
