@@ -74,7 +74,7 @@ import com.android.systemui.notifications.ui.composable.Notifications.Transition
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.ui.composable.ShadeHeader
-import com.android.systemui.statusbar.notification.stack.shared.model.StackRounding
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimRounding
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import kotlin.math.roundToInt
 
@@ -157,9 +157,9 @@ fun SceneScope.NotificationScrollingStack(
                 .toPx()
         } + navBarHeight
 
-    val contentHeight = viewModel.intrinsicContentHeight.collectAsState()
+    val stackHeight = viewModel.stackHeight.collectAsState()
 
-    val stackRounding = viewModel.stackRounding.collectAsState(StackRounding())
+    val scrimRounding = viewModel.shadeScrimRounding.collectAsState(ShadeScrimRounding())
 
     // the offset for the notifications scrim. Its upper bound is 0, and its lower bound is
     // calculated in minScrimOffset. The scrim is the same height as the screen minus the
@@ -186,8 +186,8 @@ fun SceneScope.NotificationScrollingStack(
 
     // if contentHeight drops below minimum visible scrim height while scrim is
     // expanded, reset scrim offset.
-    LaunchedEffect(contentHeight, scrimOffset) {
-        snapshotFlow { contentHeight.value < minVisibleScrimHeight() && scrimOffset.value < 0f }
+    LaunchedEffect(stackHeight, scrimOffset) {
+        snapshotFlow { stackHeight.value < minVisibleScrimHeight() && scrimOffset.value < 0f }
             .collect { shouldCollapse -> if (shouldCollapse) scrimOffset.value = 0f }
     }
 
@@ -232,7 +232,7 @@ fun SceneScope.NotificationScrollingStack(
                                 { expansionFraction },
                                 layoutState.isTransitioningBetween(Scenes.Gone, Scenes.Shade)
                             )
-                            .let { stackRounding.value.toRoundedCornerShape(it) }
+                            .let { scrimRounding.value.toRoundedCornerShape(it) }
                     clip = true
                 }
     ) {
@@ -274,14 +274,14 @@ fun SceneScope.NotificationScrollingStack(
                                     onScrimOffsetChanged = { scrimOffset.value = it },
                                     minScrimOffset = minScrimOffset,
                                     maxScrimOffset = 0f,
-                                    contentHeight = { contentHeight.value },
+                                    contentHeight = { stackHeight.value },
                                     minVisibleScrimHeight = minVisibleScrimHeight,
                                 )
                             }
                         )
                         .verticalScroll(scrollState)
                         .fillMaxWidth()
-                        .height { (contentHeight.value + navBarHeight).roundToInt() },
+                        .height { (stackHeight.value + navBarHeight).roundToInt() },
             )
         }
     }
@@ -396,7 +396,7 @@ private fun Modifier.debugBackground(
         this
     }
 
-fun StackRounding.toRoundedCornerShape(radius: Dp): RoundedCornerShape {
+fun ShadeScrimRounding.toRoundedCornerShape(radius: Dp): RoundedCornerShape {
     val topRadius = if (roundTop) radius else 0.dp
     val bottomRadius = if (roundBottom) radius else 0.dp
     return RoundedCornerShape(

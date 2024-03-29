@@ -57,7 +57,8 @@ constructor(
 
     suspend fun bind() = coroutineScope {
         launch {
-            combine(viewModel.stackClipping, clipRadius, ::Pair).collect { (clipping, clipRadius) ->
+            combine(viewModel.shadeScrimClipping, clipRadius, ::Pair).collect {
+                (clipping, clipRadius) ->
                 val (bounds, rounding) = clipping
                 val viewLeft = controller.view.left
                 val viewTop = controller.view.top
@@ -73,7 +74,7 @@ constructor(
         }
 
         launch {
-            viewModel.contentTop.collect {
+            viewModel.stackTop.collect {
                 controller.updateTopPadding(it, controller.isAddOrRemoveAnimationPending)
             }
         }
