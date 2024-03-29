@@ -234,6 +234,9 @@ final class AmbientKeyboardBacklightController implements DisplayManager.Display
         DisplayManagerInternal displayManagerInternal = LocalServices.getService(
                 DisplayManagerInternal.class);
         DisplayInfo displayInfo = displayManagerInternal.getDisplayInfo(Display.DEFAULT_DISPLAY);
+        if (displayInfo == null) {
+            return;
+        }
         synchronized (sAmbientControllerLock) {
             if (Objects.equals(mCurrentDefaultDisplayUniqueId, displayInfo.uniqueId)) {
                 return;
