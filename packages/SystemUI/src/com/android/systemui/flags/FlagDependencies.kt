@@ -53,7 +53,7 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
 
         // SceneContainer dependencies
         SceneContainerFlag.getFlagDependencies().forEach { (alpha, beta) -> alpha dependsOn beta }
-        SceneContainerFlag.getMainStaticFlag() dependsOn MIGRATE_KEYGUARD_STATUS_BAR_VIEW
+        SceneContainerFlag.getMainAconfigFlag() dependsOn MIGRATE_KEYGUARD_STATUS_BAR_VIEW
 
         // ComposeLockscreen dependencies
         ComposeLockscreen.token dependsOn KeyguardBottomAreaRefactor.token
