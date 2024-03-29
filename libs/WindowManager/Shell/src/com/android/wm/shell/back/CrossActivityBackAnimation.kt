@@ -65,7 +65,7 @@ class CrossActivityBackAnimation @Inject constructor(
     private val targetEnteringRect = RectF()
     private val currentEnteringRect = RectF()
 
-    private val taskBoundsRect = Rect()
+    private val backAnimRect = Rect()
 
     private val cornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context)
 
@@ -109,10 +109,10 @@ class CrossActivityBackAnimation @Inject constructor(
         transaction.setAnimationTransaction()
 
         // Offset start rectangle to align task bounds.
-        taskBoundsRect.set(closingTarget!!.windowConfiguration.bounds)
-        taskBoundsRect.offsetTo(0, 0)
+        backAnimRect.set(closingTarget!!.localBounds)
+        backAnimRect.offsetTo(0, 0)
 
-        startClosingRect.set(taskBoundsRect)
+        startClosingRect.set(backAnimRect)
 
         // scale closing target into the middle for rhs and to the right for lhs
         targetClosingRect.set(startClosingRect)
@@ -154,7 +154,7 @@ class CrossActivityBackAnimation @Inject constructor(
     }
 
     private fun getYOffset(centeredRect: RectF, touchY: Float): Float {
-        val screenHeight = taskBoundsRect.height()
+        val screenHeight = backAnimRect.height()
         // Base the window movement in the Y axis on the touch movement in the Y axis.
         val rawYDelta = touchY - initialTouchPos.y
         val yDirection = (if (rawYDelta < 0) -1 else 1)
@@ -181,8 +181,8 @@ class CrossActivityBackAnimation @Inject constructor(
         // off the animator
         startClosingRect.set(currentClosingRect)
         startEnteringRect.set(currentEnteringRect)
-        targetEnteringRect.set(taskBoundsRect)
-        targetClosingRect.set(taskBoundsRect)
+        targetEnteringRect.set(backAnimRect)
+        targetClosingRect.set(backAnimRect)
         targetClosingRect.offset(currentClosingRect.left + enteringStartOffset, 0f)
 
         val valueAnimator = ValueAnimator.ofFloat(1f, 0f).setDuration(POST_ANIMATION_DURATION)
@@ -240,13 +240,13 @@ class CrossActivityBackAnimation @Inject constructor(
 
     private fun applyTransform(leash: SurfaceControl?, rect: RectF, alpha: Float) {
         if (leash == null || !leash.isValid) return
-        val scale = rect.width() / taskBoundsRect.width()
+        val scale = rect.width() / backAnimRect.width()
         transformMatrix.reset()
         transformMatrix.setScale(scale, scale)
         transformMatrix.postTranslate(rect.left, rect.top)
         transaction.setAlpha(leash, alpha)
             .setMatrix(leash, transformMatrix, tmpFloat9)
-            .setCrop(leash, taskBoundsRect)
+            .setCrop(leash, backAnimRect)
             .setCornerRadius(leash, cornerRadius)
     }
 
@@ -267,6 +267,7 @@ class CrossActivityBackAnimation @Inject constructor(
         transaction
             .setColor(scrimLayer, colorComponents)
             .setAlpha(scrimLayer!!, maxScrimAlpha)
+            .setCrop(scrimLayer!!, closingTarget!!.localBounds)
             .setRelativeLayer(scrimLayer!!, closingTarget!!.leash, -1)
             .show(scrimLayer)
     }
