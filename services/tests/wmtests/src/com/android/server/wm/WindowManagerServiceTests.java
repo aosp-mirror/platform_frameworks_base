@@ -28,6 +28,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.flags.Flags.FLAG_SENSITIVE_CONTENT_APP_PROTECTION;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SENSITIVE_FOR_TRACING;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SPY;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
@@ -1113,6 +1114,34 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         verify(mTransaction).setInputWindowInfo(
                 eq(surfaceControl),
                 argThat(h -> (h.inputConfig & InputConfig.SPY) == InputConfig.SPY));
+    }
+
+    @Test
+    public void testUpdateInputChannel_sanitizeInputFeatureSensitive_forUntrustedWindows() {
+        final Session session = mock(Session.class);
+        final int callingUid = Process.FIRST_APPLICATION_UID;
+        final int callingPid = 1234;
+        final SurfaceControl surfaceControl = mock(SurfaceControl.class);
+        final IBinder window = new Binder();
+        final InputTransferToken inputTransferToken = mock(InputTransferToken.class);
+
+        final InputChannel inputChannel = new InputChannel();
+        mWm.grantInputChannel(session, callingUid, callingPid, DEFAULT_DISPLAY, surfaceControl,
+                window, null /* hostInputToken */, FLAG_NOT_FOCUSABLE, 0 /* privateFlags */,
+                INPUT_FEATURE_SENSITIVE_FOR_TRACING, TYPE_APPLICATION, null /* windowToken */,
+                inputTransferToken,
+                "TestInputChannel", inputChannel);
+        verify(mTransaction).setInputWindowInfo(
+                eq(surfaceControl),
+                argThat(h -> (h.inputConfig & InputConfig.SENSITIVE_FOR_TRACING) == 0));
+
+        mWm.updateInputChannel(inputChannel.getToken(), DEFAULT_DISPLAY, surfaceControl,
+                FLAG_NOT_FOCUSABLE, PRIVATE_FLAG_TRUSTED_OVERLAY,
+                INPUT_FEATURE_SENSITIVE_FOR_TRACING,
+                null /* region */);
+        verify(mTransaction).setInputWindowInfo(
+                eq(surfaceControl),
+                argThat(h -> (h.inputConfig & InputConfig.SENSITIVE_FOR_TRACING) != 0));
     }
 
     @RequiresFlagsDisabled(Flags.FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER)
