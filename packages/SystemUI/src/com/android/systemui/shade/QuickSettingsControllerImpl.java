@@ -336,6 +336,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
             SplitShadeStateController splitShadeStateController,
             Lazy<LargeScreenHeaderHelper> largeScreenHeaderHelperLazy
     ) {
+        SceneContainerFlag.assertInLegacyMode();
         mPanelViewControllerLazy = panelViewControllerLazy;
         mPanelView = panelView;
         mLargeScreenHeaderHelperLazy = largeScreenHeaderHelperLazy;
