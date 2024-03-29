@@ -24,6 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.Dumpable;
+import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dump.DumpManager;
@@ -68,6 +69,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
     private final VisibilityLocationProvider mVisibilityLocationProvider;
     private final VisualStabilityProvider mVisualStabilityProvider;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
+    private final CommunalInteractor mCommunalInteractor;
 
     private boolean mSleepy = true;
     private boolean mFullyDozed;
@@ -75,6 +77,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
     private boolean mPulsing;
     private boolean mNotifPanelCollapsing;
     private boolean mNotifPanelLaunchingActivity;
+    private boolean mCommunalShowing = false;
 
     private boolean mPipelineRunAllowed;
     private boolean mReorderingAllowed;
@@ -101,7 +104,8 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
             StatusBarStateController statusBarStateController,
             VisibilityLocationProvider visibilityLocationProvider,
             VisualStabilityProvider visualStabilityProvider,
-            WakefulnessLifecycle wakefulnessLifecycle) {
+            WakefulnessLifecycle wakefulnessLifecycle,
+            CommunalInteractor communalInteractor) {
         mHeadsUpManager = headsUpManager;
         mShadeAnimationInteractor = shadeAnimationInteractor;
         mJavaAdapter = javaAdapter;
@@ -110,6 +114,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mStatusBarStateController = statusBarStateController;
         mDelayableExecutor = delayableExecutor;
+        mCommunalInteractor = communalInteractor;
 
         dumpManager.registerDumpable(this);
     }
@@ -126,6 +131,8 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
                 this::onShadeOrQsClosingChanged);
         mJavaAdapter.alwaysCollectFlow(mShadeAnimationInteractor.isLaunchingActivity(),
                 this::onLaunchingActivityChanged);
+        mJavaAdapter.alwaysCollectFlow(mCommunalInteractor.isIdleOnCommunal(),
+                this::onCommunalShowingChanged);
 
         pipeline.setVisualStabilityManager(mNotifStabilityManager);
     }
@@ -231,7 +238,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
     }
 
     private boolean isReorderingAllowed() {
-        return ((mFullyDozed && mSleepy) || !mPanelExpanded) && !mPulsing;
+        return ((mFullyDozed && mSleepy) || !mPanelExpanded || mCommunalShowing) && !mPulsing;
     }
 
     /**
@@ -315,6 +322,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
         pw.println("  fullyDozed: " + mFullyDozed);
         pw.println("  panelExpanded: " + mPanelExpanded);
         pw.println("  pulsing: " + mPulsing);
+        pw.println("  communalShowing: " + mCommunalShowing);
         pw.println("isSuppressingPipelineRun: " + mIsSuppressingPipelineRun);
         pw.println("isSuppressingGroupChange: " + mIsSuppressingGroupChange);
         pw.println("isSuppressingEntryReorder: " + mIsSuppressingEntryReorder);
@@ -337,5 +345,10 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
     private void onLaunchingActivityChanged(boolean isLaunchingActivity) {
         mNotifPanelLaunchingActivity = isLaunchingActivity;
         updateAllowedStates("notifPanelLaunchingActivity", isLaunchingActivity);
+    }
+
+    private void onCommunalShowingChanged(boolean isShowing) {
+        mCommunalShowing = isShowing;
+        updateAllowedStates("communalShowing", isShowing);
     }
 }
