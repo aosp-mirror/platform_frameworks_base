@@ -84,6 +84,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"‏IT منتظم نے اسکرین شاٹس لینا مسدود کر دیا ہے"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"ترمیم کریں"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"اسکرین شاٹ میں ترمیم کریں"</string>
+    <string name="screenshot_share_label" msgid="1653061117238861559">"اشتراک کریں"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"اسکرین شاٹ کا اشتراک کریں"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"مزید کیپچر کریں"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"اسکرین شاٹ برخاست کریں"</string>
@@ -263,7 +264,7 @@
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"کسی آلے کو منسلک یا غیر منسلک کرنے کے لیے تھپتھپائیں"</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"نئے آلے کا جوڑا بنائیں"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"سبھی دیکھیں"</string>
-    <string name="turn_on_bluetooth" msgid="5681370462180289071">"استعمال کریں"</string>
+    <string name="turn_on_bluetooth" msgid="5681370462180289071">"بلوٹوتھ استعمال کریں"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"منسلک ہے"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"محفوظ ہے"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"غیر منسلک کریں"</string>

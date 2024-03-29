@@ -84,6 +84,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"IT-administraator on ekraanipiltide jäädvustamise blokeerinud"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Muutmine"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Ekraanipildi muutmine"</string>
+    <string name="screenshot_share_label" msgid="1653061117238861559">"Jaga"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Jaga ekraanipilti"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Jäädvusta rohkem"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ekraanipildist loobumine"</string>
@@ -589,7 +590,7 @@
     <string name="volume_dialog_title" msgid="6502703403483577940">"Helitugevuse juhtnupud: %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Kõnede ja märguannete puhul telefon heliseb (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"Esitamine jätkub seadmes <xliff:g id="LABEL">%s</xliff:g>"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Heli esitamine jätkub"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Heli esitatakse seadmes"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Süsteemi kasutajaliidese tuuner"</string>
     <string name="status_bar" msgid="4357390266055077437">"Olekuriba"</string>
     <string name="demo_mode" msgid="263484519766901593">"Süsteemi kasutajaliidese demorežiim"</string>
@@ -1153,7 +1154,7 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Kuva kõik"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Võrkude vahetamiseks katkestage Etherneti-ühendus"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Seadme kasutuskogemuse parandamiseks võivad rakendused ja teenused siiski alati otsida WiFi-võrke isegi siis, kui WiFi on väljas. Seda saab muuta WiFi-skannimise seadetes. "<annotation id="link">"Muuda"</annotation></string>
-    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Lennureżiimi väljalülitamine"</string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Lülita lennukireżiim välja"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> soovib kiirseadetesse lisada järgmise paani"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Lisa paan"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ära lisa paani"</string>
@@ -1214,7 +1215,7 @@
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• Vähemalt üks seade või seadmepaneel on saadaval"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Valige märkmete tegemise vaikerakendus, et kasutada märkmete tegemise otseteed"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Valige rakendus"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Pikalt puudutamise otsetee"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Puudutage otseteed pikalt"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Tühista"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Vaheta ekraane kohe"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Telefoni lahtivoltimine"</string>

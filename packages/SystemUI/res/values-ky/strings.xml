@@ -84,6 +84,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"IT администраторуңуз скриншот тартууга тыюу салган"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Түзөтүү"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Скриншотту түзөтүү"</string>
+    <string name="screenshot_share_label" msgid="1653061117238861559">"Бөлүшүү"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Скриншотту бөлүшүү"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Көбүрөөк тартуу"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Скриншотту четке кагуу"</string>
@@ -103,7 +104,7 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Экранды жаздыруу сеансы боюнча учурдагы билдирме"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Жаздырып баштайсызбы?"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Жаздырып жатканыңызда Android экраныңызда көрүнүп жана түзмөктө ойнотулуп жаткан нерселерди көрө алат. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү, сүрөттөрдү, аудио жана видеону көрсөтүп албаңыз."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Колдонмону жаздырып жатканда Android ал колдонмодо көрсөтүлүп жана ойнотулуп жаткан нерселерди көрө алат. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү, сүрөттөрдү, аудио жана видеону көрсөтүп албаңыз."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Колдонмону жаздырып жатканда Android анда көрүнүп же ойноп жаткан нерселерди көрө алат. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү, сүрөттөрдү, аудио жана видеону көрсөтүп албаңыз."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Жаздырып баштоо"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Аудио жаздыруу"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Түзмөктөгү аудиолор"</string>
@@ -458,16 +459,16 @@
     <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Колдонмону бөлүшүү же жаздыруу"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> колдонмосу аркылуу жаздырып же тышкы экранга чыгарып баштайсызбы?"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Бөлүшүп, жаздырып же тышкы экранга чыгарып жатканда <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> колдонмосу экраныңыздагы бардык маалыматты же түзмөктө ойнотулуп жаткан нерселерди көрө алат. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү, сүрөттөрдү, аудио жана видеону көрсөтүп албаңыз."</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Колдонмону бөлүшүп, жаздырып же тышкы экранга чыгарганда <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> колдонмосу ал колдонмодо көрсөтүлүп жана ойнотулуп жаткан нерселерди көрө алат. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү, сүрөттөрдү, аудио жана видеону көрсөтүп албаңыз."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Колдонмону бөлүшүп, жаздырып же тышкы экранга чыгарганда <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> колдонмосу анда көрүнүп же ойноп жаткан нерселерди көрө алат. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү, сүрөттөрдү, аудио жана видеону көрсөтүп албаңыз."</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Баштоо"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> бул параметрди өчүрүп койду"</string>
-    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Тышкы экранга чыгаруу башталсынбы?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Тышкы экранга чыгарып баштайсызбы?"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Тышкы экранга чыгарганда Android экраныңызда көрүнүп жана түзмөктө ойнотулуп жаткан нерселерди көрө алат. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү, сүрөттөрдү, аудио жана видеону көрсөтүп албаңыз."</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Колдонмону тышкы экранга чыгарганда Android ал колдонмодо көрсөтүлүп жана ойнотулуп жаткан нерселерди көрө алат. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү, сүрөттөрдү, аудио жана видеону көрсөтүп албаңыз."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Колдонмону тышкы экранга чыгарганда Android анда көрүнүп же ойноп жаткан нерселерди көрө алат. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү, сүрөттөрдү, аудио жана видеону көрсөтүп албаңыз."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Тышкы экранга чыгарып баштоо"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Бөлүшүү башталсынбы?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Бөлүшүп, жаздырып же тышкы экранга чыгарып жатканда Android экраныңыздагы бардык маалыматты же түзмөктө ойнотулуп жаткан нерселерди көрө алат. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү, сүрөттөрдү, аудио жана видеону көрсөтүп албаңыз."</string>
-    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Колдонмону бөлүшүп, жаздырып же тышкы экранга чыгарганда Android ал колдонмодо көрсөтүлүп жана ойнотулуп жаткан нерселерди көрө алат. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү, сүрөттөрдү, аудио жана видеону көрсөтүп албаңыз."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Колдонмону бөлүшүп, жаздырып же тышкы экранга чыгарганда Android анда көрүнүп же ойноп жаткан нерселерди көрө алат. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү, сүрөттөрдү, аудио жана видеону көрсөтүп албаңыз."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Баштоо"</string>
     <string name="media_projection_task_switcher_text" msgid="590885489897412359">"Колдонмо которулганда бөлүшүү тындырылат"</string>
     <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"Анын ордуна бул колдонмону бөлүшүү"</string>
@@ -589,7 +590,7 @@
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s үндү башкаруу элементтери"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Чалуулар менен эскертмелердин үнү чыгарылат (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> аркылуу ойнотулууда"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Аудио төмөнкүдө ойнотулат:"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Аудио кайсы жерде ойнотулат:"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
     <string name="status_bar" msgid="4357390266055077437">"Абал тилкеси"</string>
     <string name="demo_mode" msgid="263484519766901593">"Системанын интерфейсинин демо режими"</string>
@@ -1140,7 +1141,7 @@
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Туташты"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Убактылуу туташып турат"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Байланыш начар"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Мобилдик трафик автоматтык түрдө туташтырылбайт"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Мобилдик Интернетке автоматтык түрдө өтпөйт"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Байланыш жок"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Башка тармактар жеткиликсиз"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Тармактар жеткиликтүү эмес"</string>

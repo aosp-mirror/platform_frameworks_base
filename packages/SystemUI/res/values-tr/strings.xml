@@ -57,7 +57,7 @@
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Başka bir cihaz tarafından sistem dilinin değiştirilmesi istendi"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Dili değiştir"</string>
     <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"Mevcut dili koru"</string>
-    <string name="share_wifi_button_text" msgid="1285273973812029240">"Kablosuz ağı paylaşın"</string>
+    <string name="share_wifi_button_text" msgid="1285273973812029240">"Kablosuz ağı paylaş"</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Bu ağda kablosuz hata ayıklamaya izin verilsin mi?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Ağ Adı (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nKablosuz Adresi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Bu ağda her zaman izin ver"</string>
@@ -84,6 +84,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"BT yöneticiniz ekran görüntüsü almayı engelledi"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Düzenle"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Ekran görüntüsünü düzenle"</string>
+    <string name="screenshot_share_label" msgid="1653061117238861559">"Paylaş"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Ekranı paylaş"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Alanı genişlet"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ekran görüntüsünü kapat"</string>
@@ -261,7 +262,7 @@
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Kullanılabilir eşlenmiş cihaz yok"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Cihaz bağlamak veya cihazın bağlantısını kesmek için dokunun"</string>
-    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Yeni cihaz eşleme"</string>
+    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Yeni cihaz eşle"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Tümünü göster"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth\'u kullan"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Bağlandı"</string>
