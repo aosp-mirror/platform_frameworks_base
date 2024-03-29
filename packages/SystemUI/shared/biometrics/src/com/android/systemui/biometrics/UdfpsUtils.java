@@ -54,8 +54,9 @@ public class UdfpsUtils {
     }
 
     /**
-     * Gets the touch in native coordinates. Map the touch to portrait mode if the device is in
-     * landscape mode.
+     * Gets the touch in native coordinates.
+     *
+     * Maps the touch to portrait mode if the device is in landscape mode.
      *
      * @param idx                The pointer identifier.
      * @param event              The MotionEvent object containing full information about the event.
@@ -64,35 +65,87 @@ public class UdfpsUtils {
      */
     public Point getTouchInNativeCoordinates(int idx, MotionEvent event,
             UdfpsOverlayParams udfpsOverlayParams) {
-        Point portraitTouch = getPortraitTouch(idx, event, udfpsOverlayParams);
+        return getTouchInNativeCoordinates(idx, event, udfpsOverlayParams, true);
+    }
+
+    /**
+     * Gets the touch in native coordinates.
+     *
+     * Optionally map the touch to portrait mode if the device is in landscape mode.
+     *
+     * @param idx                The pointer identifier.
+     * @param event              The MotionEvent object containing full information about the event.
+     * @param udfpsOverlayParams The [UdfpsOverlayParams] used.
+     * @param rotateToPortrait   Whether to rotate the touch to portrait orientation.
+     * @return The mapped touch event.
+     */
+    public Point getTouchInNativeCoordinates(int idx, MotionEvent event,
+            UdfpsOverlayParams udfpsOverlayParams, boolean rotateToPortrait) {
+        Point touch;
+        if (rotateToPortrait) {
+            touch = getPortraitTouch(idx, event, udfpsOverlayParams);
+        } else {
+            touch = new Point((int) event.getRawX(idx), (int) event.getRawY(idx));
+        }
 
         // Scale the coordinates to native resolution.
         float scale = udfpsOverlayParams.getScaleFactor();
-        portraitTouch.x = (int) (portraitTouch.x / scale);
-        portraitTouch.y = (int) (portraitTouch.y / scale);
-        return portraitTouch;
+        touch.x = (int) (touch.x / scale);
+        touch.y = (int) (touch.y / scale);
+        return touch;
     }
 
     /**
      * @param idx                The pointer identifier.
      * @param event              The MotionEvent object containing full information about the event.
      * @param udfpsOverlayParams The [UdfpsOverlayParams] used.
-     * @return Whether the touch event is within sensor area.
+     * @return Whether the touch event (that needs to be rotated to portrait) is within sensor area.
      */
     public boolean isWithinSensorArea(int idx, MotionEvent event,
             UdfpsOverlayParams udfpsOverlayParams) {
-        Point portraitTouch = getPortraitTouch(idx, event, udfpsOverlayParams);
-        return udfpsOverlayParams.getSensorBounds().contains(portraitTouch.x, portraitTouch.y);
+        return isWithinSensorArea(idx, event, udfpsOverlayParams, true);
+    }
+
+    /**
+     * @param idx                The pointer identifier.
+     * @param event              The MotionEvent object containing full information about the event.
+     * @param udfpsOverlayParams The [UdfpsOverlayParams] used.
+     * @param rotateTouchToPortrait Whether to rotate the touch coordinates to portrait.
+     * @return Whether the touch event is within sensor area.
+     */
+    public boolean isWithinSensorArea(int idx, MotionEvent event,
+            UdfpsOverlayParams udfpsOverlayParams, boolean rotateTouchToPortrait) {
+        Point touch;
+        if (rotateTouchToPortrait) {
+            touch = getPortraitTouch(idx, event, udfpsOverlayParams);
+        } else {
+            touch = new Point((int) event.getRawX(idx), (int) event.getRawY(idx));
+        }
+        return udfpsOverlayParams.getSensorBounds().contains(touch.x, touch.y);
+    }
+
+    /**
+     * This function computes the angle of touch relative to the sensor, rotated to portrait,
+     * and maps the angle to a list of help messages which are announced if accessibility is
+     * enabled.
+     *
+     * @return announcement string
+     */
+    public String onTouchOutsideOfSensorArea(boolean touchExplorationEnabled, Context context,
+            int scaledTouchX, int scaledTouchY, UdfpsOverlayParams udfpsOverlayParams) {
+        return onTouchOutsideOfSensorArea(touchExplorationEnabled, context, scaledTouchX,
+                scaledTouchY, udfpsOverlayParams, true);
     }
 
     /**
      * This function computes the angle of touch relative to the sensor and maps the angle to a list
      * of help messages which are announced if accessibility is enabled.
      *
-     * @return Whether the announcing string is null
+     * @return announcement string
      */
     public String onTouchOutsideOfSensorArea(boolean touchExplorationEnabled, Context context,
-            int scaledTouchX, int scaledTouchY, UdfpsOverlayParams udfpsOverlayParams) {
+            int scaledTouchX, int scaledTouchY, UdfpsOverlayParams udfpsOverlayParams,
+            boolean touchRotatedToPortrait) {
         if (!touchExplorationEnabled) {
             return null;
         }
@@ -116,7 +169,8 @@ public class UdfpsUtils {
                         scaledTouchY,
                         scaledSensorX,
                         scaledSensorY,
-                        udfpsOverlayParams.getRotation()
+                        udfpsOverlayParams.getRotation(),
+                        touchRotatedToPortrait
                 );
         Log.v(TAG, "Announcing touch outside : $theStr");
         return theStr;
@@ -132,7 +186,7 @@ public class UdfpsUtils {
      * touchHints[1] = "Move Fingerprint down" And so on.
      */
     private String onTouchOutsideOfSensorAreaImpl(String[] touchHints, float touchX,
-            float touchY, float sensorX, float sensorY, int rotation) {
+            float touchY, float sensorX, float sensorY, int rotation, boolean rotatedToPortrait) {
         float xRelativeToSensor = touchX - sensorX;
         // Touch coordinates are with respect to the upper left corner, so reverse
         // this calculation
@@ -153,13 +207,16 @@ public class UdfpsUtils {
         int index = (int) ((degrees + halfBucketDegrees) % 360 / degreesPerBucket);
         index %= touchHints.length;
 
-        // A rotation of 90 degrees corresponds to increasing the index by 1.
-        if (rotation == Surface.ROTATION_90) {
-            index = (index + 1) % touchHints.length;
+        if (rotatedToPortrait) {
+            // A rotation of 90 degrees corresponds to increasing the index by 1.
+            if (rotation == Surface.ROTATION_90) {
+                index = (index + 1) % touchHints.length;
+            }
+            if (rotation == Surface.ROTATION_270) {
+                index = (index + 3) % touchHints.length;
+            }
         }
-        if (rotation == Surface.ROTATION_270) {
-            index = (index + 3) % touchHints.length;
-        }
+
         return touchHints[index];
     }
 
