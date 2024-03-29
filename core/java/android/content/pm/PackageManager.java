@@ -2740,6 +2740,16 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: This device is capable of launching apps in automotive display
+     * compatibility mode.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_CAR_DISPLAY_COMPATIBILITY =
+            "android.software.car.display_compatibility";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature(String, int)}: If this feature is supported, the device supports
      * {@link android.security.identity.IdentityCredentialStore} implemented in secure hardware
      * at the given feature version.
