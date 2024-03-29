@@ -5161,15 +5161,17 @@ public class AccessibilityNodeInfo implements Parcelable {
      * {@link View#onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo)} and are performed
      * within {@link View#performAccessibilityAction(int, Bundle)}.
      * </p>
+     * <p>
      * <aside class="note">
      * <b>Note:</b> Views which support these actions should invoke
      * {@link View#setImportantForAccessibility(int)} with
      * {@link View#IMPORTANT_FOR_ACCESSIBILITY_YES} to ensure an {@link AccessibilityService}
-     * can discover the set of supported actions.
+     * can discover the set of supported actions. </aside>
      * </p>
+     * <p>
      * <aside class="note">
      * <b>Note:</b> Use {@link androidx.core.view.ViewCompat#addAccessibilityAction(View,
-     * CharSequence, AccessibilityViewCommand)} to register an action directly on the view.
+     * CharSequence, AccessibilityViewCommand)} to register an action directly on the view. </aside>
      * </p>
      */
     public static final class AccessibilityAction implements Parcelable {
