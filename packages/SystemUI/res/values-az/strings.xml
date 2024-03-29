@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Vidcetlər əlavə edin"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Basıb saxlayaraq vidcetləri fərdiləşdirin"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Vidcetləri fərdiləşdirin"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Deaktiv edilmiş vidcet üçün tətbiq ikonası"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Vidceti redaktə edin"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Silin"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Vidcet əlavə edin"</string>
@@ -582,7 +581,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Səssiz etmək üçün tıklayın. Əlçatımlılıq xidmətləri səssiz edilmiş ola bilər."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Vibrasiyanı ayarlamaq üçün klikləyin."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Səssiz etmək üçün klikləyin."</string>
-    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Səs-küy idarəsi"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Səs-küy idarəetməsi"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Zəng rejimini dəyişmək üçün toxunun"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"susdurun"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"səssiz rejimdən çıxarın"</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Son tətbiqlər boyunca irəli keçin"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Son tətbiqlər boyunca geri keçin"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Tətbiq siyahısını açın"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"İşləmə panelini göstərin"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Ayarları açın"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistenti açın"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Kilid ekranı"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Qidalanma düyməsi menyusu"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> səhifədən <xliff:g id="ID_1">%1$d</xliff:g> səhifə"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Ekran kilidi"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"Bu telefon sönülü olsa belə, Cihazın Tapılması ilə onu tapa bilərsiniz"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Söndürülür…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Ehtiyat tədbiri mərhələlərinə baxın"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Ehtiyat tədbiri mərhələlərinə baxın"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Cihazınızı ayırın"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Daha yüksək ayırdetmə dəqiqliyi üçün telefonu çevirin"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Qatlana bilən cihaz açılır"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Qatlana bilən cihaz fırladılır"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"qatlanmış"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"açıq"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> enerji qalıb"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Qələmi adapterə qoşun"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Qələm enerjisi azdır"</string>

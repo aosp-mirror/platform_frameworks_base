@@ -734,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‎‎‎‎‎‏‎‎‎‎‎‎‏‏‏‏‏‏‏‎‏‏‎‎‏‏‎‎‎‏‏‏‎‏‎‏‎‎‎‏‏‎‏‏‎‏‏‎‏‏‎‏‏‏‏‎‏‎Cycle forward through recent apps‎‏‎‎‏‎"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‏‏‎‏‏‎‏‏‏‎‏‎‎‏‏‎‏‎‎‏‏‎‎‎‎‎‏‎‏‎‎‎‏‏‎‎‏‏‎‏‏‎‎‏‏‏‎‎‎‏‏‎‏‎‏‏‎‎Cycle backward through recent apps‎‏‎‎‏‎"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‏‏‎‎‎‏‏‏‏‎‏‏‏‎‏‎‎‏‎‏‎‎‎‎‎‏‎‏‏‏‎‏‏‎‏‏‎‏‏‎‏‎‎‏‏‏‎‎‏‏‏‎‏‏‏‎‏‎Open apps list‎‏‎‎‏‎"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‎‏‏‎‎‎‏‏‎‏‎‎‏‎‏‎‏‎‎‎‎‎‏‎‏‏‏‏‎‎‎‏‎‎‎‏‎‎‎‎‏‎‏‎‎‎‎‏‎‎‏‎‎‎‎‎‏‎Show taskbar‎‏‎‎‏‎"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‎‏‎‎‏‎‏‏‎‏‎‏‎‎‏‏‏‎‏‏‎‏‏‏‎‎‏‏‏‏‎‏‎‎‏‏‎‏‏‎‏‏‏‎‏‏‎‎‎‏‏‏‎‎‎‎‎‏‎Open settings‎‏‎‎‏‎"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‎‎‎‎‎‏‏‏‏‎‏‎‏‎‏‎‎‏‏‏‏‏‎‎‏‎‎‏‏‏‏‏‎‏‎‎‎‎‏‎‏‎‏‎‏‎‎‏‎‎‏‏‎‏‏‏‎‎Open assistant‎‏‎‎‏‎"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‎‎‏‎‎‏‎‏‏‎‎‏‎‎‏‎‏‎‏‎‎‏‏‏‏‎‏‎‏‎‏‎‎‎‏‏‏‏‎‎‏‏‏‎‎‏‏‏‏‎‏‏‏‏‏‎Lock screen‎‏‎‎‏‎"</string>
@@ -1223,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‎‎‏‎‏‎‏‎‏‏‏‏‏‏‎‏‏‏‎‎‎‎‏‏‏‏‎‎‎‎‏‏‎‏‎‎‏‎‎‎‎‎‏‎‎‏‏‏‎‎‎‎‎‏‎‎‏‎For higher resolution, flip the phone‎‏‎‎‏‎"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‏‎‏‎‏‏‎‎‎‏‎‎‎‎‎‎‏‎‏‏‏‏‏‎‏‏‎‏‏‎‎‎‏‎‎‎‎‎‏‏‏‎‏‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎Foldable device being unfolded‎‏‎‎‏‎"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‏‎‎‎‎‎‎‏‎‎‎‏‎‎‎‎‎‎‏‏‏‎‏‏‎‎‏‏‏‏‏‎‏‎‏‎‏‎‎‏‎‏‏‏‎‎‎‎‏‏‎‎‏‎‎‎‎‎Foldable device being flipped around‎‏‎‎‏‎"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‏‏‎‏‏‏‎‏‎‎‎‎‏‎‏‏‏‏‎‎‏‎‎‎‎‎‎‎‎‏‎‎‎‏‏‏‏‎‎‎‎‏‎‏‏‏‏‎‏‏‎‏‎‎‎‎‏‎folded‎‏‎‎‏‎"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‎‎‏‏‎‏‏‏‏‎‎‎‎‎‎‏‏‏‏‏‎‎‎‏‏‏‎‎‎‏‎‏‎‏‏‎‏‎‏‎‎‎‏‎‎‎‎‏‎‎‏‎‎‏‎‏‎‎unfolded‎‏‎‎‏‎"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‎‏‎‎‏‎‎‏‏‏‎‏‎‏‏‎‎‎‎‎‏‏‏‎‏‏‎‎‏‎‎‎‏‏‎‎‎‎‎‏‏‏‏‎‏‎‎‎‏‏‎‎‏‏‎‎%1$s / %2$s‎‏‎‎‏‎"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‎‎‏‏‏‏‎‏‏‏‎‏‎‎‎‏‏‎‏‎‏‏‏‎‏‎‏‎‏‏‏‎‎‏‎‎‏‎‎‎‏‎‏‎‏‏‏‎‎‎‏‏‏‎‏‏‎‎‎‏‎‎‏‏‎<xliff:g id="PERCENTAGE">%s</xliff:g>‎‏‎‎‏‏‏‎ battery remaining‎‏‎‎‏‎"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‏‏‎‏‏‏‏‎‎‎‏‎‏‏‏‏‎‎‏‎‏‎‏‏‎‎‏‏‏‎‏‎‏‎‏‎‏‎‏‎‏‏‎‏‏‏‎‏‎‏‏‏‎‏‎‎‏‎Connect your stylus to a charger‎‏‎‎‏‎"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‏‎‎‎‎‎‎‏‎‎‏‎‏‏‏‏‏‏‏‎‎‏‏‏‎‏‏‎‏‎‎‏‎‎‎‏‏‏‎‎‏‎‏‏‎‏‎‏‏‎‏‏‏‏‎‎‎‎Stylus battery low‎‏‎‎‏‎"</string>

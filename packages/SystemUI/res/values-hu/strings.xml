@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"További modulok hozzáadása"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Nyomja meg hosszan a modulok személyre szabásához"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Modulok személyre szabása"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Letiltott modul alkalmazásikonja"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Modul szerkesztése"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Eltávolítás"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Modul hozzáadása"</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Lépegetés előrefelé a legutóbbi alkalmazások között"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Lépegetés visszafelé a legutóbbi alkalmazások között"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Alkalmazáslista megnyitása"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Feladatsáv megjelenítése"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Beállítások megnyitása"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"A Segéd megnyitása"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Lezárási képernyő"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Bekapcsológombhoz tartozó menü"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_1">%1$d</xliff:g>. oldal, összesen: <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Lezárási képernyő"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"A Készülékkereső segítségével akár a kikapcsolt telefon helyét is meghatározhatja."</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Leállítás…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Olvassa el a kímélő használat lépéseit"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Olvassa el a kímélő használat lépéseit"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Húzza ki az eszközt"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"A nagyobb felbontás érdekében fordítsa meg a telefont"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Összehajtható eszköz kihajtása"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Összehajtható eszköz körbeforgatása"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"összehajtva"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"kihajtva"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Akkumulátor töltöttségi szintje: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Tegye töltőre az érintőceruzát"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Az érintőceruza töltöttsége alacsony"</string>

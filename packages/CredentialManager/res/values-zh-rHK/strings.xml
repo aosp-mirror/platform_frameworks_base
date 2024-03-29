@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"我們將會改用無密碼技術，而密碼仍可與密鑰並行使用。"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"選擇儲存<xliff:g id="CREATETYPES">%1$s</xliff:g>的位置"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"選取密碼管理工具即可儲存自己的資料，縮短下次登入的時間"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"要建立密鑰以登入「<xliff:g id="APPNAME">%1$s</xliff:g>」嗎？"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"要儲存密碼以登入「<xliff:g id="APPNAME">%1$s</xliff:g>」嗎？"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"要儲存「<xliff:g id="APPNAME">%1$s</xliff:g>」的登入資料嗎？"</string>
     <string name="passkey" msgid="632353688396759522">"密鑰"</string>
     <string name="password" msgid="6738570945182936667">"密碼"</string>

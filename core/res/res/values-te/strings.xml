@@ -278,7 +278,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"సెట్టింగ్‌లు"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"సహాయం"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"వాయిస్ అసిస్టెంట్"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"లాక్ చేయి"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"లాక్ చేయండి"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"కొత్త నోటిఫికేషన్"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"భౌతిక కీబోర్డ్"</string>
@@ -1923,7 +1923,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"వారపు రోజుల్లో రాత్రి"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"వారాంతం"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ఈవెంట్"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"నిద్రావస్థ"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"నిద్ర"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> ద్వారా మేనేజ్ చేయబడుతోంది"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ఆన్‌లో ఉంది"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ఆఫ్‌లో ఉంది"</string>

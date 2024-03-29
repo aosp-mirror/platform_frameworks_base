@@ -411,7 +411,7 @@
     <string name="enable_freeform_support" msgid="7599125687603914253">"Ενεργοποίηση παραθύρων ελεύθερης μορφής"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Ενεργοποίηση υποστήριξης για πειραματικά παράθυρα ελεύθερης μορφής."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Εφ/κός κωδικός desktop"</string>
-    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Τα πλήρη αντίγραφα ασφαλείας επιφάνειας εργασίας δεν προστατεύονται αυτήν τη στιγμή"</string>
+    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Τα πλήρη αντίγραφα ασφαλείας επιφάνειας εργασίας δεν προστατεύονται αυτή τη στιγμή"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Πατήστε για αλλαγή ή κατάργηση του κωδικού πρόσβασης για τα πλήρη αντίγραφα ασφαλείας επιφάνειας εργασίας"</string>
     <string name="local_backup_password_toast_success" msgid="4891666204428091604">"Ορίστηκε νέος εφεδρικός κωδικός πρόσβασης"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="2994718182129097733">"Ο νέος κωδικός πρόσβασης και η επιβεβαίωση δεν ταιριάζουν"</string>

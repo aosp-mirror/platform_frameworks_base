@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Trong quá trình chúng tôi hướng đến tương lai không dùng mật khẩu, bạn vẫn sẽ dùng được mật khẩu cùng với khoá truy cập."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Chọn vị trí lưu <xliff:g id="CREATETYPES">%1$s</xliff:g> của bạn"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Hãy chọn một trình quản lý mật khẩu để lưu thông tin của bạn và đăng nhập nhanh hơn vào lần tới"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Tạo khoá truy cập để đăng nhập vào <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Lưu mật khẩu để đăng nhập vào <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Lưu thông tin đăng nhập cho <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"khoá đăng nhập"</string>
     <string name="password" msgid="6738570945182936667">"mật khẩu"</string>

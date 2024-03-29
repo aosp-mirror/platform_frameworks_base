@@ -498,9 +498,9 @@
     <string name="install_other_apps" msgid="3232595082023199454">"Непознати апликации"</string>
     <string name="home" msgid="973834627243661438">"Почетна страница за поставки"</string>
   <string-array name="battery_labels">
-    <item msgid="7878690469765357158">"0%"</item>
-    <item msgid="8894873528875953317">"50%"</item>
-    <item msgid="7529124349186240216">"100%"</item>
+    <item msgid="7878690469765357158">"0 %"</item>
+    <item msgid="8894873528875953317">"50 %"</item>
+    <item msgid="7529124349186240216">"100 %"</item>
   </string-array>
     <string name="charge_length_format" msgid="6941645744588690932">"Пред <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="4310625772926171089">"Преостануваат <xliff:g id="ID_1">%1$s</xliff:g>"</string>

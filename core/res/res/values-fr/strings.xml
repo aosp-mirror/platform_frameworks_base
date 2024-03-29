@@ -261,7 +261,7 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Rapport de bug"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Fermer la session"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Capture d\'écran"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"Rapport de bug"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"Signaler un bug"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Cela permet de recueillir des informations concernant l\'état actuel de votre appareil. Ces informations sont ensuite envoyées sous forme d\'e-mail. Merci de patienter pendant la préparation du rapport de bug. Cette opération peut prendre quelques instants."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Rapport interactif"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Utilisez cette option dans la plupart des circonstances. Elle vous permet de suivre la progression du rapport, de saisir plus d\'informations sur le problème et d\'effectuer des captures d\'écran. Certaines sections moins utilisées et dont le remplissage demande beaucoup de temps peuvent être omises."</string>

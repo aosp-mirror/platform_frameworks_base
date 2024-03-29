@@ -112,7 +112,7 @@
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"इनपुट डिवाइस"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"इंटरनेट ऐक्सेस"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"संपर्क और कॉल इतिहास का ऐक्सेस दें"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"जानकारी का इस्तेमाल कॉल की सूचना देने वगैरह के लिए होगा"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"इस जानकारी का इस्तेमाल, कॉल की सूचना देने और दूसरी चीज़ों के लिए किया जाएगा"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"इंटरनेट कनेक्शन साझाकरण"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"लेख संदेश"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"सिम ऐक्सेस"</string>
@@ -180,7 +180,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"कुछ डिफ़ॉल्‍ट सेट हैं"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"कोई डिफ़ॉल्‍ट सेट नहीं है"</string>
     <string name="tts_settings" msgid="8130616705989351312">"लेख से बोली सेटिंग"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"लिखाई को बोली में बदलने की सुविधा"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"लिखे गए शब्दों को सुनने की सुविधा"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"बोलने की दर"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"बोलने की गति तय करें"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"पिच"</string>
@@ -304,8 +304,8 @@
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"निजी डीएनएस मोड चुनें"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"बंद"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"अपने-आप"</string>
-    <string name="private_dns_mode_provider" msgid="3619040641762557028">"निजी डीएनएस सेवा देने वाले का होस्टनेम"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"डीएनएस सेवा देने वाले का होस्टनेम डालें"</string>
+    <string name="private_dns_mode_provider" msgid="3619040641762557028">"निजी डीएनएस प्रोवाइडर का होस्टनेम"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"डीएनएस प्रोवाइडर का होस्टनेम डालें"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"कनेक्‍ट नहीं हो सका"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"वायरलेस डिसप्ले सर्टिफ़िकेशन के विकल्प दिखाएं"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"वाई-फ़ाई लॉगिंग लेवल बढ़ाएं, वाई-फ़ाई पिकर में हर SSID के लिए RSSI दिखाएं"</string>
@@ -630,7 +630,7 @@
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"हटाएं"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"मेहमान के तौर पर ब्राउज़ करने का सेशन रीसेट किया जा रहा है…"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"क्या मेहमान मोड के मौजूदा सेशन को रीसेट करना है?"</string>
-    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ऐसा करने पर, मेहमान के तौर पर ब्राउज़ करने का एक नया सेशन शुरू हो जाएगा. साथ ही, मौजूदा सेशन का डेटा और इस्तेमाल किए जा रहे ऐप्लिकेशन को मिटा दिया जाएगा"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"इससे मेहमान के तौर पर ब्राउज़ करने का नया सेशन शुरू हो जाएगा. इसके अलावा, इस्तेमाल किए जा रहे ऐप्लिकेशन पर की गई गतिविधि और मौजूदा सेशन का डेटा मिटा दिया जाएगा"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"मेहमान मोड से बाहर निकलना है?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"इससे, मेहमान मोड के मौजूदा सेशन का डेटा और इसमें इस्तेमाल हो रहे ऐप्लिकेशन मिट जाएंगे"</string>
     <string name="grant_admin" msgid="4323199171790522574">"हां, इन्हें एडमिन बनाएं"</string>
@@ -643,7 +643,7 @@
     <string name="guest_exit_button" msgid="5774985819191803960">"मेहमान मोड से बाहर निकलें"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"मेहमान मोड के सेशन को रीसेट करें"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"मेहमान मोड से बाहर निकलें"</string>
-    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"बाहर निकलने पर, सारी गतिविधि मिट जाएगी"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"बाहर निकलने पर, सभी गतिविधियां मिट जाएंगी"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"बाहर निकलने पर, गतिविधि को मिटाया या सेव किया जा सकता है"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"सेशन की गतिविधि को अभी मिटाने के लिए, रीसेट करें. इसके अलावा, बाहर निकलने पर, गतिविधि को मिटाया या सेव किया जा सकता है"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"फ़ोटो खींचें"</string>

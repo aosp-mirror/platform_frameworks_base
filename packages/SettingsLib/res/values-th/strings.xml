@@ -239,7 +239,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"การแก้ไขข้อบกพร่องผ่าน Wi-Fi"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"หากต้องการดูและใช้อุปกรณ์ที่มีอยู่ ให้เปิดการแก้ไขข้อบกพร่องผ่าน Wi-Fi"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"จับคู่อุปกรณ์ด้วยคิวอาร์โค้ด"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"จับคู่อุปกรณ์เครื่องใหม่โดยใช้เครื่องมือสแกนคิวอาร์โค้ด"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"จับคู่อุปกรณ์เครื่องใหม่โดยใช้แอปสแกนคิวอาร์โค้ด"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"จับคู่อุปกรณ์ด้วยรหัสการจับคู่"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"จับคู่อุปกรณ์เครื่องใหม่โดยใช้รหัสตัวเลข 6 หลัก"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"อุปกรณ์ที่จับคู่"</string>

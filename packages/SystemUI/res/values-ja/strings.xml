@@ -589,7 +589,7 @@
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s の音量調節"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"着信音と通知音が鳴ります（<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>）"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> を再生:"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"音声の再生形式:"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"音声の再生先"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"システムUI調整ツール"</string>
     <string name="status_bar" msgid="4357390266055077437">"ステータスバー"</string>
     <string name="demo_mode" msgid="263484519766901593">"システム UI デモモード"</string>
@@ -734,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"最近使ったアプリを確認する"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"最近使ったアプリを確認する（逆方向）"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"アプリの一覧を開く"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"タスクバーを表示する"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"設定を開く"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"アシスタントを開く"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"画面をロック"</string>
@@ -1223,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"高解像度で撮るにはスマートフォンを裏返してください"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"折りたたみ式デバイスが広げられている"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"折りたたみ式デバイスがひっくり返されている"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"折りたたんだ状態"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"広げた状態"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"バッテリー残量 <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"タッチペンを充電器に接続してください"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"タッチペンのバッテリー残量が少なくなっています"</string>
