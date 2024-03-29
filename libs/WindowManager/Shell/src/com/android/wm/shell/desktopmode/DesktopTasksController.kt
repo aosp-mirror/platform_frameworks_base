@@ -158,6 +158,10 @@ class DesktopTasksController(
             com.android.wm.shell.R.dimen.desktop_mode_transition_area_width
         )
 
+    /** Task id of the task currently being dragged from fullscreen/split. */
+    val draggingTaskId
+        get() = dragToDesktopTransitionHandler.draggingTaskId
+
     private var recentsAnimationRunning = false
     private lateinit var splitScreenController: SplitScreenController
 
@@ -406,6 +410,7 @@ class DesktopTasksController(
     fun onDesktopSplitSelectAnimComplete(taskInfo: RunningTaskInfo) {
         val wct = WindowContainerTransaction()
         wct.setBounds(taskInfo.token, Rect())
+        wct.setWindowingMode(taskInfo.token, WINDOWING_MODE_UNDEFINED)
         shellTaskOrganizer.applyTransaction(wct)
     }
 
@@ -447,7 +452,9 @@ class DesktopTasksController(
         )
         val wct = WindowContainerTransaction()
         wct.setBounds(task.token, Rect())
-        addMoveToSplitChanges(wct, task)
+        // Rather than set windowing mode to multi-window at task level, set it to
+        // undefined and inherit from split stage.
+        wct.setWindowingMode(task.token, WINDOWING_MODE_UNDEFINED)
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
         } else {
@@ -458,10 +465,12 @@ class DesktopTasksController(
     private fun exitSplitIfApplicable(wct: WindowContainerTransaction, taskInfo: RunningTaskInfo) {
         if (splitScreenController.isTaskInSplitScreen(taskInfo.taskId)) {
             splitScreenController.prepareExitSplitScreen(
-                    wct,
-                    splitScreenController.getStageOfTask(taskInfo.taskId),
-                    EXIT_REASON_DESKTOP_MODE
+                wct,
+                splitScreenController.getStageOfTask(taskInfo.taskId),
+                EXIT_REASON_DESKTOP_MODE
             )
+            splitScreenController.transitionHandler
+                ?.onSplitToDesktop()
         }
     }
 
@@ -1044,9 +1053,11 @@ class DesktopTasksController(
         wct: WindowContainerTransaction,
         taskInfo: RunningTaskInfo
     ) {
-        // Explicitly setting multi-window at task level interferes with animations.
-        // Let task inherit windowing mode once transition is complete instead.
-        wct.setWindowingMode(taskInfo.token, WINDOWING_MODE_UNDEFINED)
+        // This windowing mode is to get the transition animation started; once we complete
+        // split select, we will change windowing mode to undefined and inherit from split stage.
+        // Going to undefined here causes task to flicker to the top left.
+        // Cancelling the split select flow will revert it to fullscreen.
+        wct.setWindowingMode(taskInfo.token, WINDOWING_MODE_MULTI_WINDOW)
         // The task's density may have been overridden in freeform; revert it here as we don't
         // want it overridden in multi-window.
         wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
@@ -1237,7 +1248,7 @@ class DesktopTasksController(
                 finalizeDragToDesktop(taskInfo, getDefaultDesktopTaskBounds(displayLayout))
             }
             DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR,
-                    DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR -> {
+            DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR -> {
                 cancelDragToDesktop(taskInfo)
             }
             DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_LEFT_INDICATOR -> {

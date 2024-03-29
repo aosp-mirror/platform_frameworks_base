@@ -6,6 +6,7 @@ import android.animation.RectEvaluator
 import android.animation.ValueAnimator
 import android.app.ActivityOptions
 import android.app.ActivityOptions.SourceInfo
+import android.app.ActivityTaskManager.INVALID_TASK_ID
 import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT
 import android.app.PendingIntent.FLAG_MUTABLE
@@ -26,6 +27,9 @@ import android.window.TransitionRequestInfo
 import android.window.WindowContainerToken
 import android.window.WindowContainerTransaction
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
+import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT
+import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
+import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED
 import com.android.wm.shell.protolog.ShellProtoLogGroup
 import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.splitscreen.SplitScreenController
@@ -68,7 +72,7 @@ class DragToDesktopTransitionHandler(
             .addCategory(Intent.CATEGORY_HOME)
 
     private var dragToDesktopStateListener: DragToDesktopStateListener? = null
-    private var splitScreenController: SplitScreenController? = null
+    private lateinit var splitScreenController: SplitScreenController
     private var transitionState: TransitionState? = null
     private lateinit var onTaskResizeAnimationListener: OnTaskResizeAnimationListener
 
@@ -76,6 +80,9 @@ class DragToDesktopTransitionHandler(
     val inProgress: Boolean
         get() = transitionState != null
 
+    /** The task id of the task currently being dragged from fullscreen/split. */
+    val draggingTaskId: Int
+        get() = transitionState?.draggedTaskId ?: INVALID_TASK_ID
     /** Sets a listener to receive callback about events during the transition animation. */
     fun setDragToDesktopStateListener(listener: DragToDesktopStateListener) {
         dragToDesktopStateListener = listener
@@ -130,10 +137,14 @@ class DragToDesktopTransitionHandler(
                 .startTransition(TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP, wct, this)
 
         transitionState = if (isSplitTask(taskId)) {
+            val otherTask = getOtherSplitTask(taskId) ?: throw IllegalStateException(
+                "Expected split task to have a counterpart."
+            )
             TransitionState.FromSplit(
                     draggedTaskId = taskId,
                     dragAnimator = dragToDesktopAnimator,
-                    startTransitionToken = startTransitionToken
+                    startTransitionToken = startTransitionToken,
+                    otherSplitTask = otherTask
             )
         } else {
             TransitionState.FromFullscreen(
@@ -347,6 +358,12 @@ class DragToDesktopTransitionHandler(
                 ?: error("Start transition expected to be waiting for merge but wasn't")
         if (isEndTransition) {
             info.changes.withIndex().forEach { (i, change) ->
+                // If we're exiting split, hide the remaining split task.
+                if (state is TransitionState.FromSplit &&
+                    change.taskInfo?.taskId == state.otherSplitTask) {
+                    t.hide(change.leash)
+                    startTransactionFinishT.hide(change.leash)
+                }
                 if (change.mode == TRANSIT_CLOSE) {
                     t.hide(change.leash)
                     startTransactionFinishT.hide(change.leash)
@@ -392,7 +409,6 @@ class DragToDesktopTransitionHandler(
             onTaskResizeAnimationListener.onAnimationStart(state.draggedTaskId, t,
                 unscaledStartBounds)
             finishCallback.onTransitionFinished(null /* wct */)
-
             val tx: SurfaceControl.Transaction = transactionSupplier.get()
             ValueAnimator.ofObject(rectEvaluator, unscaledStartBounds, endBounds)
                     .setDuration(DRAG_TO_DESKTOP_FINISH_ANIM_DURATION_MS)
@@ -549,7 +565,18 @@ class DragToDesktopTransitionHandler(
     }
 
     private fun isSplitTask(taskId: Int): Boolean {
-        return splitScreenController?.isTaskInSplitScreen(taskId) ?: false
+        return splitScreenController.isTaskInSplitScreen(taskId)
+    }
+
+    private fun getOtherSplitTask(taskId: Int): Int? {
+        val splitPos = splitScreenController.getSplitPosition(taskId)
+        if (splitPos == SPLIT_POSITION_UNDEFINED) return null
+        val otherTaskPos = if (splitPos == SPLIT_POSITION_BOTTOM_OR_RIGHT) {
+            SPLIT_POSITION_TOP_OR_LEFT
+        } else {
+            SPLIT_POSITION_BOTTOM_OR_RIGHT
+        }
+        return splitScreenController.getTaskInfo(otherTaskPos)?.taskId
     }
 
     private fun requireTransitionState(): TransitionState {
@@ -598,6 +625,7 @@ class DragToDesktopTransitionHandler(
                 override var cancelled: Boolean = false,
                 override var startAborted: Boolean = false,
                 var splitRootChange: Change? = null,
+                var otherSplitTask: Int
         ) : TransitionState()
     }
 
