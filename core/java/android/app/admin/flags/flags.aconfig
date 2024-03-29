@@ -2,6 +2,7 @@
 # proto-message: flag_declarations
 
 package: "android.app.admin.flags"
+container: "system"
 
 flag {
   name: "policy_engine_migration_v2_enabled"

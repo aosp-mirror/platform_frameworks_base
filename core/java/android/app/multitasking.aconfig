@@ -1,4 +1,5 @@
 package: "android.app"
+container: "system"
 
 flag {
     name: "enable_pip_ui_state_callback_on_entering"

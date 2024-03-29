@@ -1,4 +1,5 @@
 package: "com.android.window.flags"
+container: "system"
 
 # Project link: https://gantry.corp.google.com/projects/android_platform_window_surfaces/changes
 

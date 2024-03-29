@@ -1,4 +1,5 @@
 package: "android.service.voice.flags"
+container: "system"
 
 flag {
     name: "allow_training_data_egress_from_hds"

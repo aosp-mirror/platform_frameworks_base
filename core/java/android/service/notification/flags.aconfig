@@ -1,5 +1,6 @@
 package: "android.service.notification"
 container: "system"
+container: "system"
 
 flag {
   name: "ranking_update_ashmem"

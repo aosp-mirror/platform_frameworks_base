@@ -1,4 +1,5 @@
 package: "android.speech.flags"
+container: "system"
 
 flag {
     name: "multilang_extra_launch"

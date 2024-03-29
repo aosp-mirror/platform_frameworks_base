@@ -1,4 +1,5 @@
 package: "android.security"
+container: "system"
 
 flag {
     name: "certificate_transparency_configuration"

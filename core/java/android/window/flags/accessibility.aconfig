@@ -1,4 +1,5 @@
 package: "com.android.window.flags"
+container: "system"
 
 flag {
   name: "do_not_check_intersection_when_non_magnifiable_window_transitions"

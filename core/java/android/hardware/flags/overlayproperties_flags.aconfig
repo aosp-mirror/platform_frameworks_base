@@ -1,4 +1,5 @@
 package: "android.hardware.flags"
+container: "system"
 
 flag {
     name: "overlayproperties_class_api"

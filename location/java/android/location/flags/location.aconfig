@@ -1,4 +1,5 @@
 package: "android.location.flags"
+container: "system"
 
 flag {
     name: "new_geocoder"

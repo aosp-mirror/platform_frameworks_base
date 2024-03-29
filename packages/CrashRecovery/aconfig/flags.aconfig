@@ -1,4 +1,5 @@
 package: "android.crashrecovery.flags"
+container: "system"
 
 flag {
     name: "recoverability_detection"
