@@ -72,6 +72,8 @@ import static android.content.pm.PackageManager.FEATURE_TELECOM;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.media.AudioAttributes.USAGE_MEDIA;
+import static android.media.AudioAttributes.USAGE_NOTIFICATION;
 import static android.os.Build.VERSION_CODES.O_MR1;
 import static android.os.Build.VERSION_CODES.P;
 import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
@@ -186,6 +188,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.session.MediaSession;
 import android.net.Uri;
@@ -14856,6 +14859,33 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         posted = mService.mNotificationList.get(0);
         assertThat(posted.getRankingTimeMs()).isGreaterThan(originalPostTime);
         assertThat(posted.getRankingTimeMs()).isEqualTo(posted.getSbn().getPostTime());
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_RESTRICT_AUDIO_ATTRIBUTES_MEDIA)
+    public void testRestrictAudioAttributes_listenersGetCorrectAttributes() throws Exception {
+        NotificationChannel sound = new NotificationChannel("a", "a", IMPORTANCE_DEFAULT);
+        sound.setSound(Uri.EMPTY, new AudioAttributes.Builder().setUsage(USAGE_MEDIA).build());
+        mBinderService.createNotificationChannels(mPkg, new ParceledListSlice(
+                Arrays.asList(sound)));
+
+        Notification n = new Notification.Builder(mContext, "a")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .build();
+        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 9, null, mUid, 0,
+                n, UserHandle.getUserHandleForUid(mUid), null, 0);
+
+        mBinderService.enqueueNotificationWithTag(mPkg, mPkg, sbn.getTag(),
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        waitForIdle();
+
+        ArgumentCaptor<NotificationRecord> captor =
+                ArgumentCaptor.forClass(NotificationRecord.class);
+        verify(mListeners, times(1)).prepareNotifyPostedLocked(
+                captor.capture(), any(), anyBoolean());
+
+        assertThat(captor.getValue().getChannel().getAudioAttributes().getUsage())
+                .isEqualTo(USAGE_NOTIFICATION);
     }
 
     private NotificationRecord createAndPostCallStyleNotification(String packageName,

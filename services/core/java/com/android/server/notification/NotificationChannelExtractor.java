@@ -15,8 +15,16 @@
 */
 package com.android.server.notification;
 
+import static android.app.Flags.restrictAudioAttributesAlarm;
+import static android.app.Flags.restrictAudioAttributesCall;
+import static android.app.Flags.restrictAudioAttributesMedia;
+import static android.app.Notification.CATEGORY_ALARM;
+import static android.media.AudioAttributes.USAGE_NOTIFICATION;
+
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.content.Context;
+import android.media.AudioAttributes;
 import android.util.Slog;
 
 /**
@@ -49,6 +57,36 @@ public class NotificationChannelExtractor implements NotificationSignalExtractor
                 record.getSbn().getUid(), record.getChannel().getId(),
                 record.getSbn().getShortcutId(), true, false);
         record.updateNotificationChannel(updatedChannel);
+
+        if (restrictAudioAttributesCall() || restrictAudioAttributesAlarm()
+                || restrictAudioAttributesMedia()) {
+            AudioAttributes attributes = record.getChannel().getAudioAttributes();
+            boolean updateAttributes =  false;
+            if (restrictAudioAttributesCall()
+                    && !record.getNotification().isStyle(Notification.CallStyle.class)
+                    && attributes.getUsage() == AudioAttributes.USAGE_NOTIFICATION_RINGTONE) {
+                updateAttributes = true;
+            }
+            if (restrictAudioAttributesAlarm()
+                    && record.getNotification().category != CATEGORY_ALARM
+                    && attributes.getUsage() == AudioAttributes.USAGE_ALARM) {
+                updateAttributes = true;
+            }
+
+            if (restrictAudioAttributesMedia()
+                    && (attributes.getUsage() == AudioAttributes.USAGE_UNKNOWN
+                    || attributes.getUsage() == AudioAttributes.USAGE_MEDIA)) {
+                updateAttributes = true;
+            }
+
+            if (updateAttributes) {
+                NotificationChannel clone = record.getChannel().copy();
+                clone.setSound(clone.getSound(), new AudioAttributes.Builder(attributes)
+                        .setUsage(USAGE_NOTIFICATION)
+                        .build());
+                record.updateNotificationChannel(clone);
+            }
+        }
 
         return null;
     }

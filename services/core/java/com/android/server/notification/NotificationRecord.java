@@ -15,6 +15,9 @@
  */
 package com.android.server.notification;
 
+import static android.app.Flags.restrictAudioAttributesAlarm;
+import static android.app.Flags.restrictAudioAttributesCall;
+import static android.app.Flags.restrictAudioAttributesMedia;
 import static android.app.Flags.updateRankingTime;
 import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
@@ -1159,6 +1162,11 @@ public final class NotificationRecord {
             mChannel = channel;
             calculateImportance();
             calculateUserSentiment();
+            mVibration = calculateVibration();
+            if (restrictAudioAttributesCall() || restrictAudioAttributesAlarm()
+                    || restrictAudioAttributesMedia()) {
+                mAttributes = channel.getAudioAttributes();
+            }
         }
     }
 
