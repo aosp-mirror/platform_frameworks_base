@@ -1741,7 +1741,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Usar atalho"</string>
     <string name="color_inversion_feature_name" msgid="2672824491933264951">"Inversão de cores"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Correção de cor"</string>
-    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modo para uma mão"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modo uma mão"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Escurecer a tela"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Aparelhos auditivos"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Teclas de volume pressionadas. Serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ativado."</string>

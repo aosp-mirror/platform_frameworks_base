@@ -1561,7 +1561,7 @@
     <string name="sync_do_nothing" msgid="4528734662446469646">"अहिलेको लागि केही नगर्नुहोस्"</string>
     <string name="choose_account_label" msgid="5557833752759831548">"एउटा खाता छान्‍नुहोस्"</string>
     <string name="add_account_label" msgid="4067610644298737417">"खाता हाल्नुहोस्"</string>
-    <string name="add_account_button_label" msgid="322390749416414097">"खाता थप्नुहोस्"</string>
+    <string name="add_account_button_label" msgid="322390749416414097">"खाता हाल्नुहोस्"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"बढाउनुहोस्"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"घटाउनुहोस्"</string>
     <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> टच एण्ड होल्ड गर्नुहोस्।"</string>

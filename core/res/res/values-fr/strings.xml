@@ -828,7 +828,7 @@
     <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Autorise l\'appli à mettre à jour les états de validation des clés de contact E2EE possédées par d\'autres applis."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Définir les règles du mot de passe"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Gérer le nombre et le type de caractères autorisés dans les mots de passe et les codes d\'accès de verrouillage de l\'écran"</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"Gérer les tentatives de déverrouillage de l\'écran"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"Contrôler les tentatives de déverrouillage de l\'écran"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Contrôler le nombre de mots de passe incorrects saisis pour le déverrouillage de l\'écran, puis verrouiller la tablette ou effacer toutes ses données si le nombre maximal de tentatives de saisie du mot de passe est atteint"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Contrôle le nombre de fois qu\'un mot de passe incorrect est saisi lors du déverrouillage de l\'écran, et verrouille votre appareil Android TV ou en efface toutes les données si le nombre maximal de mots de passe incorrects autorisé est dépassé."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Contrôler le nombre de mots de passe incorrects saisis pour le déverrouillage de l\'écran, puis verrouiller le système d\'infoloisirs ou effacer toutes ses données si le nombre maximal de tentatives de saisie du mot de passe est atteint."</string>
@@ -1987,9 +1987,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Réactiver les applis pro ?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Réactiver"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Urgence"</string>
-    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Définir verrouillage écran"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Activer verrouillage écran"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Activer verrouillage écran"</string>
-    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Pour utiliser votre espace privé, définissez un verrouillage de l\'écran sur cet appareil"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Pour utiliser votre espace privé, activez le verrouillage de l\'écran sur cet appareil"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Application non disponible"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> n\'est pas disponible pour le moment."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> indisponible"</string>
