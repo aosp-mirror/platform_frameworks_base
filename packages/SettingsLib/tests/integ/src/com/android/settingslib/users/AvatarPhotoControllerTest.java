@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.users;
+package com.android.settingslib.avatarpicker;
 
-import static com.android.settingslib.users.AvatarPhotoController.REQUEST_CODE_CHOOSE_PHOTO;
-import static com.android.settingslib.users.AvatarPhotoController.REQUEST_CODE_CROP_PHOTO;
-import static com.android.settingslib.users.AvatarPhotoController.REQUEST_CODE_TAKE_PHOTO;
+import static com.android.settingslib.avatarpicker.AvatarPhotoController.REQUEST_CODE_CHOOSE_PHOTO;
+import static com.android.settingslib.avatarpicker.AvatarPhotoController.REQUEST_CODE_CROP_PHOTO;
+import static com.android.settingslib.avatarpicker.AvatarPhotoController.REQUEST_CODE_TAKE_PHOTO;
 
 import static com.google.common.truth.Truth.assertThat;
 
