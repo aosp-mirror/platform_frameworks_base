@@ -8120,7 +8120,7 @@
         android:protectionLevel="signature|privileged" />
 
     <!-- @hide @SystemApi
-        @FlaggedApi("com.android.server.notification.flags.redact_otp_notifications_from_untrusted_listeners")
+        @FlaggedApi("android.view.flags.sensitive_content_app_protection_api")
         Allows apps with a NotificationListenerService to receive notifications with sensitive
         information
         <p>Apps with a NotificationListenerService without this permission will not be able
