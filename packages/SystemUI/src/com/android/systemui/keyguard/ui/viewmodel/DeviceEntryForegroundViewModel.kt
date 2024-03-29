@@ -21,6 +21,7 @@ import android.content.Context
 import com.android.settingslib.Utils
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -39,6 +40,7 @@ import kotlinx.coroutines.flow.onStart
 
 /** Models the UI state for the device entry icon foreground view (displayed icon). */
 @ExperimentalCoroutinesApi
+@SysUISingleton
 class DeviceEntryForegroundViewModel
 @Inject
 constructor(
