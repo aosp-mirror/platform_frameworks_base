@@ -84,7 +84,7 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        whenever(mirrorController.toggleSlider).thenReturn(mirror)
+        whenever(mirrorController.getToggleSlider()).thenReturn(mirror)
         whenever(motionEvent.copy()).thenReturn(motionEvent)
         whenever(vibratorHelper.getPrimitiveDurations(anyInt())).thenReturn(intArrayOf(0))
 
@@ -129,7 +129,7 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
 
     @Test
     fun testNullMirrorNotTrackingTouch() {
-        whenever(mirrorController.toggleSlider).thenReturn(null)
+        whenever(mirrorController.getToggleSlider()).thenReturn(null)
 
         mController.setMirrorControllerAndMirror(mirrorController)
 

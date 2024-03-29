@@ -74,6 +74,7 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.settings.FakeDisplayTracker
+import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModel
 import com.android.systemui.shade.domain.interactor.privacyChipInteractor
 import com.android.systemui.shade.domain.interactor.shadeHeaderClockInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
@@ -259,6 +260,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 shadeHeaderViewModel = shadeHeaderViewModel,
                 qsSceneAdapter = qsFlexiglassAdapter,
                 notifications = kosmos.notificationsPlaceholderViewModel,
+                brightnessMirrorViewModel = kosmos.brightnessMirrorViewModel,
                 mediaDataManager = mediaDataManager,
                 shadeInteractor = kosmos.shadeInteractor,
                 footerActionsController = kosmos.footerActionsController,

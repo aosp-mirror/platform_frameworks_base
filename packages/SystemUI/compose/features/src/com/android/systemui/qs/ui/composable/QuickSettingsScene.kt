@@ -19,6 +19,7 @@ package com.android.systemui.qs.ui.composable
 import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -49,6 +50,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.colorResource
@@ -120,8 +122,20 @@ private fun SceneScope.QuickSettingsScene(
     statusBarIconController: StatusBarIconController,
     modifier: Modifier = Modifier,
 ) {
+    val brightnessMirrorShowing by viewModel.brightnessMirrorViewModel.isShowing.collectAsState()
+    val contentAlpha by
+        animateFloatAsState(
+            targetValue = if (brightnessMirrorShowing) 0f else 1f,
+            label = "alphaAnimationBrightnessMirrorContentHiding",
+        )
+
+    BrightnessMirror(
+        viewModel = viewModel.brightnessMirrorViewModel,
+        qsSceneAdapter = viewModel.qsSceneAdapter
+    )
+
     // TODO(b/280887232): implement the real UI.
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize().graphicsLayer { alpha = contentAlpha }) {
         val isCustomizing by viewModel.qsSceneAdapter.isCustomizing.collectAsState()
 
         BackHandler(

@@ -25,6 +25,8 @@ import static com.android.systemui.Flags.FLAG_LIGHT_REVEAL_MIGRATION;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -119,9 +121,9 @@ import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
+import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirrorShowingInteractor;
 import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.NotificationPanelView;
 import com.android.systemui.shade.NotificationPanelViewController;
@@ -331,7 +333,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     private final DumpManager mDumpManager = new DumpManager();
     private final ScreenLifecycle mScreenLifecycle = new ScreenLifecycle(mDumpManager);
 
-    private final SceneContainerFlags mSceneContainerFlags = new FakeSceneContainerFlags();
+    private final FakeSceneContainerFlags mSceneContainerFlags = new FakeSceneContainerFlags();
+
+    private final BrightnessMirrorShowingInteractor mBrightnessMirrorShowingInteractor =
+            mKosmos.getBrightnessMirrorShowingInteractor();
 
     @Before
     public void setup() throws Exception {
@@ -553,7 +558,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mUserTracker,
                 () -> mFingerprintManager,
                 mActivityStarter,
-                mSceneContainerFlags
+                mSceneContainerFlags,
+                mBrightnessMirrorShowingInteractor
         );
         mScreenLifecycle.addObserver(mCentralSurfaces.mScreenObserver);
         mCentralSurfaces.initShadeVisibilityListener();
@@ -1082,6 +1088,34 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mCentralSurfaces.updateResources();
 
         verify(mStatusBarWindowController).refreshStatusBarHeight();
+    }
+
+    @Test
+    public void brightnesShowingChanged_flagEnabled_ScrimControllerNotified() {
+        mSceneContainerFlags.setEnabled(true);
+        mCentralSurfaces.registerCallbacks();
+
+        mBrightnessMirrorShowingInteractor.setMirrorShowing(true);
+        mTestScope.getTestScheduler().runCurrent();
+        verify(mScrimController).transitionTo(ScrimState.BRIGHTNESS_MIRROR);
+
+        mBrightnessMirrorShowingInteractor.setMirrorShowing(false);
+        mTestScope.getTestScheduler().runCurrent();
+        ArgumentCaptor<ScrimState> captor = ArgumentCaptor.forClass(ScrimState.class);
+        // The default is to call the one with the callback argument
+        verify(mScrimController).transitionTo(captor.capture(), any());
+        assertThat(captor.getValue()).isNotEqualTo(ScrimState.BRIGHTNESS_MIRROR);
+    }
+
+    @Test
+    public void brightnesShowingChanged_flagDisabled_ScrimControllerNotified() {
+        mSceneContainerFlags.setEnabled(false);
+        mCentralSurfaces.registerCallbacks();
+
+        mBrightnessMirrorShowingInteractor.setMirrorShowing(true);
+        mTestScope.getTestScheduler().runCurrent();
+        verify(mScrimController, never()).transitionTo(ScrimState.BRIGHTNESS_MIRROR);
+        verify(mScrimController, never()).transitionTo(eq(ScrimState.BRIGHTNESS_MIRROR), any());
     }
 
     /**

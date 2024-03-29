@@ -39,6 +39,7 @@ import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModel
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.privacyChipInteractor
 import com.android.systemui.shade.domain.interactor.shadeHeaderClockInteractor
@@ -127,6 +128,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
                 shadeHeaderViewModel = shadeHeaderViewModel,
                 qsSceneAdapter = qsSceneAdapter,
                 notifications = kosmos.notificationsPlaceholderViewModel,
+                brightnessMirrorViewModel = kosmos.brightnessMirrorViewModel,
                 mediaDataManager = mediaDataManager,
                 shadeInteractor = kosmos.shadeInteractor,
                 footerActionsViewModelFactory = kosmos.footerActionsViewModelFactory,
