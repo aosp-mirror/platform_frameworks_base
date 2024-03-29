@@ -2160,19 +2160,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return rect;
     }
 
-    @Override
-    public ActivityManager.TaskDescription getTaskDescription(int id) {
-        synchronized (mGlobalLock) {
-            enforceTaskPermission("getTaskDescription()");
-            final Task tr = mRootWindowContainer.anyTaskForId(id,
-                    MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
-            if (tr != null) {
-                return tr.getTaskDescription();
-            }
-        }
-        return null;
-    }
-
     /**
      * Sets the locusId for a particular activity.
      *
@@ -3072,8 +3059,33 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public Bitmap getTaskDescriptionIcon(String filePath, int userId) {
-        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
-                userId, "getTaskDescriptionIcon");
+        final int callingUid = Binder.getCallingUid();
+        // Verify that the caller can make the request for the given userId
+        userId = handleIncomingUser(Binder.getCallingPid(), callingUid, userId,
+                "getTaskDescriptionIcon");
+        synchronized (mGlobalLock) {
+            // Verify that the caller can make the request for given icon file path
+            final ActivityRecord matchingActivity = mRootWindowContainer.getActivity(
+                    r -> {
+                        if (r.taskDescription == null
+                                || r.taskDescription.getIconFilename() == null) {
+                            return false;
+                        }
+                        return r.taskDescription.getIconFilename().equals(filePath);
+                    });
+            if (matchingActivity == null || (matchingActivity.getUid() != callingUid)) {
+                // Caller UID doesn't match the requested Activity's UID, check if caller is
+                // privileged
+                try {
+                    enforceActivityTaskPermission("getTaskDescriptionIcon");
+                } catch (SecurityException e) {
+                    Slog.w(TAG, "getTaskDescriptionIcon(): request (callingUid=" + callingUid
+                            + ", filePath=" + filePath + ", user=" + userId + ") doesn't match any "
+                            + "activity");
+                    throw e;
+                }
+            }
+        }
 
         final File passedIconFile = new File(filePath);
         final File legitIconFile = new File(TaskPersister.getUserImagesDir(userId),
@@ -3301,6 +3313,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         }
         return false;
+    }
+
+    /**
+     * An instance method that's easier for mocking in tests.
+     */
+    void enforceActivityTaskPermission(String func) {
+        enforceTaskPermission(func);
     }
 
     static void enforceTaskPermission(String func) {
