@@ -26,6 +26,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Flags;
+import com.android.systemui.accessibility.hearingaid.HearingDevicesDialogManager;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -45,6 +46,8 @@ public class HearingDevicesTile extends QSTileImpl<State> {
 
     public static final String TILE_SPEC = "hearing_devices";
 
+    private final HearingDevicesDialogManager mDialogManager;
+
     @Inject
     public HearingDevicesTile(
             QSHost host,
@@ -55,10 +58,12 @@ public class HearingDevicesTile extends QSTileImpl<State> {
             MetricsLogger metricsLogger,
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
-            QSLogger qsLogger
+            QSLogger qsLogger,
+            HearingDevicesDialogManager hearingDevicesDialogManager
     ) {
         super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
+        mDialogManager = hearingDevicesDialogManager;
     }
 
     @Override
@@ -68,7 +73,7 @@ public class HearingDevicesTile extends QSTileImpl<State> {
 
     @Override
     protected void handleClick(@Nullable View view) {
-
+        mUiHandler.post(() -> mDialogManager.showDialog(view));
     }
 
     @Override
