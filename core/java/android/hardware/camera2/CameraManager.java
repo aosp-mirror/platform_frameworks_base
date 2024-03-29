@@ -1081,6 +1081,12 @@ public final class CameraManager {
      * {@link java.util.concurrent.Executor} as an argument instead of
      * {@link android.os.Handler}.</p>
      *
+     * <p>Do note that typically callbacks are expected to be dispatched
+     * by the executor in a single thread. If the executor uses two or
+     * more threads to dispatch callbacks, then clients must ensure correct
+     * synchronization and must also be able to handle potentially different
+     * ordering of the incoming callbacks.</p>
+     *
      * @param cameraId
      *             The unique identifier of the camera device to open
      * @param executor
