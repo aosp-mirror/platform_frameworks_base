@@ -130,6 +130,8 @@ import com.android.server.AppSchedulingModuleThread;
 import com.android.server.LocalServices;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.usage.AppIdleHistory.AppUsageHistory;
+import com.android.tools.r8.keepanno.annotations.KeepItemKind;
+import com.android.tools.r8.keepanno.annotations.UsedByReflection;
 
 import libcore.util.EmptyArray;
 
@@ -588,6 +590,8 @@ public class AppStandbyController
         }
     }
 
+    // This constructor is reflectively invoked from framework code in AppStandbyInternal.
+    @UsedByReflection(kind = KeepItemKind.CLASS_AND_METHODS)
     public AppStandbyController(Context context) {
         this(new Injector(context, AppSchedulingModuleThread.get().getLooper()));
     }

@@ -24,6 +24,7 @@ java_library {
         "app-compat-annotations",
         "error_prone_annotations",
         "framework",
+        "keepanno-annotations",
         "services.core",
         "unsupportedappusage",
     ],
