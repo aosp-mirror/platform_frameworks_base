@@ -2205,19 +2205,6 @@ public class ActivityOptions extends ComponentOptions {
     }
 
     /**
-     * Sets background activity launch logic won't use pending intent creator foreground state.
-     *
-     * @hide
-     * @deprecated use {@link #setPendingIntentCreatorBackgroundActivityStartMode(int)} instead
-     */
-    @Deprecated
-    public ActivityOptions setIgnorePendingIntentCreatorForegroundState(boolean ignore) {
-        mPendingIntentCreatorBackgroundActivityStartMode = ignore
-                ? MODE_BACKGROUND_ACTIVITY_START_DENIED : MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
-        return this;
-    }
-
-    /**
      * Allow a {@link PendingIntent} to use the privilege of its creator to start background
      * activities.
      *
