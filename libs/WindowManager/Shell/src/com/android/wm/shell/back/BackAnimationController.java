@@ -173,6 +173,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                         ProtoLog.i(WM_SHELL_BACK_PREVIEW, "Navigation window gone.");
                         setTriggerBack(false);
                         resetTouchTracker();
+                        // Don't wait for animation start
+                        mShellExecutor.removeCallbacks(mAnimationTimeoutRunnable);
                     });
                 }
             });
@@ -950,7 +952,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             ProtoLog.e(WM_SHELL_BACK_PREVIEW, "Lack of navigation info to start animation.");
             return;
         }
-        if (mApps == null) {
+        if (!validateAnimationTargets(mApps)) {
             ProtoLog.w(WM_SHELL_BACK_PREVIEW, "Not starting animation due to mApps being null.");
             return;
         }
@@ -981,6 +983,21 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         }
     }
 
+    /**
+     * Validate animation targets.
+     */
+    static boolean validateAnimationTargets(RemoteAnimationTarget[] apps) {
+        if (apps == null || apps.length == 0) {
+            return false;
+        }
+        for (int i = apps.length - 1; i >= 0; --i) {
+            if (!apps[i].leash.isValid()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void createAdapter() {
         IBackAnimationRunner runner =
                 new IBackAnimationRunner.Stub() {
@@ -993,6 +1010,10 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                         mShellExecutor.execute(
                                 () -> {
                                     endLatencyTracking();
+                                    if (!validateAnimationTargets(apps)) {
+                                        Log.e(TAG, "Invalid animation targets!");
+                                        return;
+                                    }
                                     mBackAnimationFinishedCallback = finishedCallback;
                                     mApps = apps;
                                     startSystemAnimation();

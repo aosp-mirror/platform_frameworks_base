@@ -69,7 +69,6 @@ import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.sysui.ShellSharedConstants;
 
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -182,7 +181,9 @@ public class BackAnimationControllerTest extends ShellTestCase {
     }
 
     RemoteAnimationTarget createAnimationTarget() {
-        SurfaceControl topWindowLeash = new SurfaceControl();
+        SurfaceControl topWindowLeash = new SurfaceControl.Builder()
+                .setName("FakeLeash")
+                .build();
         return new RemoteAnimationTarget(-1, RemoteAnimationTarget.MODE_CLOSING, topWindowLeash,
                 false, new Rect(), new Rect(), -1,
                 new Point(0, 0), new Rect(), new Rect(), new WindowConfiguration(),
