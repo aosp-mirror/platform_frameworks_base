@@ -23,10 +23,11 @@ import android.os.PowerManager
 import android.provider.Settings
 import androidx.core.view.OneShotPreDrawListener
 import com.android.internal.util.LatencyTracker
-import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.ToAodFoldTransitionInteractor
 import com.android.systemui.shade.ShadeFoldAnimator
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.LightRevealScrim
@@ -55,6 +56,7 @@ constructor(
     private val globalSettings: GlobalSettings,
     private val latencyTracker: LatencyTracker,
     private val keyguardInteractor: Lazy<KeyguardInteractor>,
+    private val foldTransitionInteractor: Lazy<ToAodFoldTransitionInteractor>,
 ) : CallbackController<FoldAodAnimationStatus>, ScreenOffAnimation, WakefulnessLifecycle.Observer {
 
     private lateinit var shadeViewController: ShadeViewController
@@ -74,7 +76,7 @@ constructor(
     private val foldToAodLatencyTracker = FoldToAodLatencyTracker()
 
     private val startAnimationRunnable = Runnable {
-        getShadeFoldAnimator().startFoldToAodAnimation(
+        shadeFoldAnimator.startFoldToAodAnimation(
             /* startAction= */ { foldToAodLatencyTracker.onAnimationStarted() },
             /* endAction= */ { setAnimationState(playing = false) },
             /* cancelAction= */ { setAnimationState(playing = false) },
@@ -82,11 +84,12 @@ constructor(
     }
 
     override fun initialize(
-            centralSurfaces: CentralSurfaces,
-            shadeViewController: ShadeViewController,
-            lightRevealScrim: LightRevealScrim,
+        centralSurfaces: CentralSurfaces,
+        shadeViewController: ShadeViewController,
+        lightRevealScrim: LightRevealScrim,
     ) {
         this.shadeViewController = shadeViewController
+        foldTransitionInteractor.get().initialize(shadeViewController.shadeFoldAnimator)
 
         deviceStateManager.registerCallback(mainExecutor, FoldListener())
         wakefulnessLifecycle.addObserver(this)
@@ -103,7 +106,7 @@ constructor(
     override fun startAnimation(): Boolean =
         if (shouldStartAnimation()) {
             setAnimationState(playing = true)
-            getShadeFoldAnimator().prepareFoldToAodAnimation()
+            shadeFoldAnimator.prepareFoldToAodAnimation()
             true
         } else {
             setAnimationState(playing = false)
@@ -114,14 +117,20 @@ constructor(
         if (isAnimationPlaying) {
             foldToAodLatencyTracker.cancel()
             cancelAnimation?.run()
-            getShadeFoldAnimator().cancelFoldToAodAnimation()
+            shadeFoldAnimator.cancelFoldToAodAnimation()
         }
 
         setAnimationState(playing = false)
     }
 
-    private fun getShadeFoldAnimator(): ShadeFoldAnimator =
-        shadeViewController.shadeFoldAnimator
+    private val shadeFoldAnimator: ShadeFoldAnimator
+        get() {
+            return if (MigrateClocksToBlueprint.isEnabled) {
+                foldTransitionInteractor.get().foldAnimator
+            } else {
+                shadeViewController.shadeFoldAnimator
+            }
+        }
 
     private fun setAnimationState(playing: Boolean) {
         shouldPlayAnimation = playing
@@ -137,41 +146,45 @@ constructor(
      * @see [com.android.systemui.keyguard.KeyguardViewMediator]
      */
     @BinderThread
-    fun onScreenTurningOn(onReady: Runnable) = mainExecutor.execute {
-        if (shouldPlayAnimation) {
-            // The device was not dozing and going to sleep after folding, play the animation
-
-            if (isScrimOpaque) {
-                onReady.run()
-            } else {
-                pendingScrimReadyCallback = onReady
-            }
-        } else if (isFolded && !isFoldHandled && alwaysOnEnabled &&
-                keyguardInteractor.get().isDozing.value) {
-            setAnimationState(playing = true)
-            getShadeFoldAnimator().prepareFoldToAodAnimation()
-
-            // We don't need to wait for the scrim as it is already displayed
-            // but we should wait for the initial animation preparations to be drawn
-            // (setting initial alpha/translation)
-            // TODO(b/254878364): remove this call to NPVC.getView()
-            if (!migrateClocksToBlueprint()) {
-                getShadeFoldAnimator().view?.let {
-                    OneShotPreDrawListener.add(it, onReady)
+    fun onScreenTurningOn(onReady: Runnable) =
+        mainExecutor.execute {
+            if (shouldPlayAnimation) {
+                // The device was not dozing and going to sleep after folding, play the animation
+                if (isScrimOpaque) {
+                    onReady.run()
+                } else {
+                    pendingScrimReadyCallback = onReady
                 }
-            }
-        } else {
-            // No animation, call ready callback immediately
-            onReady.run()
-        }
+            } else if (
+                isFolded &&
+                    !isFoldHandled &&
+                    alwaysOnEnabled &&
+                    keyguardInteractor.get().isDozing.value
+            ) {
+                setAnimationState(playing = true)
+                shadeFoldAnimator.prepareFoldToAodAnimation()
 
-        if (isFolded) {
-            // Any time the screen turns on, this state needs to be reset if the device has been
-            // folded. Reaching this line implies AOD has been shown in one way or another,
-            // if enabled
-            isFoldHandled = true
+                // We don't need to wait for the scrim as it is already displayed
+                // but we should wait for the initial animation preparations to be drawn
+                // (setting initial alpha/translation)
+                // TODO(b/254878364): remove this call to NPVC.getView()
+                if (!MigrateClocksToBlueprint.isEnabled) {
+                    shadeFoldAnimator.view?.let { OneShotPreDrawListener.add(it, onReady) }
+                } else {
+                    onReady.run()
+                }
+            } else {
+                // No animation, call ready callback immediately
+                onReady.run()
+            }
+
+            if (isFolded) {
+                // Any time the screen turns on, this state needs to be reset if the device has been
+                // folded. Reaching this line implies AOD has been shown in one way or another,
+                // if enabled
+                isFoldHandled = true
+            }
         }
-    }
 
     /** Called when keyguard scrim opaque changed */
     override fun onScrimOpaqueChanged(isOpaque: Boolean) {
@@ -184,18 +197,17 @@ constructor(
     }
 
     @BinderThread
-    fun onScreenTurnedOn() = mainExecutor.execute {
-        if (shouldPlayAnimation) {
-            cancelAnimation?.run()
+    fun onScreenTurnedOn() =
+        mainExecutor.execute {
+            if (shouldPlayAnimation) {
+                cancelAnimation?.run()
 
-            // Post starting the animation to the next frame to avoid junk due to inset changes
-            cancelAnimation = mainExecutor.executeDelayed(
-                startAnimationRunnable,
-                /* delayMillis= */ 0
-            )
-            shouldPlayAnimation = false
+                // Post starting the animation to the next frame to avoid junk due to inset changes
+                cancelAnimation =
+                    mainExecutor.executeDelayed(startAnimationRunnable, /* delayMillis= */ 0)
+                shouldPlayAnimation = false
+            }
         }
-    }
 
     override fun isAnimationPlaying(): Boolean = isAnimationPlaying
 
@@ -247,11 +259,10 @@ constructor(
      * Tracks the latency of fold to AOD using [LatencyTracker].
      *
      * Events that trigger start and end are:
-     *
      * - Start: Once [DeviceStateManager] sends the folded signal [FoldToAodLatencyTracker.onFolded]
-     * is called and latency tracking starts.
+     *   is called and latency tracking starts.
      * - End: Once the fold -> AOD animation starts, [FoldToAodLatencyTracker.onAnimationStarted] is
-     * called, and latency tracking stops.
+     *   called, and latency tracking stops.
      */
     private inner class FoldToAodLatencyTracker {
 
