@@ -19,6 +19,8 @@ package android.view;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
+import static android.view.Surface.FRAME_RATE_COMPATIBILITY_GTE;
+import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY;
 import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
 import static android.view.flags.Flags.toolkitFrameRateBySizeReadOnly;
@@ -112,6 +114,44 @@ public class ViewFrameRateTest {
 
         mActivityRule.runOnUiThread(() -> {
             assertFalse(mViewRoot.getIsTouchBoosting());
+        });
+    }
+
+    @Test
+    @RequiresFlagsEnabled({FLAG_VIEW_VELOCITY_API,
+            FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY})
+    public void lowVelocity60() throws Throwable {
+        mActivityRule.runOnUiThread(() -> {
+            ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
+            layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            mMovingView.setLayoutParams(layoutParams);
+        });
+        waitForFrameRateCategoryToSettle();
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.setFrameContentVelocity(1f);
+            mMovingView.invalidate();
+            assertEquals(60f, mViewRoot.getPreferredFrameRate(), 0f);
+            assertEquals(FRAME_RATE_COMPATIBILITY_GTE, mViewRoot.getFrameRateCompatibility());
+        });
+    }
+
+    @Test
+    @RequiresFlagsEnabled({FLAG_VIEW_VELOCITY_API,
+            FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY})
+    public void highVelocity140() throws Throwable {
+        mActivityRule.runOnUiThread(() -> {
+            ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
+            layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            mMovingView.setLayoutParams(layoutParams);
+        });
+        waitForFrameRateCategoryToSettle();
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.setFrameContentVelocity(1_000_000_000f);
+            mMovingView.invalidate();
+            assertEquals(140f, mViewRoot.getPreferredFrameRate(), 0f);
+            assertEquals(FRAME_RATE_COMPATIBILITY_GTE, mViewRoot.getFrameRateCompatibility());
         });
     }
 
