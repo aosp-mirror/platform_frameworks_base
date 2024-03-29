@@ -74,6 +74,11 @@ public final class CredentialManager {
                 PROVIDER_FILTER_ALL_PROVIDERS,
                 PROVIDER_FILTER_SYSTEM_PROVIDERS_ONLY,
                 PROVIDER_FILTER_USER_PROVIDERS_ONLY,
+                // By default the returned list of providers will not include any providers that
+                // have been hidden by device policy. However, there are some cases where we want
+                // them to show up (e.g. settings) so this will return the list of providers with
+                // the hidden ones included.
+                PROVIDER_FILTER_USER_PROVIDERS_INCLUDING_HIDDEN,
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProviderFilter {}
@@ -98,6 +103,14 @@ public final class CredentialManager {
      * @hide
      */
     @TestApi public static final int PROVIDER_FILTER_USER_PROVIDERS_ONLY = 2;
+
+    /**
+     * Returns user credential providers only. This will include providers that
+     * have been disabled by the device policy.
+     *
+     * @hide
+     */
+    public static final int PROVIDER_FILTER_USER_PROVIDERS_INCLUDING_HIDDEN = 3;
 
     private final Context mContext;
     private final ICredentialManager mService;
