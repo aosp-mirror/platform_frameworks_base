@@ -93,8 +93,9 @@ public abstract class Pip2Module {
     @Provides
     static PipScheduler providePipScheduler(Context context,
             PipBoundsState pipBoundsState,
-            @ShellMainThread ShellExecutor mainExecutor) {
-        return new PipScheduler(context, pipBoundsState, mainExecutor);
+            @ShellMainThread ShellExecutor mainExecutor,
+            ShellTaskOrganizer shellTaskOrganizer) {
+        return new PipScheduler(context, pipBoundsState, mainExecutor, shellTaskOrganizer);
     }
 
     @WMSingleton

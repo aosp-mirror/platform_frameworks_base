@@ -24,6 +24,9 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_RESIZE_PIP;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
@@ -44,6 +47,7 @@ import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipMenuController;
 import com.android.wm.shell.common.pip.PipUtils;
+import com.android.wm.shell.pip.PipContentOverlay;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
@@ -55,6 +59,11 @@ import java.util.function.Consumer;
  */
 public class PipTransition extends PipTransitionController {
     private static final String TAG = PipTransition.class.getSimpleName();
+    /**
+     * The fixed start delay in ms when fading out the content overlay from bounds animation.
+     * The fadeout animation is guaranteed to start after the client has drawn under the new config.
+     */
+    private static final int CONTENT_OVERLAY_FADE_OUT_DELAY_MS = 400;
 
     private final Context mContext;
     private final PipScheduler mPipScheduler;
@@ -230,10 +239,13 @@ public class PipTransition extends PipTransitionController {
 
         PictureInPictureParams params = pipChange.getTaskInfo().pictureInPictureParams;
         Rect srcRectHint = params.getSourceRectHint();
+        Rect startBounds = pipChange.getStartAbsBounds();
         Rect destinationBounds = pipChange.getEndAbsBounds();
 
+        WindowContainerTransaction finishWct = new WindowContainerTransaction();
+
         if (PipBoundsAlgorithm.isSourceRectHintValidForEnterPip(srcRectHint, destinationBounds)) {
-            float scale = (float) destinationBounds.width() / srcRectHint.width();
+            final float scale = (float) destinationBounds.width() / srcRectHint.width();
             startTransaction.setWindowCrop(pipLeash, srcRectHint);
             startTransaction.setPosition(pipLeash,
                     destinationBounds.left - srcRectHint.left * scale,
@@ -244,11 +256,60 @@ public class PipTransition extends PipTransitionController {
             // in multi-activity case, reparenting yields new reset scales coming from pinned task.
             startTransaction.setScale(pipLeash, scale, scale);
         } else {
-            // TODO(b/325481148): handle the case with invalid srcRectHint (using overlay).
+            final float scaleX = (float) destinationBounds.width() / startBounds.width();
+            final float scaleY = (float) destinationBounds.height() / startBounds.height();
+            final int overlaySize = PipContentOverlay.PipAppIconOverlay
+                    .getOverlaySize(mPipScheduler.mSwipePipToHomeAppBounds, destinationBounds);
+            SurfaceControl overlayLeash = mPipScheduler.mSwipePipToHomeOverlay;
+
+            startTransaction.setPosition(pipLeash, destinationBounds.left, destinationBounds.top)
+                    .setScale(pipLeash, scaleX, scaleY)
+                    .setWindowCrop(pipLeash, startBounds)
+                    .reparent(overlayLeash, pipLeash)
+                    .setLayer(overlayLeash, Integer.MAX_VALUE);
+
+            if (mPipTaskToken != null) {
+                SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+                tx.addTransactionCommittedListener(mPipScheduler.getMainExecutor(),
+                                this::onClientDrawAtTransitionEnd)
+                        .setScale(overlayLeash, 1f, 1f)
+                        .setPosition(overlayLeash,
+                                (destinationBounds.width() - overlaySize) / 2f,
+                                (destinationBounds.height() - overlaySize) / 2f);
+                finishWct.setBoundsChangeTransaction(mPipTaskToken, tx);
+            }
         }
         startTransaction.apply();
-        finishCallback.onTransitionFinished(null);
+
+        // Note that finishWct should be free of any actual WM state changes; we are using
+        // it for syncing with the client draw after delayed configuration changes are dispatched.
+        finishCallback.onTransitionFinished(finishWct.isEmpty() ? null : finishWct);
         return true;
+    }
+
+    private void onClientDrawAtTransitionEnd() {
+        startOverlayFadeoutAnimation();
+    }
+
+    private void startOverlayFadeoutAnimation() {
+        ValueAnimator animator = ValueAnimator.ofFloat(1f, 0f);
+        animator.setDuration(CONTENT_OVERLAY_FADE_OUT_DELAY_MS);
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+                tx.remove(mPipScheduler.mSwipePipToHomeOverlay);
+                tx.apply();
+                mPipScheduler.mSwipePipToHomeOverlay = null;
+            }
+        });
+        animator.addUpdateListener(animation -> {
+            float alpha = (float) animation.getAnimatedValue();
+            SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+            tx.setAlpha(mPipScheduler.mSwipePipToHomeOverlay, alpha).apply();
+        });
+        animator.start();
     }
 
     private boolean startBoundsTypeEnterAnimation(@NonNull TransitionInfo info,
