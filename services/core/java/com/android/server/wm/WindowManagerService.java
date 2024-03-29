@@ -561,6 +561,8 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Device default insets types shall be excluded from config app sizes. */
     final int mConfigTypes;
 
+    final int mLegacyConfigTypes;
+
     final boolean mLimitedAlphaCompositing;
     final int mMaxUiWidth;
 
@@ -1197,6 +1199,13 @@ public class WindowManagerService extends IWindowManager.Stub
         } else {
             mDecorTypes = WindowInsets.Type.navigationBars();
             mConfigTypes = WindowInsets.Type.navigationBars();
+        }
+        if (isScreenSizeDecoupledFromStatusBarAndCutout) {
+            // Do not fallback to legacy value for enabled devices.
+            mLegacyConfigTypes = WindowInsets.Type.navigationBars();
+        } else {
+            mLegacyConfigTypes = WindowInsets.Type.displayCutout() | WindowInsets.Type.statusBars()
+                    | WindowInsets.Type.navigationBars();
         }
 
         mLetterboxConfiguration = new LetterboxConfiguration(
