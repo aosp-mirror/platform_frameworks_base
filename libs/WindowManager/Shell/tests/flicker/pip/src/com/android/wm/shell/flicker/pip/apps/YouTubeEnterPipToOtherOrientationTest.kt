@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import android.platform.test.annotations.Postsubmit
 import android.tools.NavBar
 import android.tools.Rotation
 import android.tools.traces.component.ComponentNameMatcher
-import android.tools.device.apphelpers.NetflixAppHelper
+import android.tools.device.apphelpers.YouTubeAppHelper
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
@@ -37,13 +37,14 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test entering pip from Netflix app by interacting with the app UI
+ * Test entering pip from YouTube app by interacting with the app UI
  *
- * To run this test: `atest WMShellFlickerTests:NetflixEnterPipTest`
+ * To run this test: `atest WMShellFlickerTests:YouTubeEnterPipTest`
  *
  * Actions:
  * ```
- *     Launch Netflix and start playing a video
+ *     Launch YouTube and start playing a video
+ *     Make the video fullscreen, aka immersive mode
  *     Go home to enter PiP
  * ```
  *
@@ -61,8 +62,9 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class NetflixEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransition(flicker) {
-    override val standardAppHelper: NetflixAppHelper = NetflixAppHelper(instrumentation)
+open class YouTubeEnterPipToOtherOrientationTest(flicker: LegacyFlickerTest) :
+    YouTubeEnterPipTest(flicker) {
+    override val standardAppHelper: YouTubeAppHelper = YouTubeAppHelper(instrumentation)
     private val startingBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_90)
     private val endingBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_0)
 
@@ -72,15 +74,12 @@ open class NetflixEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransit
         setup {
             standardAppHelper.launchViaIntent(
                 wmHelper,
-                NetflixAppHelper.getNetflixWatchVideoIntent("81605060"),
-                ComponentNameMatcher(NetflixAppHelper.PACKAGE_NAME, NetflixAppHelper.WATCH_ACTIVITY)
+                YouTubeAppHelper.getYoutubeVideoIntent("HPcEAtoXXLA"),
+                ComponentNameMatcher(YouTubeAppHelper.PACKAGE_NAME, "")
             )
+            standardAppHelper.enterFullscreen()
             standardAppHelper.waitForVideoPlaying()
         }
-    }
-
-    override val defaultTeardown: FlickerBuilder.() -> Unit = {
-        teardown { standardAppHelper.exit(wmHelper) }
     }
 
     override val thisTransition: FlickerBuilder.() -> Unit = {
@@ -89,52 +88,11 @@ open class NetflixEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransit
 
     @Postsubmit
     @Test
-    override fun pipOverlayLayerAppearThenDisappear() {
-        // Netflix uses source rect hint, so PiP overlay is never present
-    }
-
-    @Postsubmit
-    @Test
-    override fun focusChanges() {
-        // in gestural nav the focus goes to different activity on swipe up with auto enter PiP
-        Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
-        super.focusChanges()
-    }
-
-    @Postsubmit
-    @Test
     override fun taskBarLayerIsVisibleAtStartAndEnd() {
         Assume.assumeTrue(flicker.scenario.isTablet)
-        // Netflix starts in immersive fullscreen mode, so taskbar bar is not visible at start
+        // YouTube starts in immersive fullscreen mode, so taskbar bar is not visible at start
         flicker.assertLayersStart { this.isInvisible(ComponentNameMatcher.TASK_BAR) }
         flicker.assertLayersEnd { this.isVisible(ComponentNameMatcher.TASK_BAR) }
-    }
-
-    @Postsubmit
-    @Test
-    override fun taskBarWindowIsAlwaysVisible() {
-        // Netflix plays in immersive fullscreen mode, so taskbar will be gone at some point
-    }
-
-    @Postsubmit
-    @Test
-    override fun statusBarLayerIsVisibleAtStartAndEnd() {
-        // Netflix starts in immersive fullscreen mode, so status bar is not visible at start
-        flicker.assertLayersStart { this.isInvisible(ComponentNameMatcher.STATUS_BAR) }
-        flicker.assertLayersEnd { this.isVisible(ComponentNameMatcher.STATUS_BAR) }
-    }
-
-    @Postsubmit
-    @Test
-    override fun statusBarLayerPositionAtStartAndEnd() {
-        // Netflix starts in immersive fullscreen mode, so status bar is not visible at start
-        flicker.statusBarLayerPositionAtEnd()
-    }
-
-    @Postsubmit
-    @Test
-    override fun statusBarWindowIsAlwaysVisible() {
-        // Netflix plays in immersive fullscreen mode, so taskbar will be gone at some point
     }
 
     @Postsubmit
@@ -156,10 +114,37 @@ open class NetflixEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransit
         // might go outside of bounds as we resize from landscape fullscreen to destination bounds,
         // and once the animation is over we assert that it's fully within the display bounds, at
         // which point the device also performs orientation change from landscape to portrait
-        // since Netflix uses source rect hint, there is no PiP overlay present
+        // since YouTube uses source rect hint, there is no PiP overlay present
         flicker.assertLayersVisibleRegion(standardAppHelper.packageNameMatcher) {
             regionsCenterPointInside(startingBounds).then().coversAtMost(endingBounds)
         }
+    }
+
+    @Postsubmit
+    @Test
+    override fun taskBarWindowIsAlwaysVisible() {
+        // YouTube plays in immersive fullscreen mode, so taskbar will be gone at some point
+    }
+
+    @Postsubmit
+    @Test
+    override fun statusBarLayerIsVisibleAtStartAndEnd() {
+        // YouTube starts in immersive fullscreen mode, so status bar is not visible at start
+        flicker.assertLayersStart { this.isInvisible(ComponentNameMatcher.STATUS_BAR) }
+        flicker.assertLayersEnd { this.isVisible(ComponentNameMatcher.STATUS_BAR) }
+    }
+
+    @Postsubmit
+    @Test
+    override fun statusBarLayerPositionAtStartAndEnd() {
+        // YouTube starts in immersive fullscreen mode, so status bar is not visible at start
+        flicker.statusBarLayerPositionAtEnd()
+    }
+
+    @Postsubmit
+    @Test
+    override fun statusBarWindowIsAlwaysVisible() {
+        // YouTube plays in immersive fullscreen mode, so taskbar will be gone at some point
     }
 
     companion object {
