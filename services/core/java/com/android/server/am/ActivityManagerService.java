@@ -136,6 +136,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NEW_MUTABLE_IMPLICIT_PENDING_INTENT_RETRIEVED;
 import static com.android.sdksandbox.flags.Flags.sdkSandboxInstrumentationInfo;
+import static com.android.server.am.ActiveServices.FGS_SAW_RESTRICTIONS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALLOWLISTS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
@@ -6467,7 +6468,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * This is a shortcut and <b>DOES NOT</b> include all reasons.
      * Use {@link #canScheduleUserInitiatedJobs(int, int, String)} to cover all cases.
      */
-    static boolean doesReasonCodeAllowSchedulingUserInitiatedJobs(int reasonCode) {
+    static boolean doesReasonCodeAllowSchedulingUserInitiatedJobs(int reasonCode, int uid) {
         switch (reasonCode) {
             case REASON_PROC_STATE_PERSISTENT:
             case REASON_PROC_STATE_PERSISTENT_UI:
@@ -6477,11 +6478,21 @@ public class ActivityManagerService extends IActivityManager.Stub
             case REASON_SYSTEM_UID:
             case REASON_START_ACTIVITY_FLAG:
             case REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD:
-            case REASON_SYSTEM_ALERT_WINDOW_PERMISSION:
             case REASON_COMPANION_DEVICE_MANAGER:
             case REASON_BACKGROUND_ACTIVITY_PERMISSION:
             case REASON_INSTR_BACKGROUND_ACTIVITY_PERMISSION:
                 return true;
+            case REASON_SYSTEM_ALERT_WINDOW_PERMISSION:
+                if (!Flags.fgsDisableSaw()
+                        || !CompatChanges.isChangeEnabled(FGS_SAW_RESTRICTIONS, uid)) {
+                    return true;
+                } else {
+                    // With the new SAW restrictions starting Android V, only allow the app to
+                    // schedule a user-initiated job if it's currently showing an overlay window
+                    // in additional to holding the permission - this additional logic will be
+                    // checked in #canScheduleUserInitiatedJobs(int, int, String) below since this
+                    // method is simply a shortcut for checking based on the reason codes.
+                }
         }
         return false;
     }
@@ -6494,7 +6505,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @GuardedBy(anyOf = {"this", "mProcLock"})
     private boolean isProcessInStateToScheduleUserInitiatedJobsLocked(
-            @Nullable ProcessRecord pr, long nowElapsed) {
+            @Nullable ProcessRecord pr, long nowElapsed, int uid) {
         if (pr == null) {
             return false;
         }
@@ -6511,7 +6522,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int procstate = state.getCurProcState();
         if (procstate <= PROCESS_STATE_BOUND_TOP) {
             if (doesReasonCodeAllowSchedulingUserInitiatedJobs(
-                    getReasonCodeFromProcState(procstate))) {
+                    getReasonCodeFromProcState(procstate), uid)) {
                 return true;
             }
         }
@@ -6553,7 +6564,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             final long nowElapsed = SystemClock.elapsedRealtime();
             final BackgroundStartPrivileges backgroundStartPrivileges;
             if (processRecord != null) {
-                if (isProcessInStateToScheduleUserInitiatedJobsLocked(processRecord, nowElapsed)) {
+                if (isProcessInStateToScheduleUserInitiatedJobsLocked(
+                        processRecord, nowElapsed, uid)) {
                     return true;
                 }
                 backgroundStartPrivileges = processRecord.getBackgroundStartPrivileges();
@@ -6579,17 +6591,30 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             final UidRecord uidRecord = mProcessList.getUidRecordLOSP(uid);
+            final boolean hasSawPermission = mAtmInternal.hasSystemAlertWindowPermission(uid, pid,
+                                                            pkgName);
+            final boolean strictSawCheckEnabled = Flags.fgsDisableSaw()
+                            && CompatChanges.isChangeEnabled(FGS_SAW_RESTRICTIONS, uid);
             if (uidRecord != null) {
                 for (int i = uidRecord.getNumOfProcs() - 1; i >= 0; --i) {
                     ProcessRecord pr = uidRecord.getProcessRecordByIndex(i);
-                    if (isProcessInStateToScheduleUserInitiatedJobsLocked(pr, nowElapsed)) {
+                    if (isProcessInStateToScheduleUserInitiatedJobsLocked(pr, nowElapsed, uid)) {
                         return true;
+                    } else if (hasSawPermission && strictSawCheckEnabled) {
+                        // isProcessInStateToScheduleUserInitiatedJobsLocked() doesn't do a strict
+                        // check for the SAW permission which is enabled from V onwards, so perform
+                        // that here (pre-V versions will be checked in the conditional below)
+                        // Starting Android V, only allow the app to schedule a user-initiated job
+                        // if it's granted the permission and currently showing an overlay window
+                        if (pr != null && pr.mState.hasOverlayUi()) {
+                            return true;
+                        }
                     }
                 }
             }
 
-            if (mAtmInternal.hasSystemAlertWindowPermission(uid, pid, pkgName)) {
-                // REASON_SYSTEM_ALERT_WINDOW_PERMISSION;
+            if (hasSawPermission && !strictSawCheckEnabled) {
+                // REASON_SYSTEM_ALERT_WINDOW_PERMISSION (pre-V)
                 return true;
             }
 
