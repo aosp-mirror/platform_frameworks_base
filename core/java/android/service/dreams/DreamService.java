@@ -1050,12 +1050,10 @@ public class DreamService extends Service implements Window.Callback {
                     overlay.endDream();
                     mOverlayConnection.unbind();
                     mOverlayConnection = null;
-                    finish();
                 } catch (RemoteException e) {
                     Log.e(mTag, "could not inform overlay of dream end:" + e);
                 }
             });
-            return;
         }
 
         if (mDebug) Slog.v(mTag, "finish(): mFinished=" + mFinished);

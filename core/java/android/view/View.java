@@ -33847,16 +33847,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
                 int frameRateCategory;
                 if (Float.isNaN(mPreferredFrameRate)) {
-                    if (mMinusTwoFrameIntervalMillis + mMinusOneFrameIntervalMillis
-                            < INFREQUENT_UPDATE_INTERVAL_MILLIS && mAttachInfo != null) {
-                        frameRateCategory = mSizeBasedFrameRateCategoryAndReason;
-                    } else if (mInfrequentUpdateCount == INFREQUENT_UPDATE_COUNTS) {
-                        frameRateCategory =
-                                FRAME_RATE_CATEGORY_NORMAL
-                                        | FRAME_RATE_CATEGORY_REASON_INTERMITTENT;
-                    } else {
-                        frameRateCategory = mLastFrameRateCategory;
-                    }
+                    frameRateCategory = calculateFrameRateCategory();
                 } else if (mPreferredFrameRate < 0) {
                     if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE) {
                         frameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE

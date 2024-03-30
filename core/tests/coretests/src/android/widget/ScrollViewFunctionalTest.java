@@ -19,6 +19,7 @@ package android.widget;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
@@ -98,13 +99,28 @@ public class ScrollViewFunctionalTest {
             mMyScrollView.setFrameContentVelocity(0);
         });
         // set setFrameContentVelocity shouldn't do anything.
-        assertEquals(mMyScrollView.isSetVelocityCalled, false);
+        assertTrue(mMyScrollView.isSetVelocityCalled);
+        assertEquals(0f, mMyScrollView.velocity, 0f);
+        mMyScrollView.isSetVelocityCalled = false;
 
         mActivityRule.runOnUiThread(() -> {
             mMyScrollView.fling(100);
         });
         // set setFrameContentVelocity should be called when fling.
-        assertEquals(mMyScrollView.isSetVelocityCalled, true);
+        assertTrue(mMyScrollView.isSetVelocityCalled);
+        assertNotEquals(0f, mMyScrollView.velocity, 0.01f);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_VIEW_VELOCITY_API)
+    public void hasVelocityInSmoothScrollBy() throws Throwable {
+        int maxScroll = mMyScrollView.getChildAt(0).getHeight() - mMyScrollView.getHeight();
+        mActivityRule.runOnUiThread(() -> {
+            mMyScrollView.smoothScrollTo(0, maxScroll);
+        });
+        PollingCheck.waitFor(() -> mMyScrollView.getScrollY() != 0);
+        assertTrue(mMyScrollView.isSetVelocityCalled);
+        assertTrue(mMyScrollView.velocity > 0f);
     }
 
     static class WatchedEdgeEffect extends EdgeEffect {
@@ -125,6 +141,8 @@ public class ScrollViewFunctionalTest {
 
         public boolean isSetVelocityCalled;
 
+        public float velocity;
+
         public MyScrollView(Context context) {
             super(context);
         }
@@ -139,9 +157,8 @@ public class ScrollViewFunctionalTest {
 
         @Override
         public void setFrameContentVelocity(float pixelsPerSecond) {
-            if (pixelsPerSecond != 0) {
-                isSetVelocityCalled = true;
-            }
+            isSetVelocityCalled = true;
+            velocity = pixelsPerSecond;
         }
     }
 }

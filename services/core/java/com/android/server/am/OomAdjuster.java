@@ -71,7 +71,7 @@ import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL;
-import static android.media.audio.Flags.foregroundAudioControl;
+import static android.media.audio.Flags.roForegroundAudioControl;
 import static android.os.Process.SCHED_OTHER;
 import static android.os.Process.THREAD_GROUP_BACKGROUND;
 import static android.os.Process.THREAD_GROUP_DEFAULT;
@@ -2212,7 +2212,7 @@ public class OomAdjuster {
                             (fgsType & FOREGROUND_SERVICE_TYPE_LOCATION)
                                     != 0 ? PROCESS_CAPABILITY_FOREGROUND_LOCATION : 0;
 
-                    if (foregroundAudioControl()) { // flag check
+                    if (roForegroundAudioControl()) { // flag check
                         final int fgsAudioType = FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
                                 | FOREGROUND_SERVICE_TYPE_CAMERA
                                 | FOREGROUND_SERVICE_TYPE_MICROPHONE
@@ -3681,7 +3681,7 @@ public class OomAdjuster {
         for (int i = N - 1; i >= 0; i--) {
             final UidRecord uidRec = mActiveUids.valueAt(i);
             final long bgTime = uidRec.getLastBackgroundTime();
-            final long idleTime = uidRec.getLastIdleTime();
+            final long idleTime = uidRec.getLastIdleTimeIfStillIdle();
             if (bgTime > 0 && (!uidRec.isIdle() || idleTime == 0)) {
                 if (bgTime <= maxBgTime) {
                     EventLogTags.writeAmUidIdle(uidRec.getUid());

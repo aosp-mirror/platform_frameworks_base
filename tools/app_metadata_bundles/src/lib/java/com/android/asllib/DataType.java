@@ -29,13 +29,15 @@ import java.util.Set;
 public class DataType implements AslMarshallable {
 
     public enum Purpose {
-        APP_FUNCTIONALITY(1),
-        ANALYTICS(2),
-        DEVELOPER_COMMUNICATIONS(3),
-        FRAUD_PREVENTION_SECURITY(4),
-        ADVERTISING(5),
-        PERSONALIZATION(6),
-        ACCOUNT_MANAGEMENT(7);
+        PURPOSE_APP_FUNCTIONALITY(1),
+        PURPOSE_ANALYTICS(2),
+        PURPOSE_DEVELOPER_COMMUNICATIONS(3),
+        PURPOSE_FRAUD_PREVENTION_SECURITY(4),
+        PURPOSE_ADVERTISING(5),
+        PURPOSE_PERSONALIZATION(6),
+        PURPOSE_ACCOUNT_MANAGEMENT(7);
+
+        private static final String PURPOSE_PREFIX = "PURPOSE_";
 
         private final int mValue;
 
@@ -55,7 +57,7 @@ public class DataType implements AslMarshallable {
                     return e;
                 }
             }
-            throw new IllegalArgumentException("No Purpose enum for value: " + value);
+            throw new IllegalArgumentException("No enum for value: " + value);
         }
 
         /** Get the Purpose associated with the human-readable String. */
@@ -65,12 +67,15 @@ public class DataType implements AslMarshallable {
                     return e;
                 }
             }
-            throw new IllegalArgumentException("No Purpose enum for str: " + s);
+            throw new IllegalArgumentException("No enum for str: " + s);
         }
 
         /** Human-readable String representation of Purpose. */
         public String toString() {
-            return this.name().toLowerCase();
+            if (!this.name().startsWith(PURPOSE_PREFIX)) {
+                return this.name();
+            }
+            return this.name().substring(PURPOSE_PREFIX.length()).toLowerCase();
         }
     }
 
@@ -134,14 +139,16 @@ public class DataType implements AslMarshallable {
     public List<Element> toOdDomElements(Document doc) {
         Element dataTypeEle = XmlUtils.createPbundleEleWithName(doc, this.getDataTypeName());
         if (!this.getPurposeSet().isEmpty()) {
-            dataTypeEle.appendChild(
-                    XmlUtils.createOdArray(
-                            doc,
-                            XmlUtils.OD_TAG_INT_ARRAY,
-                            XmlUtils.OD_NAME_PURPOSES,
-                            this.getPurposeSet().stream()
-                                    .map(p -> String.valueOf(p.getValue()))
-                                    .toList()));
+            Element purposesEle = doc.createElement(XmlUtils.OD_TAG_INT_ARRAY);
+            purposesEle.setAttribute(XmlUtils.OD_ATTR_NAME, XmlUtils.OD_NAME_PURPOSES);
+            purposesEle.setAttribute(
+                    XmlUtils.OD_ATTR_NUM, String.valueOf(this.getPurposeSet().size()));
+            for (DataType.Purpose purpose : this.getPurposeSet()) {
+                Element purposeEle = doc.createElement(XmlUtils.OD_TAG_ITEM);
+                purposeEle.setAttribute(XmlUtils.OD_ATTR_VALUE, String.valueOf(purpose.getValue()));
+                purposesEle.appendChild(purposeEle);
+            }
+            dataTypeEle.appendChild(purposesEle);
         }
 
         maybeAddBoolToOdElement(
@@ -155,7 +162,7 @@ public class DataType implements AslMarshallable {
                 this.getIsSharingOptional(),
                 XmlUtils.OD_NAME_IS_SHARING_OPTIONAL);
         maybeAddBoolToOdElement(doc, dataTypeEle, this.getEphemeral(), XmlUtils.OD_NAME_EPHEMERAL);
-        return XmlUtils.listOf(dataTypeEle);
+        return List.of(dataTypeEle);
     }
 
     private static void maybeAddBoolToOdElement(

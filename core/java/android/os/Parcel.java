@@ -577,6 +577,11 @@ public final class Parcel {
             }
             res.mReadWriteHelper = ReadWriteHelper.DEFAULT;
         }
+
+        if (res.mNativePtr == 0) {
+            Log.e(TAG, "Obtained Parcel object has null native pointer. Invalid state.");
+        }
+
         return res;
     }
 

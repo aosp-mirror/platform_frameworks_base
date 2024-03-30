@@ -36,8 +36,7 @@ public class DataCategoryFactory implements AslMarshallableFactory<DataCategory>
                 throw new MalformedXmlException(
                         String.format("Unrecognized data type name: %s", dataTypeName));
             }
-            dataTypeMap.put(
-                    dataTypeName, new DataTypeFactory().createFromHrElements(XmlUtils.listOf(ele)));
+            dataTypeMap.put(dataTypeName, new DataTypeFactory().createFromHrElements(List.of(ele)));
         }
 
         return new DataCategory(categoryName, dataTypeMap);

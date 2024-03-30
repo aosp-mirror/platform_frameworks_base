@@ -28,7 +28,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.flowOf
 
 /** Empty implementation of ShadeViewController for variants with no shade. */
-class ShadeViewControllerEmptyImpl @Inject constructor() :
+open class ShadeViewControllerEmptyImpl @Inject constructor() :
     ShadeViewController,
     ShadeBackActionInteractor,
     ShadeLockscreenInteractor,
@@ -81,6 +81,10 @@ class ShadeViewControllerEmptyImpl @Inject constructor() :
     override fun handleExternalTouch(event: MotionEvent): Boolean {
         return false
     }
+    override fun handleExternalInterceptTouch(event: MotionEvent): Boolean {
+        return false
+    }
+
     override fun startInputFocusTransfer() {}
     override fun cancelInputFocusTransfer() {}
     override fun finishInputFocusTransfer(velocity: Float) {}

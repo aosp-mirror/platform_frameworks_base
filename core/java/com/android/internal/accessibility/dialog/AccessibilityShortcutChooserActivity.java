@@ -37,7 +37,6 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.Flags;
 import android.widget.AdapterView;
 
 import com.android.internal.R;
@@ -248,12 +247,10 @@ public class AccessibilityShortcutChooserActivity extends Activity {
 
         boolean allowEditing = isUserSetupCompleted(this);
         boolean showWhenLocked = false;
-        if (Flags.allowShortcutChooserOnLockscreen()) {
-            final KeyguardManager keyguardManager = getSystemService(KeyguardManager.class);
-            if (keyguardManager != null && keyguardManager.isKeyguardLocked()) {
-                allowEditing = false;
-                showWhenLocked = true;
-            }
+        final KeyguardManager keyguardManager = getSystemService(KeyguardManager.class);
+        if (keyguardManager != null && keyguardManager.isKeyguardLocked()) {
+            allowEditing = false;
+            showWhenLocked = true;
         }
         if (allowEditing) {
             final String positiveButtonText =

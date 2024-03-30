@@ -96,12 +96,12 @@ import com.android.internal.policy.SystemBarUtils;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.ActiveUnlockConfig;
+import com.android.keyguard.LockIconViewController;
 import com.android.keyguard.KeyguardClockSwitch.ClockSize;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardStatusViewController;
 import com.android.keyguard.KeyguardUnfoldTransition;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.LockIconViewController;
 import com.android.keyguard.dagger.KeyguardQsUserSwitchComponent;
 import com.android.keyguard.dagger.KeyguardStatusBarViewComponent;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
@@ -437,7 +437,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final FalsingManager mFalsingManager;
     private final FalsingCollector mFalsingCollector;
     private final ShadeHeadsUpTrackerImpl mShadeHeadsUpTracker = new ShadeHeadsUpTrackerImpl();
-    private final ShadeFoldAnimator mShadeFoldAnimator = new ShadeFoldAnimatorImpl();
+    private final ShadeFoldAnimatorImpl mShadeFoldAnimator = new ShadeFoldAnimatorImpl();
 
     private boolean mShowIconsWhenExpanded;
     private int mIndicationBottomPadding;
@@ -982,6 +982,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 });
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         dumpManager.registerDumpable(this);
+        SceneContainerFlag.assertInLegacyMode();
     }
 
     private void unlockAnimationFinished() {
@@ -3310,19 +3311,19 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     @Override
-    public ShadeFoldAnimator getShadeFoldAnimator() {
+    public ShadeFoldAnimatorImpl getShadeFoldAnimator() {
         return mShadeFoldAnimator;
     }
 
-    private final class ShadeFoldAnimatorImpl implements ShadeFoldAnimator {
+    @Deprecated
+    public final class ShadeFoldAnimatorImpl implements ShadeFoldAnimator {
         /** Updates the views to the initial state for the fold to AOD animation. */
         @Override
         public void prepareFoldToAodAnimation() {
-            if (MigrateClocksToBlueprint.isEnabled()) {
-                return;
+            if (!MigrateClocksToBlueprint.isEnabled()) {
+                // Force show AOD UI even if we are not locked
+                showAodUi();
             }
-            // Force show AOD UI even if we are not locked
-            showAodUi();
 
             // Move the content of the AOD all the way to the left
             // so we can animate to the initial position
@@ -3340,14 +3341,29 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
          * @param cancelAction invoked when the animation is cancelled, before endAction.
          */
         @Override
-        public void startFoldToAodAnimation(Runnable startAction, Runnable endAction,
-                Runnable cancelAction) {
+        public void startFoldToAodAnimation(
+                Runnable startAction, Runnable endAction, Runnable cancelAction) {
             if (MigrateClocksToBlueprint.isEnabled()) {
                 return;
             }
+
+            buildViewAnimator(startAction, endAction, cancelAction)
+                    .setUpdateListener(anim -> mKeyguardStatusViewController
+                            .animateFoldToAod(anim.getAnimatedFraction()))
+                    .start();
+        }
+
+        /**
+         * Builds the default NPVC fold animator
+         *
+         * @deprecated Temporary stop-gap. Do not use outside of keyguard fold transition.
+         */
+        @Deprecated
+        public ViewPropertyAnimator buildViewAnimator(
+                Runnable startAction, Runnable endAction, Runnable cancelAction) {
             final ViewPropertyAnimator viewAnimator = mView.animate();
             viewAnimator.cancel();
-            viewAnimator
+            return viewAnimator
                     .translationX(0)
                     .alpha(1f)
                     .setDuration(ANIMATION_DURATION_FOLD_TO_AOD)
@@ -3370,19 +3386,12 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                             viewAnimator.setListener(null);
                             viewAnimator.setUpdateListener(null);
                         }
-                    })
-                    .setUpdateListener(anim ->
-                            mKeyguardStatusViewController.animateFoldToAod(
-                                    anim.getAnimatedFraction()))
-                    .start();
+                    });
         }
 
         /** Cancels fold to AOD transition and resets view state. */
         @Override
         public void cancelFoldToAodAnimation() {
-            if (MigrateClocksToBlueprint.isEnabled()) {
-                return;
-            }
             cancelAnimation();
             resetAlpha();
             resetTranslation();
@@ -3555,9 +3564,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     @Override
-    public ViewPropertyAnimator fadeOut(long startDelayMs, long durationMs, Runnable endAction) {
+    public void fadeOut(long startDelayMs, long durationMs, Runnable endAction) {
         mView.animate().cancel();
-        return mView.animate().alpha(0).setStartDelay(startDelayMs).setDuration(
+        mView.animate().alpha(0).setStartDelay(startDelayMs).setDuration(
                 durationMs).setInterpolator(Interpolators.ALPHA_OUT).withLayer().withEndAction(
                 endAction);
     }
@@ -4121,9 +4130,10 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     @Override
     public void updateExpansionAndVisibility() {
-        mShadeExpansionStateManager.onPanelExpansionChanged(
-                mExpandedFraction, isExpanded(), isTracking(), mExpansionDragDownAmountPx);
-
+        if (!SceneContainerFlag.isEnabled()) {
+            mShadeExpansionStateManager.onPanelExpansionChanged(
+                    mExpandedFraction, isExpanded(), isTracking());
+        }
         updateVisibility();
     }
 
@@ -4159,7 +4169,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     /** Sends an external (e.g. Status Bar) intercept touch event to the Shade touch handler. */
-    boolean handleExternalInterceptTouch(MotionEvent event) {
+    @Override
+    public boolean handleExternalInterceptTouch(MotionEvent event) {
         try {
             mUseExternalTouch = true;
             return mTouchHandler.onInterceptTouchEvent(event);

@@ -32,6 +32,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -490,6 +491,12 @@ public class PowerManagerServiceTest {
         when(mResourcesSpy.getBoolean(
                 com.android.internal.R.bool.config_batterySaverSupported)).thenReturn(
                 mIsBatterySaverSupported);
+    }
+
+    private void setScreenTimeoutOverrideConfig(int screenTimeoutOverrideConfig) {
+        when(mResourcesSpy.getInteger(
+                com.android.internal.R.integer.config_screenTimeoutOverride))
+                .thenReturn(screenTimeoutOverrideConfig);
     }
 
     @Test
@@ -2939,6 +2946,299 @@ public class PowerManagerServiceTest {
 
         setUncachedUidProcState(wakeLock.mOwnerUid);
         assertThat(wakeLock.mDisabled).isFalse();
+    }
+
+    @Test
+    public void testScreenTimeoutOverrideWakeLock() {
+        mSetFlagsRule.enableFlags(com.android.server.power.feature.flags
+                .Flags.FLAG_ENABLE_EARLY_SCREEN_TIMEOUT_DETECTOR);
+
+        setAttentiveTimeout(30000);
+        setScreenTimeoutOverrideConfig(10000);
+
+        createService();
+        startSystem();
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+
+        // Grab a wakelock
+        final String tag = "wakelock1";
+        final String packageName = "pkg.name";
+        final IBinder token = new Binder();
+        final int flags = PowerManager.SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK;
+        mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
+                null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY,
+                null /* callback */);
+
+        // Early screen off while acquired the wake lock.
+        advanceTime(10000);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
+
+        // Should not affect anything after release the wake lock.
+        mService.getBinderServiceInstance().releaseWakeLock(token, 0 /* flags */);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
+    }
+
+    @Test
+    public void testScreenTimeoutOverrideWakeLockOnFeatureDisable() {
+        // Feature flag is not enabled
+        mSetFlagsRule.disableFlags(com.android.server.power.feature.flags
+                .Flags.FLAG_ENABLE_EARLY_SCREEN_TIMEOUT_DETECTOR);
+
+        setAttentiveTimeout(30000);
+        setScreenTimeoutOverrideConfig(10000);
+
+        createService();
+        startSystem();
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+
+        // Grab a wakelock
+        final String tag = "wakelock1";
+        final String packageName = "pkg.name";
+        final IBinder token = new Binder();
+        final int flags = PowerManager.SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK;
+        try {
+            mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
+                    null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY,
+                    null /* callback */);
+        } catch (IllegalArgumentException e) {
+            return;
+        }
+
+        fail("Have to throw a IllegalArgumentException when feature is not enabled.");
+    }
+
+    @Test
+    public void testScreenTimeoutOverrideWakeLockAcquiredAfterTimeout() {
+        mSetFlagsRule.enableFlags(com.android.server.power.feature.flags
+                .Flags.FLAG_ENABLE_EARLY_SCREEN_TIMEOUT_DETECTOR);
+
+        setAttentiveTimeout(30000);
+        setScreenTimeoutOverrideConfig(10000);
+
+        createService();
+        startSystem();
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+
+        advanceTime(10000);
+
+        // Grab a wakelock
+        final String tag = "wakelock1";
+        final String packageName = "pkg.name";
+        final IBinder token = new Binder();
+        final int flags = PowerManager.SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK;
+        mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
+                null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY,
+                null /* callback */);
+
+        // Early screen off while acquired the wake lock.
+        advanceTime(0);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
+
+        // Should not affect anything after release the wake lock.
+        mService.getBinderServiceInstance().releaseWakeLock(token, 0 /* flags */);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
+    }
+
+    @Test
+    public void testScreenTimeoutOverrideWakeLockAcquiredAfterSleep() {
+        mSetFlagsRule.enableFlags(com.android.server.power.feature.flags
+                .Flags.FLAG_ENABLE_EARLY_SCREEN_TIMEOUT_DETECTOR);
+
+        setAttentiveTimeout(30000);
+        setScreenTimeoutOverrideConfig(10000);
+
+        createService();
+        startSystem();
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+        advanceTime(30000);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
+
+        // Grab a wakelock
+        final String tag = "wakelock1";
+        final String packageName = "pkg.name";
+        final IBinder token = new Binder();
+        final int flags = PowerManager.SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK;
+        mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
+                null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY,
+                null /* callback */);
+
+        // Keep screen off and the wake lock won't be acquired when screen off.
+        advanceTime(0);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
+
+        // Verify if the wake lock is still valid.
+        forceAwake();
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+        advanceTime(10000);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+
+        // Should not affect anything after release the wake lock.
+        mService.getBinderServiceInstance().releaseWakeLock(token, 0 /* flags */);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+    }
+
+    @Test
+    public void testScreenTimeoutOverrideWakeLockUserActivity() {
+        mSetFlagsRule.enableFlags(com.android.server.power.feature.flags
+                .Flags.FLAG_ENABLE_EARLY_SCREEN_TIMEOUT_DETECTOR);
+
+        final DisplayInfo info = new DisplayInfo();
+        info.displayGroupId = Display.DEFAULT_DISPLAY_GROUP;
+        when(mDisplayManagerInternalMock.getDisplayInfo(Display.DEFAULT_DISPLAY)).thenReturn(info);
+
+        setAttentiveTimeout(30000);
+        setScreenTimeoutOverrideConfig(10000);
+
+        createService();
+        startSystem();
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+
+        // Grab a wakelock
+        final String tag = "wakelock1";
+        final String packageName = "pkg.name";
+        final IBinder token = new Binder();
+        final int flags = PowerManager.SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK;
+        mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
+                null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY,
+                null /* callback */);
+
+        // Still keep awake when not timeout.
+        advanceTime(500);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+        mService.getBinderServiceInstance().userActivity(Display.DEFAULT_DISPLAY, mClock.now(),
+                PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
+
+        // screen timeout override wake lock should be released after user activity.
+        advanceTime(10000);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+        assertThat(mService.findWakeLockLocked(token)).isEqualTo(null);
+
+        // Should not affect anything after release the wake lock.
+        mService.getBinderServiceInstance().releaseWakeLock(token, 0 /* flags */);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+    }
+
+    @Test
+    public void testScreenTimeoutOverrideWakeLockFullWakeLock() {
+        mSetFlagsRule.enableFlags(com.android.server.power.feature.flags
+                .Flags.FLAG_ENABLE_EARLY_SCREEN_TIMEOUT_DETECTOR);
+
+        setAttentiveTimeout(30000);
+        setScreenTimeoutOverrideConfig(10000);
+
+        createService();
+        startSystem();
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+
+        // Grab a wakelock
+        final String tag1 = "wakelock1";
+        final String packageName1 = "pkg.name";
+        final IBinder token1 = new Binder();
+        final int flags = PowerManager.SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK;
+        mService.getBinderServiceInstance().acquireWakeLock(token1, flags, tag1, packageName1,
+                null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY,
+                null /* callback */);
+
+        advanceTime(500);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+
+        // Grab a full wake lock
+        final String tag2 = "wakelock2";
+        final String packageName2 = "pkg2.name";
+        final IBinder token2 = new Binder();
+        final int flags2 = PowerManager.FULL_WAKE_LOCK;
+        mService.getBinderServiceInstance().acquireWakeLock(token2, flags2, tag2, packageName2,
+                null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY,
+                null /* callback */);
+
+        // wake lock should be released when another full wake lock acquired.
+        advanceTime(10000);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+        assertThat(mService.findWakeLockLocked(token1)).isEqualTo(null);
+
+        // Should not affect anything after release the wake locks.
+        mService.getBinderServiceInstance().releaseWakeLock(token1, 0 /* flags */);
+        mService.getBinderServiceInstance().releaseWakeLock(token2, 0 /* flags */);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+    }
+
+    @Test
+    public void testScreenTimeoutOverrideWakeLockMultiClients() {
+        mSetFlagsRule.enableFlags(com.android.server.power.feature.flags
+                .Flags.FLAG_ENABLE_EARLY_SCREEN_TIMEOUT_DETECTOR);
+
+        setAttentiveTimeout(30000);
+        setScreenTimeoutOverrideConfig(10000);
+
+        createService();
+        startSystem();
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+
+        // Grab a wakelock
+        final String tag1 = "wakelock1";
+        final String packageName1 = "pkg.name";
+        final IBinder token1 = new Binder();
+        final int flags = PowerManager.SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK;
+        mService.getBinderServiceInstance().acquireWakeLock(token1, flags, tag1, packageName1,
+                null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY,
+                null /* callback */);
+
+        // Grab a full wake lock
+        final String tag2 = "wakelock2";
+        final String packageName2 = "pkg2.name";
+        final IBinder token2 = new Binder();
+        final int flags2 = PowerManager.SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK;
+        mService.getBinderServiceInstance().acquireWakeLock(token2, flags2, tag2, packageName2,
+                null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY,
+                null /* callback */);
+
+        advanceTime(500);
+        // Release the first lock to ensure the second lock is still valid.
+        mService.getBinderServiceInstance().releaseWakeLock(token1, 0 /* flags */);
+        advanceTime(10000);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
+
+        // Should not affect anything after release the wake locks.
+        mService.getBinderServiceInstance().releaseWakeLock(token2, 0 /* flags */);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
+    }
+
+    @Test
+    public void testGetScreenOffTimeoutOverrideApi() {
+        mSetFlagsRule.enableFlags(com.android.server.power.feature.flags
+                .Flags.FLAG_ENABLE_EARLY_SCREEN_TIMEOUT_DETECTOR);
+
+        final int screenTimeout = 30000;
+        final int screenDimTimeout = 7000;
+        final int screenTimeoutOverride = 10000;
+        setScreenTimeoutOverrideConfig(screenTimeoutOverride);
+
+        createService();
+        startSystem();
+
+        final String tag = "wakelock";
+        final String packageName = "pkg.name";
+        final IBinder token = new Binder();
+        final int flags = PowerManager.SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK;
+
+        // define cases as {isFaceDown, isTimeoutOverride, expectedTimeout}
+        final int[][] testCases = {{0, 0, screenTimeout}, {0, 1, screenTimeoutOverride},
+                {1, 0, screenDimTimeout}, {1, 1, screenDimTimeout}};
+
+        for (int[] expect : testCases) {
+            mService.mIsFaceDown = expect[0] == 1;
+            final boolean acquireWakeLock = expect[1] == 1;
+            if (acquireWakeLock) {
+                mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
+                        null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY,
+                        null /* callback */);
+            }
+            assertThat(mService.getScreenOffTimeoutOverrideLocked(screenTimeout, screenDimTimeout))
+                    .isEqualTo(expect[2]);
+            if (acquireWakeLock) {
+                mService.getBinderServiceInstance().releaseWakeLock(token, 0);
+            }
+        }
     }
 
     private void setCachedUidProcState(int uid) {

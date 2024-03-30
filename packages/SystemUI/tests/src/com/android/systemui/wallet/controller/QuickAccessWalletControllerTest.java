@@ -29,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.PendingIntent;
+import android.app.role.RoleManager;
 import android.content.Intent;
 import android.service.quickaccesswallet.GetWalletCardsRequest;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
@@ -54,11 +55,14 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
+
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest
 public class QuickAccessWalletControllerTest extends SysuiTestCase {
 
+    private static final String WALLET_ROLE_HOLDER = "wallet.role.holder";
     @Mock
     private QuickAccessWalletClient mQuickAccessWalletClient;
     @Mock
@@ -69,6 +73,8 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
     private ActivityStarter mActivityStarter;
     @Mock
     private ActivityTransitionAnimator.Controller mAnimationController;
+    @Mock
+    private RoleManager mRoleManager;
     @Captor
     private ArgumentCaptor<GetWalletCardsRequest> mRequestCaptor;
     @Captor
@@ -102,7 +108,8 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
                 MoreExecutors.directExecutor(),
                 mSecureSettings,
                 mQuickAccessWalletClient,
-                mClock);
+                mClock,
+                mRoleManager);
     }
 
     @Test
@@ -110,6 +117,24 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
         mController.updateWalletPreference();
 
         assertTrue(mController.isWalletEnabled());
+    }
+
+    @Test
+    public void walletRoleAvailable_isAvailable() {
+        when(mRoleManager.isRoleAvailable(eq(RoleManager.ROLE_WALLET))).thenReturn(true);
+        when(mRoleManager.getRoleHolders(eq(RoleManager.ROLE_WALLET)))
+                .thenReturn(List.of(WALLET_ROLE_HOLDER));
+
+        assertTrue(mController.isWalletRoleAvailable());
+    }
+
+    @Test
+    public void walletRoleAvailable_isNotAvailable() {
+        when(mRoleManager.isRoleAvailable(eq(RoleManager.ROLE_WALLET))).thenReturn(false);
+        when(mRoleManager.getRoleHolders(eq(RoleManager.ROLE_WALLET)))
+                .thenReturn(List.of(WALLET_ROLE_HOLDER));
+
+        assertFalse(mController.isWalletRoleAvailable());
     }
 
     @Test

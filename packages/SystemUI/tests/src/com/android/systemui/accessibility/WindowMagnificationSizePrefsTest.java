@@ -18,13 +18,20 @@ package com.android.systemui.accessibility;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.Size;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.FakeSharedPreferences;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -33,8 +40,18 @@ import org.junit.runner.RunWith;
 @TestableLooper.RunWithLooper
 public class WindowMagnificationSizePrefsTest extends SysuiTestCase {
 
-    WindowMagnificationSizePrefs mWindowMagnificationSizePrefs =
-            new WindowMagnificationSizePrefs(mContext);
+    WindowMagnificationSizePrefs mWindowMagnificationSizePrefs;
+    FakeSharedPreferences mSharedPreferences;
+
+    @Before
+    public void setUp() {
+        mContext = spy(mContext);
+        mSharedPreferences = new FakeSharedPreferences();
+        when(mContext.getSharedPreferences(
+                eq("window_magnification_preferences"), anyInt()))
+                .thenReturn(mSharedPreferences);
+        mWindowMagnificationSizePrefs = new WindowMagnificationSizePrefs(mContext);
+    }
 
     @Test
     public void saveSizeForCurrentDensity_getExpectedSize() {

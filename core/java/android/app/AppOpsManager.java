@@ -18,7 +18,7 @@ package android.app;
 
 
 import static android.location.flags.Flags.FLAG_LOCATION_BYPASS;
-import static android.media.audio.Flags.foregroundAudioControl;
+import static android.media.audio.Flags.roForegroundAudioControl;
 import static android.permission.flags.Flags.FLAG_OP_ENABLE_MOBILE_DATA_BY_USER;
 import static android.view.contentprotection.flags.Flags.FLAG_CREATE_ACCESSIBILITY_OVERLAY_APP_OP_ENABLED;
 import static android.view.contentprotection.flags.Flags.FLAG_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER_APP_OP_ENABLED;
@@ -3246,7 +3246,7 @@ public class AppOpsManager {
      * @hide
      */
     public static @Mode int opToDefaultMode(int op) {
-        if (op == OP_TAKE_AUDIO_FOCUS && foregroundAudioControl()) {
+        if (op == OP_TAKE_AUDIO_FOCUS && roForegroundAudioControl()) {
             // when removing the flag, change the entry in sAppOpInfos for OP_TAKE_AUDIO_FOCUS
             return AppOpsManager.MODE_FOREGROUND;
         }

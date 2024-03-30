@@ -19,17 +19,15 @@ package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.Scenes.Shade
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
-import com.android.systemui.statusbar.notification.stack.shared.model.StackClipping
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimClipping
 import com.android.systemui.util.kotlin.FlowDumperImpl
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -41,7 +39,6 @@ import kotlinx.coroutines.flow.map
 class NotificationStackAppearanceViewModel
 @Inject
 constructor(
-    @Application applicationScope: CoroutineScope,
     dumpManager: DumpManager,
     stackAppearanceInteractor: NotificationStackAppearanceInteractor,
     shadeInteractor: ShadeInteractor,
@@ -83,16 +80,16 @@ constructor(
             .dumpWhileCollecting("expandFraction")
 
     /** The bounds of the notification stack in the current scene. */
-    val stackClipping: Flow<StackClipping> =
+    val shadeScrimClipping: Flow<ShadeScrimClipping> =
         combine(
-                stackAppearanceInteractor.stackBounds,
-                stackAppearanceInteractor.stackRounding,
-                ::StackClipping
+                stackAppearanceInteractor.shadeScrimBounds,
+                stackAppearanceInteractor.shadeScrimRounding,
+                ::ShadeScrimClipping
             )
             .dumpWhileCollecting("stackClipping")
 
     /** The y-coordinate in px of top of the contents of the notification stack. */
-    val contentTop: StateFlow<Float> = stackAppearanceInteractor.contentTop.dumpValue("contentTop")
+    val stackTop: StateFlow<Float> = stackAppearanceInteractor.stackTop.dumpValue("stackTop")
 
     /** Whether the notification stack is scrollable or not. */
     val isScrollable: Flow<Boolean> =

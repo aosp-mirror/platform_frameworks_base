@@ -31,6 +31,7 @@ import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_TOP;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
@@ -321,6 +322,10 @@ class DragResizeInputListener implements AutoCloseable {
         }
     }
 
+    boolean shouldHandleEvent(MotionEvent e, Point offset) {
+        return mInputEventReceiver.shouldHandleEvent(e, offset);
+    }
+
     boolean isHandlingDragResize() {
         return mInputEventReceiver.isHandlingEvents();
     }
@@ -408,18 +413,14 @@ class DragResizeInputListener implements AutoCloseable {
             boolean result = false;
             // Check if this is a touch event vs mouse event.
             // Touch events are tracked in four corners. Other events are tracked in resize edges.
-            boolean isTouch = (e.getSource() & SOURCE_TOUCHSCREEN) == SOURCE_TOUCHSCREEN;
+            boolean isTouch = isTouchEvent(e);
             switch (e.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN: {
-                    float x = e.getX(0);
-                    float y = e.getY(0);
-                    if (isTouch) {
-                        mShouldHandleEvents = isInCornerBounds(x, y);
-                    } else {
-                        mShouldHandleEvents = isInResizeHandleBounds(x, y);
-                    }
+                    mShouldHandleEvents = shouldHandleEvent(e, isTouch, new Point() /* offset */);
                     if (mShouldHandleEvents) {
                         mDragPointerId = e.getPointerId(0);
+                        float x = e.getX(0);
+                        float y = e.getY(0);
                         float rawX = e.getRawX(0);
                         float rawY = e.getRawY(0);
                         int ctrlType = calculateCtrlType(isTouch, x, y);
@@ -447,7 +448,6 @@ class DragResizeInputListener implements AutoCloseable {
                 }
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL: {
-                    mInputManager.pilferPointers(mInputChannel.getToken());
                     if (mShouldHandleEvents) {
                         int dragPointerIndex = e.findPointerIndex(mDragPointerId);
                         final Rect taskBounds = mCallback.onDragPositioningEnd(
@@ -637,6 +637,26 @@ class DragResizeInputListener implements AutoCloseable {
                 }
                 mLastCursorType = cursorType;
             }
+        }
+
+        private boolean shouldHandleEvent(MotionEvent e, Point offset) {
+            return shouldHandleEvent(e, isTouchEvent(e), offset);
+        }
+
+        private boolean shouldHandleEvent(MotionEvent e, boolean isTouch, Point offset) {
+            boolean result;
+            final float x = e.getX(0) + offset.x;
+            final float y = e.getY(0) + offset.y;
+            if (isTouch) {
+                result = isInCornerBounds(x, y);
+            } else {
+                result = isInResizeHandleBounds(x, y);
+            }
+            return result;
+        }
+
+        private boolean isTouchEvent(MotionEvent e) {
+            return (e.getSource() & SOURCE_TOUCHSCREEN) == SOURCE_TOUCHSCREEN;
         }
     }
 }

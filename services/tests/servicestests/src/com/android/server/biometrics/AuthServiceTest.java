@@ -269,7 +269,7 @@ public class AuthServiceTest {
                 mFingerprintSensorConfigurationsCaptor.capture());
 
         final SensorProps[] fingerprintProp = mFingerprintSensorConfigurationsCaptor.getValue()
-                .getSensorPairForInstance("defaultHIDL").second;
+                .getSensorPropForInstance("defaultHIDL");
 
         assertEquals(fingerprintProp[0].commonProps.sensorId, fingerprintId);
         assertEquals(fingerprintProp[0].commonProps.sensorStrength,
@@ -280,7 +280,7 @@ public class AuthServiceTest {
 
         final android.hardware.biometrics.face.SensorProps[] faceProp =
                 mFaceSensorConfigurationsCaptor.getValue()
-                        .getSensorPairForInstance("defaultHIDL").second;
+                        .getSensorPropForInstance("defaultHIDL");
 
         assertEquals(faceProp[0].commonProps.sensorId, faceId);
         assertEquals(faceProp[0].commonProps.sensorStrength,

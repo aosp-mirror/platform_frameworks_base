@@ -29,8 +29,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 private val TAG = KeyguardClockInteractor::class.simpleName
-/** Manages keyguard clock for the lockscreen root view. */
-/** Encapsulates business-logic related to the keyguard clock. */
+/** Manages and ecapsulates the clock components of the lockscreen root view. */
 @SysUISingleton
 class KeyguardClockInteractor
 @Inject
@@ -46,6 +45,8 @@ constructor(
 
     val previewClock: Flow<ClockController> = keyguardClockRepository.previewClock
 
+    val clockEventController: ClockEventController by keyguardClockRepository::clockEventController
+
     var clock: ClockController? by keyguardClockRepository.clockEventController::clock
 
     val clockSize: StateFlow<Int> = keyguardClockRepository.clockSize
@@ -53,8 +54,10 @@ constructor(
         keyguardClockRepository.setClockSize(size)
     }
 
-    val clockEventController: ClockEventController
-        get() {
-            return keyguardClockRepository.clockEventController
+    fun animateFoldToAod(foldFraction: Float) {
+        clock?.let { clock ->
+            clock.smallClock.animations.fold(foldFraction)
+            clock.largeClock.animations.fold(foldFraction)
         }
+    }
 }

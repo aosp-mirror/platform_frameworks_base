@@ -8168,6 +8168,15 @@
     <permission android:name="android.permission.RESTRICT_DISPLAY_MODES"
         android:protectionLevel="signature" />
 
+    <!-- Allows internal applications to override screen timeout temporarily
+        <p>Protection level: signature
+        <p>Not for use by third-party applications.
+        @FlaggedApi("com.android.server.power.feature.flags.enable_early_screen_timeout_detector")
+        @hide
+    -->
+    <permission android:name="android.permission.SCREEN_TIMEOUT_OVERRIDE"
+                android:protectionLevel="signature" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->

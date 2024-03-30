@@ -47,7 +47,6 @@ import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.statusbar.commandQueue
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelChildren
@@ -64,10 +63,8 @@ import org.junit.runners.JUnit4
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.clearInvocations
-import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.spy
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 /**
@@ -521,7 +518,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             advanceTimeBy(100L)
 
             // THEN the transition is ignored
-            verify(transitionRepository, never()).startTransition(any())
+            assertThat(transitionRepository).noTransitionsStarted()
 
             coroutineContext.cancelChildren()
         }

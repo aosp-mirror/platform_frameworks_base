@@ -53,7 +53,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.os.Handler;
-import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.support.test.uiautomator.By;
@@ -63,7 +62,6 @@ import android.support.test.uiautomator.Until;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.Flags;
 import android.view.accessibility.IAccessibilityManager;
 import android.widget.Button;
 
@@ -298,7 +296,6 @@ public class AccessibilityShortcutChooserActivityTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ALLOW_SHORTCUT_CHOOSER_ON_LOCKSCREEN)
     public void createDialog_onLockscreen_hasExpectedContent() {
         when(mKeyguardManager.isKeyguardLocked()).thenReturn(true);
         launchActivity();

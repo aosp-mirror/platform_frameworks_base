@@ -83,7 +83,6 @@ import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.res.R;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.scene.ui.view.WindowRootView;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeViewController;
@@ -115,7 +114,6 @@ import com.android.systemui.statusbar.notification.collection.render.NotifStats;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.dagger.SilentHeader;
-import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor;
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
@@ -132,7 +130,6 @@ import com.android.systemui.statusbar.notification.stack.ui.viewbinder.Notificat
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -185,7 +182,6 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     private final FalsingCollector mFalsingCollector;
     private final FalsingManager mFalsingManager;
     private final NotificationSwipeHelper.Builder mNotificationSwipeHelperBuilder;
-    private final ScrimController mScrimController;
     private final NotifPipeline mNotifPipeline;
     private final NotifCollection mNotifCollection;
     private final UiEventLogger mUiEventLogger;
@@ -734,7 +730,6 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             FalsingCollector falsingCollector,
             FalsingManager falsingManager,
             NotificationSwipeHelper.Builder notificationSwipeHelperBuilder,
-            ScrimController scrimController,
             GroupExpansionManager groupManager,
             @SilentHeader SectionHeaderController silentHeaderController,
             NotifPipeline notifPipeline,
@@ -743,11 +738,9 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             UiEventLogger uiEventLogger,
             NotificationRemoteInputManager remoteInputManager,
             VisibilityLocationProviderDelegator visibilityLocationProviderDelegator,
-            ActiveNotificationsInteractor activeNotificationsInteractor,
             SeenNotificationsInteractor seenNotificationsInteractor,
             NotificationListViewBinder viewBinder,
             ShadeController shadeController,
-            SceneContainerFlags sceneContainerFlags,
             Provider<WindowRootView> windowRootView,
             NotificationStackAppearanceInteractor stackAppearanceInteractor,
             InteractionJankMonitor jankMonitor,
@@ -790,7 +783,6 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         mFalsingCollector = falsingCollector;
         mFalsingManager = falsingManager;
         mNotificationSwipeHelperBuilder = notificationSwipeHelperBuilder;
-        mScrimController = scrimController;
         mJankMonitor = jankMonitor;
         mNotificationStackSizeCalculator = notificationStackSizeCalculator;
         mGroupExpansionManager = groupManager;
@@ -1178,7 +1170,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     /** Get the y-coordinate of the top bound of the stack. */
     public float getPlaceholderTop() {
-        return mStackAppearanceInteractor.getStackBounds().getValue().getTop();
+        return mStackAppearanceInteractor.getShadeScrimBounds().getValue().getTop();
     }
 
     /**
@@ -1191,7 +1183,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     /** Set the intrinsic height of the stack content without additional padding. */
     public void setIntrinsicContentHeight(float intrinsicContentHeight) {
-        mStackAppearanceInteractor.setIntrinsicContentHeight(intrinsicContentHeight);
+        mStackAppearanceInteractor.setStackHeight(intrinsicContentHeight);
     }
 
     public void setIntrinsicPadding(int intrinsicPadding) {

@@ -94,7 +94,8 @@ public class SensitiveNotificationProtectionControllerImpl
 
                         int packageUid;
                         try {
-                            packageUid = mPackageManager.getPackageUid(info.getPackageName(), 0);
+                            packageUid = mPackageManager.getPackageUidAsUser(info.getPackageName(),
+                                    info.getUserHandle().getIdentifier());
                         } catch (PackageManager.NameNotFoundException e) {
                             Log.w(LOG_TAG, "Package " + info.getPackageName() + " not found");
                             packageUid = -1;

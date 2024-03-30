@@ -729,8 +729,8 @@ public class FaceService extends SystemService {
         private List<ServiceProvider> getProviders(
                 FaceSensorConfigurations faceSensorConfigurations) {
             final List<ServiceProvider> providers = new ArrayList<>();
-            final Pair<String, SensorProps[]> filteredSensorProps =
-                    filterAvailableHalInstances(faceSensorConfigurations);
+            final Pair<String, SensorProps[]> filteredSensorProps = filterAvailableHalInstances(
+                            faceSensorConfigurations);
             providers.add(mFaceProviderFunction.getFaceProvider(filteredSensorProps,
                     faceSensorConfigurations.getResetLockoutRequiresChallenge()));
             return providers;
@@ -739,28 +739,36 @@ public class FaceService extends SystemService {
         @NonNull
         private Pair<String, SensorProps[]> filterAvailableHalInstances(
                 FaceSensorConfigurations faceSensorConfigurations) {
-            Pair<String, SensorProps[]> finalSensorPair = faceSensorConfigurations.getSensorPair();
+            String finalSensorInstance = faceSensorConfigurations.getSensorInstance();
 
             if (faceSensorConfigurations.isSingleSensorConfigurationPresent()) {
-                return finalSensorPair;
+                return new Pair<>(finalSensorInstance,
+                        faceSensorConfigurations.getSensorPropForInstance(finalSensorInstance));
             }
-
-            final Pair<String, SensorProps[]> virtualSensorProps = faceSensorConfigurations
-                    .getSensorPairForInstance("virtual");
-
-            if (Utils.isVirtualEnabled(getContext())) {
-                if (virtualSensorProps != null) {
-                    return virtualSensorProps;
+            final String virtualInstance = "virtual";
+            final boolean isVirtualHalPresent =
+                    faceSensorConfigurations.doesInstanceExist(virtualInstance);
+            if (Flags.faceVhalFeature() && Utils.isVirtualEnabled(getContext())) {
+                if (isVirtualHalPresent) {
+                    return new Pair<>(virtualInstance,
+                            faceSensorConfigurations.getSensorPropForInstance(virtualInstance));
                 } else {
                     Slog.e(TAG, "Could not find virtual interface while it is enabled");
-                    return finalSensorPair;
+                    return new Pair<>(finalSensorInstance,
+                            faceSensorConfigurations.getSensorPropForInstance(finalSensorInstance));
                 }
             } else {
-                if (virtualSensorProps != null) {
-                    return faceSensorConfigurations.getSensorPairNotForInstance("virtual");
+                if (isVirtualHalPresent) {
+                    final String notAVirtualInstance =
+                            faceSensorConfigurations.getSensorNameNotForInstance(virtualInstance);
+                    if (notAVirtualInstance != null) {
+                        return new Pair<>(notAVirtualInstance, faceSensorConfigurations
+                                .getSensorPropForInstance(notAVirtualInstance));
+                    }
                 }
             }
-            return finalSensorPair;
+            return new Pair<>(finalSensorInstance, faceSensorConfigurations
+                    .getSensorPropForInstance(finalSensorInstance));
         }
 
         private Pair<List<FaceSensorPropertiesInternal>, List<String>>

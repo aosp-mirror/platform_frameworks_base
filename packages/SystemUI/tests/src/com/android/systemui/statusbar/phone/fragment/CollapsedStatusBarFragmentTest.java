@@ -52,7 +52,7 @@ import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeExpansionStateManager;
-import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
@@ -115,7 +115,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     @Mock
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     @Mock
-    private ShadeViewController mShadeViewController;
+    private PanelExpansionInteractor mPanelExpansionInteractor;
     @Mock
     private StatusBarIconController.DarkIconManager.Factory mIconManagerFactory;
     @Mock
@@ -304,7 +304,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // WHEN the shade is open and configured to hide the status bar icons
         mShadeExpansionStateManager.updateState(STATE_OPEN);
-        when(mShadeViewController.shouldHideStatusBarIconsWhenExpanded()).thenReturn(true);
+        when(mPanelExpansionInteractor.shouldHideStatusBarIconsWhenExpanded()).thenReturn(true);
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
@@ -320,7 +320,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // WHEN the shade is open but *not* configured to hide the status bar icons
         mShadeExpansionStateManager.updateState(STATE_OPEN);
-        when(mShadeViewController.shouldHideStatusBarIconsWhenExpanded()).thenReturn(false);
+        when(mPanelExpansionInteractor.shouldHideStatusBarIconsWhenExpanded()).thenReturn(false);
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
@@ -337,7 +337,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // WHEN the shade is open and configured to hide the status bar icons
         mShadeExpansionStateManager.updateState(STATE_OPEN);
-        when(mShadeViewController.shouldHideStatusBarIconsWhenExpanded()).thenReturn(true);
+        when(mPanelExpansionInteractor.shouldHideStatusBarIconsWhenExpanded()).thenReturn(true);
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
@@ -696,7 +696,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mCollapsedStatusBarViewBinder,
                 mStatusBarHideIconsForBouncerManager,
                 mKeyguardStateController,
-                mShadeViewController,
+                mPanelExpansionInteractor,
                 mStatusBarStateController,
                 mock(NotificationIconContainerStatusBarViewBinder.class),
                 mCommandQueue,

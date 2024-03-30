@@ -16,8 +16,10 @@
 
 package android.view;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.annotation.XmlRes;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -39,6 +41,7 @@ import android.os.Parcelable;
 import android.os.PointerIconType;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.flags.Flags;
 
 import com.android.internal.util.XmlUtils;
 
@@ -636,5 +639,16 @@ public final class PointerIcon implements Parcelable {
             case TYPE_HANDWRITING: return "HANDWRITING";
             default: return Integer.toString(type);
         }
+    }
+
+    /**
+     * Sets whether drop shadow will draw in the native code.
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(Flags.FLAG_ENABLE_VECTOR_CURSORS)
+    public void setDrawNativeDropShadow(boolean drawNativeDropShadow) {
+        mDrawNativeDropShadow = drawNativeDropShadow;
     }
 }

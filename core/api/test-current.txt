@@ -3676,6 +3676,10 @@ package android.view {
     field public static final int FLAG_IS_ACCESSIBILITY_EVENT = 2048; // 0x800
   }
 
+  public final class PointerIcon implements android.os.Parcelable {
+    method @FlaggedApi("android.view.flags.enable_vector_cursors") public void setDrawNativeDropShadow(boolean);
+  }
+
   @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME) @java.lang.annotation.Target({java.lang.annotation.ElementType.METHOD}) public @interface RemotableViewMethod {
     method public abstract String asyncImpl() default "";
   }

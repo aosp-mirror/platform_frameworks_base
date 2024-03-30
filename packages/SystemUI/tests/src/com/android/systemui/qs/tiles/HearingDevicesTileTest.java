@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.Intent;
 import android.os.Handler;
@@ -29,12 +30,14 @@ import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.accessibility.hearingaid.HearingDevicesDialogManager;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -73,6 +76,8 @@ public class HearingDevicesTileTest extends SysuiTestCase {
     private ActivityStarter mActivityStarter;
     @Mock
     private QSLogger mQSLogger;
+    @Mock
+    HearingDevicesDialogManager mHearingDevicesDialogManager;
 
     private TestableLooper mTestableLooper;
     private HearingDevicesTile mTile;
@@ -80,6 +85,7 @@ public class HearingDevicesTileTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         mTestableLooper = TestableLooper.get(this);
+        when(mHost.getContext()).thenReturn(mContext);
 
         mTile = new HearingDevicesTile(
                 mHost,
@@ -90,7 +96,8 @@ public class HearingDevicesTileTest extends SysuiTestCase {
                 mMetricsLogger,
                 mStatusBarStateController,
                 mActivityStarter,
-                mQSLogger);
+                mQSLogger,
+                mHearingDevicesDialogManager);
 
         mTile.initialize();
         mTestableLooper.processAllMessages();
@@ -124,5 +131,14 @@ public class HearingDevicesTileTest extends SysuiTestCase {
                 anyInt(), any());
         assertThat(IntentCaptor.getValue().getAction()).isEqualTo(
                 Settings.ACTION_HEARING_DEVICES_SETTINGS);
+    }
+
+    @Test
+    public void handleClick_dialogShown() {
+        View view = new View(mContext);
+        mTile.handleClick(view);
+        mTestableLooper.processAllMessages();
+
+        verify(mHearingDevicesDialogManager).showDialog(view);
     }
 }

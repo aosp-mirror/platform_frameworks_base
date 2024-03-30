@@ -136,6 +136,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NEW_MUTABLE_IMPLICIT_PENDING_INTENT_RETRIEVED;
 import static com.android.sdksandbox.flags.Flags.sdkSandboxInstrumentationInfo;
+import static com.android.server.am.ActiveServices.FGS_SAW_RESTRICTIONS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALLOWLISTS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
@@ -414,6 +415,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BinderCallHeavyHitterWatcher.BinderCallHeavyHitterListener;
 import com.android.internal.os.BinderCallHeavyHitterWatcher.HeavyHitterContainer;
 import com.android.internal.os.BinderInternal;
+import com.android.internal.os.BinderInternal.BinderProxyCountEventListener;
 import com.android.internal.os.BinderTransactionNameResolver;
 import com.android.internal.os.ByteTransferPipe;
 import com.android.internal.os.IResultReceiver;
@@ -614,8 +616,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final int MINIMUM_MEMORY_GROWTH_THRESHOLD = 10 * 1000; // 10 MB
 
     /**
-     * The number of binder proxies we need to have before we start warning and
-     * dumping debug info.
+     * The number of binder proxies we need to have before we start dumping debug info
+     * and kill the offenders.
      */
     private static final int BINDER_PROXY_HIGH_WATERMARK = 6000;
 
@@ -624,6 +626,11 @@ public class ActivityManagerService extends IActivityManager.Stub
      * after already hitting the high watermark.
      */
     private static final int BINDER_PROXY_LOW_WATERMARK = 5500;
+
+    /**
+     * The number of binder proxies we need to have before we start warning.
+     */
+    private static final int BINDER_PROXY_WARNING_WATERMARK = 5750;
 
     // Max character limit for a notification title. If the notification title is larger than this
     // the notification will not be legible to the user.
@@ -6461,7 +6468,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * This is a shortcut and <b>DOES NOT</b> include all reasons.
      * Use {@link #canScheduleUserInitiatedJobs(int, int, String)} to cover all cases.
      */
-    static boolean doesReasonCodeAllowSchedulingUserInitiatedJobs(int reasonCode) {
+    static boolean doesReasonCodeAllowSchedulingUserInitiatedJobs(int reasonCode, int uid) {
         switch (reasonCode) {
             case REASON_PROC_STATE_PERSISTENT:
             case REASON_PROC_STATE_PERSISTENT_UI:
@@ -6471,11 +6478,21 @@ public class ActivityManagerService extends IActivityManager.Stub
             case REASON_SYSTEM_UID:
             case REASON_START_ACTIVITY_FLAG:
             case REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD:
-            case REASON_SYSTEM_ALERT_WINDOW_PERMISSION:
             case REASON_COMPANION_DEVICE_MANAGER:
             case REASON_BACKGROUND_ACTIVITY_PERMISSION:
             case REASON_INSTR_BACKGROUND_ACTIVITY_PERMISSION:
                 return true;
+            case REASON_SYSTEM_ALERT_WINDOW_PERMISSION:
+                if (!Flags.fgsDisableSaw()
+                        || !CompatChanges.isChangeEnabled(FGS_SAW_RESTRICTIONS, uid)) {
+                    return true;
+                } else {
+                    // With the new SAW restrictions starting Android V, only allow the app to
+                    // schedule a user-initiated job if it's currently showing an overlay window
+                    // in additional to holding the permission - this additional logic will be
+                    // checked in #canScheduleUserInitiatedJobs(int, int, String) below since this
+                    // method is simply a shortcut for checking based on the reason codes.
+                }
         }
         return false;
     }
@@ -6488,7 +6505,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @GuardedBy(anyOf = {"this", "mProcLock"})
     private boolean isProcessInStateToScheduleUserInitiatedJobsLocked(
-            @Nullable ProcessRecord pr, long nowElapsed) {
+            @Nullable ProcessRecord pr, long nowElapsed, int uid) {
         if (pr == null) {
             return false;
         }
@@ -6505,7 +6522,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int procstate = state.getCurProcState();
         if (procstate <= PROCESS_STATE_BOUND_TOP) {
             if (doesReasonCodeAllowSchedulingUserInitiatedJobs(
-                    getReasonCodeFromProcState(procstate))) {
+                    getReasonCodeFromProcState(procstate), uid)) {
                 return true;
             }
         }
@@ -6547,7 +6564,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             final long nowElapsed = SystemClock.elapsedRealtime();
             final BackgroundStartPrivileges backgroundStartPrivileges;
             if (processRecord != null) {
-                if (isProcessInStateToScheduleUserInitiatedJobsLocked(processRecord, nowElapsed)) {
+                if (isProcessInStateToScheduleUserInitiatedJobsLocked(
+                        processRecord, nowElapsed, uid)) {
                     return true;
                 }
                 backgroundStartPrivileges = processRecord.getBackgroundStartPrivileges();
@@ -6573,17 +6591,30 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             final UidRecord uidRecord = mProcessList.getUidRecordLOSP(uid);
+            final boolean hasSawPermission = mAtmInternal.hasSystemAlertWindowPermission(uid, pid,
+                                                            pkgName);
+            final boolean strictSawCheckEnabled = Flags.fgsDisableSaw()
+                            && CompatChanges.isChangeEnabled(FGS_SAW_RESTRICTIONS, uid);
             if (uidRecord != null) {
                 for (int i = uidRecord.getNumOfProcs() - 1; i >= 0; --i) {
                     ProcessRecord pr = uidRecord.getProcessRecordByIndex(i);
-                    if (isProcessInStateToScheduleUserInitiatedJobsLocked(pr, nowElapsed)) {
+                    if (isProcessInStateToScheduleUserInitiatedJobsLocked(pr, nowElapsed, uid)) {
                         return true;
+                    } else if (hasSawPermission && strictSawCheckEnabled) {
+                        // isProcessInStateToScheduleUserInitiatedJobsLocked() doesn't do a strict
+                        // check for the SAW permission which is enabled from V onwards, so perform
+                        // that here (pre-V versions will be checked in the conditional below)
+                        // Starting Android V, only allow the app to schedule a user-initiated job
+                        // if it's granted the permission and currently showing an overlay window
+                        if (pr != null && pr.mState.hasOverlayUi()) {
+                            return true;
+                        }
                     }
                 }
             }
 
-            if (mAtmInternal.hasSystemAlertWindowPermission(uid, pid, pkgName)) {
-                // REASON_SYSTEM_ALERT_WINDOW_PERMISSION;
+            if (hasSawPermission && !strictSawCheckEnabled) {
+                // REASON_SYSTEM_ALERT_WINDOW_PERMISSION (pre-V)
                 return true;
             }
 
@@ -8015,6 +8046,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         return uidRecord != null && !uidRecord.isSetIdle();
     }
 
+    @Override
+    public long getUidLastIdleElapsedTime(int uid, String callingPackage) {
+        if (!hasUsageStatsPermission(callingPackage)) {
+            enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
+                    "getUidLastIdleElapsedTime");
+        }
+        synchronized (mProcLock) {
+            final UidRecord uidRecord = mProcessList.getUidRecordLOSP(uid);
+            return uidRecord != null ? uidRecord.getRealLastIdleTime() : 0;
+        }
+    }
+
     @GuardedBy("mUidFrozenStateChangedCallbackList")
     private final RemoteCallbackList<IUidFrozenStateChangedCallback>
             mUidFrozenStateChangedCallbackList = new RemoteCallbackList<>();
@@ -9051,34 +9094,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             t.traceBegin("setBinderProxies");
             BinderInternal.nSetBinderProxyCountWatermarks(BINDER_PROXY_HIGH_WATERMARK,
-                    BINDER_PROXY_LOW_WATERMARK);
+                    BINDER_PROXY_LOW_WATERMARK, BINDER_PROXY_WARNING_WATERMARK);
             BinderInternal.nSetBinderProxyCountEnabled(true);
-            BinderInternal.setBinderProxyCountCallback(
-                    (uid) -> {
-                        Slog.wtf(TAG, "Uid " + uid + " sent too many Binders to uid "
-                                + Process.myUid());
-                        BinderProxy.dumpProxyDebugInfo();
-                        CriticalEventLog.getInstance().logExcessiveBinderCalls(uid);
-                        if (uid == Process.SYSTEM_UID) {
-                            Slog.i(TAG, "Skipping kill (uid is SYSTEM)");
-                        } else {
-                            killUid(UserHandle.getAppId(uid), UserHandle.getUserId(uid),
-                                    ApplicationExitInfo.REASON_EXCESSIVE_RESOURCE_USAGE,
-                                    ApplicationExitInfo.SUBREASON_EXCESSIVE_BINDER_OBJECTS,
-                                    "Too many Binders sent to SYSTEM");
-                            // We need to run a GC here, because killing the processes involved
-                            // actually isn't guaranteed to free up the proxies; in fact, if the
-                            // GC doesn't run for a long time, we may even exceed the global
-                            // proxy limit for a process (20000), resulting in system_server itself
-                            // being killed.
-                            // Note that the GC here might not actually clean up all the proxies,
-                            // because the binder reference decrements will come in asynchronously;
-                            // but if new processes belonging to the UID keep adding proxies, we
-                            // will get another callback here, and run the GC again - this time
-                            // cleaning up the old proxies.
-                            VMRuntime.getRuntime().requestConcurrentGC();
-                        }
-                    }, mHandler);
+            BinderInternal.setBinderProxyCountCallback(new MyBinderProxyCountEventListener(),
+                    mHandler);
             t.traceEnd(); // setBinderProxies
 
             t.traceEnd(); // ActivityManagerStartApps
@@ -9090,6 +9109,46 @@ public class ActivityManagerService extends IActivityManager.Stub
             t.traceEnd(); // componentAlias
 
             t.traceEnd(); // PhaseActivityManagerReady
+        }
+    }
+
+    private class MyBinderProxyCountEventListener implements BinderProxyCountEventListener {
+        @Override
+        public void onLimitReached(int uid) {
+            Slog.wtf(TAG, "Uid " + uid + " sent too many Binders to uid "
+                    + Process.myUid());
+            BinderProxy.dumpProxyDebugInfo();
+            CriticalEventLog.getInstance().logExcessiveBinderCalls(uid);
+            if (uid == Process.SYSTEM_UID) {
+                Slog.i(TAG, "Skipping kill (uid is SYSTEM)");
+            } else {
+                killUid(UserHandle.getAppId(uid), UserHandle.getUserId(uid),
+                        ApplicationExitInfo.REASON_EXCESSIVE_RESOURCE_USAGE,
+                        ApplicationExitInfo.SUBREASON_EXCESSIVE_BINDER_OBJECTS,
+                        "Too many Binders sent to SYSTEM");
+                // We need to run a GC here, because killing the processes involved
+                // actually isn't guaranteed to free up the proxies; in fact, if the
+                // GC doesn't run for a long time, we may even exceed the global
+                // proxy limit for a process (20000), resulting in system_server itself
+                // being killed.
+                // Note that the GC here might not actually clean up all the proxies,
+                // because the binder reference decrements will come in asynchronously;
+                // but if new processes belonging to the UID keep adding proxies, we
+                // will get another callback here, and run the GC again - this time
+                // cleaning up the old proxies.
+                VMRuntime.getRuntime().requestConcurrentGC();
+            }
+        }
+
+        @Override
+        public void onWarningThresholdReached(int uid) {
+            if (Flags.logExcessiveBinderProxies()) {
+                Slog.w(TAG, "Uid " + uid + " sent too many ("
+                        + BINDER_PROXY_WARNING_WATERMARK + ") Binders to uid " + Process.myUid());
+                FrameworkStatsLog.write(
+                        FrameworkStatsLog.EXCESSIVE_BINDER_PROXY_COUNT_REPORTED,
+                        uid);
+            }
         }
     }
 

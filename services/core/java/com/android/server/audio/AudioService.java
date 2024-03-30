@@ -34,7 +34,7 @@ import static android.media.audio.Flags.autoPublicVolumeApiHardening;
 import static android.media.audio.Flags.automaticBtDeviceType;
 import static android.media.audio.Flags.featureSpatialAudioHeadtrackingLowLatency;
 import static android.media.audio.Flags.focusFreezeTestApi;
-import static android.media.audio.Flags.foregroundAudioControl;
+import static android.media.audio.Flags.roForegroundAudioControl;
 import static android.media.audiopolicy.Flags.enableFadeManagerConfiguration;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.INVALID_UID;
@@ -4539,10 +4539,11 @@ public class AudioService extends IAudioService.Stub
                 + focusFreezeTestApi());
         pw.println("\tcom.android.media.audio.disablePrescaleAbsoluteVolume:"
                 + disablePrescaleAbsoluteVolume());
+
         pw.println("\tcom.android.media.audio.setStreamVolumeOrder:"
                 + setStreamVolumeOrder());
-        pw.println("\tandroid.media.audio.foregroundAudioControl:"
-                + foregroundAudioControl());
+        pw.println("\tandroid.media.audio.roForegroundAudioControl:"
+                + roForegroundAudioControl());
     }
 
     private void dumpAudioMode(PrintWriter pw) {

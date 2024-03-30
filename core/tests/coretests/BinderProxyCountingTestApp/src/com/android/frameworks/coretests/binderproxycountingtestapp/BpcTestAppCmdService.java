@@ -17,14 +17,15 @@
 package com.android.frameworks.coretests.binderproxycountingtestapp;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.database.ContentObserver;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.android.frameworks.coretests.aidl.IBinderProxyCountingService;
@@ -49,24 +50,20 @@ public class BpcTestAppCmdService extends Service {
 
     private IBpcTestAppCmdService.Stub mBinder = new IBpcTestAppCmdService.Stub() {
 
-        private ArrayList<BroadcastReceiver> mBrList = new ArrayList();
+        private ArrayList<ContentObserver> mCoList = new ArrayList();
         private ArrayList<ITestRemoteCallback> mTrcList = new ArrayList();
+        private Handler mHandler = new Handler();
 
         @Override
         public void createSystemBinders(int count) {
             int i = 0;
             while (i++ < count) {
-                BroadcastReceiver br = new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-
-                    }
-                };
-                IntentFilter filt = new IntentFilter(Intent.ACTION_POWER_DISCONNECTED);
-                synchronized (mBrList) {
-                    mBrList.add(br);
+                final ContentObserver co = new ContentObserver(mHandler) {};
+                synchronized (mCoList) {
+                    mCoList.add(co);
                 }
-                registerReceiver(br, filt);
+                getContentResolver().registerContentObserver(
+                        Settings.System.CONTENT_URI, false, co);
             }
         }
 
@@ -74,11 +71,11 @@ public class BpcTestAppCmdService extends Service {
         public void releaseSystemBinders(int count) {
             int i = 0;
             while (i++ < count) {
-                BroadcastReceiver br;
-                synchronized (mBrList) {
-                    br = mBrList.remove(0);
+                ContentObserver co;
+                synchronized (mCoList) {
+                    co = mCoList.remove(0);
                 }
-                unregisterReceiver(br);
+                getContentResolver().unregisterContentObserver(co);
             }
         }
 
@@ -117,9 +114,9 @@ public class BpcTestAppCmdService extends Service {
 
         @Override
         public void releaseAllBinders() {
-            synchronized (mBrList) {
-                while (mBrList.size() > 0) {
-                    unregisterReceiver(mBrList.remove(0));
+            synchronized (mCoList) {
+                while (mCoList.size() > 0) {
+                    getContentResolver().unregisterContentObserver(mCoList.remove(0));
                 }
             }
             synchronized (mTrcList) {

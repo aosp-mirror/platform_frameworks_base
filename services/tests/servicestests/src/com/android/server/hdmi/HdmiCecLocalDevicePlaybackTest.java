@@ -58,7 +58,9 @@ import java.util.concurrent.TimeUnit;
 public class HdmiCecLocalDevicePlaybackTest {
     private static final int TIMEOUT_MS = HdmiConfig.TIMEOUT_MS + 1;
     private static final int HOTPLUG_INTERVAL =
-            HotplugDetectionAction.POLLING_INTERVAL_MS_FOR_PLAYBACK;
+            HotplugDetectionAction.POLLING_BATCH_INTERVAL_MS_FOR_PLAYBACK;
+    private static final long POLLING_DELAY =
+            HotplugDetectionAction.POLLING_MESSAGE_INTERVAL_MS_FOR_PLAYBACK;
 
     private static final int PORT_1 = 1;
     private static final HdmiDeviceInfo INFO_TV = HdmiDeviceInfo.cecDeviceBuilder()
@@ -1867,9 +1869,14 @@ public class HdmiCecLocalDevicePlaybackTest {
 
         mNativeWrapper.setPollAddressResponse(otherPlaybackLogicalAddress,
                 SendMessageResult.SUCCESS);
+        // Moving forward to skip hotplug interval for polling to start
         mTestLooper.moveTimeForward(HOTPLUG_INTERVAL);
         mTestLooper.dispatchAll();
-
+        // Skipping each polling delay and dispatch each polling message
+        for (int i = 0; i < 14; i++) {
+            mTestLooper.moveTimeForward(POLLING_DELAY);
+            mTestLooper.dispatchAll();
+        }
         // Check for <Give Physical Address> being sent to the newly discovered device.
         // This message is sent as part of the HotplugDetectionAction to available devices.
         HdmiCecMessage givePhysicalAddress = HdmiCecMessageBuilder.buildGivePhysicalAddress(

@@ -18,10 +18,10 @@ package com.android.systemui.haptics.qs
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.qs.tileimpl.QSTileViewImpl
 import kotlinx.coroutines.DisposableHandle
-import kotlinx.coroutines.launch
 
 class QSLongPressEffectViewBinder {
 
@@ -31,16 +31,18 @@ class QSLongPressEffectViewBinder {
 
     fun bind(
         tile: QSTileViewImpl,
+        tileSpec: String?,
         effect: QSLongPressEffect?,
     ) {
         if (effect == null) return
 
         handle =
             tile.repeatWhenAttached {
-                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                repeatOnLifecycle(Lifecycle.State.CREATED) {
                     effect.scope = this
+                    val tag = "${tileSpec ?: "unknownTileSpec"}#LongPressEffect"
 
-                    launch {
+                    launch("$tag#progress") {
                         effect.effectProgress.collect { progress ->
                             progress?.let {
                                 if (it == 0f) {
@@ -51,7 +53,7 @@ class QSLongPressEffectViewBinder {
                         }
                     }
 
-                    launch {
+                    launch("$tag#action") {
                         effect.actionType.collect { action ->
                             action?.let {
                                 when (it) {

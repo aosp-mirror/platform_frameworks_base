@@ -421,6 +421,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         return mHandleMenu != null;
     }
 
+    boolean shouldResizeListenerHandleEvent(MotionEvent e, Point offset) {
+        return mDragResizeListener.shouldHandleEvent(e, offset);
+    }
+
     boolean isHandlingDragResize() {
         return mDragResizeListener != null && mDragResizeListener.isHandlingDragResize();
     }
