@@ -250,7 +250,7 @@
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Ubicación"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Salvapantallas"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Acceso a cámara"</string>
-    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Acceso al micro"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Acceso a micro"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Disponible"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bloqueado"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Dispositivo multimedia"</string>

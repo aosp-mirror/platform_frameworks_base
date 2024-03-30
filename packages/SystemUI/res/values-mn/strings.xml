@@ -111,7 +111,7 @@
     <string name="screenrecord_continue" msgid="4055347133700593164">"Эхлүүлэх"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Дэлгэцийг бичиж байна"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Дэлгэц болон аудиог бичиж байна"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Дэлгэц дээр мэдрэгчийг харуулах"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Дэлгэц дээр хүрэхийг харуулах"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Зогсоох"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Хуваалцах"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Дэлгэцийн бичлэгийг хадгалсан"</string>
