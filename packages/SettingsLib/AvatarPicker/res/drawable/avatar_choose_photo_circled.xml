@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2022 The Android Open Source Project
+    Copyright (C) 2024 The Android Open Source Project
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -14,12 +13,18 @@
     See the License for the specific language governing permissions and
     limitations under the License.
   -->
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_selected="true">
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
         <shape android:shape="oval">
             <stroke
-                android:color="?android:attr/colorPrimary"
-                android:width="@dimen/avatar_picker_padding"/>
+                android:width="2dp"
+                android:color="?android:attr/colorPrimary" />
         </shape>
     </item>
-</selector>
+    <item
+        android:bottom="@dimen/avatar_picker_icon_inset"
+        android:drawable="@drawable/ic_avatar_choose_photo"
+        android:left="@dimen/avatar_picker_icon_inset"
+        android:right="@dimen/avatar_picker_icon_inset"
+        android:top="@dimen/avatar_picker_icon_inset" />
+</layer-list>

@@ -137,7 +137,6 @@ constructor(
                             ?.create(context, cachedDevice)
                     }
                     .sort(displayPriority, bluetoothAdapter?.mostRecentlyConnectedDevices)
-
             // Only emit when the job is not cancelled
             if (isActive) {
                 mutableDeviceItemUpdate.tryEmit(deviceItems)

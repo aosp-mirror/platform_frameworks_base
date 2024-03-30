@@ -321,7 +321,7 @@ package android {
     field public static final String RECEIVE_EMERGENCY_BROADCAST = "android.permission.RECEIVE_EMERGENCY_BROADCAST";
     field @FlaggedApi("android.permission.flags.voice_activation_permission_apis") public static final String RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA = "android.permission.RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA";
     field @FlaggedApi("android.permission.flags.voice_activation_permission_apis") public static final String RECEIVE_SANDBOX_TRIGGER_AUDIO = "android.permission.RECEIVE_SANDBOX_TRIGGER_AUDIO";
-    field @FlaggedApi("com.android.server.notification.flags.redact_otp_notifications_from_untrusted_listeners") public static final String RECEIVE_SENSITIVE_NOTIFICATIONS = "android.permission.RECEIVE_SENSITIVE_NOTIFICATIONS";
+    field @FlaggedApi("android.view.flags.sensitive_content_app_protection_api") public static final String RECEIVE_SENSITIVE_NOTIFICATIONS = "android.permission.RECEIVE_SENSITIVE_NOTIFICATIONS";
     field public static final String RECEIVE_WIFI_CREDENTIAL_CHANGE = "android.permission.RECEIVE_WIFI_CREDENTIAL_CHANGE";
     field public static final String RECORD_BACKGROUND_AUDIO = "android.permission.RECORD_BACKGROUND_AUDIO";
     field public static final String RECOVERY = "android.permission.RECOVERY";

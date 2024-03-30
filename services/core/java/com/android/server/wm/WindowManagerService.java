@@ -43,6 +43,7 @@ import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myPid;
 import static android.os.Process.myUid;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.permission.flags.Flags.sensitiveContentImprovements;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
@@ -65,6 +66,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SENSITIVE_FOR_TRACING;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SPY;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
@@ -305,6 +307,7 @@ import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
 import android.view.inputmethod.ImeTracker;
+import android.widget.Toast;
 import android.window.ActivityWindowInfo;
 import android.window.AddToSurfaceSyncGroupResult;
 import android.window.ClientWindowFrames;
@@ -1718,8 +1721,8 @@ public class WindowManagerService extends IWindowManager.Stub
             final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
             displayPolicy.adjustWindowParamsLw(win, win.mAttrs);
             attrs.flags = sanitizeFlagSlippery(attrs.flags, win.getName(), callingUid, callingPid);
-            attrs.inputFeatures = sanitizeSpyWindow(attrs.inputFeatures, win.getName(), callingUid,
-                    callingPid);
+            attrs.inputFeatures = sanitizeInputFeatures(attrs.inputFeatures, win.getName(),
+                    callingUid, callingPid, win.isTrustedOverlay());
             win.setRequestedVisibleTypes(requestedVisibleTypes);
 
             res = displayPolicy.validateAddingWindowLw(attrs, callingPid, callingUid);
@@ -2289,8 +2292,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (attrs != null) {
                 displayPolicy.adjustWindowParamsLw(win, attrs);
                 attrs.flags = sanitizeFlagSlippery(attrs.flags, win.getName(), uid, pid);
-                attrs.inputFeatures = sanitizeSpyWindow(attrs.inputFeatures, win.getName(), uid,
-                        pid);
+                attrs.inputFeatures = sanitizeInputFeatures(attrs.inputFeatures, win.getName(), uid,
+                        pid, win.isTrustedOverlay());
                 int disableFlags =
                         (attrs.systemUiVisibility | attrs.subtreeSystemUiVisibility) & DISABLE_MASK;
                 if (disableFlags != 0 && !hasStatusBarPermission(pid, uid)) {
@@ -2581,14 +2584,18 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (outFrames != null && outMergedConfiguration != null) {
+                final boolean shouldReportActivityWindowInfo = outBundle != null
+                        && win.mLastReportedActivityWindowInfo != null;
+                final ActivityWindowInfo outActivityWindowInfo = shouldReportActivityWindowInfo
+                        ? new ActivityWindowInfo()
+                        : null;
+
                 win.fillClientWindowFramesAndConfiguration(outFrames, outMergedConfiguration,
-                        false /* useLatestConfig */, shouldRelayout);
-                if (Flags.activityWindowInfoFlag() && outBundle != null
-                        && win.mActivityRecord != null) {
-                    final ActivityWindowInfo activityWindowInfo = win.mActivityRecord
-                            .getActivityWindowInfo();
+                        outActivityWindowInfo, false /* useLatestConfig */, shouldRelayout);
+
+                if (shouldReportActivityWindowInfo) {
                     outBundle.putParcelable(IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO,
-                            activityWindowInfo);
+                            outActivityWindowInfo);
                 }
 
                 // Set resize-handled here because the values are sent back to the client.
@@ -8721,6 +8728,15 @@ public class WindowManagerService extends IWindowManager.Stub
                         mSensitiveContentPackages.addBlockScreenCaptureForApps(packageInfos);
                 if (modified) {
                     WindowManagerService.this.refreshScreenCaptureDisabled();
+                    if (sensitiveContentImprovements()) {
+                        // TODO(b/331842561): Combine this traversal with the one inside
+                        // refreshScreenCaptureDisabled above.
+                        mRoot.forAllWindows((w) -> {
+                            if (w.isVisible()) {
+                                WindowManagerService.this.showToastIfBlockingScreenCapture(w);
+                            }
+                        }, /* traverseTopToBottom= */ true);
+                    }
                 }
             }
         }
@@ -9105,18 +9121,26 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
-     * You need MONITOR_INPUT permission to be able to set INPUT_FEATURE_SPY.
+     * Ensure the caller has the right permissions to be able to set the requested input features.
      */
-    private int sanitizeSpyWindow(int inputFeatures, String windowName, int callingUid,
-            int callingPid) {
-        if ((inputFeatures & INPUT_FEATURE_SPY) == 0) {
-            return inputFeatures;
+    private int sanitizeInputFeatures(int inputFeatures, String windowName, int callingUid,
+            int callingPid, boolean isTrustedOverlay) {
+        // You need MONITOR_INPUT permission to be able to set INPUT_FEATURE_SPY.
+        if ((inputFeatures & INPUT_FEATURE_SPY) != 0) {
+            final int permissionResult = mContext.checkPermission(
+                    permission.MONITOR_INPUT, callingPid, callingUid);
+            if (permissionResult != PackageManager.PERMISSION_GRANTED) {
+                throw new IllegalArgumentException(
+                        "Cannot use INPUT_FEATURE_SPY from '" + windowName
+                                + "' because it doesn't the have MONITOR_INPUT permission");
+            }
         }
-        final int permissionResult = mContext.checkPermission(
-                permission.MONITOR_INPUT, callingPid, callingUid);
-        if (permissionResult != PackageManager.PERMISSION_GRANTED) {
-            throw new IllegalArgumentException("Cannot use INPUT_FEATURE_SPY from '" + windowName
-                    + "' because it doesn't the have MONITOR_INPUT permission");
+
+        // You can only use INPUT_FEATURE_SENSITIVE_FOR_TRACING on a trusted overlay.
+        if ((inputFeatures & INPUT_FEATURE_SENSITIVE_FOR_TRACING) != 0 && !isTrustedOverlay) {
+            Slog.w(TAG, "Removing INPUT_FEATURE_SENSITIVE_FOR_TRACING from '" + windowName
+                    + "' because it isn't a trusted overlay");
+            return inputFeatures & ~INPUT_FEATURE_SENSITIVE_FOR_TRACING;
         }
         return inputFeatures;
     }
@@ -9194,8 +9218,10 @@ public class WindowManagerService extends IWindowManager.Stub
         h.setWindowToken(clientToken);
         h.name = name;
 
+        final boolean isTrustedOverlay = (privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) != 0;
         flags = sanitizeFlagSlippery(flags, name, callingUid, callingPid);
-        inputFeatures = sanitizeSpyWindow(inputFeatures, name, callingUid, callingPid);
+        inputFeatures = sanitizeInputFeatures(inputFeatures, name, callingUid, callingPid,
+                isTrustedOverlay);
 
         final int sanitizedLpFlags =
                 (flags & (FLAG_NOT_TOUCHABLE | FLAG_SLIPPERY | LayoutParams.FLAG_NOT_FOCUSABLE))
@@ -9232,7 +9258,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         final SurfaceControl.Transaction t = mTransactionFactory.get();
         //  Check private trusted overlay flag to set trustedOverlay field of input window handle.
-        h.setTrustedOverlay(t, surface, (privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) != 0);
+        h.setTrustedOverlay(t, surface, isTrustedOverlay);
         t.setInputWindowInfo(surface, h);
         t.apply();
         t.close();
@@ -10118,5 +10144,29 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean getDisableSecureWindows() {
         return mDisableSecureWindows;
+    }
+
+    /**
+     * Called to notify WMS that the specified window has become visible. This shows a Toast if the
+     * window is deemed to hold sensitive content.
+     */
+    void onWindowVisible(@NonNull WindowState w) {
+        showToastIfBlockingScreenCapture(w);
+    }
+
+    /**
+     * Shows a Toast if the specified window is
+     * {@link LocalService#addBlockScreenCaptureForApps(ArraySet) blocked} from screen capture based
+     * on sensitive content protections.
+     */
+    private void showToastIfBlockingScreenCapture(@NonNull WindowState w) {
+        // TODO(b/323580163): Check if already shown and update shown state.
+        if (mSensitiveContentPackages.shouldBlockScreenCaptureForApp(w.getOwningPackage(),
+                w.getOwningUid(), w.getWindowToken())) {
+            Toast.makeText(mContext, Looper.getMainLooper(),
+                            mContext.getString(R.string.screen_not_shared_sensitive_content),
+                            Toast.LENGTH_SHORT)
+                    .show();
+        }
     }
 }

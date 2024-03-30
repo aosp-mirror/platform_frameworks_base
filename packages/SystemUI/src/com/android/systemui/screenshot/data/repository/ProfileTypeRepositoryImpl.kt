@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:SuppressLint("MissingPermission")
+@file:Suppress("MissingPermission")
 
 package com.android.systemui.screenshot.data.repository
 
-import android.annotation.SuppressLint
 import android.annotation.UserIdInt
 import android.os.UserManager
 import com.android.systemui.dagger.qualifiers.Background

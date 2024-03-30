@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.users;
+package com.android.settingslib.avatarpicker;
 
 import android.app.Activity;
 import android.content.ClipData;
@@ -38,8 +38,6 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
-
-import com.android.settingslib.utils.ThreadUtils;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -170,8 +168,9 @@ class AvatarPhotoController {
     private void copyAndCropPhoto(final Uri pictureUri, boolean delayBeforeCrop) {
         ListenableFuture<Uri> future = ThreadUtils.getBackgroundExecutor().submit(() -> {
             final ContentResolver cr = mContextInjector.getContentResolver();
-            try (InputStream in = cr.openInputStream(pictureUri);
-                    OutputStream out = cr.openOutputStream(mPreCropPictureUri)) {
+            try {
+                InputStream in = cr.openInputStream(pictureUri);
+                OutputStream out = cr.openOutputStream(mPreCropPictureUri);
                 Streams.copy(in, out);
                 return mPreCropPictureUri;
             } catch (IOException e) {

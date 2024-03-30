@@ -4370,6 +4370,22 @@ public interface WindowManager extends ViewManager {
         public static final int INPUT_FEATURE_SPY = 1 << 2;
 
         /**
+         * Input feature used to indicate that this window is sensitive for tracing.
+         * <p>
+         * A window that uses {@link LayoutParams#FLAG_SECURE} will automatically be treated as
+         * a sensitive for input tracing, but this input feature can be set on windows that don't
+         * set FLAG_SECURE. The tracing configuration will determine how these sensitive events
+         * are eventually traced.
+         * <p>
+         * This can only be set for trusted system overlays.
+         * <p>
+         * Note: Input tracing is only available on userdebug and eng builds.
+         *
+         * @hide
+         */
+        public static final int INPUT_FEATURE_SENSITIVE_FOR_TRACING = 1 << 3;
+
+        /**
          * An internal annotation for flags that can be specified to {@link #inputFeatures}.
          *
          * NOTE: These are not the same as {@link android.os.InputConfig} flags.
@@ -4381,6 +4397,7 @@ public interface WindowManager extends ViewManager {
                 INPUT_FEATURE_NO_INPUT_CHANNEL,
                 INPUT_FEATURE_DISABLE_USER_ACTIVITY,
                 INPUT_FEATURE_SPY,
+                INPUT_FEATURE_SENSITIVE_FOR_TRACING,
         })
         public @interface InputFeatureFlags {
         }

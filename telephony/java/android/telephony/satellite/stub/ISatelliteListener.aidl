@@ -74,4 +74,11 @@ oneway interface ISatelliteListener {
      * @param SatelliteCapabilities The current satellite capabilities.
      */
     void onSatelliteCapabilitiesChanged(in SatelliteCapabilities capabilities);
+
+    /**
+     * Called when supported state of satellite has changed
+     *
+     * @param supported True means satellite service is supported and false means it is not.
+     */
+    void onSatelliteSupportedStateChanged(in boolean supported);
 }

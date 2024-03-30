@@ -1090,7 +1090,7 @@ public final class NotificationRecord {
         Notification n = getNotification();
         // Take developer provided 'when', unless it's in the future.
         if (updateRankingTime()) {
-            if (n.when != n.creationTime && n.when <= getSbn().getPostTime()){
+            if (n.hasAppProvidedWhen() && n.when <= getSbn().getPostTime()){
                 return n.when;
             }
         } else {

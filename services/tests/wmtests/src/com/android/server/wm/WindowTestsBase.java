@@ -107,6 +107,7 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
 import android.view.inputmethod.ImeTracker;
+import android.window.ActivityWindowInfo;
 import android.window.ClientWindowFrames;
 import android.window.ITaskFragmentOrganizer;
 import android.window.ITransitionPlayer;
@@ -694,7 +695,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     static void makeLastConfigReportedToClient(WindowState w, boolean visible) {
         w.fillClientWindowFramesAndConfiguration(new ClientWindowFrames(),
-                new MergedConfiguration(), true /* useLatestConfig */, visible);
+                new MergedConfiguration(), new ActivityWindowInfo(), true /* useLatestConfig */,
+                visible);
     }
 
     /**

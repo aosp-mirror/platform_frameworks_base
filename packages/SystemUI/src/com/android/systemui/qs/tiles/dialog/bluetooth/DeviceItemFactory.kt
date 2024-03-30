@@ -45,7 +45,7 @@ internal abstract class DeviceItemFactory {
     abstract fun create(context: Context, cachedDevice: CachedBluetoothDevice): DeviceItem
 }
 
-internal class ActiveMediaDeviceItemFactory : DeviceItemFactory() {
+internal open class ActiveMediaDeviceItemFactory : DeviceItemFactory() {
     override fun isFilterMatched(
         context: Context,
         cachedDevice: CachedBluetoothDevice,
@@ -72,7 +72,18 @@ internal class ActiveMediaDeviceItemFactory : DeviceItemFactory() {
     }
 }
 
-internal class AvailableMediaDeviceItemFactory : DeviceItemFactory() {
+internal class ActiveHearingDeviceItemFactory : ActiveMediaDeviceItemFactory() {
+    override fun isFilterMatched(
+        context: Context,
+        cachedDevice: CachedBluetoothDevice,
+        audioManager: AudioManager?
+    ): Boolean {
+        return BluetoothUtils.isActiveMediaDevice(cachedDevice) &&
+            BluetoothUtils.isAvailableHearingDevice(cachedDevice)
+    }
+}
+
+internal open class AvailableMediaDeviceItemFactory : DeviceItemFactory() {
     override fun isFilterMatched(
         context: Context,
         cachedDevice: CachedBluetoothDevice,
@@ -98,6 +109,17 @@ internal class AvailableMediaDeviceItemFactory : DeviceItemFactory() {
             isEnabled = !cachedDevice.isBusy,
             actionAccessibilityLabel = context.getString(actionAccessibilityLabelActivate),
         )
+    }
+}
+
+internal class AvailableHearingDeviceItemFactory : ActiveMediaDeviceItemFactory() {
+    override fun isFilterMatched(
+        context: Context,
+        cachedDevice: CachedBluetoothDevice,
+        audioManager: AudioManager?
+    ): Boolean {
+        return !BluetoothUtils.isActiveMediaDevice(cachedDevice) &&
+            BluetoothUtils.isAvailableHearingDevice(cachedDevice)
     }
 }
 
@@ -135,7 +157,7 @@ internal class ConnectedDeviceItemFactory : DeviceItemFactory() {
     }
 }
 
-internal class SavedDeviceItemFactory : DeviceItemFactory() {
+internal open class SavedDeviceItemFactory : DeviceItemFactory() {
     override fun isFilterMatched(
         context: Context,
         cachedDevice: CachedBluetoothDevice,
@@ -166,5 +188,27 @@ internal class SavedDeviceItemFactory : DeviceItemFactory() {
             isEnabled = !cachedDevice.isBusy,
             actionAccessibilityLabel = context.getString(actionAccessibilityLabelActivate),
         )
+    }
+}
+
+internal class SavedHearingDeviceItemFactory : SavedDeviceItemFactory() {
+    override fun isFilterMatched(
+        context: Context,
+        cachedDevice: CachedBluetoothDevice,
+        audioManager: AudioManager?
+    ): Boolean {
+        return if (Flags.enableHideExclusivelyManagedBluetoothDevice()) {
+            !BluetoothUtils.isExclusivelyManagedBluetoothDevice(
+                context,
+                cachedDevice.getDevice()
+            ) &&
+                cachedDevice.isHearingAidDevice &&
+                cachedDevice.bondState == BluetoothDevice.BOND_BONDED &&
+                !cachedDevice.isConnected
+        } else {
+            cachedDevice.isHearingAidDevice &&
+                cachedDevice.bondState == BluetoothDevice.BOND_BONDED &&
+                !cachedDevice.isConnected
+        }
     }
 }

@@ -1564,10 +1564,6 @@
     <string name="guest_notification_non_ephemeral_non_first_login">Reset to delete session
         activity now, or you can save or delete activity on exit</string>
 
-    <!-- An option in a photo selection dialog to take a new photo [CHAR LIMIT=50] -->
-    <string name="user_image_take_photo">Take a photo</string>
-    <!-- An option in a photo selection dialog to choose a pre-existing image [CHAR LIMIT=50] -->
-    <string name="user_image_choose_photo">Choose an image</string>
     <!-- Accessibility message for the photo selector which is a button/popup with the current photo [CHAR LIMIT=50] -->
     <string name="user_image_photo_selector">Select photo</string>
 
@@ -1684,12 +1680,6 @@
     <!-- Content description of the no calling for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_no_calling">No calling.</string>
 
-
-    <!-- Title for a screen allowing the user to choose a profile picture. [CHAR LIMIT=NONE] -->
-    <string name="avatar_picker_title">Choose a profile picture</string>
-
-    <!-- Content description for a default user icon. [CHAR LIMIT=NONE] -->
-    <string name="default_user_icon_description">Default user icon</string>
 
     <!-- Title for the 'physical keyboard' settings screen. [CHAR LIMIT=35] -->
     <string name="physical_keyboard_title">Physical keyboard</string>

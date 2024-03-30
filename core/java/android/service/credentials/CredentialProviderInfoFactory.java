@@ -480,8 +480,12 @@ public final class CredentialProviderInfoFactory {
             Set<ComponentName> primaryServices) {
         requireNonNull(context, "context must not be null");
 
-        // Get the device policy.
-        PackagePolicy pp = getDeviceManagerPolicy(context, userId);
+        // Get the device policy. If the client has asked for all providers then we
+        // should ignore the device policy.
+        PackagePolicy pp =
+                providerFilter != CredentialManager.PROVIDER_FILTER_USER_PROVIDERS_INCLUDING_HIDDEN
+                        ? getDeviceManagerPolicy(context, userId)
+                        : null;
 
         // Generate the provider list.
         final boolean disableSystemAppVerificationForTests = false;
@@ -514,8 +518,12 @@ public final class CredentialProviderInfoFactory {
             Set<ComponentName> primaryServices) {
         requireNonNull(context, "context must not be null");
 
-        // Get the device policy.
-        PackagePolicy pp = getDeviceManagerPolicy(context, userId);
+        // Get the device policy. If the client has asked for all providers then we
+        // should ignore the device policy.
+        PackagePolicy pp =
+                providerFilter != CredentialManager.PROVIDER_FILTER_USER_PROVIDERS_INCLUDING_HIDDEN
+                        ? getDeviceManagerPolicy(context, userId)
+                        : null;
 
         // Generate the provider list.
         final boolean disableSystemAppVerificationForTests = true;
@@ -593,7 +601,10 @@ public final class CredentialProviderInfoFactory {
             if (cpi.isSystemProvider()) {
                 return mProviderFilter == CredentialManager.PROVIDER_FILTER_SYSTEM_PROVIDERS_ONLY;
             } else {
-                return mProviderFilter == CredentialManager.PROVIDER_FILTER_USER_PROVIDERS_ONLY;
+                return mProviderFilter == CredentialManager.PROVIDER_FILTER_USER_PROVIDERS_ONLY
+                        || mProviderFilter
+                                == CredentialManager
+                                        .PROVIDER_FILTER_USER_PROVIDERS_INCLUDING_HIDDEN;
             }
         }
 

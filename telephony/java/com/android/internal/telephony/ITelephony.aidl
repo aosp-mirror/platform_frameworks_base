@@ -72,6 +72,7 @@ import android.telephony.satellite.ISatelliteCapabilitiesCallback;
 import android.telephony.satellite.ISatelliteDatagramCallback;
 import android.telephony.satellite.ISatelliteTransmissionUpdateCallback;
 import android.telephony.satellite.ISatelliteProvisionStateCallback;
+import android.telephony.satellite.ISatelliteSupportedStateCallback;
 import android.telephony.satellite.ISatelliteModemStateCallback;
 import android.telephony.satellite.NtnSignalStrength;
 import android.telephony.satellite.SatelliteCapabilities;
@@ -3315,4 +3316,29 @@ interface ITelephony {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
     List<String> getSatellitePlmnsForCarrier(int subId);
+
+    /**
+     * Registers for supported state changed from satellite modem.
+     *
+     * @param subId The subId of the subscription to register for supported state changed.
+     * @param callback The callback to handle the satellite supported state changed event.
+     *
+     * @return The {@link SatelliteError} result of the operation.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    int registerForSatelliteSupportedStateChanged(int subId,
+            in ISatelliteSupportedStateCallback callback);
+
+    /**
+     * Unregisters for supported state changed from satellite modem.
+     * If callback was not registered before, the request will be ignored.
+     *
+     * @param subId The subId of the subscription to unregister for supported state changed.
+     * @param callback The callback that was passed to registerForSatelliteSupportedStateChanged.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void unregisterForSatelliteSupportedStateChanged(int subId,
+            in ISatelliteSupportedStateCallback callback);
 }

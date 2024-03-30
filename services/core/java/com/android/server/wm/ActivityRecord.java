@@ -3198,10 +3198,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!Flags.activityWindowInfoFlag() || !isAttached()) {
             return mTmpActivityWindowInfo;
         }
-        mTmpActivityWindowInfo.set(
-                isEmbeddedInHostContainer(),
-                getTask().getBounds(),
-                getTaskFragment().getBounds());
+        if (isFixedRotationTransforming()) {
+            // Fixed rotation only applied to fullscreen activity, thus using the activity bounds
+            // for Task/TaskFragment so that it is "pre-rotated" and in sync with the Configuration
+            // update.
+            final Rect bounds = getBounds();
+            mTmpActivityWindowInfo.set(false /* isEmbedded */, bounds, bounds);
+        } else {
+            mTmpActivityWindowInfo.set(
+                    isEmbeddedInHostContainer(),
+                    getTask().getBounds(),
+                    getTaskFragment().getBounds());
+        }
         return mTmpActivityWindowInfo;
     }
 

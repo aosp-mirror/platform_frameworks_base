@@ -59,6 +59,7 @@ import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DESKTOP_MODE;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DEVICE_FOLDED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DRAG_DIVIDER;
+import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_FULLSCREEN_REQUEST;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_FULLSCREEN_SHORTCUT;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_RECREATE_SPLIT;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_RETURN_HOME;
@@ -2615,6 +2616,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     prepareEnterSplitScreen(out);
                     mSplitTransitions.setEnterTransition(transition, request.getRemoteTransition(),
                             TRANSIT_SPLIT_SCREEN_PAIR_OPEN, !mIsDropEntering);
+                } else if (inFullscreen && isSplitScreenVisible()) {
+                    // If the trigger task is in fullscreen and in split, exit split and place
+                    // task on top
+                    final int stageType = getStageOfTask(triggerTask.taskId);
+                    prepareExitSplitScreen(stageType, out);
+                    mSplitTransitions.setDismissTransition(transition, stageType,
+                            EXIT_REASON_FULLSCREEN_REQUEST);
                 }
             } else if (isOpening && inFullscreen) {
                 final int activityType = triggerTask.getActivityType();

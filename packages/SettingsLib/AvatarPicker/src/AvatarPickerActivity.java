@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.users;
+package com.android.settingslib.avatarpicker;
 
 import android.app.Activity;
 import android.content.ContentResolver;
@@ -38,7 +38,6 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.internal.util.UserIcons;
-import com.android.settingslib.R;
 
 import com.google.android.setupcompat.template.FooterBarMixin;
 import com.google.android.setupcompat.template.FooterButton;

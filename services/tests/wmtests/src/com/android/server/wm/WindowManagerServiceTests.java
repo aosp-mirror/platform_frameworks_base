@@ -28,6 +28,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.flags.Flags.FLAG_SENSITIVE_CONTENT_APP_PROTECTION;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SENSITIVE_FOR_TRACING;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SPY;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
@@ -319,7 +320,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         // Non activity window can still get the last config.
         win.mActivityRecord = null;
         win.fillClientWindowFramesAndConfiguration(outFrames, outConfig,
-                false /* useLatestConfig */, true /* relayoutVisible */);
+                null /* outActivityWindowInfo*/, false /* useLatestConfig */,
+                true /* relayoutVisible */);
         assertEquals(win.getConfiguration().densityDpi,
                 outConfig.getMergedConfiguration().densityDpi);
     }
@@ -1115,6 +1117,34 @@ public class WindowManagerServiceTests extends WindowTestsBase {
                 argThat(h -> (h.inputConfig & InputConfig.SPY) == InputConfig.SPY));
     }
 
+    @Test
+    public void testUpdateInputChannel_sanitizeInputFeatureSensitive_forUntrustedWindows() {
+        final Session session = mock(Session.class);
+        final int callingUid = Process.FIRST_APPLICATION_UID;
+        final int callingPid = 1234;
+        final SurfaceControl surfaceControl = mock(SurfaceControl.class);
+        final IBinder window = new Binder();
+        final InputTransferToken inputTransferToken = mock(InputTransferToken.class);
+
+        final InputChannel inputChannel = new InputChannel();
+        mWm.grantInputChannel(session, callingUid, callingPid, DEFAULT_DISPLAY, surfaceControl,
+                window, null /* hostInputToken */, FLAG_NOT_FOCUSABLE, 0 /* privateFlags */,
+                INPUT_FEATURE_SENSITIVE_FOR_TRACING, TYPE_APPLICATION, null /* windowToken */,
+                inputTransferToken,
+                "TestInputChannel", inputChannel);
+        verify(mTransaction).setInputWindowInfo(
+                eq(surfaceControl),
+                argThat(h -> (h.inputConfig & InputConfig.SENSITIVE_FOR_TRACING) == 0));
+
+        mWm.updateInputChannel(inputChannel.getToken(), DEFAULT_DISPLAY, surfaceControl,
+                FLAG_NOT_FOCUSABLE, PRIVATE_FLAG_TRUSTED_OVERLAY,
+                INPUT_FEATURE_SENSITIVE_FOR_TRACING,
+                null /* region */);
+        verify(mTransaction).setInputWindowInfo(
+                eq(surfaceControl),
+                argThat(h -> (h.inputConfig & InputConfig.SENSITIVE_FOR_TRACING) != 0));
+    }
+
     @RequiresFlagsDisabled(Flags.FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER)
     @Test
     public void testDrawMagnifiedViewport() {
@@ -1239,12 +1269,43 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final InsetsSourceControl.Array outControls = new InsetsSourceControl.Array();
         final Bundle outBundle = new Bundle();
 
-        mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.GONE, 0, 0, 0,
+        final ActivityRecord activity = win.mActivityRecord;
+        final ActivityWindowInfo expectedInfo = new ActivityWindowInfo();
+        expectedInfo.set(true, new Rect(0, 0, 1000, 2000), new Rect(0, 0, 500, 2000));
+        doReturn(expectedInfo).when(activity).getActivityWindowInfo();
+        activity.setVisibleRequested(false);
+        activity.setVisible(false);
+
+        mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.VISIBLE, 0, 0, 0,
                 outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
 
+        // No latest reported value, so return empty when activity is invisible
         final ActivityWindowInfo activityWindowInfo = outBundle.getParcelable(
                 IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO, ActivityWindowInfo.class);
-        assertEquals(win.mActivityRecord.getActivityWindowInfo(), activityWindowInfo);
+        assertEquals(new ActivityWindowInfo(), activityWindowInfo);
+
+        activity.setVisibleRequested(true);
+        activity.setVisible(true);
+
+        mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.VISIBLE, 0, 0, 0,
+                outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
+
+        // Report the latest when activity is visible.
+        final ActivityWindowInfo activityWindowInfo2 = outBundle.getParcelable(
+                IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO, ActivityWindowInfo.class);
+        assertEquals(expectedInfo, activityWindowInfo2);
+
+        expectedInfo.set(false, new Rect(0, 0, 1000, 2000), new Rect(0, 0, 1000, 2000));
+        activity.setVisibleRequested(false);
+        activity.setVisible(false);
+
+        mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.VISIBLE, 0, 0, 0,
+                outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
+
+        // Report the last reported value when activity is invisible.
+        final ActivityWindowInfo activityWindowInfo3 = outBundle.getParcelable(
+                IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO, ActivityWindowInfo.class);
+        assertEquals(activityWindowInfo2, activityWindowInfo3);
     }
 
     class TestResultReceiver implements IResultReceiver {

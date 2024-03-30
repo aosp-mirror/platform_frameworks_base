@@ -844,8 +844,6 @@ public class StatsPullAtomService extends SystemService {
         mStorageManager = (StorageManager) mContext.getSystemService(StorageManager.class);
         mNetworkStatsManager = mContext.getSystemService(NetworkStatsManager.class);
 
-        initMobileDataStatsPuller();
-
         // Initialize DiskIO
         mStoragedUidIoStatsReader = new StoragedUidIoStatsReader();
 
@@ -1015,7 +1013,8 @@ public class StatsPullAtomService extends SystemService {
         }
         if (ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER) {
             mAggregatedMobileDataStatsPuller =
-                    new AggregatedMobileDataStatsPuller(mNetworkStatsManager);
+                    new AggregatedMobileDataStatsPuller(
+                            mContext.getSystemService(NetworkStatsManager.class));
         }
     }
 
@@ -1061,6 +1060,7 @@ public class StatsPullAtomService extends SystemService {
         registerMobileBytesTransfer();
         registerMobileBytesTransferBackground();
         if (ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER) {
+            initMobileDataStatsPuller();
             registerMobileBytesTransferByProcState();
         }
         registerBytesTransferByTagAndMetered();

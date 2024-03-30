@@ -138,6 +138,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     public static final int EXIT_REASON_RECREATE_SPLIT = 10;
     public static final int EXIT_REASON_FULLSCREEN_SHORTCUT = 11;
     public static final int EXIT_REASON_DESKTOP_MODE = 12;
+    public static final int EXIT_REASON_FULLSCREEN_REQUEST = 13;
     @IntDef(value = {
             EXIT_REASON_UNKNOWN,
             EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW,
@@ -151,7 +152,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             EXIT_REASON_CHILD_TASK_ENTER_PIP,
             EXIT_REASON_RECREATE_SPLIT,
             EXIT_REASON_FULLSCREEN_SHORTCUT,
-            EXIT_REASON_DESKTOP_MODE
+            EXIT_REASON_DESKTOP_MODE,
+            EXIT_REASON_FULLSCREEN_REQUEST
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface ExitReason{}
@@ -1054,6 +1056,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 return "RECREATE_SPLIT";
             case EXIT_REASON_DESKTOP_MODE:
                 return "DESKTOP_MODE";
+            case EXIT_REASON_FULLSCREEN_REQUEST:
+                return "FULLSCREEN_REQUEST";
             default:
                 return "unknown reason, reason int = " + exitReason;
         }

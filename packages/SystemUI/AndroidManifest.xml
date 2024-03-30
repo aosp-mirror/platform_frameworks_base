@@ -1059,6 +1059,13 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".accessibility.hearingaid.HearingDevicesDialogReceiver"
+            android:exported="false">
+            <intent-filter android:priority="1">
+                <action android:name="com.android.systemui.action.LAUNCH_HEARING_DEVICES_DIALOG" />
+            </intent-filter>
+        </receiver>
+
         <activity android:name=".logcat.LogAccessDialogActivity"
                   android:theme="@android:style/Theme.Translucent.NoTitleBar"
                   android:excludeFromRecents="true"

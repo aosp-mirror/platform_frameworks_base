@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-    Copyright (C) 2022 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!--
+    Copyright (C) 2024 The Android Open Source Project
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -14,11 +13,10 @@
     See the License for the specific language governing permissions and
     limitations under the License.
   -->
-<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/avatar_image"
-    android:layout_height="@dimen/avatar_size_in_picker"
-    android:layout_width="@dimen/avatar_size_in_picker"
-    android:layout_margin="@dimen/avatar_picker_margin"
-    android:layout_gravity="center"
-    android:padding="@dimen/avatar_picker_padding"
-    android:background="@drawable/avatar_selector"/>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true">
+        <shape android:shape="oval">
+            <stroke android:width="@dimen/avatar_picker_padding" android:color="?android:attr/colorPrimary" />
+        </shape>
+    </item>
+</selector>
