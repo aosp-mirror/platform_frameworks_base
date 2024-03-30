@@ -261,6 +261,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 shadeInteractor = kosmos.shadeInteractor,
                 footerActionsController = kosmos.footerActionsController,
                 footerActionsViewModelFactory = kosmos.footerActionsViewModelFactory,
+                sceneInteractor = sceneInteractor,
             )
 
         kosmos.fakeDeviceEntryRepository.setUnlocked(false)
