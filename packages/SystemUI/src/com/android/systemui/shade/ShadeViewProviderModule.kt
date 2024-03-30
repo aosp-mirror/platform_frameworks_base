@@ -43,7 +43,7 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.NotificationInsetsController
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
-import com.android.systemui.statusbar.notification.stack.ui.view.NotificationStackView
+import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView
 import com.android.systemui.statusbar.phone.StatusBarLocation
@@ -65,9 +65,9 @@ abstract class ShadeViewProviderModule {
     @Binds
     @SysUISingleton
     // TODO(b/277762009): Only allow this view's binder to inject the view.
-    abstract fun bindsNotificationStackView(
+    abstract fun bindsNotificationScrollView(
         notificationStackScrollLayout: NotificationStackScrollLayout
-    ): NotificationStackView
+    ): NotificationScrollView
 
     companion object {
         const val SHADE_HEADER = "large_screen_shade_header"

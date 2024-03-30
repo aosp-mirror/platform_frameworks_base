@@ -23,8 +23,8 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationStackAppearanceInteractor
 
-val Kosmos.notificationStackAppearanceViewModel by Fixture {
-    NotificationStackAppearanceViewModel(
+val Kosmos.notificationScrollViewModel by Fixture {
+    NotificationScrollViewModel(
         dumpManager = dumpManager,
         stackAppearanceInteractor = notificationStackAppearanceInteractor,
         shadeInteractor = shadeInteractor,

@@ -33,7 +33,7 @@ import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape
 import com.android.systemui.statusbar.notification.stack.shared.model.ViewPosition
-import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationStackAppearanceViewModel
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationScrollViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -59,7 +59,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
         }
     private val testScope = kosmos.testScope
     private val placeholderViewModel by lazy { kosmos.notificationsPlaceholderViewModel }
-    private val appearanceViewModel by lazy { kosmos.notificationStackAppearanceViewModel }
+    private val appearanceViewModel by lazy { kosmos.notificationScrollViewModel }
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val fakeSceneDataSource by lazy { kosmos.fakeSceneDataSource }
 

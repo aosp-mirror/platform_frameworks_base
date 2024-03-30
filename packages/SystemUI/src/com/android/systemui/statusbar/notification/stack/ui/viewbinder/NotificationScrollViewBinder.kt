@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 
+import android.view.View
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.common.ui.ConfigurationState
@@ -26,8 +27,8 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.notification.stack.shared.model.ViewPosition
-import com.android.systemui.statusbar.notification.stack.ui.view.NotificationStackView
-import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationStackAppearanceViewModel
+import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationScrollViewModel
 import com.android.systemui.util.kotlin.FlowDumperImpl
 import com.android.systemui.util.kotlin.launchAndDispose
 import javax.inject.Inject
@@ -41,55 +42,54 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-/** Binds the NotificationStackView. */
+/** Binds the [NotificationScrollView]. */
 @SysUISingleton
-class NotificationStackViewBinder
+class NotificationScrollViewBinder
 @Inject
 constructor(
     dumpManager: DumpManager,
     @Main private val mainImmediateDispatcher: CoroutineDispatcher,
-    private val stack: NotificationStackView,
-    private val viewModel: NotificationStackAppearanceViewModel,
+    private val view: NotificationScrollView,
+    private val viewModel: NotificationScrollViewModel,
     private val configuration: ConfigurationState,
 ) : FlowDumperImpl(dumpManager) {
-    private val view = stack.asView()
 
     private val viewPosition = MutableStateFlow(ViewPosition()).dumpValue("viewPosition")
     private val viewTopOffset = viewPosition.map { it.top }.distinctUntilChanged()
 
     fun bindWhileAttached(): DisposableHandle {
-        return view.repeatWhenAttached(mainImmediateDispatcher) {
+        return view.asView().repeatWhenAttached(mainImmediateDispatcher) {
             repeatOnLifecycle(Lifecycle.State.CREATED) { bind() }
         }
     }
 
     suspend fun bind() = coroutineScope {
         launchAndDispose {
-            viewPosition.value = ViewPosition(view.left, view.top)
-            view.onLayoutChanged { viewPosition.value = ViewPosition(it.left, it.top) }
+            viewPosition.value = view.asView().position
+            view.asView().onLayoutChanged { viewPosition.value = it.position }
         }
 
         launch {
             viewModel.shadeScrimShape(scrimRadius, viewPosition).collect {
-                stack.setScrimClippingShape(it)
+                view.setScrimClippingShape(it)
             }
         }
 
-        launch { viewModel.stackTop.minusTopOffset().collect { stack.setStackTop(it) } }
-        launch { viewModel.stackBottom.minusTopOffset().collect { stack.setStackBottom(it) } }
-        launch { viewModel.scrolledToTop.collect { stack.setScrolledToTop(it) } }
-        launch { viewModel.headsUpTop.minusTopOffset().collect { stack.setHeadsUpTop(it) } }
-        launch { viewModel.expandFraction.collect { stack.setExpandFraction(it) } }
-        launch { viewModel.isScrollable.collect { stack.setScrollingEnabled(it) } }
+        launch { viewModel.stackTop.minusTopOffset().collect { view.setStackTop(it) } }
+        launch { viewModel.stackBottom.minusTopOffset().collect { view.setStackBottom(it) } }
+        launch { viewModel.scrolledToTop.collect { view.setScrolledToTop(it) } }
+        launch { viewModel.headsUpTop.minusTopOffset().collect { view.setHeadsUpTop(it) } }
+        launch { viewModel.expandFraction.collect { view.setExpandFraction(it) } }
+        launch { viewModel.isScrollable.collect { view.setScrollingEnabled(it) } }
 
         launchAndDispose {
-            stack.setSyntheticScrollConsumer(viewModel.syntheticScrollConsumer)
-            stack.setStackHeightConsumer(viewModel.stackHeightConsumer)
-            stack.setHeadsUpHeightConsumer(viewModel.headsUpHeightConsumer)
+            view.setSyntheticScrollConsumer(viewModel.syntheticScrollConsumer)
+            view.setStackHeightConsumer(viewModel.stackHeightConsumer)
+            view.setHeadsUpHeightConsumer(viewModel.headsUpHeightConsumer)
             DisposableHandle {
-                stack.setSyntheticScrollConsumer(null)
-                stack.setStackHeightConsumer(null)
-                stack.setHeadsUpHeightConsumer(null)
+                view.setSyntheticScrollConsumer(null)
+                view.setStackHeightConsumer(null)
+                view.setHeadsUpHeightConsumer(null)
             }
         }
     }
@@ -101,4 +101,8 @@ constructor(
     /** flow of the scrim clipping radius */
     private val scrimRadius: Flow<Int>
         get() = configuration.getDimensionPixelOffset(R.dimen.notification_scrim_corner_radius)
+
+    /** Construct a [ViewPosition] from this view using [View.getLeft] and [View.getTop] */
+    private val View.position
+        get() = ViewPosition(left = left, top = top)
 }

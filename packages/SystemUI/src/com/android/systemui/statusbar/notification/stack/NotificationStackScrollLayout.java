@@ -115,7 +115,7 @@ import com.android.systemui.statusbar.notification.shared.NotificationsImprovedH
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor;
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds;
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape;
-import com.android.systemui.statusbar.notification.stack.ui.view.NotificationStackView;
+import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
@@ -149,7 +149,7 @@ import java.util.function.Consumer;
  */
 public class NotificationStackScrollLayout
         extends ViewGroup
-        implements Dumpable, NotificationStackView {
+        implements Dumpable, NotificationScrollView {
 
     public static final float BACKGROUND_ALPHA_DIMMED = 0.7f;
     private static final String TAG = "StackScroller";
@@ -224,7 +224,7 @@ public class NotificationStackScrollLayout
      */
     private final StackScrollAlgorithm mStackScrollAlgorithm;
     private final AmbientState mAmbientState;
-    private final StackViewFields mStackViewFields = new StackViewFields();
+    private final ScrollViewFields mScrollViewFields = new ScrollViewFields();
 
     private final GroupMembershipManager mGroupMembershipManager;
     private final GroupExpansionManager mGroupExpansionManager;
@@ -515,9 +515,6 @@ public class NotificationStackScrollLayout
     private int mRoundedRectClippingRight;
     private final float[] mBgCornerRadii = new float[8];
 
-    /** Shape used for defining the shade scrim with SceneContainerFlag enabled */
-    private ShadeScrimShape mShadeScrimShape = null;
-
     /**
      * Whether stackY should be animated in case the view is getting shorter than the scroll
      * position and this scrolling will lead to the top scroll inset getting smaller.
@@ -599,7 +596,7 @@ public class NotificationStackScrollLayout
         @Override
         public boolean isScrolledToTop() {
             if (SceneContainerFlag.isEnabled()) {
-                return mStackViewFields.isScrolledToTop();
+                return mScrollViewFields.isScrolledToTop();
             } else {
                 return mOwnScrollY == 0;
             }
@@ -1148,39 +1145,39 @@ public class NotificationStackScrollLayout
 
     @Override
     public void setScrolledToTop(boolean scrolledToTop) {
-        mStackViewFields.setScrolledToTop(scrolledToTop);
+        mScrollViewFields.setScrolledToTop(scrolledToTop);
     }
 
     @Override
     public void setStackTop(float stackTop) {
-        mStackViewFields.setStackTop(stackTop);
+        mScrollViewFields.setStackTop(stackTop);
         // TODO(b/332574413): replace the following with using stackTop
         updateTopPadding(stackTop, isAddOrRemoveAnimationPending());
     }
 
     @Override
     public void setStackBottom(float stackBottom) {
-        mStackViewFields.setStackBottom(stackBottom);
+        mScrollViewFields.setStackBottom(stackBottom);
     }
 
     @Override
     public void setHeadsUpTop(float headsUpTop) {
-        mStackViewFields.setHeadsUpTop(headsUpTop);
+        mScrollViewFields.setHeadsUpTop(headsUpTop);
     }
 
     @Override
     public void setSyntheticScrollConsumer(@Nullable Consumer<Float> consumer) {
-        mStackViewFields.setSyntheticScrollConsumer(consumer);
+        mScrollViewFields.setSyntheticScrollConsumer(consumer);
     }
 
     @Override
     public void setStackHeightConsumer(@Nullable Consumer<Float> consumer) {
-        mStackViewFields.setStackHeightConsumer(consumer);
+        mScrollViewFields.setStackHeightConsumer(consumer);
     }
 
     @Override
     public void setHeadsUpHeightConsumer(@Nullable Consumer<Float> consumer) {
-        mStackViewFields.setHeadsUpHeightConsumer(consumer);
+        mScrollViewFields.setHeadsUpHeightConsumer(consumer);
     }
 
     /**
@@ -2392,7 +2389,7 @@ public class NotificationStackScrollLayout
                         /* notificationStackScrollLayout= */ this, mMaxDisplayedNotifications,
                         shelfIntrinsicHeight);
         mIntrinsicContentHeight = height;
-        mStackViewFields.sendStackHeight(height);
+        mScrollViewFields.sendStackHeight(height);
 
         // The topPadding can be bigger than the regular padding when qs is expanded, in that
         // state the maxPanelHeight and the contentHeight should be bigger
@@ -3631,7 +3628,7 @@ public class NotificationStackScrollLayout
 
     protected boolean isInsideQsHeader(MotionEvent ev) {
         if (SceneContainerFlag.isEnabled()) {
-            return ev.getY() < mStackViewFields.getShadeScrimClipping().getBounds().getTop();
+            return ev.getY() < mScrollViewFields.getScrimClippingShape().getBounds().getTop();
         }
 
         mQsHeader.getBoundsOnScreen(mQsHeaderBound);
@@ -4164,7 +4161,7 @@ public class NotificationStackScrollLayout
                     // to it so that it can scroll the stack and scrim accordingly.
                     if (SceneContainerFlag.isEnabled()) {
                         float diff = endPosition - layoutEnd;
-                        mStackViewFields.sendSyntheticScroll(diff);
+                        mScrollViewFields.sendSyntheticScroll(diff);
                     }
                     setOwnScrollY((int) (mOwnScrollY + endPosition - layoutEnd));
                     mDisallowScrollingInThisMotion = true;
@@ -5026,7 +5023,6 @@ public class NotificationStackScrollLayout
             println(pw, "topPadding", getTopPadding());
             println(pw, "bottomPadding", mBottomPadding);
             dumpRoundedRectClipping(pw);
-            println(pw, "shadeScrimShape", mShadeScrimShape);
             println(pw, "requestedClipBounds", mRequestedClipBounds);
             println(pw, "isClipped", mIsClipped);
             println(pw, "translationX", getTranslationX());
@@ -5048,7 +5044,7 @@ public class NotificationStackScrollLayout
                     elapsedRealtime - mLastUpdateSidePaddingElapsedRealtime);
             println(pw, "isSmallLandscapeLockscreenEnabled", mIsSmallLandscapeLockscreenEnabled);
             mNotificationStackSizeCalculator.dump(pw, args);
-            mStackViewFields.dump(pw);
+            mScrollViewFields.dump(pw);
         });
         pw.println();
         pw.println("Contents:");
@@ -5592,8 +5588,8 @@ public class NotificationStackScrollLayout
     @Override
     public void setScrimClippingShape(@Nullable ShadeScrimShape shape) {
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
-        if (Objects.equals(mShadeScrimShape, shape)) return;
-        mShadeScrimShape = shape;
+        if (Objects.equals(mScrollViewFields.getScrimClippingShape(), shape)) return;
+        mScrollViewFields.setScrimClippingShape(shape);
         mShouldUseRoundedRectClipping = shape != null;
         mRoundedClipPath.reset();
         if (shape != null) {

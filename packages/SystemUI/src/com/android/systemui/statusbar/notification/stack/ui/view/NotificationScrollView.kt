@@ -24,7 +24,7 @@ import java.util.function.Consumer
  * This view (interface) is the view which scrolls and positions the heads up notification and
  * notification stack, but is otherwise agnostic to the content.
  */
-interface NotificationStackView {
+interface NotificationScrollView {
     /**
      * Since this is an interface rather than a literal View, this provides cast-like access to the
      * underlying view.

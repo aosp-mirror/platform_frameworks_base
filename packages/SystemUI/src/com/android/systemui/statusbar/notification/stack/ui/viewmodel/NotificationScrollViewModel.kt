@@ -37,7 +37,7 @@ import kotlinx.coroutines.flow.map
 
 /** ViewModel which represents the state of the NSSL/Controller in the world of flexiglass */
 @SysUISingleton
-class NotificationStackAppearanceViewModel
+class NotificationScrollViewModel
 @Inject
 constructor(
     dumpManager: DumpManager,

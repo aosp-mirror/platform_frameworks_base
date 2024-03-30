@@ -17,21 +17,21 @@
 package com.android.systemui.statusbar.notification.stack
 
 import android.util.IndentingPrintWriter
-import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimClipping
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape
 import com.android.systemui.util.printSection
 import com.android.systemui.util.println
 import java.util.function.Consumer
 
 /**
  * This is a state holder object used by [NSSL][NotificationStackScrollLayout] to contain states
- * provided by the `NotificationStackViewBinder` to the [NotificationStackView]
+ * provided by the `NotificationScrollViewBinder` to the `NotificationScrollView`.
  *
  * Unlike AmbientState, no class other than NSSL should ever have access to this class in any way.
  * These fields are effectively NSSL's private fields.
  */
-class StackViewFields {
+class ScrollViewFields {
     /** Used to produce the clipping path */
-    var shadeScrimClipping: ShadeScrimClipping = ShadeScrimClipping()
+    var scrimClippingShape: ShadeScrimShape? = null
     /** Y coordinate in view pixels of the top of the notification stack */
     var stackTop: Float = 0f
     /**
@@ -71,7 +71,7 @@ class StackViewFields {
 
     fun dump(pw: IndentingPrintWriter) {
         pw.printSection("StackViewStates") {
-            pw.println("shadeScrimClipping", shadeScrimClipping)
+            pw.println("scrimClippingShape", scrimClippingShape)
             pw.println("stackTop", stackTop)
             pw.println("stackBottom", stackBottom)
             pw.println("headsUpTop", headsUpTop)
