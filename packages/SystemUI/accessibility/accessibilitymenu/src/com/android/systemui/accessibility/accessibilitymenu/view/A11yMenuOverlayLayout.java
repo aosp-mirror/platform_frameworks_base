@@ -151,6 +151,14 @@ public class A11yMenuOverlayLayout {
         return mLayout;
     }
 
+    public void clearLayout() {
+        if (mLayout != null) {
+            mWindowManager.removeView(mLayout);
+            mLayout.setOnTouchListener(null);
+            mLayout = null;
+        }
+    }
+
     /** Updates view layout with new layout parameters only. */
     public void updateViewLayout() {
         if (mLayout == null || mLayoutParameter == null) {
