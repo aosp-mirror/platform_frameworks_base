@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -26,6 +27,7 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimRounding
+import com.android.systemui.util.kotlin.FlowDumperImpl
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,12 +40,13 @@ import kotlinx.coroutines.flow.StateFlow
 class NotificationsPlaceholderViewModel
 @Inject
 constructor(
+    dumpManager: DumpManager,
     private val interactor: NotificationStackAppearanceInteractor,
     shadeInteractor: ShadeInteractor,
     flags: SceneContainerFlags,
     featureFlags: FeatureFlagsClassic,
     private val keyguardInteractor: KeyguardInteractor,
-) {
+) : FlowDumperImpl(dumpManager) {
     /** DEBUG: whether the placeholder should be made slightly visible for positional debugging. */
     val isVisualDebuggingEnabled: Boolean = featureFlags.isEnabled(Flags.NSSL_DEBUG_LINES)
 
@@ -77,30 +80,32 @@ constructor(
     }
 
     /** Corner rounding of the stack */
-    val shadeScrimRounding: Flow<ShadeScrimRounding> = interactor.shadeScrimRounding
+    val shadeScrimRounding: Flow<ShadeScrimRounding> =
+        interactor.shadeScrimRounding.dumpWhileCollecting("shadeScrimRounding")
 
     /**
      * The height in px of the contents of notification stack. Depending on the number of
      * notifications, this can exceed the space available on screen to show notifications, at which
      * point the notification stack should become scrollable.
      */
-    val stackHeight: StateFlow<Float> = interactor.stackHeight
+    val stackHeight: StateFlow<Float> = interactor.stackHeight.dumpValue("stackHeight")
 
     /** The height in px of the contents of the HUN. */
-    val headsUpHeight: StateFlow<Float> = interactor.headsUpHeight
+    val headsUpHeight: StateFlow<Float> = interactor.headsUpHeight.dumpValue("headsUpHeight")
 
     /**
      * The amount [0-1] that the shade has been opened. At 0, the shade is closed; at 1, the shade
      * is open.
      */
-    val expandFraction: Flow<Float> = shadeInteractor.shadeExpansion
+    val expandFraction: Flow<Float> = shadeInteractor.shadeExpansion.dumpValue("expandFraction")
 
     /**
      * The amount in px that the notification stack should scroll due to internal expansion. This
      * should only happen when a notification expansion hits the bottom of the screen, so it is
      * necessary to scroll up to keep expanding the notification.
      */
-    val syntheticScroll: Flow<Float> = interactor.syntheticScroll
+    val syntheticScroll: Flow<Float> =
+        interactor.syntheticScroll.dumpWhileCollecting("syntheticScroll")
 
     /** Sets whether the notification stack is scrolled to the top. */
     fun setScrolledToTop(scrolledToTop: Boolean) {
