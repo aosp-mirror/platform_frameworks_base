@@ -430,4 +430,14 @@ public class BluetoothUtilsTest {
         assertThat(BluetoothUtils.isExclusivelyManagedBluetoothDevice(mContext,
                 mBluetoothDevice)).isEqualTo(true);
     }
+
+    @Test
+    public void isAvailableHearingDevice_isConnectedHearingAid_returnTure() {
+        when(mCachedBluetoothDevice.isConnectedHearingAidDevice()).thenReturn(true);
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(mBluetoothDevice);
+        when(mBluetoothDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mBluetoothDevice.isConnected()).thenReturn(true);
+
+        assertThat(BluetoothUtils.isAvailableHearingDevice(mCachedBluetoothDevice)).isEqualTo(true);
+    }
 }

@@ -542,6 +542,25 @@ public class BluetoothUtils {
     }
 
     /**
+     * Checks if the Bluetooth device is an available hearing device, which means:
+     * 1) currently connected
+     * 2) is Hearing Aid
+     * 3) connected profile match hearing aid related profiles (e.g. ASHA, HAP)
+     *
+     * @param cachedDevice the CachedBluetoothDevice
+     * @return if the device is Available hearing device
+     */
+    @WorkerThread
+    public static boolean isAvailableHearingDevice(CachedBluetoothDevice cachedDevice) {
+        if (isDeviceConnected(cachedDevice) && cachedDevice.isConnectedHearingAidDevice()) {
+            Log.d(TAG, "isFilterMatched() device : "
+                    + cachedDevice.getName() + ", the profile is connected.");
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Check if the Bluetooth device is a ConnectedBluetoothDevice, which means:
      * 1) currently connected
      * 2) is not Hearing Aid or LE Audio
