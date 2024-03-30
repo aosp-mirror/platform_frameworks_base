@@ -320,7 +320,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         // Non activity window can still get the last config.
         win.mActivityRecord = null;
         win.fillClientWindowFramesAndConfiguration(outFrames, outConfig,
-                false /* useLatestConfig */, true /* relayoutVisible */);
+                null /* outActivityWindowInfo*/, false /* useLatestConfig */,
+                true /* relayoutVisible */);
         assertEquals(win.getConfiguration().densityDpi,
                 outConfig.getMergedConfiguration().densityDpi);
     }
@@ -1268,12 +1269,43 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final InsetsSourceControl.Array outControls = new InsetsSourceControl.Array();
         final Bundle outBundle = new Bundle();
 
-        mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.GONE, 0, 0, 0,
+        final ActivityRecord activity = win.mActivityRecord;
+        final ActivityWindowInfo expectedInfo = new ActivityWindowInfo();
+        expectedInfo.set(true, new Rect(0, 0, 1000, 2000), new Rect(0, 0, 500, 2000));
+        doReturn(expectedInfo).when(activity).getActivityWindowInfo();
+        activity.setVisibleRequested(false);
+        activity.setVisible(false);
+
+        mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.VISIBLE, 0, 0, 0,
                 outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
 
+        // No latest reported value, so return empty when activity is invisible
         final ActivityWindowInfo activityWindowInfo = outBundle.getParcelable(
                 IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO, ActivityWindowInfo.class);
-        assertEquals(win.mActivityRecord.getActivityWindowInfo(), activityWindowInfo);
+        assertEquals(new ActivityWindowInfo(), activityWindowInfo);
+
+        activity.setVisibleRequested(true);
+        activity.setVisible(true);
+
+        mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.VISIBLE, 0, 0, 0,
+                outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
+
+        // Report the latest when activity is visible.
+        final ActivityWindowInfo activityWindowInfo2 = outBundle.getParcelable(
+                IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO, ActivityWindowInfo.class);
+        assertEquals(expectedInfo, activityWindowInfo2);
+
+        expectedInfo.set(false, new Rect(0, 0, 1000, 2000), new Rect(0, 0, 1000, 2000));
+        activity.setVisibleRequested(false);
+        activity.setVisible(false);
+
+        mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.VISIBLE, 0, 0, 0,
+                outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
+
+        // Report the last reported value when activity is invisible.
+        final ActivityWindowInfo activityWindowInfo3 = outBundle.getParcelable(
+                IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO, ActivityWindowInfo.class);
+        assertEquals(activityWindowInfo2, activityWindowInfo3);
     }
 
     class TestResultReceiver implements IResultReceiver {

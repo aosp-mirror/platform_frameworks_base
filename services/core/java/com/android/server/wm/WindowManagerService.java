@@ -2584,14 +2584,18 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (outFrames != null && outMergedConfiguration != null) {
+                final boolean shouldReportActivityWindowInfo = outBundle != null
+                        && win.mLastReportedActivityWindowInfo != null;
+                final ActivityWindowInfo outActivityWindowInfo = shouldReportActivityWindowInfo
+                        ? new ActivityWindowInfo()
+                        : null;
+
                 win.fillClientWindowFramesAndConfiguration(outFrames, outMergedConfiguration,
-                        false /* useLatestConfig */, shouldRelayout);
-                if (Flags.activityWindowInfoFlag() && outBundle != null
-                        && win.mActivityRecord != null) {
-                    final ActivityWindowInfo activityWindowInfo = win.mActivityRecord
-                            .getActivityWindowInfo();
+                        outActivityWindowInfo, false /* useLatestConfig */, shouldRelayout);
+
+                if (shouldReportActivityWindowInfo) {
                     outBundle.putParcelable(IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO,
-                            activityWindowInfo);
+                            outActivityWindowInfo);
                 }
 
                 // Set resize-handled here because the values are sent back to the client.

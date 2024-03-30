@@ -422,6 +422,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     private final MergedConfiguration mLastReportedConfiguration = new MergedConfiguration();
 
+    /**
+     * Similar to {@link #mLastReportedConfiguration}, used to store last reported to client
+     * ActivityWindowInfo. {@code null} if this is not an Activity window.
+     */
+    @Nullable
+    final ActivityWindowInfo mLastReportedActivityWindowInfo;
+
     /** @see #isLastConfigReportedToClient() */
     private boolean mLastConfigReportedToClient;
 
@@ -1081,6 +1088,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mPolicy = mWmService.mPolicy;
         mContext = mWmService.mContext;
         mForceSeamlesslyRotate = token.mRoundedCornerOverlay;
+        mLastReportedActivityWindowInfo = Flags.activityWindowInfoFlag() && mActivityRecord != null
+                ? new ActivityWindowInfo()
+                : null;
         mInputWindowHandle = new InputWindowHandleWrapper(new InputWindowHandle(
                 mActivityRecord != null
                         ? mActivityRecord.getInputApplicationHandle(false /* update */) : null,
@@ -3607,12 +3617,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      *
      * @param outFrames The frames that will be sent to the client.
      * @param outMergedConfiguration The configuration that will be sent to the client.
+     * @param outActivityWindowInfo The ActivityWindowInfo that will be sent to the client if set.
+     *                              {@code null} if this is not activity window.
      * @param useLatestConfig Whether to use the latest configuration.
      * @param relayoutVisible Whether to consider visibility to use the latest configuration.
      */
-    void fillClientWindowFramesAndConfiguration(ClientWindowFrames outFrames,
-            MergedConfiguration outMergedConfiguration, boolean useLatestConfig,
-            boolean relayoutVisible) {
+    void fillClientWindowFramesAndConfiguration(@NonNull ClientWindowFrames outFrames,
+            @NonNull MergedConfiguration outMergedConfiguration,
+            @Nullable ActivityWindowInfo outActivityWindowInfo,
+            boolean useLatestConfig, boolean relayoutVisible) {
         outFrames.frame.set(mWindowFrames.mCompatFrame);
         outFrames.displayFrame.set(mWindowFrames.mDisplayFrame);
         if (mInvGlobalScale != 1f) {
@@ -3642,8 +3655,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (outMergedConfiguration != mLastReportedConfiguration) {
                 mLastReportedConfiguration.setTo(outMergedConfiguration);
             }
+            if (outActivityWindowInfo != null && mLastReportedActivityWindowInfo != null) {
+                outActivityWindowInfo.set(mActivityRecord.getActivityWindowInfo());
+                mLastReportedActivityWindowInfo.set(outActivityWindowInfo);
+            }
         } else {
             outMergedConfiguration.setTo(mLastReportedConfiguration);
+            if (outActivityWindowInfo != null && mLastReportedActivityWindowInfo != null) {
+                outActivityWindowInfo.set(mLastReportedActivityWindowInfo);
+            }
         }
         mLastConfigReportedToClient = true;
     }
@@ -3680,10 +3700,22 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mDragResizingChangeReported = true;
         mWindowFrames.clearReportResizeHints();
 
+        // App window resize may trigger Activity#onConfigurationChanged, so we need to update
+        // ActivityWindowInfo as well.
+        final IBinder activityToken;
+        final ActivityWindowInfo activityWindowInfo;
+        if (mLastReportedActivityWindowInfo != null) {
+            activityToken = mActivityRecord.token;
+            activityWindowInfo = mLastReportedActivityWindowInfo;
+        } else {
+            activityToken = null;
+            activityWindowInfo = null;
+        }
+
         final int prevRotation = mLastReportedConfiguration
                 .getMergedConfiguration().windowConfiguration.getRotation();
         fillClientWindowFramesAndConfiguration(mClientWindowFrames, mLastReportedConfiguration,
-                true /* useLatestConfig */, false /* relayoutVisible */);
+                activityWindowInfo, true /* useLatestConfig */, false /* relayoutVisible */);
         final boolean syncRedraw = shouldSendRedrawForSync();
         final boolean syncWithBuffers = syncRedraw && shouldSyncWithBuffers();
         final boolean reportDraw = syncRedraw || drawPending;
@@ -3700,18 +3732,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final boolean isDragResizing = isDragResizing();
 
         markRedrawForSyncReported();
-
-        // App window resize may trigger Activity#onConfigurationChanged, so we need to update
-        // ActivityWindowInfo as well.
-        final IBinder activityToken;
-        final ActivityWindowInfo activityWindowInfo;
-        if (Flags.activityWindowInfoFlag() && mActivityRecord != null) {
-            activityToken = mActivityRecord.token;
-            activityWindowInfo = mActivityRecord.getActivityWindowInfo();
-        } else {
-            activityToken = null;
-            activityWindowInfo = null;
-        }
 
         if (Flags.bundleClientTransactionFlag()) {
             getProcess().scheduleClientTransactionItem(
@@ -4136,6 +4156,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
             pw.println(prefix + "mFullConfiguration=" + getConfiguration());
             pw.println(prefix + "mLastReportedConfiguration=" + getLastReportedConfiguration());
+            if (mLastReportedActivityWindowInfo != null) {
+                pw.println(prefix + "mLastReportedActivityWindowInfo="
+                        + mLastReportedActivityWindowInfo);
+            }
         }
         pw.println(prefix + "mHasSurface=" + mHasSurface
                 + " isReadyForDisplay()=" + isReadyForDisplay()
