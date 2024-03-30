@@ -1148,7 +1148,7 @@
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"em <xliff:g id="COUNT">%d</xliff:g> d"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"em <xliff:g id="COUNT">%d</xliff:g> a"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Há # minuto}many{Há # minutos}other{Há # minutos}}"</string>
-    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Há # hora}many{Há # horas}other{Há # horas}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{há # hora}many{há # horas}other{há # horas}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Há # dia}many{Há # dias}other{Há # dias}}"</string>
     <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{Há # ano}many{Há # anos}other{Há # anos}}"</string>
     <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minuto}many{# minutos}other{# minutos}}"</string>
@@ -1310,13 +1310,13 @@
     <string name="volume_call" msgid="7625321655265747433">"Volume da chamada recebida"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Volume de chamada recebida em Bluetooth"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"Volume do alarme"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"Volume de notificações"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"Volume das notificações"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Volume"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Volume de Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Volume do toque"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"Volume de chamadas"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"Volume de multimédia"</string>
-    <string name="volume_icon_description_notification" msgid="579091344110747279">"Volume de notificações"</string>
+    <string name="volume_icon_description_notification" msgid="579091344110747279">"Volume das notificações"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Toque predefinido"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Predefinição (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"Nenhum"</string>
@@ -1989,7 +1989,7 @@
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Emergência"</string>
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Defina um bloqueio de ecrã"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Definir bloqueio de ecrã"</string>
-    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Para usar espaço privado, defina bloqueio de ecrã no disp."</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Defina um bloqueio para usar o espaço privado"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"A app não está disponível"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"De momento, a app <xliff:g id="APP_NAME">%1$s</xliff:g> não está disponível."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> indisponível"</string>
@@ -2066,7 +2066,7 @@
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"Quer atualizar <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> em "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_3types" msgid="8285767070604652626">"Atualizar estes itens no serviço "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Guardar"</string>
-    <string name="autofill_save_no" msgid="9212826374207023544">"Não, obrigado"</string>
+    <string name="autofill_save_no" msgid="9212826374207023544">"Não"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"Agora não"</string>
     <string name="autofill_save_never" msgid="6821841919831402526">"Nunca"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"Atualizar"</string>

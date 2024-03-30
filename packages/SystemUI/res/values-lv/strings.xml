@@ -84,6 +84,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Jūsu IT administrators ir bloķējis ekrānuzņēmumu izveidi"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Rediģēt"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Rediģēt ekrānuzņēmumu"</string>
+    <string name="screenshot_share_label" msgid="1653061117238861559">"Kopīgot"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Kopīgot ekrānuzņēmumu"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Tvert vairāk"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Nerādīt ekrānuzņēmumu"</string>
@@ -103,8 +104,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Aktīvs paziņojums par ekrāna ierakstīšanas sesiju"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Vai sākt ierakstīšanu?"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Ierakstīšanas laikā Android var piekļūt visam, kas tiek rādīts jūsu ekrānā vai atskaņots jūsu ierīcē. Tāpēc piesardzīgi apejieties ar parolēm, maksājumu informāciju, ziņojumiem, fotoattēliem un audio un video saturu."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Lietotnes ierakstīšanas laikā Android var piekļūt visam, kas tiek rādīts vai atskaņots attiecīgajā lietotnē. Tāpēc piesardzīgi apejieties ar parolēm, maksājumu informāciju, ziņojumiem, fotoattēliem un audio un video saturu."</string>
-    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Sāk ierakstīšanu"</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Lietotnes ierakstīšanas laikā Android var piekļūt visam, kas tiek rādīts vai atskaņots attiecīgajā lietotnē. Tāpēc ar parolēm, maksājumu informāciju, ziņojumiem, fotoattēliem un audio un video saturu rīkojieties piesardzīgi."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Sākt ierakstīšanu"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Ierakstīt audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Ierīces audio"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Skaņa no jūsu ierīces, piemēram, mūzika, sarunas un zvana signāli"</string>
@@ -261,7 +262,7 @@
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Nav pieejama neviena pārī savienota ierīce."</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Lai pievienotu vai atvienotu kādu ierīci, pieskarieties."</string>
-    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Savienošana pārī ar jaunu ierīci"</string>
+    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Savienot pārī ar jaunu ierīci"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Skatīt visas"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Izmantot Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Savienojums izveidots"</string>

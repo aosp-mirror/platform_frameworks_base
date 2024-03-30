@@ -117,7 +117,7 @@
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Teksboodskappe"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM-toegang"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-oudio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
-    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD oudio"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-oudio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="2607867572569689732">"Gehoortoestelle"</string>
     <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE-oudio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="5757754050938807276">"Gekoppel aan gehoortoestelle"</string>
@@ -265,7 +265,7 @@
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Wys \'n knoppie in die kragkieslys om \'n foutverslag te doen"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Bly wakker"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Skerm sal nooit slaap terwyl dit laai nie"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Aktiveer Bluetooth HCI-loerloglêer"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Aktiveer Bluetooth HCI-snuffelloglêer"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Vang Bluetooth-pakkette vas. (Wissel Bluetooth nadat jy hierdie instelling verander het)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM-ontsluit"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Laat toe dat die selflaaiprogram ontsluit word"</string>
@@ -396,7 +396,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Oorganganimasieskaal"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animator-tydsduurskaal"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simuleer sekondêre uitstallings"</string>
-    <string name="debug_applications_category" msgid="5394089406638954196">"Programme"</string>
+    <string name="debug_applications_category" msgid="5394089406638954196">"Apps"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Moenie aktiwiteite behou nie"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Vernietig elke aktiwiteit sodra die gebruiker dit verlaat"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Agtergrondproseslimiet"</string>
@@ -518,7 +518,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Gebruik stelseltale"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Kon nie instellings vir <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> oopmaak nie"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Die invoermetode kan dalk alle teks wat jy invoer, versamel, insluitend persoonlike data soos wagwoorde en kredietkaartnommers. Dit kom van die program <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Wil jy dié invoermetode gebruik?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Let wel: Ná \'n herselflaai kan hierdie program nie begin voordat jy jou foon ontsluit het nie"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Let wel: Ná \'n herselflaai kan hierdie app nie begin voordat jy jou foon ontsluit het nie"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS-registrasiestaat"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Geregistreer"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Nie geregistreer nie"</string>
@@ -630,7 +630,7 @@
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Verwyder"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Stel tans gassessie terug …"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Stel gastesessie terug?"</string>
-    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Dit sal ’n nuwe gastesessie begin en alle programme en data van die huidige sessie uitvee"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Dit sal ’n nuwe gastesessie begin en alle apps en data van die huidige sessie uitvee"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Verlaat gasmodus?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Dit sal programme en data in die huidige gastesessie uitvee"</string>
     <string name="grant_admin" msgid="4323199171790522574">"Ja, maak hulle ’n admin"</string>
@@ -657,7 +657,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Gedeaktiveer"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Geaktiveer"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Jou toestel moet herselflaai om hierdie verandering toe te pas. Herselflaai nou of kanselleer."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Bedraade oorfoon"</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Bedrade oorfone"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Aan"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Af"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Diensverskaffernetwerk verander tans"</string>

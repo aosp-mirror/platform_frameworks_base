@@ -84,6 +84,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"IKT saileko administratzaileak blokeatu egin dizu pantaila-argazkiak ateratzeko aukera"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Editatu"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Editatu pantaila-argazkia"</string>
+    <string name="screenshot_share_label" msgid="1653061117238861559">"Partekatu"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Partekatu pantaila-argazkia"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Kapturatu eduki gehiago"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Baztertu pantaila-argazkia"</string>
@@ -581,7 +582,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Sakatu audioa desaktibatzeko. Baliteke erabilerraztasun-eginbideen audioa desaktibatzea."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Sakatu hau dardara ezartzeko."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Sakatu hau audioa desaktibatzeko."</string>
-    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Zarata-murrizketa"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Zarata-kontrola"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Sakatu tonu-jotzailearen modua aldatzeko"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"desaktibatu audioa"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"aktibatu audioa"</string>
@@ -589,7 +590,7 @@
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s gailuaren bolumena kontrolatzeko aukerak"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Tonuak jo egingo du deiak eta jakinarazpenak jasotzean (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> hemen erreproduzitzen:"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Audioa erreproduzitzen jarraituko du"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Audioak abian jarraituko du hemen:"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Sistemaren erabiltzaile-interfazearen konfiguratzailea"</string>
     <string name="status_bar" msgid="4357390266055077437">"Egoera-barra"</string>
     <string name="demo_mode" msgid="263484519766901593">"Sistemaren erabiltzaile-interfazearen demo modua"</string>
@@ -1127,7 +1128,7 @@
     <string name="person_available" msgid="2318599327472755472">"Konektatuta"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Arazo bat izan da bateria-neurgailua irakurtzean"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Informazio gehiago lortzeko, sakatu hau"</string>
-    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Ez da ezarri alarmarik"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Alarmarik ez"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"erabili pantailaren blokeoa"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Hatz-marken sentsorea"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"autentifikatu"</string>
@@ -1140,7 +1141,7 @@
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Konektatuta"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Aldi baterako konektatuta"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Konexio ahula"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Ez da automatikoki aktibatuko datu-konexioa"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Datu-konexioa ez da automatikoki aktibatuko"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Konexiorik gabe"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Ez dago beste sare erabilgarririk"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Ez dago sare erabilgarririk"</string>

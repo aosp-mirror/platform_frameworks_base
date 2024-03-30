@@ -1988,7 +1988,7 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Zrušit pozastavení pracovních aplikací?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Zrušit pozastavení"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Stav nouze"</string>
-    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Nastavení zámku obrazovky"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Nastavte si zámek obrazovky"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Nastavit zámek obrazovky"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Pokud chcete používat soukromý prostor, nastavte na tomto zařízení zámek obrazovky"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikace není k dispozici"</string>

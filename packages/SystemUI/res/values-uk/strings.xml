@@ -84,6 +84,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Системний адміністратор заблокував можливість робити знімки екрана"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Редагувати"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Редагувати знімок екрана"</string>
+    <string name="screenshot_share_label" msgid="1653061117238861559">"Поділитися"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Поділитися знімком екрана"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Включити більше деталей"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Закрити знімок екрана"</string>
@@ -107,9 +108,9 @@
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Почати записування"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Записувати звук"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Звук із пристрою"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Звук із пристрою, зокрема музика, виклики та сигнали дзвінка"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Звук із пристрою, зокрема музика, виклики й сигнали дзвінка"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Мікрофон"</string>
-    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Звук із пристрою та мікрофона"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Звук із пристрою і мікрофона"</string>
     <string name="screenrecord_continue" msgid="4055347133700593164">"Почати"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Запис екрана"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Запис екрана та звуку"</string>
@@ -360,9 +361,9 @@
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Надати доступ до мікрофона?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Надати доступ до камери пристрою?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Надати доступ до камери й мікрофона?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Усі додатки та сервіси, яким дозволено користуватися вашим мікрофоном, отримають доступ."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Усі додатки та сервіси, яким дозволено користуватися вашою камерою, отримають доступ."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Усі додатки та сервіси, яким дозволено користуватися вашою камерою чи мікрофоном, отримають доступ."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Усі додатки й сервіси, яким дозволено користуватися вашим мікрофоном, отримають доступ."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Усі додатки й сервіси, яким дозволено користуватися вашою камерою, отримають доступ."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Усі додатки й сервіси, яким дозволено користуватися вашою камерою чи мікрофоном, отримають доступ."</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Мікрофон заблоковано"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Камеру заблоковано"</string>
     <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Мікрофон і камеру заблоковано"</string>

@@ -609,7 +609,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"थप्नुहोस्"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"नयाँ प्रयोगकर्ता"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"नयाँ प्रोफाइल"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"प्रयोगकर्ता जानकारी"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"प्रयोगकर्ताको विवरण"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"प्रोफाइलको जानकारी"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"निषेधयुक्त प्रोफाइल बनाउनु अघि तपाईँको एप र व्यक्तिगत डेटा सुरक्षा गर्नाका लागि तपाईँले स्क्रिन लक सेटअप गर्नु पर्दछ ।"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"लक सेट गर्नुहोस्"</string>

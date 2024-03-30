@@ -111,8 +111,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Chuyển tệp"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Thiết bị đầu vào"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Truy cập Internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Cho truy cập danh bạ và nhật ký cuộc gọi"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Thông tin được dùng cho tính năng thông báo cuộc gọi, v.v."</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Cho phép truy cập danh bạ và nhật ký cuộc gọi"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Thông tin sẽ được dùng cho tính năng thông báo cuộc gọi, v.v."</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Chia sẻ kết nối internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Tin nhắn văn bản"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Truy cập SIM"</string>

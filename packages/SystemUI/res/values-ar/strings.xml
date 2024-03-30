@@ -84,6 +84,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"حَظَر مشرف تكنولوجيا المعلومات عملية أخذ لقطات للشاشة."</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"تعديل"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"تعديل لقطة الشاشة"</string>
+    <string name="screenshot_share_label" msgid="1653061117238861559">"مشاركة"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"مشاركة لقطة الشاشة"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"التقاط المزيد من المحتوى"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"إغلاق لقطة الشاشة"</string>
@@ -260,7 +261,7 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"عدم الإزعاج"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"بلوتوث"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"لا يتوفر أي أجهزة مقترنة"</string>
-    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"انقر لربط جهاز أو إلغاء ربطه."</string>
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"انقر لربط جهاز أو إلغاء ربطه"</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"إقران جهاز جديد"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"عرض الكل"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"استخدام البلوتوث"</string>
@@ -442,7 +443,7 @@
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"البدء من جديد"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"نعم، متابعة"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"وضع الضيف"</string>
-    <string name="guest_notification_session_active" msgid="5567273684713471450">"أنت تستخدِم وضع الضيف."</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"أنت تستخدِم وضع الضيف"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"ستؤدي إضافة مُستخدِم جديد إلى الخروج من وضع الضيف وحذف كل التطبيقات والبيانات من جلسة الضيف الحالية."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"تم الوصول إلى أقصى عدد للمستخدمين"</string>
     <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{يمكن إنشاء مستخدم واحد فقط.}zero{يمكنك إضافة ما يصل إلى # مستخدم}two{يمكنك إضافة ما يصل إلى مستخدمَين}few{يمكنك إضافة ما يصل إلى # مستخدمِين}many{يمكنك إضافة ما يصل إلى # مستخدمًا}other{يمكنك إضافة ما يصل إلى # مستخدم}}"</string>
@@ -485,7 +486,7 @@
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"محو جميع الإشعارات الصامتة"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"تم إيقاف الإشعارات مؤقتًا وفقًا لإعداد \"عدم الإزعاج\""</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"البدء الآن"</string>
-    <string name="empty_shade_text" msgid="8935967157319717412">"ما مِن إشعارات."</string>
+    <string name="empty_shade_text" msgid="8935967157319717412">"ما مِن إشعارات"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"ما مِن إشعارات جديدة"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"افتَح قفل الشاشة لعرض الإشعارات الأقدم."</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"يتولّى أحد الوالدين إدارة هذا الجهاز."</string>
@@ -600,7 +601,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"محفظة"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"يمكنك إعداد طريقة دفع لإجراء عمليات شراء بسرعة وأمان أكبر باستخدام هاتفك."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"عرض الكل"</string>
-    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"انقر لفتح قفل الجهاز."</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"انقر لفتح قفل الجهاز"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"جارٍ تحديث تطبيق المحفظة"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"فتح القفل للاستخدام"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"حدثت مشكلة أثناء الحصول على البطاقات، يُرجى إعادة المحاولة لاحقًا."</string>
@@ -1127,7 +1128,7 @@
     <string name="person_available" msgid="2318599327472755472">"متاح"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"حدثت مشكلة أثناء قراءة مقياس مستوى شحن البطارية."</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"انقر للحصول على مزيد من المعلومات."</string>
-    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"لم يتم ضبط منبّه."</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"لم يتم ضبط منبّه"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"إدخال الرمز لفتح القفل"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"مستشعر بصمات الإصبع"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"المصادقة"</string>

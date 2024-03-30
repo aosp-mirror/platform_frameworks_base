@@ -84,6 +84,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Η λήψη στιγμιότυπων οθόνης έχει αποκλειστεί από τον διαχειριστή IT."</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Επεξεργασία"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Επεξεργασία στιγμιότυπου οθόνης"</string>
+    <string name="screenshot_share_label" msgid="1653061117238861559">"Κοινή χρήση"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Κοινοποίηση στιγμιότυπου οθόνης"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Περισσότερα"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Παράβλεψη στιγμιότυπου οθόνης"</string>
@@ -1152,7 +1153,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Δεν θα γίνεται προς το παρόν αυτόματη σύνδεση Wi-Fi."</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Εμφάνιση όλων"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Για εναλλαγή δικτύων, αποσυνδέστε το ethernet"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Για βελτίωση της εμπειρίας στη συσκευή, οι εφαρμογές και οι υπηρεσίες μπορούν ακόμα να εκτελούν σάρωση για δίκτυα Wi‑Fi ανά πάσα στιγμή, ακόμα και όταν το Wi‑Fi είναι απενεργοποιημένο. Μπορείτε να αλλάξετε αυτήν τη ρύθμιση στις ρυθμίσεις της Σάρωσης Wi‑Fi. "<annotation id="link">"Αλλαγή"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Για βελτίωση της εμπειρίας στη συσκευή, οι εφαρμογές και οι υπηρεσίες μπορούν ακόμα να εκτελούν σάρωση για δίκτυα Wi‑Fi ανά πάσα στιγμή, ακόμα και όταν το Wi‑Fi είναι απενεργοποιημένο. Μπορείτε να αλλάξετε αυτή τη ρύθμιση στις ρυθμίσεις της Σάρωσης Wi‑Fi. "<annotation id="link">"Αλλαγή"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Απενεργοποίηση λειτουργίας πτήσης"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"Η εφαρμογή <xliff:g id="APPNAME">%1$s</xliff:g> θέλει να προσθέσει το παρακάτω πλακίδιο στις Γρήγορες ρυθμίσεις"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Προσθήκη πλακιδίου"</string>

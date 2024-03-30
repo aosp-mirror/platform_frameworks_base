@@ -561,6 +561,8 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Device default insets types shall be excluded from config app sizes. */
     final int mConfigTypes;
 
+    final int mLegacyConfigTypes;
+
     final boolean mLimitedAlphaCompositing;
     final int mMaxUiWidth;
 
@@ -1190,13 +1192,23 @@ public class WindowManagerService extends IWindowManager.Stub
         final boolean isScreenSizeDecoupledFromStatusBarAndCutout = context.getResources()
                 .getBoolean(R.bool.config_decoupleStatusBarAndDisplayCutoutFromScreenSize)
                 && mFlags.mAllowsScreenSizeDecoupledFromStatusBarAndCutout;
-        if (!isScreenSizeDecoupledFromStatusBarAndCutout) {
+        if (mFlags.mInsetsDecoupledConfiguration) {
+            mDecorTypes = 0;
+            mConfigTypes = 0;
+        } else if (isScreenSizeDecoupledFromStatusBarAndCutout) {
+            mDecorTypes = WindowInsets.Type.navigationBars();
+            mConfigTypes = WindowInsets.Type.navigationBars();
+        } else {
             mDecorTypes = WindowInsets.Type.displayCutout() | WindowInsets.Type.navigationBars();
             mConfigTypes = WindowInsets.Type.displayCutout() | WindowInsets.Type.statusBars()
                     | WindowInsets.Type.navigationBars();
+        }
+        if (isScreenSizeDecoupledFromStatusBarAndCutout) {
+            // Do not fallback to legacy value for enabled devices.
+            mLegacyConfigTypes = WindowInsets.Type.navigationBars();
         } else {
-            mDecorTypes = WindowInsets.Type.navigationBars();
-            mConfigTypes = WindowInsets.Type.navigationBars();
+            mLegacyConfigTypes = WindowInsets.Type.displayCutout() | WindowInsets.Type.statusBars()
+                    | WindowInsets.Type.navigationBars();
         }
 
         mLetterboxConfiguration = new LetterboxConfiguration(

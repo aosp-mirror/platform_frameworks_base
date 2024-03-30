@@ -491,7 +491,7 @@
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Bateria w pełni naładowana"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Ładowanie wstrzymane"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Kontrolowane przez administratora"</string>
-    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Kontrolowane przez ograniczone ustawienia"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Obowiązują ustawienia z ograniczonym dostępem"</string>
     <string name="disabled" msgid="8017887509554714950">"Wyłączone"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Dozwolone"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Niedozwolone"</string>
@@ -518,7 +518,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Użyj języków systemu"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Nie udało się otworzyć ustawień aplikacji <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Ta metoda wprowadzania tekstu może gromadzić cały wpisywany tekst, w tym dane osobowe takie jak hasła czy numery kart kredytowych. Pochodzi ona z aplikacji <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Użyć jej?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Uwaga: po restarcie ta aplikacja będzie mogła uruchomić się dopiero po odblokowaniu telefonu"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Uwaga: po restarcie ta aplikacja będzie mogła uruchomić się dopiero, gdy odblokujesz telefon."</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"Stan rejestracji IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Zarejestrowane"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Niezarejestrowane"</string>

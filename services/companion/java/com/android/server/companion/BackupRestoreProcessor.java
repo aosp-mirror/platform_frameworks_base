@@ -116,6 +116,14 @@ class BackupRestoreProcessor {
      * Create new associations and system data transfer request consents using backed up payload.
      */
     void applyRestoredPayload(byte[] payload, int userId) {
+        Slog.i(TAG, "applyRestoredPayload() userId=[" + userId + "], payload size=["
+                + payload.length + "].");
+
+        if (payload.length == 0) {
+            Slog.i(TAG, "CDM backup payload was empty.");
+            return;
+        }
+
         ByteBuffer buffer = ByteBuffer.wrap(payload);
 
         // Make sure that payload version matches current version to ensure proper deserialization
@@ -125,16 +133,27 @@ class BackupRestoreProcessor {
             return;
         }
 
-        // Read the bytes containing backed-up associations
-        byte[] associationsPayload = new byte[buffer.getInt()];
-        buffer.get(associationsPayload);
+        // Pre-load the bytes into memory before processing them to ensure payload mal-formatting
+        // error is caught early on.
+        final byte[] associationsPayload;
+        final byte[] requestsPayload;
+        try {
+            // Read the bytes containing backed-up associations
+            associationsPayload = new byte[buffer.getInt()];
+            buffer.get(associationsPayload);
+
+            // Read the bytes containing backed-up system data transfer requests user consent
+            requestsPayload = new byte[buffer.getInt()];
+            buffer.get(requestsPayload);
+        } catch (Exception bufferException) {
+            Slog.e(TAG, "CDM backup payload was mal-formatted.", bufferException);
+            return;
+        }
+
         final Set<AssociationInfo> restoredAssociations = new HashSet<>();
         mPersistentStore.readStateFromPayload(associationsPayload, userId,
                 restoredAssociations, new HashMap<>());
 
-        // Read the bytes containing backed-up system data transfer requests user consent
-        byte[] requestsPayload = new byte[buffer.getInt()];
-        buffer.get(requestsPayload);
         List<SystemDataTransferRequest> restoredRequestsForUser =
                 mSystemDataTransferRequestStore.readRequestsFromPayload(requestsPayload, userId);
 
