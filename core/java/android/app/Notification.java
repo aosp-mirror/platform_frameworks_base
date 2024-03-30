@@ -3910,6 +3910,13 @@ public class Notification implements Parcelable
     /**
      * @hide
      */
+    public boolean hasAppProvidedWhen() {
+        return when != 0 && when != creationTime;
+    }
+
+    /**
+     * @hide
+     */
     @UnsupportedAppUsage
     public boolean isGroupSummary() {
         return mGroupKey != null && (flags & FLAG_GROUP_SUMMARY) != 0;
