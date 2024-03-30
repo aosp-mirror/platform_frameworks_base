@@ -243,6 +243,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private static final String SET_PIP_ACTION_REPLACEMENT =
             "setPictureInPictureActionReplacingConnection";
 
+    /**
+     * An intent action to launch Hearing devices dialog.
+     */
+    @VisibleForTesting
+    static final String ACTION_LAUNCH_HEARING_DEVICES_DIALOG =
+            "com.android.systemui.action.LAUNCH_HEARING_DEVICES_DIALOG";
+
     private static final char COMPONENT_NAME_SEPARATOR = ':';
 
     private static final int OWN_PROCESS_ID = android.os.Process.myPid();
@@ -2311,6 +2318,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    private void launchHearingDevicesDialog() {
+        final Intent intent = new Intent(ACTION_LAUNCH_HEARING_DEVICES_DIALOG);
+        intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        intent.setPackage(
+                mContext.getString(com.android.internal.R.string.config_systemUi));
+        mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
+    }
+
     private void notifyAccessibilityButtonVisibilityChangedLocked(boolean available) {
         final AccessibilityUserState state = getCurrentUserStateLocked();
         mIsAccessibilityButtonShown = available;
@@ -4120,7 +4135,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private void launchAccessibilityFrameworkFeature(int displayId, ComponentName assignedTarget) {
         if (assignedTarget.equals(ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME)) {
-            launchAccessibilitySubSettings(displayId, ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME);
+            //import com.android.systemui.Flags;
+            if (com.android.systemui.Flags.hearingAidsQsTileDialog()) {
+                launchHearingDevicesDialog();
+            } else {
+                launchAccessibilitySubSettings(displayId,
+                        ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME);
+            }
         }
     }
 
