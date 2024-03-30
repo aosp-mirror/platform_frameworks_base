@@ -62,4 +62,8 @@ interface IUiAutomationConnection {
     void executeShellCommandWithStderr(String command, in ParcelFileDescriptor sink,
                 in ParcelFileDescriptor source, in ParcelFileDescriptor stderrSink);
     List<String> getAdoptedShellPermissions();
+    void addOverridePermissionState(int uid, String permission, int result);
+    void removeOverridePermissionState(int uid, String permission);
+    void clearOverridePermissionStates(int uid);
+    void clearAllOverridePermissionStates();
 }

@@ -970,4 +970,40 @@ interface IActivityManager {
      * time in the past.
      */
     long getUidLastIdleElapsedTime(int uid, in String callingPackage);
+
+    /**
+     * Adds permission to be overridden to the given state. Must be called from root user.
+     *
+     * @param originatingUid The UID of the instrumented app that initialized the override
+     * @param uid The UID of the app whose permission will be overridden
+     * @param permission The permission whose state will be overridden
+     * @param result The state to override the permission to
+     *
+     * @see PackageManager.PermissionResult
+     */
+    void addOverridePermissionState(int originatingUid, int uid, String permission, int result);
+
+    /**
+     * Removes overridden permission. Must be called from root user.
+     *
+     * @param originatingUid The UID of the instrumented app that initialized the override
+     * @param uid The UID of the app whose permission is overridden
+     * @param permission The permission whose state will no longer be overridden
+     */
+    void removeOverridePermissionState(int originatingUid, int uid, String permission);
+
+    /**
+     * Clears all overridden permissions for the given UID. Must be called from root user.
+     *
+     * @param originatingUid The UID of the instrumented app that initialized the override
+     * @param uid The UID of the app whose permissions will no longer be overridden
+     */
+    void clearOverridePermissionStates(int originatingUid, int uid);
+
+    /**
+     * Clears all overridden permissions on the device. Must be called from root user.
+     *
+     * @param originatingUid The UID of the instrumented app that initialized the override
+     */
+    void clearAllOverridePermissionStates(int originatingUid);
 }
