@@ -387,6 +387,10 @@ public class AccessibilityMenuService extends AccessibilityService
         unregisterReceiver(mToggleMenuReceiver);
         mPrefs.unregisterOnSharedPreferenceChangeListener(mSharedPreferenceChangeListener);
         sInitialized = false;
+        if (mA11yMenuLayout != null) {
+            mA11yMenuLayout.clearLayout();
+            mA11yMenuLayout = null;
+        }
         return super.onUnbind(intent);
     }
 
