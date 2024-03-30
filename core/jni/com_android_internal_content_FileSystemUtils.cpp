@@ -42,7 +42,11 @@ namespace android {
 bool punchHoles(const char *filePath, const uint64_t offset,
                 const std::vector<Elf64_Phdr> &programHeaders) {
     struct stat64 beforePunch;
-    lstat64(filePath, &beforePunch);
+    if (int result = lstat64(filePath, &beforePunch); result != 0) {
+        ALOGE("lstat64 failed for filePath %s, error:%d", filePath, errno);
+        return false;
+    }
+
     uint64_t blockSize = beforePunch.st_blksize;
     IF_ALOGD() {
         ALOGD("Total number of LOAD segments %zu", programHeaders.size());
@@ -152,7 +156,10 @@ bool punchHoles(const char *filePath, const uint64_t offset,
 
     IF_ALOGD() {
         struct stat64 afterPunch;
-        lstat64(filePath, &afterPunch);
+        if (int result = lstat64(filePath, &afterPunch); result != 0) {
+            ALOGD("lstat64 failed for filePath %s, error:%d", filePath, errno);
+            return false;
+        }
         ALOGD("Size after punching holes st_blocks: %" PRIu64 ", st_blksize: %ld, st_size: %" PRIu64
               "",
               afterPunch.st_blocks, afterPunch.st_blksize,
@@ -177,7 +184,7 @@ bool punchHolesInElf64(const char *filePath, const uint64_t offset) {
 
     // only consider elf64 for punching holes
     if (ehdr.e_ident[EI_CLASS] != ELFCLASS64) {
-        ALOGE("Provided file is not ELF64");
+        ALOGW("Provided file is not ELF64");
         return false;
     }
 
@@ -213,6 +220,110 @@ bool punchHolesInElf64(const char *filePath, const uint64_t offset) {
     }
 
     return punchHoles(filePath, offset, programHeaders);
+}
+
+bool punchHolesInZip(const char *filePath, uint64_t offset, uint16_t extraFieldLen) {
+    android::base::unique_fd fd(open(filePath, O_RDWR | O_CLOEXEC));
+    if (!fd.ok()) {
+        ALOGE("Can't open file to punch %s", filePath);
+        return false;
+    }
+
+    struct stat64 beforePunch;
+    if (int result = lstat64(filePath, &beforePunch); result != 0) {
+        ALOGE("lstat64 failed for filePath %s, error:%d", filePath, errno);
+        return false;
+    }
+
+    uint64_t blockSize = beforePunch.st_blksize;
+    IF_ALOGD() {
+        ALOGD("Extra field length: %hu,  Size before punching holes st_blocks: %" PRIu64
+              ", st_blksize: %ld, st_size: %" PRIu64 "",
+              extraFieldLen, beforePunch.st_blocks, beforePunch.st_blksize,
+              static_cast<uint64_t>(beforePunch.st_size));
+    }
+
+    if (extraFieldLen < blockSize) {
+        ALOGD("Skipping punching apk as extra field length is less than block size");
+        return false;
+    }
+
+    // content is preceded by extra field. Zip offset is offset of exact content.
+    // move back by extraFieldLen so that scan can be started at start of extra field.
+    uint64_t extraFieldStart;
+    if (__builtin_sub_overflow(offset, extraFieldLen, &extraFieldStart)) {
+        ALOGE("Overflow occurred when calculating start of extra field");
+        return false;
+    }
+
+    constexpr uint64_t kMaxSize = 64 * 1024;
+    // Use malloc to gracefully handle any oom conditions
+    std::unique_ptr<uint8_t, decltype(&free)> buffer(static_cast<uint8_t *>(malloc(kMaxSize)),
+                                                     &free);
+    if (buffer == nullptr) {
+        ALOGE("Failed to allocate read buffer");
+        return false;
+    }
+
+    // Read the entire extra fields at once and punch file according to zero stretches.
+    if (!ReadFullyAtOffset(fd, buffer.get(), extraFieldLen, extraFieldStart)) {
+        ALOGE("Failed to read extra field content");
+        return false;
+    }
+
+    IF_ALOGD() {
+        ALOGD("Extra field length: %hu content near offset: %s", extraFieldLen,
+              HexString(buffer.get(), extraFieldLen).c_str());
+    }
+
+    uint64_t currentSize = 0;
+    while (currentSize < extraFieldLen) {
+        uint64_t end = currentSize;
+        // find zero ranges
+        while (end < extraFieldLen && *(buffer.get() + end) == 0) {
+            ++end;
+        }
+
+        uint64_t punchLen;
+        if (__builtin_sub_overflow(end, currentSize, &punchLen)) {
+            ALOGW("Overflow occurred when calculating punching length");
+            return false;
+        }
+
+        // Don't punch for every stretch of zero which is found
+        if (punchLen > blockSize) {
+            uint64_t punchOffset;
+            if (__builtin_add_overflow(extraFieldStart, currentSize, &punchOffset)) {
+                ALOGW("Overflow occurred when calculating punch start offset");
+                return false;
+            }
+
+            ALOGD("Punching hole in apk start: %" PRIu64 " len:%" PRIu64 "", punchOffset, punchLen);
+
+            // Punch hole for this entire stretch.
+            int result = fallocate(fd, FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE, punchOffset,
+                                   punchLen);
+            if (result < 0) {
+                ALOGE("fallocate failed to punch hole inside apk, error:%d", errno);
+                return false;
+            }
+        }
+        currentSize = end;
+        ++currentSize;
+    }
+
+    IF_ALOGD() {
+        struct stat64 afterPunch;
+        if (int result = lstat64(filePath, &afterPunch); result != 0) {
+            ALOGD("lstat64 failed for filePath %s, error:%d", filePath, errno);
+            return false;
+        }
+        ALOGD("punchHolesInApk:: Size after punching holes st_blocks: %" PRIu64
+              ", st_blksize: %ld, st_size: %" PRIu64 "",
+              afterPunch.st_blocks, afterPunch.st_blksize,
+              static_cast<uint64_t>(afterPunch.st_size));
+    }
+    return true;
 }
 
 }; // namespace android

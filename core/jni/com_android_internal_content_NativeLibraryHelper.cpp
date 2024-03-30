@@ -145,8 +145,9 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
 
     uint16_t method;
     off64_t offset;
-
-    if (!zipFile->getEntryInfo(zipEntry, &method, &uncompLen, nullptr, &offset, &when, &crc)) {
+    uint16_t extraFieldLength;
+    if (!zipFile->getEntryInfo(zipEntry, &method, &uncompLen, nullptr, &offset, &when, &crc,
+                               &extraFieldLength)) {
         ALOGE("Couldn't read zip entry info\n");
         return INSTALL_FAILED_INVALID_APK;
     }
@@ -176,6 +177,12 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
             ALOGW("Failed to punch uncompressed elf file :%s inside apk : %s at offset: "
                   "%" PRIu64 "",
                   fileName, zipFile->getZipFileName(), offset);
+        }
+
+        // if extra field for this zip file is present with some length, possibility is that it is
+        // padding added for zip alignment. Punch holes there too.
+        if (!punchHolesInZip(zipFile->getZipFileName(), offset, extraFieldLength)) {
+            ALOGW("Failed to punch apk : %s at extra field", zipFile->getZipFileName());
         }
 #endif // ENABLE_PUNCH_HOLES
 
