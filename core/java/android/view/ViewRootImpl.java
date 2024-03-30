@@ -34,13 +34,13 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_GTE;
-import static android.view.View.FRAME_RATE_CATEGORY_REASON_UNKNOWN;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_IDLE;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_INTERMITTENT;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_INVALID;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_LARGE;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_REQUESTED;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_SMALL;
+import static android.view.View.FRAME_RATE_CATEGORY_REASON_UNKNOWN;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_VELOCITY;
 import static android.view.View.PFLAG_DRAW_ANIMATION;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
@@ -69,11 +69,10 @@ import static android.view.ViewRootImplProto.WIDTH;
 import static android.view.ViewRootImplProto.WINDOW_ATTRIBUTES;
 import static android.view.ViewRootImplProto.WIN_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
-import static android.view.WindowInsetsController.COMPATIBLE_APPEARANCE_FLAGS;
-import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
+import static android.view.WindowInsetsController.Appearance;
 import static android.view.WindowInsetsController.BEHAVIOR_DEFAULT;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowLayout.UNSPECIFIED_LENGTH;
@@ -85,8 +84,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APPEARANCE_CONTROLLED;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FIT_INSETS_CONTROLLED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME;
@@ -107,6 +104,7 @@ import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.accessibility.Flags.fixMergedContentChangeEvent;
 import static android.view.accessibility.Flags.forceInvertColor;
 import static android.view.accessibility.Flags.reduceWindowContentChangedEventThrottle;
+import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.view.flags.Flags.toolkitFrameRateTypingReadOnly;
 import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
@@ -1517,7 +1515,9 @@ public final class ViewRootImpl implements ViewParent,
                     mOrigWindowType = mWindowAttributes.type;
                     mAttachInfo.mRecomputeGlobalAttributes = true;
                     collectViewAttributes();
-                    adjustLayoutParamsForCompatibility(mWindowAttributes);
+                    adjustLayoutParamsForCompatibility(mWindowAttributes,
+                            mInsetsController.getAppearanceControlled(),
+                            mInsetsController.isBehaviorControlled());
                     controlInsetsForCompatibility(mWindowAttributes);
 
                     Rect attachedFrame = new Rect();
@@ -2033,8 +2033,6 @@ public final class ViewRootImpl implements ViewParent,
             // Preserve appearance and behavior.
             final int appearance = mWindowAttributes.insetsFlags.appearance;
             final int behavior = mWindowAttributes.insetsFlags.behavior;
-            final int appearanceAndBehaviorPrivateFlags = mWindowAttributes.privateFlags
-                    & (PRIVATE_FLAG_APPEARANCE_CONTROLLED | PRIVATE_FLAG_BEHAVIOR_CONTROLLED);
 
             final int changes = mWindowAttributes.copyFrom(attrs);
             if ((changes & WindowManager.LayoutParams.TRANSLUCENT_FLAGS_CHANGED) != 0) {
@@ -2057,7 +2055,6 @@ public final class ViewRootImpl implements ViewParent,
             mWindowAttributes.subtreeSystemUiVisibility = subtreeSystemUiVisibility;
             mWindowAttributes.insetsFlags.appearance = appearance;
             mWindowAttributes.insetsFlags.behavior = behavior;
-            mWindowAttributes.privateFlags |= appearanceAndBehaviorPrivateFlags;
 
             if (mWindowAttributes.preservePreviousSurfaceInsets) {
                 // Restore old surface insets.
@@ -2911,26 +2908,35 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     @VisibleForTesting
-    public static void adjustLayoutParamsForCompatibility(WindowManager.LayoutParams inOutParams) {
+    public static void adjustLayoutParamsForCompatibility(WindowManager.LayoutParams inOutParams,
+            @Appearance int appearanceControlled, boolean behaviorControlled) {
         final int sysUiVis = inOutParams.systemUiVisibility | inOutParams.subtreeSystemUiVisibility;
         final int flags = inOutParams.flags;
         final int type = inOutParams.type;
         final int adjust = inOutParams.softInputMode & SOFT_INPUT_MASK_ADJUST;
 
-        if ((inOutParams.privateFlags & PRIVATE_FLAG_APPEARANCE_CONTROLLED) == 0) {
-            inOutParams.insetsFlags.appearance &= ~COMPATIBLE_APPEARANCE_FLAGS;
-            if ((sysUiVis & SYSTEM_UI_FLAG_LOW_PROFILE) != 0) {
-                inOutParams.insetsFlags.appearance |= APPEARANCE_LOW_PROFILE_BARS;
-            }
-            if ((sysUiVis & SYSTEM_UI_FLAG_LIGHT_STATUS_BAR) != 0) {
-                inOutParams.insetsFlags.appearance |= APPEARANCE_LIGHT_STATUS_BARS;
-            }
-            if ((sysUiVis & SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR) != 0) {
-                inOutParams.insetsFlags.appearance |= APPEARANCE_LIGHT_NAVIGATION_BARS;
-            }
+        @Appearance int appearance = inOutParams.insetsFlags.appearance;
+        if ((appearanceControlled & APPEARANCE_LOW_PROFILE_BARS) == 0) {
+            appearance &= ~APPEARANCE_LOW_PROFILE_BARS;
+            appearance |= (sysUiVis & SYSTEM_UI_FLAG_LOW_PROFILE) != 0
+                    ? APPEARANCE_LOW_PROFILE_BARS
+                    : 0;
         }
+        if ((appearanceControlled & APPEARANCE_LIGHT_STATUS_BARS) == 0) {
+            appearance &= ~APPEARANCE_LIGHT_STATUS_BARS;
+            appearance |= (sysUiVis & SYSTEM_UI_FLAG_LIGHT_STATUS_BAR) != 0
+                    ? APPEARANCE_LIGHT_STATUS_BARS
+                    : 0;
+        }
+        if ((appearanceControlled & APPEARANCE_LIGHT_NAVIGATION_BARS) == 0) {
+            appearance &= ~APPEARANCE_LIGHT_NAVIGATION_BARS;
+            appearance |= (sysUiVis & SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR) != 0
+                    ? APPEARANCE_LIGHT_NAVIGATION_BARS
+                    : 0;
+        }
+        inOutParams.insetsFlags.appearance = appearance;
 
-        if ((inOutParams.privateFlags & PRIVATE_FLAG_BEHAVIOR_CONTROLLED) == 0) {
+        if (!behaviorControlled) {
             if ((sysUiVis & SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0
                     || (flags & FLAG_FULLSCREEN) != 0) {
                 inOutParams.insetsFlags.behavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
@@ -3480,7 +3486,9 @@ public final class ViewRootImpl implements ViewParent,
                     && !PixelFormat.formatHasAlpha(params.format)) {
                 params.format = PixelFormat.TRANSLUCENT;
             }
-            adjustLayoutParamsForCompatibility(params);
+            adjustLayoutParamsForCompatibility(params,
+                    mInsetsController.getAppearanceControlled(),
+                    mInsetsController.isBehaviorControlled());
             controlInsetsForCompatibility(params);
             if (mDispatchedSystemBarAppearance != params.insetsFlags.appearance) {
                 mDispatchedSystemBarAppearance = params.insetsFlags.appearance;
