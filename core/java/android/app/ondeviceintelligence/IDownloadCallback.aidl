@@ -23,7 +23,7 @@ import android.os.PersistableBundle;
  *
  * @hide
  */
-interface IDownloadCallback {
+oneway interface IDownloadCallback {
   void onDownloadStarted(long bytesToDownload) = 1;
   void onDownloadProgress(long bytesDownloaded) = 2;
   void onDownloadFailed(int failureStatus, String errorMessage, in PersistableBundle errorParams) = 3;

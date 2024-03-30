@@ -8,7 +8,7 @@ import android.app.ondeviceintelligence.TokenInfo;
   *
   * @hide
   */
-interface ITokenInfoCallback {
+oneway interface ITokenInfoCallback {
     void onSuccess(in TokenInfo tokenInfo) = 1;
     void onFailure(int errorCode, in String errorMessage, in PersistableBundle errorParams) = 2;
 }
