@@ -1038,7 +1038,7 @@
     <string name="person_available" msgid="2318599327472755472">"Konektatuta"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Arazo bat izan da bateria-neurgailua irakurtzean"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Informazio gehiago lortzeko, sakatu hau"</string>
-    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Ez da ezarri alarmarik"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Alarmarik ez"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Hatz-marken sentsorea"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"autentifikatu"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"sartu gailuan"</string>
@@ -1050,7 +1050,7 @@
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Konektatuta"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Aldi baterako konektatuta"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Konexio ahula"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Ez da automatikoki aktibatuko datu-konexioa"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Datu-konexioa ez da automatikoki aktibatuko"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Konexiorik gabe"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Ez dago beste sare erabilgarririk"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Ez dago sare erabilgarririk"</string>

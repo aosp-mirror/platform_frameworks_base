@@ -105,7 +105,7 @@
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Lancer l\'enregistrement"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Enregistrer l\'audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio de l\'appareil"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Son provenant de l\'appareil (musique, appels et sonneries, etc.)"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Son provenant de l\'appareil (musique, appels, sonneries, etc.)"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Micro"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio de l\'appareil et micro"</string>
     <string name="screenrecord_continue" msgid="4055347133700593164">"Commencer"</string>
@@ -128,7 +128,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Téléphoner"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Assistance vocale"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
-    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Lecteur de code QR"</string>
+    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Lecteur code QR"</string>
     <string name="accessibility_unlock_button" msgid="3613812140816244310">"Déverrouillé"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Appareil verrouillé"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Analyse du visage en cours"</string>
@@ -398,7 +398,7 @@
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Commencer à enregistrer ou à caster ?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Le service qui fournit cette fonction aura accès à toutes les infos visibles sur votre écran ou lues depuis votre appareil pendant un enregistrement ou une diffusion de contenu. Il peut s\'agir de mots de passe, détails de mode de paiement, photos, messages ou encore contenus audio lus."</string>
     <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Tout l\'écran"</string>
-    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Une seule appli"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Uniquement l\'appli"</string>
     <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Partager ou enregistrer une appli"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Commencer à enregistrer ou à caster avec <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ?"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Lorsque vous partagez, enregistrez ou castez, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages, photos et contenus audio et vidéo."</string>
