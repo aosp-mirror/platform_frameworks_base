@@ -838,7 +838,7 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"स्क्रीन रेकॉर्डिंग"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"शीर्षक नाही"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्टँडबाय"</string>
-    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"फॉंट आकार"</string>
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"फॉंटचा आकार"</string>
     <string name="font_scaling_smaller" msgid="1012032217622008232">"आणखी लहान करा"</string>
     <string name="font_scaling_larger" msgid="5476242157436806760">"आणखी मोठे करा"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"मॅग्निफिकेशन विंडो"</string>

@@ -251,7 +251,7 @@
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Заставка"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Доступ к камере"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Доступ к микрофону"</string>
-    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Доступно"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Есть"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Заблокировано"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Режим медиа"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Пользователь"</string>
