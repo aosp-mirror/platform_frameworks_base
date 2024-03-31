@@ -2139,7 +2139,7 @@ public class DisplayDeviceConfig {
                 mAmbientLightSensor = SensorData.loadAmbientLightSensorConfig(config,
                         mContext.getResources());
                 mScreenOffBrightnessSensor = SensorData.loadScreenOffBrightnessSensorConfig(config);
-                mProximitySensor = SensorData.loadProxSensorConfig(config);
+                mProximitySensor = SensorData.loadProxSensorConfig(mFlags, config);
                 mTempSensor = SensorData.loadTempSensorConfig(mFlags, config);
                 loadAmbientHorizonFromDdc(config);
                 loadBrightnessChangeThresholds(config);

@@ -235,3 +235,11 @@ flag {
     bug: "310026579"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "use_fusion_prox_sensor"
+    namespace: "display_manager"
+    description: "Feature flag to control usage of a Fusion Proximity sensor if configued."
+    bug: "306203895"
+    is_fixed_read_only: true
+}

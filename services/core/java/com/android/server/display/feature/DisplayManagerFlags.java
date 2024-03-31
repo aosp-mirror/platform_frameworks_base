@@ -144,12 +144,15 @@ public class DisplayManagerFlags {
             Flags::idleScreenRefreshRateTimeout
     );
 
-
     private final FlagState mRefactorDisplayPowerController = new FlagState(
             Flags.FLAG_REFACTOR_DISPLAY_POWER_CONTROLLER,
             Flags::refactorDisplayPowerController
     );
 
+    private final FlagState mUseFusionProxSensor = new FlagState(
+            Flags.FLAG_USE_FUSION_PROX_SENSOR,
+            Flags::useFusionProxSensor
+    );
 
     /**
      * @return {@code true} if 'port' is allowed in display layout configuration file.
@@ -301,6 +304,14 @@ public class DisplayManagerFlags {
         return mRefactorDisplayPowerController.isEnabled();
     }
 
+    public boolean isUseFusionProxSensorEnabled() {
+        return mUseFusionProxSensor.isEnabled();
+    }
+
+    public String getUseFusionProxSensorFlagName() {
+        return mUseFusionProxSensor.getName();
+    }
+
     /**
      * dumps all flagstates
      * @param pw printWriter
@@ -331,6 +342,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mIdleScreenRefreshRateTimeout);
         pw.println(" " + mRefactorDisplayPowerController);
         pw.println(" " + mResolutionBackupRestore);
+        pw.println(" " + mUseFusionProxSensor);
     }
 
     private static class FlagState {
@@ -344,6 +356,10 @@ public class DisplayManagerFlags {
         private FlagState(String name, Supplier<Boolean> flagFunction) {
             mName = name;
             mFlagFunction = flagFunction;
+        }
+
+        private String getName() {
+            return mName;
         }
 
         private boolean isEnabled() {
