@@ -291,7 +291,7 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Upozornenie pri <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Pracovné aplikácie"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Nočný režim"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Zap. pri záp. slnka"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Pri západe slnka"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Do východu slnka"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Od <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Do <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -1050,7 +1050,7 @@
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Pripojené"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Dočasne pripojené"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Slabé pripojenie"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Automatické pripojenie cez mobilné dáta nefunguje"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Mobilné dáta sa nepripájajú automaticky"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Bez pripojenia"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Nie sú k dispozícii žiadne ďalšie siete"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Nie sú k dispozícii žiadne siete"</string>

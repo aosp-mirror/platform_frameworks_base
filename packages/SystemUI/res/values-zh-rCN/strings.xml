@@ -421,7 +421,7 @@
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"静音"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"通知"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"对话"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"清除所有无声通知"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"清除所有静音通知"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"勿扰模式暂停的通知"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"立即开始"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"没有通知"</string>
@@ -1050,7 +1050,7 @@
     <string name="mobile_data_connection_active" msgid="944490013299018227">"已连接"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"已暂时连接"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"连接状况不佳"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"系统将不会自动连接到移动数据网络"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"不会自动连接到移动数据网络"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"无网络连接"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"没有其他可用网络"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"没有可用网络"</string>
@@ -1142,7 +1142,7 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"切换到工作资料"</string>
     <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"安装工作电话应用"</string>
     <string name="call_from_work_profile_close" msgid="5830072964434474143">"取消"</string>
-    <string name="lock_screen_settings" msgid="6152703934761402399">"自定义锁屏状态"</string>
+    <string name="lock_screen_settings" msgid="6152703934761402399">"自定义锁屏"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"解锁以自定义锁定屏幕"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"没有 WLAN 连接"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"已禁用摄像头"</string>
