@@ -16,10 +16,8 @@
 
 package com.android.internal.accessibility.dialog;
 
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
-
-import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.internal.accessibility.util.AccessibilityUtils.setAccessibilityServiceState;
 import static com.android.internal.accessibility.util.ShortcutUtils.isComponentIdExistingInSettings;
 
@@ -28,10 +26,10 @@ import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.UserHandle;
-import android.view.accessibility.AccessibilityManager.ShortcutType;
 import android.view.accessibility.Flags;
 
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
+import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 import com.android.internal.accessibility.util.ShortcutUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -45,7 +43,7 @@ import java.util.Set;
 public class InvisibleToggleAccessibilityServiceTarget extends AccessibilityServiceTarget {
 
     public InvisibleToggleAccessibilityServiceTarget(
-            Context context, @ShortcutType int shortcutType,
+            Context context, @UserShortcutType int shortcutType,
             @NonNull AccessibilityServiceInfo serviceInfo) {
         super(context,
                 shortcutType,
@@ -72,10 +70,10 @@ public class InvisibleToggleAccessibilityServiceTarget extends AccessibilityServ
 
     private boolean isComponentIdExistingInOtherShortcut() {
         switch (getShortcutType()) {
-            case ACCESSIBILITY_BUTTON:
+            case SOFTWARE:
                 return isComponentIdExistingInSettings(getContext(), UserShortcutType.HARDWARE,
                         getId());
-            case ACCESSIBILITY_SHORTCUT_KEY:
+            case HARDWARE:
                 return isComponentIdExistingInSettings(getContext(), UserShortcutType.SOFTWARE,
                         getId());
             default:

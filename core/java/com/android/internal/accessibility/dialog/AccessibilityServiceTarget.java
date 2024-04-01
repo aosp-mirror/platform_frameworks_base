@@ -17,16 +17,15 @@
 package com.android.internal.accessibility.dialog;
 
 import static com.android.internal.accessibility.util.ShortcutUtils.convertToKey;
-import static com.android.internal.accessibility.util.ShortcutUtils.convertToUserType;
 import static com.android.internal.accessibility.util.ShortcutUtils.isShortcutContained;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
 import android.content.Context;
-import android.view.accessibility.AccessibilityManager.ShortcutType;
 
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
 import com.android.internal.accessibility.common.ShortcutConstants.ShortcutMenuMode;
+import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 
 /**
  * Base class for creating accessibility service target with various fragment types related to
@@ -36,7 +35,7 @@ class AccessibilityServiceTarget extends AccessibilityTarget {
 
     private final AccessibilityServiceInfo mAccessibilityServiceInfo;
 
-    AccessibilityServiceTarget(Context context, @ShortcutType int shortcutType,
+    AccessibilityServiceTarget(Context context, @UserShortcutType int shortcutType,
             @AccessibilityFragmentType int fragmentType,
             @NonNull AccessibilityServiceInfo serviceInfo) {
         super(context,
@@ -48,7 +47,7 @@ class AccessibilityServiceTarget extends AccessibilityTarget {
                 serviceInfo.getResolveInfo().serviceInfo.applicationInfo.uid,
                 serviceInfo.getResolveInfo().loadLabel(context.getPackageManager()),
                 serviceInfo.getResolveInfo().loadIcon(context.getPackageManager()),
-                convertToKey(convertToUserType(shortcutType)));
+                convertToKey(shortcutType));
         mAccessibilityServiceInfo = serviceInfo;
     }
 

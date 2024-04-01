@@ -18,8 +18,8 @@ package com.android.internal.accessibility;
 
 import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getTargets;
 import static com.android.internal.os.RoSystemProperties.SUPPORT_ONE_HANDED_MODE;
 import static com.android.internal.util.ArrayUtils.convertToLongArray;
@@ -57,7 +57,6 @@ import android.view.accessibility.Flags;
 import android.widget.Toast;
 
 import com.android.internal.R;
-import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.internal.accessibility.util.ShortcutUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -331,7 +330,7 @@ public class AccessibilityShortcutController {
     }
 
     private AlertDialog createShortcutWarningDialog(int userId) {
-        List<AccessibilityTarget> targets = getTargets(mContext, ACCESSIBILITY_SHORTCUT_KEY);
+        List<AccessibilityTarget> targets = getTargets(mContext, HARDWARE);
         if (targets.size() == 0) {
             return null;
         }
@@ -374,7 +373,7 @@ public class AccessibilityShortcutController {
                                 Set<String> targetServices =
                                         ShortcutUtils.getShortcutTargetsFromSettings(
                                                 mContext,
-                                                ShortcutConstants.UserShortcutType.HARDWARE,
+                                                HARDWARE,
                                                 userId);
 
                                 Settings.Secure.putStringForUser(mContext.getContentResolver(),
@@ -543,7 +542,7 @@ public class AccessibilityShortcutController {
     private ComponentName getShortcutTargetComponentName() {
         final List<String> shortcutTargets = mFrameworkObjectProvider
                 .getAccessibilityManagerInstance(mContext)
-                .getAccessibilityShortcutTargets(ACCESSIBILITY_SHORTCUT_KEY);
+                .getAccessibilityShortcutTargets(HARDWARE);
         if (shortcutTargets.size() != 1) {
             return null;
         }

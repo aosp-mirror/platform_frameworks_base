@@ -16,14 +16,10 @@
 
 package com.android.internal.accessibility.util;
 
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
-
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
 import static com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType.INVISIBLE_TOGGLE;
 import static com.android.internal.accessibility.common.ShortcutConstants.SERVICES_SEPARATOR;
 import static com.android.internal.accessibility.common.ShortcutConstants.USER_SHORTCUT_TYPES;
-import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
@@ -33,7 +29,8 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.AccessibilityManager.ShortcutType;
+
+import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 
 import java.util.Collections;
 import java.util.List;
@@ -151,7 +148,7 @@ public final class ShortcutUtils {
      * @param componentId The component id that need to be checked.
      * @return {@code true} if a component id is contained.
      */
-    public static boolean isShortcutContained(Context context, @ShortcutType int shortcutType,
+    public static boolean isShortcutContained(Context context, @UserShortcutType int shortcutType,
             @NonNull String componentId) {
         final AccessibilityManager am = (AccessibilityManager) context.getSystemService(
                 Context.ACCESSIBILITY_SERVICE);
@@ -180,24 +177,6 @@ public final class ShortcutUtils {
             default:
                 throw new IllegalArgumentException(
                         "Unsupported user shortcut type: " + type);
-        }
-    }
-
-    /**
-     * Converts {@link ShortcutType} to {@link UserShortcutType}.
-     *
-     * @param type The shortcut type.
-     * @return Mapping type from {@link UserShortcutType}.
-     */
-    public static @UserShortcutType int convertToUserType(@ShortcutType int type) {
-        switch (type) {
-            case ACCESSIBILITY_BUTTON:
-                return UserShortcutType.SOFTWARE;
-            case ACCESSIBILITY_SHORTCUT_KEY:
-                return UserShortcutType.HARDWARE;
-            default:
-                throw new IllegalArgumentException(
-                        "Unsupported shortcut type:" + type);
         }
     }
 

@@ -16,10 +16,8 @@
 
 package com.android.internal.accessibility.dialog;
 
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
-
-import static com.android.internal.accessibility.util.ShortcutUtils.convertToUserType;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.internal.accessibility.util.ShortcutUtils.optInValueToSettings;
 import static com.android.internal.accessibility.util.ShortcutUtils.optOutValueFromSettings;
 
@@ -30,10 +28,10 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.AccessibilityManager.ShortcutType;
 
 import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
+import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 import com.android.internal.accessibility.dialog.TargetAdapter.ViewHolder;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -47,7 +45,7 @@ import com.android.internal.annotations.VisibleForTesting;
 public abstract class AccessibilityTarget implements TargetOperations, OnTargetSelectedListener,
         OnTargetCheckedChangeListener {
     private Context mContext;
-    @ShortcutType
+    @UserShortcutType
     private int mShortcutType;
     @AccessibilityFragmentType
     private int mFragmentType;
@@ -61,7 +59,7 @@ public abstract class AccessibilityTarget implements TargetOperations, OnTargetS
     private CharSequence mStateDescription;
 
     @VisibleForTesting
-    public AccessibilityTarget(Context context, @ShortcutType int shortcutType,
+    public AccessibilityTarget(Context context, @UserShortcutType int shortcutType,
             @AccessibilityFragmentType int fragmentType, boolean isShortcutSwitched, String id,
             int uid, CharSequence label, Drawable icon, String key) {
         mContext = context;
@@ -99,10 +97,10 @@ public abstract class AccessibilityTarget implements TargetOperations, OnTargetS
         final AccessibilityManager am =
                 getContext().getSystemService(AccessibilityManager.class);
         switch (getShortcutType()) {
-            case ACCESSIBILITY_BUTTON:
+            case SOFTWARE:
                 am.notifyAccessibilityButtonClicked(getContext().getDisplayId(), getId());
                 return;
-            case ACCESSIBILITY_SHORTCUT_KEY:
+            case HARDWARE:
                 am.performAccessibilityShortcut(getId());
                 return;
             default:
@@ -114,9 +112,9 @@ public abstract class AccessibilityTarget implements TargetOperations, OnTargetS
     public void onCheckedChanged(boolean isChecked) {
         setShortcutEnabled(isChecked);
         if (isChecked) {
-            optInValueToSettings(getContext(), convertToUserType(getShortcutType()), getId());
+            optInValueToSettings(getContext(), getShortcutType(), getId());
         } else {
-            optOutValueFromSettings(getContext(), convertToUserType(getShortcutType()), getId());
+            optOutValueFromSettings(getContext(), getShortcutType(), getId());
         }
     }
 
@@ -142,7 +140,7 @@ public abstract class AccessibilityTarget implements TargetOperations, OnTargetS
         return mContext;
     }
 
-    public @ShortcutType int getShortcutType() {
+    public @UserShortcutType int getShortcutType() {
         return mShortcutType;
     }
 

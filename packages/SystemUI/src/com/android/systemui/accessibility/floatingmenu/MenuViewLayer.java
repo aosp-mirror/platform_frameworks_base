@@ -17,13 +17,13 @@
 package com.android.systemui.accessibility.floatingmenu;
 
 import static android.view.WindowInsets.Type.ime;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 
 import static androidx.core.view.WindowInsetsCompat.Type;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_BUTTON_COMPONENT_NAME;
 import static com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType.INVISIBLE_TOGGLE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.internal.accessibility.util.AccessibilityUtils.getAccessibilityServiceFragmentType;
 import static com.android.internal.accessibility.util.AccessibilityUtils.setAccessibilityServiceState;
 import static com.android.systemui.accessibility.floatingmenu.MenuMessageView.Index;
@@ -175,8 +175,8 @@ class MenuViewLayer extends FrameLayout implements
                 mAccessibilityManager.enableShortcutsForTargets(
                         /* enable= */ false,
                         ShortcutConstants.UserShortcutType.SOFTWARE,
-                        new ArraySet<>(mAccessibilityManager.getAccessibilityShortcutTargets(
-                                ACCESSIBILITY_BUTTON)),
+                        new ArraySet<>(
+                                mAccessibilityManager.getAccessibilityShortcutTargets(SOFTWARE)),
                         mSecureSettings.getRealUserHandle(UserHandle.USER_CURRENT)
                 );
             } else {
@@ -185,8 +185,7 @@ class MenuViewLayer extends FrameLayout implements
                         UserHandle.USER_CURRENT);
 
                 final List<ComponentName> hardwareKeyShortcutComponents =
-                        mAccessibilityManager.getAccessibilityShortcutTargets(
-                                        ACCESSIBILITY_SHORTCUT_KEY)
+                        mAccessibilityManager.getAccessibilityShortcutTargets(HARDWARE)
                                 .stream()
                                 .map(ComponentName::unflattenFromString)
                                 .toList();
