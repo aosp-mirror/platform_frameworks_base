@@ -31,6 +31,7 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.customization.R
 import com.android.systemui.dagger.qualifiers.Background
@@ -65,6 +66,7 @@ import java.util.Locale
 import java.util.TimeZone
 import java.util.concurrent.Executor
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
@@ -72,7 +74,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.launch
 
 /**
  * Controller for a Clock provided by the registry and used on the keyguard. Instantiated by
@@ -90,6 +91,7 @@ constructor(
     @DisplaySpecific private val resources: Resources,
     private val context: Context,
     @Main private val mainExecutor: DelayableExecutor,
+    @Main private val mainImmediateDispatcher: CoroutineDispatcher,
     @Background private val bgExecutor: Executor,
     private val clockBuffers: ClockMessageBuffers,
     private val featureFlags: FeatureFlagsClassic,
@@ -424,7 +426,7 @@ constructor(
         keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
         zenModeController.addCallback(zenModeCallback)
         disposableHandle =
-            parent.repeatWhenAttached {
+            parent.repeatWhenAttached(mainImmediateDispatcher) {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
                     listenForDozing(this)
                     if (MigrateClocksToBlueprint.isEnabled) {
@@ -529,12 +531,14 @@ constructor(
 
     @VisibleForTesting
     internal fun listenForDozeAmount(scope: CoroutineScope): Job {
-        return scope.launch { keyguardInteractor.dozeAmount.collect { handleDoze(it) } }
+        return scope.launch("$TAG#listenForDozeAmount") {
+            keyguardInteractor.dozeAmount.collect { handleDoze(it) }
+        }
     }
 
     @VisibleForTesting
     internal fun listenForDozeAmountTransition(scope: CoroutineScope): Job {
-        return scope.launch {
+        return scope.launch("$TAG#listenForDozeAmountTransition") {
             merge(
                     keyguardTransitionInteractor.aodToLockscreenTransition.map { step ->
                         step.copy(value = 1f - step.value)
@@ -550,7 +554,7 @@ constructor(
      */
     @VisibleForTesting
     internal fun listenForAnyStateToAodTransition(scope: CoroutineScope): Job {
-        return scope.launch {
+        return scope.launch("$TAG#listenForAnyStateToAodTransition") {
             keyguardTransitionInteractor
                 .transitionStepsToState(AOD)
                 .filter { it.transitionState == TransitionState.STARTED }
@@ -561,7 +565,7 @@ constructor(
 
     @VisibleForTesting
     internal fun listenForDozing(scope: CoroutineScope): Job {
-        return scope.launch {
+        return scope.launch("$TAG#listenForDozing") {
             combine(
                     keyguardInteractor.dozeAmount,
                     keyguardInteractor.isDozing,
@@ -626,7 +630,7 @@ constructor(
     }
 
     companion object {
-        private val TAG = ClockEventController::class.simpleName!!
-        private val DOZE_TICKRATE_THRESHOLD = 0.99f
+        private const val TAG = "ClockEventController"
+        private const val DOZE_TICKRATE_THRESHOLD = 0.99f
     }
 }
