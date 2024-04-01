@@ -4949,8 +4949,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 displayInfo.appWidth, displayInfo.appHeight);
         anim.restrictDuration(MAX_ANIMATION_DURATION);
         anim.scaleCurrentDuration(mWmService.getWindowAnimationScaleLocked());
+        final Point position = new Point();
+        if (com.android.window.flags.Flags.removePrepareSurfaceInPlacement()) {
+            transformFrameToSurfacePosition(mWindowFrames.mFrame.left, mWindowFrames.mFrame.top,
+                    position);
+        } else {
+            position.set(mSurfacePosition);
+        }
         final AnimationAdapter adapter = new LocalAnimationAdapter(
-                new WindowAnimationSpec(anim, mSurfacePosition, false /* canSkipFirstFrame */,
+                new WindowAnimationSpec(anim, position, false /* canSkipFirstFrame */,
                         0 /* windowCornerRadius */),
                 mWmService.mSurfaceAnimationRunner);
         startAnimation(getPendingTransaction(), adapter);
