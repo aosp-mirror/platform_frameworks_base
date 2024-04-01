@@ -176,8 +176,8 @@ public class ViewFrameRateTest {
         mActivityRule.runOnUiThread(() -> {
             float density = mActivity.getResources().getDisplayMetrics().density;
             ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
-            layoutParams.height = 4 * ((int) (10 * density));
-            layoutParams.width = 4 * ((int) (10 * density));
+            layoutParams.height = ((int) (40 * density));
+            layoutParams.width = ((int) (40 * density));
             mMovingView.setLayoutParams(layoutParams);
             mMovingView.getViewTreeObserver().addOnDrawListener(drawLatch1::countDown);
         });
@@ -251,8 +251,8 @@ public class ViewFrameRateTest {
         mActivityRule.runOnUiThread(() -> {
             float density = mActivity.getResources().getDisplayMetrics().density;
             ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
-            layoutParams.height = 4 * ((int) (10 * density));
-            layoutParams.width = 4 * ((int) Math.ceil(10 * density)) + 1;
+            layoutParams.height = (int) (40 * density);
+            layoutParams.width = ((int) Math.ceil(40 * density)) + 1;
             mMovingView.setLayoutParams(layoutParams);
             mMovingView.getViewTreeObserver().addOnDrawListener(drawLatch1::countDown);
         });
@@ -276,8 +276,8 @@ public class ViewFrameRateTest {
         mActivityRule.runOnUiThread(() -> {
             float density = mActivity.getResources().getDisplayMetrics().density;
             ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
-            layoutParams.height = 4 * ((int) Math.ceil(10 * density)) + 1;
-            layoutParams.width = 4 * ((int) (10 * density));
+            layoutParams.height = ((int) Math.ceil(40 * density)) + 1;
+            layoutParams.width = ((int) (40 * density));
             mMovingView.setLayoutParams(layoutParams);
             mMovingView.getViewTreeObserver().addOnDrawListener(drawLatch1::countDown);
         });
