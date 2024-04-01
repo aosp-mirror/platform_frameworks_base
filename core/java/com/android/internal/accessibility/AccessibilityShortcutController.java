@@ -24,8 +24,10 @@ import static com.android.internal.accessibility.dialog.AccessibilityTargetHelpe
 import static com.android.internal.os.RoSystemProperties.SUPPORT_ONE_HANDED_MODE;
 import static com.android.internal.util.ArrayUtils.convertToLongArray;
 
+import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.IntDef;
+import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.AlertDialog;
@@ -53,6 +55,7 @@ import android.util.Slog;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.Flags;
 import android.widget.Toast;
 
 import com.android.internal.R;
@@ -328,11 +331,14 @@ public class AccessibilityShortcutController {
         warningToast.show();
     }
 
+    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
     private AlertDialog createShortcutWarningDialog(int userId) {
         List<AccessibilityTarget> targets = getTargets(mContext, HARDWARE);
         if (targets.size() == 0) {
             return null;
         }
+        final AccessibilityManager am = mFrameworkObjectProvider
+                .getAccessibilityManagerInstance(mContext);
 
         // Avoid non-a11y users accidentally turning shortcut on without reading this carefully.
         // Put "don't turn on" as the primary action.
@@ -360,10 +366,15 @@ public class AccessibilityShortcutController {
                                 // to the Settings.
                                 final ComponentName configDefaultService =
                                         ComponentName.unflattenFromString(defaultService);
-                                Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                                        Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
-                                        configDefaultService.flattenToString(),
-                                        userId);
+                                if (Flags.a11yQsShortcut()) {
+                                    am.enableShortcutsForTargets(true, HARDWARE,
+                                            Set.of(configDefaultService.flattenToString()), userId);
+                                } else {
+                                    Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                                            Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
+                                            configDefaultService.flattenToString(),
+                                            userId);
+                                }
                             }
                         })
                 .setPositiveButton(R.string.accessibility_shortcut_off,
@@ -373,13 +384,16 @@ public class AccessibilityShortcutController {
                                             mContext,
                                             HARDWARE,
                                             userId);
-
-                            Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                                    Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, "",
-                                    userId);
-                            ShortcutUtils.updateInvisibleToggleAccessibilityServiceEnableState(
-                                    mContext, targetServices, userId);
-
+                            if (Flags.a11yQsShortcut()) {
+                                am.enableShortcutsForTargets(
+                                        false, HARDWARE, targetServices, userId);
+                            } else {
+                                Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                                        Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, "",
+                                        userId);
+                                ShortcutUtils.updateInvisibleToggleAccessibilityServiceEnableState(
+                                        mContext, targetServices, userId);
+                            }
                             // If canceled, treat as if the dialog has never been shown
                             Settings.Secure.putIntForUser(mContext.getContentResolver(),
                                     Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
