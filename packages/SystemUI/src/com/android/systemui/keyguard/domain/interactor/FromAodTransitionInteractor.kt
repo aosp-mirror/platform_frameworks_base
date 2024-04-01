@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -33,7 +34,6 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.launch
 
 @SysUISingleton
 class FromAodTransitionInteractor
@@ -72,7 +72,7 @@ constructor(
         // Use PowerInteractor's wakefulness, which is the earliest wake signal available. We
         // have all of the information we need at this time to make a decision about where to
         // transition.
-        scope.launch {
+        scope.launch("$TAG#listenForAodToAwake") {
             powerInteractor.detailedWakefulness
                 .filterRelevantKeyguardStateAnd { wakefulness -> wakefulness.isAwake() }
                 .sample(
@@ -150,7 +150,7 @@ constructor(
             return
         }
 
-        scope.launch {
+        scope.launch("$TAG#listenForAodToOccluded") {
             keyguardInteractor.isKeyguardOccluded
                 .filterRelevantKeyguardStateAnd { isOccluded -> isOccluded }
                 .collect {
@@ -168,7 +168,7 @@ constructor(
      * PRIMARY_BOUNCER.
      */
     private fun listenForAodToPrimaryBouncer() {
-        scope.launch {
+        scope.launch("$TAG#listenForAodToPrimaryBouncer") {
             keyguardInteractor.primaryBouncerShowing
                 .filterRelevantKeyguardStateAnd { primaryBouncerShowing -> primaryBouncerShowing }
                 .collect { startTransitionTo(KeyguardState.PRIMARY_BOUNCER) }
@@ -181,7 +181,7 @@ constructor(
             return
         }
 
-        scope.launch {
+        scope.launch("$TAG#listenForAodToGone") {
             powerInteractor.isAwake
                 .debounce(50L)
                 .filterRelevantKeyguardState()
@@ -209,7 +209,7 @@ constructor(
      * AOD.
      */
     fun dismissAod() {
-        scope.launch { startTransitionTo(KeyguardState.GONE) }
+        scope.launch("$TAG#dismissAod") { startTransitionTo(KeyguardState.GONE) }
     }
 
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
@@ -224,7 +224,7 @@ constructor(
     }
 
     companion object {
-        const val TAG = "FromAodTransitionInteractor"
+        private const val TAG = "FromAodTransitionInteractor"
         private val DEFAULT_DURATION = 500.milliseconds
         val TO_LOCKSCREEN_DURATION = 500.milliseconds
         val TO_GONE_DURATION = DEFAULT_DURATION

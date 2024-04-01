@@ -26,6 +26,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
@@ -39,7 +40,6 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlin.math.max
-import kotlinx.coroutines.launch
 
 private const val TAG = "KeyguardBlueprintViewBinder"
 private const val DEBUG = false
@@ -90,7 +90,7 @@ constructor(
     ) {
         constraintLayout.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                launch {
+                launch("$TAG#viewModel.blueprint") {
                     viewModel.blueprint.collect { blueprint ->
                         Trace.beginSection("KeyguardBlueprintViewBinder#applyBlueprint")
                         val prevBluePrint = viewModel.currentBluePrint
@@ -137,7 +137,7 @@ constructor(
                     }
                 }
 
-                launch {
+                launch("$TAG#viewModel.refreshTransition") {
                     viewModel.refreshTransition.collect { transition ->
                         Trace.beginSection("KeyguardBlueprintViewBinder#refreshTransition")
                         val cs =
