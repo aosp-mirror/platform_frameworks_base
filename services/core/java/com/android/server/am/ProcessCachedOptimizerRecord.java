@@ -25,6 +25,8 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 /**
  * The state info of app when it's cached, used by the optimizer.
  */
@@ -340,6 +342,7 @@ final class ProcessCachedOptimizerRecord {
     }
 
     @GuardedBy("mProcLock")
+    @NeverCompile
     void dump(PrintWriter pw, String prefix, long nowUptime) {
         pw.print(prefix); pw.print("lastCompactTime="); pw.print(mLastCompactTime);
         pw.print(" lastCompactProfile=");
