@@ -17,9 +17,11 @@
 package com.android.systemui.communal.ui.compose
 
 import android.appwidget.AppWidgetHostView
+import android.content.res.Configuration
 import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.util.SizeF
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -92,6 +94,7 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -110,8 +113,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Popup
 import androidx.core.view.setPadding
 import androidx.window.layout.WindowMetricsCalculator
-import com.android.compose.modifiers.height
-import com.android.compose.modifiers.padding
 import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
@@ -364,7 +365,7 @@ private fun ScrollOnUpdatedLiveContentEffect(
             liveContentKeys.indexOfFirst { !prevLiveContentKeys.contains(it) }
 
         // Scroll if current position is behind the first updated content
-        if (indexOfFirstUpdatedContent in 0..<gridState.firstVisibleItemIndex) {
+        if (indexOfFirstUpdatedContent in 0 until gridState.firstVisibleItemIndex) {
             // Launching with a scope to prevent the job from being canceled in the case of a
             // recomposition during scrolling
             coroutineScope.launch { gridState.animateScrollToItem(indexOfFirstUpdatedContent) }
@@ -834,6 +835,13 @@ private fun WidgetContent(
     widgetConfigurator: WidgetConfigurator?,
     modifier: Modifier = Modifier,
 ) {
+    var widgetId: Int by remember { mutableStateOf(-1) }
+    var configuration: Configuration? by remember { mutableStateOf(null) }
+
+    // In addition to returning the current configuration, this also causes a recompose on
+    // configuration change.
+    val currentConfiguration = LocalConfiguration.current
+
     Box(
         modifier =
             modifier.thenIf(!viewModel.isEditMode && model.inQuietMode) {
@@ -849,18 +857,48 @@ private fun WidgetContent(
         AndroidView(
             modifier = Modifier.fillMaxSize().allowGestures(allowed = !viewModel.isEditMode),
             factory = { context ->
-                model.appWidgetHost
-                    .createViewForCommunal(context, model.appWidgetId, model.providerInfo)
-                    .apply {
-                        updateAppWidgetSize(Bundle.EMPTY, listOf(size))
-                        // Remove the extra padding applied to AppWidgetHostView to allow widgets to
-                        // occupy the entire box.
-                        setPadding(0)
-                    }
+                // This FrameLayout becomes the container view for the AppWidgetHostView we add as a
+                // child in update below. Having a container view allows for updating the contained
+                // host view as needed (e.g. on configuration changes).
+                FrameLayout(context).apply {
+                    layoutParams =
+                        ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                        )
+                    setPadding(0)
+                }
+            },
+            update = { widgetContainer: ViewGroup ->
+                if (widgetId == model.appWidgetId && currentConfiguration.equals(configuration)) {
+                    return@AndroidView
+                }
+
+                // Add the widget's host view to the FrameLayout parent (after removing any
+                // previously added host view).
+                widgetContainer.removeAllViews()
+                widgetContainer.addView(
+                    model.appWidgetHost
+                        .createViewForCommunal(
+                            widgetContainer.context,
+                            model.appWidgetId,
+                            model.providerInfo
+                        )
+                        .apply {
+                            updateAppWidgetSize(Bundle.EMPTY, listOf(size))
+                            // Remove the extra padding applied to AppWidgetHostView to allow
+                            // widgets to occupy the entire box.
+                            setPadding(0)
+                        }
+                )
+
+                widgetId = model.appWidgetId
+                configuration = currentConfiguration
             },
             // For reusing composition in lazy lists.
             onReset = {},
         )
+
         if (
             viewModel is CommunalEditModeViewModel &&
                 model.reconfigurable &&
