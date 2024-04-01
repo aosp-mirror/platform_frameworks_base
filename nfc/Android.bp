@@ -39,6 +39,7 @@ java_sdk_library {
     libs: [
         "unsupportedappusage", // for android.compat.annotation.UnsupportedAppUsage
         "framework-permission-s",
+        "framework-permission",
     ],
     static_libs: [
         "android.nfc.flags-aconfig-java",
