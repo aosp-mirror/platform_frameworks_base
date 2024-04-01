@@ -24,13 +24,10 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.Companion.isWakeAndUnlock
-import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
-import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample
-import java.util.UUID
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
@@ -72,79 +69,73 @@ constructor(
      * Listen for the signal that we're waking up and figure what state we need to transition to.
      */
     private fun listenForAodToAwake() {
-        val transitionToLockscreen: suspend (TransitionStep) -> UUID? =
-            { startedStep: TransitionStep ->
-                val modeOnCanceled =
-                    if (startedStep.from == KeyguardState.LOCKSCREEN) {
-                        TransitionModeOnCanceled.REVERSE
-                    } else if (startedStep.from == KeyguardState.GONE) {
-                        TransitionModeOnCanceled.RESET
-                    } else {
-                        TransitionModeOnCanceled.LAST_VALUE
-                    }
-                startTransitionTo(
-                    toState = KeyguardState.LOCKSCREEN,
-                    modeOnCanceled = modeOnCanceled,
+        // Use PowerInteractor's wakefulness, which is the earliest wake signal available. We
+        // have all of the information we need at this time to make a decision about where to
+        // transition.
+        scope.launch {
+            powerInteractor.detailedWakefulness
+                .filterRelevantKeyguardStateAnd { wakefulness -> wakefulness.isAwake() }
+                .sample(
+                    startedKeyguardTransitionStep,
+                    keyguardInteractor.biometricUnlockState,
+                    keyguardInteractor.primaryBouncerShowing,
+                    keyguardInteractor.isKeyguardShowing,
+                    keyguardInteractor.isKeyguardOccluded,
+                    keyguardInteractor.isKeyguardDismissible,
                 )
-            }
+                .collect {
+                    (
+                        _,
+                        startedStep,
+                        biometricUnlockState,
+                        primaryBouncerShowing,
+                        _,
+                        isKeyguardOccludedLegacy,
+                        _) ->
+                    if (!maybeHandleInsecurePowerGesture()) {
+                        val shouldTransitionToLockscreen =
+                            if (KeyguardWmStateRefactor.isEnabled) {
+                                // Check with the superclass to see if an occlusion transition is
+                                // needed. Also, don't react to wake and unlock events, as we'll be
+                                // receiving a call to #dismissAod() shortly when the authentication
+                                // completes.
+                                !maybeStartTransitionToOccludedOrInsecureCamera() &&
+                                    !isWakeAndUnlock(biometricUnlockState) &&
+                                    !primaryBouncerShowing
+                            } else {
+                                !isKeyguardOccludedLegacy &&
+                                    !isWakeAndUnlock(biometricUnlockState) &&
+                                    !primaryBouncerShowing
+                            }
 
-        if (KeyguardWmStateRefactor.isEnabled) {
-            // The refactor uses PowerInteractor's wakefulness, which is the earliest wake signal
-            // available. We have all of the information we need at this time to make a decision
-            // about where to transition.
-            scope.launch {
-                powerInteractor.detailedWakefulness
-                    // React only to wake events.
-                    .filterRelevantKeyguardStateAnd { it.isAwake() }
-                    .sample(
-                        startedKeyguardTransitionStep,
-                        keyguardInteractor.biometricUnlockState,
-                        keyguardInteractor.primaryBouncerShowing,
-                    )
-                    // Make sure we've at least STARTED a transition to AOD.
-                    .collect { (_, startedStep, biometricUnlockState, primaryBouncerShowing) ->
-                        // Check with the superclass to see if an occlusion transition is needed.
-                        // Also, don't react to wake and unlock events, as we'll be receiving a call
-                        // to #dismissAod() shortly when the authentication completes.
-                        if (
-                            !maybeStartTransitionToOccludedOrInsecureCamera() &&
-                                !isWakeAndUnlock(biometricUnlockState) &&
-                                !primaryBouncerShowing
-                        ) {
-                            transitionToLockscreen(startedStep)
+                        // With the refactor enabled, maybeStartTransitionToOccludedOrInsecureCamera
+                        // handles transitioning to OCCLUDED.
+                        val shouldTransitionToOccluded =
+                            !KeyguardWmStateRefactor.isEnabled && isKeyguardOccludedLegacy
+
+                        if (shouldTransitionToLockscreen) {
+                            val modeOnCanceled =
+                                if (startedStep.from == KeyguardState.LOCKSCREEN) {
+                                    TransitionModeOnCanceled.REVERSE
+                                } else if (startedStep.from == KeyguardState.GONE) {
+                                    TransitionModeOnCanceled.RESET
+                                } else {
+                                    TransitionModeOnCanceled.LAST_VALUE
+                                }
+
+                            startTransitionTo(
+                                toState = KeyguardState.LOCKSCREEN,
+                                modeOnCanceled = modeOnCanceled,
+                                ownerReason = "listen for aod to awake"
+                            )
+                        } else if (shouldTransitionToOccluded) {
+                            startTransitionTo(
+                                toState = KeyguardState.OCCLUDED,
+                                ownerReason = "waking up and isOccluded=true",
+                            )
                         }
                     }
-            }
-        } else {
-            scope.launch {
-                keyguardInteractor
-                    .dozeTransitionTo(DozeStateModel.FINISH)
-                    .filterRelevantKeyguardState()
-                    .sample(
-                        keyguardInteractor.isKeyguardShowing,
-                        startedKeyguardTransitionStep,
-                        keyguardInteractor.isKeyguardOccluded,
-                        keyguardInteractor.biometricUnlockState,
-                        keyguardInteractor.primaryBouncerShowing,
-                    )
-                    .collect {
-                        (
-                            _,
-                            isKeyguardShowing,
-                            lastStartedStep,
-                            occluded,
-                            biometricUnlockState,
-                            primaryBouncerShowing) ->
-                        if (
-                            !occluded &&
-                                !isWakeAndUnlock(biometricUnlockState) &&
-                                isKeyguardShowing &&
-                                !primaryBouncerShowing
-                        ) {
-                            transitionToLockscreen(lastStartedStep)
-                        }
-                    }
-            }
+                }
         }
     }
 
@@ -165,7 +156,8 @@ constructor(
                 .collect {
                     startTransitionTo(
                         toState = KeyguardState.OCCLUDED,
-                        modeOnCanceled = TransitionModeOnCanceled.RESET
+                        modeOnCanceled = TransitionModeOnCanceled.RESET,
+                        ownerReason = "isOccluded = true",
                     )
                 }
         }

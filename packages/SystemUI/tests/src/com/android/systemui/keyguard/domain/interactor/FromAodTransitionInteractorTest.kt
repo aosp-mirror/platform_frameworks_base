@@ -288,4 +288,16 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
             assertThat(transitionRepository)
                 .startedTransition(from = KeyguardState.AOD, to = KeyguardState.GONE)
         }
+
+    @Test
+    fun testTransitionToOccluded_onWake() =
+        testScope.runTest {
+            kosmos.fakeKeyguardRepository.setKeyguardOccluded(true)
+            powerInteractor.setAwakeForTest()
+            runCurrent()
+
+            // Waking up from AOD while occluded should transition to OCCLUDED.
+            assertThat(transitionRepository)
+                .startedTransition(from = KeyguardState.AOD, to = KeyguardState.OCCLUDED)
+        }
 }
