@@ -16,6 +16,8 @@
 
 package com.android.systemui.media.controls.data.repository
 
+import android.R
+import android.graphics.drawable.Icon
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -81,11 +83,12 @@ class MediaDataRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, true)
             val smartspaceData by collectLastValue(underTest.smartspaceMediaData)
+            val icon = Icon.createWithResource(context, R.drawable.ic_media_play)
             val recommendation =
                 SmartspaceMediaData(
                     targetId = KEY_MEDIA_SMARTSPACE,
                     isActive = true,
-                    recommendations = MediaTestHelper.getValidRecommendationList(context),
+                    recommendations = MediaTestHelper.getValidRecommendationList(icon),
                 )
 
             underTest.setRecommendation(recommendation)
@@ -102,11 +105,12 @@ class MediaDataRepositoryTest : SysuiTestCase() {
     fun dismissRecommendation() =
         testScope.runTest {
             val smartspaceData by collectLastValue(underTest.smartspaceMediaData)
+            val icon = Icon.createWithResource(context, R.drawable.ic_media_play)
             val recommendation =
                 SmartspaceMediaData(
                     targetId = KEY_MEDIA_SMARTSPACE,
                     isActive = true,
-                    recommendations = MediaTestHelper.getValidRecommendationList(context),
+                    recommendations = MediaTestHelper.getValidRecommendationList(icon),
                 )
 
             underTest.setRecommendation(recommendation)

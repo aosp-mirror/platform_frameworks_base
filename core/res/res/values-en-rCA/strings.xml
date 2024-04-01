@@ -1929,6 +1929,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Managed by <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"On"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Off"</string>
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Any calendar"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> is muting some sounds"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"There\'s an internal problem with your device, and it may be unstable until you factory data reset."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"There\'s an internal problem with your device. Contact your manufacturer for details."</string>

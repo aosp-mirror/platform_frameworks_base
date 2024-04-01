@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2021 The Android Open Source Project
+/*
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package android.app.tare;
+package com.android.systemui.settings
 
- /**
-  * IPC interface that supports the app-facing {@link #EconomyManager} api.
-  * {@hide}
-  */
-interface IEconomyManager {
-    int getEnabledMode();
+import android.content.applicationContext
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
+
+val Kosmos.displayTracker by Fixture {
+    FakeDisplayTracker(
+        context = applicationContext,
+    )
 }

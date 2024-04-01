@@ -19,45 +19,91 @@ package com.android.systemui.scene.domain.interactor
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardOcclusionInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 
 /** Encapsulates logic regarding the occlusion state of the scene container. */
 @SysUISingleton
 class SceneContainerOcclusionInteractor
 @Inject
 constructor(
+    @Application applicationScope: CoroutineScope,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
     sceneInteractor: SceneInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
 ) {
+    /** Whether a show-when-locked activity is at the top of the current activity stack. */
+    private val isOccludingActivityShown: StateFlow<Boolean> =
+        keyguardOcclusionInteractor.isShowWhenLockedActivityOnTop.stateIn(
+            scope = applicationScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = false,
+        )
+
+    /**
+     * Whether AOD is fully shown (not transitioning) or partially shown during a transition to/from
+     * AOD.
+     */
+    private val isAodFullyOrPartiallyShown: StateFlow<Boolean> =
+        keyguardTransitionInteractor
+            .transitionValue(KeyguardState.AOD)
+            .onStart { emit(0f) }
+            .map { it > 0 }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
+
     /**
      * Whether the scene container should become invisible due to "occlusion" by an in-foreground
      * "show when locked" activity.
      */
-    val invisibleDueToOcclusion: Flow<Boolean> =
+    val invisibleDueToOcclusion: StateFlow<Boolean> =
         combine(
-                keyguardOcclusionInteractor.isShowWhenLockedActivityOnTop,
+                isOccludingActivityShown,
                 sceneInteractor.transitionState,
-                keyguardTransitionInteractor
-                    .transitionValue(KeyguardState.AOD)
-                    .onStart { emit(0f) }
-                    .map { it > 0 }
-                    .distinctUntilChanged(),
+                isAodFullyOrPartiallyShown,
             ) { isOccludingActivityShown, sceneTransitionState, isAodFullyOrPartiallyShown ->
-                isOccludingActivityShown &&
-                    !isAodFullyOrPartiallyShown &&
-                    sceneTransitionState.canBeOccluded
+                invisibleDueToOcclusion(
+                    isOccludingActivityShown = isOccludingActivityShown,
+                    sceneTransitionState = sceneTransitionState,
+                    isAodFullyOrPartiallyShown = isAodFullyOrPartiallyShown,
+                )
             }
-            .distinctUntilChanged()
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue =
+                    invisibleDueToOcclusion(
+                        isOccludingActivityShown = isOccludingActivityShown.value,
+                        sceneTransitionState = sceneInteractor.transitionState.value,
+                        isAodFullyOrPartiallyShown = isAodFullyOrPartiallyShown.value,
+                    ),
+            )
+
+    private fun invisibleDueToOcclusion(
+        isOccludingActivityShown: Boolean,
+        sceneTransitionState: ObservableTransitionState,
+        isAodFullyOrPartiallyShown: Boolean,
+    ): Boolean {
+        return isOccludingActivityShown &&
+            // Cannot be occluded in AOD.
+            !isAodFullyOrPartiallyShown &&
+            // Only some scenes can be occluded.
+            sceneTransitionState.canBeOccluded
+    }
 
     private val ObservableTransitionState.canBeOccluded: Boolean
         get() =

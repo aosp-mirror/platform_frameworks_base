@@ -39,12 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"비밀번호 없는 미래로 나아가는 과정에서 비밀번호는 여전히 패스키와 함께 사용될 것입니다."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"<xliff:g id="CREATETYPES">%1$s</xliff:g> 저장 위치 선택"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"정보를 저장해서 다음에 더 빠르게 로그인하려면 비밀번호 관리자를 선택하세요."</string>
-    <!-- no translation found for choose_create_option_passkey_title (8762295821604276511) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (4481366993598649224) -->
-    <skip />
-    <!-- no translation found for choose_create_option_sign_in_title (7092914088455358079) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"패스키를 생성하여 <xliff:g id="APP_NAME">%1$s</xliff:g>에 로그인하시겠습니까?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"비밀번호를 저장하여 <xliff:g id="APP_NAME">%1$s</xliff:g>에 로그인하시겠습니까?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"<xliff:g id="APP_NAME">%1$s</xliff:g>의 로그인 정보를 저장하시겠습니까?"</string>
     <string name="passkey" msgid="632353688396759522">"패스키"</string>
     <string name="password" msgid="6738570945182936667">"비밀번호"</string>
     <string name="passkeys" msgid="5733880786866559847">"패스키"</string>
@@ -73,8 +70,7 @@
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"닫기"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱용으로 저장된 패스키를 사용하시겠습니까?"</string>
     <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"저장된 비밀번호를 <xliff:g id="APP_NAME">%1$s</xliff:g>에 사용할까요?"</string>
-    <!-- no translation found for get_dialog_title_single_tap_for (2057945648748859483) -->
-    <skip />
+    <string name="get_dialog_title_single_tap_for" msgid="2057945648748859483">"화면 잠금을 사용하여 <xliff:g id="USERNAME">%2$s</xliff:g> 계정으로 <xliff:g id="APP_NAME">%1$s</xliff:g>에 로그인합니다."</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"<xliff:g id="APP_NAME">%1$s</xliff:g>에 로그인을 사용하시겠습니까?"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"<xliff:g id="APP_NAME">%1$s</xliff:g>에 대해 로그인 옵션을 잠금 해제하시겠습니까?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"<xliff:g id="APP_NAME">%1$s</xliff:g>에 대해 저장된 패스키 선택"</string>

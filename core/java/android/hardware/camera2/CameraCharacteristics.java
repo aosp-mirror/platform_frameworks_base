@@ -41,7 +41,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * <p>The properties describing a
@@ -569,10 +571,23 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @NonNull
     @FlaggedApi(Flags.FLAG_FEATURE_COMBINATION_QUERY)
     public List<CameraCharacteristics.Key<?>> getAvailableSessionCharacteristicsKeys() {
-        if (mAvailableSessionCharacteristicsKeys == null) {
-            mAvailableSessionCharacteristicsKeys =
-                    Arrays.asList(CONTROL_ZOOM_RATIO_RANGE, SCALER_AVAILABLE_MAX_DIGITAL_ZOOM);
+        if (mAvailableSessionCharacteristicsKeys != null) {
+            return mAvailableSessionCharacteristicsKeys;
         }
+
+        Integer queryVersion = get(INFO_SESSION_CONFIGURATION_QUERY_VERSION);
+        if (queryVersion == null) {
+            mAvailableSessionCharacteristicsKeys = List.of();
+            return mAvailableSessionCharacteristicsKeys;
+        }
+
+        mAvailableSessionCharacteristicsKeys =
+                AVAILABLE_SESSION_CHARACTERISTICS_KEYS_MAP.entrySet().stream()
+                        .filter(e -> e.getKey() <= queryVersion)
+                        .map(Map.Entry::getValue)
+                        .flatMap(Arrays::stream)
+                        .collect(Collectors.toUnmodifiableList());
+
         return mAvailableSessionCharacteristicsKeys;
     }
 
@@ -6117,16 +6132,22 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     public static final Key<android.util.Range<Float>> EFV_PADDING_ZOOM_FACTOR_RANGE =
             new Key<android.util.Range<Float>>("android.efv.paddingZoomFactorRange", new TypeReference<android.util.Range<Float>>() {{ }});
 
+
+    /**
+     * Mapping from INFO_SESSION_CONFIGURATION_QUERY_VERSION to session characteristics key.
+     */
+    private static final Map<Integer, Key<?>[]> AVAILABLE_SESSION_CHARACTERISTICS_KEYS_MAP =
+            Map.ofEntries(
+                Map.entry(
+                    35,
+                    new Key<?>[] {
+                        CONTROL_ZOOM_RATIO_RANGE,
+                        SCALER_AVAILABLE_MAX_DIGITAL_ZOOM,
+                    }
+                )
+            );
+
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/
-
-
-
-
-
-
-
-
-
 }

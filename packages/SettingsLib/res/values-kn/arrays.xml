@@ -55,11 +55,11 @@
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="4045840870658484038">"HDCP ಪರಿಶೀಲನೆಯನ್ನು ಎಂದಿಗೂ ಬಳಸದಿರು"</item>
-    <item msgid="8254225038262324761">"DRM ವಿಷಯಗಳಿಗೆ ಮಾತ್ರ HDCP ಪರೀಕ್ಷಿಸುವಿಕೆಯನ್ನು ಬಳಸು"</item>
+    <item msgid="8254225038262324761">"DRM ಕಂಟೆಂಟ್‌ಗೆ ಮಾತ್ರ HDCP ಪರೀಕ್ಷಿಸುವಿಕೆಯನ್ನು ಬಳಸಿ"</item>
     <item msgid="6421717003037072581">"HDCP ಪರಿಶೀಲನೆಯನ್ನು ಯಾವಾಗಲೂ ಬಳಸು"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
-    <item msgid="695678520785580527">"ನಿಷ್ಕ್ರಿಯಗೊಂಡಿದೆ"</item>
+    <item msgid="695678520785580527">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</item>
     <item msgid="6336372935919715515">"ಫಿಲ್ಟರ್ ಮಾಡುವುದನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</item>
     <item msgid="2779123106632690576">"ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</item>
   </string-array>

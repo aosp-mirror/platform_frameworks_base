@@ -20,7 +20,6 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.os.Binder;
 import android.os.Process;
-import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.security.legacykeystore.ILegacyKeystore;
 import android.util.Log;
@@ -37,12 +36,6 @@ import java.util.Set;
 @SuppressLint("UnflaggedApi") // Promoting from @SystemApi(MODULE_LIBRARIES)
 public final class WifiKeystore {
     private static final String TAG = "WifiKeystore";
-    private static final String LEGACY_KEYSTORE_SERVICE_NAME = "android.security.legacykeystore";
-
-    private static ILegacyKeystore getLegacyKeystore() {
-        return ILegacyKeystore.Stub.asInterface(
-                ServiceManager.checkService(LEGACY_KEYSTORE_SERVICE_NAME));
-    }
 
     /** @hide */
     WifiKeystore() {
@@ -93,7 +86,7 @@ public final class WifiKeystore {
                 return blob;
             }
             Log.i(TAG, "Searching for blob in Legacy Keystore");
-            return getLegacyKeystore().get(alias, Process.WIFI_UID);
+            return WifiBlobStore.getLegacyKeystore().get(alias, Process.WIFI_UID);
         } catch (ServiceSpecificException e) {
             if (e.errorCode != ILegacyKeystore.ERROR_ENTRY_NOT_FOUND) {
                 Log.e(TAG, "Failed to get blob.", e);
@@ -122,7 +115,7 @@ public final class WifiKeystore {
             Log.i(TAG, "remove blob. alias " + alias);
             blobStoreSuccess = WifiBlobStore.getInstance().remove(alias);
             // Legacy Keystore will throw an exception if the alias is not found.
-            getLegacyKeystore().remove(alias, Process.WIFI_UID);
+            WifiBlobStore.getLegacyKeystore().remove(alias, Process.WIFI_UID);
             legacyKsSuccess = true;
         } catch (ServiceSpecificException e) {
             if (e.errorCode != ILegacyKeystore.ERROR_ENTRY_NOT_FOUND) {
@@ -151,7 +144,8 @@ public final class WifiKeystore {
         try {
             // Aliases from WifiBlobStore will be pre-trimmed.
             final String[] blobStoreAliases = WifiBlobStore.getInstance().list(prefix);
-            final String[] legacyAliases = getLegacyKeystore().list(prefix, Process.WIFI_UID);
+            final String[] legacyAliases =
+                    WifiBlobStore.getLegacyKeystore().list(prefix, Process.WIFI_UID);
             for (int i = 0; i < legacyAliases.length; ++i) {
                 legacyAliases[i] = legacyAliases[i].substring(prefix.length());
             }

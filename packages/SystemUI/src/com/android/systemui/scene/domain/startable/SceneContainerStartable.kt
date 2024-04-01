@@ -317,15 +317,23 @@ constructor(
     /** Keeps [SysUiState] up-to-date */
     private fun hydrateSystemUiState() {
         applicationScope.launch {
-            sceneInteractor.transitionState
-                .mapNotNull { it as? ObservableTransitionState.Idle }
-                .map { it.scene }
-                .distinctUntilChanged()
-                .collect { sceneKey ->
+            combine(
+                    sceneInteractor.transitionState
+                        .mapNotNull { it as? ObservableTransitionState.Idle }
+                        .map { it.scene }
+                        .distinctUntilChanged(),
+                    occlusionInteractor.invisibleDueToOcclusion,
+                ) { sceneKey, invisibleDueToOcclusion ->
+                    SceneContainerPlugin.SceneContainerPluginState(
+                        scene = sceneKey,
+                        invisibleDueToOcclusion = invisibleDueToOcclusion,
+                    )
+                }
+                .collect { sceneContainerPluginState ->
                     sysUiState.updateFlags(
                         displayId,
                         *SceneContainerPlugin.EvaluatorByFlag.map { (flag, evaluator) ->
-                                flag to evaluator.invoke(sceneKey)
+                                flag to evaluator.invoke(sceneContainerPluginState)
                             }
                             .toTypedArray(),
                     )

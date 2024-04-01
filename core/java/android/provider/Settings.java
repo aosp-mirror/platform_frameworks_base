@@ -15938,41 +15938,6 @@ public final class Settings {
                 = "forced_app_standby_for_small_battery_enabled";
 
         /**
-         * Whether to enable the TARE subsystem or not.
-         * Valid values are
-         * {@link android.app.tare.EconomyManager#ENABLE_TARE_ON EconomyManager.ENABLE_TARE_*}.
-         *
-         * @hide
-         */
-        public static final String ENABLE_TARE = "enable_tare";
-
-        /**
-         * Whether to show the TARE page in Developer Options or not.
-         * 1 = true, everything else = false
-         *
-         * @hide
-         */
-        public static final String SHOW_TARE_DEVELOPER_OPTIONS = "show_tare_developer_options";
-
-        /**
-         * Settings for AlarmManager's TARE EconomicPolicy (list of its economic factors).
-         *
-         * Keys are listed in {@link android.app.tare.EconomyManager}.
-         *
-         * @hide
-         */
-        public static final String TARE_ALARM_MANAGER_CONSTANTS = "tare_alarm_manager_constants";
-
-        /**
-         * Settings for JobScheduler's TARE EconomicPolicy (list of its economic factors).
-         *
-         * Keys are listed in {@link android.app.tare.EconomyManager}.
-         *
-         * @hide
-         */
-        public static final String TARE_JOB_SCHEDULER_CONSTANTS = "tare_job_scheduler_constants";
-
-        /**
          * Whether or not to enable the User Absent, Radios Off feature on small battery devices.
          * Type: int (0 for false, 1 for true)
          * Default: 0

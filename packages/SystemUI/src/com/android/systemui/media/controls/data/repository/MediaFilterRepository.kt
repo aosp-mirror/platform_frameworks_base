@@ -16,6 +16,7 @@
 
 package com.android.systemui.media.controls.data.repository
 
+import com.android.internal.logging.InstanceId
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
@@ -28,17 +29,18 @@ import kotlinx.coroutines.flow.asStateFlow
 @SysUISingleton
 class MediaFilterRepository @Inject constructor() {
 
-    /** Key of media control that recommendations card reactivated. */
-    private val _reactivatedKey: MutableStateFlow<String?> = MutableStateFlow(null)
-    val reactivatedKey: StateFlow<String?> = _reactivatedKey.asStateFlow()
+    /** Instance id of media control that recommendations card reactivated. */
+    private val _reactivatedId: MutableStateFlow<InstanceId?> = MutableStateFlow(null)
+    val reactivatedId: StateFlow<InstanceId?> = _reactivatedId.asStateFlow()
 
     private val _smartspaceMediaData: MutableStateFlow<SmartspaceMediaData> =
         MutableStateFlow(SmartspaceMediaData())
     val smartspaceMediaData: StateFlow<SmartspaceMediaData> = _smartspaceMediaData.asStateFlow()
 
-    private val _selectedUserEntries: MutableStateFlow<Map<String, MediaData>> =
+    private val _selectedUserEntries: MutableStateFlow<Map<InstanceId, MediaData>> =
         MutableStateFlow(LinkedHashMap())
-    val selectedUserEntries: StateFlow<Map<String, MediaData>> = _selectedUserEntries.asStateFlow()
+    val selectedUserEntries: StateFlow<Map<InstanceId, MediaData>> =
+        _selectedUserEntries.asStateFlow()
 
     private val _allUserEntries: MutableStateFlow<Map<String, MediaData>> =
         MutableStateFlow(LinkedHashMap())
@@ -62,9 +64,9 @@ class MediaFilterRepository @Inject constructor() {
         return mediaData
     }
 
-    fun addSelectedUserMediaEntry(key: String, data: MediaData) {
-        val entries = LinkedHashMap<String, MediaData>(_selectedUserEntries.value)
-        entries[key] = data
+    fun addSelectedUserMediaEntry(data: MediaData) {
+        val entries = LinkedHashMap<InstanceId, MediaData>(_selectedUserEntries.value)
+        entries[data.instanceId] = data
         _selectedUserEntries.value = entries
     }
 
@@ -73,8 +75,8 @@ class MediaFilterRepository @Inject constructor() {
      *
      * @return media data if an entry is actually removed, `null` otherwise.
      */
-    fun removeSelectedUserMediaEntry(key: String): MediaData? {
-        val entries = LinkedHashMap<String, MediaData>(_selectedUserEntries.value)
+    fun removeSelectedUserMediaEntry(key: InstanceId): MediaData? {
+        val entries = LinkedHashMap<InstanceId, MediaData>(_selectedUserEntries.value)
         val mediaData = entries.remove(key)
         _selectedUserEntries.value = entries
         return mediaData
@@ -85,8 +87,8 @@ class MediaFilterRepository @Inject constructor() {
      *
      * @return true if media data is removed, false otherwise.
      */
-    fun removeSelectedUserMediaEntry(key: String, data: MediaData): Boolean {
-        val entries = LinkedHashMap<String, MediaData>(_selectedUserEntries.value)
+    fun removeSelectedUserMediaEntry(key: InstanceId, data: MediaData): Boolean {
+        val entries = LinkedHashMap<InstanceId, MediaData>(_selectedUserEntries.value)
         val succeed = entries.remove(key, data)
         if (!succeed) {
             return false
@@ -105,7 +107,7 @@ class MediaFilterRepository @Inject constructor() {
     }
 
     /** Updates media control key that recommendations card reactivated. */
-    fun setReactivatedKey(key: String?) {
-        _reactivatedKey.value = key
+    fun setReactivatedId(instanceId: InstanceId?) {
+        _reactivatedId.value = instanceId
     }
 }

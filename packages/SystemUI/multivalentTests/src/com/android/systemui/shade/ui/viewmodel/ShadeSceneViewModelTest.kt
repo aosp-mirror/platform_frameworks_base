@@ -129,6 +129,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
                 shadeInteractor = kosmos.shadeInteractor,
                 footerActionsViewModelFactory = kosmos.footerActionsViewModelFactory,
                 footerActionsController = kosmos.footerActionsController,
+                sceneInteractor = kosmos.sceneInteractor,
             )
     }
 
@@ -215,22 +216,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun onContentClicked_deviceUnlocked_switchesToGone() =
-        testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.currentScene)
-            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin
-            )
-            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
-            runCurrent()
-
-            underTest.onContentClicked()
-
-            assertThat(currentScene).isEqualTo(Scenes.Gone)
-        }
-
-    @Test
-    fun onContentClicked_deviceLockedSecurely_switchesToBouncer() =
+    fun onContentClicked_deviceLockedSecurely_switchesToLockscreen() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
@@ -241,7 +227,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
 
             underTest.onContentClicked()
 
-            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
         }
 
     @Test

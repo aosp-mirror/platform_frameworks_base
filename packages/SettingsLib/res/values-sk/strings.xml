@@ -111,7 +111,7 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Prenos súborov"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Vstupné zariadenie"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Prístup na internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Povoľte aj prístup ku kontaktom a histórii hovorov"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Povoliť prístup ku kontaktom a histórii hovorov"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Pomocou informácií sa budú oznamovať hovory a viac"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Zdieľanie pripojenia na Internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Textové správy"</string>
@@ -140,7 +140,7 @@
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Použiť pre vstup"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="3374057355721486932">"Používať pre načúvadlá"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Používať s profilom LE_AUDIO"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Párovať"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Spárovať"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"PÁROVAŤ"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Zrušiť"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Párovaním udelíte zariadeniam po pripojení prístup k svojim kontaktom a histórii hovorov."</string>
@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Prepdokladať, že aplikácie podporujú moderné formáty"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Zobraziť upozornenia prekódovania"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Deaktivácia vyrovnávacej pamäte prekódovania"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Nastavenia softvéru Widevine"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Vynútiť zálohu L3"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Vyberte, keď chcete vynútiť zálohu L3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Spustené služby"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Zobrazovať a riadiť aktuálne spustené služby"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementácia WebView"</string>
@@ -619,7 +616,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Nového použív. sa nepodarilo vytvoriť"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Nového hosťa sa nepodarilo vytvoriť"</string>
     <string name="user_nickname" msgid="262624187455825083">"Prezývka"</string>
-    <string name="edit_user_info_message" msgid="6677556031419002895">"Názov a obrázok, ktorý vyberiete, budú vidieť všetci používatelia tohto zariadenia."</string>
+    <string name="edit_user_info_message" msgid="6677556031419002895">"Meno a obrázok, ktorý vyberiete, uvidia všetci používatelia tohto zariadenia."</string>
     <string name="user_add_user" msgid="7876449291500212468">"Pridať používateľa"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Pridať hosťa"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Odobrať hosťa"</string>

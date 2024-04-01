@@ -70,7 +70,7 @@ constructor(
         combine(
                 mediaFilterRepository.selectedUserEntries,
                 mediaFilterRepository.smartspaceMediaData,
-                mediaFilterRepository.reactivatedKey
+                mediaFilterRepository.reactivatedId
             ) { entries, smartspaceMediaData, reactivatedKey ->
                 entries.any { it.value.active } ||
                     (smartspaceMediaData.isActive &&
@@ -140,14 +140,6 @@ constructor(
         }
         mediaResumeListener.setManager(this)
         mediaDataFilter.mediaDataManager = this
-    }
-
-    override fun addListener(listener: MediaDataManager.Listener) {
-        mediaDataFilter.addListener(listener)
-    }
-
-    override fun removeListener(listener: MediaDataManager.Listener) {
-        mediaDataFilter.removeListener(listener)
     }
 
     override fun setInactive(key: String, timedOut: Boolean, forceUpdate: Boolean) {

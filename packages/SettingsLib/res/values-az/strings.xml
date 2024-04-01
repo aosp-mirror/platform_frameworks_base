@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Tətbiqlərin müasir formatları dəstəklədiyini qəbul edin"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Kod dəyişmə bildirişlərini göstərin"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Keşin kodlaşdırılmasını deaktiv edin"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine ayarları"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"L3 alternativini məcburi tətbiq edin"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"L3 alternativinin məcburi tətbiqi üçün seçim edin"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"İşləyən xidmətlər"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"İşlək xidmətlərə baxış və onların idarəedilməsi"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView servisi"</string>

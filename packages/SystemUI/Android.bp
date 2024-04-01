@@ -188,7 +188,6 @@ android_library {
         extra_check_modules: ["SystemUILintChecker"],
         warning_checks: ["MissingApacheLicenseDetector"],
     },
-    skip_jarjar_repackage: true,
 }
 
 filegroup {
@@ -304,7 +303,6 @@ android_library {
         "androidx.compose.animation_animation-graphics",
         "TraceurCommon",
     ],
-    skip_jarjar_repackage: true,
 }
 
 android_library {
@@ -356,7 +354,6 @@ android_library {
         test: true,
         extra_check_modules: ["SystemUILintChecker"],
     },
-    skip_jarjar_repackage: true,
 }
 
 android_app {

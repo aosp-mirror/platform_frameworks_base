@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"앱이 최신 형식을 지원하는 것으로 가정"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"트랜스코딩 알림 표시"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"트랜스코딩 캐시 사용 중지"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine 설정"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"L3 대체 강제"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"L3 대체를 강제하려면 선택하세요."</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"실행 중인 서비스"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"현재 실행 중인 서비스 보기 및 제어"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView 구현"</string>

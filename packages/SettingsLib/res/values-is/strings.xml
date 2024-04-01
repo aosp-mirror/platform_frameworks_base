@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Gera ráð fyrir að forrit styðji nútímasnið"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Sýna umkóðunartilkynningar"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Slökkva á skyndiminni umkóðunar"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Stillingar Widevine"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Þvinga fram L3 varaleið"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Veldu til að þvinga fram L3 varaleið"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Þjónustur í gangi"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Skoða og stjórna þjónustum í gangi"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Innleiðing WebView"</string>

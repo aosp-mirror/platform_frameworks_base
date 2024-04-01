@@ -200,9 +200,7 @@ public class PrefetchControllerTest {
         js.setBackgroundNotRestrictedConstraintSatisfied(
                 sElapsedRealtimeClock.millis(), true, false);
         js.setQuotaConstraintSatisfied(sElapsedRealtimeClock.millis(), true);
-        js.setTareWealthConstraintSatisfied(sElapsedRealtimeClock.millis(), true);
         js.setExpeditedJobQuotaApproved(sElapsedRealtimeClock.millis(), true);
-        js.setExpeditedJobTareApproved(sElapsedRealtimeClock.millis(), true);
         js.setFlexibilityConstraintSatisfied(sElapsedRealtimeClock.millis(), true);
         return js;
     }

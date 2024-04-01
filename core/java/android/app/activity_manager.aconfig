@@ -39,11 +39,3 @@ flag {
      description: "Add a new callback in Service to indicate a FGS has reached its timeout."
      bug: "317799821"
 }
-
-flag {
-    name: "bcast_event_timestamps"
-    is_exported: true
-    namespace: "backstage_power"
-    description: "Add APIs for clients to provide broadcast event trigger timestamps"
-    bug: "325136414"
-}

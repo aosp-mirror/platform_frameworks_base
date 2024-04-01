@@ -28,6 +28,7 @@ import android.nfc.INfcVendorNciCallback;
 import android.nfc.INfcTag;
 import android.nfc.INfcCardEmulation;
 import android.nfc.INfcFCardEmulation;
+import android.nfc.INfcOemExtensionCallback;
 import android.nfc.INfcUnlockHandler;
 import android.nfc.ITagRemovedCallback;
 import android.nfc.INfcDta;
@@ -105,4 +106,7 @@ interface INfcAdapter
     int sendVendorNciMessage(int mt, int gid, int oid, in byte[] payload);
     void registerVendorExtensionCallback(in INfcVendorNciCallback callbacks);
     void unregisterVendorExtensionCallback(in INfcVendorNciCallback callbacks);
+    void registerOemExtensionCallback(INfcOemExtensionCallback callbacks);
+    void unregisterOemExtensionCallback(INfcOemExtensionCallback callbacks);
+    void clearPreference();
 }

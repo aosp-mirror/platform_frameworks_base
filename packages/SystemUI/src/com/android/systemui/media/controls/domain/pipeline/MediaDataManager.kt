@@ -27,10 +27,10 @@ import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
 interface MediaDataManager {
 
     /** Add a listener for changes in this class */
-    fun addListener(listener: Listener)
+    fun addListener(listener: Listener) {}
 
     /** Remove a listener for changes in this class */
-    fun removeListener(listener: Listener)
+    fun removeListener(listener: Listener) {}
 
     /**
      * Called whenever the player has been paused or stopped for a while, or swiped from QQS. This

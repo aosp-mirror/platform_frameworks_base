@@ -18,7 +18,6 @@ package com.android.wm.shell.flicker.pip.apps
 
 import android.Manifest
 import android.platform.test.annotations.Postsubmit
-import android.tools.NavBar
 import android.tools.Rotation
 import android.tools.traces.component.ComponentNameMatcher
 import android.tools.device.apphelpers.YouTubeAppHelper
@@ -158,8 +157,7 @@ open class YouTubeEnterPipToOtherOrientationTest(flicker: LegacyFlickerTest) :
         @JvmStatic
         fun getParams() =
             LegacyFlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(Rotation.ROTATION_0),
-                supportedNavigationModes = listOf(NavBar.MODE_GESTURAL)
+                supportedRotations = listOf(Rotation.ROTATION_0)
             )
     }
 }

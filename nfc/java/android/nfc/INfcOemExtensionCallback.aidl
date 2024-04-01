@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,24 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package android.nfc;
 
-package com.android.server.tare;
+import android.nfc.Tag;
 
-import static org.junit.Assert.assertEquals;
-
-import androidx.test.runner.AndroidJUnit4;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-@RunWith(AndroidJUnit4.class)
-public class EconomicPolicyTest {
-
-    @Test
-    public void testMasksDisjoint() {
-        assertEquals(-1,
-                (-1 & EconomicPolicy.MASK_TYPE)
-                        + (-1 & EconomicPolicy.MASK_POLICY)
-                        + (-1 & EconomicPolicy.MASK_EVENT));
-    }
+/**
+ * @hide
+ */
+interface INfcOemExtensionCallback {
+   void onTagConnected(boolean connected, in Tag tag);
 }

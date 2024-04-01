@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"假設應用程式支援新型格式"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"顯示轉碼通知"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"停用轉碼快取"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine 設定"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"強制退回 L3"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"選取即可強制退回 L3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"執行中的服務"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"查看並控制目前正在執行中的服務"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView 設置"</string>

@@ -74,6 +74,7 @@ fun SettingsDropdownCheckBox(
         text = getDisplayText(options) ?: emptyText,
         enabled = enabled && options.changeable,
         errorMessage = errorMessage,
+        singleLine = false,
     ) {
         for (option in options) {
             CheckboxItem(option) {

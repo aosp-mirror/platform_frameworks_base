@@ -84,8 +84,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"ম’বাইল নেটৱৰ্কৰ লগত সংযোগ কৰিব পৰা নাই"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"পচন্দৰ নেটৱৰ্ক সলনি কৰি চেষ্টা কৰি চাওক। সলনি কৰিবলৈ টিপক।"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"জৰুৰীকালীন কল কৰাৰ সুবিধা উপলব্ধ নহয়"</string>
-    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
-    <skip />
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"জৰুৰীকালীন কল কৰিবলৈ ম’বাইল নেটৱৰ্কৰ প্ৰয়োজন"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"সতৰ্কবাণীসমূহ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"কল ফৰৱাৰ্ডিং"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"জৰুৰীকালীন ক\'লবেক ম\'ড"</string>
@@ -1184,10 +1183,8 @@
     <string name="deleteText" msgid="4200807474529938112">"মচক"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ইনপুট পদ্ধতি"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"পাঠ বিষয়ক কাৰ্য"</string>
-    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
-    <skip />
-    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
-    <skip />
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"এই ক্ষেত্ৰত হস্তলিপি সমৰ্থিত নহয়"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"পাছৱৰ্ড ক্ষেত্ৰসমূহত হস্তলিপি সমৰ্থিত নহয়"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"উভতি যাওক"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ইনপুটৰ পদ্ধতি সলনি কৰক"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"ষ্ট’ৰেজৰ খালী ঠাই শেষ হৈ আছে"</string>
@@ -1932,6 +1929,12 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g>এ পৰিচালনা কৰা"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"অন আছে"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"অফ আছে"</string>
+    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
+    <skip />
+    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
+    <skip />
+    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
+    <skip />
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>এ কিছুমান ধ্বনি মিউট কৰি আছে"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"আপোনাৰ ডিভাইচত এটা আভ্যন্তৰীণ সমস্যা আছে আৰু আপুনি ফেক্টৰী ডেটা ৰিছেট নকৰালৈকে ই সুস্থিৰভাৱে কাম নকৰিব পাৰে।"</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"আপোনাৰ ডিভাইচত এটা আভ্যন্তৰীণ সমস্যা আছে। সবিশেষ জানিবৰ বাবে আপোনাৰ ডিভাইচ নির্মাতাৰ সৈতে যোগাযোগ কৰক।"</string>
@@ -1993,7 +1996,7 @@
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"জৰুৰীকালীন"</string>
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"এটা স্ক্ৰীন লক ছেট কৰক"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"স্ক্ৰীন লক ছেট কৰা"</string>
-    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"আপোনাৰ প্ৰাইভেট স্পেচ ব্যৱহাৰ কৰিবলৈ এই ডিভাইচটোত স্ক্ৰীন লক ছেট কৰক"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"আপোনাৰ প্ৰাইভেট স্পে\'চ ব্যৱহাৰ কৰিবলৈ এই ডিভাইচটোত স্ক্ৰীন লক ছেট কৰক"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"এপ্‌টো উপলব্ধ নহয়"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"এই মুহূৰ্তত <xliff:g id="APP_NAME">%1$s</xliff:g> উপলব্ধ নহয়।"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> উপলব্ধ নহয়"</string>

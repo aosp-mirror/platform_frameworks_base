@@ -1317,7 +1317,7 @@
     <string name="volume_unknown" msgid="4041914008166576293">"Głośność"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Głośność Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Głośność dzwonka"</string>
-    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Głośność w czasie połączenia"</string>
+    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Głośność połączeń"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"Głośność multimediów"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Głośność powiadomień"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Dzwonek domyślny"</string>
@@ -1931,6 +1931,12 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Zarządzana przez aplikację <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Włączono"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Wyłączono"</string>
+    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
+    <skip />
+    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
+    <skip />
+    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
+    <skip />
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> wycisza niektóre dźwięki"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"W Twoim urządzeniu wystąpił problem wewnętrzny. Może być ono niestabilne, dopóki nie przywrócisz danych fabrycznych."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"W Twoim urządzeniu wystąpił problem wewnętrzny. Skontaktuj się z jego producentem, by otrzymać szczegółowe informacje."</string>

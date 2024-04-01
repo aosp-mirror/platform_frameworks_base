@@ -26,6 +26,8 @@ import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobi
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.FakeDeviceBasedSatelliteRepository
 import com.android.systemui.statusbar.pipeline.satellite.shared.model.SatelliteConnectionState
+import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository
+import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisioningInteractor
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
@@ -48,6 +50,9 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
         )
 
     private val repo = FakeDeviceBasedSatelliteRepository()
+    private val deviceProvisionedRepository = FakeDeviceProvisioningRepository()
+    private val deviceProvisioningInteractor =
+        DeviceProvisioningInteractor(deviceProvisionedRepository)
 
     @Before
     fun setUp() {
@@ -55,6 +60,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
             DeviceBasedSatelliteInteractor(
                 repo,
                 iconsInteractor,
+                deviceProvisioningInteractor,
                 testScope.backgroundScope,
             )
     }
@@ -96,6 +102,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                 DeviceBasedSatelliteInteractor(
                     repo,
                     iconsInteractor,
+                    deviceProvisioningInteractor,
                     testScope.backgroundScope,
                 )
 
@@ -142,6 +149,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                 DeviceBasedSatelliteInteractor(
                     repo,
                     iconsInteractor,
+                    deviceProvisioningInteractor,
                     testScope.backgroundScope,
                 )
 
@@ -196,6 +204,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                 DeviceBasedSatelliteInteractor(
                     repo,
                     iconsInteractor,
+                    deviceProvisioningInteractor,
                     testScope.backgroundScope,
                 )
 
@@ -327,6 +336,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                 DeviceBasedSatelliteInteractor(
                     repo,
                     iconsInteractor,
+                    deviceProvisioningInteractor,
                     testScope.backgroundScope,
                 )
 

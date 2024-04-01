@@ -19,10 +19,12 @@ package com.android.systemui.scene.domain.interactor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 
 val Kosmos.sceneContainerOcclusionInteractor by Fixture {
     SceneContainerOcclusionInteractor(
+        applicationScope = applicationCoroutineScope,
         keyguardOcclusionInteractor = keyguardOcclusionInteractor,
         sceneInteractor = sceneInteractor,
         keyguardTransitionInteractor = keyguardTransitionInteractor,

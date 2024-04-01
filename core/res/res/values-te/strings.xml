@@ -84,8 +84,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"మొబైల్ నెట్‌వర్క్ అందుబాటులో లేదు"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ప్రాధాన్య నెట్‌వర్క్‌ను మార్చుకోవడానికి ప్రయత్నించండి. మార్చడానికి నొక్కండి."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"అత్యవసర కాలింగ్ అందుబాటులో లేదు"</string>
-    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
-    <skip />
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"ఎమర్జెన్సీ కాల్స్‌కు మొబైల్ నెట్‌వర్క్ అవసరమవుతుంది"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"అలర్ట్‌లు"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"కాల్ ఫార్వార్డింగ్"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"అత్యవసర కాల్‌బ్యాక్ మోడ్"</string>
@@ -828,7 +827,7 @@
     <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"మీకు సంబంధించిన ఇతర యాప్‌లలోని E2EE కాంటాక్ట్ కీల వెరిఫికేషన్ స్టేట్‌లను అప్‌డేట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"పాస్‌వర్డ్ నియమాలను సెట్ చేయండి"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"స్క్రీన్ లాక్ పాస్‌వర్డ్‌లు మరియు PINల్లో అనుమతించబడిన పొడవు మరియు అక్షరాలను నియంత్రిస్తుంది."</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"స్క్రీన్ అన్‌లాక్ ప్రయత్నాలను పర్యవేక్షించండి"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"స్క్రీన్‌ను అన్‌లాక్ చేయడానికి చేస్తున్న ప్రయత్నాలను మానిటర్ చేయడానికి"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"టైప్ చేసిన చెల్లని పాస్‌వర్డ్‌ల సంఖ్యను పర్యవేక్షిస్తుంది. స్క్రీన్‌ను అన్‌లాక్ చేస్తున్నప్పుడు, అనేక సార్లు చెల్లని పాస్‌వర్డ్‌లను టైప్ చేస్తే టాబ్లెట్ లాక్ చేయబడుతుంది లేదా టాబ్లెట్‌లోని మొత్తం డేటా ఎరేజ్ చేయబడుతుంది."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"స్క్రీన్‌ను అన్‌లాక్ చేస్తున్నప్పుడు పాస్‌వర్డ్‌లను ఎన్నిసార్లు తప్పుగా టైప్ చేశారో పర్యవేక్షిస్తుంది, అలాగే చాలా ఎక్కువసార్లు పాస్‌వర్డ్‌లను తప్పుగా టైప్ చేసి ఉంటే మీ Android TV పరికరాన్ని లాక్ చేస్తుంది లేదా మీ Android TV డేటా మొత్తాన్ని తొలగిస్తుంది."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"స్క్రీన్‌ను అన్‌లాక్ చేస్తున్నప్పుడు, పాస్‌వర్డ్‌ను ఎన్నిసార్లు తప్పుగా టైప్ చేశారో పర్యవేక్షిస్తుంది. ఒకవేళ చాలా ఎక్కువ సార్లు పాస్‌వర్డ్‌ను తప్పుగా టైప్ చేసి ఉంటే, సమాచారంతో కూడిన వినోదం సిస్టమ్‌ను లాక్ చేస్తుంది లేదా సమాచారంతో కూడిన వినోదం సిస్టమ్ డేటాను తొలగించి ఫ్యాక్టరీ రీసెట్ చేస్తుంది."</string>
@@ -1184,10 +1183,8 @@
     <string name="deleteText" msgid="4200807474529938112">"తొలగించండి"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ఇన్‌పుట్ పద్ధతి"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"వచనానికి సంబంధించిన చర్యలు"</string>
-    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
-    <skip />
-    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
-    <skip />
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"ఈ ఫీల్డ్‌లో చేతిరాతకు సపోర్ట్ లేదు"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"పాస్‌వర్డ్ ఫీల్డ్‌లలో చేతిరాతకు సపోర్ట్ లేదు"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"వెనుకకు"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ఇన్‌పుట్ విధానాన్ని మార్చండి"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"స్టోరేజ్‌ ఖాళీ అయిపోతోంది"</string>
@@ -1247,10 +1244,10 @@
     <string name="aerr_process_repeated" msgid="1153152413537954974">"<xliff:g id="PROCESS">%1$s</xliff:g> పునరావృతంగా ఆపివేయబడుతోంది"</string>
     <string name="aerr_restart" msgid="2789618625210505419">"యాప్‌ను మళ్లీ తెరువు"</string>
     <string name="aerr_report" msgid="3095644466849299308">"ఫీడ్‌బ్యాక్‌ను పంపు"</string>
-    <string name="aerr_close" msgid="3398336821267021852">"మూసివేయి"</string>
+    <string name="aerr_close" msgid="3398336821267021852">"మూసివేయండి"</string>
     <string name="aerr_mute" msgid="2304972923480211376">"పరికరం పునఃప్రారంభమయ్యే వరకు మ్యూట్ చేయి"</string>
     <string name="aerr_wait" msgid="3198677780474548217">"వేచి ఉండండి"</string>
-    <string name="aerr_close_app" msgid="8318883106083050970">"యాప్‌ను మూసివేయి"</string>
+    <string name="aerr_close_app" msgid="8318883106083050970">"యాప్‌ను మూసివేయండి"</string>
     <string name="anr_title" msgid="7290329487067300120"></string>
     <string name="anr_activity_application" msgid="8121716632960340680">"<xliff:g id="APPLICATION">%2$s</xliff:g> ప్రతిస్పందించడం లేదు"</string>
     <string name="anr_activity_process" msgid="3477362583767128667">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ప్రతిస్పందించడం లేదు"</string>
@@ -1928,10 +1925,16 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"వారపు రోజుల్లో రాత్రి"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"వారాంతం"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ఈవెంట్"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"నిద్రావస్థ"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"నిద్ర"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> ద్వారా మేనేజ్ చేయబడుతోంది"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ఆన్‌లో ఉంది"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ఆఫ్‌లో ఉంది"</string>
+    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
+    <skip />
+    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
+    <skip />
+    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
+    <skip />
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> కొన్ని ధ్వనులను మ్యూట్ చేస్తోంది"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది మరియు మీరు ఫ్యాక్టరీ డేటా రీసెట్ చేసే వరకు అస్థిరంగా ఉంటుంది."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది. వివరాల కోసం మీ తయారీదారుని సంప్రదించండి."</string>
@@ -1958,7 +1961,7 @@
     <string name="floating_toolbar_open_overflow_description" msgid="2260297653578167367">"మరిన్ని ఆప్షన్‌లు"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="3949818077708138098">"అతివ్యాప్తిని మూసివేస్తుంది"</string>
     <string name="maximize_button_text" msgid="4258922519914732645">"గరిష్టీకరించు"</string>
-    <string name="close_button_text" msgid="10603510034455258">"మూసివేయి"</string>
+    <string name="close_button_text" msgid="10603510034455258">"మూసివేయండి"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"పికప్ చేయండి"</string>
     <string name="call_notification_answer_video_action" msgid="2086030940195382249">"వీడియో కాల్"</string>

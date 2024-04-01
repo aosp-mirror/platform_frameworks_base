@@ -6519,7 +6519,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 throw new SecurityException("Not allowed to query domain verification agent");
             }
             final Computer snapshot = snapshotComputer();
-            return getDomainVerificationAgentComponentNameLPr(snapshot, userId);
+            final ComponentName agent = mDomainVerificationManager.getProxy().getComponentName();
+            final PackageStateInternal ps = snapshot.getPackageStateForInstalledAndFiltered(
+                    agent.getPackageName(), callerUid, userId);
+            if (ps == null) {
+                return null;
+            }
+            final var disabledComponents =
+                    ps.getUserStateOrDefault(userId).getDisabledComponentsNoCopy();
+            if (disabledComponents != null && disabledComponents.contains(agent.getClassName())) {
+                return null;
+            }
+            // Only return the result if the agent is installed and enabled on the target user
+            return agent;
         }
 
         @Override

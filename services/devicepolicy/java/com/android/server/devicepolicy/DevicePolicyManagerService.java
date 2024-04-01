@@ -727,7 +727,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         SYSTEM_SETTINGS_ALLOWLIST = new ArraySet<>();
         SYSTEM_SETTINGS_ALLOWLIST.add(Settings.System.SCREEN_BRIGHTNESS);
-        SYSTEM_SETTINGS_ALLOWLIST.add(Settings.System.SCREEN_BRIGHTNESS_FLOAT);
         SYSTEM_SETTINGS_ALLOWLIST.add(Settings.System.SCREEN_BRIGHTNESS_MODE);
         SYSTEM_SETTINGS_ALLOWLIST.add(Settings.System.SCREEN_OFF_TIMEOUT);
 
