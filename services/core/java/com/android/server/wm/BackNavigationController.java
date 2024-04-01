@@ -843,14 +843,14 @@ class BackNavigationController {
      * @param targets The final animation targets derived in transition.
      * @param finishedTransition The finished transition target.
     */
-    boolean onTransitionFinish(ArrayList<Transition.ChangeInfo> targets,
+    void onTransitionFinish(ArrayList<Transition.ChangeInfo> targets,
             @NonNull Transition finishedTransition) {
         if (finishedTransition == mWaitTransitionFinish) {
             clearBackAnimations();
         }
 
         if (!mBackAnimationInProgress || mPendingAnimationBuilder == null) {
-            return false;
+            return;
         }
         ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
                 "Handling the deferred animation after transition finished");
@@ -878,7 +878,7 @@ class BackNavigationController {
                     + " open: " + Arrays.toString(mPendingAnimationBuilder.mOpenTargets)
                     + " close: " + mPendingAnimationBuilder.mCloseTarget);
             cancelPendingAnimation();
-            return false;
+            return;
         }
 
         // Ensure the final animation targets which hidden by transition could be visible.
@@ -887,9 +887,14 @@ class BackNavigationController {
             wc.prepareSurfaces();
         }
 
-        scheduleAnimation(mPendingAnimationBuilder);
-        mPendingAnimationBuilder = null;
-        return true;
+        // The pending builder could be cleared due to prepareSurfaces
+        // => updateNonSystemOverlayWindowsVisibilityIfNeeded
+        // => setForceHideNonSystemOverlayWindowIfNeeded
+        // => updateFocusedWindowLocked => onFocusWindowChanged.
+        if (mPendingAnimationBuilder != null) {
+            scheduleAnimation(mPendingAnimationBuilder);
+            mPendingAnimationBuilder = null;
+        }
     }
 
     private void cancelPendingAnimation() {
