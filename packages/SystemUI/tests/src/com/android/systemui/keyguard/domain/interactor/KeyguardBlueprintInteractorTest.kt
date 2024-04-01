@@ -27,16 +27,12 @@ import com.android.systemui.biometrics.data.repository.fakeFingerprintPropertyRe
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor.Companion.SPLIT_SHADE_WEATHER_CLOCK_BLUEPRINT_ID
-import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor.Companion.WEATHER_CLOCK_BLUEPRINT_ID
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.SplitShadeKeyguardBlueprint
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.plugins.clocks.ClockConfig
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.res.R
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
@@ -99,72 +95,6 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
             fingerprintPropertyRepository.supportsUdfps() // initialize properties
             runCurrent()
             assertThat(blueprint?.id).isEqualTo(SplitShadeKeyguardBlueprint.Companion.ID)
-        }
-    }
-
-    @Test
-    @DisableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
-    fun composeLockscreenOff_DoesAppliesSplitShadeWeatherClockBlueprint() {
-        testScope.runTest {
-            val blueprint by collectLastValue(underTest.blueprint)
-            whenever(clockController.config)
-                .thenReturn(
-                    ClockConfig(
-                        id = "DIGITAL_CLOCK_WEATHER",
-                        name = "clock",
-                        description = "clock",
-                    )
-                )
-            clockRepository.setCurrentClock(clockController)
-            overrideResource(R.bool.config_use_split_notification_shade, true)
-            configurationRepository.onConfigurationChange()
-            runCurrent()
-
-            assertThat(blueprint?.id).isNotEqualTo(SPLIT_SHADE_WEATHER_CLOCK_BLUEPRINT_ID)
-        }
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
-    fun testDoesAppliesSplitShadeWeatherClockBlueprint() {
-        testScope.runTest {
-            val blueprint by collectLastValue(underTest.blueprint)
-            whenever(clockController.config)
-                .thenReturn(
-                    ClockConfig(
-                        id = "DIGITAL_CLOCK_WEATHER",
-                        name = "clock",
-                        description = "clock",
-                    )
-                )
-            clockRepository.setCurrentClock(clockController)
-            overrideResource(R.bool.config_use_split_notification_shade, true)
-            configurationRepository.onConfigurationChange()
-            runCurrent()
-
-            assertThat(blueprint?.id).isEqualTo(SPLIT_SHADE_WEATHER_CLOCK_BLUEPRINT_ID)
-        }
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
-    fun testAppliesWeatherClockBlueprint() {
-        testScope.runTest {
-            val blueprint by collectLastValue(underTest.blueprint)
-            whenever(clockController.config)
-                .thenReturn(
-                    ClockConfig(
-                        id = "DIGITAL_CLOCK_WEATHER",
-                        name = "clock",
-                        description = "clock",
-                    )
-                )
-            clockRepository.setCurrentClock(clockController)
-            overrideResource(R.bool.config_use_split_notification_shade, false)
-            configurationRepository.onConfigurationChange()
-            runCurrent()
-
-            assertThat(blueprint?.id).isEqualTo(WEATHER_CLOCK_BLUEPRINT_ID)
         }
     }
 
