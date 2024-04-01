@@ -1,4 +1,5 @@
 package: "android.view.inputmethod"
+container: "system"
 
 flag {
     name: "refactor_insets_controller"
