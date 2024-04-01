@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Assumeix que les aplicacions són compatibles amb formats moderns"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Mostra les notificacions de transcodificació"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Desactiva la memòria cau per a la transcodificació"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Configuració de Widevine"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Força l\'alternativa L3"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Selecciona per forçar l\'alternativa L3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Serveis en execució"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Visualitza i controla els serveis en execució"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementació de WebView"</string>
@@ -481,9 +478,9 @@
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g>: s\'està carregant"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Desconegut"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"S\'està carregant"</string>
-    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Carregant ràpidament"</string>
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Càrrega ràpida"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Carregant lentament"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Carregant sense fil"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Càrrega sense fil"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"S\'està carregant"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"No s\'està carregant"</string>
     <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Connectat, però sense carregar"</string>

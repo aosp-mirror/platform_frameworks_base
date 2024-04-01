@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Considerar que os apps são compatíveis com formatos modernos"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Mostrar notificações de transcodificação"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Desativar cache da transcodificação"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Configurações o Widevine"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Forçar substituição do L3"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Selecione para forçar a substituição do L3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Serviços em execução"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Ver e controlar os serviços em execução no momento"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementação do WebView"</string>
@@ -641,7 +638,7 @@
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Excluir"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Salvar"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"Sair do modo visitante"</string>
-    <string name="guest_reset_button" msgid="2515069346223503479">"Redefinir Sessão de visitante"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Redefinir sessão de visitante"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Sair do modo visitante"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Todas as atividades serão excluídas ao sair"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Você pode salvar ou excluir sua atividade ao sair"</string>

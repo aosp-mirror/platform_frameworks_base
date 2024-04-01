@@ -219,7 +219,7 @@
     <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"ເລືອກໂປຣໄຟລ໌"</string>
-    <string name="category_personal" msgid="6236798763159385225">"​ສ່ວນ​ໂຕ"</string>
+    <string name="category_personal" msgid="6236798763159385225">"ສ່ວນຕົວ"</string>
     <string name="category_work" msgid="4014193632325996115">"​ບ່ອນ​ເຮັດ​ວຽກ"</string>
     <string name="category_private" msgid="4244892185452788977">"ສ່ວນຕົວ"</string>
     <string name="category_clone" msgid="1554511758987195974">"ໂຄລນ"</string>
@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"ສົມມຸດວ່າແອັບຮອງຮັບຮູບແບບສະໄໝໃໝ່"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"ສະແດງການແຈ້ງເຕືອນການ​ປ່ຽນ​ຮູບ​ແບບ​ລະ​ຫັດ"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"ປິດການນຳໃຊ້ແຄສການ​ປ່ຽນ​ຮູບ​ແບບ​ລະ​ຫັດ"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"ການຕັ້ງຄ່າ Widevine"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"ບັງຄັບທາງເລືອກ L3"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"ເລືອກເພື່ອບັງຄັບທາງເລືອກ L3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"ບໍລິການທີ່ເຮັດວຽກຢູ່"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"ເບິ່ງ ແລະ ຈັດການບໍລິການທີ່ກຳລັງເຮັດວຽກຢູ່ໃນປັດຈຸບັນ"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"ການຈັດຕັ້ງປະຕິບັດ WebView"</string>

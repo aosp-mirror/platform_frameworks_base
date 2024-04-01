@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"යෙදුම් නවීන ආකෘති සඳහා සහාය දක්වයි යැයි උපකල්පනය කරමු"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"ට්‍රාන්ස්කෝඩින් දැනුම්දීම් පෙන්වන්න"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"ට්‍රාන්ස්කොඩින් හැඹිලිය අබල කරන්න"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine සැකසීම්"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"L3 පසුබැසීමට බල කරන්න"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"L3 පසුබැසීමට බල කිරීමට තෝරන්න"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"ධාවනය වන සේවා"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"දැනට ධාවනය වන සේවා බලන්න සහ පාලනය කරන්න"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView ක්‍රියාත්මක කිරීම"</string>

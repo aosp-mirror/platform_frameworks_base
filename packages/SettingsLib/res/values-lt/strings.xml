@@ -106,7 +106,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktyvus, tik kairysis"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktyvus, tik dešinysis"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktyvus, kairysis ir dešinysis"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Laikmenos garsas"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Medijos garsas"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefono skambučiai"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Failo perkėlimas"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Įvesties įrenginys"</string>
@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Manoma, kad programos palaiko modernius formatus"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Rodyti perkodavimo pranešimus"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Išjungti talpyklos perkodavimą"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"„Widevine“ nustatymai"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Priverstinai naudoti L3 kaip atsarginį variantą"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Pasirinkite, kad priverstinai naudoti L3 kaip atsarginį variantą"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Vykdomos paslaugos"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Žiūrėti ir valdyti dabar vykdomas paslaugas"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"„WebView“ diegimas"</string>

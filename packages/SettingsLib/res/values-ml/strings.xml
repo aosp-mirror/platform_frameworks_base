@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"ആപ്പുകൾ ആധുനിക ഫോർമാറ്റുകളെ പിന്തുണയ്ക്കുമെന്ന് കരുതുക"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"ട്രാൻസ്കോഡ് ചെയ്യൽ അറിയിപ്പുകൾ കാണിക്കുക"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"ട്രാൻസ്കോഡ് ചെയ്യൽ കാഷെ പ്രവർത്തനരഹിതമാക്കുക"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"വൈഡ്‌ലൈൻ ക്രമീകരണം"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"L3 ഫോൾബാക്ക് ഫോഴ്‌സ് ചെയ്യുക"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"L3 ഫോൾബാക്ക് ഫോഴ്‌സ് ചെയ്യാൻ തിരഞ്ഞെടുക്കുക"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"പ്രവർത്തിക്കുന്ന സേവനങ്ങൾ"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"നിലവിൽ പ്രവർത്തിക്കുന്ന സേവനങ്ങൾ കാണുക, നിയന്ത്രിക്കുക"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView നടപ്പാക്കൽ"</string>

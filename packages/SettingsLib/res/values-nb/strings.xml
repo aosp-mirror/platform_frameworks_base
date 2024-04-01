@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Anta at apper støtter moderne formater"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Vis omkodingsvarsler"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Slå av omkodingsbuffer"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine-innstillinger"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Tving bruk av L3-reservealternativet"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Velg for å tvinge bruk av L3-reservealternativet"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Aktive tjenester"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Se og kontroller tjenester som kjører"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView-implementering"</string>
@@ -657,7 +654,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Slått av"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Slått på"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Enheten din må startes på nytt for at denne endringen skal tre i kraft. Start på nytt nå eller avbryt."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Hodetelefoner med kabel"</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"hodetelefoner med kabel"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"På"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Av"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Bytting av operatørnettverk"</string>

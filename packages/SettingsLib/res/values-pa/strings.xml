@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"ਮੰਨ ਲਓ ਕਿ ਐਪਾਂ ਆਧੁਨਿਕ ਫਾਰਮੈਟਾਂ ਦਾ ਸਮਰਥਨ ਕਰਦੀਆਂ ਹਨ"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"ਟ੍ਰਾਂਸਕੋਡਿੰਗ ਸੂਚਨਾਵਾਂ ਦਿਖਾਓ"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"ਟ੍ਰਾਂਸਕੋਡਿੰਗ ਕੈਸ਼ੇ ਬੰਦ ਕਰੋ"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine ਸੈਟਿੰਗਾਂ"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"ਜ਼ਬਰਦਸਤੀ L3 ਫਾਲਬੈਕ ਕਰੋ"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"ਜ਼ਬਰਦਸਤੀ L3 ਫਾਲਬੈਕ ਕਰਨ ਲਈ ਚੁਣੋ"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"ਚੱਲ ਰਹੀਆਂ ਸੇਵਾਵਾਂ"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"ਇਸ ਵੇਲੇ ਚੱਲ ਰਹੀਆਂ ਸੇਵਾਵਾਂ ਦੇਖੋ ਅਤੇ ਉਨ੍ਹਾਂ ਨੂੰ ਕੰਟਰੋਲ ਕਰੋ"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView ਅਮਲੀਕਰਨ"</string>
@@ -643,7 +640,7 @@
     <string name="guest_exit_button" msgid="5774985819191803960">"ਮਹਿਮਾਨ ਮੋਡ ਤੋਂ ਬਾਹਰ ਜਾਓ"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"ਮਹਿਮਾਨ ਸੈਸ਼ਨ ਨੂੰ ਰੀਸੈੱਟ ਕਰੋ"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"ਮਹਿਮਾਨ ਮੋਡ ਤੋਂ ਬਾਹਰ ਜਾਓ"</string>
-    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"ਬਾਹਰ ਜਾਣ \'ਤੇ ਸਾਰੀ ਸਰਗਰਮੀ ਮਿਟਾਈ ਜਾਵੇਗੀ"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"ਬਾਹਰ ਜਾਣ \'ਤੇ ਸਾਰੀ ਸਰਗਰਮੀ ਮਿਟਾ ਦਿੱਤੀ ਜਾਵੇਗੀ"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"ਤੁਸੀਂ ਬਾਹਰ ਜਾਣ \'ਤੇ ਆਪਣੀ ਸਰਗਰਮੀ ਰੱਖਿਅਤ ਕਰ ਜਾਂ ਮਿਟਾ ਸਕਦੇ ਹੋ"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"ਸੈਸ਼ਨ ਦੀ ਸਰਗਰਮੀ ਹੁਣੇ ਮਿਟਾਉਣ ਲਈ ਰੀਸੈੱਟ ਕਰੋ ਜਾਂ ਤੁਸੀਂ ਬਾਹਰ ਜਾਣ \'ਤੇ ਸਰਗਰਮੀ ਨੂੰ ਰੱਖਿਅਤ ਕਰ ਜਾਂ ਮਿਟਾ ਸਕਦੇ ਹੋ"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ਇੱਕ ਫ਼ੋਟੋ ਖਿੱਚੋ"</string>

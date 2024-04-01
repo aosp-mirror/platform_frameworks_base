@@ -106,13 +106,13 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Actif, gauche uniquement"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Actif, droit uniquement"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Actifs, gauche et droit"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Multimédia"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Audio multimédia"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Appels téléphoniques"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transfert de fichiers"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Périphérique d\'entrée"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Accès Internet"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Autoriser l\'accès aux contacts et à l\'historique des appels"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Les infos seront utilisées pour les notifications d\'appels, entre autres"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Ces infos seront utilisées pour les notifications d\'appels, entre autres"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Partage de connexion Internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"SMS"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Accès à la SIM"</string>
@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Supposer que les applications sont compatibles avec les formats modernes"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Afficher les notifications de transcodage"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Désactiver la cache de transcodage"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Paramètres Widevine"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Forcer le retour en arrière vers le niveau 3"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Sélectionner pour forcer le retour en arrière vers le niveau 3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Services en cours d\'exécution"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Afficher et contrôler les services en cours d\'exécution"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Mise en œuvre WebView"</string>
@@ -518,7 +515,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Utiliser les langues du système"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Échec de l\'ouverture des paramètres de l\'application <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>."</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Ce mode de saisie est susceptible d\'enregistrer le texte que vous saisissez, y compris vos données personnelles, telles que les mots de passe et les numéros de carte de paiement. Il provient de l\'application <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Voulez-vous vraiment l\'activer ?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Remarque : Après un redémarrage, vous ne pouvez pas lancer cette application tant que vous n\'avez pas déverrouillé votre téléphone."</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Remarque : Après un redémarrage, cette application ne peut pas démarrer tant que vous n\'avez pas déverrouillé votre téléphone."</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"État de l\'enregistrement IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Enregistré"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Non enregistré"</string>
