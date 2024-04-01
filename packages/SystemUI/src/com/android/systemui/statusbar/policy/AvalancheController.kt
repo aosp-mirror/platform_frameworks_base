@@ -64,13 +64,16 @@ class AvalancheController @Inject constructor(
     }
 
     /** Run or delay Runnable for given HeadsUpEntry */
-    fun update(entry: HeadsUpEntry, runnable: Runnable, label: String) {
+    fun update(entry: HeadsUpEntry?, runnable: Runnable, label: String) {
         if (!NotificationThrottleHun.isEnabled) {
             runnable.run()
             return
         }
         val fn = "[$label] => AvalancheController.update ${getKey(entry)}"
-
+        if (entry == null) {
+            log { "Entry is NULL, stop update." }
+            return;
+        }
         if (debug) {
             debugRunnableLabelMap[runnable] = label
         }
