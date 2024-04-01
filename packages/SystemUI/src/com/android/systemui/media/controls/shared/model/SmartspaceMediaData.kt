@@ -20,6 +20,7 @@ import android.app.smartspace.SmartspaceAction
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Process
 import android.text.TextUtils
 import android.util.Log
 import androidx.annotation.VisibleForTesting
@@ -85,6 +86,15 @@ data class SmartspaceMediaData(
             packageManager.getApplicationLabel(applicationInfo)
         } catch (e: PackageManager.NameNotFoundException) {
             null
+        }
+    }
+
+    fun getUid(context: Context): Int {
+        return try {
+            context.packageManager.getApplicationInfo(packageName, 0 /* flags */).uid
+        } catch (e: PackageManager.NameNotFoundException) {
+            Log.w(TAG, "Fail to get media recommendation's app info", e)
+            Process.INVALID_UID
         }
     }
 }

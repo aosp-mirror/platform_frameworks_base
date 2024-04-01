@@ -16,6 +16,8 @@
 
 package com.android.systemui.media.controls.data.repository
 
+import android.R
+import android.graphics.drawable.Icon
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
@@ -124,11 +126,12 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val smartspaceMediaData by collectLastValue(underTest.smartspaceMediaData)
 
+            val icon = Icon.createWithResource(context, R.drawable.ic_media_play)
             val mediaRecommendation =
                 SmartspaceMediaData(
                     targetId = KEY_MEDIA_SMARTSPACE,
                     isActive = true,
-                    recommendations = MediaTestHelper.getValidRecommendationList(context),
+                    recommendations = MediaTestHelper.getValidRecommendationList(icon),
                 )
 
             underTest.setRecommendation(mediaRecommendation)
