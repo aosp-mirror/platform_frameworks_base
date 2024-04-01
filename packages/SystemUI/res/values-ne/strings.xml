@@ -86,8 +86,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"तपाईंको IT एड्मिनले स्क्रिनसट लिने सुविधा ब्लक गर्नुभएको छ"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"सम्पादन गर्नुहोस्"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"स्क्रिनसट सम्पादन गर्नुहोस्"</string>
-    <!-- no translation found for screenshot_share_label (1653061117238861559) -->
-    <skip />
+    <string name="screenshot_share_label" msgid="1653061117238861559">"सेयर गर्नुहोस्"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"स्क्रिनसट सेयर गर्नुहोस्"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"अन्य कुराहरू खिच्नुहोस्"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"स्क्रिनसट हटाउनुहोस्"</string>
@@ -152,6 +151,7 @@
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"अनुहार स्क्यान गर्दै"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"पठाउनुहोस्"</string>
     <string name="cancel" msgid="1089011503403416730">"रद्द गर्नुहोस्"</string>
+    <string name="biometric_dialog_logo" msgid="7681107853070774595">"एपको लोगो"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"पुष्टि गर्नुहोस्"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"फेरि प्रयास गर्नुहोस्"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"प्रमाणीकरण रद्द गर्न ट्याप गर्नुहोस्"</string>
@@ -166,6 +166,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"अनुहार पहिचान गरियो। जारी राख्न अनलक आइकनमा थिच्नुहोस्।"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"प्रमाणीकरण गरियो"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"प्रमाणीकरण रद्द गर्नुहोस्"</string>
+    <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"थप विकल्पहरू"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN प्रयोग गर्नुहोस्"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ढाँचा प्रयोग गर्नुहोस्"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"पासवर्ड प्रयोग गर्नुहोस्"</string>
@@ -362,6 +363,8 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"डिफल्ट"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"मध्यम"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"उच्च"</string>
+    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"डिभाइसको माइक्रोफोन अनब्लक गर्ने हो?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"डिभाइसको क्यामेरा अनब्लक गर्ने हो?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"डिभाइसको क्यामेरा र माइक्रोफोन अनब्लक गर्ने हो?"</string>
@@ -439,6 +442,10 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"हटाउनुहोस्"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"विजेट हाल्नुहोस्"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"पूरा भयो"</string>
+    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
+    <skip />
+    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
+    <skip />
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"लक स्क्रिनमा कुनै विजेट देखाउने हो?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"सेटिङ खोल्नुहोस्"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"कामसम्बन्धी एपहरू अनपज गर्ने हो?"</string>
@@ -540,10 +547,8 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"यो डिभाइस तपाईंका अभिभावक व्यवस्थापन गर्नुहुन्छ। तपाईंका अभिभावक तपाईंले प्रयोग गर्ने एप, तपाईंको स्थान र तपाईंले यन्त्र चलाएर बिताउने समय जस्ता जानकारी हेर्न तथा व्यवस्थापन गर्न सक्नुहुन्छ।"</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent ले खुला राखेको"</string>
-    <!-- no translation found for kg_prompt_after_adaptive_auth_lock (2587481497846342760) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_after_adaptive_auth_lock (2323400645470712787) -->
-    <skip />
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"डिभाइस लक गरिएको छ, प्रमाणीकरण गर्ने निकै धेरै प्रयास गरिएका छन्"</string>
+    <string name="keyguard_indication_after_adaptive_auth_lock" msgid="2323400645470712787">"डिभाइस लक गरिएको छ\nप्रमाणीकरण गर्न सकिएन"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"ध्वनिसम्बन्धी सेटिङहरू"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"मिडियाको स्वत: क्याप्सन बनाउनुहोस्"</string>
@@ -765,10 +770,8 @@
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"हालको एप दायाँतर्फ रहने गरी स्प्लिट स्क्रिन मोड सुरु गर्नुहोस्"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"हालको एप बायाँतर्फ रहने गरी स्प्लिट स्क्रिन मोड सुरु गर्नुहोस्"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"स्प्लिट स्क्रिनको साटो फुल स्क्रिन प्रयोग गर्नुहोस्"</string>
-    <!-- no translation found for system_multitasking_splitscreen_focus_rhs (3838578650313318508) -->
-    <skip />
-    <!-- no translation found for system_multitasking_splitscreen_focus_lhs (3164261844398662518) -->
-    <skip />
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"स्प्लिट स्क्रिन प्रयोग गर्दै गर्दा दायाँ वा तलको एप चलाउनुहोस्"</string>
+    <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"स्प्लिट स्क्रिन प्रयोग गर्दै गर्दा बायाँ वा माथिको एप चलाउनुहोस्"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"स्प्लिट स्क्रिन प्रयोग गरिएका बेला: एउटा स्क्रिनमा भएको एप अर्कोमा लैजानुहोस्"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"इनपुट"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"अर्को भाषा प्रयोग गर्नुहोस्"</string>

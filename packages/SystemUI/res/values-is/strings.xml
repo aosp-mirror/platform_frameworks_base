@@ -86,8 +86,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Kerfisstjórinn lokaði á skjámyndatöku"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Breyta"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Breyta skjámynd"</string>
-    <!-- no translation found for screenshot_share_label (1653061117238861559) -->
-    <skip />
+    <string name="screenshot_share_label" msgid="1653061117238861559">"Deila"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Deila skjámynd"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Mynda meira"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Loka skjámynd"</string>
@@ -152,6 +151,7 @@
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Andlit skannað"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Senda"</string>
     <string name="cancel" msgid="1089011503403416730">"Hætta við"</string>
+    <string name="biometric_dialog_logo" msgid="7681107853070774595">"Lógó forrits"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Staðfesta"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Reyna aftur"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Ýttu til að hætta við auðkenningu"</string>
@@ -166,6 +166,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Andlitið var greint. Ýttu á opnunartáknið til að halda áfr."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Auðkennt"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Hætta við auðkenningu"</string>
+    <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Fleiri valkostir"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Nota PIN-númer"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Nota mynstur"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Nota aðgangsorð"</string>
@@ -362,6 +363,8 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Staðlað"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Miðlungs"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Mikið"</string>
+    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Opna fyrir hljóðnema tækisins?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Opna fyrir myndavél tækisins?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Opna fyrir myndavél og hljóðnema tækisins?"</string>
@@ -439,6 +442,10 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Fjarlægja"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Bæta græju við"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Lokið"</string>
+    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
+    <skip />
+    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
+    <skip />
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Leyfa allar græjur á lásskjá?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Opna stillingar"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Ljúka hléi vinnuforrita?"</string>
@@ -763,10 +770,8 @@
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Opna skjáskiptingu hægra megin með núverandi forriti"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Opna skjáskiptingu vinstra megin með núverandi forriti"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Skipta úr skjáskiptingu yfir á allan skjáinn"</string>
-    <!-- no translation found for system_multitasking_splitscreen_focus_rhs (3838578650313318508) -->
-    <skip />
-    <!-- no translation found for system_multitasking_splitscreen_focus_lhs (3164261844398662518) -->
-    <skip />
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Skiptu í forrit til hægri eða fyrir neðan þegar skjáskipting er notuð"</string>
+    <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Skiptu í forrit til vinstri eða fyrir ofan þegar skjáskipting er notuð"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Í skjáskiptingu: Skipta forriti út fyrir annað forrit"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Innsláttur"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Skipta yfir í næsta tungumál"</string>
