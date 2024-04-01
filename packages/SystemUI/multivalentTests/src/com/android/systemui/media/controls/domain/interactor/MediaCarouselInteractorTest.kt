@@ -56,13 +56,13 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
 
             val userMedia = MediaData().copy(active = true)
 
-            mediaFilterRepository.addSelectedUserMediaEntry(KEY, userMedia)
+            mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
 
             assertThat(hasActiveMediaOrRecommendation).isTrue()
             assertThat(hasActiveMedia).isTrue()
             assertThat(hasAnyMedia).isTrue()
 
-            mediaFilterRepository.addSelectedUserMediaEntry(KEY, userMedia.copy(active = false))
+            mediaFilterRepository.addSelectedUserMediaEntry(userMedia.copy(active = false))
 
             assertThat(hasActiveMediaOrRecommendation).isFalse()
             assertThat(hasActiveMedia).isFalse()
@@ -78,14 +78,16 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
             val hasAnyMedia by collectLastValue(underTest.hasAnyMedia)
 
             val userMedia = MediaData().copy(active = false)
+            val instanceId = userMedia.instanceId
 
-            mediaFilterRepository.addSelectedUserMediaEntry(KEY, userMedia)
+            mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
 
             assertThat(hasActiveMediaOrRecommendation).isFalse()
             assertThat(hasActiveMedia).isFalse()
             assertThat(hasAnyMedia).isTrue()
 
-            assertThat(mediaFilterRepository.removeSelectedUserMediaEntry(KEY, userMedia)).isTrue()
+            assertThat(mediaFilterRepository.removeSelectedUserMediaEntry(instanceId, userMedia))
+                .isTrue()
 
             assertThat(hasActiveMediaOrRecommendation).isFalse()
             assertThat(hasActiveMedia).isFalse()
@@ -114,7 +116,7 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
             assertThat(hasActiveMediaOrRecommendation).isTrue()
             assertThat(hasAnyMediaOrRecommendation).isTrue()
 
-            mediaFilterRepository.addSelectedUserMediaEntry(KEY, userMedia)
+            mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
 
             assertThat(hasActiveMediaOrRecommendation).isTrue()
             assertThat(hasAnyMediaOrRecommendation).isTrue()
@@ -193,7 +195,6 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
         testScope.runTest { assertThat(underTest.hasActiveMediaOrRecommendation.value).isFalse() }
 
     companion object {
-        private const val KEY = "KEY"
         private const val KEY_MEDIA_SMARTSPACE = "MEDIA_SMARTSPACE_ID"
     }
 }
