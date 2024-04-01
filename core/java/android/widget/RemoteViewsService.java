@@ -132,7 +132,8 @@ public abstract class RemoteViewsService extends Service {
             RemoteViews.RemoteCollectionItems items = new RemoteViews.RemoteCollectionItems
                     .Builder().build();
             Parcel capSizeTestParcel = Parcel.obtain();
-            capSizeTestParcel.allowSquashing();
+            // restore allowSquashing to reduce the noise in error messages
+            boolean prevAllowSquashing = capSizeTestParcel.allowSquashing();
 
             try {
                 RemoteViews.RemoteCollectionItems.Builder itemsBuilder =
@@ -154,6 +155,7 @@ public abstract class RemoteViewsService extends Service {
 
                 items = itemsBuilder.build();
             } finally {
+                capSizeTestParcel.restoreAllowSquashing(prevAllowSquashing);
                 // Recycle the parcel
                 capSizeTestParcel.recycle();
             }
