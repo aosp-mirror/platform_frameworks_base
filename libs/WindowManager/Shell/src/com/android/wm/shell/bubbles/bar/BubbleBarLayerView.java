@@ -33,8 +33,6 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
-import androidx.annotation.NonNull;
-
 import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubbleData;
@@ -44,7 +42,6 @@ import com.android.wm.shell.bubbles.BubbleViewProvider;
 import com.android.wm.shell.bubbles.DeviceConfig;
 import com.android.wm.shell.bubbles.DismissViewUtils;
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedViewDragController.DragListener;
-import com.android.wm.shell.common.bubbles.BubbleBarLocation;
 import com.android.wm.shell.common.bubbles.DismissView;
 
 import kotlin.Unit;
@@ -71,7 +68,7 @@ public class BubbleBarLayerView extends FrameLayout
     private final BubbleBarAnimationHelper mAnimationHelper;
     private final BubbleEducationViewController mEducationViewController;
     private final View mScrimView;
-    private final BubbleBarDropTargetController mDropTargetController;
+    private final BubbleExpandedViewPinController mBubbleExpandedViewPinController;
 
     @Nullable
     private BubbleViewProvider mExpandedBubble;
@@ -116,7 +113,9 @@ public class BubbleBarLayerView extends FrameLayout
 
         setUpDismissView();
 
-        mDropTargetController = new BubbleBarDropTargetController(context, this, mPositioner);
+        mBubbleExpandedViewPinController = new BubbleExpandedViewPinController(
+                context, this, mPositioner);
+        mBubbleExpandedViewPinController.setListener(mBubbleController::setBubbleBarLocation);
 
         setOnClickListener(view -> hideMenuOrCollapse());
     }
@@ -207,12 +206,17 @@ public class BubbleBarLayerView extends FrameLayout
                 }
             });
 
-            DragListener dragListener = createDragListener();
+            DragListener dragListener = inDismiss -> {
+                if (inDismiss && mExpandedBubble != null) {
+                    mBubbleController.dismissBubble(mExpandedBubble.getKey(), DISMISS_USER_GESTURE);
+                }
+            };
             mDragController = new BubbleBarExpandedViewDragController(
                     mExpandedView,
                     mDismissView,
                     mAnimationHelper,
                     mPositioner,
+                    mBubbleExpandedViewPinController,
                     dragListener);
 
             addView(mExpandedView, new LayoutParams(width, height, Gravity.LEFT));
@@ -377,26 +381,4 @@ public class BubbleBarLayerView extends FrameLayout
         }
     }
 
-    private DragListener createDragListener() {
-        return new DragListener() {
-            @Override
-            public void onLocationChanged(@NonNull BubbleBarLocation location) {
-                mBubbleController.setBubbleBarLocation(location);
-                mDropTargetController.show(location);
-            }
-
-            @Override
-            public void onStuckToDismissChanged(boolean isStuck) {
-                mDropTargetController.setHidden(isStuck);
-            }
-
-            @Override
-            public void onReleased(boolean inDismiss) {
-                mDropTargetController.dismiss();
-                if (inDismiss && mExpandedBubble != null) {
-                    mBubbleController.dismissBubble(mExpandedBubble.getKey(), DISMISS_USER_GESTURE);
-                }
-            }
-        };
-    }
 }
