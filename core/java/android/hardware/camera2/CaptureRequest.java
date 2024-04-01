@@ -4454,13 +4454,4 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/
-
-
-
-
-
-
-
-
-
 }
