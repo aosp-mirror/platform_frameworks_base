@@ -14,15 +14,13 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
 -->
-
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
     <item android:state_pressed="true"
-        android:color="@color/desktop_mode_maximize_menu_button_on_hover"/>
-    <item android:state_hovered="true"
-        android:color="@color/desktop_mode_maximize_menu_button_on_hover"/>
+        android:color="?androidprv:attr/colorAccentPrimary"/>
     <item android:state_focused="true"
-        android:color="@color/desktop_mode_maximize_menu_button_on_hover"/>
+        android:color="?androidprv:attr/colorAccentPrimary"/>
     <item android:state_selected="true"
-        android:color="@color/desktop_mode_maximize_menu_button_on_hover"/>
-    <item android:color="@color/desktop_mode_maximize_menu_button"/>
+        android:color="?androidprv:attr/colorAccentPrimary"/>
+    <item android:color="?androidprv:attr/materialColorOutlineVariant"/>
 </selector>
