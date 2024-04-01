@@ -25,6 +25,7 @@ import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
 import static android.view.flags.Flags.toolkitFrameRateBySizeReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateDefaultNormalReadOnly;
+import static android.view.flags.Flags.toolkitFrameRateSmallUsesPercentReadOnly;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -34,6 +35,7 @@ import static org.junit.Assert.assertTrue;
 import android.app.Activity;
 import android.os.SystemClock;
 import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.util.DisplayMetrics;
 
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
@@ -174,10 +176,19 @@ public class ViewFrameRateTest {
     public void noVelocityUsesCategorySmall() throws Throwable {
         final CountDownLatch drawLatch1 = new CountDownLatch(1);
         mActivityRule.runOnUiThread(() -> {
-            float density = mActivity.getResources().getDisplayMetrics().density;
+            DisplayMetrics displayMetrics = mActivity.getResources().getDisplayMetrics();
             ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
-            layoutParams.height = ((int) (40 * density));
-            layoutParams.width = ((int) (40 * density));
+            if (toolkitFrameRateSmallUsesPercentReadOnly()) {
+                float pixels = displayMetrics.widthPixels * displayMetrics.heightPixels * 0.07f;
+                double smallSize = Math.sqrt(pixels);
+                layoutParams.width = (int) smallSize;
+                layoutParams.height = (int) smallSize;
+            } else {
+                float density = displayMetrics.density;
+                layoutParams.height = ((int) (40 * density));
+                layoutParams.width = ((int) (40 * density));
+            }
+
             mMovingView.setLayoutParams(layoutParams);
             mMovingView.getViewTreeObserver().addOnDrawListener(drawLatch1::countDown);
         });
@@ -199,10 +210,18 @@ public class ViewFrameRateTest {
     public void noVelocityUsesCategoryNarrowWidth() throws Throwable {
         final CountDownLatch drawLatch1 = new CountDownLatch(1);
         mActivityRule.runOnUiThread(() -> {
-            float density = mActivity.getResources().getDisplayMetrics().density;
+            DisplayMetrics displayMetrics = mActivity.getResources().getDisplayMetrics();
             ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
-            layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
-            layoutParams.width = (int) (10 * density);
+            if (toolkitFrameRateSmallUsesPercentReadOnly()) {
+                float pixels = displayMetrics.widthPixels * displayMetrics.heightPixels * 0.07f;
+                int parentWidth = ((View) mMovingView.getParent()).getWidth();
+                layoutParams.width = parentWidth;
+                layoutParams.height = (int) (pixels / parentWidth);
+            } else {
+                float density = displayMetrics.density;
+                layoutParams.width = (int) (10 * density);
+                layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            }
             mMovingView.setLayoutParams(layoutParams);
             mMovingView.getViewTreeObserver().addOnDrawListener(drawLatch1::countDown);
         });
@@ -224,10 +243,18 @@ public class ViewFrameRateTest {
     public void noVelocityUsesCategoryNarrowHeight() throws Throwable {
         final CountDownLatch drawLatch1 = new CountDownLatch(1);
         mActivityRule.runOnUiThread(() -> {
-            float density = mActivity.getResources().getDisplayMetrics().density;
+            DisplayMetrics displayMetrics = mActivity.getResources().getDisplayMetrics();
             ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
-            layoutParams.height = (int) (10 * density);
-            layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            if (toolkitFrameRateSmallUsesPercentReadOnly()) {
+                float pixels = displayMetrics.widthPixels * displayMetrics.heightPixels * 0.07f;
+                int parentHeight = ((View) mMovingView.getParent()).getHeight();
+                layoutParams.width = (int) (pixels / parentHeight);
+                layoutParams.height = parentHeight;
+            } else {
+                float density = displayMetrics.density;
+                layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                layoutParams.height = (int) (10 * density);
+            }
             mMovingView.setLayoutParams(layoutParams);
             mMovingView.getViewTreeObserver().addOnDrawListener(drawLatch1::countDown);
         });
@@ -249,10 +276,18 @@ public class ViewFrameRateTest {
     public void noVelocityUsesCategoryLargeWidth() throws Throwable {
         final CountDownLatch drawLatch1 = new CountDownLatch(1);
         mActivityRule.runOnUiThread(() -> {
-            float density = mActivity.getResources().getDisplayMetrics().density;
+            DisplayMetrics displayMetrics = mActivity.getResources().getDisplayMetrics();
             ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
-            layoutParams.height = (int) (40 * density);
-            layoutParams.width = ((int) Math.ceil(40 * density)) + 1;
+            if (toolkitFrameRateSmallUsesPercentReadOnly()) {
+                float pixels = displayMetrics.widthPixels * displayMetrics.heightPixels * 0.07f;
+                double smallSize = Math.sqrt(pixels);
+                layoutParams.width = 1 + (int) Math.ceil(pixels / smallSize);
+                layoutParams.height = (int) smallSize;
+            } else {
+                float density = displayMetrics.density;
+                layoutParams.width = ((int) Math.ceil(40 * density)) + 1;
+                layoutParams.height = ((int) (40 * density));
+            }
             mMovingView.setLayoutParams(layoutParams);
             mMovingView.getViewTreeObserver().addOnDrawListener(drawLatch1::countDown);
         });
@@ -274,10 +309,18 @@ public class ViewFrameRateTest {
     public void noVelocityUsesCategoryLargeHeight() throws Throwable {
         final CountDownLatch drawLatch1 = new CountDownLatch(1);
         mActivityRule.runOnUiThread(() -> {
-            float density = mActivity.getResources().getDisplayMetrics().density;
+            DisplayMetrics displayMetrics = mActivity.getResources().getDisplayMetrics();
             ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
-            layoutParams.height = ((int) Math.ceil(40 * density)) + 1;
-            layoutParams.width = ((int) (40 * density));
+            if (toolkitFrameRateSmallUsesPercentReadOnly()) {
+                float pixels = displayMetrics.widthPixels * displayMetrics.heightPixels * 0.07f;
+                double smallSize = Math.sqrt(pixels);
+                layoutParams.width = (int) smallSize;
+                layoutParams.height = 1 + (int) Math.ceil(pixels / smallSize);
+            } else {
+                float density = displayMetrics.density;
+                layoutParams.width = ((int) (40 * density));
+                layoutParams.height = ((int) Math.ceil(40 * density)) + 1;
+            }
             mMovingView.setLayoutParams(layoutParams);
             mMovingView.getViewTreeObserver().addOnDrawListener(drawLatch1::countDown);
         });
@@ -297,6 +340,13 @@ public class ViewFrameRateTest {
     @Test
     @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
     public void defaultNormal() throws Throwable {
+        mActivityRule.runOnUiThread(() -> {
+            View parent = (View) mMovingView.getParent();
+            ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
+            layoutParams.width = parent.getWidth() / 2;
+            layoutParams.height = parent.getHeight() / 2;
+            mMovingView.setLayoutParams(layoutParams);
+        });
         waitForFrameRateCategoryToSettle();
         mActivityRule.runOnUiThread(() -> {
             mMovingView.invalidate();
