@@ -5141,7 +5141,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
         for (Dataset dataset: response.getDatasets()) {
-            if (isPinnedDataset(dataset)) {
+            if (dataset.getId() != null
+                    && dataset.getId().equals(AutofillManager.PINNED_DATASET_ID)) {
                 Slog.d(TAG, "Adding Credential Manager callback to a pinned entry");
                 addCredentialManagerCallbackForDataset(dataset, response.getRequestId());
             }
