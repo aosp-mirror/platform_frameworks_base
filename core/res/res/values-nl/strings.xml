@@ -84,8 +84,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Kan mobiel netwerk niet bereiken"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Probeer een ander voorkeursnetwerk. Tik om te wijzigen."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Noodoproepen niet beschikbaar"</string>
-    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
-    <skip />
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Voor noodoproepen is een mobiel netwerk vereist"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Meldingen"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Gesprek doorschakelen"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Modus voor noodoproepen"</string>
@@ -1184,10 +1183,8 @@
     <string name="deleteText" msgid="4200807474529938112">"Verwijderen"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Invoermethode"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Tekstacties"</string>
-    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
-    <skip />
-    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
-    <skip />
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"Handschrift wordt in dit veld niet ondersteund"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Handschrift wordt niet ondersteund in wachtwoordvelden"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Terug"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Invoermethode wijzigen"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Opslagruimte is bijna vol"</string>
@@ -1651,7 +1648,7 @@
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefoon"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Dockluidsprekers"</string>
     <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Extern apparaat"</string>
-    <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Hoofdtelefoon"</string>
+    <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Koptelefoon"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Systeem"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"Bluetooth-audio"</string>
@@ -1932,6 +1929,12 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Beheerd door <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Aan"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Uit"</string>
+    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
+    <skip />
+    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
+    <skip />
+    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
+    <skip />
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> zet sommige geluiden uit"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Er is een intern probleem met je apparaat. Het apparaat kan instabiel zijn totdat u het apparaat terugzet naar de fabrieksinstellingen."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Er is een intern probleem met je apparaat. Neem contact op met de fabrikant voor meer informatie."</string>
@@ -1993,7 +1996,7 @@
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Noodgeval"</string>
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Schermvergrendeling instellen"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Schermvergrendeling instellen"</string>
-    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Als je je privéruimte wilt gebruiken, stel je een schermvergrendeling op dit apparaat in"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Als je je privégedeelte wilt gebruiken, stel je een schermvergrendeling op dit apparaat in"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"App is niet beschikbaar"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> is momenteel niet beschikbaar."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> niet beschikbaar"</string>
@@ -2334,7 +2337,7 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Je kunt nu een deel van je scherm vergroten"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Aanzetten in Instellingen"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Sluiten"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Blokkeren van apparaatmicrofoon opheffen"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Microfoon van apparaat niet meer blokkeren"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Blokkeren van apparaatcamera opheffen"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Voor &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; en alle andere apps en services"</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Niet meer blokkeren"</string>

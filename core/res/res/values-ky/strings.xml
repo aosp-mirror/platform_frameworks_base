@@ -84,8 +84,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Мобилдик тармакка туташпай жатат"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Тандалган тармакты өзгөртүп көрүңүз. Өзгөртүү үчүн таптаңыз."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Шашылыш чалуу жеткиликсиз"</string>
-    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
-    <skip />
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Шашылыш чалуу үчүн мобилдик тармак талап кылынат"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Шашылыш билдирүүлөр"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Чалууну башка номерге багыттоо"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Шашылыш кайра чалуу режими"</string>
@@ -1184,10 +1183,8 @@
     <string name="deleteText" msgid="4200807474529938112">"Өчүрүү"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Киргизүү ыкмасы"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Текст боюнча иштер"</string>
-    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
-    <skip />
-    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
-    <skip />
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"Бул талаада жазып киргизүү колдоого алынбайт"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Сырсөз талаасында жазып киргизүү колдоого алынбайт"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Артка"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Киргизүү ыкмасын өзгөртүү"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Сактагычта орун калбай баратат"</string>
@@ -1932,6 +1929,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> башкарат"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Күйүк"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Өчүк"</string>
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>, <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Бардык жылнаамалар"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> айрым үндөрдү өчүрүүдө"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Түзмөгүңүздө ички көйгөй бар жана ал баштапкы абалга кайтарылмайынча туруктуу иштебей коюшу мүмкүн."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Түзмөгүңүздө ички көйгөй бар. Анын чоо-жайын билүү үчүн өндүрүүчүңүзгө кайрылыңыз."</string>
