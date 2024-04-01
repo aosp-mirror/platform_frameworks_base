@@ -472,7 +472,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
-    fun doesNotSwitchToGoneWhenDeviceStartsToWakeUp_authMethodSecure() =
+    fun doesNotSwitchToGone_whenDeviceStartsToWakeUp_authMethodSecure() =
         testScope.runTest {
             val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
             prepareState(
@@ -484,6 +484,34 @@ class SceneContainerStartableTest : SysuiTestCase() {
             powerInteractor.setAwakeForTest()
 
             assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+        }
+
+    @Test
+    fun doesNotSwitchToGone_whenDeviceStartsToWakeUp_ifAlreadyTransitioningToLockscreen() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            val transitioningTo by collectLastValue(sceneInteractor.transitioningTo)
+            val transitionStateFlow =
+                prepareState(
+                    isDeviceUnlocked = true,
+                    initialSceneKey = Scenes.Gone,
+                    authenticationMethod = AuthenticationMethodModel.Pin,
+                )
+            transitionStateFlow.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Gone,
+                    toScene = Scenes.Lockscreen,
+                    progress = flowOf(0.1f),
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                )
+            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
+            assertThat(transitioningTo).isEqualTo(Scenes.Lockscreen)
+            underTest.start()
+            powerInteractor.setAwakeForTest()
+
+            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
+            assertThat(transitioningTo).isEqualTo(Scenes.Lockscreen)
         }
 
     @Test

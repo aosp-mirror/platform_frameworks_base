@@ -294,12 +294,17 @@ constructor(
                     val canSwipeToEnter = deviceEntryInteractor.canSwipeToEnter.value
                     val isUnlocked = deviceEntryInteractor.isUnlocked.value
                     if (isUnlocked && canSwipeToEnter == false) {
-                        switchToScene(
-                            targetSceneKey = Scenes.Gone,
-                            loggingReason =
-                                "device is waking up while unlocked without the ability" +
-                                    " to swipe up on lockscreen to enter.",
-                        )
+                        val isTransitioningToLockscreen =
+                            sceneInteractor.transitioningTo.value == Scenes.Lockscreen
+                        if (!isTransitioningToLockscreen) {
+                            switchToScene(
+                                targetSceneKey = Scenes.Gone,
+                                loggingReason =
+                                    "device is waking up while unlocked without the ability to" +
+                                        " swipe up on lockscreen to enter and not on or" +
+                                        " transitioning to, the lockscreen scene.",
+                            )
+                        }
                     } else if (
                         authenticationInteractor.get().getAuthenticationMethod() ==
                             AuthenticationMethodModel.Sim
