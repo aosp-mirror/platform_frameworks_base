@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene.domain.interactor
+package com.android.systemui.settings
 
-import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 
-val Kosmos.sceneContainerOcclusionInteractor by Fixture {
-    SceneContainerOcclusionInteractor(
-        applicationScope = applicationCoroutineScope,
-        keyguardOcclusionInteractor = keyguardOcclusionInteractor,
-        sceneInteractor = sceneInteractor,
-        keyguardTransitionInteractor = keyguardTransitionInteractor,
+val Kosmos.displayTracker by Fixture {
+    FakeDisplayTracker(
+        context = applicationContext,
     )
 }

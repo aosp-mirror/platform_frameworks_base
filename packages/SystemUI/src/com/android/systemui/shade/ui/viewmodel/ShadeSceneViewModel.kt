@@ -31,6 +31,7 @@ import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
+import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
@@ -52,7 +53,7 @@ class ShadeSceneViewModel
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    private val deviceEntryInteractor: DeviceEntryInteractor,
+    deviceEntryInteractor: DeviceEntryInteractor,
     val qsSceneAdapter: QSSceneAdapter,
     val shadeHeaderViewModel: ShadeHeaderViewModel,
     val notifications: NotificationsPlaceholderViewModel,
@@ -60,6 +61,7 @@ constructor(
     shadeInteractor: ShadeInteractor,
     private val footerActionsViewModelFactory: FooterActionsViewModel.Factory,
     private val footerActionsController: FooterActionsController,
+    private val sceneInteractor: SceneInteractor,
 ) {
     val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
         combine(
@@ -103,7 +105,13 @@ constructor(
     val shadeMode: StateFlow<ShadeMode> = shadeInteractor.shadeMode
 
     /** Notifies that some content in the shade was clicked. */
-    fun onContentClicked() = deviceEntryInteractor.attemptDeviceEntry()
+    fun onContentClicked() {
+        if (!isClickable.value) {
+            return
+        }
+
+        sceneInteractor.changeScene(Scenes.Lockscreen, "Shade empty content clicked")
+    }
 
     fun isMediaVisible(): Boolean {
         // TODO(b/296122467): handle updates to carousel visibility while scene is still visible
