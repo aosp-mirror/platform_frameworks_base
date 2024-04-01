@@ -45,7 +45,6 @@ import android.app.job.JobService;
 import android.app.job.JobSnapshot;
 import android.app.job.JobWorkItem;
 import android.app.job.UserVisibleJobSummary;
-import android.app.tare.EconomyManager;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.compat.annotation.ChangeId;
@@ -85,7 +84,6 @@ import android.os.UserHandle;
 import android.os.WorkSource;
 import android.os.storage.StorageManagerInternal;
 import android.provider.DeviceConfig;
-import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -130,13 +128,10 @@ import com.android.server.job.controllers.QuotaController;
 import com.android.server.job.controllers.RestrictingController;
 import com.android.server.job.controllers.StateController;
 import com.android.server.job.controllers.StorageController;
-import com.android.server.job.controllers.TareController;
 import com.android.server.job.controllers.TimeController;
 import com.android.server.job.restrictions.JobRestriction;
 import com.android.server.job.restrictions.ThermalStatusRestriction;
 import com.android.server.pm.UserManagerInternal;
-import com.android.server.tare.EconomyManagerInternal;
-import com.android.server.tare.JobSchedulerEconomicPolicy;
 import com.android.server.usage.AppStandbyInternal;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 import com.android.server.utils.quota.Categorizer;
@@ -310,8 +305,6 @@ public class JobSchedulerService extends com.android.server.SystemService
     private final PrefetchController mPrefetchController;
     /** Needed to get remaining quota time. */
     private final QuotaController mQuotaController;
-    /** Needed to get max execution time and expedited-job allowance. */
-    private final TareController mTareController;
     /**
      * List of restrictions.
      * Note: do not add to or remove from this list at runtime except in the constructor, because we
@@ -485,8 +478,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     // (ScheduledJobStateChanged and JobStatusDumpProto).
     public static final int EXEMPTED_INDEX = 6;
 
-    private class ConstantsObserver implements DeviceConfig.OnPropertiesChangedListener,
-            EconomyManagerInternal.TareStateChangeListener {
+    private class ConstantsObserver implements DeviceConfig.OnPropertiesChangedListener {
         @Nullable
         @GuardedBy("mLock")
         private DeviceConfig.Properties mLastPropertiesPulled;
@@ -516,16 +508,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         public void start() {
             DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     AppSchedulingModuleThread.getExecutor(), this);
-            final EconomyManagerInternal economyManagerInternal =
-                    LocalServices.getService(EconomyManagerInternal.class);
-            economyManagerInternal
-                    .registerTareStateChangeListener(this, JobSchedulerEconomicPolicy.POLICY_JOB);
-            // Load all the constants.
-            synchronized (mLock) {
-                mConstants.updateTareSettingsLocked(
-                        economyManagerInternal.getEnabledMode(
-                                JobSchedulerEconomicPolicy.POLICY_JOB));
-            }
             onPropertiesChanged(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_JOB_SCHEDULER));
         }
 
@@ -645,16 +627,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             mHandler.sendEmptyMessage(MSG_CHECK_JOB);
         }
 
-        @Override
-        public void onTareEnabledModeChanged(@EconomyManager.EnabledMode int enabledMode) {
-            if (mConstants.updateTareSettingsLocked(enabledMode)) {
-                for (int controller = 0; controller < mControllers.size(); controller++) {
-                    final StateController sc = mControllers.get(controller);
-                    sc.onConstantsUpdatedLocked();
-                }
-                onControllerStateChanged(null);
-            }
-        }
     }
 
     @VisibleForTesting
@@ -1051,12 +1023,6 @@ public class JobSchedulerService extends com.android.server.SystemService
          */
         public int MAX_NUM_PERSISTED_JOB_WORK_ITEMS = DEFAULT_MAX_NUM_PERSISTED_JOB_WORK_ITEMS;
 
-        /**
-         * If true, use TARE policy for job limiting. If false, use quotas.
-         */
-        public boolean USE_TARE_POLICY = EconomyManager.DEFAULT_ENABLE_POLICY_JOB_SCHEDULER
-                && EconomyManager.DEFAULT_ENABLE_TARE_MODE == EconomyManager.ENABLED_MODE_ON;
-
         public Constants() {
             copyTransportBatchThresholdDefaults();
         }
@@ -1300,16 +1266,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                     DEFAULT_RUNTIME_USE_DATA_ESTIMATES_FOR_LIMITS);
         }
 
-        private boolean updateTareSettingsLocked(@EconomyManager.EnabledMode int enabledMode) {
-            boolean changed = false;
-            final boolean useTare = enabledMode == EconomyManager.ENABLED_MODE_ON;
-            if (USE_TARE_POLICY != useTare) {
-                USE_TARE_POLICY = useTare;
-                changed = true;
-            }
-            return changed;
-        }
-
         void dump(IndentingPrintWriter pw) {
             pw.println("Settings:");
             pw.increaseIndent();
@@ -1382,8 +1338,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.print(KEY_PERSIST_IN_SPLIT_FILES, PERSIST_IN_SPLIT_FILES).println();
             pw.print(KEY_MAX_NUM_PERSISTED_JOB_WORK_ITEMS, MAX_NUM_PERSISTED_JOB_WORK_ITEMS)
                     .println();
-
-            pw.print(Settings.Global.ENABLE_TARE, USE_TARE_POLICY).println();
 
             pw.decreaseIndent();
         }
@@ -1869,9 +1823,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             // Return failure early if expedited job quota used up.
             if (jobStatus.isRequestedExpeditedJob()) {
-                if ((mConstants.USE_TARE_POLICY && !mTareController.canScheduleEJ(jobStatus))
-                        || (!mConstants.USE_TARE_POLICY
-                        && !mQuotaController.isWithinEJQuotaLocked(jobStatus))) {
+                if (!mQuotaController.isWithinEJQuotaLocked(jobStatus)) {
                     Counter.logIncrementWithUid(
                             "job_scheduler.value_cntr_w_uid_schedule_failure_ej_out_of_quota",
                             callingUid);
@@ -2726,9 +2678,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                 new QuotaController(this, backgroundJobsController, mConnectivityController);
         mControllers.add(mQuotaController);
         mControllers.add(new ComponentController(this));
-        mTareController =
-                new TareController(this, backgroundJobsController, mConnectivityController);
-        mControllers.add(mTareController);
 
         startControllerTrackingAsync();
 
@@ -4243,10 +4192,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                             job.getTimeoutBlamePackageName(), timeoutTag)
                             ? normalUpperLimitMs
                             : mConstants.RUNTIME_MIN_GUARANTEE_MS;
-            return Math.min(upperLimitMs,
-                    mConstants.USE_TARE_POLICY
-                            ? mTareController.getMaxJobExecutionTimeMsLocked(job)
-                            : mQuotaController.getMaxJobExecutionTimeMsLocked(job));
+            return Math.min(upperLimitMs, mQuotaController.getMaxJobExecutionTimeMsLocked(job));
         }
     }
 
@@ -5744,11 +5690,6 @@ public class JobSchedulerService extends com.android.server.SystemService
     @VisibleForTesting
     protected QuotaController getQuotaController() {
         return mQuotaController;
-    }
-
-    @VisibleForTesting
-    protected TareController getTareController() {
-        return mTareController;
     }
 
     @VisibleForTesting
