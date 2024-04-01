@@ -20,6 +20,7 @@ import static android.view.accessibility.Flags.FLAG_FORCE_INVERT_COLOR;
 import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY;
+import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
@@ -578,7 +579,8 @@ public class ViewRootImplTest {
      */
     @Test
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
-            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_visibility_defaultHigh() {
         View view = new View(sContext);
         attachViewToWindow(view);
@@ -612,7 +614,8 @@ public class ViewRootImplTest {
      */
     @Test
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
-            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_smallSize_defaultHigh() {
         View view = new View(sContext);
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
@@ -640,7 +643,8 @@ public class ViewRootImplTest {
      */
     @Test
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
-            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_normalSize_defaultHigh() {
         View view = new View(sContext);
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
@@ -777,7 +781,8 @@ public class ViewRootImplTest {
      */
     @Test
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
-            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRate_category() {
         View view = new View(sContext);
         attachViewToWindow(view);
@@ -817,7 +822,9 @@ public class ViewRootImplTest {
      */
     @Test
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
-            FLAG_VIEW_VELOCITY_API, FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
+            FLAG_VIEW_VELOCITY_API,
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_velocityToHigh() {
         View view = new View(sContext);
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
@@ -957,7 +964,8 @@ public class ViewRootImplTest {
      */
     @Test
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
-            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateOnly() {
         View view = new View(sContext);
         float frameRate = 20;
@@ -1000,7 +1008,8 @@ public class ViewRootImplTest {
      */
     @Test
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
-            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_infrequentLayer_defaultHigh() throws InterruptedException {
         final long delay = 200L;
 
@@ -1102,7 +1111,8 @@ public class ViewRootImplTest {
      */
     @Test
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
-            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_applyTextureViewHeuristic() throws InterruptedException {
         final long delay = 30L;
 
