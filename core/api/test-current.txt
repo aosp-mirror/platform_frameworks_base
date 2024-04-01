@@ -4126,7 +4126,6 @@ package android.window {
     method @NonNull public static String typeToString(int);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.window.BackNavigationInfo> CREATOR;
-    field public static final String KEY_TRIGGER_BACK = "TriggerBack";
     field public static final int TYPE_CALLBACK = 4; // 0x4
     field public static final int TYPE_CROSS_ACTIVITY = 2; // 0x2
     field public static final int TYPE_CROSS_TASK = 3; // 0x3

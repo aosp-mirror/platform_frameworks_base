@@ -828,6 +828,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
         // The next callback should be {@link #onBackAnimationFinished}.
         if (mCurrentTracker.getTriggerBack()) {
+            // notify gesture finished
+            mBackNavigationInfo.onBackGestureFinished(true);
             dispatchOrAnimateOnBackInvoked(mActiveCallback, mCurrentTracker);
         } else {
             tryDispatchOnBackCancelled(mActiveCallback);
