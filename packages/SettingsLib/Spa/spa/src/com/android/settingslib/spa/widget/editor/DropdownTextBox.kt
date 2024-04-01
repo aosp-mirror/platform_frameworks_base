@@ -44,6 +44,7 @@ internal fun DropdownTextBox(
     text: String,
     enabled: Boolean = true,
     errorMessage: String? = null,
+    singleLine: Boolean = true,
     content: @Composable DropdownTextBoxScope.() -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -70,7 +71,7 @@ internal fun DropdownTextBox(
             onValueChange = { },
             label = { Text(text = label) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            singleLine = true,
+            singleLine = singleLine,
             readOnly = true,
             enabled = enabled,
             isError = errorMessage != null,
