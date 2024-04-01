@@ -39,12 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"စကားဝှက်မသုံးခြင်း အနာဂတ်ဆီသို့ ရှေ့ဆက်ရာတွင် လျှို့ဝှက်ကီးများနှင့်အတူ စကားဝှက်များကို ဆက်လက်အသုံးပြုနိုင်ပါမည်။"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"သင်၏ <xliff:g id="CREATETYPES">%1$s</xliff:g> သိမ်းရန်နေရာ ရွေးခြင်း"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"သင့်အချက်အလက်သိမ်းပြီး နောက်တစ်ကြိမ်၌ ပိုမိုမြန်ဆန်စွာ လက်မှတ်ထိုးဝင်ရန် စကားဝှက်မန်နေဂျာကို ရွေးပါ"</string>
-    <!-- no translation found for choose_create_option_passkey_title (8762295821604276511) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (4481366993598649224) -->
-    <skip />
-    <!-- no translation found for choose_create_option_sign_in_title (7092914088455358079) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"<xliff:g id="APP_NAME">%1$s</xliff:g> သို့ လက်မှတ်ထိုးဝင်ရန် လျှို့ဝှက်ကီး ပြုလုပ်မလား။"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"<xliff:g id="APP_NAME">%1$s</xliff:g> သို့ လက်မှတ်ထိုးဝင်ရန် စကားဝှက်ကို သိမ်းမလား။"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် လက်မှတ်ထိုးဝင်ရန် အချက်အလက်ကို သိမ်းမလား။"</string>
     <string name="passkey" msgid="632353688396759522">"လျှို့ဝှက်ကီး"</string>
     <string name="password" msgid="6738570945182936667">"စကားဝှက်"</string>
     <string name="passkeys" msgid="5733880786866559847">"လျှို့ဝှက်ကီးများ"</string>
@@ -73,8 +70,7 @@
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"ပယ်ရန်"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"သိမ်းထားသောလျှို့ဝှက်ကီးကို <xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် သုံးမလား။"</string>
     <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် သိမ်းထားသောစကားဝှက် သုံးမလား။"</string>
-    <!-- no translation found for get_dialog_title_single_tap_for (2057945648748859483) -->
-    <skip />
+    <string name="get_dialog_title_single_tap_for" msgid="2057945648748859483">"<xliff:g id="APP_NAME">%1$s</xliff:g> သို့ <xliff:g id="USERNAME">%2$s</xliff:g> ဖြင့် လက်မှတ်ထိုးဝင်ရန် သင့်ဖန်သားပြင်လော့ခ်ကို သုံးနိုင်သည်"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် သင့်လက်မှတ်ထိုးဝင်မှုကို သုံးမလား။"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် လက်မှတ်ထိုးဝင်မှု ရွေးစရာကို ဖွင့်မလား။"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် သိမ်းထားသော လျှို့ဝှက်ကီး ရွေးပါ"</string>

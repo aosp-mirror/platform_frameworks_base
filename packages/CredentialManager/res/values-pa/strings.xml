@@ -39,12 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"ਹਾਲਾਂਕਿ, ਅਸੀਂ ਪਾਸਵਰਡ ਰਹਿਤ ਭਵਿੱਖ ਵੱਲ ਵਧ ਰਹੇ ਹਾਂ, ਪਰ ਪਾਸਕੀਆਂ ਦੇ ਨਾਲ ਪਾਸਵਰਡ ਹਾਲੇ ਵੀ ਉਪਲਬਧ ਹੋਣਗੇ।"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"ਚੁਣੋ ਕਿ ਆਪਣੀਆਂ <xliff:g id="CREATETYPES">%1$s</xliff:g> ਨੂੰ ਕਿੱਥੇ ਰੱਖਿਅਤ ਕਰਨਾ ਹੈ"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"ਆਪਣੀ ਜਾਣਕਾਰੀ ਨੂੰ ਰੱਖਿਅਤ ਕਰਨ ਅਤੇ ਅਗਲੀ ਵਾਰ ਤੇਜ਼ੀ ਨਾਲ ਸਾਈਨ-ਇਨ ਕਰਨ ਲਈ ਪਾਸਵਰਡ ਪ੍ਰਬੰਧਕ ਚੁਣੋ"</string>
-    <!-- no translation found for choose_create_option_passkey_title (8762295821604276511) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (4481366993598649224) -->
-    <skip />
-    <!-- no translation found for choose_create_option_sign_in_title (7092914088455358079) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"ਕੀ <xliff:g id="APP_NAME">%1$s</xliff:g> ਵਿੱਚ ਸਾਈਨ-ਇਨ ਕਰਨ ਲਈ ਪਾਸਕੀ ਬਣਾਉਣੀ ਹੈ?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"ਕੀ <xliff:g id="APP_NAME">%1$s</xliff:g> ਵਿੱਚ ਸਾਈਨ-ਇਨ ਕਰਨ ਲਈ ਪਾਸਵਰਡ ਰੱਖਿਅਤ ਕਰਨਾ ਹੈ?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"ਕੀ <xliff:g id="APP_NAME">%1$s</xliff:g> ਲਈ ਸਾਈਨ-ਇਨ ਜਾਣਕਾਰੀ ਰੱਖਿਅਤ ਕਰਨੀ ਹੈ?"</string>
     <string name="passkey" msgid="632353688396759522">"ਪਾਸਕੀ"</string>
     <string name="password" msgid="6738570945182936667">"ਪਾਸਵਰਡ"</string>
     <string name="passkeys" msgid="5733880786866559847">"ਪਾਸਕੀਆਂ"</string>
@@ -73,8 +70,7 @@
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"ਖਾਰਜ ਕਰੋ"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"ਕੀ <xliff:g id="APP_NAME">%1$s</xliff:g> ਲਈ ਆਪਣੀ ਰੱਖਿਅਤ ਕੀਤੀ ਪਾਸਕੀ ਦੀ ਵਰਤੋਂ ਕਰਨੀ ਹੈ?"</string>
     <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"ਕੀ <xliff:g id="APP_NAME">%1$s</xliff:g> ਲਈ ਤੁਹਾਡਾ ਰੱਖਿਅਤ ਕੀਤਾ ਪਾਸਵਰਡ ਵਰਤਣਾ ਹੈ?"</string>
-    <!-- no translation found for get_dialog_title_single_tap_for (2057945648748859483) -->
-    <skip />
+    <string name="get_dialog_title_single_tap_for" msgid="2057945648748859483">"<xliff:g id="USERNAME">%2$s</xliff:g> ਨਾਲ <xliff:g id="APP_NAME">%1$s</xliff:g> ਵਿੱਚ ਸਾਈਨ-ਇਨ ਕਰਨ ਲਈ ਆਪਣੇ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"ਕੀ <xliff:g id="APP_NAME">%1$s</xliff:g> ਲਈ ਆਪਣਾ ਸਾਈਨ-ਇਨ ਕਰਨ ਦਾ ਵਿਕਲਪ ਵਰਤਣਾ ਹੈ?"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"ਕੀ <xliff:g id="APP_NAME">%1$s</xliff:g> ਲਈ ਸਾਈਨ-ਇਨ ਵਿਕਲਪਾਂ ਨੂੰ ਅਣਲਾਕ ਕਰਨਾ ਹੈ?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਲਈ ਕੋਈ ਰੱਖਿਅਤ ਕੀਤੀ ਪਾਸਕੀ ਚੁਣੋ"</string>

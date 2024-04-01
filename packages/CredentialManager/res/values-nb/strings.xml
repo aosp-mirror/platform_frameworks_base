@@ -39,12 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Vi går mot en fremtid uten passord, men passord fortsetter å være tilgjengelige ved siden av passnøkler."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Velg hvor du vil lagre <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Velg et verktøy for passordlagring for å lagre informasjonen din og logge på raskere neste gang"</string>
-    <!-- no translation found for choose_create_option_passkey_title (8762295821604276511) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (4481366993598649224) -->
-    <skip />
-    <!-- no translation found for choose_create_option_sign_in_title (7092914088455358079) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Vil du opprette en passnøkkel for å logge på <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"Vil du lagre passordet for å logge på <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Vil du lagre påloggingsinformasjon for <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"passnøkkel"</string>
     <string name="password" msgid="6738570945182936667">"passord"</string>
     <string name="passkeys" msgid="5733880786866559847">"passnøkler"</string>
@@ -73,8 +70,7 @@
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Lukk"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Vil du bruke den lagrede tilgangsnøkkelen for <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Vil du bruke det lagrede passordet ditt for <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <!-- no translation found for get_dialog_title_single_tap_for (2057945648748859483) -->
-    <skip />
+    <string name="get_dialog_title_single_tap_for" msgid="2057945648748859483">"Bruk skjermlåsen til å logge på <xliff:g id="APP_NAME">%1$s</xliff:g> med <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Vil du bruke påloggingen for <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Vil du låse opp påloggingsalternativene for <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Velg en lagret passnøkkel for <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
