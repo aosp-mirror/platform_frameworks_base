@@ -57,6 +57,7 @@
             android:id="@+id/lockPatternView"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:focusable="false"
             androidprv:layout_constraintTop_toBottomOf="@id/pattern_top_guideline"
             androidprv:layout_constraintBottom_toBottomOf="parent"
             androidprv:layout_constraintLeft_toLeftOf="parent"
