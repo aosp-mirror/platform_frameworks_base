@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.tiles.dialog.bluetooth
+package com.android.systemui.bluetooth.qsdialog
 
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger

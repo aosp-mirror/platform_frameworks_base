@@ -30,7 +30,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.tiles.dialog.bluetooth
+package com.android.systemui.bluetooth.qsdialog
 
 import android.graphics.drawable.Drawable
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
