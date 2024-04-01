@@ -74,7 +74,7 @@ public class DataLabels implements AslMarshallable {
         maybeAppendDataUsages(doc, dataLabelsEle, mDataCollected, XmlUtils.OD_NAME_DATA_COLLECTED);
         maybeAppendDataUsages(doc, dataLabelsEle, mDataShared, XmlUtils.OD_NAME_DATA_SHARED);
 
-        return List.of(dataLabelsEle);
+        return XmlUtils.listOf(dataLabelsEle);
     }
 
     private void maybeAppendDataUsages(
