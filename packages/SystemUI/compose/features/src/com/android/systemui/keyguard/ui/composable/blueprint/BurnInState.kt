@@ -71,7 +71,6 @@ private fun rememberBurnInParameters(
 
     return remember(clock, topInset, topmostTop) {
         BurnInParameters(
-            clockControllerProvider = { clock },
             topInset = topInset,
             minViewY = topmostTop,
         )

@@ -20,4 +20,4 @@ import com.android.systemui.keyguard.data.repository.keyguardClockRepository
 import com.android.systemui.kosmos.Kosmos
 
 val Kosmos.keyguardClockInteractor by
-    Kosmos.Fixture { KeyguardClockInteractor(keyguardClockRepository = keyguardClockRepository) }
+    Kosmos.Fixture { KeyguardClockInteractor(keyguardClockRepository) }

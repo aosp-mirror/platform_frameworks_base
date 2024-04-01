@@ -17,7 +17,9 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.util.Log
 import com.android.keyguard.ClockEventController
+import com.android.keyguard.KeyguardClockSwitch
 import com.android.keyguard.KeyguardClockSwitch.ClockSize
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.KeyguardClockRepository
@@ -53,6 +55,15 @@ constructor(
     fun setClockSize(@ClockSize size: Int) {
         keyguardClockRepository.setClockSize(size)
     }
+
+    val renderedClockId: ClockId
+        get() {
+            return clock?.let { clock -> clock.config.id }
+                ?: run {
+                    Log.e(TAG, "No clock is available")
+                    KeyguardClockSwitch.MISSING_CLOCK_ID
+                }
+        }
 
     fun animateFoldToAod(foldFraction: Float) {
         clock?.let { clock ->

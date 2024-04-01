@@ -48,7 +48,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor;
 import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor;
-import com.android.systemui.plugins.clocks.ClockController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
@@ -468,13 +467,7 @@ public class StatusBarStateControllerImpl implements
     /** Returns the id of the currently rendering clock */
     public String getClockId() {
         if (MigrateClocksToBlueprint.isEnabled()) {
-            ClockController clock = mKeyguardClockInteractorLazy.get()
-                    .getCurrentClock().getValue();
-            if (clock == null) {
-                Log.e(TAG, "No clock is available");
-                return KeyguardClockSwitch.MISSING_CLOCK_ID;
-            }
-            return clock.getConfig().getId();
+            return mKeyguardClockInteractorLazy.get().getRenderedClockId();
         }
 
         if (mClockSwitchView == null) {
