@@ -46,6 +46,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -74,7 +75,9 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
 
     private UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
     private final HeadsUpManagerLogger mLogger = spy(new HeadsUpManagerLogger(logcatLogBuffer()));
-    private AvalancheController mAvalancheController = new AvalancheController();
+
+    @Mock private DumpManager dumpManager;
+    private AvalancheController mAvalancheController;
 
     @Mock private AccessibilityManagerWrapper mAccessibilityMgr;
 
@@ -131,6 +134,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     public void SysuiSetup() throws Exception {
         super.SysuiSetup();
         mSetFlagsRule.disableFlags(NotificationThrottleHun.FLAG_NAME);
+        mAvalancheController = new AvalancheController(dumpManager);
     }
 
     @Test

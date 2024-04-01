@@ -22,6 +22,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
@@ -47,11 +48,13 @@ import org.mockito.junit.MockitoRule
 @EnableFlags(NotificationThrottleHun.FLAG_NAME)
 class AvalancheControllerTest : SysuiTestCase() {
 
-    private val mAvalancheController = AvalancheController()
-
     // For creating mocks
     @get:Rule var rule: MockitoRule = MockitoJUnit.rule()
     @Mock private val runnableMock: Runnable? = null
+
+    // For creating AvalancheController
+    @Mock private lateinit var dumpManager: DumpManager
+    private lateinit var mAvalancheController: AvalancheController
 
     // For creating TestableHeadsUpManager
     @Mock private val mAccessibilityMgr: AccessibilityManagerWrapper? = null
@@ -60,7 +63,7 @@ class AvalancheControllerTest : SysuiTestCase() {
     private val mGlobalSettings = FakeGlobalSettings()
     private val mSystemClock = FakeSystemClock()
     private val mExecutor = FakeExecutor(mSystemClock)
-    private var testableHeadsUpManager: BaseHeadsUpManager? = null
+    private lateinit var testableHeadsUpManager: BaseHeadsUpManager
 
     @Before
     fun setUp() {
@@ -73,7 +76,10 @@ class AvalancheControllerTest : SysuiTestCase() {
             )
             .then { i: InvocationOnMock -> i.getArgument(0) }
 
-        // Initialize TestableHeadsUpManager here instead of at declaration, when mocks will be null
+        // Initialize AvalancheController and TestableHeadsUpManager during setUp instead of
+        // declaration, where mocks are null
+        mAvalancheController = AvalancheController(dumpManager)
+
         testableHeadsUpManager =
             TestableHeadsUpManager(
                 mContext,

@@ -17,9 +17,12 @@ package com.android.systemui.statusbar.policy
 
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
 import com.android.systemui.statusbar.policy.BaseHeadsUpManager.HeadsUpEntry
+import java.io.PrintWriter
 import javax.inject.Inject
 
 /*
@@ -27,7 +30,9 @@ import javax.inject.Inject
  * succession, by delaying visual listener side effects and removal handling from BaseHeadsUpManager
  */
 @SysUISingleton
-class AvalancheController @Inject constructor() {
+class AvalancheController @Inject constructor(
+    dumpManager: DumpManager,
+) : Dumpable {
 
     private val tag = "AvalancheController"
     private val debug = false
@@ -54,9 +59,11 @@ class AvalancheController @Inject constructor() {
     // For debugging only
     @VisibleForTesting var debugDropSet: MutableSet<HeadsUpEntry> = HashSet()
 
-    /**
-     * Run or delay Runnable for given HeadsUpEntry
-     */
+    init {
+        dumpManager.registerNormalDumpable(tag, /* module */ this)
+    }
+
+    /** Run or delay Runnable for given HeadsUpEntry */
     fun update(entry: HeadsUpEntry, runnable: Runnable, label: String) {
         if (!NotificationThrottleHun.isEnabled) {
             runnable.run()
@@ -67,9 +74,8 @@ class AvalancheController @Inject constructor() {
         if (debug) {
             debugRunnableLabelMap[runnable] = label
         }
-
         if (isShowing(entry)) {
-            log {"$fn => [update showing]" }
+            log { "$fn => [update showing]" }
             runnable.run()
         } else if (entry in nextMap) {
             log { "$fn => [update next]" }
@@ -164,9 +170,7 @@ class AvalancheController @Inject constructor() {
         }
     }
 
-    /**
-     * Return true if entry is waiting to show.
-     */
+    /** Return true if entry is waiting to show. */
     fun isWaiting(key: String): Boolean {
         if (!NotificationThrottleHun.isEnabled) {
             return false
@@ -179,9 +183,7 @@ class AvalancheController @Inject constructor() {
         return false
     }
 
-    /**
-     * Return list of keys for huns waiting
-     */
+    /** Return list of keys for huns waiting */
     fun getWaitingKeys(): MutableList<String> {
         if (!NotificationThrottleHun.isEnabled) {
             return mutableListOf()
@@ -254,12 +256,15 @@ class AvalancheController @Inject constructor() {
         }
     }
 
-    // TODO(b/315362456) expose as dumpable for bugreports
+    private fun getStateStr(): String {
+        return "SHOWING: ${getKey(headsUpEntryShowing)}" +
+            "\tNEXT LIST: $nextListStr\tMAP: $nextMapStr" +
+            "\tDROP: $dropSetStr"
+    }
+
     private fun logState(reason: String) {
-        log { "state $reason" }
-        log { "showing: " + getKey(headsUpEntryShowing) }
-        log { "next list: $nextListStr map: $nextMapStr" }
-        log { "drop: $dropSetStr" }
+        log { "REASON $reason" }
+        log { getStateStr() }
     }
 
     private val dropSetStr: String
@@ -297,5 +302,9 @@ class AvalancheController @Inject constructor() {
             return entry.toString()
         }
         return entry.mEntry!!.key
+    }
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
+        pw.println("AvalancheController: ${getStateStr()}")
     }
 }
