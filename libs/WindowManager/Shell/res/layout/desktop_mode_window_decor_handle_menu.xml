@@ -52,7 +52,7 @@
             android:textStyle="normal"
             android:layout_weight="1"/>
 
-        <ImageButton
+        <com.android.wm.shell.windowdecor.HandleMenuImageButton
             android:id="@+id/collapse_menu_button"
             android:layout_width="32dp"
             android:layout_height="32dp"

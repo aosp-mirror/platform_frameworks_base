@@ -19,6 +19,8 @@ package com.android.wm.shell.windowdecor;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.windowingModeToString;
+import static android.view.MotionEvent.ACTION_DOWN;
+import static android.view.MotionEvent.ACTION_UP;
 
 import static com.android.launcher3.icons.BaseIconFactory.MODE_DEFAULT;
 
@@ -713,24 +715,45 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     /**
-     * Check a passed MotionEvent if a click has occurred on any button on this caption
+     * Check a passed MotionEvent if it has occurred on any button related to this decor.
      * Note this should only be called when a regular onClick is not possible
      * (i.e. the button was clicked through status bar layer)
      *
      * @param ev the MotionEvent to compare
      */
-    void checkClickEvent(MotionEvent ev) {
+    void checkTouchEvent(MotionEvent ev) {
         if (mResult.mRootView == null) return;
-        if (!isHandleMenuActive()) {
-            // Click if point in caption handle view
-            final View caption = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
-            final View handle = caption.findViewById(R.id.caption_handle);
-            if (checkTouchEventInFocusedCaptionHandle(ev)) {
-                mOnCaptionButtonClickListener.onClick(handle);
-            }
-        } else {
-            mHandleMenu.checkClickEvent(ev);
+        final View caption = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
+        final View handle = caption.findViewById(R.id.caption_handle);
+        final boolean inHandle = !isHandleMenuActive()
+                && checkTouchEventInFocusedCaptionHandle(ev);
+        final int action = ev.getActionMasked();
+        if (action == ACTION_UP && inHandle) {
+            handle.performClick();
+        }
+        if (isHandleMenuActive()) {
+            mHandleMenu.checkMotionEvent(ev);
             closeHandleMenuIfNeeded(ev);
+        }
+    }
+
+    /**
+     * Updates hover and pressed status of views in this decoration. Should only be called
+     * when status cannot be updated normally (i.e. the button is hovered through status
+     * bar layer).
+     * @param ev the MotionEvent to compare against.
+     */
+    void updateHoverAndPressStatus(MotionEvent ev) {
+        if (mResult.mRootView == null) return;
+        final View handle = mResult.mRootView.findViewById(R.id.caption_handle);
+        final boolean inHandle = !isHandleMenuActive()
+                && checkTouchEventInFocusedCaptionHandle(ev);
+        final int action = ev.getActionMasked();
+        // The comparison against ACTION_UP is needed for the cancel drag to desktop case.
+        handle.setHovered(inHandle && action != ACTION_UP);
+        handle.setPressed(inHandle && action == ACTION_DOWN);
+        if (isHandleMenuActive()) {
+            mHandleMenu.checkMotionEvent(ev);
         }
     }
 
