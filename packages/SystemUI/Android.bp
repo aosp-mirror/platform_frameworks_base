@@ -197,12 +197,29 @@ filegroup {
 }
 
 filegroup {
+    name: "kosmos-src",
+    srcs: ["tests/utils/kosmos/src/**/*.kt"],
+    path: "tests/utils/kosmos",
+}
+
+java_library {
+    name: "kosmos",
+    host_supported: true,
+    srcs: [":kosmos-src"],
+    static_libs: [
+        "kotlin-reflect",
+        "kotlin-stdlib",
+    ],
+}
+
+filegroup {
     name: "SystemUI-tests-utils",
     srcs: [
         "tests/utils/src/**/*.java",
         "tests/utils/src/**/*.kt",
+        ":kosmos-src",
     ],
-    path: "tests/utils/src",
+    path: "tests/utils",
 }
 
 filegroup {
@@ -334,6 +351,7 @@ android_library {
         "kotlin-test",
         "SystemUICustomizationTestUtils",
         "androidx.compose.runtime_runtime",
+        "kosmos",
     ],
     libs: [
         "android.test.runner",
@@ -416,6 +434,7 @@ android_robolectric_test {
         "inline-mockito-robolectric-prebuilt",
         "platform-parametric-runner-lib",
         "SystemUICustomizationTestUtils",
+        "kosmos",
     ],
     libs: [
         "android.test.runner",
@@ -449,6 +468,7 @@ android_ravenwood_test {
         "androidx.test.uiautomator_uiautomator",
         "androidx.core_core-animation-testing",
         "androidx.test.ext.junit",
+        "kosmos",
     ],
     libs: [
         "android.test.runner",

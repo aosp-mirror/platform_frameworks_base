@@ -62,10 +62,6 @@
     <color name="desktop_mode_caption_handle_bar_dark">#1C1C17</color>
     <color name="desktop_mode_resize_veil_light">#EFF1F2</color>
     <color name="desktop_mode_resize_veil_dark">#1C1C17</color>
-    <color name="desktop_mode_maximize_menu_button">#DDDACD</color>
-    <color name="desktop_mode_maximize_menu_button_outline">#797869</color>
-    <color name="desktop_mode_maximize_menu_button_outline_on_hover">#606219</color>
-    <color name="desktop_mode_maximize_menu_button_on_hover">#E7E790</color>
     <color name="desktop_mode_maximize_menu_progress_light">#33000000</color>
     <color name="desktop_mode_maximize_menu_progress_dark">#33FFFFFF</color>
     <color name="desktop_mode_caption_button_on_hover_light">#11000000</color>

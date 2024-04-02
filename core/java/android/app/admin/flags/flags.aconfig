@@ -2,6 +2,7 @@
 # proto-message: flag_declarations
 
 package: "android.app.admin.flags"
+container: "system"
 
 flag {
   name: "policy_engine_migration_v2_enabled"
@@ -39,6 +40,14 @@ flag {
   namespace: "enterprise"
   description: "Allow holders of INTERACT_ACROSS_USERS_FULL to suspend apps in different users."
   bug: "263464464"
+}
+
+flag {
+  name: "cross_user_suspension_enabled_ro"
+  namespace: "enterprise"
+  description: "Allow holders of INTERACT_ACROSS_USERS_FULL to suspend apps in different users."
+  bug: "263464464"
+  is_fixed_read_only: true
 }
 
 flag {

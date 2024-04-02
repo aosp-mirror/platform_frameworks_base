@@ -1,4 +1,5 @@
 package: "android.content.pm"
+container: "system"
 
 flag {
     name: "quarantined_enabled"

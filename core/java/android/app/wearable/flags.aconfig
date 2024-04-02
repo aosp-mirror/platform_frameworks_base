@@ -1,4 +1,5 @@
 package: "android.app.wearable"
+container: "system"
 
 flag {
     name: "enable_unsupported_operation_status_code"

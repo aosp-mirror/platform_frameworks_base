@@ -1,4 +1,5 @@
 package: "android.service.chooser"
+container: "system"
 
 flag {
   name: "chooser_album_text"

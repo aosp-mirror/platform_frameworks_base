@@ -120,25 +120,15 @@ sealed class TransitionInteractor(
      * Returns true if a transition was started, false otherwise.
      */
     suspend fun maybeStartTransitionToOccludedOrInsecureCamera(): Boolean {
+        // The refactor is required for the occlusion interactor to work.
+        KeyguardWmStateRefactor.isUnexpectedlyInLegacyMode()
+
+        // Check if we should start a transition from the power gesture.
         if (keyguardOcclusionInteractor.shouldTransitionFromPowerButtonGesture()) {
-            if (transitionInteractor.getCurrentState() == KeyguardState.GONE) {
-                // If the current state is GONE when the launch gesture is triggered, it means we
-                // were in transition from GONE -> DOZING/AOD due to the first power button tap. The
-                // second tap indicates that the user's intent was actually to launch the unlocked
-                // (insecure) camera, so we should transition back to GONE.
-                startTransitionTo(
-                    KeyguardState.GONE,
-                    ownerReason = "Power button gesture while GONE"
-                )
-            } else if (keyguardOcclusionInteractor.occludingActivityWillDismissKeyguard.value) {
-                // The double tap gesture occurred while not GONE (AOD/LOCKSCREEN/etc.), but the
-                // keyguard is dismissable. The activity launch will dismiss the keyguard, so we
-                // should transition to GONE.
-                startTransitionTo(
-                    KeyguardState.GONE,
-                    ownerReason = "Power button gesture on dismissable keyguard"
-                )
-            } else {
+            // See if we handled the insecure power gesture. If not, then we'll be launching the
+            // secure camera. Once KeyguardWmStateRefactor is fully enabled, we can clean up this
+            // code path by pulling maybeHandleInsecurePowerGesture() into this conditional.
+            if (!maybeHandleInsecurePowerGesture()) {
                 // Otherwise, the double tap gesture occurred while not GONE and not dismissable,
                 // which means we will launch the secure camera, which OCCLUDES the keyguard.
                 startTransitionTo(
@@ -162,6 +152,43 @@ sealed class TransitionInteractor(
             // No transition needed, let the interactor figure out where to go.
             return false
         }
+    }
+
+    /**
+     * Transition to [KeyguardState.GONE] for the insecure power button launch gesture, if the
+     * conditions to do so are met.
+     *
+     * Called from [FromAodTransitionInteractor] if [KeyguardWmStateRefactor] is not enabled, or
+     * [maybeStartTransitionToOccludedOrInsecureCamera] if it's enabled.
+     */
+    @Deprecated("Will be merged into maybeStartTransitionToOccludedOrInsecureCamera")
+    suspend fun maybeHandleInsecurePowerGesture(): Boolean {
+        if (keyguardOcclusionInteractor.shouldTransitionFromPowerButtonGesture()) {
+            if (transitionInteractor.getCurrentState() == KeyguardState.GONE) {
+                // If the current state is GONE when the launch gesture is triggered, it means we
+                // were in transition from GONE -> DOZING/AOD due to the first power button tap. The
+                // second tap indicates that the user's intent was actually to launch the unlocked
+                // (insecure) camera, so we should transition back to GONE.
+                startTransitionTo(
+                    KeyguardState.GONE,
+                    ownerReason = "Power button gesture while GONE"
+                )
+
+                return true
+            } else if (keyguardOcclusionInteractor.occludingActivityWillDismissKeyguard.value) {
+                // The double tap gesture occurred while not GONE (AOD/LOCKSCREEN/etc.), but the
+                // keyguard is dismissable. The activity launch will dismiss the keyguard, so we
+                // should transition to GONE.
+                startTransitionTo(
+                    KeyguardState.GONE,
+                    ownerReason = "Power button gesture on dismissable keyguard"
+                )
+
+                return true
+            }
+        }
+
+        return false
     }
 
     /**

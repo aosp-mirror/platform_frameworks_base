@@ -21,6 +21,7 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_GTE;
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY;
+import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY;
 import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
 import static android.view.flags.Flags.toolkitFrameRateBySizeReadOnly;
@@ -35,6 +36,8 @@ import static org.junit.Assert.assertTrue;
 import android.app.Activity;
 import android.os.SystemClock;
 import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.DisplayMetrics;
 
 import androidx.test.annotation.UiThreadTest;
@@ -60,6 +63,9 @@ public class ViewFrameRateTest {
     public ActivityTestRule<ViewCaptureTestActivity> mActivityRule = new ActivityTestRule<>(
             ViewCaptureTestActivity.class);
 
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+
     private Activity mActivity;
     private View mMovingView;
     private ViewRootImpl mViewRoot;
@@ -80,7 +86,8 @@ public class ViewFrameRateTest {
 
     @UiThreadTest
     @Test
-    @RequiresFlagsEnabled(FLAG_VIEW_VELOCITY_API)
+    @RequiresFlagsEnabled({FLAG_VIEW_VELOCITY_API,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void frameRateChangesWhenContentMoves() {
         mMovingView.offsetLeftAndRight(100);
         float frameRate = mViewRoot.getPreferredFrameRate();
@@ -121,7 +128,8 @@ public class ViewFrameRateTest {
 
     @Test
     @RequiresFlagsEnabled({FLAG_VIEW_VELOCITY_API,
-            FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void lowVelocity60() throws Throwable {
         mActivityRule.runOnUiThread(() -> {
             ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
@@ -140,7 +148,8 @@ public class ViewFrameRateTest {
 
     @Test
     @RequiresFlagsEnabled({FLAG_VIEW_VELOCITY_API,
-            FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void highVelocity140() throws Throwable {
         mActivityRule.runOnUiThread(() -> {
             ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
@@ -172,7 +181,8 @@ public class ViewFrameRateTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void noVelocityUsesCategorySmall() throws Throwable {
         final CountDownLatch drawLatch1 = new CountDownLatch(1);
         mActivityRule.runOnUiThread(() -> {
@@ -206,7 +216,8 @@ public class ViewFrameRateTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void noVelocityUsesCategoryNarrowWidth() throws Throwable {
         final CountDownLatch drawLatch1 = new CountDownLatch(1);
         mActivityRule.runOnUiThread(() -> {
@@ -239,7 +250,8 @@ public class ViewFrameRateTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void noVelocityUsesCategoryNarrowHeight() throws Throwable {
         final CountDownLatch drawLatch1 = new CountDownLatch(1);
         mActivityRule.runOnUiThread(() -> {
@@ -272,7 +284,8 @@ public class ViewFrameRateTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void noVelocityUsesCategoryLargeWidth() throws Throwable {
         final CountDownLatch drawLatch1 = new CountDownLatch(1);
         mActivityRule.runOnUiThread(() -> {
@@ -305,7 +318,8 @@ public class ViewFrameRateTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void noVelocityUsesCategoryLargeHeight() throws Throwable {
         final CountDownLatch drawLatch1 = new CountDownLatch(1);
         mActivityRule.runOnUiThread(() -> {
@@ -338,7 +352,8 @@ public class ViewFrameRateTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void defaultNormal() throws Throwable {
         mActivityRule.runOnUiThread(() -> {
             View parent = (View) mMovingView.getParent();

@@ -363,7 +363,12 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Padrão"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Médio"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Alto"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Dispositivos auditivos"</string>
+    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
+    <skip />
+    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
+    <skip />
+    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
     <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Desbloquear o microfone do dispositivo?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Desbloquear a câmara do dispositivo?"</string>
@@ -590,9 +595,9 @@
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Vibrar"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Desativar som"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"Transmitir"</string>
-    <string name="stream_notification_unavailable" msgid="4313854556205836435">"Indisponível porque o toque está desat."</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"Indisponível com toque desativado"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Indisponível porque Não incomodar está ativado"</string>
-    <string name="stream_media_unavailable" msgid="6823020894438959853">"Indisponível porque Não incomodar está ativado"</string>
+    <string name="stream_media_unavailable" msgid="6823020894438959853">"Indisponível com Não incomodar ativado"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Toque para reativar o som."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Toque para ativar a vibração. Os serviços de acessibilidade podem ser silenciados."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Toque para desativar o som. Os serviços de acessibilidade podem ser silenciados."</string>
@@ -615,7 +620,7 @@
     <string name="volume_panel_hint_mute" msgid="6962563028495243738">"desativar o som de %s"</string>
     <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"reativar o som de %s"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"A ouvir <xliff:g id="LABEL">%s</xliff:g> em"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"O áudio será ouv. em"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Áudio ouvido em:"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Sintonizador da interface do sistema"</string>
     <string name="status_bar" msgid="4357390266055077437">"Barra de estado"</string>
     <string name="demo_mode" msgid="263484519766901593">"Modo de demonstração da IU do sistema"</string>

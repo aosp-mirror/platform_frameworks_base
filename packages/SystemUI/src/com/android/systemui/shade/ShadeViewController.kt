@@ -54,6 +54,7 @@ interface ShadeViewController {
     fun setQsScrimEnabled(qsScrimEnabled: Boolean)
 
     /** Sets the top spacing for the ambient indicator. */
+    @Deprecated("Does nothing when scene container is enabled.")
     fun setAmbientIndicationTop(ambientIndicationTop: Int, ambientTextVisible: Boolean)
 
     /** Updates notification panel-specific flags on [SysUiState]. */
@@ -71,6 +72,7 @@ interface ShadeViewController {
      */
     fun handleExternalTouch(event: MotionEvent): Boolean
 
+    /** Sends an external (e.g. Status Bar) intercept touch event to the Shade touch handler. */
     fun handleExternalInterceptTouch(event: MotionEvent): Boolean
 
     /**

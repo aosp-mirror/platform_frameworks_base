@@ -828,7 +828,7 @@
     <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Permite aplicației să actualizeze starea verificării cheilor E2EE deținute de alte aplicații"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Să seteze reguli pentru parolă"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Stabilește lungimea și tipul de caractere permise pentru parolele și codurile PIN de blocare a ecranului."</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"Să monitorizeze încercările de deblocare a ecranului"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"să monitorizeze încercările de deblocare a ecranului"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Monitorizează numărul de parole incorecte introduse la deblocarea ecranului și blochează tableta sau șterge datele acesteia dacă sunt introduse prea multe parole incorecte."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Monitorizează numărul de parole incorecte introduse la deblocarea ecranului și blochează dispozitivul Android TV sau șterge toate datele de pe acesta dacă se introduc prea multe parole incorecte."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Monitorizează numărul de parole incorecte introduse la deblocarea ecranului și blochează sistemul de infotainment sau șterge toate datele acestuia dacă sunt introduse prea multe parole incorecte."</string>
@@ -841,7 +841,7 @@
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Modifică blocarea ecranului."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Să blocheze ecranul"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Stabilește cum și când se blochează ecranul."</string>
-    <string name="policylab_wipeData" msgid="1359485247727537311">"Să șteargă toate datele"</string>
+    <string name="policylab_wipeData" msgid="1359485247727537311">"să șteargă toate datele"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Șterge datele de pe tabletă fără avertisment, efectuând resetarea configurării din fabrică."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Șterge datele de pe dispozitivul Android TV fără avertisment, efectuând o revenire la setările din fabrică."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Șterge datele din sistemul de infotainment fără avertisment, prin revenirea la setările din fabrică."</string>
@@ -1930,12 +1930,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Gestionat de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Activată"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Dezactivată"</string>
-    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Orice calendar"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> dezactivează anumite sunete"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"A apărut o problemă internă pe dispozitiv, iar acesta poate fi instabil până la revenirea la setările din fabrică."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"A apărut o problemă internă pe dispozitiv. Pentru detalii, contactează producătorul."</string>
@@ -2398,6 +2395,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Comun"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
+    <skip />
     <string name="satellite_notification_title" msgid="4026338973463121526">"S-a conectat automat la satelit"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Poți să trimiți și să primești mesaje fără o rețea mobilă sau Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Deschide Mesaje"</string>

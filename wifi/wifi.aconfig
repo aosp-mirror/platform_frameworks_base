@@ -1,4 +1,5 @@
 package: "android.net.wifi.flags"
+container: "system"
 
 flag {
     name: "get_device_cross_akm_roaming_support"

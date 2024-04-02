@@ -1,4 +1,5 @@
 package: "android.view.flags"
+container: "system"
 
 flag {
     name: "view_velocity_api"
@@ -100,6 +101,14 @@ flag {
     name: "toolkit_frame_rate_function_enabling_read_only"
     namespace: "toolkit"
     description: "Feature flag to enable the functionality of the dVRR feature"
+    bug: "239979904"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "toolkit_frame_rate_view_enabling_read_only"
+    namespace: "toolkit"
+    description: "Feature flag to enable the functionality on views for the dVRR feature"
     bug: "239979904"
     is_fixed_read_only: true
 }

@@ -418,25 +418,6 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     private void startRestore() {
         sendStartRestore(mAcceptSet.size());
 
-        // If we're starting a full-system restore, set up to begin widget ID remapping
-        if (mIsSystemRestore) {
-            AppWidgetBackupBridge.systemRestoreStarting(mUserId);
-            Bundle monitoringExtras = addRestoreOperationTypeToEvent(/* extras= */ null);
-            mBackupManagerMonitorEventSender.monitorEvent(
-                    BackupManagerMonitor.LOG_EVENT_ID_START_SYSTEM_RESTORE,
-                    null,
-                    BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                    monitoringExtras);
-        } else {
-            // We are either performing RestoreAtInstall or Bmgr.
-            Bundle monitoringExtras = addRestoreOperationTypeToEvent(/* extras= */ null);
-            mBackupManagerMonitorEventSender.monitorEvent(
-                    BackupManagerMonitor.LOG_EVENT_ID_START_RESTORE_AT_INSTALL,
-                    null,
-                    BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                    monitoringExtras);
-        }
-
         try {
             String transportDirName =
                     mTransportManager.getTransportDirName(
@@ -457,6 +438,34 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             // for one.
             if (mBackupManagerMonitorEventSender.getMonitor() == null) {
                 mBackupManagerMonitorEventSender.setMonitor(transport.getBackupManagerMonitor());
+            }
+
+            if (Flags.enableIncreasedBmmLoggingForRestoreAtInstall()) {
+                for (PackageInfo info : mAcceptSet) {
+                    mBackupManagerMonitorEventSender.monitorEvent(
+                            BackupManagerMonitor.LOG_EVENT_ID_PACKAGE_ACCEPTED_FOR_RESTORE, info,
+                            BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                            addRestoreOperationTypeToEvent(/* extras= */ null));
+                }
+            }
+
+            // If we're starting a full-system restore, set up to begin widget ID remapping
+            if (mIsSystemRestore) {
+                AppWidgetBackupBridge.systemRestoreStarting(mUserId);
+                Bundle monitoringExtras = addRestoreOperationTypeToEvent(/* extras= */ null);
+                mBackupManagerMonitorEventSender.monitorEvent(
+                        BackupManagerMonitor.LOG_EVENT_ID_START_SYSTEM_RESTORE,
+                        null,
+                        BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                        monitoringExtras);
+            } else {
+                // We are either performing RestoreAtInstall or Bmgr.
+                Bundle monitoringExtras = addRestoreOperationTypeToEvent(/* extras= */ null);
+                mBackupManagerMonitorEventSender.monitorEvent(
+                        BackupManagerMonitor.LOG_EVENT_ID_START_RESTORE_AT_INSTALL,
+                        null,
+                        BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                        monitoringExtras);
             }
 
             mStatus = transport.startRestore(mToken, packages);
@@ -638,7 +647,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 Bundle monitoringExtras = addRestoreOperationTypeToEvent(/* extras= */ null);
                 mBackupManagerMonitorEventSender.monitorEvent(
                         BackupManagerMonitor.LOG_EVENT_ID_PACKAGE_NOT_PRESENT,
-                        mCurrentPackage,
+                        createPackageInfoForBMMLogging(pkgName),
                         BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
                         monitoringExtras);
                 EventLog.writeEvent(
@@ -739,7 +748,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             Bundle monitoringExtras = addRestoreOperationTypeToEvent(/* extras= */ null);
             mBackupManagerMonitorEventSender.monitorEvent(
                     BackupManagerMonitor.LOG_EVENT_ID_NO_NEXT_RESTORE_TARGET,
-                    mCurrentPackage,
+                    null,
                     BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
                     monitoringExtras);
             EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
@@ -1804,4 +1813,10 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 monitoringExtrasDenylist);
     }
 
+    private PackageInfo createPackageInfoForBMMLogging(String packageName) {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = packageName;
+
+        return packageInfo;
+    }
 }

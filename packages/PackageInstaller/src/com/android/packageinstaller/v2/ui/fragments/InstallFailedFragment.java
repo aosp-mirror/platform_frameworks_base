@@ -38,7 +38,7 @@ import com.android.packageinstaller.v2.ui.InstallActionListener;
  */
 public class InstallFailedFragment extends DialogFragment {
 
-    private static final String TAG = InstallFailedFragment.class.getSimpleName();
+    private static final String LOG_TAG = InstallFailedFragment.class.getSimpleName();
     private final InstallFailed mDialogData;
     private InstallActionListener mInstallActionListener;
 
@@ -55,6 +55,7 @@ public class InstallFailedFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        Log.i(LOG_TAG, "Creating " + LOG_TAG + "\n" + mDialogData);
         View dialogView = getLayoutInflater().inflate(R.layout.install_content_view, null);
         AlertDialog dialog = new AlertDialog.Builder(requireContext())
             .setTitle(mDialogData.getAppLabel())
@@ -75,7 +76,7 @@ public class InstallFailedFragment extends DialogFragment {
      * @param statusCode The status code from the package installer.
      */
     private void setExplanationFromErrorCode(int statusCode, View dialogView) {
-        Log.d(TAG, "Installation status code: " + statusCode);
+        Log.i(LOG_TAG, "Installation status code: " + statusCode);
 
         View viewToEnable;
         switch (statusCode) {

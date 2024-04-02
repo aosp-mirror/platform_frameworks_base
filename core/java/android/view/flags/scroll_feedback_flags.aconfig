@@ -1,4 +1,5 @@
 package: "android.view.flags"
+container: "system"
 
 flag {
     namespace: "toolkit"

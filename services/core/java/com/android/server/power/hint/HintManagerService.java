@@ -456,6 +456,9 @@ public final class HintManagerService extends SystemService {
                         totalDurationNs / durationNsList.length);
                 int th90DurationUs = (int) TimeUnit.NANOSECONDS.toMicros(
                         durationNsList[(int) (durationNsList.length * 0.9)]);
+                FrameworkStatsLog.write(FrameworkStatsLog.ADPF_HINT_SESSION_TID_CLEANUP, uid,
+                        totalDurationUs, maxDurationUs, totalTidCnt, totalInvalidTidCnt,
+                        maxInvalidTidCnt, sessionCnt, isForeground);
                 Slog.d(TAG,
                         "Invalid tid found for UID" + uid + " in " + totalDurationUs + "us:\n\t"
                                 + "count("

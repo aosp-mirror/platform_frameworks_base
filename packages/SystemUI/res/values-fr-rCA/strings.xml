@@ -365,6 +365,12 @@
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Élevé"</string>
     <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
     <skip />
+    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
+    <skip />
+    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
+    <skip />
+    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Débloquer le microphone de l\'appareil?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Débloquer l\'appareil photo de l\'appareil?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Débloquer l\'appareil photo et le microphone?"</string>

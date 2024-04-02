@@ -827,7 +827,7 @@
     <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"यसले एपलाई अन्य एपको स्वामित्वमा रहेका E2EE कन्ट्याक्ट कीहरूको प्रमाणीकरणको स्थिति अपडेट गर्न दिन्छ"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"पासवर्ड नियमहरू मिलाउनुहोस्"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"स्क्रिन लक पासवर्ड र PIN हरूमा अनुमति दिइएको लम्बाइ र वर्णहरूको नियन्त्रण गर्नुहोस्।"</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"मनिटरको स्क्रिन अनलक गर्ने प्रयासहरू"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"स्क्रिन अनलक गर्न गरिएको प्रयासको अनुगमन गर्ने"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप भएको संख्या निरीक्षण गर्नुहोस् र यदि निकै धेरै गलत पासवर्डहरू टाइप भएका छन भने ट्याब्लेट लक गर्नुहोस् वा ट्याब्लेटका सबै डेटा मेट्नुहोस्।"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप गरेको सङ्ख्या निरीक्षण गर्नुहोस्, र धेरै पटक गलत पासवर्डहरू टाइप गरिएको खण्डमा आफ्नो Android टिभी यन्त्र लक गर्नुहोस् वा डिभाइसमा भएको सम्पूर्ण डेटा मेटाउनुहोस्।"</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"स्क्रिन अनलक गर्दा कति पटक गलत पासवर्ड टाइप गरिन्छ भन्ने कुरा निगरानी गरियोस् र अत्यन्तै धेरै पटक गलत पासवर्ड टाइप गरिएका खण्डमा यो इन्फोटेनमेन्ट प्रणाली लक गरियोस् वा यस इन्फोटेनमेन्ट प्रणालीका सबै डेटा मेटाइयोस्।"</string>
@@ -1929,12 +1929,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> ले व्यवस्थापन गरेको"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"अन छ"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"अफ छ"</string>
-    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"कुनै पनि पात्रो"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ले केही ध्वनिहरू म्युट गर्दै छ"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"तपाईंको यन्त्रसँग आन्तरिक समस्या छ, र तपाईंले फ्याक्ट्री डाटा रिसेट नगर्दासम्म यो अस्थिर रहन्छ।"</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"तपाईंको यन्त्रसँग आन्तरिक समस्या छ। विवरणहरूको लागि आफ्नो निर्मातासँग सम्पर्क गर्नुहोस्।"</string>
@@ -2397,6 +2394,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"परीक्षण"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"सामुदायिक"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
+    <skip />
     <string name="satellite_notification_title" msgid="4026338973463121526">"स्याटलाइटमा स्वतः कनेक्ट गरियो"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"तपाईं मोबाइल वा Wi-Fi नेटवर्कविनै म्यासेज पठाउन र प्राप्त गर्न सक्नुहुन्छ"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages खोल्नुहोस्"</string>

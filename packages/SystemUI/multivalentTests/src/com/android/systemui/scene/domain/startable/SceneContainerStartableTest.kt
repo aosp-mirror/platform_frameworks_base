@@ -37,6 +37,7 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.falsingManager
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
@@ -133,6 +134,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 centralSurfaces = centralSurfaces,
                 headsUpInteractor = kosmos.headsUpNotificationInteractor,
                 occlusionInteractor = kosmos.sceneContainerOcclusionInteractor,
+                faceUnlockInteractor = kosmos.deviceEntryFaceAuthInteractor,
             )
     }
 
@@ -472,7 +474,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
-    fun doesNotSwitchToGoneWhenDeviceStartsToWakeUp_authMethodSecure() =
+    fun doesNotSwitchToGone_whenDeviceStartsToWakeUp_authMethodSecure() =
         testScope.runTest {
             val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
             prepareState(
@@ -484,6 +486,34 @@ class SceneContainerStartableTest : SysuiTestCase() {
             powerInteractor.setAwakeForTest()
 
             assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+        }
+
+    @Test
+    fun doesNotSwitchToGone_whenDeviceStartsToWakeUp_ifAlreadyTransitioningToLockscreen() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            val transitioningTo by collectLastValue(sceneInteractor.transitioningTo)
+            val transitionStateFlow =
+                prepareState(
+                    isDeviceUnlocked = true,
+                    initialSceneKey = Scenes.Gone,
+                    authenticationMethod = AuthenticationMethodModel.Pin,
+                )
+            transitionStateFlow.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Gone,
+                    toScene = Scenes.Lockscreen,
+                    progress = flowOf(0.1f),
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                )
+            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
+            assertThat(transitioningTo).isEqualTo(Scenes.Lockscreen)
+            underTest.start()
+            powerInteractor.setAwakeForTest()
+
+            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
+            assertThat(transitioningTo).isEqualTo(Scenes.Lockscreen)
         }
 
     @Test
@@ -1049,6 +1079,28 @@ class SceneContainerStartableTest : SysuiTestCase() {
             kosmos.falsingManager.sendFalsingBelief()
 
             assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+        }
+
+    @Test
+    fun handleBouncerOverscroll() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val transitionStateFlow = prepareState()
+            underTest.start()
+            emulateSceneTransition(transitionStateFlow, toScene = Scenes.Bouncer)
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
+
+            transitionStateFlow.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Bouncer,
+                    toScene = Scenes.Lockscreen,
+                    progress = flowOf(-0.4f),
+                    isInitiatedByUserInput = true,
+                    isUserInputOngoing = flowOf(true),
+                )
+            runCurrent()
+
+            assertThat(kosmos.fakeDeviceEntryFaceAuthRepository.isAuthRunning.value).isTrue()
         }
 
     private fun TestScope.emulateSceneTransition(

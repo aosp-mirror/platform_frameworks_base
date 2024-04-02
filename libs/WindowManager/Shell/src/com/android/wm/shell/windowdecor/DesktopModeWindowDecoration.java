@@ -403,7 +403,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         final int menuHeight = loadDimensionPixelSize(
                 resources, R.dimen.desktop_mode_maximize_menu_height);
 
-        float menuLeft = (mPositionInParent.x + maximizeButtonLocation[0]);
+        float menuLeft = (mPositionInParent.x + maximizeButtonLocation[0] - ((float) (menuWidth
+                - maximizeWindowButton.getWidth()) / 2));
         float menuTop = (mPositionInParent.y + captionHeight);
         final float menuRight = menuLeft + menuWidth;
         final float menuBottom = menuTop + menuHeight;
@@ -831,15 +832,33 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 .setAnimatingTaskResize(animatingTaskResize);
     }
 
+    /** Called when there is a {@Link ACTION_HOVER_EXIT} on the maximize window button. */
     void onMaximizeWindowHoverExit() {
         ((DesktopModeAppControlsWindowDecorationViewHolder) mWindowDecorViewHolder)
                 .onMaximizeWindowHoverExit();
     }
 
+    /** Called when there is a {@Link ACTION_HOVER_ENTER} on the maximize window button. */
     void onMaximizeWindowHoverEnter() {
         ((DesktopModeAppControlsWindowDecorationViewHolder) mWindowDecorViewHolder)
                 .onMaximizeWindowHoverEnter();
     }
+
+    /** Called when there is a {@Link ACTION_HOVER_ENTER} on a view in the maximize menu. */
+    void onMaximizeMenuHoverEnter(int id, MotionEvent ev) {
+        mMaximizeMenu.onMaximizeMenuHoverEnter(id, ev);
+    }
+
+    /** Called when there is a {@Link ACTION_HOVER_MOVE} on a view in the maximize menu. */
+    void onMaximizeMenuHoverMove(int id, MotionEvent ev) {
+        mMaximizeMenu.onMaximizeMenuHoverMove(id, ev);
+    }
+
+    /** Called when there is a {@Link ACTION_HOVER_EXIT} on a view in the maximize menu. */
+    void onMaximizeMenuHoverExit(int id, MotionEvent ev) {
+        mMaximizeMenu.onMaximizeMenuHoverExit(id, ev);
+    }
+
 
     @Override
     public String toString() {

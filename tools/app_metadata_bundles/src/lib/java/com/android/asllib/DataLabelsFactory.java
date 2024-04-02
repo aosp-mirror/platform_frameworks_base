@@ -16,13 +16,14 @@
 
 package com.android.asllib;
 
+import com.android.asllib.util.AslgenUtil;
 import com.android.asllib.util.MalformedXmlException;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,6 +34,10 @@ public class DataLabelsFactory implements AslMarshallableFactory<DataLabels> {
     @Override
     public DataLabels createFromHrElements(List<Element> elements) throws MalformedXmlException {
         Element ele = XmlUtils.getSingleElement(elements);
+        if (ele == null) {
+            AslgenUtil.logI("Found no DataLabels in hr format.");
+            return null;
+        }
         Map<String, DataCategory> dataAccessed =
                 getDataCategoriesWithTag(ele, XmlUtils.HR_TAG_DATA_ACCESSED);
         Map<String, DataCategory> dataCollected =
@@ -88,7 +93,7 @@ public class DataLabelsFactory implements AslMarshallableFactory<DataLabels> {
     private static Map<String, DataCategory> getDataCategoriesWithTag(
             Element dataLabelsEle, String dataCategoryUsageTypeTag) throws MalformedXmlException {
         NodeList dataUsedNodeList = dataLabelsEle.getElementsByTagName(dataCategoryUsageTypeTag);
-        Map<String, DataCategory> dataCategoryMap = new HashMap<String, DataCategory>();
+        Map<String, DataCategory> dataCategoryMap = new LinkedHashMap<String, DataCategory>();
 
         Set<String> dataCategoryNames = new HashSet<String>();
         for (int i = 0; i < dataUsedNodeList.getLength(); i++) {

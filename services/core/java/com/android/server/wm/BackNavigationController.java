@@ -359,6 +359,7 @@ class BackNavigationController {
                         mAnimationHandler.prepareAnimation(
                                 backType,
                                 adapter,
+                                mNavigationMonitor,
                                 currentTask,
                                 prevTask,
                                 currentActivity,
@@ -667,7 +668,8 @@ class BackNavigationController {
         mAnimationHandler.markWindowHasDrawn(openActivity);
     }
 
-    private class NavigationMonitor {
+    @VisibleForTesting
+    class NavigationMonitor {
         // The window which triggering the back navigation.
         private WindowState mNavigatingWindow;
         private RemoteCallback mObserver;
@@ -1492,28 +1494,31 @@ class BackNavigationController {
         ScheduleAnimationBuilder prepareAnimation(
                 int backType,
                 BackAnimationAdapter adapter,
+                NavigationMonitor monitor,
                 Task currentTask,
                 Task previousTask,
                 ActivityRecord currentActivity,
                 ArrayList<ActivityRecord> previousActivity,
                 WindowContainer removedWindowContainer) {
+            final ScheduleAnimationBuilder builder =
+                    new ScheduleAnimationBuilder(backType, adapter, monitor);
             switch (backType) {
                 case BackNavigationInfo.TYPE_RETURN_TO_HOME:
-                    return new ScheduleAnimationBuilder(backType, adapter)
+                    return builder
                             .setIsLaunchBehind(true)
                             .setComposeTarget(currentTask, previousTask);
                 case BackNavigationInfo.TYPE_CROSS_ACTIVITY:
                     ActivityRecord[] prevActs = new ActivityRecord[previousActivity.size()];
                     prevActs = previousActivity.toArray(prevActs);
-                    return new ScheduleAnimationBuilder(backType, adapter)
+                    return builder
                             .setComposeTarget(currentActivity, prevActs)
                             .setIsLaunchBehind(false);
                 case BackNavigationInfo.TYPE_CROSS_TASK:
-                    return new ScheduleAnimationBuilder(backType, adapter)
+                    return builder
                             .setComposeTarget(currentTask, previousTask)
                             .setIsLaunchBehind(false);
                 case BackNavigationInfo.TYPE_DIALOG_CLOSE:
-                    return new ScheduleAnimationBuilder(backType, adapter)
+                    return builder
                             .setComposeTarget(removedWindowContainer, currentActivity)
                             .setIsLaunchBehind(false);
             }
@@ -1523,13 +1528,16 @@ class BackNavigationController {
         class ScheduleAnimationBuilder {
             final int mType;
             final BackAnimationAdapter mBackAnimationAdapter;
+            final NavigationMonitor mNavigationMonitor;
             WindowContainer mCloseTarget;
             WindowContainer[] mOpenTargets;
             boolean mIsLaunchBehind;
 
-            ScheduleAnimationBuilder(int type, BackAnimationAdapter backAnimationAdapter) {
+            ScheduleAnimationBuilder(int type, BackAnimationAdapter adapter,
+                    NavigationMonitor monitor) {
                 mType = type;
-                mBackAnimationAdapter = backAnimationAdapter;
+                mBackAnimationAdapter = adapter;
+                mNavigationMonitor = monitor;
             }
 
             ScheduleAnimationBuilder setComposeTarget(@NonNull WindowContainer close,
@@ -1610,8 +1618,13 @@ class BackNavigationController {
 
                 return () -> {
                     try {
-                        mBackAnimationAdapter.getRunner().onAnimationStart(
-                                targets, null, null, callback);
+                        if (hasTargetDetached() || !validateAnimationTargets(targets)) {
+                            mNavigationMonitor.cancelBackNavigating("cancelAnimation");
+                            mBackAnimationAdapter.getRunner().onAnimationCancelled();
+                        } else {
+                            mBackAnimationAdapter.getRunner().onAnimationStart(
+                                    targets, null, null, callback);
+                        }
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
@@ -1638,6 +1651,21 @@ class BackNavigationController {
                 };
             }
         }
+    }
+
+    /**
+     * Validate animation targets.
+     */
+    private static boolean validateAnimationTargets(RemoteAnimationTarget[] apps) {
+        if (apps == null || apps.length == 0) {
+            return false;
+        }
+        for (int i = apps.length - 1; i >= 0; --i) {
+            if (!apps[i].leash.isValid()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

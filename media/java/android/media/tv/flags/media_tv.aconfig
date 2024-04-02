@@ -1,4 +1,5 @@
 package: "android.media.tv.flags"
+container: "system"
 
 flag {
     name: "broadcast_visibility_types"

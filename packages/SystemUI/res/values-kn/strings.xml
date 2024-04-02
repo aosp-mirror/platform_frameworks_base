@@ -365,6 +365,12 @@
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"ಹೆಚ್ಚು"</string>
     <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
     <skip />
+    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
+    <skip />
+    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
+    <skip />
+    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ಸಾಧನದ ಮೈಕ್ರೋಫೋನ್ ನಿರ್ಬಂಧವನ್ನು ತೆಗೆಯಬೇಕೆ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ಸಾಧನದ ಕ್ಯಾಮರಾ ನಿರ್ಬಂಧವನ್ನು ತೆಗೆಯಬೇಕೆ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ಸಾಧನದ ಕ್ಯಾಮರಾ ಮತ್ತು ಮೈಕ್ರೋಫೋನ್ ಅನ್ನು ಅನ್‍ಬ್ಲಾಕ್ ಮಾಡಬೇಕೇ?"</string>
@@ -442,10 +448,8 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"ತೆಗೆದುಹಾಕಿ"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ವಿಜೆಟ್ ಅನ್ನು ಸೇರಿಸಿ"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"ಮುಗಿದಿದೆ"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"ವಿಜೆಟ್‌ಗಳನ್ನು ಸೇರಿಸಿ"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡದೆಯೇ ನಿಮ್ಮ ಮೆಚ್ಚಿನ ಆ್ಯಪ್ ವಿಜೆಟ್‌ಗಳಿಗೆ ತ್ವರಿತ ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ಪಡೆಯಿರಿ."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ಯಾವುದೇ ವಿಜೆಟ್ ಅನ್ನು ಅನುಮತಿಸಬೇಕೇ?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"ಕೆಲಸದ ಆ್ಯಪ್ ವಿರಾಮ ರದ್ದುಮಾಡಬೇಕೇ"</string>
@@ -617,7 +621,7 @@
     <string name="volume_panel_hint_mute" msgid="6962563028495243738">"%s ಮ್ಯೂಟ್ ಮಾಡಿ"</string>
     <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"%s ಅನ್‌ಮ್ಯೂಟ್ ಮಾಡಿ"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> ನಲ್ಲಿ ಪ್ಲೇ ಆಗು..."</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"ಇಲ್ಲಿ ಆಡಿಯೋ ಪ್ಲೇ..."</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"ಇದರಲ್ಲಿ ಪ್ಲೇ ಆಗುತ್ತದೆ"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"ಸಿಸ್ಟಂ UI ಟ್ಯೂನರ್"</string>
     <string name="status_bar" msgid="4357390266055077437">"ಸ್ಥಿತಿ ಪಟ್ಟಿ"</string>
     <string name="demo_mode" msgid="263484519766901593">"ಸಿಸ್ಟಂ UI ಡೆಮೋ ಮೋಡ್"</string>

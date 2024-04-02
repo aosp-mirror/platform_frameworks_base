@@ -365,6 +365,12 @@
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"उच्च"</string>
     <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
     <skip />
+    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
+    <skip />
+    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
+    <skip />
+    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"डिभाइसको माइक्रोफोन अनब्लक गर्ने हो?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"डिभाइसको क्यामेरा अनब्लक गर्ने हो?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"डिभाइसको क्यामेरा र माइक्रोफोन अनब्लक गर्ने हो?"</string>
@@ -442,10 +448,8 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"हटाउनुहोस्"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"विजेट हाल्नुहोस्"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"पूरा भयो"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"विजेट हाल्नुहोस्"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"ट्याब्लेट अनलक नगरिकनै आफूलाई मन पर्ने एपका विजेटहरू तुरुन्तै एक्सेस गर्नुहोस्।"</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"लक स्क्रिनमा कुनै विजेट देखाउने हो?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"सेटिङ खोल्नुहोस्"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"कामसम्बन्धी एपहरू अनपज गर्ने हो?"</string>
@@ -600,7 +604,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s। म्यूट गर्नाका लागि ट्याप गर्नुहोस्। पहुँच सम्बन्धी सेवाहरू म्यूट हुन सक्छन्।"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s। कम्पन मोडमा सेट गर्न ट्याप गर्नुहोस्।"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s। म्यूट गर्न ट्याप गर्नुहोस्।"</string>
-    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"नोइज कन्ट्रोल"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"न्वाइज कन्ट्रोल"</string>
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"स्पेसियल अडियो"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"अफ छ"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"निश्चित"</string>
@@ -617,7 +621,7 @@
     <string name="volume_panel_hint_mute" msgid="6962563028495243738">"%s म्युट गर्नुहोस्"</string>
     <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"%s अनम्युट गर्नुहोस्"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> प्ले गरिँदै छ"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"अडियो प्ले भइरहने छ"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"अडियो यसमा प्ले हुने छ"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"सिस्टम UI ट्युनर"</string>
     <string name="status_bar" msgid="4357390266055077437">"स्थिति पट्टी"</string>
     <string name="demo_mode" msgid="263484519766901593">"सिस्टम UI को डेमो मोड"</string>

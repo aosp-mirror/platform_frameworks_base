@@ -828,7 +828,7 @@
     <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Atļauj lietotnei atjaunināt citām lietotnēm piederošu E2EE sakaru atslēgu verifikācijas statusus."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Paroles kārtulu iestatīšana"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrolēt ekrāna bloķēšanas paroļu un PIN garumu un tajos atļautās rakstzīmes."</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"Ekrāna atbloķēšanas mēģinājumu pārraudzīšana"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"Pārraudzīt ekrāna atbloķēšanas mēģinājumus"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Pārrauga nepareizi ievadīto paroļu skaitu, atbloķējot ekrānu, un bloķē planšetdatoru vai dzēš visus planšetdatora datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Pārraudzīt nepareizi ievadīto ekrāna atbloķēšanas paroļu skaitu un bloķēt Android TV vai dzēst visus Android TV ierīces datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Ekrāna atbloķēšanas laikā pārraudzīt nepareizi ievadīto paroļu skaitu un bloķēt informatīvi izklaidējošo sistēmu vai dzēst visus informatīvi izklaidējošās sistēmas datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
@@ -1930,12 +1930,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Pārvalda <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Ieslēgta"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Izslēgta"</string>
-    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>–<xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Jebkurš kalendārs"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> izslēdz noteiktas skaņas"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Jūsu ierīcē ir radusies iekšēja problēma, un ierīce var darboties nestabili. Lai to labotu, veiciet rūpnīcas datu atiestatīšanu."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Jūsu ierīcē ir radusies iekšēja problēma. Lai iegūtu plašāku informāciju, lūdzu, sazinieties ar ražotāju."</string>
@@ -2398,6 +2395,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Testēšanai"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Kopīgs"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
+    <skip />
     <string name="satellite_notification_title" msgid="4026338973463121526">"Automātiski izveidots savienojums ar satelītu"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Varat sūtīt un saņemt ziņojumus bez mobilā vai Wi-Fi tīkla."</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Atvērt lietotni Ziņojumi"</string>

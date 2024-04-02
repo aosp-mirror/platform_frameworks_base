@@ -21,6 +21,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import com.android.packageinstaller.R;
@@ -29,7 +30,7 @@ import com.android.packageinstaller.v2.ui.InstallActionListener;
 
 public class ParseErrorFragment extends DialogFragment {
 
-    private static final String TAG = ParseErrorFragment.class.getSimpleName();
+    private static final String LOG_TAG = ParseErrorFragment.class.getSimpleName();
     private final InstallAborted mDialogData;
     private InstallActionListener mInstallActionListener;
 
@@ -46,7 +47,8 @@ public class ParseErrorFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        return new AlertDialog.Builder(getActivity())
+        Log.i(LOG_TAG, "Creating " + LOG_TAG + "\n" + mDialogData);
+        return new AlertDialog.Builder(requireContext())
             .setMessage(R.string.Parse_error_dlg_text)
             .setPositiveButton(R.string.ok,
                 (dialog, which) ->

@@ -1,4 +1,5 @@
 package: "android.tracing"
+container: "system"
 
 flag {
     name: "perfetto_transition_tracing"
@@ -13,4 +14,11 @@ flag {
     description: "Migrate protolog to Perfetto"
     bug: "276432490"
     is_fixed_read_only: true
+}
+
+flag {
+    name: "perfetto_ime_tracing"
+    namespace: "windowing_tools"
+    description: "Migrate IME tracing to Perfetto"
+    bug: "276433199"
 }

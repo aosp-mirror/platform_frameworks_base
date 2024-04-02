@@ -29,19 +29,16 @@ public class DataTypeFactory implements AslMarshallableFactory<DataType> {
     public DataType createFromHrElements(List<Element> elements) {
         Element hrDataTypeEle = XmlUtils.getSingleElement(elements);
         String dataTypeName = hrDataTypeEle.getAttribute(XmlUtils.HR_ATTR_DATA_TYPE);
-        Set<DataType.Purpose> purposeSet =
+        List<DataType.Purpose> purposes =
                 Arrays.stream(hrDataTypeEle.getAttribute(XmlUtils.HR_ATTR_PURPOSES).split("\\|"))
                         .map(DataType.Purpose::forString)
-                        .collect(Collectors.toUnmodifiableSet());
+                        .collect(Collectors.toList());
         Boolean isCollectionOptional =
-                XmlUtils.fromString(
-                        hrDataTypeEle.getAttribute(XmlUtils.HR_ATTR_IS_COLLECTION_OPTIONAL));
+                XmlUtils.getBoolAttr(hrDataTypeEle, XmlUtils.HR_ATTR_IS_COLLECTION_OPTIONAL);
         Boolean isSharingOptional =
-                XmlUtils.fromString(
-                        hrDataTypeEle.getAttribute(XmlUtils.HR_ATTR_IS_SHARING_OPTIONAL));
-        Boolean ephemeral =
-                XmlUtils.fromString(hrDataTypeEle.getAttribute(XmlUtils.HR_ATTR_EPHEMERAL));
+                XmlUtils.getBoolAttr(hrDataTypeEle, XmlUtils.HR_ATTR_IS_SHARING_OPTIONAL);
+        Boolean ephemeral = XmlUtils.getBoolAttr(hrDataTypeEle, XmlUtils.HR_ATTR_EPHEMERAL);
         return new DataType(
-                dataTypeName, purposeSet, isCollectionOptional, isSharingOptional, ephemeral);
+                dataTypeName, purposes, isCollectionOptional, isSharingOptional, ephemeral);
     }
 }

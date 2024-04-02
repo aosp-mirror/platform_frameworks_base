@@ -357,7 +357,7 @@
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Kan \'n skermkiekie neem."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"Voorskou, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"deaktiveer of verander statusbalk"</string>
-    <string name="permdesc_statusBar" msgid="5809162768651019642">"Laat die program toe om die statusbalk te deaktiveer en stelselikone by te voeg of te verwyder."</string>
+    <string name="permdesc_statusBar" msgid="5809162768651019642">"Laat die app toe om die statusbalk te deaktiveer en stelselikone by te voeg of te verwyder."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"wees die statusbalk"</string>
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Laat die program toe om die statusbalk te wees."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"vou statusbalk in of uit"</string>
@@ -2397,6 +2397,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Toets"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Gemeenskaplik"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
+    <skip />
     <string name="satellite_notification_title" msgid="4026338973463121526">"Outomaties aan satelliet gekoppel"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Jy kan boodskappe stuur en ontvang sonder ’n selfoon- of wi-fi-netwerk"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Maak Boodskappe oop"</string>

@@ -300,7 +300,7 @@ class TransitionController {
      * Creates a transition. It can immediately collect participants.
      */
     @NonNull
-    private Transition createTransition(@WindowManager.TransitionType int type,
+    Transition createTransition(@WindowManager.TransitionType int type,
             @WindowManager.TransitionFlags int flags) {
         if (mTransitionPlayer == null) {
             throw new IllegalStateException("Shell Transitions not enabled");

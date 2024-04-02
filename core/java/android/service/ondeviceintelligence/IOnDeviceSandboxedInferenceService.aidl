@@ -36,15 +36,15 @@ import android.service.ondeviceintelligence.IProcessingUpdateStatusCallback;
 oneway interface IOnDeviceSandboxedInferenceService {
     void registerRemoteStorageService(in IRemoteStorageService storageService);
     void requestTokenInfo(int callerUid, in Feature feature, in Bundle request,
-                            in AndroidFuture<ICancellationSignal> cancellationSignal,
+                            in AndroidFuture cancellationSignal,
                             in ITokenInfoCallback tokenInfoCallback);
     void processRequest(int callerUid, in Feature feature, in Bundle request, in int requestType,
-                        in AndroidFuture<ICancellationSignal> cancellationSignal,
-                        in AndroidFuture<IProcessingSignal> processingSignal,
+                        in AndroidFuture cancellationSignal,
+                        in AndroidFuture processingSignal,
                         in IResponseCallback callback);
     void processRequestStreaming(int callerUid, in Feature feature, in Bundle request, in int requestType,
-                                in AndroidFuture<ICancellationSignal> cancellationSignal,
-                                in AndroidFuture<IProcessingSignal> processingSignal,
+                                in AndroidFuture cancellationSignal,
+                                in AndroidFuture processingSignal,
                                 in IStreamingResponseCallback callback);
     void updateProcessingState(in Bundle processingState,
                                      in IProcessingUpdateStatusCallback callback);

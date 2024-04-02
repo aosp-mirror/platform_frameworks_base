@@ -1291,7 +1291,8 @@ final class AutofillManagerServiceImpl
         RemoteFillService remoteService =
                 new RemoteFillService(
                         getContext(), mInfo.getServiceInfo().getComponentName(), mUserId,
-                        /* callbacks= */ null, mMaster.isInstantServiceAllowed());
+                        /* callbacks= */ null, mMaster.isInstantServiceAllowed(),
+                        mMaster.mCredentialAutofillService);
         remoteService.onSavedPasswordCountRequest(receiver);
     }
 

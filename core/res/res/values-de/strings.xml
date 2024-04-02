@@ -2397,6 +2397,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Gemeinsam genutzt"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
+    <skip />
     <string name="satellite_notification_title" msgid="4026338973463121526">"Automatisch mit Satellit verbunden"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Du kannst Nachrichten ohne Mobilfunknetz oder WLAN senden und empfangen"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages öffnen"</string>
