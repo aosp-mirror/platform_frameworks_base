@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import static android.hardware.display.DisplayManagerInternal.DisplayPowerReques
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.display.BrightnessConfiguration;
-import android.hardware.display.DisplayManagerInternal;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -28,11 +27,10 @@ import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.AutomaticBrightnessController;
-import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessEvent;
 import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.brightness.BrightnessUtils;
-import com.android.server.display.brightness.StrategySelectionNotifyRequest;
+import com.android.server.display.feature.DisplayManagerFlags;
 
 import java.io.PrintWriter;
 
@@ -42,9 +40,13 @@ import java.io.PrintWriter;
  * {@link com.android.server.display.DisplayDeviceConfig} class. This class inherently assumes
  * that it is being executed from the power thread, and hence doesn't synchronize
  * any of its resources
+ *
+ * @deprecated This class is relevant only while the
+ * {@link DisplayManagerFlags#isRefactorDisplayPowerControllerEnabled()} is not fully rolled out.
+ * Till then, please replicated your changes to {@link AutomaticBrightnessStrategy} as well.
  */
-public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
-        implements DisplayBrightnessStrategy{
+@Deprecated
+public class AutomaticBrightnessStrategy2 {
     private final Context mContext;
     // The DisplayId of the associated logical display
     private final int mDisplayId;
@@ -92,12 +94,7 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
     @Nullable
     private BrightnessConfiguration mBrightnessConfiguration;
 
-    // Indicates if the strategy is already configured for a request, in which case we wouldn't
-    // want to re-evaluate the auto-brightness state
-    private boolean mIsConfigured;
-
-    public AutomaticBrightnessStrategy(Context context, int displayId) {
-        super(context, displayId);
+    public AutomaticBrightnessStrategy2(Context context, int displayId) {
         mContext = context;
         mDisplayId = displayId;
         mAutoBrightnessAdjustment = getAutoBrightnessAdjustmentSetting();
@@ -129,34 +126,10 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
 
         accommodateUserBrightnessChanges(userSetBrightnessChanged, lastUserSetScreenBrightness,
                 policy, targetDisplayState, mBrightnessConfiguration, autoBrightnessState);
-        mIsConfigured = true;
-    }
-
-    public void setIsConfigured(boolean configure) {
-        mIsConfigured = configure;
     }
 
     public boolean isAutoBrightnessEnabled() {
         return mIsAutoBrightnessEnabled;
-    }
-
-    /**
-     * Validates if the auto-brightness strategy is valid or not considering the current system
-     * state.
-     */
-    public boolean isAutoBrightnessValid() {
-        boolean isValid = false;
-        if (isAutoBrightnessEnabled()) {
-            float brightness = (mAutomaticBrightnessController != null)
-                    ? mAutomaticBrightnessController.getAutomaticScreenBrightness(null)
-                    : PowerManager.BRIGHTNESS_INVALID_FLOAT;
-            if (BrightnessUtils.isValidBrightnessValue(brightness)
-                    || brightness == PowerManager.BRIGHTNESS_OFF_FLOAT) {
-                isValid = true;
-            }
-        }
-        setAutoBrightnessApplied(isValid);
-        return isValid;
     }
 
     public boolean isAutoBrightnessDisabledDueToDisplayOff() {
@@ -250,29 +223,6 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
         mTemporaryAutoBrightnessAdjustment = temporaryAutoBrightnessAdjustment;
     }
 
-    @Override
-    public DisplayBrightnessState updateBrightness(
-            DisplayManagerInternal.DisplayPowerRequest displayPowerRequest) {
-        BrightnessReason brightnessReason = new BrightnessReason();
-        brightnessReason.setReason(BrightnessReason.REASON_AUTOMATIC);
-        BrightnessEvent brightnessEvent = new BrightnessEvent(mDisplayId);
-        float brightness = getAutomaticScreenBrightness(brightnessEvent);
-        return new DisplayBrightnessState.Builder()
-                .setBrightness(brightness)
-                .setSdrBrightness(brightness)
-                .setBrightnessReason(brightnessReason)
-                .setDisplayBrightnessStrategyName(getName())
-                .setIsSlowChange(hasAppliedAutoBrightness()
-                        && !getAutoBrightnessAdjustmentChanged())
-                .setBrightnessEvent(brightnessEvent)
-                .build();
-    }
-
-    @Override
-    public String getName() {
-        return "AutomaticBrightnessStrategy";
-    }
-
     /**
      * Dumps the state of this class.
      */
@@ -292,26 +242,6 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
         writer.println("  mWasShortTermModelActive=" + mIsShortTermModelActive);
         writer.println("  mAutoBrightnessAdjustmentReasonsFlags="
                 + mAutoBrightnessAdjustmentReasonsFlags);
-    }
-
-    @Override
-    public void strategySelectionPostProcessor(
-            StrategySelectionNotifyRequest strategySelectionNotifyRequest) {
-        if (!mIsConfigured) {
-            setAutoBrightnessState(strategySelectionNotifyRequest.getTargetDisplayState(),
-                    strategySelectionNotifyRequest.isAllowAutoBrightnessWhileDozingConfig(),
-                    strategySelectionNotifyRequest.getSelectedDisplayBrightnessStrategy()
-                            .getReason(),
-                    strategySelectionNotifyRequest.getDisplayPowerRequest().policy,
-                    strategySelectionNotifyRequest.getLastUserSetScreenBrightness(),
-                    strategySelectionNotifyRequest.isUserSetBrightnessChanged());
-        }
-        mIsConfigured = false;
-    }
-
-    @Override
-    public int getReason() {
-        return BrightnessReason.REASON_AUTOMATIC;
     }
 
     /**

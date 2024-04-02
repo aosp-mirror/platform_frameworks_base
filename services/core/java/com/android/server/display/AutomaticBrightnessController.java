@@ -425,7 +425,7 @@ public class AutomaticBrightnessController {
         return mScreenAutoBrightness;
     }
 
-    float getRawAutomaticScreenBrightness() {
+    public float getRawAutomaticScreenBrightness() {
         return mRawScreenAutoBrightness;
     }
 

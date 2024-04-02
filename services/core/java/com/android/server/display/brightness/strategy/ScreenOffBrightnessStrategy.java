@@ -53,4 +53,9 @@ public class ScreenOffBrightnessStrategy implements DisplayBrightnessStrategy {
             StrategySelectionNotifyRequest strategySelectionNotifyRequest) {
         // DO NOTHING
     }
+
+    @Override
+    public int getReason() {
+        return BrightnessReason.REASON_SCREEN_OFF;
+    }
 }

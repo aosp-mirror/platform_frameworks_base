@@ -27,6 +27,7 @@ import android.view.Display;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.brightness.strategy.AutomaticBrightnessStrategy;
+import com.android.server.display.brightness.strategy.AutomaticBrightnessStrategy2;
 import com.android.server.display.brightness.strategy.BoostBrightnessStrategy;
 import com.android.server.display.brightness.strategy.DisplayBrightnessStrategy;
 import com.android.server.display.brightness.strategy.DozeBrightnessStrategy;
@@ -65,7 +66,16 @@ public class DisplayBrightnessStrategySelector {
     // The brightness strategy used to manage the brightness state when the request is invalid.
     private final InvalidBrightnessStrategy mInvalidBrightnessStrategy;
     // Controls brightness when automatic (adaptive) brightness is running.
-    private final AutomaticBrightnessStrategy mAutomaticBrightnessStrategy;
+    private final AutomaticBrightnessStrategy2 mAutomaticBrightnessStrategy;
+
+    // The automatic strategy which controls the brightness when adaptive mode is ON.
+    private final AutomaticBrightnessStrategy mAutomaticBrightnessStrategy1;
+
+    // The deprecated AutomaticBrightnessStrategy. Avoid using it for any new features without
+    // consulting with the display frameworks team. Use {@link AutomaticBrightnessStrategy} instead.
+    // This will be removed once the flag
+    // {@link DisplayManagerFlags#isRefactorDisplayPowerControllerEnabled is fully rolled out
+    private final AutomaticBrightnessStrategy2 mAutomaticBrightnessStrategy2;
     // Controls the brightness if adaptive brightness is on and there exists an active offload
     // session. Brightness value is provided by the offload session.
     @Nullable
@@ -101,7 +111,15 @@ public class DisplayBrightnessStrategySelector {
         mBoostBrightnessStrategy = injector.getBoostBrightnessStrategy();
         mFollowerBrightnessStrategy = injector.getFollowerBrightnessStrategy(displayId);
         mInvalidBrightnessStrategy = injector.getInvalidBrightnessStrategy();
-        mAutomaticBrightnessStrategy = injector.getAutomaticBrightnessStrategy(context, displayId);
+        mAutomaticBrightnessStrategy1 =
+                (!mDisplayManagerFlags.isRefactorDisplayPowerControllerEnabled()) ? null
+                        : injector.getAutomaticBrightnessStrategy1(context, displayId);
+        mAutomaticBrightnessStrategy2 =
+                (mDisplayManagerFlags.isRefactorDisplayPowerControllerEnabled()) ? null
+                        : injector.getAutomaticBrightnessStrategy2(context, displayId);
+        mAutomaticBrightnessStrategy =
+                (mDisplayManagerFlags.isRefactorDisplayPowerControllerEnabled())
+                        ? mAutomaticBrightnessStrategy1 : mAutomaticBrightnessStrategy2;
         if (flags.isDisplayOffloadEnabled()) {
             mOffloadBrightnessStrategy = injector.getOffloadBrightnessStrategy();
         } else {
@@ -110,7 +128,7 @@ public class DisplayBrightnessStrategySelector {
         mDisplayBrightnessStrategies = new DisplayBrightnessStrategy[]{mInvalidBrightnessStrategy,
                 mScreenOffBrightnessStrategy, mDozeBrightnessStrategy, mFollowerBrightnessStrategy,
                 mBoostBrightnessStrategy, mOverrideBrightnessStrategy, mTemporaryBrightnessStrategy,
-                mOffloadBrightnessStrategy};
+                mAutomaticBrightnessStrategy1, mOffloadBrightnessStrategy};
         mAllowAutoBrightnessWhileDozingConfig = context.getResources().getBoolean(
                 R.bool.config_allowAutoBrightnessWhileDozing);
         mOldBrightnessStrategyName = mInvalidBrightnessStrategy.getName();
@@ -142,6 +160,9 @@ public class DisplayBrightnessStrategySelector {
         } else if (BrightnessUtils.isValidBrightnessValue(
                 mTemporaryBrightnessStrategy.getTemporaryScreenBrightness())) {
             displayBrightnessStrategy = mTemporaryBrightnessStrategy;
+        } else if (mDisplayManagerFlags.isRefactorDisplayPowerControllerEnabled()
+                && isAutomaticBrightnessStrategyValid(strategySelectionRequest)) {
+            displayBrightnessStrategy = mAutomaticBrightnessStrategy1;
         } else if (mAutomaticBrightnessStrategy.shouldUseAutoBrightness()
                 && mOffloadBrightnessStrategy != null && BrightnessUtils.isValidBrightnessValue(
                 mOffloadBrightnessStrategy.getOffloadScreenBrightness())) {
@@ -149,7 +170,8 @@ public class DisplayBrightnessStrategySelector {
         }
 
         if (mDisplayManagerFlags.isRefactorDisplayPowerControllerEnabled()) {
-            postProcess(constructStrategySelectionNotifyRequest(displayBrightnessStrategy));
+            postProcess(constructStrategySelectionNotifyRequest(displayBrightnessStrategy,
+                    strategySelectionRequest));
         }
 
         if (!mOldBrightnessStrategyName.equals(displayBrightnessStrategy.getName())) {
@@ -170,7 +192,7 @@ public class DisplayBrightnessStrategySelector {
         return mFollowerBrightnessStrategy;
     }
 
-    public AutomaticBrightnessStrategy getAutomaticBrightnessStrategy() {
+    public AutomaticBrightnessStrategy2 getAutomaticBrightnessStrategy() {
         return mAutomaticBrightnessStrategy;
     }
 
@@ -206,9 +228,28 @@ public class DisplayBrightnessStrategySelector {
         }
     }
 
+    private boolean isAutomaticBrightnessStrategyValid(
+            StrategySelectionRequest strategySelectionRequest) {
+        mAutomaticBrightnessStrategy1.setAutoBrightnessState(
+                strategySelectionRequest.getTargetDisplayState(),
+                mAllowAutoBrightnessWhileDozingConfig,
+                BrightnessReason.REASON_UNKNOWN,
+                strategySelectionRequest.getDisplayPowerRequest().policy,
+                strategySelectionRequest.getLastUserSetScreenBrightness(),
+                strategySelectionRequest.isUserSetBrightnessChanged());
+        return mAutomaticBrightnessStrategy1.isAutoBrightnessValid();
+    }
+
     private StrategySelectionNotifyRequest constructStrategySelectionNotifyRequest(
-            DisplayBrightnessStrategy selectedDisplayBrightnessStrategy) {
-        return new StrategySelectionNotifyRequest(selectedDisplayBrightnessStrategy);
+            DisplayBrightnessStrategy selectedDisplayBrightnessStrategy,
+            StrategySelectionRequest strategySelectionRequest) {
+        return new StrategySelectionNotifyRequest(
+                        strategySelectionRequest.getDisplayPowerRequest(),
+                strategySelectionRequest.getTargetDisplayState(),
+                selectedDisplayBrightnessStrategy,
+                strategySelectionRequest.getLastUserSetScreenBrightness(),
+                strategySelectionRequest.isUserSetBrightnessChanged(),
+                isAllowAutoBrightnessWhileDozingConfig());
     }
 
     private void postProcess(StrategySelectionNotifyRequest strategySelectionNotifyRequest) {
@@ -263,8 +304,14 @@ public class DisplayBrightnessStrategySelector {
             return new InvalidBrightnessStrategy();
         }
 
-        AutomaticBrightnessStrategy getAutomaticBrightnessStrategy(Context context, int displayId) {
+        AutomaticBrightnessStrategy getAutomaticBrightnessStrategy1(Context context,
+                int displayId) {
             return new AutomaticBrightnessStrategy(context, displayId);
+        }
+
+        AutomaticBrightnessStrategy2 getAutomaticBrightnessStrategy2(Context context,
+                int displayId) {
+            return new AutomaticBrightnessStrategy2(context, displayId);
         }
 
         OffloadBrightnessStrategy getOffloadBrightnessStrategy() {

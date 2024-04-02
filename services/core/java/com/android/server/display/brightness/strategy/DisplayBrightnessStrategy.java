@@ -45,6 +45,11 @@ public interface DisplayBrightnessStrategy {
     String getName();
 
     /**
+     * Returns the reason for the change of the brightness
+     */
+    int getReason();
+
+    /**
      * Dumps the state of the Strategy
      * @param writer
      */
