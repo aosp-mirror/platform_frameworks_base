@@ -556,6 +556,7 @@ public final class NfcAdapter {
     final Context mContext;
     final HashMap<NfcUnlockHandler, INfcUnlockHandler> mNfcUnlockHandlers;
     final Object mLock;
+    final NfcOemExtension mNfcOemExtension;
 
     ITagRemovedCallback mTagRemovedListener; // protected by mLock
 
@@ -864,6 +865,7 @@ public final class NfcAdapter {
         mLock = new Object();
         mControllerAlwaysOnListener = new NfcControllerAlwaysOnListener(getService());
         mNfcVendorNciCallbackListener = new NfcVendorNciCallbackListener(getService());
+        mNfcOemExtension = new NfcOemExtension(mContext, this);
     }
 
     /**
@@ -2918,5 +2920,20 @@ public final class NfcAdapter {
         @FlaggedApi(Flags.FLAG_NFC_VENDOR_CMD)
         void onVendorNciNotification(
                 @IntRange(from = 9, to = 15) int gid, int oid, @NonNull byte[] payload);
+    }
+
+    /**
+     * Returns an instance of {@link NfcOemExtension} associated with {@link NfcAdapter} instance.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    @NonNull public NfcOemExtension getNfcOemExtension() {
+        synchronized (sLock) {
+            if (!sHasNfcFeature) {
+                throw new UnsupportedOperationException();
+            }
+        }
+        return mNfcOemExtension;
     }
 }
