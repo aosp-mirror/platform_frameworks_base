@@ -334,7 +334,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             // The error dialog alerting users that streaming is blocked is always allowed.
             return true;
         }
-        if (!mAllowedUsers.contains(activityUser)) {
+        if (!activityUser.isSystem() && !mAllowedUsers.contains(activityUser)) {
             Slog.d(TAG, "Virtual device launch disallowed from user " + activityUser);
             return false;
         }
