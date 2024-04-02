@@ -565,7 +565,7 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Lietotne tika atsprausta"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"Zvans"</string>
     <string name="stream_system" msgid="7663148785370565134">"Sistēma"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Zvans"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Skaņas signāls"</string>
     <string name="stream_music" msgid="2188224742361847580">"Multivide"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Signāls"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Paziņojums"</string>

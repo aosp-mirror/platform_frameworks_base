@@ -565,7 +565,7 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"ஆப்ஸ் பின்னிலிருந்து அகற்றப்பட்டது"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"அழைப்பு"</string>
     <string name="stream_system" msgid="7663148785370565134">"சிஸ்டம்"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"ரிங் செய்"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"அழைப்பு ஒலி"</string>
     <string name="stream_music" msgid="2188224742361847580">"மீடியா"</string>
     <string name="stream_alarm" msgid="16058075093011694">"அலாரம்"</string>
     <string name="stream_notification" msgid="7930294049046243939">"அறிவிப்பு"</string>
@@ -590,7 +590,7 @@
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s ஒலியளவுக் கட்டுப்பாடுகள்"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"அழைப்புகளும் அறிவிப்புகளும் வரும்போது ஒலிக்கச் செய்யும் (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"இதில் <xliff:g id="LABEL">%s</xliff:g> பிளே ஆகிறது"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"இல் ஆடியோ பிளே ஆகும்"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"ஆடியோ இதில் பிளே ஆகும்"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
     <string name="status_bar" msgid="4357390266055077437">"நிலைப் பட்டி"</string>
     <string name="demo_mode" msgid="263484519766901593">"சிஸ்டம் பயனர் இடைமுக டெமோ பயன்முறை"</string>

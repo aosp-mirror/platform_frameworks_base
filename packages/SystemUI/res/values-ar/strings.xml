@@ -576,7 +576,7 @@
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"اهتزاز"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"كتم الصوت"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"البثّ"</string>
-    <string name="stream_notification_unavailable" msgid="4313854556205836435">"يتعذّر التغيير بسبب كتم صوت الرنين."</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"غير متاح بسبب كتم صوت الرنين"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"‏%1$s. انقر لإلغاء التجاهل."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"‏%1$s. انقر للتعيين على الاهتزاز. قد يتم تجاهل خدمات \"سهولة الاستخدام\"."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"‏%1$s. انقر للتجاهل. قد يتم تجاهل خدمات \"سهولة الاستخدام\"."</string>
@@ -647,7 +647,7 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"‏&lt;b&gt;الحالة:&lt;/b&gt; تم خفض الترتيب"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"تظهر في أعلى إشعارات المحادثات وكصورة ملف شخصي على شاشة القفل."</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"تظهر في أعلى إشعارات المحادثات وكصورة ملف شخصي على شاشة القفل وتظهر على شكل فقاعة."</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"تظهر في أعلى إشعارات المحادثات وكصورة ملف شخصي على شاشة القفل، وتقاطع ميزة \"عدم الإزعاج\"."</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"تظهر في أعلى إشعارات المحادثات وكصورة ملف شخصي على شاشة القفل، وتُقاطع ميزة \"عدم الإزعاج\""</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"تظهر في أعلى إشعارات المحادثات وكصورة ملف شخصي على شاشة القفل وتظهر على شكل فقاعة لمقاطعة ميزة \"عدم الإزعاج\"."</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"الأولوية"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"لا يدعم تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> ميزات المحادثات."</string>
@@ -1092,8 +1092,8 @@
     <string name="build_number_copy_toast" msgid="877720921605503046">"تم نسخ رقم الإصدار إلى الحافظة."</string>
     <string name="basic_status" msgid="2315371112182658176">"محادثة مفتوحة"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"التطبيقات المصغّرة للمحادثات"</string>
-    <string name="select_conversation_text" msgid="3376048251434956013">"انقر على محادثة لإضافتها إلى \"الشاشة الرئيسية\"."</string>
-    <string name="no_conversations_text" msgid="5354115541282395015">"ستظهر هنا المحادثات الحديثة."</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"انقر على محادثة لإضافتها إلى \"الشاشة الرئيسية\""</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"ستظهر هنا المحادثات الحديثة"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"المحادثات ذات الأولوية"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"المحادثات الحديثة"</string>
     <string name="days_timestamp" msgid="5821854736213214331">"قبل <xliff:g id="DURATION">%1$s</xliff:g> يوم"</string>
@@ -1215,7 +1215,7 @@
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• توفُّر جهاز واحد أو لوحة جهاز واحدة على الأقل"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"اختَر تطبيقًا تلقائيًا لتدوين الملاحظات لاستخدام اختصار تدوين الملاحظات."</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"اختيار تطبيق"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"انقر مع الاستمرار على الاختصار."</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"انقر مع الاستمرار على الاختصار"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"إلغاء"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"تبديل الشاشتَين الآن"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"فتح الهاتف"</string>
