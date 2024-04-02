@@ -112,19 +112,30 @@ public final class CameraExtensionUtils {
         if (outputConfig == null) return null;
 
         SurfaceInfo surfaceInfo = querySurface(outputConfig.getSurface());
-        if (surfaceInfo.mFormat == captureFormat) {
-            if (supportedPostviewSizes.containsKey(captureFormat)) {
-                Size postviewSize = new Size(surfaceInfo.mWidth, surfaceInfo.mHeight);
-                if (supportedPostviewSizes.get(surfaceInfo.mFormat)
-                        .contains(postviewSize)) {
-                    return outputConfig.getSurface();
-                } else {
-                    throw new IllegalArgumentException("Postview size not supported!");
-                }
+
+        if (Flags.extension10Bit()) {
+            Size postviewSize = new Size(surfaceInfo.mWidth, surfaceInfo.mHeight);
+            if (supportedPostviewSizes.get(surfaceInfo.mFormat)
+                    .contains(postviewSize)) {
+                return outputConfig.getSurface();
+            } else {
+                throw new IllegalArgumentException("Postview size not supported!");
             }
         } else {
-            throw new IllegalArgumentException("Postview format should be equivalent to " +
-                    " the capture format!");
+            if (surfaceInfo.mFormat == captureFormat) {
+                if (supportedPostviewSizes.containsKey(captureFormat)) {
+                    Size postviewSize = new Size(surfaceInfo.mWidth, surfaceInfo.mHeight);
+                    if (supportedPostviewSizes.get(surfaceInfo.mFormat)
+                            .contains(postviewSize)) {
+                        return outputConfig.getSurface();
+                    } else {
+                        throw new IllegalArgumentException("Postview size not supported!");
+                    }
+                }
+            } else {
+                throw new IllegalArgumentException("Postview format should be equivalent to "
+                        + " the capture format!");
+            }
         }
 
         return null;

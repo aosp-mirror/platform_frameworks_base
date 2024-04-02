@@ -917,8 +917,11 @@ public final class CameraExtensionCharacteristics {
      * image. For example, it can be used as a temporary placeholder for the requested capture
      * while the final image is being processed. The supported sizes for a still capture's postview
      * can be retrieved using
-     * {@link CameraExtensionCharacteristics#getPostviewSupportedSizes(int, Size, int)}.
-     * The formats of the still capture and postview should be equivalent upon capture request.</p>
+     * {@link CameraExtensionCharacteristics#getPostviewSupportedSizes(int, Size, int)}.</p>
+     *
+     * <p>Starting with Android {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM},
+     * the formats of the still capture and postview are not required to be equivalent upon capture
+     * request.</p>
      *
      * @param extension the extension type
      * @return {@code true} in case postview is supported, {@code false} otherwise
@@ -976,8 +979,7 @@ public final class CameraExtensionCharacteristics {
      *
      * @param extension the extension type
      * @param captureSize size of the still capture for which the postview is requested
-     * @param format device-specific extension output format of the still capture and
-     * postview
+     * @param format device-specific extension output format of the postview
      * @return non-modifiable list of available sizes or an empty list if the format and
      * size is not supported.
      * @throws IllegalArgumentException in case of unsupported extension or if postview
@@ -1018,8 +1020,8 @@ public final class CameraExtensionCharacteristics {
                 }
                 IAdvancedExtenderImpl extender = initializeAdvancedExtension(extension);
                 extender.init(mCameraId, mCharacteristicsMapNative);
-                return generateSupportedSizes(extender.getSupportedPostviewResolutions(
-                    sz), format, streamMap);
+                return getSupportedSizes(extender.getSupportedPostviewResolutions(sz),
+                        format);
             } else {
                 Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
                         initializeExtension(extension);
@@ -1034,15 +1036,13 @@ public final class CameraExtensionCharacteristics {
                 }
 
                 if (format == ImageFormat.YUV_420_888) {
-                    return generateSupportedSizes(
-                            extenders.second.getSupportedPostviewResolutions(sz),
-                            format, streamMap);
+                    return getSupportedSizes(
+                            extenders.second.getSupportedPostviewResolutions(sz), format);
                 } else if (format == ImageFormat.JPEG) {
                     // The framework will perform the additional encoding pass on the
                     // processed YUV_420 buffers.
-                    return generateJpegSupportedSizes(
-                            extenders.second.getSupportedPostviewResolutions(sz),
-                                    streamMap);
+                    return getSupportedSizes(
+                            extenders.second.getSupportedPostviewResolutions(sz), format);
                 }  else if (format == ImageFormat.JPEG_R || format == ImageFormat.YCBCR_P010) {
                     // Jpeg_R/UltraHDR + YCBCR_P010 is currently not supported in the basic
                     // extension case

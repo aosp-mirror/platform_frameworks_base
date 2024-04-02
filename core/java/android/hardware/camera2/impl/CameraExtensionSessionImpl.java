@@ -390,7 +390,16 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 if (surfaceInfo.mFormat == ImageFormat.JPEG) {
                     mImageJpegProcessor = new CameraExtensionJpegProcessor(mImageProcessor);
                     mImageProcessor = mImageJpegProcessor;
+                } else if (Flags.extension10Bit() && mClientPostviewSurface != null) {
+                    // Handles case when postview is JPEG and capture is YUV
+                    CameraExtensionUtils.SurfaceInfo postviewSurfaceInfo =
+                            CameraExtensionUtils.querySurface(mClientPostviewSurface);
+                    if (postviewSurfaceInfo.mFormat == ImageFormat.JPEG) {
+                        mImageJpegProcessor = new CameraExtensionJpegProcessor(mImageProcessor);
+                        mImageProcessor = mImageJpegProcessor;
+                    }
                 }
+
                 mBurstCaptureImageReader = ImageReader.newInstance(surfaceInfo.mWidth,
                         surfaceInfo.mHeight, CameraExtensionCharacteristics.PROCESSING_INPUT_FORMAT,
                         mImageExtender.getMaxCaptureStage());
