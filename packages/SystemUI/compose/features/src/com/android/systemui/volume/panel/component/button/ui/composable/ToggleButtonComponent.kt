@@ -17,6 +17,7 @@
 package com.android.systemui.volume.panel.component.button.ui.composable
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.volume.panel.component.button.ui.viewmodel.ToggleButtonViewModel
@@ -78,11 +78,10 @@ class ToggleButtonComponent(
                 Icon(modifier = Modifier.size(24.dp), icon = viewModel.icon)
             }
             Text(
-                modifier = Modifier.clearAndSetSemantics {},
+                modifier = Modifier.clearAndSetSemantics {}.basicMarquee(),
                 text = label,
                 style = MaterialTheme.typography.labelMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+                maxLines = 2,
             )
         }
     }

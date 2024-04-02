@@ -20,6 +20,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -130,9 +131,12 @@ fun VolumePanelRadioButtonBar(
                 horizontalArrangement = Arrangement.spacedBy(spacing),
             ) {
                 for (itemIndex in items.indices) {
+                    val cornersRadius = 4.dp
                     TextButton(
                         modifier = Modifier.weight(1f),
                         onClick = { items[itemIndex].onItemSelected() },
+                        shape = RoundedCornerShape(cornersRadius),
+                        contentPadding = PaddingValues(cornersRadius)
                     ) {
                         val item = items[itemIndex]
                         if (item.icon !== Empty) {
