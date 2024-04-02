@@ -20,7 +20,9 @@ import android.credentials.flags.Flags
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -69,6 +71,7 @@ fun ModalBottomSheet(
                 },
                 scrimColor = MaterialTheme.colorScheme.scrim.copy(alpha = .32f),
                 shape = EntryShape.TopRoundedCorner,
+                windowInsets = WindowInsets.navigationBars,
                 dragHandle = null,
                 // Never take over the full screen. We always want to leave some top scrim space
                 // for exiting and viewing the underlying app to help a user gain context.
