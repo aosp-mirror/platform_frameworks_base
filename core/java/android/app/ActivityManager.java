@@ -5672,9 +5672,11 @@ public class ActivityManager {
     }
 
     /**
-     * Return if a given profile is in the foreground.
+     * Returns whether the given user, or its parent (if the user is a profile), is in the
+     * foreground.
      * @param userHandle UserHandle to check
-     * @return Returns the boolean result.
+     * @return whether the user is the foreground user or, if it is a profile, whether its parent
+     *         is the foreground user
      * @hide
      */
     @RequiresPermission(anyOf = {

@@ -403,7 +403,7 @@
     <string name="show_all_anrs" msgid="9160563836616468726">"Erakutsi atzeko planoko ANRak"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Erakutsi aplikazioak ez erantzutearen (ANR) leihoa atzeko planoan dabiltzan aplikazioen kasuan"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Erakutsi jakinarazpenen kanalen abisuak"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Bistaratu abisuak aplikazioek baliozko kanalik gabeko jakinarazpenak argitaratzean"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Bistaratu abisuak aplikazioek kanal baliodunik gabeko jakinarazpenak argitaratzean"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Behartu aplikazioak onartzera kanpoko memorian"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Aplikazioek kanpoko memorian idatz dezakete, ezarritako balioak kontuan izan gabe"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Behartu jardueren tamaina doitu ahal izatera"</string>
@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Arduratu aplikazioek formatu modernoak onartzeaz"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Erakutsi transkodetze-jakinarazpenak"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Desgaitu transkodetze-cachea"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine-ren ezarpenak"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Behartu L3 ordezko aukera"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Hautatu L3 ordezko aukera behartu nahi duzun"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Abian diren zerbitzuak"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Ikusi eta kontrolatu une honetan abian diren zerbitzuak"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView inplementazioa"</string>

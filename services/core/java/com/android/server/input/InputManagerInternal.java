@@ -141,6 +141,11 @@ public abstract class InputManagerInternal {
      */
     public abstract void unregisterLidSwitchCallback(@NonNull LidSwitchCallback callbacks);
 
+    /**
+     * Notify the input manager that an IME connection is becoming active or is no longer active.
+     */
+    public abstract void notifyInputMethodConnectionActive(boolean connectionIsActive);
+
     /** Callback interface for notifications relating to the lid switch. */
     public interface LidSwitchCallback {
         /**

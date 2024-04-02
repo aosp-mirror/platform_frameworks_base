@@ -54,7 +54,7 @@ import com.android.internal.dynamicanimation.animation.SpringForce;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
 
 import javax.inject.Inject;
 
@@ -285,6 +285,11 @@ public class CustomizeActivityAnimation extends ShellBackAnimation {
     private final class Callback extends IOnBackInvokedCallback.Default {
         @Override
         public void onBackStarted(BackMotionEvent backEvent) {
+            // in case we're still animating an onBackCancelled event, let's remove the finish-
+            // callback from the progress animator to prevent calling finishAnimation() before
+            // restarting a new animation
+            mProgressAnimator.removeOnBackCancelledFinishCallback();
+
             mProgressAnimator.onBackStarted(backEvent,
                     CustomizeActivityAnimation.this::onGestureProgress);
         }

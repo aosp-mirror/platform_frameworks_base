@@ -140,7 +140,11 @@ public final class FontFamily {
          * value of the supported `wght`axis, the maximum supported `wght` value is used. The weight
          * value of the font is ignored.
          *
-         * If none of the above conditions are met, this function return {@code null}.
+         * If none of the above conditions are met, the provided font files cannot be used for
+         * variable font family and this function returns {@code null}. Even if this function
+         * returns {@code null}, you can still use {@link #build()} method for creating FontFamily
+         * instance with manually specifying variation settings by using
+         * {@link Font.Builder#setFontVariationSettings(String)}.
          *
          * @return A variable font family. null if a variable font cannot be built from the given
          *         fonts.

@@ -136,6 +136,7 @@ import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.notification.Condition;
 import android.service.notification.DeviceEffectsApplier;
+import android.service.notification.SystemZenRules;
 import android.service.notification.ZenAdapters;
 import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenModeConfig;
@@ -193,6 +194,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -1087,6 +1089,11 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelper.mConfig.manualRule.enabled = true;
 
         ZenModeConfig expected = mZenModeHelper.mConfig.copy();
+        if (Flags.modesUi()) {
+            // Reading the configuration will upgrade it, so for equality comparison also upgrade
+            // the expected value.
+            SystemZenRules.maybeUpgradeRules(mContext, expected);
+        }
 
         ByteArrayOutputStream baos = writeXmlAndPurge(null);
         TypedXmlPullParser parser = getParserForByteStream(baos);
@@ -1404,6 +1411,13 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelper.readXml(parser, true, 11);
 
         ZenModeConfig actual = mZenModeHelper.mConfigs.get(10);
+        if (Flags.modesUi()) {
+            // Reading the configuration will upgrade it, so for equality comparison also upgrade
+            // the expected value.
+            SystemZenRules.maybeUpgradeRules(mContext, config10);
+            SystemZenRules.maybeUpgradeRules(mContext, config11);
+        }
+
         assertEquals(
                 "Config mismatch: current vs expected: "
                         + new ZenModeDiff.ConfigDiff(actual, config10), config10, actual);
@@ -1483,6 +1497,11 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelper.mConfig.automaticRules = automaticRules;
 
         ZenModeConfig expected = mZenModeHelper.mConfig.copy();
+        if (Flags.modesUi()) {
+            // Reading the configuration will upgrade it, so for equality comparison also upgrade
+            // the expected value.
+            SystemZenRules.maybeUpgradeRules(mContext, expected);
+        }
 
         ByteArrayOutputStream baos = writeXmlAndPurge(null);
         TypedXmlPullParser parser = Xml.newFastPullParser();
@@ -1494,7 +1513,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         ZenModeConfig.ZenRule original = expected.automaticRules.get(ruleId);
         ZenModeConfig.ZenRule current = mZenModeHelper.mConfig.automaticRules.get(ruleId);
 
-        assertEquals("Automatic rules mismatch", original, current);
+        assertEquals("Automatic rules mismatch: current vs expected: "
+                + new ZenModeDiff.RuleDiff(original, current), original, current);
     }
 
     @Test
@@ -1524,6 +1544,11 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelper.mConfig.automaticRules = automaticRules;
 
         ZenModeConfig expected = mZenModeHelper.mConfig.copy();
+        if (Flags.modesUi()) {
+            // Reading the configuration will upgrade it, so for equality comparison also upgrade
+            // the expected value.
+            SystemZenRules.maybeUpgradeRules(mContext, expected);
+        }
 
         ByteArrayOutputStream baos = writeXmlAndPurgeForUser(null, UserHandle.USER_SYSTEM);
         TypedXmlPullParser parser = getParserForByteStream(baos);
@@ -1532,7 +1557,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         ZenModeConfig.ZenRule original = expected.automaticRules.get(ruleId);
         ZenModeConfig.ZenRule current = mZenModeHelper.mConfig.automaticRules.get(ruleId);
 
-        assertEquals("Automatic rules mismatch", original, current);
+        assertEquals("Automatic rules mismatch: current vs expected: "
+                + new ZenModeDiff.RuleDiff(original, current), original, current);
     }
 
     @Test
@@ -2112,7 +2138,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         ZenModeConfig config = new ZenModeConfig();
         config.automaticRules = new ArrayMap<>();
         mZenModeHelper.mConfig = config;
-        mZenModeHelper.updateDefaultZenRules(Process.SYSTEM_UID); // shouldn't throw null pointer
+        mZenModeHelper.updateZenRulesOnLocaleChange(); // shouldn't throw null pointer
         mZenModeHelper.pullRules(events); // shouldn't throw null pointer
     }
 
@@ -2137,33 +2163,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         autoRules.put(SCHEDULE_DEFAULT_RULE_ID, updatedDefaultRule);
         mZenModeHelper.mConfig.automaticRules = autoRules;
 
-        mZenModeHelper.updateDefaultZenRules(Process.SYSTEM_UID);
-        assertEquals(updatedDefaultRule,
-                mZenModeHelper.mConfig.automaticRules.get(SCHEDULE_DEFAULT_RULE_ID));
-    }
-
-    @Test
-    public void testDoNotUpdateEnabledDefaultAutoRule() {
-        // mDefaultConfig is set to default config in setup by getDefaultConfigParser
-        when(mContext.checkCallingPermission(anyString()))
-                .thenReturn(PERMISSION_GRANTED);
-
-        // shouldn't update the rule that's enabled
-        ZenModeConfig.ZenRule updatedDefaultRule = new ZenModeConfig.ZenRule();
-        updatedDefaultRule.enabled = true;
-        updatedDefaultRule.modified = false;
-        updatedDefaultRule.creationTime = 0;
-        updatedDefaultRule.id = SCHEDULE_DEFAULT_RULE_ID;
-        updatedDefaultRule.name = "Schedule Default Rule";
-        updatedDefaultRule.zenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        updatedDefaultRule.conditionId = ZenModeConfig.toScheduleConditionId(new ScheduleInfo());
-        updatedDefaultRule.component = new ComponentName("android", "ScheduleConditionProvider");
-
-        ArrayMap<String, ZenModeConfig.ZenRule> autoRules = new ArrayMap<>();
-        autoRules.put(SCHEDULE_DEFAULT_RULE_ID, updatedDefaultRule);
-        mZenModeHelper.mConfig.automaticRules = autoRules;
-
-        mZenModeHelper.updateDefaultZenRules(Process.SYSTEM_UID);
+        mZenModeHelper.updateZenRulesOnLocaleChange();
         assertEquals(updatedDefaultRule,
                 mZenModeHelper.mConfig.automaticRules.get(SCHEDULE_DEFAULT_RULE_ID));
     }
@@ -2177,27 +2177,35 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // will update rule that is not enabled and modified
         ZenModeConfig.ZenRule customDefaultRule = new ZenModeConfig.ZenRule();
+        customDefaultRule.pkg = SystemZenRules.PACKAGE_ANDROID;
         customDefaultRule.enabled = false;
         customDefaultRule.modified = false;
         customDefaultRule.creationTime = 0;
         customDefaultRule.id = SCHEDULE_DEFAULT_RULE_ID;
         customDefaultRule.name = "Schedule Default Rule";
         customDefaultRule.zenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        customDefaultRule.conditionId = ZenModeConfig.toScheduleConditionId(new ScheduleInfo());
+        ScheduleInfo scheduleInfo = new ScheduleInfo();
+        scheduleInfo.days = new int[] { Calendar.SUNDAY };
+        scheduleInfo.startHour = 18;
+        scheduleInfo.endHour = 19;
+        customDefaultRule.conditionId = ZenModeConfig.toScheduleConditionId(scheduleInfo);
         customDefaultRule.component = new ComponentName("android", "ScheduleConditionProvider");
 
         ArrayMap<String, ZenModeConfig.ZenRule> autoRules = new ArrayMap<>();
         autoRules.put(SCHEDULE_DEFAULT_RULE_ID, customDefaultRule);
         mZenModeHelper.mConfig.automaticRules = autoRules;
 
-        mZenModeHelper.updateDefaultZenRules(Process.SYSTEM_UID);
+        mZenModeHelper.updateZenRulesOnLocaleChange();
         ZenModeConfig.ZenRule ruleAfterUpdating =
                 mZenModeHelper.mConfig.automaticRules.get(SCHEDULE_DEFAULT_RULE_ID);
         assertEquals(customDefaultRule.enabled, ruleAfterUpdating.enabled);
         assertEquals(customDefaultRule.modified, ruleAfterUpdating.modified);
         assertEquals(customDefaultRule.id, ruleAfterUpdating.id);
         assertEquals(customDefaultRule.conditionId, ruleAfterUpdating.conditionId);
-        assertFalse(Objects.equals(defaultRuleName, ruleAfterUpdating.name)); // update name
+        assertNotEquals(defaultRuleName, ruleAfterUpdating.name); // update name
+        if (Flags.modesUi()) {
+            assertThat(ruleAfterUpdating.triggerDescription).isNotEmpty(); // update trigger desc
+        }
     }
 
     @Test
@@ -3634,12 +3642,11 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mTestFlagResolver.setFlagOverride(LOG_DND_STATE_EVENTS, true);
         setupZenConfig();
 
-        // Event 1: turn on manual zen mode. Manual rule will have ACTIVE_RULE_TYPE_MANUAL
-        mZenModeHelper.setManualZenMode(ZEN_MODE_IMPORTANT_INTERRUPTIONS, null,
-                UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI, "", null, Process.SYSTEM_UID);
-
         // Create bedtime rule
+        // This one has INTERRUPTION_FILTER_ALL to make sure active rules still count when zen mode
+        // (in the notification filtering sense) is not on
         AutomaticZenRule bedtime = new AutomaticZenRule.Builder("Bedtime Mode (TM)", CONDITION_ID)
+                .setInterruptionFilter(INTERRUPTION_FILTER_ALL)
                 .setType(TYPE_BEDTIME)
                 .build();
         String bedtimeRuleId = mZenModeHelper.addAutomaticZenRule(mPkg, bedtime, UPDATE_ORIGIN_APP,
@@ -3652,17 +3659,21 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         String immersiveId = mZenModeHelper.addAutomaticZenRule(mPkg, immersive, UPDATE_ORIGIN_APP,
                 "reason", CUSTOM_PKG_UID);
 
-        // Event 2: Activate bedtime rule
+        // Event 1: Activate bedtime rule. This doesn't turn on notification filtering
         mZenModeHelper.setAutomaticZenRuleState(bedtimeRuleId,
                 new Condition(bedtime.getConditionId(), "", STATE_TRUE, SOURCE_SCHEDULE),
                 UPDATE_ORIGIN_APP, CUSTOM_PKG_UID);
+
+        // Event 2: turn on manual zen mode. Manual rule will have ACTIVE_RULE_TYPE_MANUAL
+        mZenModeHelper.setManualZenMode(ZEN_MODE_IMPORTANT_INTERRUPTIONS, null,
+                UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI, "", null, Process.SYSTEM_UID);
 
         // Event 3: Turn immersive on
         mZenModeHelper.setAutomaticZenRuleState(immersiveId,
                 new Condition(immersive.getConditionId(), "", STATE_TRUE, SOURCE_SCHEDULE),
                 UPDATE_ORIGIN_APP, CUSTOM_PKG_UID);
 
-        // Event 4: Turn off bedtime mode, leaving just unknown + immersive
+        // Event 4: Turn off bedtime mode, leaving just manual + immersive
         mZenModeHelper.setAutomaticZenRuleState(bedtimeRuleId,
                 new Condition(bedtime.getConditionId(), "", STATE_FALSE, SOURCE_SCHEDULE),
                 UPDATE_ORIGIN_APP, CUSTOM_PKG_UID);
@@ -3670,19 +3681,21 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // Total of 4 events
         assertEquals(4, mZenModeEventLogger.numLoggedChanges());
 
-        // First event: DND_TURNED_ON; active rules: 1; type is ACTIVE_RULE_TYPE_MANUAL
+        // First event: active rules changed; active rules: 1; type is ACTIVE_RULE_TYPE_MANUAL
         assertThat(mZenModeEventLogger.getEventId(0)).isEqualTo(
-                ZenModeEventLogger.ZenStateChangedEvent.DND_TURNED_ON.getId());
+                ZenModeEventLogger.ZenStateChangedEvent.DND_ACTIVE_RULES_CHANGED.getId());
         assertThat(mZenModeEventLogger.getChangedRuleType(0)).isEqualTo(
-                DNDProtoEnums.MANUAL_RULE);
+                DNDProtoEnums.AUTOMATIC_RULE);
         assertThat(mZenModeEventLogger.getNumRulesActive(0)).isEqualTo(1);
         int[] ruleTypes0 = mZenModeEventLogger.getActiveRuleTypes(0);
         assertThat(ruleTypes0.length).isEqualTo(1);
-        assertThat(ruleTypes0[0]).isEqualTo(ACTIVE_RULE_TYPE_MANUAL);
+        assertThat(ruleTypes0[0]).isEqualTo(TYPE_BEDTIME);
 
         // Second event: active rules: 2; types are TYPE_MANUAL and TYPE_BEDTIME
+        assertThat(mZenModeEventLogger.getEventId(1)).isEqualTo(
+                ZenModeEventLogger.ZenStateChangedEvent.DND_TURNED_ON.getId());
         assertThat(mZenModeEventLogger.getChangedRuleType(1)).isEqualTo(
-                DNDProtoEnums.AUTOMATIC_RULE);
+                DNDProtoEnums.MANUAL_RULE);
         assertThat(mZenModeEventLogger.getNumRulesActive(1)).isEqualTo(2);
         int[] ruleTypes1 = mZenModeEventLogger.getActiveRuleTypes(1);
         assertThat(ruleTypes1.length).isEqualTo(2);

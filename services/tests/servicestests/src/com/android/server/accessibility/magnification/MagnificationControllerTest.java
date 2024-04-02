@@ -1272,7 +1272,7 @@ public class MagnificationControllerTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_MAGNIFICATION_ALWAYS_DRAW_FULLSCREEN_BORDER)
+    @RequiresFlagsEnabled(Flags.FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER)
     public void onFullscreenMagnificationActivationState_systemUiBorderFlagOn_notifyConnection() {
         mMagnificationController.onFullScreenMagnificationActivationState(
                 TEST_DISPLAY, /* activated= */ true);
@@ -1282,7 +1282,7 @@ public class MagnificationControllerTest {
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_MAGNIFICATION_ALWAYS_DRAW_FULLSCREEN_BORDER)
+    @RequiresFlagsDisabled(Flags.FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER)
     public void
             onFullscreenMagnificationActivationState_systemUiBorderFlagOff_neverNotifyConnection() {
         mMagnificationController.onFullScreenMagnificationActivationState(

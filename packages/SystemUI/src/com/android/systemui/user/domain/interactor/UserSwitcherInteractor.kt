@@ -170,7 +170,8 @@ constructor(
                 keyguardInteractor.isKeyguardShowing,
             ) { _, userInfos, settings, isDeviceLocked ->
                 buildList {
-                    if (!isDeviceLocked || settings.isAddUsersFromLockscreen) {
+                    val canAccessUserSwitcher = !isDeviceLocked || settings.isAddUsersFromLockscreen
+                    if (canAccessUserSwitcher) {
                         // The device is locked and our setting to allow actions that add users
                         // from the lock-screen is not enabled. We can finish building the list
                         // here.
@@ -194,7 +195,10 @@ constructor(
                             when (it) {
                                 UserActionModel.ENTER_GUEST_MODE -> {
                                     val hasGuestUser = userInfos.any { it.isGuest }
-                                    if (!hasGuestUser && canCreateGuestUser(settings)) {
+                                    if (
+                                        !hasGuestUser &&
+                                            canCreateGuestUser(settings, canAccessUserSwitcher)
+                                    ) {
                                         add(UserActionModel.ENTER_GUEST_MODE)
                                     }
                                 }
@@ -204,7 +208,7 @@ constructor(
                                             manager,
                                             repository,
                                             settings.isUserSwitcherEnabled,
-                                            settings.isAddUsersFromLockscreen,
+                                            canAccessUserSwitcher
                                         )
 
                                     if (canCreateUsers) {
@@ -217,7 +221,7 @@ constructor(
                                             manager,
                                             repository,
                                             settings.isUserSwitcherEnabled,
-                                            settings.isAddUsersFromLockscreen,
+                                            canAccessUserSwitcher,
                                             supervisedUserPackageName,
                                         )
                                     ) {
@@ -229,11 +233,7 @@ constructor(
                         }
                     }
                     if (
-                        UserActionsUtil.canManageUsers(
-                            repository,
-                            settings.isUserSwitcherEnabled,
-                            settings.isAddUsersFromLockscreen,
-                        )
+                        UserActionsUtil.canManageUsers(repository, settings.isUserSwitcherEnabled)
                     ) {
                         add(UserActionModel.NAVIGATE_TO_USER_MANAGEMENT)
                     }
@@ -820,13 +820,16 @@ constructor(
         )
     }
 
-    private fun canCreateGuestUser(settings: UserSwitcherSettingsModel): Boolean {
+    private fun canCreateGuestUser(
+        settings: UserSwitcherSettingsModel,
+        canAccessUserSwitcher: Boolean
+    ): Boolean {
         return guestUserInteractor.isGuestUserAutoCreated ||
             UserActionsUtil.canCreateGuest(
                 manager,
                 repository,
                 settings.isUserSwitcherEnabled,
-                settings.isAddUsersFromLockscreen,
+                canAccessUserSwitcher,
             )
     }
 

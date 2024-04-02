@@ -23,7 +23,9 @@ import androidx.core.animation.ObjectAnimator
 import com.android.app.animation.Interpolators
 import com.android.app.animation.InterpolatorsAndroidX
 import com.android.systemui.Dumpable
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionChangeEvent
@@ -47,11 +49,14 @@ import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.min
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @SysUISingleton
 class NotificationWakeUpCoordinator
 @Inject
 constructor(
+    @Application applicationScope: CoroutineScope,
     dumpManager: DumpManager,
     private val mHeadsUpManager: HeadsUpManager,
     private val statusBarStateController: StatusBarStateController,
@@ -60,6 +65,7 @@ constructor(
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val logger: NotificationWakeUpCoordinatorLogger,
     private val notifsKeyguardInteractor: NotificationsKeyguardInteractor,
+    private val communalInteractor: CommunalInteractor,
 ) :
     OnHeadsUpChangedListener,
     StatusBarStateController.StateListener,
@@ -201,6 +207,13 @@ constructor(
                 }
             }
         )
+        applicationScope.launch {
+            communalInteractor.isIdleOnCommunal.collect {
+                if (!overrideDozeAmountIfCommunalShowing()) {
+                    maybeClearHardDozeAmountOverrideHidingNotifs()
+                }
+            }
+        }
     }
 
     fun setStackScroller(stackScrollerController: NotificationStackScrollLayoutController) {
@@ -302,6 +315,10 @@ constructor(
             return
         }
 
+        if (overrideDozeAmountIfCommunalShowing()) {
+            return
+        }
+
         if (clearHardDozeAmountOverride()) {
             return
         }
@@ -311,9 +328,12 @@ constructor(
 
     private fun setHardDozeAmountOverride(dozing: Boolean, source: String) {
         logger.logSetDozeAmountOverride(dozing = dozing, source = source)
+        val previousOverride = hardDozeAmountOverride
         hardDozeAmountOverride = if (dozing) 1f else 0f
         hardDozeAmountOverrideSource = source
-        updateDozeAmount()
+        if (previousOverride != hardDozeAmountOverride) {
+            updateDozeAmount()
+        }
     }
 
     private fun clearHardDozeAmountOverride(): Boolean {
@@ -434,6 +454,11 @@ constructor(
             return
         }
 
+        if (overrideDozeAmountIfCommunalShowing()) {
+            this.state = newState
+            return
+        }
+
         maybeClearHardDozeAmountOverrideHidingNotifs()
 
         this.state = newState
@@ -471,6 +496,18 @@ constructor(
         return false
     }
 
+    private fun overrideDozeAmountIfCommunalShowing(): Boolean {
+        if (communalInteractor.isIdleOnCommunal.value) {
+            if (statusBarStateController.state == StatusBarState.KEYGUARD) {
+                setHardDozeAmountOverride(dozing = true, source = "Override: communal (keyguard)")
+            } else {
+                setHardDozeAmountOverride(dozing = false, source = "Override: communal (shade)")
+            }
+            return true
+        }
+        return false
+    }
+
     /**
      * If the last [setDozeAmount] call was an override to hide notifications, then this call will
      * check for the set of states that may have caused that override, and if none of them still
@@ -483,20 +520,23 @@ constructor(
             val onKeyguard = statusBarStateController.state == StatusBarState.KEYGUARD
             val dozing = statusBarStateController.isDozing
             val bypass = bypassController.bypassEnabled
+            val idleOnCommunal = communalInteractor.isIdleOnCommunal.value
             val animating =
                 screenOffAnimationController.overrideNotificationsFullyDozingOnKeyguard()
-            // Overrides are set by [overrideDozeAmountIfAnimatingScreenOff] and
-            // [overrideDozeAmountIfBypass] based on 'animating' and 'bypass' respectively, so only
-            // clear the override if both those conditions are cleared.  But also require either
+            // Overrides are set by [overrideDozeAmountIfAnimatingScreenOff],
+            // [overrideDozeAmountIfBypass] and [overrideDozeAmountIfCommunalShowing] based on
+            // 'animating', 'bypass' and 'idleOnCommunal' respectively, so only clear the override
+            // if all of those conditions are cleared.  But also require either
             // !dozing or !onKeyguard because those conditions should indicate that we intend
             // notifications to be visible, and thus it is safe to unhide them.
-            val willRemove = (!onKeyguard || !dozing) && !bypass && !animating
+            val willRemove = (!onKeyguard || !dozing) && !bypass && !animating && !idleOnCommunal
             logger.logMaybeClearHardDozeAmountOverrideHidingNotifs(
                 willRemove = willRemove,
                 onKeyguard = onKeyguard,
                 dozing = dozing,
                 bypass = bypass,
                 animating = animating,
+                idleOnCommunal = idleOnCommunal,
             )
             if (willRemove) {
                 clearHardDozeAmountOverride()

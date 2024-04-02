@@ -31,16 +31,14 @@ import static android.companion.virtual.VirtualDeviceManager.ACTION_VIRTUAL_DEVI
 import static android.companion.virtual.VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID;
 import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.provider.Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 import static android.view.accessibility.AccessibilityManager.FlashNotificationReason;
-import static android.view.accessibility.AccessibilityManager.ShortcutType;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
 import static com.android.internal.accessibility.common.ShortcutConstants.USER_SHORTCUT_TYPES;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 import static com.android.internal.accessibility.util.AccessibilityStatsLogUtils.logAccessibilityShortcutActivated;
 import static com.android.internal.util.FunctionalUtils.ignoreRemoteException;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
@@ -149,7 +147,6 @@ import com.android.internal.accessibility.AccessibilityShortcutController.Framew
 import com.android.internal.accessibility.AccessibilityShortcutController.LaunchableFrameworkFeatureInfo;
 import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.accessibility.common.ShortcutConstants.FloatingMenuSize;
-import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity;
 import com.android.internal.accessibility.dialog.AccessibilityShortcutChooserActivity;
 import com.android.internal.accessibility.util.AccessibilityUtils;
@@ -164,6 +161,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IntPair;
 import com.android.internal.util.Preconditions;
+import com.android.modules.expresslog.Counter;
 import com.android.server.AccessibilityManagerInternal;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -242,6 +240,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private static final String SET_PIP_ACTION_REPLACEMENT =
             "setPictureInPictureActionReplacingConnection";
 
+    /**
+     * An intent action to launch Hearing devices dialog.
+     */
+    @VisibleForTesting
+    static final String ACTION_LAUNCH_HEARING_DEVICES_DIALOG =
+            "com.android.systemui.action.LAUNCH_HEARING_DEVICES_DIALOG";
+
     private static final char COMPONENT_NAME_SEPARATOR = ':';
 
     private static final int OWN_PROCESS_ID = android.os.Process.myPid();
@@ -252,6 +257,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     public static final int MAGNIFICATION_GESTURE_HANDLER_ID = 0;
 
     private static int sIdCounter = MAGNIFICATION_GESTURE_HANDLER_ID + 1;
+    /**
+     * The counter metric id tracking how many times users add qs shortcut for a11y features.
+     *
+     * <p>Defined in frameworks/proto_logging/stats/express/catalog/accessibility.cfg.
+     */
+    static final String METRIC_ID_QS_SHORTCUT_ADD = "accessibility.value_qs_shortcut_add";
+
+    /**
+     * The counter metric id tracking how many times users remove qs shortcut for a11y features.
+     *
+     * <p>Defined in frameworks/proto_logging/stats/express/catalog/accessibility.cfg.
+     */
+    static final String METRIC_ID_QS_SHORTCUT_REMOVE = "accessibility.value_qs_shortcut_remove";
+
 
     private final Context mContext;
 
@@ -1664,7 +1683,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         mMainHandler.sendMessage(obtainMessage(
                 AccessibilityManagerService::performAccessibilityShortcutInternal, this,
-                displayId, ACCESSIBILITY_BUTTON, targetName));
+                displayId, UserShortcutType.SOFTWARE, targetName));
     }
 
     /**
@@ -1767,6 +1786,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (serviceInfo != null && isAccessibilityServiceWarningRequired(serviceInfo)) {
                     // TODO(b/314850435): show full device control warning if needed after
                     // SysUI QS Panel can update live
+                    // The user attempts to add QS shortcut in QS Panel, but we don't actually
+                    // turn on the shortcut due to lack of full device control permission
+                    logMetricForQsShortcutConfiguration(/* enable= */ true, /* numOfFeatures= */ 1);
                     continue;
                 }
                 a11yFeaturesToEnable.add(a11yFeature);
@@ -2258,9 +2280,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private void showAccessibilityTargetsSelection(int displayId,
-            @ShortcutType int shortcutType) {
+            @UserShortcutType int shortcutType) {
         final Intent intent = new Intent(AccessibilityManager.ACTION_CHOOSE_ACCESSIBILITY_BUTTON);
-        final String chooserClassName = (shortcutType == ACCESSIBILITY_SHORTCUT_KEY)
+        final String chooserClassName = (shortcutType == UserShortcutType.HARDWARE)
                 ? AccessibilityShortcutChooserActivity.class.getName()
                 : AccessibilityButtonChooserActivity.class.getName();
         intent.setClassName(CHOOSER_PACKAGE_NAME, chooserClassName);
@@ -2291,6 +2313,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         } catch (ActivityNotFoundException ignore) {
             // ignore the exception
         }
+    }
+
+    private void launchHearingDevicesDialog() {
+        final Intent intent = new Intent(ACTION_LAUNCH_HEARING_DEVICES_DIALOG);
+        intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        intent.setPackage(
+                mContext.getString(com.android.internal.R.string.config_systemUi));
+        mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
     }
 
     private void notifyAccessibilityButtonVisibilityChangedLocked(boolean available) {
@@ -3345,7 +3375,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         final Set<String> currentTargets =
-                userState.getShortcutTargetsLocked(ACCESSIBILITY_SHORTCUT_KEY);
+                userState.getShortcutTargetsLocked(UserShortcutType.HARDWARE);
         if (targetsFromSetting.equals(currentTargets)) {
             return false;
         }
@@ -3376,7 +3406,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 userState.mUserId, str -> str, targetsFromSetting);
 
         final Set<String> currentTargets =
-                userState.getShortcutTargetsLocked(ACCESSIBILITY_BUTTON);
+                userState.getShortcutTargetsLocked(UserShortcutType.SOFTWARE);
         if (targetsFromSetting.equals(currentTargets)) {
             return false;
         }
@@ -3431,7 +3461,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     private void updateAccessibilityShortcutKeyTargetsLocked(AccessibilityUserState userState) {
         final Set<String> currentTargets =
-                userState.getShortcutTargetsLocked(ACCESSIBILITY_SHORTCUT_KEY);
+                userState.getShortcutTargetsLocked(UserShortcutType.HARDWARE);
         final int lastSize = currentTargets.size();
         if (lastSize == 0) {
             return;
@@ -3532,7 +3562,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     && userState.isMagnificationTwoFingerTripleTapEnabledLocked()));
 
         final boolean createConnectionForCurrentCapability =
-                com.android.window.flags.Flags.magnificationAlwaysDrawFullscreenBorder()
+                com.android.window.flags.Flags.alwaysDrawMagnificationFullscreenBorder()
                         || (userState.getMagnificationCapabilitiesLocked()
                                 != Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
 
@@ -3623,7 +3653,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         final Set<String> currentTargets =
-                userState.getShortcutTargetsLocked(ACCESSIBILITY_BUTTON);
+                userState.getShortcutTargetsLocked(UserShortcutType.SOFTWARE);
         final int lastSize = currentTargets.size();
         if (lastSize == 0) {
             return;
@@ -3663,7 +3693,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return;
         }
         final Set<String> buttonTargets =
-                userState.getShortcutTargetsLocked(ACCESSIBILITY_BUTTON);
+                userState.getShortcutTargetsLocked(UserShortcutType.SOFTWARE);
         int lastSize = buttonTargets.size();
         buttonTargets.removeIf(name -> {
             if (packageName != null && name != null && !name.contains(packageName)) {
@@ -3700,7 +3730,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         lastSize = buttonTargets.size();
 
         final Set<String> shortcutKeyTargets =
-                userState.getShortcutTargetsLocked(ACCESSIBILITY_SHORTCUT_KEY);
+                userState.getShortcutTargetsLocked(UserShortcutType.HARDWARE);
         final Set<String> qsShortcutTargets =
                 userState.getShortcutTargetsLocked(UserShortcutType.QUICK_SETTINGS);
         userState.mEnabledServices.forEach(componentName -> {
@@ -3806,10 +3836,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         final List<Pair<Integer, String>> shortcutTypeAndShortcutSetting = new ArrayList<>(3);
         shortcutTypeAndShortcutSetting.add(
-                new Pair<>(ACCESSIBILITY_SHORTCUT_KEY,
+                new Pair<>(UserShortcutType.HARDWARE,
                         Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE));
         shortcutTypeAndShortcutSetting.add(
-                new Pair<>(ACCESSIBILITY_BUTTON,
+                new Pair<>(UserShortcutType.SOFTWARE,
                         Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS));
         if (android.view.accessibility.Flags.a11yQsShortcut()) {
             shortcutTypeAndShortcutSetting.add(
@@ -3916,7 +3946,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         mMainHandler.sendMessage(obtainMessage(
                 AccessibilityManagerService::performAccessibilityShortcutInternal, this,
-                Display.DEFAULT_DISPLAY, ACCESSIBILITY_SHORTCUT_KEY, targetName));
+                Display.DEFAULT_DISPLAY, UserShortcutType.HARDWARE, targetName));
     }
 
     /**
@@ -3929,7 +3959,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      *        specified target.
      */
     private void performAccessibilityShortcutInternal(int displayId,
-            @ShortcutType int shortcutType, @Nullable String targetName) {
+            @UserShortcutType int shortcutType, @Nullable String targetName) {
         final List<String> shortcutTargets = getAccessibilityShortcutTargetsInternal(shortcutType);
         if (shortcutTargets.isEmpty()) {
             Slog.d(LOG_TAG, "No target to perform shortcut, shortcutType=" + shortcutType);
@@ -3980,7 +4010,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private boolean performAccessibilityFrameworkFeature(int displayId,
-            ComponentName assignedTarget, @ShortcutType int shortcutType) {
+            ComponentName assignedTarget, @UserShortcutType int shortcutType) {
         final Map<ComponentName, FrameworkFeatureInfo> frameworkFeatureMap =
                 AccessibilityShortcutController.getFrameworkShortcutFeaturesMap();
         if (!frameworkFeatureMap.containsKey(assignedTarget)) {
@@ -4029,12 +4059,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     /**
      * Perform accessibility service shortcut action.
      *
-     * 1) For {@link AccessibilityManager#ACCESSIBILITY_BUTTON} type and services targeting sdk
+     * 1) For {@link UserShortcutType#SOFTWARE} type and services targeting sdk
      *    version <= Q: callbacks to accessibility service if service is bounded and requests
      *    accessibility button.
-     * 2) For {@link AccessibilityManager#ACCESSIBILITY_SHORTCUT_KEY} type and service targeting sdk
+     * 2) For {@link UserShortcutType#HARDWARE} type and service targeting sdk
      *    version <= Q: turns on / off the accessibility service.
-     * 3) For {@link AccessibilityManager#ACCESSIBILITY_SHORTCUT_KEY} type and service targeting sdk
+     * 3) For {@link UserShortcutType#HARDWARE} type and service targeting sdk
      *    version > Q and request accessibility button: turn on the accessibility service if it's
      *    not in the enabled state.
      *    (It'll happen when a service is disabled and assigned to shortcut then upgraded.)
@@ -4045,7 +4075,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      *       button.
      */
     private boolean performAccessibilityShortcutTargetService(int displayId,
-            @ShortcutType int shortcutType, ComponentName assignedTarget) {
+            @UserShortcutType int shortcutType, ComponentName assignedTarget) {
         synchronized (mLock) {
             final AccessibilityUserState userState = getCurrentUserStateLocked();
             final AccessibilityServiceInfo installedServiceInfo =
@@ -4063,7 +4093,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final boolean requestA11yButton = (installedServiceInfo.flags
                     & FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0;
             // Turns on / off the accessibility service
-            if ((targetSdk <= Build.VERSION_CODES.Q && shortcutType == ACCESSIBILITY_SHORTCUT_KEY)
+            if ((targetSdk <= Build.VERSION_CODES.Q && shortcutType == UserShortcutType.HARDWARE)
                     || (targetSdk > Build.VERSION_CODES.Q && !requestA11yButton)) {
                 if (serviceConnection == null) {
                     logAccessibilityShortcutActivated(mContext, assignedTarget, shortcutType,
@@ -4077,7 +4107,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 }
                 return true;
             }
-            if (shortcutType == ACCESSIBILITY_SHORTCUT_KEY && targetSdk > Build.VERSION_CODES.Q
+            if (shortcutType == UserShortcutType.HARDWARE && targetSdk > Build.VERSION_CODES.Q
                     && requestA11yButton) {
                 if (!userState.getEnabledServicesLocked().contains(assignedTarget)) {
                     enableAccessibilityServiceLocked(assignedTarget, mCurrentUserId);
@@ -4102,7 +4132,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private void launchAccessibilityFrameworkFeature(int displayId, ComponentName assignedTarget) {
         if (assignedTarget.equals(ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME)) {
-            launchAccessibilitySubSettings(displayId, ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME);
+            //import com.android.systemui.Flags;
+            if (com.android.systemui.Flags.hearingAidsQsTileDialog()) {
+                launchHearingDevicesDialog();
+            } else {
+                launchAccessibilitySubSettings(displayId,
+                        ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME);
+            }
         }
     }
 
@@ -4183,6 +4219,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             );
 
             if (shortcutType == UserShortcutType.QUICK_SETTINGS) {
+                int numOfFeatureChanged = Math.abs(currentTargets.size() - validNewTargets.size());
+                logMetricForQsShortcutConfiguration(enable, numOfFeatureChanged);
                 userState.updateA11yQsTargetLocked(validNewTargets);
                 scheduleNotifyClientsOfServicesStateChangeLocked(userState);
                 onUserStateChangedLocked(userState);
@@ -4363,7 +4401,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
-    public List<String> getAccessibilityShortcutTargets(@ShortcutType int shortcutType) {
+    public List<String> getAccessibilityShortcutTargets(@UserShortcutType int shortcutType) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".getAccessibilityShortcutTargets",
                     FLAGS_ACCESSIBILITY_MANAGER, "shortcutType=" + shortcutType);
@@ -4377,12 +4415,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return getAccessibilityShortcutTargetsInternal(shortcutType);
     }
 
-    private List<String> getAccessibilityShortcutTargetsInternal(@ShortcutType int shortcutType) {
+    private List<String> getAccessibilityShortcutTargetsInternal(
+            @UserShortcutType int shortcutType) {
         synchronized (mLock) {
             final AccessibilityUserState userState = getCurrentUserStateLocked();
             final ArrayList<String> shortcutTargets = new ArrayList<>(
                     userState.getShortcutTargetsLocked(shortcutType));
-            if (shortcutType != ACCESSIBILITY_BUTTON) {
+            if (shortcutType != UserShortcutType.SOFTWARE) {
                 return shortcutTargets;
             }
             // Adds legacy a11y services requesting a11y button into the list.
@@ -4875,7 +4914,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
         }
         // Warning is not required if the service is already assigned to a shortcut.
-        for (int shortcutType : AccessibilityManager.SHORTCUT_TYPES) {
+        for (int shortcutType : ShortcutConstants.USER_SHORTCUT_TYPES) {
             if (getAccessibilityShortcutTargets(shortcutType).contains(
                     componentName.flattenToString())) {
                 return false;
@@ -6215,7 +6254,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-
     /**
      * Bypasses the timeout restriction if volume key shortcut assigned.
      */
@@ -6224,5 +6262,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 userId,
                 Settings.Secure.SKIP_ACCESSIBILITY_SHORTCUT_DIALOG_TIMEOUT_RESTRICTION,
                 /* true */ 1);
+    }
+
+    /**
+     * Log the metric when the user add/remove qs shortcut for accessibility features. Use the
+     * callingUid to know where the users configure the a11y qs shortcuts.
+     */
+    private void logMetricForQsShortcutConfiguration(boolean enable, int numOfFeatures) {
+        if (numOfFeatures <= 0) {
+            // Skip logging metric if no a11y features are configured
+            return;
+        }
+        String metricId = enable ? METRIC_ID_QS_SHORTCUT_ADD : METRIC_ID_QS_SHORTCUT_REMOVE;
+        Counter.logIncrementWithUid(metricId, Binder.getCallingUid(), numOfFeatures);
     }
 }

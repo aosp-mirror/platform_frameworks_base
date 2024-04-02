@@ -2054,8 +2054,8 @@ public class JobInfo implements Parcelable {
          * or in a state where launching an activity is allowed, as defined
          * <a href=
          * "https://developer.android.com/guide/components/activities/background-starts#exceptions">
-         * here</a>. Attempting to schedule one outside of these conditions will throw a
-         * {@link SecurityException}.
+         * here</a>. Attempting to schedule one outside of these conditions will return a
+         * {@link JobScheduler#RESULT_FAILURE}.
          *
          * <p>
          * This should <b>NOT</b> be used for automatic features.

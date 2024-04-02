@@ -301,7 +301,7 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Spustit zvukový kodek Bluetooth LDAC\nVýběr kodeku: kvalita přehrávání"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Streamování: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Soukromý DNS"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Vyberte soukromý režim DNS"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Režim výběru soukromého DNS"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Vypnuto"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automaticky"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Název hostitele poskytovatele soukromého DNS"</string>
@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Předpokládat, že aplikace podporují moderní formáty"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Zobrazit oznámení o překódování"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Deaktivovat mezipaměť pro překódování"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Nastavení Widevine"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Vynucení L3 fallback"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Vybrat vynucení L3 fallback"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Spuštěné služby"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Umožňuje zobrazit a ovládat aktuálně spuštěné služby"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementace WebView"</string>

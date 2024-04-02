@@ -345,7 +345,7 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * @hide
      */
-    private static final int MAX_ADAPTER_CONVERSION_WAITING_TIME_MS = 5000;
+    private static final int MAX_ADAPTER_CONVERSION_WAITING_TIME_MS = 20_000;
 
     /**
      * Application that hosts the remote views.

@@ -16,9 +16,7 @@
 
 package com.android.systemui.media.controls
 
-import android.R
 import android.app.smartspace.SmartspaceAction
-import android.content.Context
 import android.graphics.drawable.Icon
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -26,17 +24,9 @@ import com.android.systemui.util.mockito.whenever
 class MediaTestHelper {
     companion object {
         /** Returns a list of three mocked recommendations */
-        fun getValidRecommendationList(context: Context): List<SmartspaceAction> {
+        fun getValidRecommendationList(mediaIcon: Icon): List<SmartspaceAction> {
             val mediaRecommendationItem =
-                mock<SmartspaceAction> {
-                    whenever(icon)
-                        .thenReturn(
-                            Icon.createWithResource(
-                                context,
-                                R.drawable.ic_media_play,
-                            )
-                        )
-                }
+                mock<SmartspaceAction> { whenever(icon).thenReturn(mediaIcon) }
             return listOf(mediaRecommendationItem, mediaRecommendationItem, mediaRecommendationItem)
         }
     }

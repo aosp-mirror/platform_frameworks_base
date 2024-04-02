@@ -23,7 +23,7 @@ import android.util.Size;
 /**
  * Class to handle SharedPreference for window magnification size.
  */
-public final class WindowMagnificationSizePrefs {
+final class WindowMagnificationSizePrefs {
 
     private static final String WINDOW_MAGNIFICATION_PREFERENCES =
             "window_magnification_preferences";

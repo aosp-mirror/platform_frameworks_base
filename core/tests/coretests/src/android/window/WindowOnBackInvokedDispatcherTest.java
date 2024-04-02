@@ -96,7 +96,7 @@ public class WindowOnBackInvokedDispatcherTest {
         doReturn(mApplicationInfo).when(mContext).getApplicationInfo();
 
         mDispatcher = new WindowOnBackInvokedDispatcher(mContext);
-        mDispatcher.attachToWindow(mWindowSession, mWindow);
+        mDispatcher.attachToWindow(mWindowSession, mWindow, null);
     }
 
     private void waitForIdle() {

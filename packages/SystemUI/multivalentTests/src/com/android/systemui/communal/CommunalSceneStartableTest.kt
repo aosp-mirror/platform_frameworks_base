@@ -88,7 +88,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
             testScope.runTest {
                 val scene by collectLastValue(communalInteractor.desiredScene)
 
-                communalInteractor.onSceneChanged(CommunalScenes.Communal)
+                communalInteractor.changeScene(CommunalScenes.Communal)
                 assertThat(scene).isEqualTo(CommunalScenes.Communal)
 
                 fakeKeyguardTransitionRepository.sendTransitionSteps(
@@ -158,7 +158,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 val scene by collectLastValue(communalInteractor.desiredScene)
-                communalInteractor.onSceneChanged(CommunalScenes.Communal)
+                communalInteractor.changeScene(CommunalScenes.Communal)
                 assertThat(scene).isEqualTo(CommunalScenes.Communal)
 
                 fakeKeyguardTransitionRepository.sendTransitionSteps(
@@ -179,7 +179,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 val scene by collectLastValue(communalInteractor.desiredScene)
-                communalInteractor.onSceneChanged(CommunalScenes.Communal)
+                communalInteractor.changeScene(CommunalScenes.Communal)
                 assertThat(scene).isEqualTo(CommunalScenes.Communal)
 
                 fakeKeyguardTransitionRepository.sendTransitionSteps(
@@ -207,7 +207,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
     fun dockingOnLockscreen_forcesCommunal() =
         with(kosmos) {
             testScope.runTest {
-                communalInteractor.onSceneChanged(CommunalScenes.Blank)
+                communalInteractor.changeScene(CommunalScenes.Blank)
                 val scene by collectLastValue(communalInteractor.desiredScene)
 
                 // device is docked while on the lockscreen
@@ -229,7 +229,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
     fun dockingOnLockscreen_doesNotForceCommunalIfDreamStarts() =
         with(kosmos) {
             testScope.runTest {
-                communalInteractor.onSceneChanged(CommunalScenes.Blank)
+                communalInteractor.changeScene(CommunalScenes.Blank)
                 val scene by collectLastValue(communalInteractor.desiredScene)
 
                 // device is docked while on the lockscreen
@@ -261,7 +261,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
             testScope.runTest {
                 // Device is dreaming and on communal.
                 fakeKeyguardRepository.setDreaming(true)
-                communalInteractor.onSceneChanged(CommunalScenes.Communal)
+                communalInteractor.changeScene(CommunalScenes.Communal)
 
                 val scene by collectLastValue(communalInteractor.desiredScene)
                 assertThat(scene).isEqualTo(CommunalScenes.Communal)
@@ -278,7 +278,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
             testScope.runTest {
                 // Device is not dreaming and on communal.
                 fakeKeyguardRepository.setDreaming(false)
-                communalInteractor.onSceneChanged(CommunalScenes.Communal)
+                communalInteractor.changeScene(CommunalScenes.Communal)
 
                 // Scene stays as Communal
                 advanceTimeBy(SCREEN_TIMEOUT.milliseconds)
@@ -293,7 +293,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
             testScope.runTest {
                 // Device is dreaming and on communal.
                 fakeKeyguardRepository.setDreaming(true)
-                communalInteractor.onSceneChanged(CommunalScenes.Communal)
+                communalInteractor.changeScene(CommunalScenes.Communal)
 
                 val scene by collectLastValue(communalInteractor.desiredScene)
                 assertThat(scene).isEqualTo(CommunalScenes.Communal)
@@ -316,7 +316,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
             testScope.runTest {
                 // Device is on communal, but not dreaming.
                 fakeKeyguardRepository.setDreaming(false)
-                communalInteractor.onSceneChanged(CommunalScenes.Communal)
+                communalInteractor.changeScene(CommunalScenes.Communal)
 
                 val scene by collectLastValue(communalInteractor.desiredScene)
                 assertThat(scene).isEqualTo(CommunalScenes.Communal)
@@ -338,7 +338,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
             testScope.runTest {
                 // Device is dreaming and on communal.
                 fakeKeyguardRepository.setDreaming(true)
-                communalInteractor.onSceneChanged(CommunalScenes.Communal)
+                communalInteractor.changeScene(CommunalScenes.Communal)
 
                 val scene by collectLastValue(communalInteractor.desiredScene)
                 assertThat(scene).isEqualTo(CommunalScenes.Communal)
@@ -367,7 +367,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
 
                 // Device is dreaming and on communal.
                 fakeKeyguardRepository.setDreaming(true)
-                communalInteractor.onSceneChanged(CommunalScenes.Communal)
+                communalInteractor.changeScene(CommunalScenes.Communal)
 
                 val scene by collectLastValue(communalInteractor.desiredScene)
                 assertThat(scene).isEqualTo(CommunalScenes.Communal)

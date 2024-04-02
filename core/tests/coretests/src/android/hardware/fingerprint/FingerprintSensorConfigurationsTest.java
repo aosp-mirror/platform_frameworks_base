@@ -18,13 +18,10 @@ package android.hardware.fingerprint;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.hardware.biometrics.fingerprint.IFingerprint;
-import android.hardware.biometrics.fingerprint.SensorProps;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 
@@ -37,8 +34,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import java.util.function.Function;
-
 @Presubmit
 @SmallTest
 public class FingerprintSensorConfigurationsTest {
@@ -48,10 +43,6 @@ public class FingerprintSensorConfigurationsTest {
     private Context mContext;
     @Mock
     private Resources mResources;
-    @Mock
-    private IFingerprint mFingerprint;
-    @Mock
-    private Function<String, IFingerprint> mGetIFingerprint;
 
     private final String[] mAidlInstances = new String[]{"default", "virtual"};
     private String[] mHidlConfigStrings = new String[]{"0:2:15", "0:8:15"};
@@ -59,8 +50,6 @@ public class FingerprintSensorConfigurationsTest {
 
     @Before
     public void setUp() throws RemoteException {
-        when(mGetIFingerprint.apply(anyString())).thenReturn(mFingerprint);
-        when(mFingerprint.getSensorProps()).thenReturn(new SensorProps[]{});
         when(mContext.getResources()).thenReturn(mResources);
     }
 
@@ -68,7 +57,7 @@ public class FingerprintSensorConfigurationsTest {
     public void testAidlInstanceSensorProps() {
         mFingerprintSensorConfigurations = new FingerprintSensorConfigurations(
                 true /* resetLockoutRequiresHardwareAuthToken */);
-        mFingerprintSensorConfigurations.addAidlSensors(mAidlInstances, mGetIFingerprint);
+        mFingerprintSensorConfigurations.addAidlSensors(mAidlInstances);
 
         assertThat(mFingerprintSensorConfigurations.hasSensorConfigurations()).isTrue();
         assertThat(!mFingerprintSensorConfigurations.isSingleSensorConfigurationPresent())

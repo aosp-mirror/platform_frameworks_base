@@ -1773,7 +1773,12 @@ public class ZenModeConfig implements Parcelable {
         return true;
     }
 
+    /**
+     * Returns the {@link ScheduleInfo} encoded in the condition id, or {@code null} if it could not
+     * be decoded.
+     */
     @UnsupportedAppUsage
+    @Nullable
     public static ScheduleInfo tryParseScheduleConditionId(Uri conditionId) {
         final boolean isSchedule =  conditionId != null
                 && Condition.SCHEME.equals(conditionId.getScheme())
@@ -1882,6 +1887,11 @@ public class ZenModeConfig implements Parcelable {
         return tryParseEventConditionId(conditionId) != null;
     }
 
+    /**
+     * Returns the {@link EventInfo} encoded in the condition id, or {@code null} if it could not be
+     * decoded.
+     */
+    @Nullable
     public static EventInfo tryParseEventConditionId(Uri conditionId) {
         final boolean isEvent = conditionId != null
                 && Condition.SCHEME.equals(conditionId.getScheme())

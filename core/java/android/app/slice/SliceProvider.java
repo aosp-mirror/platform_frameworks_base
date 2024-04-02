@@ -91,7 +91,12 @@ import java.util.Set;
  * </pre>
  *
  * @see Slice
+ * @deprecated Slice framework has been deprecated, it will not receive any updates from
+ *          {@link android.os.Build.VANILLA_ICE_CREAM} and forward. If you are looking for a
+ *          framework that sends displayable data from one app to another, consider using
+ *          {@link android.app.appsearch.AppSearchManager}.
  */
+@Deprecated
 public abstract class SliceProvider extends ContentProvider {
     /**
      * This is the Android platform's MIME type for a URI

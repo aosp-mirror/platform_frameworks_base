@@ -747,7 +747,7 @@ final class InstallPackageHelper {
                                 onInstallComplete(PackageManager.INSTALL_SUCCEEDED, mContext,
                                         onCompleteSender);
                             }
-                        });
+                        }, pkgSetting.getAppId(), callingUid, pkgSetting.isSystem());
                 restoreAndPostInstall(request);
             }
         } finally {

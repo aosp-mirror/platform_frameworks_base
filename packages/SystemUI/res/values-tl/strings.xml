@@ -86,8 +86,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Na-block ng iyong IT admin ang pagkuha ng mga screenshot"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"I-edit"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"I-edit ang screenshot"</string>
-    <!-- no translation found for screenshot_share_label (1653061117238861559) -->
-    <skip />
+    <string name="screenshot_share_label" msgid="1653061117238861559">"Ibahagi"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Ibahagi ang screenshot"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Mag-capture pa"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"I-dismiss ang screenshot"</string>
@@ -152,6 +151,7 @@
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Sina-scan ang mukha"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Ipadala"</string>
     <string name="cancel" msgid="1089011503403416730">"Kanselahin"</string>
+    <string name="biometric_dialog_logo" msgid="7681107853070774595">"Logo ng app"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Kumpirmahin"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Subukang muli"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"I-tap para kanselahin ang pag-authenticate"</string>
@@ -166,6 +166,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Nakilala ang mukha. Pindutin ang unlock para magpatuloy."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Na-authenticate"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Kanselahin ang Pag-authenticate"</string>
+    <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Higit Pang Opsyon"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Gumamit ng PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Gumamit ng pattern"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Gumamit ng password"</string>
@@ -362,6 +363,8 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Standard"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Katamtaman"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Mataas"</string>
+    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"I-unblock ang mikropono ng device?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"I-unblock ang camera ng device?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"I-unblock ang camera at mikropono ng device?"</string>
@@ -439,6 +442,10 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Alisin"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Magdagdag ng widget"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Tapos na"</string>
+    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
+    <skip />
+    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
+    <skip />
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Payagan ang anumang widget sa lock screen?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Buksan ang mga setting"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"I-unpause ang mga work app?"</string>
@@ -464,7 +471,7 @@
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Ang serbisyong nagbibigay ng function na ito ay magkakaroon ng access sa lahat ng impormasyong nakikita sa iyong screen o pine-play mula sa device mo habang nagre-record o nagka-cast. Kasama rito ang impormasyong tulad ng mga password, detalye ng pagbabayad, larawan, mensahe, at audio na pine-play mo."</string>
     <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Buong screen"</string>
     <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Isang app"</string>
-    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Ibahagi o i-record ang isang app"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"I-share o i-record ang isang app"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Simulang mag-record o mag-cast gamit ang <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Kapag nagbabahagi, nagre-record, o nagka-cast ka, may access ang <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sa kahit anong nakikita sa iyong screen o pine-play sa device mo. Kaya mag-ingat sa mga bagay-bagay tulad ng mga password, detalye ng pagbabayad, mensahe, larawan, at audio at video."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Kapag nagbabahagi, nagre-record, o nagka-cast ka ng app, may access ang <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sa kahit anong ipinapakita o pine-play sa app na iyon. Kaya mag-ingat sa mga bagay-bagay tulad ng mga password, detalye ng pagbabayad, mensahe, larawan, at audio at video."</string>
@@ -763,10 +770,8 @@
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Lumipat sa split screen nang nasa RHS ang kasalukuyang app"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Lumipat sa split screen nang nasa LHS ang kasalukuyang app"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Lumipat sa full screen mula sa split screen"</string>
-    <!-- no translation found for system_multitasking_splitscreen_focus_rhs (3838578650313318508) -->
-    <skip />
-    <!-- no translation found for system_multitasking_splitscreen_focus_lhs (3164261844398662518) -->
-    <skip />
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Lumipat sa app sa kanan o ibaba habang ginagamit ang split screen"</string>
+    <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Lumipat sa app sa kaliwa o itaas habang ginagamit ang split screen"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Habang nasa split screen: magpalit-palit ng app"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Input"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Lumipat sa susunod na wika"</string>

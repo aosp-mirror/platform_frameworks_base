@@ -247,7 +247,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
         if (nowExpanded) {
             if (mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
                 mShadeTransitionController.goToLockedShade(clickedEntry.getRow());
-            } else if (clickedEntry.isSensitive()
+            } else if (clickedEntry.isSensitive().getValue()
                     && mDynamicPrivacyController.isInLockedDownShade()) {
                 mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
                 mActivityStarter.dismissKeyguardThenExecute(() -> false /* dismissAction */

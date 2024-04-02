@@ -86,8 +86,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"您的 IT 管理员已禁止截取屏幕截图"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"编辑"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"编辑屏幕截图"</string>
-    <!-- no translation found for screenshot_share_label (1653061117238861559) -->
-    <skip />
+    <string name="screenshot_share_label" msgid="1653061117238861559">"分享"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"分享屏幕截图"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"截取更多内容"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"关闭屏幕截图"</string>
@@ -152,6 +151,7 @@
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"正在扫描面孔"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"发送"</string>
     <string name="cancel" msgid="1089011503403416730">"取消"</string>
+    <string name="biometric_dialog_logo" msgid="7681107853070774595">"应用徽标"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"确认"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"重试"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"点按即可取消身份验证"</string>
@@ -166,6 +166,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"识别出面孔。按下解锁图标即可继续。"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"已经过身份验证"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"取消身份验证"</string>
+    <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"更多选项"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"使用 PIN 码"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"使用图案"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"使用密码"</string>
@@ -362,6 +363,8 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"标准"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"中"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"高"</string>
+    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"要解锁设备麦克风吗？"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"要解锁设备摄像头吗？"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"要解锁设备摄像头和麦克风吗？"</string>
@@ -439,6 +442,10 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"移除"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"添加微件"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"完成"</string>
+    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
+    <skip />
+    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
+    <skip />
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"允许在锁屏状态下显示任何微件？"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"打开设置"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"是否为工作应用解除暂停状态？"</string>
@@ -491,7 +498,7 @@
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"静音"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"通知"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"对话"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"清除所有无声通知"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"清除所有静音通知"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"勿扰模式暂停的通知"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"立即开始"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"没有通知"</string>
@@ -540,10 +547,8 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"此设备由您的家长管理。您的家长可以查看和管理相关信息，例如您使用的应用、您的位置信息和设备使用时间。"</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"由 TrustAgent 保持解锁状态"</string>
-    <!-- no translation found for kg_prompt_after_adaptive_auth_lock (2587481497846342760) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_after_adaptive_auth_lock (2323400645470712787) -->
-    <skip />
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"尝试验证身份的次数过多，设备已锁定"</string>
+    <string name="keyguard_indication_after_adaptive_auth_lock" msgid="2323400645470712787">"设备已锁定\n未能验证身份"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>（<xliff:g id="EXIT_CONDITION">%2$s</xliff:g>）"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"声音设置"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"自动生成媒体字幕"</string>
@@ -595,7 +600,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s。点按即可设为静音，但可能会同时将无障碍服务设为静音。"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s。点按即可设为振动。"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s。点按即可设为静音。"</string>
-    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"噪声控制"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"降噪"</string>
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"空间音频"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"关闭"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"固定"</string>
@@ -765,10 +770,8 @@
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"进入分屏模式，当前应用显示于右侧"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"进入分屏模式，当前应用显示于左侧"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"从分屏模式切换为全屏"</string>
-    <!-- no translation found for system_multitasking_splitscreen_focus_rhs (3838578650313318508) -->
-    <skip />
-    <!-- no translation found for system_multitasking_splitscreen_focus_lhs (3164261844398662518) -->
-    <skip />
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"使用分屏模式时，切换到右侧或下方的应用"</string>
+    <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"使用分屏模式时，切换到左侧或上方的应用"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"在分屏期间：将一个应用替换为另一个应用"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"输入"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"切换到下一种语言"</string>
@@ -1166,7 +1169,7 @@
     <string name="mobile_data_connection_active" msgid="944490013299018227">"已连接"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"已暂时连接"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"连接状况不佳"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"系统将不会自动连接到移动数据网络"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"不会自动连接到移动数据网络"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"无网络连接"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"没有其他可用网络"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"没有可用网络"</string>
@@ -1261,7 +1264,7 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"切换到工作资料"</string>
     <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"安装工作电话应用"</string>
     <string name="call_from_work_profile_close" msgid="5830072964434474143">"取消"</string>
-    <string name="lock_screen_settings" msgid="6152703934761402399">"自定义锁屏状态"</string>
+    <string name="lock_screen_settings" msgid="6152703934761402399">"自定义锁屏"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"解锁以自定义锁定屏幕"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"没有 WLAN 连接"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"已禁用摄像头"</string>

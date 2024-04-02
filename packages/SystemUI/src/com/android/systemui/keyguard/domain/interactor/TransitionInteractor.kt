@@ -29,11 +29,11 @@ import com.android.systemui.util.kotlin.sample
 import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * Each TransitionInteractor is responsible for determining under which conditions to notify
@@ -78,32 +78,38 @@ sealed class TransitionInteractor(
         // a bugreport.
         ownerReason: String = "",
     ): UUID? {
-        if (
-            fromState != transitionInteractor.startedKeyguardState.replayCache.last() &&
-                fromState != transitionInteractor.finishedKeyguardState.replayCache.last()
-        ) {
+        if (fromState != transitionInteractor.currentTransitionInfoInternal.value.to) {
             Log.e(
                 name,
-                "startTransition: We were asked to transition from " +
-                    "$fromState to $toState, however we last finished a transition to " +
-                    "${transitionInteractor.finishedKeyguardState.replayCache.last()}, " +
-                    "and last started a transition to " +
-                    "${transitionInteractor.startedKeyguardState.replayCache.last()}. " +
-                    "Ignoring startTransition, but this should never happen."
+                "Ignoring startTransition: This interactor asked to transition from " +
+                    "$fromState -> $toState, but we last transitioned to " +
+                    "${transitionInteractor.currentTransitionInfoInternal.value.to}, not " +
+                    "$fromState. This should never happen - check currentTransitionInfoInternal " +
+                    "or use filterRelevantKeyguardState before starting transitions."
             )
+
+            if (fromState == transitionInteractor.finishedKeyguardState.replayCache.last()) {
+                Log.e(
+                    name,
+                    "This transition would not have been ignored prior to ag/26681239, since we " +
+                        "are FINISHED in $fromState (but have since started another transition). " +
+                        "If ignoring this transition has caused a regression, fix it by ensuring " +
+                        "that transitions are exclusively started from the most recently started " +
+                        "state."
+                )
+            }
             return null
         }
-        return withContext(mainDispatcher) {
-            transitionRepository.startTransition(
-                TransitionInfo(
-                    name + if (ownerReason.isNotBlank()) "($ownerReason)" else "",
-                    fromState,
-                    toState,
-                    animator,
-                    modeOnCanceled,
-                )
+
+        return transitionRepository.startTransition(
+            TransitionInfo(
+                name + if (ownerReason.isNotBlank()) "($ownerReason)" else "",
+                fromState,
+                toState,
+                animator,
+                modeOnCanceled,
             )
-        }
+        )
     }
 
     /**
@@ -166,15 +172,14 @@ sealed class TransitionInteractor(
      * state, [startTransitionTo] would complain anyway.
      */
     suspend fun listenForSleepTransition(
-        from: KeyguardState,
         modeOnCanceledFromStartedStep: (TransitionStep) -> TransitionModeOnCanceled = {
             TransitionModeOnCanceled.LAST_VALUE
         }
     ) {
         powerInteractor.isAsleep
             .filter { isAsleep -> isAsleep }
+            .filterRelevantKeyguardState()
             .sample(startedKeyguardTransitionStep)
-            .filter { startedStep -> startedStep.to == from }
             .map(modeOnCanceledFromStartedStep)
             .collect { modeOnCanceled ->
                 startTransitionTo(
@@ -208,6 +213,34 @@ sealed class TransitionInteractor(
                     }
             }
         }
+    }
+
+    /**
+     * Whether we're in the KeyguardState relevant to this From*TransitionInteractor (which we know
+     * from [fromState]).
+     *
+     * This uses [KeyguardTransitionInteractor.currentTransitionInfoInternal], which is more up to
+     * date than [startedKeyguardState] as it does not wait for the emission of the first STARTED
+     * step.
+     */
+    fun inOrTransitioningToRelevantKeyguardState(): Boolean {
+        return transitionInteractor.currentTransitionInfoInternal.value.to == fromState
+    }
+
+    /**
+     * Filters emissions whenever we're not in a KeyguardState relevant to this
+     * From*TransitionInteractor (which we know from [fromState]).
+     */
+    fun <T> Flow<T>.filterRelevantKeyguardState(): Flow<T> {
+        return filter { inOrTransitioningToRelevantKeyguardState() }
+    }
+
+    /**
+     * Filters emissions whenever we're not in a KeyguardState relevant to this
+     * From*TransitionInteractor (which we know from [fromState]).
+     */
+    fun <T> Flow<T>.filterRelevantKeyguardStateAnd(predicate: (T) -> Boolean): Flow<T> {
+        return filter { inOrTransitioningToRelevantKeyguardState() && predicate.invoke(it) }
     }
 
     /**

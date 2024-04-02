@@ -512,7 +512,7 @@ public final class DreamManagerService extends SystemService {
     }
 
     private void startDozingInternal(IBinder token, int screenState,
-            int screenBrightness) {
+            @Display.StateReason int reason, int screenBrightness) {
         if (DEBUG) {
             Slog.d(TAG, "Dream requested to start dozing: " + token
                     + ", screenState=" + screenState
@@ -524,7 +524,7 @@ public final class DreamManagerService extends SystemService {
                 mCurrentDream.dozeScreenState = screenState;
                 mCurrentDream.dozeScreenBrightness = screenBrightness;
                 mPowerManagerInternal.setDozeOverrideFromDreamManager(
-                        screenState, screenBrightness);
+                        screenState, reason, screenBrightness);
                 if (!mCurrentDream.isDozing) {
                     mCurrentDream.isDozing = true;
                     mDozeWakeLock.acquire();
@@ -543,7 +543,9 @@ public final class DreamManagerService extends SystemService {
                 mCurrentDream.isDozing = false;
                 mDozeWakeLock.release();
                 mPowerManagerInternal.setDozeOverrideFromDreamManager(
-                        Display.STATE_UNKNOWN, PowerManager.BRIGHTNESS_DEFAULT);
+                        Display.STATE_UNKNOWN,
+                        Display.STATE_REASON_DREAM_MANAGER,
+                        PowerManager.BRIGHTNESS_DEFAULT);
             }
         }
     }
@@ -1046,7 +1048,9 @@ public final class DreamManagerService extends SystemService {
         }
 
         @Override // Binder call
-        public void startDozing(IBinder token, int screenState, int screenBrightness) {
+        public void startDozing(
+                IBinder token, int screenState, @Display.StateReason int reason,
+                int screenBrightness) {
             // Requires no permission, called by Dream from an arbitrary process.
             if (token == null) {
                 throw new IllegalArgumentException("token must not be null");
@@ -1054,7 +1058,7 @@ public final class DreamManagerService extends SystemService {
 
             final long ident = Binder.clearCallingIdentity();
             try {
-                startDozingInternal(token, screenState, screenBrightness);
+                startDozingInternal(token, screenState, reason, screenBrightness);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

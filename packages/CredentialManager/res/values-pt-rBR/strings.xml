@@ -39,12 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Estamos avançando em direção a um futuro sem senhas, mas elas ainda vão estar disponíveis junto às chaves de acesso."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Escolha onde salvar suas <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecione um gerenciador de senhas para salvar suas informações e fazer login mais rapidamente na próxima vez"</string>
-    <!-- no translation found for choose_create_option_passkey_title (8762295821604276511) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (4481366993598649224) -->
-    <skip />
-    <!-- no translation found for choose_create_option_sign_in_title (7092914088455358079) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Criar chave de acesso para fazer login no app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"Salvar senha para fazer login no app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Salvar informações de login do app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"chave de acesso"</string>
     <string name="password" msgid="6738570945182936667">"senha"</string>
     <string name="passkeys" msgid="5733880786866559847">"chaves de acesso"</string>
@@ -73,8 +70,7 @@
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Dispensar"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Usar sua chave de acesso salva para o app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Usar a senha salva para o app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <!-- no translation found for get_dialog_title_single_tap_for (2057945648748859483) -->
-    <skip />
+    <string name="get_dialog_title_single_tap_for" msgid="2057945648748859483">"Use o bloqueio de tela para fazer login no app <xliff:g id="APP_NAME">%1$s</xliff:g> com a conta <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Usar seu login para o app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Desbloquear opções de login para o app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Escolha uma chave de acesso salva para o app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

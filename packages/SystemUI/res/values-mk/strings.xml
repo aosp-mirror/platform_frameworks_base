@@ -86,8 +86,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Зачувувањето слики од екранот е блокирано од IT-администраторот"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Измени"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Изменете ја сликата од екранот"</string>
-    <!-- no translation found for screenshot_share_label (1653061117238861559) -->
-    <skip />
+    <string name="screenshot_share_label" msgid="1653061117238861559">"Сподели"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Споделете слика од екранот"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Сними повеќе"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Отфрлете ја сликата од екранот"</string>
@@ -107,7 +106,7 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Тековно известување за сесија за снимање на екранот"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Да се започне со снимање?"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Додека снимате, Android има пристап до сѐ што е видливо на вашиот екран или пуштено на вашиот уред. Затоа, бидете внимателни со работи како лозинки, детали за плаќање, пораки, фотографии и аудио и видео."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Додека снимате апликација, Android има пристап до сѐ што се прикажува или пушта на таа апликација. Затоа, бидете внимателни со лозинки, детали за плаќање, пораки фотографии и аудио и видео."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Додека снимате апликација, Android има пристап до сѐ што се прикажува или пушта на таа апликација. Затоа, бидете внимателни со лозинки, детали за плаќање, пораки, фотографии и аудио и видео."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Започни со снимање"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Снимај аудио"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Аудио од уредот"</string>
@@ -152,6 +151,7 @@
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Скенирање лице"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Испрати"</string>
     <string name="cancel" msgid="1089011503403416730">"Откажи"</string>
+    <string name="biometric_dialog_logo" msgid="7681107853070774595">"Лого на апликацијата"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Потврди"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Обиди се повторно"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Допрете за да ја откажете проверката"</string>
@@ -166,6 +166,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Лицето е препознаено. Притиснете ја иконата за отклучување за да продолжите."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Проверена"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Откажување автентикација"</string>
+    <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Повеќе опции"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Користи PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Користи шема"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Користи лозинка"</string>
@@ -264,7 +265,7 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Не вознемирувај"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Нема достапни спарени уреди"</string>
-    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Допрете за да поврзете уред или да ја прекинете врската со уред"</string>
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Допрете за да воспоставите или да прекинете врска со уред"</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Спарете нов уред"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Прикажи ги сите"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Користи Bluetooth"</string>
@@ -362,6 +363,8 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Стандарден"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Среден"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Висок"</string>
+    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Да се одблокира пристапот до микрофонот на уредот?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Да се одблокира пристапот до камерата на уредот?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Да се одблокира пристапот до камерата и микрофонот на уредот?"</string>
@@ -439,13 +442,17 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Отстранува"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Додајте виџет"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Готово"</string>
+    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
+    <skip />
+    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
+    <skip />
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Да се дозволи каков било виџет на заклучен екран?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Отвори ги поставките"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Да се актив. работните аплик.?"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"Прекини ја паузата"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Промени го корисникот"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"паѓачко мени"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Сите апликации и податоци во сесијата ќе се избришат."</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Сите апликации и податоци во сесијава ќе се избришат."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Добре дојде пак, гостине!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Дали сакате да продолжите со сесијата?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Почни одново"</string>
@@ -585,7 +592,7 @@
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Вибрации"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Исклучи звук"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"Емитување"</string>
-    <string name="stream_notification_unavailable" msgid="4313854556205836435">"Недостапно бидејќи ѕвонењето е исклучено"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"Недостапно бидејќи звукот е исклучен"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Недостапно бидејќи е вклучено „Не вознемирувај“"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"Недостапно бидејќи е вклучено „Не вознемирувај“"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Допрете за да вклучите звук."</string>
@@ -593,7 +600,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Допрете за да исклучите звук. Можеби ќе се исклучи звукот на услугите за достапност."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Допрете за да се постави на вибрации."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Допрете за да се исклучи звукот."</string>
-    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Контрола на бучавата"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Контрола на шум"</string>
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"Просторен звук"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"Исклучено"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Фиксно"</string>
@@ -763,10 +770,8 @@
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Активирајте поделен екран со тековната апликација десно"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Активирајте поделен екран со тековната апликација лево"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Префрлете од поделен екран во цел екран"</string>
-    <!-- no translation found for system_multitasking_splitscreen_focus_rhs (3838578650313318508) -->
-    <skip />
-    <!-- no translation found for system_multitasking_splitscreen_focus_lhs (3164261844398662518) -->
-    <skip />
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Префрлете на апликацијата десно или долу при користењето поделен екран"</string>
+    <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Префрлете на апликацијата лево или горе при користењето поделен екран"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"При поделен екран: префрлете ги аплик. од едната на другата страна"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Внесување"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Префрлете на следниот јазик"</string>

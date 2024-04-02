@@ -16,10 +16,14 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator
 
+import android.app.Flags
 import android.app.NotificationChannel
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.NotificationManager.IMPORTANCE_HIGH
 import android.app.NotificationManager.IMPORTANCE_LOW
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
@@ -29,6 +33,7 @@ import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
+import com.android.systemui.statusbar.notification.collection.SortBySectionTimeFlag
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator
@@ -48,12 +53,13 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -77,6 +83,8 @@ class ConversationCoordinatorTest : SysuiTestCase() {
 
     private lateinit var coordinator: ConversationCoordinator
 
+    @Rule @JvmField public val setFlagsRule = SetFlagsRule()
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
@@ -99,7 +107,8 @@ class ConversationCoordinatorTest : SysuiTestCase() {
 
         peopleAlertingSectioner = coordinator.peopleAlertingSectioner
         peopleSilentSectioner = coordinator.peopleSilentSectioner
-        peopleComparator = peopleAlertingSectioner.comparator!!
+        if (!SortBySectionTimeFlag.isEnabled)
+            peopleComparator = peopleAlertingSectioner.comparator!!
 
         entry = NotificationEntryBuilder().setChannel(channel).build()
 
@@ -150,6 +159,20 @@ class ConversationCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_SORT_SECTION_BY_TIME)
+    fun testInAlertingPeopleSectionWhenTheImportanceIsLowerThanDefault() {
+        // GIVEN
+        val silentEntry =
+                NotificationEntryBuilder().setChannel(channel).setImportance(IMPORTANCE_LOW).build()
+        whenever(peopleNotificationIdentifier.getPeopleNotificationType(silentEntry))
+                .thenReturn(TYPE_PERSON)
+
+        // THEN put silent people notifications in alerting section
+        assertThat(peopleAlertingSectioner.isInSection(silentEntry)).isTrue()
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_SORT_SECTION_BY_TIME)
     fun testInSilentPeopleSectionWhenTheImportanceIsLowerThanDefault() {
         // GIVEN
         val silentEntry =
@@ -178,7 +201,8 @@ class ConversationCoordinatorTest : SysuiTestCase() {
             .thenReturn(TYPE_NON_PERSON)
 
         // THEN - only put people notification either silent or alerting
-        assertThat(peopleSilentSectioner.isInSection(entry)).isFalse()
+        if (!SortBySectionTimeFlag.isEnabled)
+            assertThat(peopleSilentSectioner.isInSection(entry)).isFalse()
         assertThat(peopleAlertingSectioner.isInSection(importantEntry)).isFalse()
     }
 
@@ -207,6 +231,7 @@ class ConversationCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_SORT_SECTION_BY_TIME)
     fun testComparatorPutsImportantPeopleFirst() {
         whenever(peopleNotificationIdentifier.getPeopleNotificationType(entryA))
             .thenReturn(TYPE_IMPORTANT_PERSON)
@@ -218,6 +243,7 @@ class ConversationCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_SORT_SECTION_BY_TIME)
     fun testComparatorEquatesPeopleWithSameType() {
         whenever(peopleNotificationIdentifier.getPeopleNotificationType(entryA))
             .thenReturn(TYPE_PERSON)
@@ -226,5 +252,11 @@ class ConversationCoordinatorTest : SysuiTestCase() {
 
         // only put people notifications in this section
         assertThat(peopleComparator.compare(entryA, entryB)).isEqualTo(0)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_SORT_SECTION_BY_TIME)
+    fun testNoSecondarySortForConversations() {
+        assertThat(peopleAlertingSectioner.comparator).isNull()
     }
 }

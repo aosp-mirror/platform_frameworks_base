@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Oleta, et rakendused toetavad kaasaegseid vorminguid"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Kuva transkodeerimise märguanded"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Transkodeerimise vahemälu keelamine"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine\'i seaded"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Sundtaane tasemele L3"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Valige sundtaandeks tasemele L3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Käitatud teenused"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Praegu käitatud teenuste vaatamine ja juhtimine"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView\' rakendamine"</string>

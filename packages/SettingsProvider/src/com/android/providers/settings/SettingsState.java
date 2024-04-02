@@ -600,14 +600,25 @@ final class SettingsState {
         }
 
         Setting oldState = mSettings.get(name);
+        String previousOwningPackage = (oldState != null) ? oldState.packageName : null;
+        // If the old state doesn't exist, no need to handle the owning package change
+        final boolean owningPackageChanged = previousOwningPackage != null
+                && !previousOwningPackage.equals(packageName);
+
         String oldValue = (oldState != null) ? oldState.value : null;
         String oldDefaultValue = (oldState != null) ? oldState.defaultValue : null;
         String newDefaultValue = makeDefault ? value : oldDefaultValue;
 
-        int newSize = getNewMemoryUsagePerPackageLocked(packageName,
-                oldValue == null ? name.length() : 0 /* deltaKeySize */,
-                oldValue, value, oldDefaultValue, newDefaultValue);
-        checkNewMemoryUsagePerPackageLocked(packageName, newSize);
+        int newSizeForCurrentPackage = getNewMemoryUsagePerPackageLocked(packageName,
+                /* deltaKeyLength= */ (oldState == null || owningPackageChanged) ? name.length() : 0,
+                /* oldValue= */ owningPackageChanged ? null : oldValue,
+                /* newValue= */ value,
+                /* oldDefaultValue= */ owningPackageChanged ? null : oldDefaultValue,
+                /* newDefaultValue = */ newDefaultValue);
+        // Only check the memory usage for the current package. Even if the owning package
+        // has changed, the previous owning package will only have a reduced memory usage, so
+        // there is no need to check its memory usage.
+        checkNewMemoryUsagePerPackageLocked(packageName, newSizeForCurrentPackage);
 
         Setting newState;
 
@@ -629,7 +640,17 @@ final class SettingsState {
 
         addHistoricalOperationLocked(HISTORICAL_OPERATION_UPDATE, newState);
 
-        updateMemoryUsagePerPackageLocked(packageName, newSize);
+        updateMemoryUsagePerPackageLocked(packageName, newSizeForCurrentPackage);
+
+        if (owningPackageChanged) {
+            int newSizeForPreviousPackage = getNewMemoryUsagePerPackageLocked(previousOwningPackage,
+                    /* deltaKeyLength= */ -name.length(),
+                    /* oldValue= */ oldValue,
+                    /* newValue= */ null,
+                    /* oldDefaultValue= */ oldDefaultValue,
+                    /* newDefaultValue = */ null);
+            updateMemoryUsagePerPackageLocked(previousOwningPackage, newSizeForPreviousPackage);
+        }
 
         scheduleWriteIfNeededLocked();
 

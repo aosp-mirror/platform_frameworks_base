@@ -37,7 +37,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PageIndicator
 import com.android.systemui.res.R
 import com.android.systemui.util.concurrency.DelayableExecutor
-import com.android.wm.shell.animation.PhysicsAnimator
+import com.android.wm.shell.shared.animation.PhysicsAnimator
 
 private const val FLING_SLOP = 1000000
 private const val DISMISS_DELAY = 100L

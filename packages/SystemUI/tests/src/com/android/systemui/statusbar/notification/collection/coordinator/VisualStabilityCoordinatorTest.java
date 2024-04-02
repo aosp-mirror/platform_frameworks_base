@@ -29,15 +29,19 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
+
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.keyguard.TestScopeProvider;
+import com.android.compose.animation.scene.ObservableTransitionState;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.communal.shared.model.CommunalScenes;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.shade.data.repository.ShadeAnimationRepository;
@@ -67,6 +71,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.verification.VerificationMode;
 
+import kotlinx.coroutines.flow.MutableStateFlow;
 import kotlinx.coroutines.test.TestScope;
 
 @SmallTest
@@ -89,9 +94,10 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mSBStateListenerCaptor;
     @Captor private ArgumentCaptor<NotifStabilityManager> mNotifStabilityManagerCaptor;
 
+    private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
     private FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private FakeExecutor mFakeExecutor = new FakeExecutor(mFakeSystemClock);
-    private final TestScope mTestScope = TestScopeProvider.getTestScope();
+    private final TestScope mTestScope = mKosmos.getTestScope();
     private final JavaAdapter mJavaAdapter = new JavaAdapter(mTestScope.getBackgroundScope());
 
     private ShadeAnimationInteractor mShadeAnimationInteractor;
@@ -118,8 +124,10 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
                 mStatusBarStateController,
                 mVisibilityLocationProvider,
                 mVisualStabilityProvider,
-                mWakefulnessLifecycle);
+                mWakefulnessLifecycle,
+                mKosmos.getCommunalInteractor());
         mCoordinator.attach(mNotifPipeline);
+        mTestScope.getTestScheduler().runCurrent();
 
         // capture arguments:
         verify(mWakefulnessLifecycle).addObserver(mWakefulnessObserverCaptor.capture());
@@ -496,6 +504,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         setFullyDozed(false);
         setSleepy(false);
         setPanelExpanded(true);
+        setCommunalShowing(false);
 
         assertFalse(mNotifStabilityManager.isEntryReorderingAllowed(mEntry));
         // The pipeline still has to report back that entry reordering was suppressed
@@ -506,6 +515,19 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
         //  invalidate is called because we were previously suppressing an entry reorder
         verifyStabilityManagerWasInvalidated(times(1));
+    }
+
+    @Test
+    public void testCommunalShowingWillNotSuppressReordering() {
+        // GIVEN panel is expanded and communal is showing
+        setPulsing(false);
+        setFullyDozed(false);
+        setSleepy(false);
+        setPanelExpanded(true);
+        setCommunalShowing(true);
+
+        // Reordering should be allowed
+        assertTrue(mNotifStabilityManager.isEntryReorderingAllowed(mEntry));
     }
 
     @Test
@@ -558,6 +580,16 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
     private void setPanelCollapsing(boolean collapsing) {
         mShadeRepository.setLegacyIsClosing(collapsing);
+        mTestScope.getTestScheduler().runCurrent();
+    }
+
+    private void setCommunalShowing(boolean isShowing) {
+        final MutableStateFlow<ObservableTransitionState> showingFlow =
+                MutableStateFlow(
+                        new ObservableTransitionState.Idle(
+                                isShowing ? CommunalScenes.Communal : CommunalScenes.Blank)
+                );
+        mKosmos.getCommunalRepository().setTransitionState(showingFlow);
         mTestScope.getTestScheduler().runCurrent();
     }
 

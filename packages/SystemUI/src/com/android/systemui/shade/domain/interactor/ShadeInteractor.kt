@@ -29,6 +29,9 @@ interface ShadeInteractor : BaseShadeInteractor {
     /** Emits true if the shade is currently allowed and false otherwise. */
     val isShadeEnabled: StateFlow<Boolean>
 
+    /** Emits true if QS is currently allowed and false otherwise. */
+    val isQsEnabled: StateFlow<Boolean>
+
     /** Whether either the shade or QS is fully expanded. */
     val isAnyFullyExpanded: StateFlow<Boolean>
 

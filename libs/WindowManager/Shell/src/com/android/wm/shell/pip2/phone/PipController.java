@@ -245,9 +245,9 @@ public class PipController implements ConfigurationChangeListener,
             Rect destinationBounds, SurfaceControl overlay, Rect appBounds) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "onSwipePipToHomeAnimationStart: %s", componentName);
-        mPipScheduler.setInSwipePipToHomeTransition(true);
+        mPipScheduler.onSwipePipToHomeAnimationStart(taskId, componentName, destinationBounds,
+                overlay, appBounds);
         mPipRecentsAnimationListener.onPipAnimationStarted();
-        // TODO: cache the overlay if provided for reparenting later.
     }
 
     //

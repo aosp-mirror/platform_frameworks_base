@@ -436,7 +436,7 @@ class ZenModeEventLogger {
          * Only available when {@code MODES_API} is active; otherwise returns an empty list.
          */
         int[] getActiveRuleTypes() {
-            if (!Flags.modesApi() || mNewZenMode == ZEN_MODE_OFF) {
+            if (!Flags.modesApi()) {
                 return new int[0];
             }
 

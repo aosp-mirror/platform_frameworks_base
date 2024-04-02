@@ -172,19 +172,18 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                     final float screenTravelPercentage = Math.abs(e1.getY() - e2.getY())
                             / mTouchSession.getBounds().height();
                     setPanelExpansion(mBouncerInitiallyShowing
-                            ? screenTravelPercentage : 1 - screenTravelPercentage, dragDownAmount);
+                            ? screenTravelPercentage : 1 - screenTravelPercentage);
                     return true;
                 }
             };
 
-    private void setPanelExpansion(float expansion, float dragDownAmount) {
+    private void setPanelExpansion(float expansion) {
         mCurrentExpansion = expansion;
         ShadeExpansionChangeEvent event =
                 new ShadeExpansionChangeEvent(
                         /* fraction= */ mCurrentExpansion,
                         /* expanded= */ mExpanded,
-                        /* tracking= */ true,
-                        /* dragDownPxAmount= */ dragDownAmount);
+                        /* tracking= */ true);
         mCurrentScrimController.expand(event);
     }
 
@@ -333,7 +332,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                 animation -> {
                     float expansionFraction = (float) animation.getAnimatedValue();
                     float dragDownAmount = expansionFraction * expansionHeight;
-                    setPanelExpansion(expansionFraction, dragDownAmount);
+                    setPanelExpansion(expansionFraction);
                 });
         if (!mBouncerInitiallyShowing
                 && targetExpansion == KeyguardBouncerConstants.EXPANSION_VISIBLE) {

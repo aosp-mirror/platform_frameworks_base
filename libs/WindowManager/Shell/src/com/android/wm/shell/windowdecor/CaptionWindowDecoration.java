@@ -90,12 +90,14 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     @Override
     @NonNull
     Rect calculateValidDragArea() {
+        final Context displayContext = mDisplayController.getDisplayContext(mTaskInfo.displayId);
+        if (displayContext == null) return new Rect();
         final int leftButtonsWidth = loadDimensionPixelSize(mContext.getResources(),
                 R.dimen.caption_left_buttons_width);
 
         // On a smaller screen, don't require as much empty space on screen, as offscreen
         // drags will be restricted too much.
-        final int requiredEmptySpaceId = mDisplayController.getDisplayContext(mTaskInfo.displayId)
+        final int requiredEmptySpaceId = displayContext
                 .getResources().getConfiguration().smallestScreenWidthDp >= 600
                 ? R.dimen.freeform_required_visible_empty_space_in_header :
                 R.dimen.small_screen_required_visible_empty_space_in_header;

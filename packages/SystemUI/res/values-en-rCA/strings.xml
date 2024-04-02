@@ -151,6 +151,7 @@
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Scanning face"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Send"</string>
     <string name="cancel" msgid="1089011503403416730">"Cancel"</string>
+    <string name="biometric_dialog_logo" msgid="7681107853070774595">"App logo"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Confirm"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Try again"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Tap to cancel authentication"</string>
@@ -165,6 +166,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Face recognized. Press the unlock icon to continue."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Authenticated"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Cancel Authentication"</string>
+    <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"More Options"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Use PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Use pattern"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Use password"</string>
@@ -361,6 +363,8 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Standard"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Medium"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"High"</string>
+    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Unblock device microphone?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Unblock device camera?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Unblock device camera and microphone?"</string>
@@ -438,6 +442,8 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Remove"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Add widget"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Done"</string>
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"Add widgets"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Get quick access to your favorite app widgets without unlocking your tablet."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Allow any widget on lock screen?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Open settings"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Unpause work apps?"</string>

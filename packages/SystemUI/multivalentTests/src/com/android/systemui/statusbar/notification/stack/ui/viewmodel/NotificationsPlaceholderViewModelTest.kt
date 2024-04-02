@@ -26,7 +26,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationStackAppearanceInteractor
-import com.android.systemui.statusbar.notification.stack.shared.model.StackBounds
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -47,16 +47,16 @@ class NotificationsPlaceholderViewModelTest : SysuiTestCase() {
             val containerBounds by
                 collectLastValue(kosmos.keyguardInteractor.notificationContainerBounds)
             val stackBounds by
-                collectLastValue(kosmos.notificationStackAppearanceInteractor.stackBounds)
+                collectLastValue(kosmos.notificationStackAppearanceInteractor.shadeScrimBounds)
             assertThat(containerBounds)
                 .isEqualTo(NotificationContainerBounds(top = 5f, bottom = 5f))
             assertThat(stackBounds)
-                .isEqualTo(StackBounds(left = 5f, top = 5f, right = 5f, bottom = 5f))
+                .isEqualTo(ShadeScrimBounds(left = 5f, top = 5f, right = 5f, bottom = 5f))
         }
 
     @Test
     fun onContentTopChanged_setsContentTop() {
         underTest.onContentTopChanged(padding = 5f)
-        assertThat(kosmos.notificationStackAppearanceInteractor.contentTop.value).isEqualTo(5f)
+        assertThat(kosmos.notificationStackAppearanceInteractor.stackTop.value).isEqualTo(5f)
     }
 }

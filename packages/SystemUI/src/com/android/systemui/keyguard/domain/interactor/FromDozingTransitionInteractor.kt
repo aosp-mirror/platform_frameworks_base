@@ -35,7 +35,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -83,9 +82,9 @@ constructor(
         scope.launch {
             powerInteractor.isAwake
                 .debounce(50L)
+                .filterRelevantKeyguardStateAnd { isAwake -> isAwake }
                 .sample(
                     keyguardInteractor.biometricUnlockState,
-                    startedKeyguardTransitionStep,
                     keyguardInteractor.isKeyguardOccluded,
                     communalInteractor.isIdleOnCommunal,
                     canDismissLockScreen,
@@ -93,16 +92,12 @@ constructor(
                 )
                 .collect {
                     (
-                        isAwake,
+                        _,
                         biometricUnlockState,
-                        lastStartedTransition,
                         occluded,
                         isIdleOnCommunal,
                         canDismissLockScreen,
                         primaryBouncerShowing) ->
-                    if (!(isAwake && lastStartedTransition.to == KeyguardState.DOZING)) {
-                        return@collect
-                    }
                     startTransitionTo(
                         if (isWakeAndUnlock(biometricUnlockState)) {
                             KeyguardState.GONE
@@ -130,19 +125,15 @@ constructor(
 
         scope.launch {
             powerInteractor.detailedWakefulness
-                .filter { it.isAwake() }
+                .filterRelevantKeyguardStateAnd { it.isAwake() }
                 .sample(
-                    startedKeyguardTransitionStep,
                     communalInteractor.isIdleOnCommunal,
                     keyguardInteractor.biometricUnlockState,
                     canDismissLockScreen,
                     keyguardInteractor.primaryBouncerShowing,
                 )
-                // If we haven't at least STARTED a transition to DOZING, ignore.
-                .filter { (_, startedStep, _, _) -> startedStep.to == KeyguardState.DOZING }
                 .collect {
                     (
-                        _,
                         _,
                         isIdleOnCommunal,
                         biometricUnlockState,

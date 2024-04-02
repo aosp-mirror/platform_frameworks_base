@@ -164,6 +164,7 @@ import com.android.systemui.qs.QSFragmentLegacy;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.settings.UserTracker;
@@ -836,7 +837,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mLightRevealScrimViewModelLazy = lightRevealScrimViewModelLazy;
         mLightRevealScrim = lightRevealScrim;
 
-        // Based on teamfood flag, turn predictive back dispatch on at runtime.
         if (predictiveBackSysui()) {
             mContext.getApplicationInfo().setEnableOnBackInvokedCallback(true);
         }
@@ -1257,11 +1257,13 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mScreenOffAnimationController.initialize(this, mShadeSurface, mLightRevealScrim);
         updateLightRevealScrimVisibility();
 
-        mShadeSurface.initDependencies(
-                this,
-                mGestureRec,
-                mShadeController::makeExpandedInvisible,
-                mHeadsUpManager);
+        if (!SceneContainerFlag.isEnabled()) {
+            mShadeSurface.initDependencies(
+                    this,
+                    mGestureRec,
+                    mShadeController::makeExpandedInvisible,
+                    mHeadsUpManager);
+        }
 
         // Set up the quick settings tile panel
         final View container = getNotificationShadeWindowView().findViewById(R.id.qs_frame);
@@ -2629,11 +2631,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         boolean goingToSleepWithoutAnimation = isGoingToSleep()
                 && !mDozeParameters.shouldControlScreenOff();
         boolean disabled = (!mDeviceInteractive && !mDozeServiceHost.isPulsing())
-                || goingToSleepWithoutAnimation
-                || mDeviceProvisionedController.isFrpActive();
+                || goingToSleepWithoutAnimation;
         mShadeLogger.logUpdateNotificationPanelTouchState(disabled, isGoingToSleep(),
                 !mDozeParameters.shouldControlScreenOff(), !mDeviceInteractive,
-                !mDozeServiceHost.isPulsing(), mDeviceProvisionedController.isFrpActive());
+                !mDozeServiceHost.isPulsing());
 
         mShadeSurface.setTouchAndAnimationDisabled(disabled);
         if (!NotificationIconContainerRefactor.isEnabled()) {
@@ -3060,6 +3061,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         public void onConfigChanged(Configuration newConfig) {
             updateResources();
             updateDisplaySize(); // populates mDisplayMetrics
+            if (predictiveBackSysui()) {
+                mContext.getApplicationInfo().setEnableOnBackInvokedCallback(true);
+            }
 
             if (DEBUG) {
                 Log.v(TAG, "configuration changed: " + mContext.getResources().getConfiguration());

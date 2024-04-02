@@ -23,6 +23,7 @@ import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.PowerManager;
+import android.view.Display;
 
 import java.io.PrintWriter;
 
@@ -137,7 +138,13 @@ public interface DisplayPowerControllerInterface {
     boolean requestPowerState(DisplayManagerInternal.DisplayPowerRequest request,
             boolean waitForNegativeProximity);
 
-    void overrideDozeScreenState(int displayState);
+    /**
+     * Overrides the current doze screen state.
+     *
+     * @param displayState the new doze display state.
+     * @param reason the reason behind the new doze display state.
+     */
+    void overrideDozeScreenState(int displayState, @Display.StateReason int reason);
 
     void setDisplayOffloadSession(DisplayManagerInternal.DisplayOffloadSession session);
 

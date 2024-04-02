@@ -38,18 +38,22 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityManager.TaskDescription;
 import android.app.IApplicationThread;
 import android.app.PictureInPictureParams;
 import android.app.servertransaction.ClientTransactionItem;
@@ -62,6 +66,7 @@ import android.os.Binder;
 import android.os.LocaleList;
 import android.os.PowerManagerInternal;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -1098,5 +1103,62 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         mAtm.continueWindowLayout();
 
         verify(mClientLifecycleManager).onLayoutContinued();
+    }
+
+    @Test
+    public void testGetTaskDescriptionIcon_matchingUid() {
+        // Ensure that we do not hold MANAGE_ACTIVITY_TASKS
+        doThrow(new SecurityException()).when(mAtm).enforceActivityTaskPermission(any());
+
+        final String filePath = "abc/def";
+        // Create an activity with a task description at the test icon filepath
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setUid(android.os.Process.myUid())
+                .setCreateTask(true)
+                .build();
+        final TaskDescription td = new TaskDescription.Builder().build();
+        td.setIconFilename(filePath);
+        activity.setTaskDescription(td);
+
+        // Verify this calls and does not throw a security exception
+        try {
+            mAtm.getTaskDescriptionIcon(filePath, activity.mUserId);
+        } catch (SecurityException e) {
+            fail("Unexpected security exception: " + e);
+        } catch (IllegalArgumentException e) {
+            // Ok, the file doesn't actually exist
+        }
+    }
+
+    @Test
+    public void testGetTaskDescriptionIcon_noMatchingActivity_expectException() {
+        // Ensure that we do not hold MANAGE_ACTIVITY_TASKS
+        doThrow(new SecurityException()).when(mAtm).enforceActivityTaskPermission(any());
+
+        final String filePath = "abc/def";
+
+        // Verify this throws a security exception due to no matching activity
+        assertThrows(SecurityException.class,
+                () -> mAtm.getTaskDescriptionIcon(filePath, UserHandle.myUserId()));
+    }
+
+    @Test
+    public void testGetTaskDescriptionIcon_noMatchingUid_expectException() {
+        // Ensure that we do not hold MANAGE_ACTIVITY_TASKS
+        doThrow(new SecurityException()).when(mAtm).enforceActivityTaskPermission(any());
+
+        final String filePath = "abc/def";
+        // Create an activity with a task description at the test icon filepath
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .setUid(101010)
+                .build();
+        final TaskDescription td = new TaskDescription.Builder().build();
+        td.setIconFilename(filePath);
+        activity.setTaskDescription(td);
+
+        // Verify this throws a security exception due to no matching UID
+        assertThrows(SecurityException.class,
+                () -> mAtm.getTaskDescriptionIcon(filePath, activity.mUserId));
     }
 }

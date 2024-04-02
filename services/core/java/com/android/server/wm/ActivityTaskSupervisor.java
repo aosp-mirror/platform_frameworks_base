@@ -902,10 +902,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                                 + " andResume=" + andResume);
                 EventLogTags.writeWmRestartActivity(r.mUserId, System.identityHashCode(r),
                         task.mTaskId, r.shortComponentName);
-                if (r.isActivityTypeHome()) {
-                    // Home process is the root process of the task.
-                    updateHomeProcess(task.getBottomMostActivity().app);
-                }
+                updateHomeProcessIfNeeded(r);
                 mService.getPackageManagerInternalLocked().notifyPackageUse(
                         r.intent.getComponent().getPackageName(), NOTIFY_PACKAGE_USE_ACTIVITY);
                 mService.getAppWarningsLocked().onStartActivity(r);
@@ -1048,6 +1045,16 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         }
 
         return true;
+    }
+
+    void updateHomeProcessIfNeeded(@NonNull ActivityRecord r) {
+        if (!r.isActivityTypeHome()) return;
+        // Make sure that we use the bottom most activity from the same package, because the home
+        // task can also embed third-party -1 activities.
+        final ActivityRecord bottom = r.getTask().getBottomMostActivityInSamePackage();
+        if (bottom != null) {
+            updateHomeProcess(bottom.app);
+        }
     }
 
     void updateHomeProcess(WindowProcessController app) {
@@ -2266,7 +2273,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
      * activity releases the top state and reports back, message about acquiring top state will be
      * sent to the new top resumed activity.
      */
-    void updateTopResumedActivityIfNeeded(String reason) {
+    ActivityRecord updateTopResumedActivityIfNeeded(String reason) {
         final ActivityRecord prevTopActivity = mTopResumedActivity;
         final Task topRootTask = mRootWindowContainer.getTopDisplayFocusedRootTask();
         if (topRootTask == null || topRootTask.getTopResumedActivity() == prevTopActivity) {
@@ -2279,7 +2286,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 // according to the current top focused activity.
                 mService.updateTopApp(null /* topResumedActivity */);
             }
-            return;
+            return mTopResumedActivity;
         }
 
         // Ask previous activity to release the top state.
@@ -2306,6 +2313,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         scheduleTopResumedActivityStateIfNeeded();
 
         mService.updateTopApp(mTopResumedActivity);
+
+        return mTopResumedActivity;
     }
 
     /** Schedule current top resumed activity state loss */

@@ -1823,10 +1823,10 @@ public class HdmiControlService extends SystemService {
      */
     @ServiceThreadOnly
     void pollDevices(DevicePollingCallback callback, int sourceAddress, int pickStrategy,
-            int retryCount) {
+            int retryCount, long pollingMessageInterval) {
         assertRunOnServiceThread();
         mCecController.pollDevices(callback, sourceAddress, checkPollStrategy(pickStrategy),
-                retryCount);
+                retryCount, pollingMessageInterval);
     }
 
     private int checkPollStrategy(int pickStrategy) {

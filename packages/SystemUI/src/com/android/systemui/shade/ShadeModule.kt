@@ -162,9 +162,7 @@ abstract class ShadeModule {
 
     @Binds
     @SysUISingleton
-    abstract fun bindsShadeViewController(
-        notificationPanelViewController: NotificationPanelViewController
-    ): ShadeViewController
+    abstract fun bindsShadeViewController(shadeSurface: ShadeSurface): ShadeViewController
 
     @Binds
     @SysUISingleton

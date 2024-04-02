@@ -32,6 +32,10 @@ import androidx.annotation.NonNull;
  * {@link ContextualSearchState} contains additional data a contextual search handler can request
  * via {@link ContextualSearchManager#getContextualSearchState} method.
  *
+ * It provides the caller of {@link ContextualSearchManager#getContextualSearchState} with an
+ * {@link AssistStructure}, {@link AssistContent} and a {@link Bundle} extras containing any
+ * relevant data added by th system server. When invoked via the Launcher, this bundle is empty.
+ *
  * @hide
  */
 @FlaggedApi(Flags.FLAG_ENABLE_SERVICE)
@@ -41,6 +45,12 @@ public final class ContextualSearchState implements Parcelable {
     private final @Nullable AssistStructure mStructure;
     private final @Nullable AssistContent mContent;
 
+    /**
+     * {@link ContextualSearchState} contains non-essential data which can be requested by the
+     * Contextual Search activity.
+     * The activity can request an instance of {@link ContextualSearchState} by calling
+     * {@link CallbackToken#getContextualSearchState} and passing a valid token as an argument.
+     */
     public ContextualSearchState(@Nullable AssistStructure structure,
             @Nullable AssistContent content, @NonNull Bundle extras) {
         mStructure = structure;

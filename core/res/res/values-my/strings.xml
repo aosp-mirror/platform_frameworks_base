@@ -84,8 +84,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"မိုဘိုင်းကွန်ရက် လိုင်းမရပါ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ဦးစားပေးကွန်ရက်သို့ ပြောင်းကြည့်ပါ။ ပြောင်းရန် တို့ပါ။"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"အရေးပေါ်ခေါ်ဆိုမှု မရနိုင်ပါ"</string>
-    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
-    <skip />
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"အရေးပေါ်ဖုန်းခေါ်ရန် မိုဘိုင်းကွန်ရက် လိုအပ်သည်"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"သတိပေးချက်များ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"အဝင်ခေါ်ဆိုမှုအား ထပ်ဆင့်ပို့ခြင်း"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"အရေးပေါ် ပြန်လည်ခေါ်ဆိုနိုင်သောမုဒ်"</string>
@@ -828,7 +827,7 @@
     <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"အခြားအက်ပ်များ ပိုင်ဆိုင်သော E2EE အဆက်အသွယ်ကီးများ၏ အတည်ပြုခြင်းအခြေအနေများကို အက်ပ်အား အပ်ဒိတ်လုပ်ခွင့်ပြုသည်"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"စကားဝှက်စည်းမျဥ်းကိုသတ်မှတ်ရန်"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"မျက်နှာပြင်သော့ခတ်သည့် စကားဝှက်များနှင့် PINများရှိ ခွင့်ပြုထားသည့် စာလုံးအရေအတွက်နှင့် အက္ခရာများအား ထိန်းချုပ်ရန်။"</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"မျက်နှာပြင်လော့ခ်ဖွင့်ရန် ကြိုးပမ်းမှုများကို စောင့်ကြည့်ပါ"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"မျက်နှာပြင်လော့ခ်ဖွင့်ရန် ကြိုးပမ်းမှုများကို စောင့်ကြည့်ခြင်း"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"မျက်နှာပြင်ကို သော့ဖွင့်ရန် အတွက် စကားဝှက် မမှန်မကန် ထည့်သွင်းမှု အရေအတွက်ကို စောင့်ကြည့်လျက်၊ စကားဝှက် ရိုက်ထည့်မှု သိပ်များနေလျှင် တက်ဘလက်ကို သော့ခတ်ရန် သို့မဟုတ် တက်ဘလက် ဒေတာ အားလုံးကို ဖျက်ရန်။"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"မျက်နှာပြင်ကို လော့ခ်ဖွင့်သည့်အခါ စကားဝှက်မှားယွင်းစွာ ရိုက်သွင်းသည့်အကြိမ်ရေကို စောင့်ကြည့်ပြီး မှားယွင်းသည့်အကြိမ်ရေ အလွန်များလာပါက သင့် Android TV စက်ပစ္စည်းကို လော့ခ်ချခြင်း သို့မဟုတ် သင့် Android TV ရှိ အသုံးပြုသူဒေတာများအားလုံးကို ဖျက်ခြင်းတို့ ပြုလုပ်သွားပါမည်။"</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"ဖန်သားပြင်လော့ခ်ဖွင့်ရန် အတွက် စကားဝှက် မမှန်မကန် ထည့်သွင်းမှု အရေအတွက်ကို စောင့်ကြည့်လျက် စကားဝှက် မမှန်မကန် ရိုက်ထည့်မှု များနေလျှင် သတင်းနှင့်ဖျော်ဖြေရေး စနစ်ကို လော့ခ်ချသည် (သို့) ၎င်း၏ ဒေတာအားလုံးကို ဖျက်သည်။"</string>
@@ -1184,10 +1183,8 @@
     <string name="deleteText" msgid="4200807474529938112">"ဖျက်ရန်"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ထည့်သွင်းရန်နည်းလမ်း"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"စာတို လုပ်ဆောင်ချက်"</string>
-    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
-    <skip />
-    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
-    <skip />
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"ဤအကွက်တွင် လက်ရေးကို မပံ့ပိုးပါ"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"စကားဝှက်အကွက်များတွင် လက်ရေးကို မပံ့ပိုးပါ"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"နောက်သို့"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"လက်ကွက်ပြောင်းရန်"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"သိမ်းဆည်သော နေရာ နည်းနေပါသည်"</string>
@@ -1903,8 +1900,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"သင်၏ စီမံခန့်ခွဲသူက အပ်ဒိတ်လုပ်ထားသည်"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"သင်၏ စီမံခန့်ခွဲသူက ဖျက်လိုက်ပါပြီ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"‘ဘက်ထရီ အားထိန်း’ က ‘အမှောင်နောက်ခံ’ ကို ဖွင့်ပြီး နောက်ခံလုပ်ဆောင်ချက်၊ ပြသမှုဆိုင်ရာ အထူးပြုလုပ်ချက်အချို့၊ ဝန်ဆောင်မှုအချို့နှင့် ကွန်ရက်ချိတ်ဆက်မှုအချို့တို့ကို ကန့်သတ်သည် သို့မဟုတ် ပိတ်သည်။"</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"‘ဘက်ထရီ အားထိန်း’ က ‘အမှောင်နောက်ခံ’ ကို ဖွင့်ပြီး နောက်ခံလုပ်ဆောင်ချက်၊ ပြသမှုဆိုင်ရာ အထူးပြုလုပ်ချက်အချို့၊ ဝန်ဆောင်မှုအချို့နှင့် ကွန်ရက်ချိတ်ဆက်မှုအချို့တို့ကို ကန့်သတ်သည် သို့မဟုတ် ပိတ်သည်။"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"‘ဘက်ထရီ အားထိန်း’ က ‘အမှောင်နောက်ခံ’ ကို ဖွင့်ပြီး နောက်ခံလုပ်ဆောင်ချက်၊ ဖန်တီးပြသချက်အချို့၊ ဝန်ဆောင်မှုအချို့နှင့် ကွန်ရက်ချိတ်ဆက်မှုအချို့တို့ကို ကန့်သတ်သည် သို့မဟုတ် ပိတ်သည်။"</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"‘ဘက်ထရီ အားထိန်း’ က ‘အမှောင်နောက်ခံ’ ကို ဖွင့်ပြီး နောက်ခံလုပ်ဆောင်ချက်၊ ဖန်တီးပြသချက်အချို့၊ ဝန်ဆောင်မှုအချို့နှင့် ကွန်ရက်ချိတ်ဆက်မှုအချို့တို့ကို ကန့်သတ်သည် သို့မဟုတ် ပိတ်သည်။"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ဒေတာအသုံးလျှော့ချနိုင်ရန်အတွက် အက်ပ်များကို နောက်ခံတွင် ဒေတာပို့ခြင်းနှင့် လက်ခံခြင်းမပြုရန် \'ဒေတာချွေတာမှု\' စနစ်က တားဆီးထားပါသည်။ ယခုအက်ပ်ဖြင့် ဒေတာအသုံးပြုနိုင်သော်လည်း အကြိမ်လျှော့၍သုံးရပါမည်။ ဥပမာ၊ သင်က မတို့မချင်း ပုံများပေါ်လာမည် မဟုတ်ပါ။"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ဒေတာချွေတာမှုစနစ် ဖွင့်မလား။"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ဖွင့်ရန်"</string>
@@ -1932,6 +1929,12 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> က စီမံသည်"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ဖွင့်"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ပိတ်"</string>
+    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
+    <skip />
+    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
+    <skip />
+    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
+    <skip />
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> သည် အချို့အသံကို ပိတ်နေသည်"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"သင့်ကိရိယာအတွင်းပိုင်းတွင် ပြဿနာရှိနေပြီး၊ မူလစက်ရုံထုတ်အခြေအနေအဖြစ် ပြန်လည်ရယူနိုင်သည်အထိ အခြေအနေမတည်ငြိမ်နိုင်ပါ။"</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"သင့်ကိရိယာအတွင်းပိုင်းတွင် ပြဿနာရှိနေ၏။ အသေးစိတ်သိရန်အတွက် ပစ္စည်းထုတ်လုပ်သူအား ဆက်သွယ်ပါ။"</string>

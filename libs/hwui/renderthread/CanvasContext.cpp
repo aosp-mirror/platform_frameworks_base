@@ -777,6 +777,8 @@ void CanvasContext::draw(bool solelyTextureViewUpdates) {
                                  (std::min(syncDelayDuration, mLastDequeueBufferDuration)) -
                                  dequeueBufferDuration - idleDuration;
         mHintSessionWrapper->reportActualWorkDuration(actualDuration);
+        mHintSessionWrapper->setActiveFunctorThreads(
+                WebViewFunctorManager::instance().getRenderingThreadsForActiveFunctors());
     }
 
     mLastDequeueBufferDuration = dequeueBufferDuration;

@@ -207,11 +207,6 @@ class BubbleNotAllowedSuppressor() :
     override fun shouldSuppress(entry: NotificationEntry) = !entry.canBubble()
 }
 
-class BubbleAppSuspendedSuppressor :
-    VisualInterruptionFilter(types = setOf(BUBBLE), reason = "app is suspended") {
-    override fun shouldSuppress(entry: NotificationEntry) = entry.ranking.isSuspended
-}
-
 class BubbleNoMetadataSuppressor() :
     VisualInterruptionFilter(types = setOf(BUBBLE), reason = "has no or invalid bubble metadata") {
 
@@ -221,6 +216,11 @@ class BubbleNoMetadataSuppressor() :
     override fun shouldSuppress(entry: NotificationEntry) = !isValidMetadata(entry.bubbleMetadata)
 }
 
+class AlertAppSuspendedSuppressor :
+    VisualInterruptionFilter(types = setOf(PEEK, PULSE, BUBBLE), reason = "app is suspended") {
+    override fun shouldSuppress(entry: NotificationEntry) = entry.ranking.isSuspended
+}
+
 class AlertKeyguardVisibilitySuppressor(
     private val keyguardNotificationVisibilityProvider: KeyguardNotificationVisibilityProvider
 ) : VisualInterruptionFilter(types = setOf(PEEK, PULSE, BUBBLE), reason = "hidden on keyguard") {
@@ -228,11 +228,11 @@ class AlertKeyguardVisibilitySuppressor(
         keyguardNotificationVisibilityProvider.shouldHideNotification(entry)
 }
 
-
 class AvalancheSuppressor(
     private val avalancheProvider: AvalancheProvider,
     private val systemClock: SystemClock,
-) : VisualInterruptionFilter(
+) :
+    VisualInterruptionFilter(
         types = setOf(PEEK, PULSE),
         reason = "avalanche",
     ) {
@@ -261,7 +261,7 @@ class AvalancheSuppressor(
         return suppress
     }
 
-    private fun calculateState(entry: NotificationEntry): State  {
+    private fun calculateState(entry: NotificationEntry): State {
         if (
             entry.ranking.isConversation &&
                 entry.sbn.notification.`when` > avalancheProvider.startTime

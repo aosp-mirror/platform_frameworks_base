@@ -579,7 +579,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
         final ActivityRecord prevR = mResumedActivity;
         mResumedActivity = r;
-        mTaskSupervisor.updateTopResumedActivityIfNeeded(reason);
+        final ActivityRecord topResumed = mTaskSupervisor.updateTopResumedActivityIfNeeded(reason);
+        if (mResumedActivity != null && topResumed != null && topResumed.isEmbedded()
+                && topResumed.getTaskFragment().getAdjacentTaskFragment() == this) {
+            // Explicitly updates the last resumed Activity if the resumed activity is
+            // adjacent to the top-resumed embedded activity.
+            mAtmService.setLastResumedActivityUncheckLocked(mResumedActivity, reason);
+        }
         if (r == null && prevR.mDisplayContent != null
                 && prevR.mDisplayContent.getFocusedRootTask() == null) {
             // Only need to notify DWPC when no activity will resume.

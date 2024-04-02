@@ -27,6 +27,7 @@ import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.NotificationShadeWindowController
@@ -78,4 +79,11 @@ val Kosmos.shadeControllerImpl by
             { mock<NotificationGutsManager>() },
         )
     }
-var Kosmos.shadeController: ShadeController by Kosmos.Fixture { shadeControllerImpl }
+var Kosmos.shadeController: ShadeController by
+    Kosmos.Fixture {
+        if (SceneContainerFlag.isEnabled) {
+            shadeControllerSceneImpl
+        } else {
+            shadeControllerImpl
+        }
+    }

@@ -43,6 +43,13 @@ class AndroidRemoteContext extends RemoteContext {
     // Data handling
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
+    @Override
+    public void loadPathData(int instanceId, float[] floatPath) {
+        if (!mRemoteComposeState.containsId(instanceId)) {
+            mRemoteComposeState.cache(instanceId, floatPath);
+        }
+    }
+
     /**
      * Decode a byte array into an image and cache it using the given imageId
      *

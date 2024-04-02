@@ -84,8 +84,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Tidak dapat menjangkau jaringan seluler"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Coba ubah jaringan pilihan. Ketuk untuk mengubah."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Panggilan darurat tidak tersedia"</string>
-    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
-    <skip />
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Panggilan darurat memerlukan jaringan seluler"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Notifikasi"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Penerusan panggilan"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Mode telepon balik darurat"</string>
@@ -1184,10 +1183,8 @@
     <string name="deleteText" msgid="4200807474529938112">"Hapus"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Metode masukan"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Tindakan teks"</string>
-    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
-    <skip />
-    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
-    <skip />
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"Tulisan tangan tidak didukung di kolom ini"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Tulisan tangan tidak didukung di kolom sandi"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Kembali"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Beralih metode input"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Ruang penyimpanan hampir habis"</string>
@@ -1932,6 +1929,12 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Dikelola oleh <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Aktif"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Nonaktif"</string>
+    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
+    <skip />
+    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
+    <skip />
+    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
+    <skip />
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> mematikan beberapa suara"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Ada masalah dengan perangkat. Hal ini mungkin membuat perangkat jadi tidak stabil dan perlu dikembalikan ke setelan pabrik."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Ada masalah dengan perangkat. Hubungi produsen perangkat untuk informasi selengkapnya."</string>
@@ -1993,7 +1996,7 @@
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Darurat"</string>
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Setel kunci layar"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Setel kunci layar"</string>
-    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Untuk menggunakan ruang pribadi, setel kunci layar di perangkat ini"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Untuk menggunakan ruang privasi, setel kunci layar di perangkat ini"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikasi tidak tersedia"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak tersedia saat ini."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> tidak tersedia"</string>

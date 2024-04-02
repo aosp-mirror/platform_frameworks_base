@@ -173,11 +173,8 @@ import java.util.concurrent.ThreadLocalRandom;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class PreferencesHelperTest extends UiServiceTestCase {
-    private static final int UID_N_MR1 = 0;
     private static final int UID_HEADLESS = 1000000;
     private static final UserHandle USER = UserHandle.of(0);
-    private static final int UID_O = 1111;
-    private static final int UID_P = 2222;
     private static final String SYSTEM_PKG = "android";
     private static final int SYSTEM_UID = 1000;
     private static final UserHandle USER2 = UserHandle.of(10);
@@ -1102,18 +1099,15 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "<package name=\"com.example.o\" show_badge=\"true\" "
                 + "app_user_locked_fields=\"0\" sent_invalid_msg=\"false\" "
                 + "sent_valid_msg=\"false\" user_demote_msg_app=\"false\" sent_valid_bubble"
-                + "=\"false\" uid=\"1111\">\n"
+                + "=\"false\" uid=\"10002\">\n"
                 + "<channel id=\"id\" name=\"name\" importance=\"2\" "
                 + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
                 + "content_type=\"4\" flags=\"0\" show_badge=\"true\" orig_imp=\"2\" />\n"
                 + "</package>\n"
-                + "<package name=\"com.example.p\" show_badge=\"true\" "
-                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"true\" sent_valid_msg=\"true\""
-                + " user_demote_msg_app=\"true\" sent_valid_bubble=\"false\" uid=\"2222\" />\n"
                 + "<package name=\"com.example.n_mr1\" show_badge=\"true\" "
                 + "app_user_locked_fields=\"0\" sent_invalid_msg=\"false\" "
                 + "sent_valid_msg=\"false\" user_demote_msg_app=\"false\" sent_valid_bubble"
-                + "=\"false\" uid=\"0\">\n"
+                + "=\"false\" uid=\"10001\">\n"
                 + "<channelGroup id=\"1\" name=\"bye\" blocked=\"false\" locked=\"0\" />\n"
                 + "<channelGroup id=\"2\" name=\"hello\" blocked=\"false\" locked=\"0\" />\n"
                 + "<channel id=\"id1\" name=\"name1\" importance=\"4\" show_badge=\"true\" "
@@ -1129,6 +1123,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
                 + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
                 + "</package>\n"
+                + "<package name=\"com.example.p\" show_badge=\"true\" "
+                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"true\" sent_valid_msg=\"true\""
+                + " user_demote_msg_app=\"true\" sent_valid_bubble=\"false\" uid=\"10003\" />\n"
                 + "</ranking>";
         assertThat(baos.toString()).contains(expected);
     }
@@ -1194,10 +1191,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "content_type=\"4\" flags=\"0\" show_badge=\"true\" orig_imp=\"2\" />\n"
                 + "</package>\n"
                 // Importance default because on in permission helper
-                + "<package name=\"com.example.p\" importance=\"3\" show_badge=\"true\" "
-                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"true\" sent_valid_msg=\"true\""
-                + " user_demote_msg_app=\"true\" sent_valid_bubble=\"false\" />\n"
-                // Importance default because on in permission helper
                 + "<package name=\"com.example.n_mr1\" importance=\"3\" show_badge=\"true\" "
                 + "app_user_locked_fields=\"0\" sent_invalid_msg=\"false\" "
                 + "sent_valid_msg=\"false\" user_demote_msg_app=\"false\" sent_valid_bubble"
@@ -1217,6 +1210,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
                 + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
                 + "</package>\n"
+                // Importance default because on in permission helper
+                + "<package name=\"com.example.p\" importance=\"3\" show_badge=\"true\" "
+                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"true\" sent_valid_msg=\"true\""
+                + " user_demote_msg_app=\"true\" sent_valid_bubble=\"false\" />\n"
                 // Packages that exist solely in permissionhelper
                 + "<package name=\"first\" importance=\"3\" />\n"
                 + "<package name=\"third\" importance=\"0\" />\n"
@@ -1280,12 +1277,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
                 + "content_type=\"4\" flags=\"0\" show_badge=\"true\" orig_imp=\"2\" />\n"
                 + "</package>\n"
-                // Importance default because on in permission helper
-                + "<package name=\"com.example.p\" importance=\"3\" show_badge=\"true\" "
-                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"true\" sent_valid_msg=\"true\""
-                + " user_demote_msg_app=\"true\" sent_valid_bubble=\"false\" />\n"
-                // Importance missing because missing from permission helper
-                + "<package name=\"com.example.n_mr1\" show_badge=\"true\" "
+                // Importance 0 because missing from permission helper
+                + "<package name=\"com.example.n_mr1\" importance=\"0\" show_badge=\"true\" "
                 + "app_user_locked_fields=\"0\" sent_invalid_msg=\"false\" "
                 + "sent_valid_msg=\"false\" user_demote_msg_app=\"false\" sent_valid_bubble"
                 + "=\"false\">\n"
@@ -1304,6 +1297,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
                 + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
                 + "</package>\n"
+                // Importance default because on in permission helper
+                + "<package name=\"com.example.p\" importance=\"3\" show_badge=\"true\" "
+                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"true\" sent_valid_msg=\"true\""
+                + " user_demote_msg_app=\"true\" sent_valid_bubble=\"false\" />\n"
                 + "</ranking>";
         assertThat(baos.toString()).contains(expected);
     }

@@ -28,6 +28,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -78,8 +79,6 @@ import com.android.server.am.BatteryStatsService;
 import com.android.server.display.RampAnimator.DualRampAnimator;
 import com.android.server.display.brightness.BrightnessEvent;
 import com.android.server.display.brightness.BrightnessReason;
-import com.android.server.display.brightness.LightSensorController;
-import com.android.server.display.brightness.TestUtilsKt;
 import com.android.server.display.brightness.clamper.BrightnessClamperController;
 import com.android.server.display.brightness.clamper.HdrClamper;
 import com.android.server.display.color.ColorDisplayService;
@@ -265,7 +264,8 @@ public final class DisplayPowerControllerTest {
         advanceTime(1);
 
         // The display should have been turned off
-        verify(mHolder.displayPowerState).setScreenState(Display.STATE_OFF);
+        verify(mHolder.displayPowerState)
+                .setScreenState(Display.STATE_OFF, Display.STATE_REASON_DEFAULT_POLICY);
 
         clearInvocations(mHolder.displayPowerState);
         when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_OFF);
@@ -276,13 +276,15 @@ public final class DisplayPowerControllerTest {
         advanceTime(1);
 
         // The prox sensor is debounced so the display should not have been turned back on yet
-        verify(mHolder.displayPowerState, never()).setScreenState(Display.STATE_ON);
+        verify(mHolder.displayPowerState, never())
+                .setScreenState(Display.STATE_ON, Display.STATE_REASON_DEFAULT_POLICY);
 
         // Advance time by more than PROXIMITY_SENSOR_NEGATIVE_DEBOUNCE_DELAY
         advanceTime(1000);
 
         // The display should have been turned back on
-        verify(mHolder.displayPowerState).setScreenState(Display.STATE_ON);
+        verify(mHolder.displayPowerState)
+                .setScreenState(Display.STATE_ON, Display.STATE_REASON_DEFAULT_POLICY);
     }
 
     @Test
@@ -305,7 +307,8 @@ public final class DisplayPowerControllerTest {
         advanceTime(1);
 
         // The display should have been turned off
-        verify(mHolder.displayPowerState).setScreenState(Display.STATE_OFF);
+        verify(mHolder.displayPowerState)
+                .setScreenState(Display.STATE_OFF, Display.STATE_REASON_DEFAULT_POLICY);
 
         when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_OFF);
         // The display device changes and we no longer have a prox sensor
@@ -318,7 +321,8 @@ public final class DisplayPowerControllerTest {
 
         // The display should have been turned back on and the listener should have been
         // unregistered
-        verify(mHolder.displayPowerState).setScreenState(Display.STATE_ON);
+        verify(mHolder.displayPowerState)
+                .setScreenState(Display.STATE_ON, Display.STATE_REASON_DEFAULT_POLICY);
         verify(mSensorManagerMock).unregisterListener(listener);
     }
 
@@ -814,17 +818,17 @@ public final class DisplayPowerControllerTest {
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
-        verify(mHolder.displayPowerState).setScreenState(anyInt());
+        verify(mHolder.displayPowerState).setScreenState(anyInt(), anyInt());
 
         mHolder = createDisplayPowerController(42, UNIQUE_ID);
 
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
-        verify(mHolder.displayPowerState, never()).setScreenState(anyInt());
+        verify(mHolder.displayPowerState, never()).setScreenState(anyInt(), anyInt());
 
         mHolder.dpc.onBootCompleted();
         advanceTime(1); // Run updatePowerState
-        verify(mHolder.displayPowerState).setScreenState(anyInt());
+        verify(mHolder.displayPowerState).setScreenState(anyInt(), anyInt());
     }
 
     @Test
@@ -1162,19 +1166,30 @@ public final class DisplayPowerControllerTest {
                 any(AutomaticBrightnessController.Callbacks.class),
                 any(Looper.class),
                 eq(mSensorManagerMock),
+                /* lightSensor= */ any(),
                 /* brightnessMappingStrategyMap= */ any(SparseArray.class),
+                /* lightSensorWarmUpTime= */ anyInt(),
                 /* brightnessMin= */ anyFloat(),
                 /* brightnessMax= */ anyFloat(),
                 /* dozeScaleFactor */ anyFloat(),
+                /* lightSensorRate= */ anyInt(),
+                /* initialLightSensorRate= */ anyInt(),
+                /* brighteningLightDebounceConfig */ anyLong(),
+                /* darkeningLightDebounceConfig */ anyLong(),
+                /* brighteningLightDebounceConfigIdle= */ anyLong(),
+                /* darkeningLightDebounceConfigIdle= */ anyLong(),
+                /* resetAmbientLuxAfterWarmUpConfig= */ anyBoolean(),
+                any(HysteresisLevels.class),
+                any(HysteresisLevels.class),
                 any(HysteresisLevels.class),
                 any(HysteresisLevels.class),
                 eq(mContext),
                 any(BrightnessRangeController.class),
                 any(BrightnessThrottler.class),
+                /* ambientLightHorizonShort= */ anyInt(),
+                /* ambientLightHorizonLong= */ anyInt(),
                 eq(lux),
                 eq(nits),
-                eq(DISPLAY_ID),
-                any(LightSensorController.LightSensorControllerConfig.class),
                 any(BrightnessClamperController.class)
         );
     }
@@ -1469,7 +1484,7 @@ public final class DisplayPowerControllerTest {
         doAnswer(invocation -> {
             when(mHolder.displayPowerState.getScreenState()).thenReturn(invocation.getArgument(0));
             return null;
-        }).when(mHolder.displayPowerState).setScreenState(anyInt());
+        }).when(mHolder.displayPowerState).setScreenState(anyInt(), anyInt());
         mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
 
         // start with DOZE.
@@ -1479,10 +1494,12 @@ public final class DisplayPowerControllerTest {
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
 
-        mHolder.dpc.overrideDozeScreenState(supportedTargetState);
+        mHolder.dpc.overrideDozeScreenState(
+                supportedTargetState, Display.STATE_REASON_DEFAULT_POLICY);
         advanceTime(1); // Run updatePowerState
 
-        verify(mHolder.displayPowerState).setScreenState(supportedTargetState);
+        verify(mHolder.displayPowerState)
+                .setScreenState(supportedTargetState, Display.STATE_REASON_DEFAULT_POLICY);
     }
 
     @Test
@@ -1495,7 +1512,7 @@ public final class DisplayPowerControllerTest {
         doAnswer(invocation -> {
             when(mHolder.displayPowerState.getScreenState()).thenReturn(invocation.getArgument(0));
             return null;
-        }).when(mHolder.displayPowerState).setScreenState(anyInt());
+        }).when(mHolder.displayPowerState).setScreenState(anyInt(), anyInt());
         mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
 
         // start with DOZE.
@@ -1505,10 +1522,12 @@ public final class DisplayPowerControllerTest {
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
 
-        mHolder.dpc.overrideDozeScreenState(unSupportedTargetState);
+        mHolder.dpc.overrideDozeScreenState(
+                unSupportedTargetState, Display.STATE_REASON_DEFAULT_POLICY);
         advanceTime(1); // Run updatePowerState
 
-        verify(mHolder.displayPowerState, never()).setScreenState(anyInt());
+        verify(mHolder.displayPowerState, never())
+                .setScreenState(anyInt(), eq(Display.STATE_REASON_DEFAULT_POLICY));
     }
 
     @Test
@@ -1520,7 +1539,7 @@ public final class DisplayPowerControllerTest {
         doAnswer(invocation -> {
             when(mHolder.displayPowerState.getScreenState()).thenReturn(invocation.getArgument(0));
             return null;
-        }).when(mHolder.displayPowerState).setScreenState(anyInt());
+        }).when(mHolder.displayPowerState).setScreenState(anyInt(), anyInt());
         mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
 
         // start with OFF.
@@ -1530,10 +1549,11 @@ public final class DisplayPowerControllerTest {
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
 
-        mHolder.dpc.overrideDozeScreenState(supportedTargetState);
+        mHolder.dpc.overrideDozeScreenState(
+                supportedTargetState, Display.STATE_REASON_DEFAULT_POLICY);
         advanceTime(1); // Run updatePowerState
 
-        verify(mHolder.displayPowerState, never()).setScreenState(anyInt());
+        verify(mHolder.displayPowerState, never()).setScreenState(anyInt(), anyInt());
     }
 
     @Test
@@ -2138,22 +2158,22 @@ public final class DisplayPowerControllerTest {
         }
 
         @Override
-        LightSensorController.LightSensorControllerConfig getLightSensorControllerConfig(
-                Context context, DisplayDeviceConfig displayDeviceConfig) {
-            return TestUtilsKt.createLightSensorControllerConfig();
-        }
-
-        @Override
         AutomaticBrightnessController getAutomaticBrightnessController(
                 AutomaticBrightnessController.Callbacks callbacks, Looper looper,
-                SensorManager sensorManager,
+                SensorManager sensorManager, Sensor lightSensor,
                 SparseArray<BrightnessMappingStrategy> brightnessMappingStrategyMap,
-                float brightnessMin, float brightnessMax, float dozeScaleFactor,
+                int lightSensorWarmUpTime, float brightnessMin, float brightnessMax,
+                float dozeScaleFactor, int lightSensorRate, int initialLightSensorRate,
+                long brighteningLightDebounceConfig, long darkeningLightDebounceConfig,
+                long brighteningLightDebounceConfigIdle, long darkeningLightDebounceConfigIdle,
+                boolean resetAmbientLuxAfterWarmUpConfig,
+                HysteresisLevels ambientBrightnessThresholds,
                 HysteresisLevels screenBrightnessThresholds,
+                HysteresisLevels ambientBrightnessThresholdsIdle,
                 HysteresisLevels screenBrightnessThresholdsIdle, Context context,
                 BrightnessRangeController brightnessRangeController,
-                BrightnessThrottler brightnessThrottler, float userLux, float userNits,
-                int displayId, LightSensorController.LightSensorControllerConfig config,
+                BrightnessThrottler brightnessThrottler, int ambientLightHorizonShort,
+                int ambientLightHorizonLong, float userLux, float userNits,
                 BrightnessClamperController brightnessClamperController) {
             return mAutomaticBrightnessController;
         }
@@ -2166,12 +2186,18 @@ public final class DisplayPowerControllerTest {
         }
 
         @Override
-        HysteresisLevels getBrightnessThresholdsIdleHysteresisLevels(DisplayDeviceConfig ddc) {
+        HysteresisLevels getHysteresisLevels(float[] brighteningThresholdsPercentages,
+                float[] darkeningThresholdsPercentages, float[] brighteningThresholdLevels,
+                float[] darkeningThresholdLevels, float minDarkeningThreshold,
+                float minBrighteningThreshold) {
             return mHysteresisLevels;
         }
 
         @Override
-        HysteresisLevels getBrightnessThresholdsHysteresisLevels(DisplayDeviceConfig ddc) {
+        HysteresisLevels getHysteresisLevels(float[] brighteningThresholdsPercentages,
+                float[] darkeningThresholdsPercentages, float[] brighteningThresholdLevels,
+                float[] darkeningThresholdLevels, float minDarkeningThreshold,
+                float minBrighteningThreshold, boolean potentialOldBrightnessRange) {
             return mHysteresisLevels;
         }
 

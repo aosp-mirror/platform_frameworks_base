@@ -24,6 +24,7 @@
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG"/>
     <uses-permission android:name="android.permission.READ_DREAM_STATE"/>
     <uses-permission android:name="android.permission.READ_DREAM_SUPPRESSION"/>
+    <uses-permission android:name="android.permission.SCREEN_TIMEOUT_OVERRIDE"/>
     <uses-permission android:name="android.permission.STATUS_BAR_SERVICE"/>
     <uses-permission android:name="android.permission.UPDATE_APP_OPS_STATS"/>
     <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS"/>

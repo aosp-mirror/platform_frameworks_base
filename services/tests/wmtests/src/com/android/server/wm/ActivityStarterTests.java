@@ -1634,6 +1634,28 @@ public class ActivityStarterTests extends WindowTestsBase {
         assertThat(transition.isInTransientHide(top.getTask())).isTrue();
     }
 
+    /**
+     * Tests ATMS#startActivityWithScreenshot should collect display content for creating snapshot.
+     */
+    @Test
+    public void testActivityStartWithScreenshot() {
+        final ActivityStarter starter = prepareStarter(0 /* flags */);
+        starter.setFreezeScreen(true);
+
+        registerTestTransitionPlayer();
+
+        final Intent intent = new Intent();
+        intent.setComponent(ActivityBuilder.getDefaultComponent());
+        starter.setReason("testActivityStartWithScreenshot")
+                .setIntent(intent)
+                .execute();
+
+        final TransitionController controller = mRootWindowContainer.mTransitionController;
+        final Transition transition = controller.getCollectingTransition();
+        final Transition.ChangeInfo targetChangeInfo = transition.mChanges.get(mDisplayContent);
+        assertThat(targetChangeInfo).isNotNull();
+    }
+
     @Test
     public void testActivityStart_expectAddedToRecentTask() {
         RecentTasks recentTasks = mock(RecentTasks.class);

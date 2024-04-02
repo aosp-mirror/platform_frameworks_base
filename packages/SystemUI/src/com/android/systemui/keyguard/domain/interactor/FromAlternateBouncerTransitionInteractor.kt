@@ -100,40 +100,30 @@ constructor(
                 .onEach { delay(150L) }
                 .sampleCombine(
                     keyguardInteractor.primaryBouncerShowing,
-                    startedKeyguardTransitionStep,
                     powerInteractor.isAwake,
                     keyguardInteractor.isAodAvailable,
                     communalInteractor.isIdleOnCommunal
                 )
-                .collect {
-                    (
-                        isAlternateBouncerShowing,
-                        isPrimaryBouncerShowing,
-                        lastStartedTransitionStep,
-                        isAwake,
-                        isAodAvailable,
-                        isIdleOnCommunal) ->
-                    if (
-                        !isAlternateBouncerShowing &&
-                            !isPrimaryBouncerShowing &&
-                            lastStartedTransitionStep.to == KeyguardState.ALTERNATE_BOUNCER
-                    ) {
-                        val to =
-                            if (!isAwake) {
-                                if (isAodAvailable) {
-                                    KeyguardState.AOD
-                                } else {
-                                    KeyguardState.DOZING
-                                }
+                .filterRelevantKeyguardStateAnd {
+                    (isAlternateBouncerShowing, isPrimaryBouncerShowing, _, _, _) ->
+                    !isAlternateBouncerShowing && !isPrimaryBouncerShowing
+                }
+                .collect { (_, _, isAwake, isAodAvailable, isIdleOnCommunal) ->
+                    val to =
+                        if (!isAwake) {
+                            if (isAodAvailable) {
+                                KeyguardState.AOD
                             } else {
-                                if (isIdleOnCommunal) {
-                                    KeyguardState.GLANCEABLE_HUB
-                                } else {
-                                    KeyguardState.LOCKSCREEN
-                                }
+                                KeyguardState.DOZING
                             }
-                        startTransitionTo(to)
-                    }
+                        } else {
+                            if (isIdleOnCommunal) {
+                                KeyguardState.GLANCEABLE_HUB
+                            } else {
+                                KeyguardState.LOCKSCREEN
+                            }
+                        }
+                    startTransitionTo(to)
                 }
         }
     }
@@ -158,15 +148,10 @@ constructor(
     private fun listenForAlternateBouncerToPrimaryBouncer() {
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
-                .sampleUtil(startedKeyguardTransitionStep, ::Pair)
-                .collect { (isPrimaryBouncerShowing, startedKeyguardState) ->
-                    if (
-                        isPrimaryBouncerShowing &&
-                            startedKeyguardState.to == KeyguardState.ALTERNATE_BOUNCER
-                    ) {
-                        startTransitionTo(KeyguardState.PRIMARY_BOUNCER)
-                    }
+                .filterRelevantKeyguardStateAnd { isPrimaryBouncerShowing ->
+                    isPrimaryBouncerShowing
                 }
+                .collect { startTransitionTo(KeyguardState.PRIMARY_BOUNCER) }
         }
     }
 

@@ -20,7 +20,7 @@ import com.android.frameworks.coretests.aidl.IBpcCallbackObserver;
 interface IBpcTestServiceCmdService {
    void forceGc();
    int getBinderProxyCount(int uid);
-   void setBinderProxyWatermarks(int high, int low);
+   void setBinderProxyWatermarks(int high, int low, int warning);
    void enableBinderProxyLimit(boolean enable);
    void setBinderProxyCountCallback(IBpcCallbackObserver observer);
 }

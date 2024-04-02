@@ -53,19 +53,17 @@ abstract class BaseMediaProjectionPermissionDialogDelegate<T : AlertDialog>(
     private lateinit var cancelButton: TextView
     private lateinit var warning: TextView
     private lateinit var screenShareModeSpinner: Spinner
-    private var hasCancelBeenLogged: Boolean = false
     protected lateinit var dialog: AlertDialog
+    private var shouldLogCancel: Boolean = true
     var selectedScreenShareOption: ScreenShareOption = screenShareOptions.first()
 
     @CallSuper
     override fun onStop(dialog: T) {
         // onStop can be called multiple times and we only want to log once.
-        if (hasCancelBeenLogged) {
-            return
+        if (shouldLogCancel) {
+            mediaProjectionMetricsLogger.notifyProjectionRequestCancelled(hostUid)
+            shouldLogCancel = false
         }
-
-        mediaProjectionMetricsLogger.notifyProjectionRequestCancelled(hostUid)
-        hasCancelBeenLogged = true
     }
 
     @CallSuper
@@ -140,7 +138,10 @@ abstract class BaseMediaProjectionPermissionDialogDelegate<T : AlertDialog>(
     }
 
     protected fun setStartButtonOnClickListener(listener: View.OnClickListener?) {
-        startButton.setOnClickListener(listener)
+        startButton.setOnClickListener { view ->
+            shouldLogCancel = false
+            listener?.onClick(view)
+        }
     }
 
     protected fun setCancelButtonOnClickListener(listener: View.OnClickListener?) {

@@ -25,7 +25,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityContainerController
-import com.android.keyguard.LockIconViewController
+import com.android.keyguard.LegacyLockIconViewController
 import com.android.keyguard.dagger.KeyguardBouncerComponent
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
@@ -46,6 +46,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.statusbar.DragDownHelper
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.NotificationInsetsController
@@ -68,6 +69,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
@@ -85,7 +87,6 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import java.util.Optional
 import org.mockito.Mockito.`when` as whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -100,7 +101,8 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var dozeServiceHost: DozeServiceHost
     @Mock private lateinit var dozeScrimController: DozeScrimController
     @Mock private lateinit var dockManager: DockManager
-    @Mock private lateinit var notificationPanelViewController: NotificationPanelViewController
+    @Mock private lateinit var shadeViewController: ShadeViewController
+    @Mock private lateinit var panelExpansionInteractor: PanelExpansionInteractor
     @Mock private lateinit var notificationShadeDepthController: NotificationShadeDepthController
     @Mock private lateinit var notificationShadeWindowController: NotificationShadeWindowController
     @Mock private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
@@ -113,7 +115,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var quickSettingsController: QuickSettingsControllerImpl
     @Mock
     private lateinit var lockscreenShadeTransitionController: LockscreenShadeTransitionController
-    @Mock private lateinit var lockIconViewController: LockIconViewController
+    @Mock private lateinit var lockIconViewController: LegacyLockIconViewController
     @Mock private lateinit var phoneStatusBarViewController: PhoneStatusBarViewController
     @Mock private lateinit var pulsingGestureListener: PulsingGestureListener
     @Mock
@@ -177,7 +179,8 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                 dockManager,
                 notificationShadeDepthController,
                 view,
-                notificationPanelViewController,
+                shadeViewController,
+                panelExpansionInteractor,
                 ShadeExpansionStateManager(),
                 stackScrollLayoutController,
                 statusBarKeyguardViewManager,
@@ -263,7 +266,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         testScope.runTest {
             underTest.setStatusBarViewController(phoneStatusBarViewController)
             whenever(statusBarWindowStateController.windowIsShowing()).thenReturn(true)
-            whenever(notificationPanelViewController.isFullyCollapsed).thenReturn(true)
+            whenever(panelExpansionInteractor.isFullyCollapsed).thenReturn(true)
             whenever(phoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
                 .thenReturn(true)
             whenever(phoneStatusBarViewController.sendTouchToView(DOWN_EVENT)).thenReturn(true)
@@ -282,7 +285,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             whenever(phoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
                 .thenReturn(true)
             // Item we're testing
-            whenever(notificationPanelViewController.isFullyCollapsed).thenReturn(false)
+            whenever(panelExpansionInteractor.isFullyCollapsed).thenReturn(false)
 
             val returnVal = interactionEventHandler.handleDispatchTouchEvent(DOWN_EVENT)
 
@@ -295,7 +298,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         testScope.runTest {
             underTest.setStatusBarViewController(phoneStatusBarViewController)
             whenever(statusBarWindowStateController.windowIsShowing()).thenReturn(true)
-            whenever(notificationPanelViewController.isFullyCollapsed).thenReturn(true)
+            whenever(panelExpansionInteractor.isFullyCollapsed).thenReturn(true)
             // Item we're testing
             whenever(phoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
                 .thenReturn(false)
@@ -310,7 +313,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     fun handleDispatchTouchEvent_sbWindowNotShowing_noSendTouchToSbAndReturnsTrue() =
         testScope.runTest {
             underTest.setStatusBarViewController(phoneStatusBarViewController)
-            whenever(notificationPanelViewController.isFullyCollapsed).thenReturn(true)
+            whenever(panelExpansionInteractor.isFullyCollapsed).thenReturn(true)
             whenever(phoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
                 .thenReturn(true)
             // Item we're testing
@@ -327,7 +330,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         testScope.runTest {
             underTest.setStatusBarViewController(phoneStatusBarViewController)
             whenever(statusBarWindowStateController.windowIsShowing()).thenReturn(true)
-            whenever(notificationPanelViewController.isFullyCollapsed).thenReturn(true)
+            whenever(panelExpansionInteractor.isFullyCollapsed).thenReturn(true)
             whenever(phoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
                 .thenReturn(true)
 
@@ -486,7 +489,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         // AND bouncer is not showing
         whenever(centralSurfaces.isBouncerShowing()).thenReturn(false)
         // AND panel view controller wants it
-        whenever(notificationPanelViewController.handleExternalInterceptTouch(DOWN_EVENT))
+        whenever(shadeViewController.handleExternalInterceptTouch(DOWN_EVENT))
             .thenReturn(true)
 
         mSetFlagsRule.enableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)

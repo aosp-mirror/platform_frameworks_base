@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Chukulia kuwa programu zinatumia miundo ya kisasa"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Onyesha arifa za kubadilisha muundo wa faili"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Zima kipengele cha akiba ya kubadilisha muundo wa faili"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Mipangilio ya Widevine"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Lazimisha chaguo mbadala ya L3"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Teua ili ulazimishe chaguo mbadala ya L3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Huduma zinazoendeshwa"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Onyesha na udhibiti huduma zinazoendeshwa kwa sasa"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Utekelezaji wa WebView"</string>

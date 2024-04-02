@@ -37,15 +37,11 @@ class SettingsColorsTest {
         assertThat(ls.categoryTitle).isNotEqualTo(ls.background)
         assertThat(ls.secondaryText).isNotEqualTo(ls.background)
         assertThat(ls.primaryContainer).isNotEqualTo(ls.onPrimaryContainer)
-        assertThat(ls.spinnerHeaderContainer).isNotEqualTo(ls.onSpinnerHeaderContainer)
-        assertThat(ls.spinnerItemContainer).isNotEqualTo(ls.onSpinnerItemContainer)
 
         val ds = dynamicDarkColorScheme(context)
         assertThat(ds.categoryTitle).isNotEqualTo(ds.background)
         assertThat(ds.secondaryText).isNotEqualTo(ds.background)
         assertThat(ds.primaryContainer).isNotEqualTo(ds.onPrimaryContainer)
-        assertThat(ds.spinnerHeaderContainer).isNotEqualTo(ds.onSpinnerHeaderContainer)
-        assertThat(ds.spinnerItemContainer).isNotEqualTo(ds.onSpinnerItemContainer)
     }
 
     @Test
@@ -58,10 +54,6 @@ class SettingsColorsTest {
         assertThat(ls.secondaryText).isEqualTo(Color(red = 73, green = 69, blue = 79))
         assertThat(ls.primaryContainer).isEqualTo(Color(red = 234, green = 221, blue = 255))
         assertThat(ls.onPrimaryContainer).isEqualTo(Color(red = 28, green = 27, blue = 31))
-        assertThat(ls.spinnerHeaderContainer).isEqualTo(Color(red = 234, green = 221, blue = 255))
-        assertThat(ls.onSpinnerHeaderContainer).isEqualTo(Color(red = 28, green = 27, blue = 31))
-        assertThat(ls.spinnerItemContainer).isEqualTo(Color(red = 232, green = 222, blue = 248))
-        assertThat(ls.onSpinnerItemContainer).isEqualTo(Color(red = 73, green = 69, blue = 79))
 
         val ds = darkColorScheme()
         assertThat(ds.background).isEqualTo(Color(red = 28, green = 27, blue = 31))
@@ -71,9 +63,5 @@ class SettingsColorsTest {
         assertThat(ds.secondaryText).isEqualTo(Color(red = 202, green = 196, blue = 208))
         assertThat(ds.primaryContainer).isEqualTo(Color(red = 232, green = 222, blue = 248))
         assertThat(ds.onPrimaryContainer).isEqualTo(Color(red = 28, green = 27, blue = 31))
-        assertThat(ds.spinnerHeaderContainer).isEqualTo(Color(red = 234, green = 221, blue = 255))
-        assertThat(ds.onSpinnerHeaderContainer).isEqualTo(Color(red = 28, green = 27, blue = 31))
-        assertThat(ds.spinnerItemContainer).isEqualTo(Color(red = 232, green = 222, blue = 248))
-        assertThat(ds.onSpinnerItemContainer).isEqualTo(Color(red = 73, green = 69, blue = 79))
     }
 }

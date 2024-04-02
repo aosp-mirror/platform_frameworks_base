@@ -387,16 +387,8 @@ object Flags {
     // TODO(b/273800936): Tracking Bug
     @JvmField val TRACKPAD_GESTURE_COMMON = releasedFlag("trackpad_gesture_common")
 
-    // 1300 - screenshots
-    // TODO(b/264916608): Tracking Bug
-    @JvmField val SCREENSHOT_METADATA = unreleasedFlag("screenshot_metadata")
-
     // TODO(b/251205791): Tracking Bug
     @JvmField val SCREENSHOT_APP_CLIPS = releasedFlag("screenshot_app_clips")
-
-    /** TODO(b/295143676): Tracking bug. When enable, captures a screenshot for each display. */
-    @JvmField
-    val MULTI_DISPLAY_SCREENSHOT = releasedFlag("multi_display_screenshot")
 
     // 1400 - columbus
     // TODO(b/254512756): Tracking Bug
@@ -417,14 +409,6 @@ object Flags {
     @JvmField
     val CLIPBOARD_SHARED_TRANSITIONS =
             unreleasedFlag("clipboard_shared_transitions", teamfood = true)
-
-    /**
-     * Whether the scene container (Flexiglass) is enabled. Note that SceneContainerFlags#isEnabled
-     * should be checked and toggled together with [SCENE_CONTAINER_ENABLED] so that ProGuard can
-     * remove unused code from our APK at compile time.
-     */
-    // TODO(b/283300105): Tracking Bug
-    @JvmField val SCENE_CONTAINER_ENABLED = false
 
     /**
      * Whether the compose bouncer is enabled. This ensures ProGuard can

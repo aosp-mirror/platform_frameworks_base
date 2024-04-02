@@ -62,7 +62,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Tests for the {@link ActivityStarter} class.
+ * Tests for the {@link BackgroundActivityStartController} class.
  *
  * Build/Install/Run:
  * atest WmTests:BackgroundActivityStartControllerTests

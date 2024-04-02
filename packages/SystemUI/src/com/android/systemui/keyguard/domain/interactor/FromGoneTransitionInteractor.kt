@@ -28,16 +28,12 @@ import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepositor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.util.kotlin.Utils.Companion.sample
-import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -81,40 +77,31 @@ constructor(
             scope.launch {
                 biometricSettingsRepository.isCurrentUserInLockdown
                     .distinctUntilChanged()
-                    .filter { inLockdown -> inLockdown }
-                    .sample(
-                        startedKeyguardState,
-                        communalInteractor.isIdleOnCommunal,
-                    )
-                    .collect { (_, startedState, isIdleOnCommunal) ->
-                        if (startedState == KeyguardState.GONE) {
-                            val to =
-                                if (isIdleOnCommunal) {
-                                    KeyguardState.GLANCEABLE_HUB
-                                } else {
-                                    KeyguardState.LOCKSCREEN
-                                }
-                            startTransitionTo(to, ownerReason = "User initiated lockdown")
-                        }
+                    .filterRelevantKeyguardStateAnd { inLockdown -> inLockdown }
+                    .sample(communalInteractor.isIdleOnCommunal, ::Pair)
+                    .collect { (_, isIdleOnCommunal) ->
+                        val to =
+                            if (isIdleOnCommunal) {
+                                KeyguardState.GLANCEABLE_HUB
+                            } else {
+                                KeyguardState.LOCKSCREEN
+                            }
+                        startTransitionTo(to, ownerReason = "User initiated lockdown")
                     }
             }
         } else {
             scope.launch {
                 keyguardInteractor.isKeyguardShowing
-                    .sample(
-                        startedKeyguardState,
-                        communalInteractor.isIdleOnCommunal,
-                    )
-                    .collect { (isKeyguardShowing, startedState, isIdleOnCommunal) ->
-                        if (isKeyguardShowing && startedState == KeyguardState.GONE) {
-                            val to =
-                                if (isIdleOnCommunal) {
-                                    KeyguardState.GLANCEABLE_HUB
-                                } else {
-                                    KeyguardState.LOCKSCREEN
-                                }
-                            startTransitionTo(to)
-                        }
+                    .filterRelevantKeyguardStateAnd { isKeyguardShowing -> isKeyguardShowing }
+                    .sample(communalInteractor.isIdleOnCommunal, ::Pair)
+                    .collect { (_, isIdleOnCommunal) ->
+                        val to =
+                            if (isIdleOnCommunal) {
+                                KeyguardState.GLANCEABLE_HUB
+                            } else {
+                                KeyguardState.LOCKSCREEN
+                            }
+                        startTransitionTo(to)
                     }
             }
         }
@@ -123,42 +110,27 @@ constructor(
     private fun listenForGoneToDreamingLockscreenHosted() {
         scope.launch {
             keyguardInteractor.isActiveDreamLockscreenHosted
-                .sample(startedKeyguardTransitionStep, ::Pair)
-                .collect { (isActiveDreamLockscreenHosted, lastStartedStep) ->
-                    if (isActiveDreamLockscreenHosted && lastStartedStep.to == KeyguardState.GONE) {
-                        startTransitionTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
-                    }
+                .filterRelevantKeyguardStateAnd { isActiveDreamLockscreenHosted ->
+                    isActiveDreamLockscreenHosted
                 }
+                .collect { startTransitionTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED) }
         }
     }
 
     private fun listenForGoneToDreaming() {
         scope.launch {
             keyguardInteractor.isAbleToDream
-                .sample(
-                    combine(
-                        startedKeyguardTransitionStep,
-                        keyguardInteractor.isActiveDreamLockscreenHosted,
-                        ::Pair
-                    ),
-                    ::toTriple
-                )
-                .collect { (isAbleToDream, lastStartedStep, isActiveDreamLockscreenHosted) ->
-                    if (
-                        isAbleToDream &&
-                            lastStartedStep.to == KeyguardState.GONE &&
-                            !isActiveDreamLockscreenHosted
-                    ) {
-                        startTransitionTo(KeyguardState.DREAMING)
-                    }
+                .sample(keyguardInteractor.isActiveDreamLockscreenHosted, ::Pair)
+                .filterRelevantKeyguardStateAnd { (isAbleToDream, isActiveDreamLockscreenHosted) ->
+                    isAbleToDream && !isActiveDreamLockscreenHosted
                 }
+                .collect { startTransitionTo(KeyguardState.DREAMING) }
         }
     }
 
     private fun listenForGoneToAodOrDozing() {
         scope.launch {
             listenForSleepTransition(
-                from = KeyguardState.GONE,
                 modeOnCanceledFromStartedStep = { TransitionModeOnCanceled.RESET },
             )
         }

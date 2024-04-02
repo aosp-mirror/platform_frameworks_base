@@ -116,6 +116,15 @@ flag {
 }
 
 flag {
+  name: "sensitive_content_improvements"
+  namespace: "permissions"
+  description: "Improvements to sensitive content/notification features, such as the Toast UX."
+  bug: "301960090"
+  # Referenced in WM where WM starts before DeviceConfig
+  is_fixed_read_only: true
+}
+
+flag {
     name: "device_aware_permissions_enabled"
     is_fixed_read_only: true
     namespace: "permissions"

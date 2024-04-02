@@ -42,6 +42,7 @@ import static android.view.flags.Flags.enableUseMeasureCacheDuringForceLayout;
 import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.view.flags.Flags.toolkitFrameRateBySizeReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateDefaultNormalReadOnly;
+import static android.view.flags.Flags.toolkitFrameRateSmallUsesPercentReadOnly;
 import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
 import static android.view.flags.Flags.viewVelocityApi;
@@ -2431,6 +2432,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     protected static boolean sToolkitSetFrameRateReadOnlyFlagValue;
     private static boolean sToolkitMetricsForFrameRateDecisionFlagValue;
+    private static final boolean sToolkitFrameRateDefaultNormalReadOnlyFlagValue =
+            toolkitFrameRateDefaultNormalReadOnly();
+    private static final boolean sToolkitFrameRateBySizeReadOnlyFlagValue =
+            toolkitFrameRateBySizeReadOnly();
+
+    private static final boolean sToolkitFrameRateSmallUsesPercentReadOnlyFlagValue =
+            toolkitFrameRateSmallUsesPercentReadOnly();
+
     // Used to set frame rate compatibility.
     @Surface.FrameRateCompatibility int mFrameRateCompatibility =
             FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
@@ -3764,6 +3773,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *         1                        PFLAG4_ROTARY_HAPTICS_WAITING_FOR_SCROLL_EVENT
      *       11                         PFLAG4_CONTENT_SENSITIVITY_MASK
      *      1                           PFLAG4_IS_COUNTED_AS_SENSITIVE
+     *     1                            PFLAG4_HAS_DRAWN
+     *    1                             PFLAG4_HAS_MOVED
      * |-------|-------|-------|-------|
      */
 
@@ -3896,6 +3907,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see AttachInfo#mSensitiveViewsCount
      */
     private static final int PFLAG4_IS_COUNTED_AS_SENSITIVE = 0x4000000;
+
+    /**
+     * Whether this view has been drawn once with updateDisplayListIfDirty() or not.
+     * Used by VRR to for quick detection of scrolling.
+     */
+    private static final int PFLAG4_HAS_DRAWN = 0x8000000;
+
+    /**
+     * Whether this view has been moved with either setTranslationX/Y or setLeft/Top.
+     * Used by VRR to for quick detection of scrolling.
+     */
+    private static final int PFLAG4_HAS_MOVED = 0x10000000;
+
     /* End of masks for mPrivateFlags4 */
 
     /** @hide */
@@ -5695,19 +5719,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private ViewTranslationResponse mViewTranslationResponse;
 
     /**
-     * Threshold size for something to be considered a small area update (in DP).
-     * This is the dimension for both width and height.
+     * The size in DP that is considered small for VRR purposes, if square.
      */
-    private static final float FRAME_RATE_SMALL_SIZE_THRESHOLD = 40f;
+    private static final float FRAME_RATE_SQUARE_SMALL_SIZE_DP = 40f;
 
     /**
-     * Threshold size for something to be considered a small area update (in DP) if
-     * it is narrow. This is for either width OR height. For example, a narrow progress
-     * bar could be considered a small area.
+     * The size in DP that is considered small for VRR purposes in the narrow dimension. Used for
+     * narrow Views like a progress bar.
      */
-    private static final float FRAME_RATE_NARROW_THRESHOLD = 10f;
+    private static final float FRAME_RATE_NARROW_SIZE_DP = 10f;
 
-    private static final long INFREQUENT_UPDATE_INTERVAL_MILLIS = 100;
+    /**
+     * A threshold value to determine the frame rate category of the View based on the size.
+     */
+    private static final float FRAME_RATE_SIZE_PERCENTAGE_THRESHOLD = 0.07f;
+
+    private static final int INFREQUENT_UPDATE_INTERVAL_MILLIS = 100;
     private static final int INFREQUENT_UPDATE_COUNTS = 2;
 
     // The preferred frame rate of the view that is mainly used for
@@ -5719,15 +5746,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      */
-    protected long mMinusOneFrameIntervalMillis = 0;
+    protected int mMinusOneFrameIntervalMillis = 0;
     /**
      * @hide
      */
-    protected long mMinusTwoFrameIntervalMillis = 0;
+    protected int mMinusTwoFrameIntervalMillis = 0;
     private int mLastFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
-
-    private float mLastFrameX = Float.NaN;
-    private float mLastFrameY = Float.NaN;
 
     @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
     public static final float REQUESTED_FRAME_RATE_CATEGORY_DEFAULT = Float.NaN;
@@ -5739,6 +5763,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final float REQUESTED_FRAME_RATE_CATEGORY_NORMAL = -3;
     @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
     public static final float REQUESTED_FRAME_RATE_CATEGORY_HIGH = -4;
+
+    private int mSizeBasedFrameRateCategoryAndReason;
 
     /**
      * Simple constructor to use when creating a view from code.
@@ -19425,6 +19451,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public final void setTop(int top) {
         if (top != mTop) {
+            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
             final boolean matrixIsIdentity = hasIdentityMatrix();
             if (matrixIsIdentity) {
                 if (mAttachInfo != null) {
@@ -19549,6 +19576,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public final void setLeft(int left) {
         if (left != mLeft) {
+            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
             final boolean matrixIsIdentity = hasIdentityMatrix();
             if (matrixIsIdentity) {
                 if (mAttachInfo != null) {
@@ -19805,6 +19833,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @RemotableViewMethod
     public void setTranslationX(float translationX) {
         if (translationX != getTranslationX()) {
+            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
             invalidateViewProperty(true, false);
             mRenderNode.setTranslationX(translationX);
             invalidateViewProperty(false, true);
@@ -19841,6 +19870,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @RemotableViewMethod
     public void setTranslationY(float translationY) {
         if (translationY != getTranslationY()) {
+            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
             invalidateViewProperty(true, false);
             mRenderNode.setTranslationY(translationY);
             invalidateViewProperty(false, true);
@@ -20313,6 +20343,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void offsetTopAndBottom(int offset) {
         if (offset != 0) {
+            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
             final boolean matrixIsIdentity = hasIdentityMatrix();
             if (matrixIsIdentity) {
                 if (isHardwareAccelerated()) {
@@ -20364,6 +20395,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void offsetLeftAndRight(int offset) {
         if (offset != 0) {
+            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
             final boolean matrixIsIdentity = hasIdentityMatrix();
             if (matrixIsIdentity) {
                 if (isHardwareAccelerated()) {
@@ -20763,7 +20795,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         // For VRR to vote the preferred frame rate
         if (sToolkitSetFrameRateReadOnlyFlagValue) {
-            updateInfrequentCount();
             votePreferredFrameRate();
         }
 
@@ -20871,7 +20902,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mParent != null && mAttachInfo != null) {
             // For VRR to vote the preferred frame rate
             if (sToolkitSetFrameRateReadOnlyFlagValue) {
-                updateInfrequentCount();
                 votePreferredFrameRate();
             }
             mParent.onDescendantInvalidated(this, this);
@@ -23561,6 +23591,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return renderNode;
         }
 
+        mPrivateFlags4 = (mPrivateFlags4 & ~PFLAG4_HAS_MOVED) | PFLAG4_HAS_DRAWN;
+        if (sToolkitSetFrameRateReadOnlyFlagValue) {
+            updateInfrequentCount();
+        }
+
         if ((mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == 0
                 || !renderNode.hasDisplayList()
                 || (mRecreateDisplayList)) {
@@ -24724,8 +24759,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mPrivateFlags = (privateFlags & ~PFLAG_DIRTY_MASK) | PFLAG_DRAWN;
 
         mFrameContentVelocity = -1;
-        mLastFrameX = mLeft + mRenderNode.getTranslationX();
-        mLastFrameY = mTop + mRenderNode.getTranslationY();
 
         /*
          * Draw traversal performs several drawing steps which must be executed
@@ -25402,6 +25435,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if (mLeft != left || mRight != right || mTop != top || mBottom != bottom) {
+            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
             changed = true;
 
             // Remember our drawn bit
@@ -25474,6 +25508,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private void sizeChange(int newWidth, int newHeight, int oldWidth, int oldHeight) {
+        if (mAttachInfo != null) {
+            boolean isSmall;
+            if (sToolkitFrameRateSmallUsesPercentReadOnlyFlagValue) {
+                int size = newWidth * newHeight;
+                float percent = size / mAttachInfo.mDisplayPixelCount;
+                isSmall = percent <= FRAME_RATE_SIZE_PERCENTAGE_THRESHOLD;
+            } else {
+                float density = mAttachInfo.mDensity;
+                int narrowSize = (int) (density * FRAME_RATE_NARROW_SIZE_DP);
+                int smallSize = (int) (density * FRAME_RATE_SQUARE_SMALL_SIZE_DP);
+                isSmall = newWidth <= narrowSize || newHeight <= narrowSize
+                        || (newWidth <= smallSize && newHeight <= smallSize);
+            }
+            if (isSmall) {
+                int category = sToolkitFrameRateBySizeReadOnlyFlagValue
+                        ? FRAME_RATE_CATEGORY_LOW : FRAME_RATE_CATEGORY_NORMAL;
+                mSizeBasedFrameRateCategoryAndReason = category | FRAME_RATE_CATEGORY_REASON_SMALL;
+            } else {
+                int category = sToolkitFrameRateDefaultNormalReadOnlyFlagValue
+                        ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
+                mSizeBasedFrameRateCategoryAndReason = category | FRAME_RATE_CATEGORY_REASON_LARGE;
+            }
+        }
+
         onSizeChanged(newWidth, newHeight, oldWidth, oldHeight);
         if (mOverlay != null) {
             mOverlay.getOverlayView().setRight(newWidth);
@@ -32040,6 +32098,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         int mSensitiveViewsCount;
 
         /**
+         * The value of viewVelocityApi(), read only once per ViewRootImpl
+         */
+        final boolean mViewVelocityApi = viewVelocityApi();
+
+        /**
+         * Density so that it doesn't need to be retrieved on every invalidation.
+         */
+        final float mDensity;
+
+        /**
+         * The number of pixels in the display (width * height).
+         */
+        final float mDisplayPixelCount;
+
+        /**
          * Creates a new set of attachment information with the specified
          * events handler and thread.
          *
@@ -32056,6 +32129,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mHandler = handler;
             mRootCallbacks = effectPlayer;
             mTreeObserver = new ViewTreeObserver(context);
+            DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+            mDensity = displayMetrics.density;
+            float pixelCount = (float) displayMetrics.widthPixels * displayMetrics.heightPixels;
+            mDisplayPixelCount = pixelCount == 0f ? Float.POSITIVE_INFINITY : pixelCount;
         }
 
         void increaseSensitiveViewsCount() {
@@ -33760,52 +33837,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return null;
     }
 
-    private float getSizePercentage() {
-        float alpha = mTransformationInfo != null ? mTransformationInfo.mAlpha : 1;
-        int visibility = mViewFlags & VISIBILITY_MASK;
-
-        if (mResources == null || alpha == 0 || visibility != VISIBLE) {
-            return 0;
-        }
-
-        DisplayMetrics displayMetrics = mResources.getDisplayMetrics();
-        int screenSize = displayMetrics.widthPixels
-                * displayMetrics.heightPixels;
-        int viewSize = getWidth() * getHeight();
-
-        if (screenSize == 0 || viewSize == 0) {
-            return 0f;
-        }
-        return (float) viewSize / screenSize;
-    }
-
     /**
      * Used to calculate the frame rate category of a View.
      *
      * @hide
      */
-    protected int calculateFrameRateCategory(int width, int height) {
+    protected int calculateFrameRateCategory() {
         if (mMinusTwoFrameIntervalMillis + mMinusOneFrameIntervalMillis
                 < INFREQUENT_UPDATE_INTERVAL_MILLIS) {
-            DisplayMetrics displayMetrics = mResources.getDisplayMetrics();
-            float density = displayMetrics.density;
-            if (density == 0f) {
-                density = 1f;
-            }
-            float widthDp = width / density;
-            float heightDp = height / density;
-            if (widthDp <= FRAME_RATE_NARROW_THRESHOLD
-                    || heightDp <= FRAME_RATE_NARROW_THRESHOLD
-                    || (widthDp <= FRAME_RATE_SMALL_SIZE_THRESHOLD
-                    && heightDp <= FRAME_RATE_SMALL_SIZE_THRESHOLD)) {
-                int category = toolkitFrameRateBySizeReadOnly()
-                        ? FRAME_RATE_CATEGORY_LOW : FRAME_RATE_CATEGORY_NORMAL;
-                return category | FRAME_RATE_CATEGORY_REASON_SMALL;
-            } else {
-                int category = toolkitFrameRateDefaultNormalReadOnly()
-                        ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
-                return category | FRAME_RATE_CATEGORY_REASON_LARGE;
-            }
+            return mSizeBasedFrameRateCategoryAndReason;
         }
 
         if (mInfrequentUpdateCount == INFREQUENT_UPDATE_COUNTS) {
@@ -33819,11 +33859,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         ViewRootImpl viewRootImpl = getViewRootImpl();
         int width = mRight - mLeft;
         int height = mBottom - mTop;
-        if (viewRootImpl != null && (width != 0 && height != 0)) {
-            if (viewVelocityApi()) {
+        float alpha = mTransformationInfo != null ? mTransformationInfo.mAlpha : 1;
+        int visibility = mViewFlags & VISIBILITY_MASK;
+
+        if (viewRootImpl != null && (width != 0 && height != 0)
+                && alpha != 0 && visibility == View.VISIBLE
+        ) {
+            if (mAttachInfo.mViewVelocityApi) {
                 float velocity = mFrameContentVelocity;
-                if (velocity < 0f) {
-                    velocity = calculateVelocity();
+                int mask = PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN;
+                if (velocity < 0f && (mPrivateFlags4 & mask) == mask) {
+                    // This current calculation is very simple. If something on the screen moved,
+                    // then it votes for the highest velocity. If it doesn't move, then return 0.
+                    velocity = Float.POSITIVE_INFINITY;
                 }
                 if (velocity > 0f) {
                     float frameRate = convertVelocityToFrameRate(velocity);
@@ -33831,61 +33879,56 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     return;
                 }
             }
-            if (sToolkitMetricsForFrameRateDecisionFlagValue) {
-                float sizePercentage = getSizePercentage();
-                viewRootImpl.recordViewPercentage(sizePercentage);
-            }
-            int frameRateCategory;
-            if (Float.isNaN(mPreferredFrameRate)) {
-                frameRateCategory = calculateFrameRateCategory(width, height);
-            } else if (mPreferredFrameRate < 0) {
-                if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE) {
-                    frameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE
-                            | FRAME_RATE_CATEGORY_REASON_REQUESTED;
-                } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_LOW) {
-                    frameRateCategory = FRAME_RATE_CATEGORY_LOW
-                            | FRAME_RATE_CATEGORY_REASON_REQUESTED;
-                } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NORMAL) {
-                    frameRateCategory = FRAME_RATE_CATEGORY_NORMAL
-                            | FRAME_RATE_CATEGORY_REASON_REQUESTED;
-                } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_HIGH) {
-                    frameRateCategory = FRAME_RATE_CATEGORY_HIGH
-                            | FRAME_RATE_CATEGORY_REASON_REQUESTED;
-                } else {
-                    // invalid frame rate, use default
-                    int category = toolkitFrameRateDefaultNormalReadOnly()
-                            ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
-                    frameRateCategory = category
-                            | FRAME_RATE_CATEGORY_REASON_INVALID;
+            if (!willNotDraw()) {
+                if (sToolkitMetricsForFrameRateDecisionFlagValue) {
+                    float sizePercentage = width * height / mAttachInfo.mDisplayPixelCount;
+                    viewRootImpl.recordViewPercentage(sizePercentage);
                 }
-            } else {
-                viewRootImpl.votePreferredFrameRate(mPreferredFrameRate,
-                        mFrameRateCompatibility);
-                return;
-            }
 
-            int category = frameRateCategory & ~FRAME_RATE_CATEGORY_REASON_MASK;
-            int reason = frameRateCategory & FRAME_RATE_CATEGORY_REASON_MASK;
-            viewRootImpl.votePreferredFrameRateCategory(category, reason, this);
-            mLastFrameRateCategory = frameRateCategory;
+                int frameRateCategory;
+                if (Float.isNaN(mPreferredFrameRate)) {
+                    frameRateCategory = calculateFrameRateCategory();
+                } else if (mPreferredFrameRate < 0) {
+                    switch ((int) mPreferredFrameRate) {
+                        case (int) REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE ->
+                                frameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE
+                                        | FRAME_RATE_CATEGORY_REASON_REQUESTED;
+                        case (int) REQUESTED_FRAME_RATE_CATEGORY_LOW ->
+                                frameRateCategory = FRAME_RATE_CATEGORY_LOW
+                                        | FRAME_RATE_CATEGORY_REASON_REQUESTED;
+                        case (int) REQUESTED_FRAME_RATE_CATEGORY_NORMAL ->
+                                frameRateCategory = FRAME_RATE_CATEGORY_NORMAL
+                                        | FRAME_RATE_CATEGORY_REASON_REQUESTED;
+                        case (int) REQUESTED_FRAME_RATE_CATEGORY_HIGH ->
+                                frameRateCategory = FRAME_RATE_CATEGORY_HIGH
+                                        | FRAME_RATE_CATEGORY_REASON_REQUESTED;
+                        default -> {
+                            // invalid frame rate, use default
+                            int category = sToolkitFrameRateDefaultNormalReadOnlyFlagValue
+                                    ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
+                            frameRateCategory = category
+                                    | FRAME_RATE_CATEGORY_REASON_INVALID;
+                        }
+                    }
+                } else {
+                    viewRootImpl.votePreferredFrameRate(mPreferredFrameRate,
+                            mFrameRateCompatibility);
+                    return;
+                }
+
+                int category = frameRateCategory & ~FRAME_RATE_CATEGORY_REASON_MASK;
+                int reason = frameRateCategory & FRAME_RATE_CATEGORY_REASON_MASK;
+                viewRootImpl.votePreferredFrameRateCategory(category, reason, this);
+                mLastFrameRateCategory = frameRateCategory;
+            }
         }
     }
 
     private float convertVelocityToFrameRate(float velocityPps) {
-        float density = getResources().getDisplayMetrics().density;
+        float density = mAttachInfo.mDensity;
         float velocityDps = velocityPps / density;
         // Choose a frame rate in increments of 10fps
         return Math.min(140f, 60f + (10f * (float) Math.floor(velocityDps / 300f)));
-    }
-
-    private float calculateVelocity() {
-        // This current calculation is very simple. If something on the screen moved, then
-        // it votes for the highest velocity. If it doesn't move, then return 0.
-        float x = mLeft + mRenderNode.getTranslationX();
-        float y = mTop + mRenderNode.getTranslationY();
-
-        return (!Float.isNaN(mLastFrameX) && (x != mLastFrameX || y != mLastFrameY))
-                ? 100_000f : 0f;
     }
 
     /**
@@ -33970,20 +34013,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * - otherwise, use the previous category value.
      */
     private void updateInfrequentCount() {
-        long currentTimeMillis = getDrawingTime();
-        long timeIntervalMillis = currentTimeMillis - mLastUpdateTimeMillis;
-        mMinusTwoFrameIntervalMillis = mMinusOneFrameIntervalMillis;
-        mMinusOneFrameIntervalMillis = timeIntervalMillis;
+        if (!willNotDraw()) {
+            long currentTimeMillis = getDrawingTime();
+            int timeIntervalMillis =
+                    (int) Math.min(Integer.MAX_VALUE, currentTimeMillis - mLastUpdateTimeMillis);
+            mMinusTwoFrameIntervalMillis = mMinusOneFrameIntervalMillis;
+            mMinusOneFrameIntervalMillis = timeIntervalMillis;
 
-        mLastUpdateTimeMillis = currentTimeMillis;
-        if (mMinusTwoFrameIntervalMillis >= 30 && timeIntervalMillis < 2) {
-            return;
-        }
-        if (timeIntervalMillis >= INFREQUENT_UPDATE_INTERVAL_MILLIS) {
-            mInfrequentUpdateCount = mInfrequentUpdateCount == INFREQUENT_UPDATE_COUNTS
+            mLastUpdateTimeMillis = currentTimeMillis;
+            if (mMinusTwoFrameIntervalMillis >= 30 && timeIntervalMillis < 2) {
+                return;
+            }
+            if (timeIntervalMillis >= INFREQUENT_UPDATE_INTERVAL_MILLIS) {
+                mInfrequentUpdateCount = mInfrequentUpdateCount == INFREQUENT_UPDATE_COUNTS
                         ? mInfrequentUpdateCount : mInfrequentUpdateCount + 1;
-        } else {
-            mInfrequentUpdateCount = 0;
+            } else {
+                mInfrequentUpdateCount = 0;
+            }
         }
     }
 }

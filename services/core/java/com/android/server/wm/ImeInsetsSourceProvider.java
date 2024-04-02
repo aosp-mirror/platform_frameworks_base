@@ -38,7 +38,6 @@ import android.view.InsetsSourceConsumer;
 import android.view.InsetsSourceControl;
 import android.view.WindowInsets;
 import android.view.inputmethod.ImeTracker;
-import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
@@ -78,17 +77,22 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
         final InsetsSourceControl control = super.getControl(target);
         if (control != null && target != null && target.getWindow() != null) {
             final WindowState targetWin = target.getWindow();
+            final Task task = targetWin.getTask();
             // If the control target changes during the app transition with the task snapshot
             // starting window and the IME snapshot is visible, in case not have duplicated IME
             // showing animation during transitioning, use a flag to inform IME source control to
             // skip showing animation once.
-            final TaskSnapshot snapshot = targetWin.getRootTask() != null
-                    ? targetWin.mWmService.getTaskSnapshot(targetWin.getRootTask().mTaskId,
-                        0 /* userId */, false /* isLowResolution */, false /* restoreFromDisk */)
-                    : null;
-            control.setSkipAnimationOnce(targetWin.mActivityRecord != null
-                    && targetWin.mActivityRecord.hasStartingWindow()
-                    && snapshot != null && snapshot.hasImeSurface());
+            StartingData startingData = null;
+            if (task != null) {
+                startingData = targetWin.mActivityRecord.mStartingData;
+                if (startingData == null) {
+                    final WindowState startingWin = task.topStartingWindow();
+                    if (startingWin != null) {
+                        startingData = startingWin.mStartingData;
+                    }
+                }
+            }
+            control.setSkipAnimationOnce(startingData != null && startingData.hasImeSurface());
         }
         return control;
     }

@@ -30,14 +30,12 @@ import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample
-import com.android.systemui.util.kotlin.sample
 import java.util.UUID
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -97,14 +95,13 @@ constructor(
             scope.launch {
                 powerInteractor.detailedWakefulness
                     // React only to wake events.
-                    .filter { it.isAwake() }
+                    .filterRelevantKeyguardStateAnd { it.isAwake() }
                     .sample(
                         startedKeyguardTransitionStep,
                         keyguardInteractor.biometricUnlockState,
                         keyguardInteractor.primaryBouncerShowing,
                     )
                     // Make sure we've at least STARTED a transition to AOD.
-                    .filter { (_, startedStep, _, _) -> startedStep.to == KeyguardState.AOD }
                     .collect { (_, startedStep, biometricUnlockState, primaryBouncerShowing) ->
                         // Check with the superclass to see if an occlusion transition is needed.
                         // Also, don't react to wake and unlock events, as we'll be receiving a call
@@ -122,6 +119,7 @@ constructor(
             scope.launch {
                 keyguardInteractor
                     .dozeTransitionTo(DozeStateModel.FINISH)
+                    .filterRelevantKeyguardState()
                     .sample(
                         keyguardInteractor.isKeyguardShowing,
                         startedKeyguardTransitionStep,
@@ -138,8 +136,7 @@ constructor(
                             biometricUnlockState,
                             primaryBouncerShowing) ->
                         if (
-                            lastStartedStep.to == KeyguardState.AOD &&
-                                !occluded &&
+                            !occluded &&
                                 !isWakeAndUnlock(biometricUnlockState) &&
                                 isKeyguardShowing &&
                                 !primaryBouncerShowing
@@ -164,14 +161,12 @@ constructor(
 
         scope.launch {
             keyguardInteractor.isKeyguardOccluded
-                .sample(startedKeyguardTransitionStep, ::Pair)
-                .collect { (isOccluded, lastStartedStep) ->
-                    if (isOccluded && lastStartedStep.to == KeyguardState.AOD) {
-                        startTransitionTo(
-                            toState = KeyguardState.OCCLUDED,
-                            modeOnCanceled = TransitionModeOnCanceled.RESET
-                        )
-                    }
+                .filterRelevantKeyguardStateAnd { isOccluded -> isOccluded }
+                .collect {
+                    startTransitionTo(
+                        toState = KeyguardState.OCCLUDED,
+                        modeOnCanceled = TransitionModeOnCanceled.RESET
+                    )
                 }
         }
     }
@@ -183,12 +178,8 @@ constructor(
     private fun listenForAodToPrimaryBouncer() {
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
-                .sample(startedKeyguardTransitionStep, ::Pair)
-                .collect { (isBouncerShowing, lastStartedTransitionStep) ->
-                    if (isBouncerShowing && lastStartedTransitionStep.to == KeyguardState.AOD) {
-                        startTransitionTo(KeyguardState.PRIMARY_BOUNCER)
-                    }
-                }
+                .filterRelevantKeyguardStateAnd { primaryBouncerShowing -> primaryBouncerShowing }
+                .collect { startTransitionTo(KeyguardState.PRIMARY_BOUNCER) }
         }
     }
 
@@ -201,23 +192,17 @@ constructor(
         scope.launch {
             powerInteractor.isAwake
                 .debounce(50L)
+                .filterRelevantKeyguardState()
                 .sample(
                     keyguardInteractor.biometricUnlockState,
-                    startedKeyguardTransitionStep,
                     keyguardInteractor.isKeyguardShowing,
                     keyguardInteractor.isKeyguardDismissible,
                 )
-                .collect {
-                    (
-                        isAwake,
-                        biometricUnlockState,
-                        lastStartedTransitionStep,
-                        isKeyguardShowing,
-                        isKeyguardDismissible) ->
+                .collect { (isAwake, biometricUnlockState, isKeyguardShowing, isKeyguardDismissible)
+                    ->
                     KeyguardWmStateRefactor.assertInLegacyMode()
                     if (
                         isAwake &&
-                            lastStartedTransitionStep.to == KeyguardState.AOD &&
                             (isWakeAndUnlock(biometricUnlockState) ||
                                 (!isKeyguardShowing && isKeyguardDismissible))
                     ) {

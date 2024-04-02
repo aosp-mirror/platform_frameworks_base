@@ -45,7 +45,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.OnReceiveContentListener;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.WindowInsets;
@@ -85,9 +84,7 @@ import com.android.systemui.res.R;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
-import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.LightBarController;
-import com.android.wm.shell.animation.Interpolators;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -132,8 +129,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private boolean mColorized;
     private int mLastBackgroundColor;
     private boolean mResetting;
-    @Nullable
-    private RevealParams mRevealParams;
     private Rect mContentBackgroundBounds;
     private boolean mIsAnimatingAppearance = false;
 
@@ -453,6 +448,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                         setTopMargin(0);
                         if (grandParent != null) grandParent.setClipChildren(true);
                         setVisibility(GONE);
+                        setAlpha(1f);
                         if (mWrapper != null) {
                             mWrapper.setRemoteInputVisible(false);
                         }
@@ -464,20 +460,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 if (actionsContainer != null) actionsContainer.setAlpha(0f);
                 animator.start();
 
-            } else if (animate && mRevealParams != null && mRevealParams.radius > 0) {
-                android.animation.Animator reveal = mRevealParams.createCircularHideAnimator(this);
-                reveal.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
-                reveal.setDuration(StackStateAnimator.ANIMATION_DURATION_CLOSE_REMOTE_INPUT);
-                reveal.addListener(new android.animation.AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(android.animation.Animator animation) {
-                        setVisibility(GONE);
-                        if (mWrapper != null) {
-                            mWrapper.setRemoteInputVisible(false);
-                        }
-                    }
-                });
-                reveal.start();
             } else {
                 setVisibility(GONE);
                 if (doAfterDefocus != null) doAfterDefocus.run();
@@ -717,10 +699,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
     public void setRemoved() {
         mRemoved = true;
-    }
-
-    public void setRevealParameters(@Nullable RevealParams revealParams) {
-        mRevealParams = revealParams;
     }
 
     @Override
@@ -1176,25 +1154,5 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             return remainingItems;
         }
 
-    }
-
-    public static class RevealParams {
-        final int centerX;
-        final int centerY;
-        final int radius;
-
-        public RevealParams(int centerX, int centerY, int radius) {
-            this.centerX = centerX;
-            this.centerY = centerY;
-            this.radius = radius;
-        }
-
-        android.animation.Animator createCircularHideAnimator(View view) {
-            return ViewAnimationUtils.createCircularReveal(view, centerX, centerY, radius, 0);
-        }
-
-        android.animation.Animator createCircularRevealAnimator(View view) {
-            return ViewAnimationUtils.createCircularReveal(view, centerX, centerY, 0, radius);
-        }
     }
 }

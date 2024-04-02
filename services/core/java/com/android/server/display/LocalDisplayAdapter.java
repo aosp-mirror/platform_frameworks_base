@@ -53,6 +53,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
+import com.android.server.display.color.ColorDisplayService;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.mode.DisplayModeDirector;
 import com.android.server.display.notifications.DisplayNotificationManager;
@@ -100,6 +101,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
     private Context mOverlayContext;
 
     private int mEvenDimmerStrength = -1;
+    private ColorDisplayService.ColorDisplayServiceInternal mCdsi;
 
     // Called with SyncRoot lock held.
     LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot, Context context,
@@ -938,7 +940,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             final float nits = backlightToNits(backlight);
                             final float sdrNits = backlightToNits(sdrBacklight);
 
-                            if (getFeatureFlags().isEvenDimmerEnabled()) {
+                            if (getFeatureFlags().isEvenDimmerEnabled()
+                                    && mDisplayDeviceConfig != null
+                                    && mDisplayDeviceConfig.isEvenDimmerAvailable()) {
                                 applyColorMatrixBasedDimming(brightnessState);
                             }
 
@@ -1000,9 +1004,15 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                                 || strength <= 1) {
                             mEvenDimmerStrength = strength;
                         }
+                        boolean enabled = mEvenDimmerStrength > 0.0f;
 
-                        // TODO: use `enabled` and `mRbcStrength` to set color matrices here
-                        // TODO: boolean enabled = mEvenDimmerStrength > 0.0f;
+                        if (mCdsi == null) {
+                            mCdsi = LocalServices.getService(
+                                    ColorDisplayService.ColorDisplayServiceInternal.class);
+                        }
+                        if (mCdsi != null) {
+                            mCdsi.applyEvenDimmerColorChanges(enabled, strength);
+                        }
                     }
                 };
             }

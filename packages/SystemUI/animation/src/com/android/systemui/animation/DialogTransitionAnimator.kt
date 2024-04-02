@@ -711,7 +711,6 @@ private class AnimatedDialog(
         dialog.setDismissOverride(this::onDialogDismissed)
 
         if (featureFlags.isPredictiveBackQsDialogAnim) {
-            // TODO(b/265923095) Improve animations for QS dialogs on configuration change
             dialog.registerAnimationOnBackInvoked(targetView = dialogContentWithBackground)
         }
 

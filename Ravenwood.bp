@@ -30,7 +30,7 @@ java_genrule {
     name: "framework-minus-apex.ravenwood-base",
     tools: ["hoststubgen"],
     cmd: "$(location hoststubgen) " +
-        "@$(location ravenwood/ravenwood-standard-options.txt) " +
+        "@$(location ravenwood/texts/ravenwood-standard-options.txt) " +
 
         "--debug-log $(location hoststubgen_framework-minus-apex.log) " +
         "--stats-file $(location hoststubgen_framework-minus-apex_stats.csv) " +
@@ -41,13 +41,13 @@ java_genrule {
         "--gen-input-dump-file $(location hoststubgen_dump.txt) " +
 
         "--in-jar $(location :framework-minus-apex-for-hoststubgen) " +
-        "--policy-override-file $(location ravenwood/framework-minus-apex-ravenwood-policies.txt) " +
-        "--annotation-allowed-classes-file $(location ravenwood/ravenwood-annotation-allowed-classes.txt) ",
+        "--policy-override-file $(location ravenwood/texts/framework-minus-apex-ravenwood-policies.txt) " +
+        "--annotation-allowed-classes-file $(location ravenwood/texts/ravenwood-annotation-allowed-classes.txt) ",
     srcs: [
         ":framework-minus-apex-for-hoststubgen",
-        "ravenwood/framework-minus-apex-ravenwood-policies.txt",
-        "ravenwood/ravenwood-standard-options.txt",
-        "ravenwood/ravenwood-annotation-allowed-classes.txt",
+        "ravenwood/texts/framework-minus-apex-ravenwood-policies.txt",
+        "ravenwood/texts/ravenwood-standard-options.txt",
+        "ravenwood/texts/ravenwood-annotation-allowed-classes.txt",
     ],
     out: [
         "ravenwood.jar",
@@ -77,6 +77,19 @@ java_genrule {
     ],
 }
 
+// Extract the stats file.
+genrule {
+    name: "framework-minus-apex.ravenwood.stats",
+    defaults: ["ravenwood-internal-only-visibility-genrule"],
+    cmd: "cp $(in) $(out)",
+    srcs: [
+        ":framework-minus-apex.ravenwood-base{hoststubgen_framework-minus-apex_stats.csv}",
+    ],
+    out: [
+        "hoststubgen_framework-minus-apex_stats.csv",
+    ],
+}
+
 java_library {
     name: "services.core-for-hoststubgen",
     installable: false, // host only jar.
@@ -91,7 +104,7 @@ java_genrule {
     name: "services.core.ravenwood-base",
     tools: ["hoststubgen"],
     cmd: "$(location hoststubgen) " +
-        "@$(location ravenwood/ravenwood-standard-options.txt) " +
+        "@$(location ravenwood/texts/ravenwood-standard-options.txt) " +
 
         "--debug-log $(location hoststubgen_services.core.log) " +
         "--stats-file $(location hoststubgen_services.core_stats.csv) " +
@@ -102,13 +115,13 @@ java_genrule {
         "--gen-input-dump-file $(location hoststubgen_dump.txt) " +
 
         "--in-jar $(location :services.core-for-hoststubgen) " +
-        "--policy-override-file $(location ravenwood/services.core-ravenwood-policies.txt) " +
-        "--annotation-allowed-classes-file $(location ravenwood/ravenwood-annotation-allowed-classes.txt) ",
+        "--policy-override-file $(location ravenwood/texts/services.core-ravenwood-policies.txt) " +
+        "--annotation-allowed-classes-file $(location ravenwood/texts/ravenwood-annotation-allowed-classes.txt) ",
     srcs: [
         ":services.core-for-hoststubgen",
-        "ravenwood/services.core-ravenwood-policies.txt",
-        "ravenwood/ravenwood-standard-options.txt",
-        "ravenwood/ravenwood-annotation-allowed-classes.txt",
+        "ravenwood/texts/services.core-ravenwood-policies.txt",
+        "ravenwood/texts/ravenwood-standard-options.txt",
+        "ravenwood/texts/ravenwood-annotation-allowed-classes.txt",
     ],
     out: [
         "ravenwood.jar",
@@ -132,6 +145,19 @@ java_genrule {
     ],
     out: [
         "services.core.ravenwood.jar",
+    ],
+}
+
+// Extract the stats file.
+genrule {
+    name: "services.core.ravenwood.stats",
+    defaults: ["ravenwood-internal-only-visibility-genrule"],
+    cmd: "cp $(in) $(out)",
+    srcs: [
+        ":services.core.ravenwood-base{hoststubgen_services.core_stats.csv}",
+    ],
+    out: [
+        "hoststubgen_services.core_stats.csv",
     ],
 }
 

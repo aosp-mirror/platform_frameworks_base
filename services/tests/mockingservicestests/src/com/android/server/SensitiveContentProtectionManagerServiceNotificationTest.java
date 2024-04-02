@@ -31,6 +31,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import android.content.pm.PackageManagerInternal;
 import android.media.projection.MediaProjectionInfo;
 import android.media.projection.MediaProjectionManager;
 import android.platform.test.annotations.RequiresFlagsEnabled;
@@ -104,6 +105,9 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
     private WindowManagerInternal mWindowManager;
 
     @Mock
+    private PackageManagerInternal mPackageManagerInternal;
+
+    @Mock
     private StatusBarNotification mNotification1;
 
     @Mock
@@ -141,7 +145,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
         setupSensitiveNotification();
 
         mSensitiveContentProtectionManagerService.init(mProjectionManager, mWindowManager,
-                new ArraySet<>(Set.of(EXEMPTED_SCREEN_RECORDER_PACKAGE)));
+                mPackageManagerInternal, new ArraySet<>(Set.of(EXEMPTED_SCREEN_RECORDER_PACKAGE)));
 
         // Obtain useful mMediaProjectionCallback
         verify(mProjectionManager).addCallback(mMediaProjectionCallbackCaptor.capture(), any());

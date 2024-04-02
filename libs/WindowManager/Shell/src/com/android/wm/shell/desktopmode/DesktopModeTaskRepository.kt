@@ -20,6 +20,7 @@ import android.graphics.Region
 import android.util.ArrayMap
 import android.util.ArraySet
 import android.util.SparseArray
+import android.view.Display.INVALID_DISPLAY
 import androidx.core.util.forEach
 import androidx.core.util.keyIterator
 import androidx.core.util.valueIterator
@@ -226,6 +227,14 @@ class DesktopModeTaskRepository {
                         displayData[otherDisplayId].visibleTasks.size)
                 }
             }
+        } else if (displayId == INVALID_DISPLAY) {
+            // Task has vanished. Check which display to remove the task from.
+            displayData.forEach { displayId, data ->
+                if (data.visibleTasks.remove(taskId)) {
+                    notifyVisibleTaskListeners(displayId, data.visibleTasks.size)
+                }
+            }
+            return
         }
 
         val prevCount = getVisibleTaskCount(displayId)
@@ -236,6 +245,7 @@ class DesktopModeTaskRepository {
         }
         val newCount = getVisibleTaskCount(displayId)
 
+        // Check if count changed
         if (prevCount != newCount) {
             KtProtoLog.d(
                 WM_SHELL_DESKTOP_MODE,
@@ -244,10 +254,6 @@ class DesktopModeTaskRepository {
                 visible,
                 displayId
             )
-        }
-
-        // Check if count changed
-        if (prevCount != newCount) {
             KtProtoLog.d(
                 WM_SHELL_DESKTOP_MODE,
                 "DesktopTaskRepo: visibleTaskCount has changed from %d to %d",

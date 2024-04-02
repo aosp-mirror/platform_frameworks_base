@@ -23,6 +23,7 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.os.Build.VERSION_CODES.S;
+import static android.permission.flags.Flags.FLAG_SHOULD_REGISTER_ATTRIBUTION_SOURCE;
 import static android.permission.flags.Flags.serverSideAttributionRegistration;
 
 import android.Manifest;
@@ -1652,6 +1653,8 @@ public final class PermissionManager {
      *
      * @hide
      */
+    @TestApi
+    @FlaggedApi(FLAG_SHOULD_REGISTER_ATTRIBUTION_SOURCE)
     public boolean isRegisteredAttributionSource(@NonNull AttributionSource source) {
         try {
             return mPermissionManager.isRegisteredAttributionSource(source.asState());

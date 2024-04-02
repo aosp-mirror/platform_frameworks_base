@@ -21,8 +21,6 @@ import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepositor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.FailureMetadata
 import com.google.common.truth.Subject
 import com.google.common.truth.Truth
@@ -30,8 +28,6 @@ import com.google.common.truth.Truth.assertAbout
 import junit.framework.Assert.assertEquals
 import kotlin.test.fail
 import org.mockito.Mockito
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
 
 /** [Subject] used to make assertions about a [Mockito.spy] KeyguardTransitionRepository. */
 class KeyguardTransitionRepositorySpySubject
@@ -45,7 +41,7 @@ private constructor(
      * parameters. If an animator param or assertion is not provided, we will not assert anything
      * about the animator.
      */
-    fun startedTransition(
+    suspend fun startedTransition(
         ownerName: String? = null,
         from: KeyguardState? = null,
         to: KeyguardState,
@@ -58,7 +54,7 @@ private constructor(
      * Asserts that we started a transition to the given state, optionally verifying additional
      * params.
      */
-    fun startedTransition(
+    suspend fun startedTransition(
         ownerName: String? = null,
         from: KeyguardState? = null,
         to: KeyguardState,
@@ -72,26 +68,41 @@ private constructor(
      * Asserts that we started a transition to the given state, optionally verifying additional
      * params.
      */
-    fun startedTransition(
+    suspend fun startedTransition(
         ownerName: String? = null,
         from: KeyguardState? = null,
         to: KeyguardState,
         animatorAssertion: (Subject) -> Unit,
         modeOnCanceled: TransitionModeOnCanceled? = null,
     ) {
-        withArgCaptor<TransitionInfo> { verify(repository).startTransition(capture()) }
-            .also { transitionInfo ->
+        // TODO(b/331799060): Remove this workaround once atest supports mocking suspend functions.
+        Mockito.mockingDetails(repository).invocations.forEach { invocation ->
+            if (invocation.method.equals(KeyguardTransitionRepository::startTransition.name)) {
+                val transitionInfo = invocation.arguments.firstOrNull() as TransitionInfo
                 assertEquals(to, transitionInfo.to)
                 animatorAssertion.invoke(Truth.assertThat(transitionInfo.animator))
                 from?.let { assertEquals(it, transitionInfo.from) }
                 ownerName?.let { assertEquals(it, transitionInfo.ownerName) }
                 modeOnCanceled?.let { assertEquals(it, transitionInfo.modeOnCanceled) }
+                invocation.markVerified()
             }
+        }
     }
 
     /** Verifies that [KeyguardTransitionRepository.startTransition] was never called. */
-    fun noTransitionsStarted() {
-        verify(repository, never()).startTransition(any())
+    suspend fun noTransitionsStarted() {
+        // TODO(b/331799060): Remove this workaround once atest supports mocking suspend functions.
+        Mockito.mockingDetails(repository).invocations.forEach {
+            if (
+                it.method.equals(KeyguardTransitionRepository::startTransition.name) &&
+                    !it.isVerified
+            ) {
+                fail(
+                    "Expected no transitions started, however this transition was started: " +
+                        it.arguments.firstOrNull()
+                )
+            }
+        }
     }
 
     companion object {

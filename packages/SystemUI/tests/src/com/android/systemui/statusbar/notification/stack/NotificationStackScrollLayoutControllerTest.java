@@ -37,7 +37,6 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
-import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
 
 import android.metrics.LogMaker;
 import android.platform.test.annotations.DisableFlags;
@@ -69,7 +68,6 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.scene.ui.view.WindowRootView;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -89,7 +87,6 @@ import com.android.systemui.statusbar.notification.collection.render.NotifStats;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository;
-import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor;
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
@@ -100,7 +97,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationSwipeHelper
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor;
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationListViewBinder;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -155,7 +151,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock(answer = Answers.RETURNS_SELF)
     private NotificationSwipeHelper.Builder mNotificationSwipeHelperBuilder;
     @Mock private NotificationSwipeHelper mNotificationSwipeHelper;
-    @Mock private ScrimController mScrimController;
     @Mock private GroupExpansionManager mGroupExpansionManager;
     @Mock private SectionHeaderController mSilentHeaderController;
     @Mock private NotifPipeline mNotifPipeline;
@@ -165,7 +160,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
     @Mock private VisibilityLocationProviderDelegator mVisibilityLocationProviderDelegator;
     @Mock private ShadeController mShadeController;
-    @Mock private SceneContainerFlags mSceneContainerFlags;
     @Mock private Provider<WindowRootView> mWindowRootView;
     @Mock private NotificationStackAppearanceInteractor mNotificationStackAppearanceInteractor;
     private final StackStateLogger mStackLogger = new StackStateLogger(logcatLogBuffer(),
@@ -190,10 +184,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
 
     private final ActiveNotificationListRepository mActiveNotificationsRepository =
             new ActiveNotificationListRepository();
-
-    private final ActiveNotificationsInteractor mActiveNotificationsInteractor =
-            new ActiveNotificationsInteractor(mActiveNotificationsRepository,
-                    StandardTestDispatcher(/* scheduler = */ null, /* name = */ null));
 
     private final SeenNotificationsInteractor mSeenNotificationsInteractor =
             new SeenNotificationsInteractor(mActiveNotificationsRepository);
@@ -1014,7 +1004,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 new FalsingCollectorFake(),
                 new FalsingManagerFake(),
                 mNotificationSwipeHelperBuilder,
-                mScrimController,
                 mGroupExpansionManager,
                 mSilentHeaderController,
                 mNotifPipeline,
@@ -1023,11 +1012,9 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mUiEventLogger,
                 mRemoteInputManager,
                 mVisibilityLocationProviderDelegator,
-                mActiveNotificationsInteractor,
                 mSeenNotificationsInteractor,
                 mViewBinder,
                 mShadeController,
-                mSceneContainerFlags,
                 mWindowRootView,
                 mNotificationStackAppearanceInteractor,
                 mKosmos.getInteractionJankMonitor(),

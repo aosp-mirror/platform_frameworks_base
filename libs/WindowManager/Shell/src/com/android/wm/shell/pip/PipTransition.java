@@ -27,6 +27,7 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.transitTypeToString;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 
@@ -840,8 +841,11 @@ public class PipTransition extends PipTransitionController {
                 && change.getTaskInfo().getWindowingMode() == WINDOWING_MODE_PINNED
                 && !change.getContainer().equals(mCurrentPipTaskToken)) {
             // We support TRANSIT_PIP type (from RootWindowContainer) or TRANSIT_OPEN (from apps
-            // that enter PiP instantly on opening, mostly from CTS/Flicker tests)
-            if (transitType == TRANSIT_PIP || transitType == TRANSIT_OPEN) {
+            // that enter PiP instantly on opening, mostly from CTS/Flicker tests).
+            // TRANSIT_TO_FRONT, though uncommon with triggering PiP, should semantically also
+            // be allowed to animate if the task in question is pinned already - see b/308054074.
+            if (transitType == TRANSIT_PIP || transitType == TRANSIT_OPEN
+                    || transitType == TRANSIT_TO_FRONT) {
                 return true;
             }
             // This can happen if the request to enter PIP happens when we are collecting for

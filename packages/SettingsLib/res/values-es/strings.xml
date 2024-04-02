@@ -263,8 +263,8 @@
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, depuración, desarrollo"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Acceso directo a informe de errores"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Muestra un botón en el menú de encendido para crear un informe de errores"</string>
-    <string name="keep_screen_on" msgid="1187161672348797558">"Pantalla siempre encendida al cargar"</string>
-    <string name="keep_screen_on_summary" msgid="1510731514101925829">"La pantalla nunca entra en modo de suspensión si el dispositivo se está cargando"</string>
+    <string name="keep_screen_on" msgid="1187161672348797558">"Pantalla activa"</string>
+    <string name="keep_screen_on_summary" msgid="1510731514101925829">"La pantalla nunca entra en modo Suspensión si el dispositivo se está cargando"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Habilitar registro de Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Capturar paquetes de Bluetooth (después de cambiar esta opción, desactiva y activa el Bluetooth)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Desbloqueo de OEM"</string>
@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Considerar que las aplicaciones admiten formatos modernos"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Mostrar notificaciones de transcodificación"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Inhabilitar almacenamiento en caché para transcodificaciones"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Ajustes de Widevine"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Forzar respaldo a L3"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Selecciona para forzar el respaldo a L3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Servicios en ejecución"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Consulta y controla los servicios en ejecución"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementación de WebView"</string>
@@ -498,9 +495,9 @@
     <string name="install_other_apps" msgid="3232595082023199454">"Instalar aplicaciones desconocidas"</string>
     <string name="home" msgid="973834627243661438">"Página principal de ajustes"</string>
   <string-array name="battery_labels">
-    <item msgid="7878690469765357158">"0%"</item>
-    <item msgid="8894873528875953317">"50%"</item>
-    <item msgid="7529124349186240216">"100%"</item>
+    <item msgid="7878690469765357158">"0 %"</item>
+    <item msgid="8894873528875953317">"50 %"</item>
+    <item msgid="7529124349186240216">"100 %"</item>
   </string-array>
     <string name="charge_length_format" msgid="6941645744588690932">"Hace <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="4310625772926171089">"Tiempo restante: <xliff:g id="ID_1">%1$s</xliff:g>"</string>
@@ -555,7 +552,7 @@
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Esta tablet"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Altavoz base"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Altavoz de la base"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositivo externo"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispositivo conectado"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este teléfono"</string>

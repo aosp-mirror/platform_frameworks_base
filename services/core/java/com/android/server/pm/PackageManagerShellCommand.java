@@ -28,7 +28,6 @@ import static android.content.pm.PackageManager.RESTRICTION_HIDE_NOTIFICATIONS;
 import static android.content.pm.PackageManager.RESTRICTION_NONE;
 
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
-import static com.android.server.pm.PackageManagerService.DEFAULT_FILE_ACCESS_MODE;
 
 import android.accounts.IAccountManager;
 import android.annotation.NonNull;
@@ -45,6 +44,7 @@ import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.FeatureInfo;
+import android.content.pm.Flags;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageManager;
@@ -4412,8 +4412,31 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int runGetDomainVerificationAgent() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
+        int userId = UserHandle.USER_ALL;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+                if (userId != UserHandle.USER_ALL && userId != UserHandle.USER_CURRENT) {
+                    UserManagerInternal umi =
+                            LocalServices.getService(UserManagerInternal.class);
+                    UserInfo userInfo = umi.getUserInfo(userId);
+                    if (userInfo == null) {
+                        pw.println("Failure [user " + userId + " doesn't exist]");
+                        return 1;
+                    }
+                }
+            } else {
+                pw.println("Error: Unknown option: " + opt);
+                return 1;
+            }
+        }
+        final int translatedUserId =
+                translateUserId(userId, UserHandle.USER_SYSTEM, "runGetDomainVerificationAgent");
         try {
-            final ComponentName domainVerificationAgent = mInterface.getDomainVerificationAgent();
+            final ComponentName domainVerificationAgent =
+                    mInterface.getDomainVerificationAgent(translatedUserId);
             pw.println(domainVerificationAgent == null
                     ? "No Domain Verifier available!" : domainVerificationAgent.flattenToString());
         } catch (Exception e) {
@@ -4466,7 +4489,9 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      -d: filter to only show disabled packages");
         pw.println("      -e: filter to only show enabled packages");
         pw.println("      -s: filter to only show system packages");
-        pw.println("      -q: filter to only show quarantined packages");
+        if (Flags.quarantinedEnabled()) {
+            pw.println("      -q: filter to only show quarantined packages");
+        }
         pw.println("      -3: filter to only show third party packages");
         pw.println("      -i: see the installer for the packages");
         pw.println("      -l: ignored (used for compatibility with older releases)");
@@ -4823,8 +4848,10 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    to unarchive an app to the responsible installer. Options are:");
         pw.println("      --user: request unarchival of the app from the given user.");
         pw.println("");
-        pw.println("  get-domain-verification-agent");
+        pw.println("  get-domain-verification-agent [--user USER_ID]");
         pw.println("    Displays the component name of the domain verification agent on device.");
+        pw.println("    If the component isn't enabled, an error message will be displayed.");
+        pw.println("      --user: return the agent of the given user (SYSTEM_USER if unspecified)");
         pw.println("");
         printArtServiceHelp();
         pw.println("");

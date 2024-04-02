@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.recents;
 
-import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.shared.annotations.ExternalThread;
 import com.android.wm.shell.util.GroupedRecentTaskInfo;
 
 import java.util.List;

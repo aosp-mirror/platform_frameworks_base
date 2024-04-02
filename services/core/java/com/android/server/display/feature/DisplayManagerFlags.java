@@ -96,6 +96,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_RESTRICT_DISPLAY_MODES,
             Flags::enableRestrictDisplayModes);
 
+    private final FlagState mResolutionBackupRestore = new FlagState(
+            Flags.FLAG_RESOLUTION_BACKUP_RESTORE,
+            Flags::resolutionBackupRestore);
+
     private final FlagState mVsyncLowPowerVote = new FlagState(
             Flags.FLAG_ENABLE_VSYNC_LOW_POWER_VOTE,
             Flags::enableVsyncLowPowerVote);
@@ -140,12 +144,15 @@ public class DisplayManagerFlags {
             Flags::idleScreenRefreshRateTimeout
     );
 
-
     private final FlagState mRefactorDisplayPowerController = new FlagState(
             Flags.FLAG_REFACTOR_DISPLAY_POWER_CONTROLLER,
             Flags::refactorDisplayPowerController
     );
 
+    private final FlagState mUseFusionProxSensor = new FlagState(
+            Flags.FLAG_USE_FUSION_PROX_SENSOR,
+            Flags::useFusionProxSensor
+    );
 
     /**
      * @return {@code true} if 'port' is allowed in display layout configuration file.
@@ -246,6 +253,10 @@ public class DisplayManagerFlags {
         return mRestrictDisplayModes.isEnabled();
     }
 
+    public boolean isResolutionBackupRestoreEnabled() {
+        return mResolutionBackupRestore.isEnabled();
+    }
+
     public boolean isVsyncLowPowerVoteEnabled() {
         return mVsyncLowPowerVote.isEnabled();
     }
@@ -293,6 +304,14 @@ public class DisplayManagerFlags {
         return mRefactorDisplayPowerController.isEnabled();
     }
 
+    public boolean isUseFusionProxSensorEnabled() {
+        return mUseFusionProxSensor.isEnabled();
+    }
+
+    public String getUseFusionProxSensorFlagName() {
+        return mUseFusionProxSensor.getName();
+    }
+
     /**
      * dumps all flagstates
      * @param pw printWriter
@@ -309,6 +328,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mHdrClamperFlagState);
         pw.println(" " + mNbmControllerFlagState);
         pw.println(" " + mPowerThrottlingClamperFlagState);
+        pw.println(" " + mEvenDimmerFlagState);
         pw.println(" " + mSmallAreaDetectionFlagState);
         pw.println(" " + mBrightnessIntRangeUserPerceptionFlagState);
         pw.println(" " + mRestrictDisplayModes);
@@ -321,6 +341,8 @@ public class DisplayManagerFlags {
         pw.println(" " + mSensorBasedBrightnessThrottling);
         pw.println(" " + mIdleScreenRefreshRateTimeout);
         pw.println(" " + mRefactorDisplayPowerController);
+        pw.println(" " + mResolutionBackupRestore);
+        pw.println(" " + mUseFusionProxSensor);
     }
 
     private static class FlagState {
@@ -334,6 +356,10 @@ public class DisplayManagerFlags {
         private FlagState(String name, Supplier<Boolean> flagFunction) {
             mName = name;
             mFlagFunction = flagFunction;
+        }
+
+        private String getName() {
+            return mName;
         }
 
         private boolean isEnabled() {

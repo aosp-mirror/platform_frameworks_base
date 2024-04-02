@@ -727,7 +727,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         SYSTEM_SETTINGS_ALLOWLIST = new ArraySet<>();
         SYSTEM_SETTINGS_ALLOWLIST.add(Settings.System.SCREEN_BRIGHTNESS);
-        SYSTEM_SETTINGS_ALLOWLIST.add(Settings.System.SCREEN_BRIGHTNESS_FLOAT);
         SYSTEM_SETTINGS_ALLOWLIST.add(Settings.System.SCREEN_BRIGHTNESS_MODE);
         SYSTEM_SETTINGS_ALLOWLIST.add(Settings.System.SCREEN_OFF_TIMEOUT);
 
@@ -887,6 +886,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     // TODO(b/266831522) remove the flag after rollout.
     private static final String APPLICATION_EXEMPTIONS_FLAG = "application_exemptions";
     private static final boolean DEFAULT_APPLICATION_EXEMPTIONS_FLAG = true;
+
+    private static final int RETRY_COPY_ACCOUNT_ATTEMPTS = 3;
 
     /**
      * For apps targeting U+
@@ -9028,7 +9029,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     void sendDeviceOwnerOrProfileOwnerCommand(String action, Bundle extras, int userId) {
         if (userId == UserHandle.USER_ALL) {
-            userId = UserHandle.USER_SYSTEM;
+            if (Flags.headlessDeviceOwnerDelegateSecurityLoggingBugFix()
+                    && getHeadlessDeviceOwnerModeForDeviceOwner()
+                    == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER) {
+                userId = mOwners.getDeviceOwnerUserId();
+            } else {
+                userId = UserHandle.USER_SYSTEM;
+            }
         }
         boolean inForeground = false;
         ComponentName receiverComponent = null;
@@ -21514,13 +21521,26 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             Slogf.w(LOG_TAG, "sourceUser and targetUser are the same, won't migrate account.");
             return;
         }
-        copyAccount(targetUser, sourceUser, accountToMigrate, callerPackage);
+
+        if (Flags.copyAccountWithRetryEnabled()) {
+            boolean copySucceeded = false;
+            int retryAttemptsLeft = RETRY_COPY_ACCOUNT_ATTEMPTS;
+            while (!copySucceeded && (retryAttemptsLeft > 0)) {
+                Slogf.i(LOG_TAG, "Copying account. Attempts left : " + retryAttemptsLeft);
+                copySucceeded =
+                        copyAccount(targetUser, sourceUser, accountToMigrate, callerPackage);
+                retryAttemptsLeft--;
+            }
+        } else {
+            copyAccount(targetUser, sourceUser, accountToMigrate, callerPackage);
+        }
         if (!keepAccountMigrated) {
             removeAccount(accountToMigrate, sourceUserId);
         }
+
     }
 
-    private void copyAccount(
+    private boolean copyAccount(
             UserHandle targetUser, UserHandle sourceUser, Account accountToMigrate,
             String callerPackage) {
         final long startTime = SystemClock.elapsedRealtime();
@@ -21538,6 +21558,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         DevicePolicyEnums.PLATFORM_PROVISIONING_COPY_ACCOUNT_MS,
                         startTime,
                         callerPackage);
+                Slogf.i(LOG_TAG, "Copy account successful to " + targetUser);
+                return true;
             } else {
                 logCopyAccountStatus(COPY_ACCOUNT_FAILED, callerPackage);
                 Slogf.e(LOG_TAG, "Failed to copy account to " + targetUser);
@@ -21550,6 +21572,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             logCopyAccountStatus(COPY_ACCOUNT_EXCEPTION, callerPackage);
             Slogf.e(LOG_TAG, "Exception copying account to " + targetUser, e);
         }
+        return false;
     }
 
     private static void logCopyAccountStatus(@CopyAccountStatus int status, String callerPackage) {

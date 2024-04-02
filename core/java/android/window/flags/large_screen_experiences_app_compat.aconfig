@@ -86,3 +86,10 @@ flag {
   description: "Whether the blurred letterbox wallpaper background is enabled by default"
   bug: "297195682"
 }
+
+flag {
+    name: "enable_compatui_sysui_launcher"
+    namespace: "large_screen_experiences_app_compat"
+    description: "Enables sysui animation for user aspect ratio button"
+    bug: "300357441"
+}

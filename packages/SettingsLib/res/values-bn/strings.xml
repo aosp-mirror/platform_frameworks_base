@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"অ্যাপ মর্ডার্ন ফর্ম্যাটে কাজ করবে বলে ধরে নিন"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"ট্রান্সকোডিং বিজ্ঞপ্তি দেখুন"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"ক্যাশে ট্রান্সকোডিং বন্ধ করুন"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"ওয়াইডভাইন সেটিংস"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"ফোর্স L3 ফলব্যাক"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"ফোর্স L3 ফলব্যাক চালু করবেন কিনা তা বেছে নিন"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"এখন চলছে যে পরিষেবাগুলি"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"বর্তমান চলমান পরিষেবাগুলি দেখুন এবং নিয়ন্ত্রণ করুন"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"ওয়েবভিউ প্রয়োগ"</string>
@@ -609,7 +606,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"যোগ করুন"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"নতুন ব্যবহারকারী"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"নতুন প্রোফাইল"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"ব্যবহারকারী তথ্য"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"ব্যবহারকারীর তথ্য"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"প্রোফাইল তথ্য"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"আপনি একটি সীমাবদ্ধযুক্ত প্রোফাইল তৈরি করার আগে, আপনাকে আপনার অ্যাপ্লিকেশন এবং ব্যক্তিগত ডেটা সুরক্ষিত করার জন্য একটি স্ক্রিন লক সেট-আপ করতে হবে।"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"লক সেট করুন"</string>

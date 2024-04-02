@@ -32,6 +32,7 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInt
 import com.android.systemui.deviceentry.domain.interactor.SystemUIDeviceEntryFaceAuthInteractor
 import com.android.systemui.scene.SceneContainerFrameworkModule
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneDataSource
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.shade.domain.interactor.BaseShadeInteractor
@@ -45,6 +46,7 @@ import dagger.Provides
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -71,7 +73,10 @@ interface SysUITestModule {
     @Binds @Main fun bindMainResources(resources: Resources): Resources
     @Binds fun bindBroadcastDispatcher(fake: FakeBroadcastDispatcher): BroadcastDispatcher
     @Binds @SysUISingleton fun bindsShadeInteractor(sii: ShadeInteractorImpl): ShadeInteractor
-    @Binds fun bindSceneDataSource(delegator: SceneDataSourceDelegator): SceneDataSource
+
+    @Binds
+    @SysUISingleton
+    fun bindSceneDataSource(delegator: SceneDataSourceDelegator): SceneDataSource
 
     @Binds
     fun provideFaceAuthInteractor(
@@ -108,6 +113,15 @@ interface SysUITestModule {
             } else {
                 sceneContainerOff.get()
             }
+        }
+
+        @Provides
+        @SysUISingleton
+        fun providesSceneDataSourceDelegator(
+            @Application applicationScope: CoroutineScope,
+            config: SceneContainerConfig,
+        ): SceneDataSourceDelegator {
+            return SceneDataSourceDelegator(applicationScope, config)
         }
     }
 }

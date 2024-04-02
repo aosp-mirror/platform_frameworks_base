@@ -42,15 +42,18 @@ import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepo
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.model.SysUiState
+import com.android.systemui.model.sysUiState
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
+import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
+import com.android.systemui.shared.system.QuickStepContract
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRowRepository
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
@@ -76,6 +79,7 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
+import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -97,7 +101,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
     private val faceAuthRepository by lazy { kosmos.fakeDeviceEntryFaceAuthRepository }
     private val deviceEntryInteractor by lazy { kosmos.deviceEntryInteractor }
     private val keyguardInteractor by lazy { kosmos.keyguardInteractor }
-    private val sysUiState: SysUiState = mock()
+    private val sysUiState = spy(kosmos.sysUiState)
     private val falsingCollector: FalsingCollector = mock()
     private val powerInteractor = PowerInteractorFactory.create().powerInteractor
     private val fakeSceneDataSource = kosmos.fakeSceneDataSource
@@ -128,6 +132,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 deviceProvisioningInteractor = kosmos.deviceProvisioningInteractor,
                 centralSurfaces = centralSurfaces,
                 headsUpInteractor = kosmos.headsUpNotificationInteractor,
+                occlusionInteractor = kosmos.sceneContainerOcclusionInteractor,
             )
     }
 
@@ -187,27 +192,42 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
-    fun hydrateVisibility_basedOnDeviceProvisioningAndFactoryResetProtection() =
+    fun hydrateVisibility_basedOnDeviceProvisioning() =
         testScope.runTest {
             val isVisible by collectLastValue(sceneInteractor.isVisible)
             prepareState(
                 isDeviceUnlocked = true,
                 initialSceneKey = Scenes.Lockscreen,
                 isDeviceProvisioned = false,
-                isFrpActive = true,
             )
 
             underTest.start()
             assertThat(isVisible).isFalse()
 
-            kosmos.fakeDeviceProvisioningRepository.setFactoryResetProtectionActive(false)
-            assertThat(isVisible).isFalse()
-
             kosmos.fakeDeviceProvisioningRepository.setDeviceProvisioned(true)
             assertThat(isVisible).isTrue()
+        }
 
-            kosmos.fakeDeviceProvisioningRepository.setFactoryResetProtectionActive(true)
+    @Test
+    fun hydrateVisibility_basedOnOcclusion() =
+        testScope.runTest {
+            val isVisible by collectLastValue(sceneInteractor.isVisible)
+            prepareState(
+                isDeviceUnlocked = true,
+                initialSceneKey = Scenes.Lockscreen,
+            )
+
+            underTest.start()
+            assertThat(isVisible).isTrue()
+
+            kosmos.keyguardOcclusionInteractor.setWmNotifiedShowWhenLockedActivityOnTop(
+                true,
+                mock()
+            )
             assertThat(isVisible).isFalse()
+
+            kosmos.keyguardOcclusionInteractor.setWmNotifiedShowWhenLockedActivityOnTop(false)
+            assertThat(isVisible).isTrue()
         }
 
     @Test
@@ -377,6 +397,46 @@ class SceneContainerStartableTest : SysuiTestCase() {
                     runCurrent()
                     verify(sysUiState, times(index + 1)).commitUpdate(Display.DEFAULT_DISPLAY)
                 }
+        }
+
+    @Test
+    fun hydrateSystemUiState_onLockscreen_basedOnOcclusion() =
+        testScope.runTest {
+            prepareState(
+                initialSceneKey = Scenes.Lockscreen,
+            )
+            underTest.start()
+            runCurrent()
+            clearInvocations(sysUiState)
+
+            kosmos.keyguardOcclusionInteractor.setWmNotifiedShowWhenLockedActivityOnTop(
+                true,
+                mock()
+            )
+            runCurrent()
+            assertThat(
+                    sysUiState.flags and
+                        QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED != 0
+                )
+                .isTrue()
+            assertThat(
+                    sysUiState.flags and
+                        QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING != 0
+                )
+                .isFalse()
+
+            kosmos.keyguardOcclusionInteractor.setWmNotifiedShowWhenLockedActivityOnTop(false)
+            runCurrent()
+            assertThat(
+                    sysUiState.flags and
+                        QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED != 0
+                )
+                .isFalse()
+            assertThat(
+                    sysUiState.flags and
+                        QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING != 0
+                )
+                .isTrue()
         }
 
     @Test
@@ -1030,7 +1090,6 @@ class SceneContainerStartableTest : SysuiTestCase() {
         isLockscreenEnabled: Boolean = true,
         startsAwake: Boolean = true,
         isDeviceProvisioned: Boolean = true,
-        isFrpActive: Boolean = false,
     ): MutableStateFlow<ObservableTransitionState> {
         if (authenticationMethod?.isSecure == true) {
             assert(isLockscreenEnabled) {
@@ -1068,7 +1127,6 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
         kosmos.fakeDeviceProvisioningRepository.setDeviceProvisioned(isDeviceProvisioned)
-        kosmos.fakeDeviceProvisioningRepository.setFactoryResetProtectionActive(isFrpActive)
 
         runCurrent()
 

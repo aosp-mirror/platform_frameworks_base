@@ -1960,6 +1960,27 @@ public class TaskTests extends WindowTestsBase {
         verify(task).startPausing(eq(true) /* userLeaving */, anyBoolean(), any(), any());
     }
 
+    @Test
+    public void testGetBottomMostActivityInSamePackage() {
+        final String packageName = "homePackage";
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final Task task = new TaskBuilder(mSupervisor).setCreateActivity(false).build();
+        task.realActivity = new ComponentName(packageName, packageName + ".root_activity");
+        doNothing().when(task).sendTaskFragmentParentInfoChangedIfNeeded();
+
+        final TaskFragment fragment1 = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final ActivityRecord activityDifferentPackage =
+                new ActivityBuilder(mAtm).setTask(task).build();
+        final ActivityRecord activitySamePackage =
+                new ActivityBuilder(mAtm)
+                        .setComponent(new ComponentName(packageName, packageName + ".activity2"))
+                        .setTask(task).build();
+
+        assertEquals(fragment1.getChildAt(0), task.getBottomMostActivity());
+        assertEquals(activitySamePackage, task.getBottomMostActivityInSamePackage());
+        assertNotEquals(activityDifferentPackage, task.getBottomMostActivityInSamePackage());
+    }
+
     private Task getTestTask() {
         return new TaskBuilder(mSupervisor).setCreateActivity(true).build();
     }

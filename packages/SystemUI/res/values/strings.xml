@@ -899,6 +899,16 @@
     <!-- QuickSettings: Contrast tile description: high [CHAR LIMIT=NONE] -->
     <string name="quick_settings_contrast_high">High</string>
 
+    <!-- Hearing devices -->
+    <!-- QuickSettings: Hearing devices [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_hearing_devices_label">Hearing devices</string>
+    <!-- QuickSettings: Quick Settings Hearing devices dialog title [CHAR LIMIT=30] -->
+    <string name="quick_settings_hearing_devices_dialog_title">Hearing devices</string>
+    <!-- QuickSettings: Hearing devices dialog pair new device [CHAR LIMIT=NONE]-->
+    <string name="quick_settings_pair_hearing_devices">Pair new device</string>
+    <!-- QuickSettings: Content description of the hearing devices dialog pair new device [CHAR LIMIT=NONE] -->
+    <string name="accessibility_hearing_device_pair_new_device">Click to pair new device</string>
+
     <!--- Title of dialog triggered if the microphone is disabled but an app tried to access it. [CHAR LIMIT=150] -->
     <string name="sensor_privacy_start_use_mic_dialog_title">Unblock device microphone?</string>
     <!--- Title of dialog triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=150] -->
@@ -1119,15 +1129,15 @@
     <!-- Indicator on keyguard to start the communal tutorial. [CHAR LIMIT=100] -->
     <string name="communal_tutorial_indicator_text">Swipe left to start the communal tutorial</string>
 
-    <!-- Text for CTA button that launches the hub mode widget editor on click. [CHAR LIMIT=50] -->
+    <!-- Text for call-to-action button that launches the hub mode widget editor on click. [CHAR LIMIT=50] -->
     <string name="cta_tile_button_to_open_widget_editor">Customize</string>
-    <!-- Text for CTA button that dismisses the tile on click. [CHAR LIMIT=50] -->
+    <!-- Text for call-to-action button that dismisses the tile on click. [CHAR LIMIT=50] -->
     <string name="cta_tile_button_to_dismiss">Dismiss</string>
-    <!-- Label for CTA tile to edit the glanceable hub [CHAR LIMIT=100] -->
+    <!-- Label for call-to-action tile to edit the glanceable hub [CHAR LIMIT=100] -->
     <string name="cta_label_to_edit_widget">Add, remove, and reorder your widgets in this space</string>
-    <!-- Label for CTA tile that opens widget picker on click in edit mode [CHAR LIMIT=50] -->
+    <!-- Label for call-to-action tile that opens widget picker on click in edit mode [CHAR LIMIT=50] -->
     <string name="cta_label_to_open_widget_picker">Add more widgets</string>
-    <!-- Text for the popup to be displayed after dismissing the CTA tile. [CHAR LIMIT=50] -->
+    <!-- Text for the popup to be displayed after dismissing the call-to-action tile. [CHAR LIMIT=50] -->
     <string name="popup_on_dismiss_cta_tile_text">Long press to customize widgets</string>
     <!-- Text for the button to configure widgets after long press. [CHAR LIMIT=50] -->
     <string name="button_to_configure_widgets_text">Customize widgets</string>
@@ -1141,6 +1151,10 @@
     <string name="hub_mode_add_widget_button_text">Add widget</string>
     <!-- Text for the button that exits the hub mode editing mode. [CHAR LIMIT=50] -->
     <string name="hub_mode_editing_exit_button_text">Done</string>
+    <!-- Label for the button in the empty state call-to-action tile that will open the widget picker. [CHAR LIMIT=NONE] -->
+    <string name="label_for_button_in_empty_state_cta">Add widgets</string>
+    <!-- Title for the empty state call-to-action when no widgets are available in the hub. [CHAR LIMIT=NONE] -->
+    <string name="title_for_empty_state_cta">Get quick access to your favorite app widgets without unlocking your tablet.</string>
     <!-- Title for the dialog that redirects users to change allowed widget category in settings. [CHAR LIMIT=NONE] -->
     <string name="dialog_title_to_allow_any_widget">Allow any widget on lock screen?</string>
     <!-- Text for the button in the dialog that opens when tapping on disabled widgets. [CHAR LIMIT=NONE] -->

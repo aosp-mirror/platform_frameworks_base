@@ -135,6 +135,8 @@ public class BiometricSchedulerTest {
     private ISession mSession;
     @Mock
     private IFingerprint mFingerprint;
+    @Mock
+    private ClientMonitorCallbackConverter mListener;
 
     @Before
     public void setUp() {
@@ -206,7 +208,7 @@ public class BiometricSchedulerTest {
         // Pretend the scheduler is busy so the first operation doesn't start right away. We want
         // to pretend like there are two operations in the queue before kicking things off
         mScheduler.mCurrentOperation = new BiometricSchedulerOperation(
-                mock(BaseClientMonitor.class), mock(ClientMonitorCallback.class));
+                createBaseClientMonitor(), mock(ClientMonitorCallback.class));
 
         mScheduler.scheduleClientMonitor(client1, callback1);
         assertEquals(1, mScheduler.mPendingOperations.size());
@@ -244,7 +246,7 @@ public class BiometricSchedulerTest {
         // Pretend the scheduler is busy so the first operation doesn't start right away. We want
         // to pretend like there are two operations in the queue before kicking things off
         mScheduler.mCurrentOperation = new BiometricSchedulerOperation(
-                mock(BaseClientMonitor.class), mock(ClientMonitorCallback.class));
+                createBaseClientMonitor(), mock(ClientMonitorCallback.class));
 
         mScheduler.scheduleClientMonitor(client1, callback1);
         assertEquals(1, mScheduler.mPendingOperations.size());
@@ -612,10 +614,10 @@ public class BiometricSchedulerTest {
 
     @Test
     public void testInterruptPrecedingClients_whenExpected() {
-        final BaseClientMonitor interruptableMonitor = mock(BaseClientMonitor.class);
+        final BaseClientMonitor interruptableMonitor = createBaseClientMonitor();
         when(interruptableMonitor.isInterruptable()).thenReturn(true);
 
-        final BaseClientMonitor interrupter = mock(BaseClientMonitor.class);
+        final BaseClientMonitor interrupter = createBaseClientMonitor();
         when(interrupter.interruptsPrecedingClients()).thenReturn(true);
 
         mScheduler.scheduleClientMonitor(interruptableMonitor);
@@ -628,10 +630,10 @@ public class BiometricSchedulerTest {
 
     @Test
     public void testDoesNotInterruptPrecedingClients_whenNotExpected() {
-        final BaseClientMonitor interruptableMonitor = mock(BaseClientMonitor.class);
+        final BaseClientMonitor interruptableMonitor = createBaseClientMonitor();
         when(interruptableMonitor.isInterruptable()).thenReturn(true);
 
-        final BaseClientMonitor interrupter = mock(BaseClientMonitor.class);
+        final BaseClientMonitor interrupter = createBaseClientMonitor();
         when(interrupter.interruptsPrecedingClients()).thenReturn(false);
 
         mScheduler.scheduleClientMonitor(interruptableMonitor);
@@ -741,7 +743,7 @@ public class BiometricSchedulerTest {
         //Start watchdog
         mScheduler.startWatchdog();
         waitForIdle();
-        mScheduler.scheduleClientMonitor(mock(BaseClientMonitor.class),
+        mScheduler.scheduleClientMonitor(createBaseClientMonitor(),
                 mock(ClientMonitorCallback.class));
         waitForIdle();
 
@@ -775,9 +777,9 @@ public class BiometricSchedulerTest {
         //Start watchdog
         mScheduler.startWatchdog();
         waitForIdle();
-        mScheduler.scheduleClientMonitor(mock(BaseClientMonitor.class),
+        mScheduler.scheduleClientMonitor(createBaseClientMonitor(),
                 mock(ClientMonitorCallback.class));
-        mScheduler.scheduleClientMonitor(mock(BaseClientMonitor.class),
+        mScheduler.scheduleClientMonitor(createBaseClientMonitor(),
                 mock(ClientMonitorCallback.class));
         waitForIdle();
 
@@ -857,7 +859,7 @@ public class BiometricSchedulerTest {
     public void testScheduleOperation_whenNoUser() {
         mCurrentUserId = UserHandle.USER_NULL;
 
-        final BaseClientMonitor nextClient = mock(BaseClientMonitor.class);
+        final BaseClientMonitor nextClient = createBaseClientMonitor();
         when(nextClient.getTargetUserId()).thenReturn(0);
 
         mScheduler.scheduleClientMonitor(nextClient);
@@ -875,9 +877,9 @@ public class BiometricSchedulerTest {
         mStartOperationsFinish = false;
 
         final BaseClientMonitor[] nextClients = new BaseClientMonitor[]{
-                mock(BaseClientMonitor.class),
-                mock(BaseClientMonitor.class),
-                mock(BaseClientMonitor.class)
+                createBaseClientMonitor(),
+                createBaseClientMonitor(),
+                createBaseClientMonitor()
         };
         for (BaseClientMonitor client : nextClients) {
             when(client.getTargetUserId()).thenReturn(5);
@@ -899,7 +901,7 @@ public class BiometricSchedulerTest {
         mCurrentUserId = UserHandle.USER_NULL;
         mStartOperationsFinish = false;
 
-        final BaseClientMonitor client = mock(BaseClientMonitor.class);
+        final BaseClientMonitor client = createBaseClientMonitor();
 
         when(client.getTargetUserId()).thenReturn(5);
 
@@ -913,7 +915,7 @@ public class BiometricSchedulerTest {
         assertThat(mScheduler.mCurrentOperation).isNull();
 
         final BiometricSchedulerOperation fakeOperation = new BiometricSchedulerOperation(
-                mock(BaseClientMonitor.class), new ClientMonitorCallback() {});
+                createBaseClientMonitor(), new ClientMonitorCallback() {});
         mScheduler.mCurrentOperation = fakeOperation;
         startUserClient.mCallback.onClientFinished(startUserClient, true);
 
@@ -925,7 +927,7 @@ public class BiometricSchedulerTest {
     public void testScheduleOperation_whenSameUser() {
         mCurrentUserId = 10;
 
-        BaseClientMonitor nextClient = mock(BaseClientMonitor.class);
+        BaseClientMonitor nextClient = createBaseClientMonitor();
         when(nextClient.getTargetUserId()).thenReturn(mCurrentUserId);
 
         mScheduler.scheduleClientMonitor(nextClient);
@@ -943,7 +945,7 @@ public class BiometricSchedulerTest {
         mCurrentUserId = 10;
 
         final int nextUserId = 11;
-        BaseClientMonitor nextClient = mock(BaseClientMonitor.class);
+        BaseClientMonitor nextClient = createBaseClientMonitor();
         when(nextClient.getTargetUserId()).thenReturn(nextUserId);
 
         mScheduler.scheduleClientMonitor(nextClient);
@@ -963,7 +965,7 @@ public class BiometricSchedulerTest {
     public void testStartUser_alwaysStartsNextOperation() {
         mCurrentUserId = UserHandle.USER_NULL;
 
-        BaseClientMonitor nextClient = mock(BaseClientMonitor.class);
+        BaseClientMonitor nextClient = createBaseClientMonitor();
         when(nextClient.getTargetUserId()).thenReturn(10);
 
         mScheduler.scheduleClientMonitor(nextClient);
@@ -977,7 +979,7 @@ public class BiometricSchedulerTest {
 
         // schedule second operation but swap out the current operation
         // before it runs so that it's not current when it's completion callback runs
-        nextClient = mock(BaseClientMonitor.class);
+        nextClient = createBaseClientMonitor();
         when(nextClient.getTargetUserId()).thenReturn(11);
         mScheduler.scheduleClientMonitor(nextClient);
 
@@ -994,7 +996,7 @@ public class BiometricSchedulerTest {
 
         // When a stop user client fails, check that mStopUserClient
         // is set to null to prevent the scheduler from getting stuck.
-        BaseClientMonitor nextClient = mock(BaseClientMonitor.class);
+        BaseClientMonitor nextClient = createBaseClientMonitor();
         when(nextClient.getTargetUserId()).thenReturn(10);
 
         mScheduler.scheduleClientMonitor(nextClient);
@@ -1008,7 +1010,7 @@ public class BiometricSchedulerTest {
 
         // schedule second operation but swap out the current operation
         // before it runs so that it's not current when it's completion callback runs
-        nextClient = mock(BaseClientMonitor.class);
+        nextClient = createBaseClientMonitor();
         when(nextClient.getTargetUserId()).thenReturn(11);
         mShouldFailStopUser = true;
         mScheduler.scheduleClientMonitor(nextClient);
@@ -1021,6 +1023,13 @@ public class BiometricSchedulerTest {
 
     private BiometricSchedulerProto getDump(boolean clearSchedulerBuffer) throws Exception {
         return BiometricSchedulerProto.parseFrom(mScheduler.dumpProtoState(clearSchedulerBuffer));
+    }
+
+    private BaseClientMonitor createBaseClientMonitor() {
+        BaseClientMonitor client = mock(BaseClientMonitor.class);
+        when(client.getListener()).thenReturn(mListener);
+
+        return client;
     }
 
     private void waitForIdle() {

@@ -59,7 +59,7 @@ public class BouncerlessScrimControllerTest extends SysuiTestCase {
         final BouncerlessScrimController scrimController =
                 new BouncerlessScrimController(mExecutor, mPowerManager);
         scrimController.addCallback(mCallback);
-        scrimController.expand(new ShadeExpansionChangeEvent(.5f, true, false, 0.0f));
+        scrimController.expand(new ShadeExpansionChangeEvent(.5f, true, false));
         mExecutor.runAllReady();
         verify(mPowerManager).wakeUp(anyLong(), eq(PowerManager.WAKE_REASON_GESTURE), any());
         verify(mCallback).onWakeup();
@@ -71,7 +71,7 @@ public class BouncerlessScrimControllerTest extends SysuiTestCase {
                 new BouncerlessScrimController(mExecutor, mPowerManager);
         scrimController.addCallback(mCallback);
         final ShadeExpansionChangeEvent expansionEvent =
-                new ShadeExpansionChangeEvent(0.5f, false, false, 0.0f);
+                new ShadeExpansionChangeEvent(0.5f, false, false);
         scrimController.expand(expansionEvent);
         mExecutor.runAllReady();
         verify(mCallback).onExpansion(eq(expansionEvent));

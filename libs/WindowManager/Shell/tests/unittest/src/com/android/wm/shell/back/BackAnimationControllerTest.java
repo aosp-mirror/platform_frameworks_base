@@ -409,6 +409,32 @@ public class BackAnimationControllerTest extends ShellTestCase {
     }
 
     @Test
+    public void gestureNotQueued_WhenPreviousGestureIsPostCommitCancelling()
+            throws RemoteException {
+        registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
+        createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME,
+                /* enableAnimation = */ true,
+                /* isAnimationCallback = */ false);
+
+        doStartEvents(0, 100);
+        simulateRemoteAnimationStart();
+        releaseBackGesture();
+
+        // Check that back cancellation is dispatched.
+        verify(mAnimatorCallback).onBackCancelled();
+        verify(mBackAnimationRunner).onAnimationStart(anyInt(), any(), any(), any(), any());
+
+        reset(mAnimatorCallback);
+        reset(mBackAnimationRunner);
+
+        // Verify that a new start event is dispatched if a new gesture is started during the
+        // post-commit cancel phase
+        triggerBackGesture();
+        verify(mAnimatorCallback).onBackStarted(any());
+        verify(mBackAnimationRunner).onAnimationStart(anyInt(), any(), any(), any(), any());
+    }
+
+    @Test
     public void acceptsGesture_transitionTimeout() throws RemoteException {
         registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
         createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME,
@@ -528,6 +554,23 @@ public class BackAnimationControllerTest extends ShellTestCase {
         verify(mAnimatorCallback, never()).onBackStarted(any());
         verify(mAnimatorCallback, never()).onBackProgressed(any());
         verify(mAnimatorCallback, never()).onBackInvoked();
+    }
+
+    @Test
+    public void skipsCancelWithoutStart() throws RemoteException {
+        final int type = BackNavigationInfo.TYPE_CALLBACK;
+        final ResultListener result = new ResultListener();
+        createNavigationInfo(new BackNavigationInfo.Builder()
+                .setType(type)
+                .setOnBackInvokedCallback(mAppCallback)
+                .setOnBackNavigationDone(new RemoteCallback(result)));
+        doMotionEvent(MotionEvent.ACTION_CANCEL, 0);
+        mShellExecutor.flushAll();
+
+        verify(mAppCallback, never()).onBackStarted(any());
+        verify(mAppCallback, never()).onBackProgressed(any());
+        verify(mAppCallback, never()).onBackInvoked();
+        verify(mAppCallback, never()).onBackCancelled();
     }
 
     @Test

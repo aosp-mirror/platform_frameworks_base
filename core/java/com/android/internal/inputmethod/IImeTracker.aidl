@@ -86,4 +86,13 @@ interface IImeTracker {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.TEST_INPUT_METHOD)")
     boolean hasPendingImeVisibilityRequests();
+
+    /**
+     * Finishes the tracking of any pending IME visibility requests. This won't stop the actual
+     * requests, but allows resetting the state when starting up test runs.
+     */
+    @EnforcePermission("TEST_INPUT_METHOD")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.TEST_INPUT_METHOD)")
+    oneway void finishTrackingPendingImeVisibilityRequests();
 }

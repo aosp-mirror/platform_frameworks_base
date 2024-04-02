@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.animation.FloatEvaluator
 import android.animation.IntEvaluator
 import com.android.keyguard.KeyguardViewController
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntrySourceInteractor
@@ -52,6 +53,7 @@ import kotlinx.coroutines.flow.shareIn
 
 /** Models the UI state for the containing device entry icon & long-press handling view. */
 @ExperimentalCoroutinesApi
+@SysUISingleton
 class DeviceEntryIconViewModel
 @Inject
 constructor(

@@ -588,6 +588,9 @@ public final class AutofillManager {
      */
     public static final int NO_SESSION = Integer.MAX_VALUE;
 
+    /** @hide **/
+    public static final String PINNED_DATASET_ID = "PINNED_DATASET_ID";
+
     private final IAutoFillManager mService;
 
     private final Object mLock = new Object();

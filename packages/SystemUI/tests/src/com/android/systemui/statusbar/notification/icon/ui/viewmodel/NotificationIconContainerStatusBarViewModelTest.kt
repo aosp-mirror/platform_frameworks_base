@@ -117,7 +117,6 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
     fun setup() {
         testComponent.apply {
             keyguardRepository.setKeyguardShowing(false)
-            deviceProvisioningRepository.setFactoryResetProtectionActive(false)
             powerRepository.updateWakefulness(
                 rawState = WakefulnessState.AWAKE,
                 lastWakeReason = WakeSleepReason.OTHER,
@@ -125,20 +124,6 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
             )
         }
     }
-
-    @Test
-    fun animationsEnabled_isFalse_whenFrpIsActive() =
-        testComponent.runTest {
-            deviceProvisioningRepository.setFactoryResetProtectionActive(true)
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                )
-            )
-            val animationsEnabled by collectLastValue(underTest.animationsEnabled)
-            runCurrent()
-            assertThat(animationsEnabled).isFalse()
-        }
 
     @Test
     fun animationsEnabled_isFalse_whenDeviceAsleepAndNotPulsing() =

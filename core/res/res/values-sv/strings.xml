@@ -84,8 +84,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Det går inte att nå mobilnätverket"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Testa att byta föredraget nätverk. Tryck om du vill ändra."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Det går inte att ringa nödsamtal"</string>
-    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
-    <skip />
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Mobilnätverk krävs för att ringa nödsamtal"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Aviseringar"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Vidarekoppla samtal"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Läget Återuppringning vid nödsamtal"</string>
@@ -1184,10 +1183,8 @@
     <string name="deleteText" msgid="4200807474529938112">"Ta bort"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Indatametod"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Textåtgärder"</string>
-    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
-    <skip />
-    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
-    <skip />
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"Handskrift stöds inte i det här fältet"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Handskrift stöds inte i lösenordsfält"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Tillbaka"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Byt inmatningsmetod"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Lagringsutrymmet börjar ta slut"</string>
@@ -1530,10 +1527,10 @@
     <string name="vpn_title_long" msgid="6834144390504619998">"VPN aktiveras av <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="2275388920267251078">"Knacka lätt för att hantera nätverket."</string>
     <string name="vpn_text_long" msgid="278540576806169831">"Ansluten till <xliff:g id="SESSION">%s</xliff:g>. Knacka lätt för att hantera nätverket."</string>
-    <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"Ansluter till Always-on VPN ..."</string>
-    <string name="vpn_lockdown_connected" msgid="2853127976590658469">"Ansluten till Always-on VPN"</string>
-    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Frånkopplad från Always-on VPN"</string>
-    <string name="vpn_lockdown_error" msgid="4453048646854247947">"Det gick inte att ansluta till Always-on VPN"</string>
+    <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"Ansluter till Alltid på-VPN ..."</string>
+    <string name="vpn_lockdown_connected" msgid="2853127976590658469">"Ansluten till Alltid på-VPN"</string>
+    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Frånkopplad från Alltid på-VPN"</string>
+    <string name="vpn_lockdown_error" msgid="4453048646854247947">"Det gick inte att ansluta till Alltid på-VPN"</string>
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Ändra inställningarna för nätverk eller VPN"</string>
     <string name="upload_file" msgid="8651942222301634271">"Välj fil"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"Ingen fil har valts"</string>
@@ -1932,6 +1929,12 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Hanteras av <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"På"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Av"</string>
+    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
+    <skip />
+    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
+    <skip />
+    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
+    <skip />
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> stänger av vissa ljud"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Ett internt problem har uppstått i enheten, och det kan hända att problemet kvarstår tills du återställer standardinställningarna."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Ett internt problem har uppstått i enheten. Kontakta tillverkaren om du vill veta mer."</string>

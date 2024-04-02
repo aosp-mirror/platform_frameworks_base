@@ -110,6 +110,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             ShadeHeaderViewModel(
                 applicationScope = testScope.backgroundScope,
                 context = context,
+                shadeInteractor = kosmos.shadeInteractor,
                 mobileIconsInteractor = mobileIconsInteractor,
                 mobileIconsViewModel = mobileIconsViewModel,
                 privacyChipInteractor = kosmos.privacyChipInteractor,
@@ -128,6 +129,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
                 shadeInteractor = kosmos.shadeInteractor,
                 footerActionsViewModelFactory = kosmos.footerActionsViewModelFactory,
                 footerActionsController = kosmos.footerActionsController,
+                sceneInteractor = kosmos.sceneInteractor,
             )
     }
 
@@ -214,22 +216,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun onContentClicked_deviceUnlocked_switchesToGone() =
-        testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.currentScene)
-            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin
-            )
-            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
-            runCurrent()
-
-            underTest.onContentClicked()
-
-            assertThat(currentScene).isEqualTo(Scenes.Gone)
-        }
-
-    @Test
-    fun onContentClicked_deviceLockedSecurely_switchesToBouncer() =
+    fun onContentClicked_deviceLockedSecurely_switchesToLockscreen() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
@@ -240,7 +227,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
 
             underTest.onContentClicked()
 
-            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
         }
 
     @Test
@@ -280,17 +267,17 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
 
     @Test
     fun upTransitionSceneKey_customizing_noTransition() =
-            testScope.runTest {
-                val destinationScenes by collectLastValue(underTest.destinationScenes)
+        testScope.runTest {
+            val destinationScenes by collectLastValue(underTest.destinationScenes)
 
-                qsSceneAdapter.setCustomizing(true)
-                assertThat(
-                        destinationScenes!!
-                                .keys
-                                .filterIsInstance<Swipe>()
-                                .filter { it.direction == SwipeDirection.Up }
-                ).isEmpty()
-            }
+            qsSceneAdapter.setCustomizing(true)
+            assertThat(
+                    destinationScenes!!.keys.filterIsInstance<Swipe>().filter {
+                        it.direction == SwipeDirection.Up
+                    }
+                )
+                .isEmpty()
+        }
 
     @Test
     fun shadeMode() =

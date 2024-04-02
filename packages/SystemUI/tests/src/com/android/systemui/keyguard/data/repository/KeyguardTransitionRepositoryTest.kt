@@ -35,14 +35,16 @@ import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.util.KeyguardTransitionRunner
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.UUID
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -54,6 +56,9 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @FlakyTest(bugId = 270760395)
 class KeyguardTransitionRepositoryTest : SysuiTestCase() {
+    val kosmos = testKosmos()
+
+    private val testScope = kosmos.testScope
 
     private lateinit var underTest: KeyguardTransitionRepository
     private lateinit var oldWtfHandler: TerribleFailureHandler
@@ -62,7 +67,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        underTest = KeyguardTransitionRepositoryImpl()
+        underTest = KeyguardTransitionRepositoryImpl(Dispatchers.Main)
         wtfHandler = WtfHandler()
         oldWtfHandler = Log.setWtfHandler(wtfHandler)
         runner = KeyguardTransitionRunner(underTest)
@@ -75,7 +80,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun startTransitionRunsAnimatorToCompletion() =
-        TestScope().runTest {
+        testScope.runTest {
             val steps = mutableListOf<TransitionStep>()
             val job = underTest.transition(AOD, LOCKSCREEN).onEach { steps.add(it) }.launchIn(this)
 
@@ -91,7 +96,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun startingSecondTransitionWillCancelTheFirstTransitionAndUseLastValue() =
-        TestScope().runTest {
+        testScope.runTest {
             val steps = mutableListOf<TransitionStep>()
             val job = underTest.transition(AOD, LOCKSCREEN).onEach { steps.add(it) }.launchIn(this)
             runner.startTransition(
@@ -126,7 +131,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun startingSecondTransitionWillCancelTheFirstTransitionAndUseReset() =
-        TestScope().runTest {
+        testScope.runTest {
             val steps = mutableListOf<TransitionStep>()
             val job = underTest.transition(AOD, LOCKSCREEN).onEach { steps.add(it) }.launchIn(this)
             runner.startTransition(
@@ -161,7 +166,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun startingSecondTransitionWillCancelTheFirstTransitionAndUseReverse() =
-        TestScope().runTest {
+        testScope.runTest {
             val steps = mutableListOf<TransitionStep>()
             val job = underTest.transition(AOD, LOCKSCREEN).onEach { steps.add(it) }.launchIn(this)
             runner.startTransition(
@@ -196,7 +201,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun nullAnimatorEnablesManualControlWithUpdateTransition() =
-        TestScope().runTest {
+        testScope.runTest {
             val steps = mutableListOf<TransitionStep>()
             val job = underTest.transition(AOD, LOCKSCREEN).onEach { steps.add(it) }.launchIn(this)
 
@@ -228,7 +233,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun startingSecondManualTransitionWillCancelPreviousManualTransition() =
-        TestScope().runTest {
+        testScope.runTest {
             // Drop initial steps from OFF which are sent in the constructor
             val steps = mutableListOf<TransitionStep>()
             val job =
@@ -274,7 +279,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun startingSecondTransitionWillCancelPreviousManualTransition() =
-        TestScope().runTest {
+        testScope.runTest {
             // Drop initial steps from OFF which are sent in the constructor
             val steps = mutableListOf<TransitionStep>()
             val job =
@@ -328,42 +333,44 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun attemptToManuallyUpdateTransitionAfterFINISHEDstateThrowsException() {
-        val uuid =
-            underTest.startTransition(
-                TransitionInfo(
-                    ownerName = OWNER_NAME,
-                    from = AOD,
-                    to = LOCKSCREEN,
-                    animator = null,
+    fun attemptToManuallyUpdateTransitionAfterFINISHEDstateThrowsException() =
+        testScope.runTest {
+            val uuid =
+                underTest.startTransition(
+                    TransitionInfo(
+                        ownerName = OWNER_NAME,
+                        from = AOD,
+                        to = LOCKSCREEN,
+                        animator = null,
+                    )
                 )
-            )
 
-        checkNotNull(uuid).let {
-            underTest.updateTransition(it, 1f, TransitionState.FINISHED)
-            underTest.updateTransition(it, 0.5f, TransitionState.RUNNING)
+            checkNotNull(uuid).let {
+                underTest.updateTransition(it, 1f, TransitionState.FINISHED)
+                underTest.updateTransition(it, 0.5f, TransitionState.RUNNING)
+            }
+            assertThat(wtfHandler.failed).isTrue()
         }
-        assertThat(wtfHandler.failed).isTrue()
-    }
 
     @Test
-    fun attemptToManuallyUpdateTransitionAfterCANCELEDstateThrowsException() {
-        val uuid =
-            underTest.startTransition(
-                TransitionInfo(
-                    ownerName = OWNER_NAME,
-                    from = AOD,
-                    to = LOCKSCREEN,
-                    animator = null,
+    fun attemptToManuallyUpdateTransitionAfterCANCELEDstateThrowsException() =
+        testScope.runTest {
+            val uuid =
+                underTest.startTransition(
+                    TransitionInfo(
+                        ownerName = OWNER_NAME,
+                        from = AOD,
+                        to = LOCKSCREEN,
+                        animator = null,
+                    )
                 )
-            )
 
-        checkNotNull(uuid).let {
-            underTest.updateTransition(it, 0.2f, TransitionState.CANCELED)
-            underTest.updateTransition(it, 0.5f, TransitionState.RUNNING)
+            checkNotNull(uuid).let {
+                underTest.updateTransition(it, 0.2f, TransitionState.CANCELED)
+                underTest.updateTransition(it, 0.5f, TransitionState.RUNNING)
+            }
+            assertThat(wtfHandler.failed).isTrue()
         }
-        assertThat(wtfHandler.failed).isTrue()
-    }
 
     private fun listWithStep(
         step: BigDecimal,

@@ -3844,6 +3844,7 @@ public class BatteryStatsImpl extends BatteryStats {
         public abstract T instantiateObject();
     }
 
+    @SuppressWarnings("ParcelableCreator")
     public static class ControllerActivityCounterImpl extends ControllerActivityCounter
             implements Parcelable {
         private final Clock mClock;

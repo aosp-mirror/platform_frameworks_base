@@ -87,4 +87,22 @@ final class PendingStartActivityUids {
     synchronized boolean isPendingTopUid(int uid) {
         return mPendingUids.get(uid) != null;
     }
+
+    // Must called with AMS locked.
+    synchronized void enqueuePendingTopAppIfNecessaryLocked(ActivityManagerService ams) {
+        for (int i = 0, size = mPendingUids.size(); i < size; i++) {
+            final Pair<Integer, Long> p = mPendingUids.valueAt(i);
+            final ProcessRecord app;
+            synchronized (ams.mPidsSelfLocked) {
+                app = ams.mPidsSelfLocked.get(p.first);
+            }
+            if (app != null) {
+                ams.enqueueOomAdjTargetLocked(app);
+            }
+        }
+    }
+
+    synchronized void clear() {
+        mPendingUids.clear();
+    }
 }

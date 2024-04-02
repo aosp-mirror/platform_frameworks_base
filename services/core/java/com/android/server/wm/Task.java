@@ -1074,9 +1074,11 @@ class Task extends TaskFragment {
         // as the one in the task because either one of them could be the alias activity.
         if (Objects.equals(realActivity, r.mActivityComponent) && this.intent != null) {
             intent.setComponent(this.intent.getComponent());
-            // Make sure the package name the same to prevent one of the intent is set while the
-            // other one is not.
-            intent.setPackage(this.intent.getPackage());
+            if (intent.getSelector() == null) {
+                // Make sure the package name the same to prevent one of the intent is set while the
+                // other one is not.
+                intent.setPackage(this.intent.getPackage());
+            }
         }
         return intent.filterEquals(this.intent);
     }
@@ -1275,8 +1277,9 @@ class Task extends TaskFragment {
             final ActivityRecord top = topRunningActivity();
             final ActivityRecord resumedActivity = getResumedActivity();
             if (resumedActivity != null
-                    && (top.getTaskFragment() != this || !canBeResumed(resuming))) {
-                // Pausing the resumed activity because it is occluded by other task fragment.
+                    && (top == null || top.getTaskFragment() != this || !canBeResumed(resuming))) {
+                // Pausing the resumed activity because it is occluded by other task fragment, or
+                // should not be remained in resumed state.
                 if (startPausing(false /* uiSleeping*/, resuming, reason)) {
                     someActivityPaused[0]++;
                 }
@@ -6795,6 +6798,15 @@ class Task extends TaskFragment {
             getBounds(mTmpRect);
             mOverlayHost.dispatchInsetsChanged(s, mTmpRect);
         }
+    }
+
+    @Nullable
+    ActivityRecord getBottomMostActivityInSamePackage() {
+        if (realActivity == null) {
+            return null;
+        }
+        return getActivity(ar -> ar.packageName.equals(
+                realActivity.getPackageName()), false /* traverseTopToBottom */);
     }
 
     /**

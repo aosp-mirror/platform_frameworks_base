@@ -130,15 +130,9 @@ public class DreamClockTimeComplication implements Complication {
         }
 
         @Override
-        protected void onViewAttached() {
-            mView.setOnClickListener(this::onClick);
-        }
+        protected void onViewAttached() {}
 
         @Override
         protected void onViewDetached() {}
-
-        private void onClick(View v) {
-            mUiEventLogger.log(DreamOverlayUiEvent.DREAM_CLOCK_TAPPED);
-        }
     }
 }

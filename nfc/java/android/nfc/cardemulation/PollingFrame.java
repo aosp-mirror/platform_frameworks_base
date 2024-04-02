@@ -171,7 +171,7 @@ public final class PollingFrame implements Parcelable{
         byte[] data = frame.getByteArray(KEY_POLLING_LOOP_DATA);
         mData = (data == null) ? new byte[0] : data;
         mGain = frame.getInt(KEY_POLLING_LOOP_GAIN, -1);
-        mTimestamp = frame.getInt(KEY_POLLING_LOOP_TIMESTAMP);
+        mTimestamp = frame.getLong(KEY_POLLING_LOOP_TIMESTAMP);
         mTriggeredAutoTransact = frame.containsKey(KEY_POLLING_LOOP_TRIGGERED_AUTOTRANSACT)
                 && frame.getBoolean(KEY_POLLING_LOOP_TRIGGERED_AUTOTRANSACT);
     }

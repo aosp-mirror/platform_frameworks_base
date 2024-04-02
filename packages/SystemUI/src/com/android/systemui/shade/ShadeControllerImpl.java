@@ -127,7 +127,9 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
     @Override
     public void animateCollapseShade(int flags, boolean force, boolean delayed,
             float speedUpFactor) {
-        if (!force && mStatusBarStateController.getState() != StatusBarState.SHADE) {
+        int statusBarState = mStatusBarStateController.getState();
+        if (!force && statusBarState != StatusBarState.SHADE
+                && statusBarState != StatusBarState.SHADE_LOCKED) {
             runPostCollapseActions();
             return;
         }

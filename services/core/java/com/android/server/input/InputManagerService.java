@@ -2846,13 +2846,6 @@ public class InputManagerService extends IInputManager.Stub
                 lockedModifierState);
     }
 
-    // Native callback.
-    @SuppressWarnings("unused")
-    boolean isInputMethodConnectionActive() {
-        return mInputMethodManagerInternal != null
-                && mInputMethodManagerInternal.isAnyInputConnectionActive();
-    }
-
     /**
      * Callback interface implemented by the Window Manager.
      */
@@ -3298,6 +3291,11 @@ public class InputManagerService extends IInputManager.Stub
         @Override
         public void unregisterLidSwitchCallback(LidSwitchCallback callbacks) {
             unregisterLidSwitchCallbackInternal(callbacks);
+        }
+
+        @Override
+        public void notifyInputMethodConnectionActive(boolean connectionIsActive) {
+            mNative.setInputMethodConnectionIsActive(connectionIsActive);
         }
 
         @Override

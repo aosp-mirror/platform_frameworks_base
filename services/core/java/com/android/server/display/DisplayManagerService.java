@@ -45,6 +45,9 @@ import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_UNSUPPOR
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.ROOT_UID;
+import static android.provider.Settings.Secure.RESOLUTION_MODE_FULL;
+import static android.provider.Settings.Secure.RESOLUTION_MODE_HIGH;
+import static android.provider.Settings.Secure.RESOLUTION_MODE_UNKNOWN;
 
 import android.Manifest;
 import android.annotation.EnforcePermission;
@@ -461,10 +464,11 @@ public final class DisplayManagerService extends SystemService {
     // May be used outside of the lock but only on the handler thread.
     private final ArrayList<CallbackRecord> mTempCallbacks = new ArrayList<CallbackRecord>();
 
-    // Pending callback records indexed by calling process uid.
+    // Pending callback records indexed by calling process uid and pid.
     // Must be used outside of the lock mSyncRoot and should be selflocked.
     @GuardedBy("mPendingCallbackSelfLocked")
-    public final SparseArray<PendingCallback> mPendingCallbackSelfLocked = new SparseArray<>();
+    public final SparseArray<SparseArray<PendingCallback>> mPendingCallbackSelfLocked =
+            new SparseArray<>();
 
     // Temporary viewports, used when sending new viewport information to the
     // input system.  May be used outside of the lock but only on the handler thread.
@@ -531,6 +535,18 @@ public final class DisplayManagerService extends SystemService {
         }
     };
 
+    private final BroadcastReceiver mResolutionRestoreReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_SETTING_RESTORED.equals(intent.getAction())) {
+                if (Settings.Secure.SCREEN_RESOLUTION_MODE.equals(
+                        intent.getExtra(Intent.EXTRA_SETTING_NAME))) {
+                    restoreResolutionFromBackup();
+                }
+            }
+        }
+    };
+
     private final BrightnessSynchronizer mBrightnessSynchronizer;
 
     private final DeviceConfigParameterProvider mConfigParameterProvider;
@@ -559,6 +575,9 @@ public final class DisplayManagerService extends SystemService {
     @ChangeId
     @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.S)
     static final long DISPLAY_MODE_RETURNS_PHYSICAL_REFRESH_RATE = 170503758L;
+
+    private final Uri mScreenResolutionModeUri = Settings.Secure.getUriFor(
+            Settings.Secure.SCREEN_RESOLUTION_MODE);
 
     public DisplayManagerService(Context context) {
         this(context, new Injector());
@@ -782,6 +801,11 @@ public final class DisplayManagerService extends SystemService {
 
         mContext.registerReceiver(mIdleModeReceiver, filter);
 
+        if (mFlags.isResolutionBackupRestoreEnabled()) {
+            final IntentFilter restoreFilter = new IntentFilter(Intent.ACTION_SETTING_RESTORED);
+            mContext.registerReceiver(mResolutionRestoreReceiver, restoreFilter);
+        }
+
         mSmallAreaDetectionController = (mFlags.isSmallAreaDetectionEnabled())
                 ? SmallAreaDetectionController.create(mContext) : null;
     }
@@ -988,8 +1012,8 @@ public final class DisplayManagerService extends SystemService {
                 }
 
                 // Do we care about this uid?
-                PendingCallback pendingCallback = mPendingCallbackSelfLocked.get(uid);
-                if (pendingCallback == null) {
+                SparseArray<PendingCallback> pendingCallbacks = mPendingCallbackSelfLocked.get(uid);
+                if (pendingCallbacks == null) {
                     return;
                 }
 
@@ -997,7 +1021,12 @@ public final class DisplayManagerService extends SystemService {
                 if (DEBUG) {
                     Slog.d(TAG, "Uid " + uid + " becomes " + importance);
                 }
-                pendingCallback.sendPendingDisplayEvent();
+                for (int i = 0; i < pendingCallbacks.size(); i++) {
+                    PendingCallback pendingCallback = pendingCallbacks.valueAt(i);
+                    if (pendingCallback != null) {
+                        pendingCallback.sendPendingDisplayEvent();
+                    }
+                }
                 mPendingCallbackSelfLocked.delete(uid);
             }
         }
@@ -1029,6 +1058,44 @@ public final class DisplayManagerService extends SystemService {
         setMinimalPostProcessingAllowed(Settings.Secure.getIntForUser(
                 mContext.getContentResolver(), Settings.Secure.MINIMAL_POST_PROCESSING_ALLOWED,
                 1, UserHandle.USER_CURRENT) != 0);
+    }
+
+    private void restoreResolutionFromBackup() {
+        int savedMode = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.SCREEN_RESOLUTION_MODE,
+                RESOLUTION_MODE_UNKNOWN, UserHandle.USER_CURRENT);
+        if (savedMode == RESOLUTION_MODE_UNKNOWN) {
+            // Nothing to restore.
+            return;
+        }
+
+        synchronized (mSyncRoot) {
+            LogicalDisplay display =
+                    mLogicalDisplayMapper.getDisplayLocked(Display.DEFAULT_DISPLAY);
+            DisplayDevice device = display == null ? null : display.getPrimaryDisplayDeviceLocked();
+            if (device == null) {
+                Slog.w(TAG, "No default display device present to restore resolution mode");
+                return;
+            }
+
+            Point[] supportedRes = device.getSupportedResolutionsLocked();
+            if (supportedRes.length != 2) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Skipping resolution restore - " + supportedRes.length);
+                }
+                return;
+            }
+
+            // We follow the same logic as Settings but in reverse. If the display supports 2
+            // resolutions, we treat the small (index=0) one as HIGH and the larger (index=1)
+            // one as FULL and restore the correct resolution accordingly.
+            int index = savedMode == RESOLUTION_MODE_HIGH ? 0 : 1;
+            Point res = supportedRes[index];
+            Display.Mode newMode = new Display.Mode(res.x, res.y, /*refreshRate=*/ 0);
+            Slog.i(TAG, "Restoring resolution from backup: (" + savedMode + ") "
+                    + res.x + "x" + res.y);
+            setUserPreferredDisplayModeInternal(Display.DEFAULT_DISPLAY, newMode);
+        }
     }
 
     private void updateUserDisabledHdrTypesFromSettingsLocked() {
@@ -2348,6 +2415,28 @@ public final class DisplayManagerService extends SystemService {
         if (displayDevice == null) {
             return;
         }
+
+        // We do not yet support backup and restore for our PersistentDataStore, however, we want to
+        // preserve the user's choice for HIGH/FULL resolution setting, so we when we are given a
+        // a new resolution for the default display (normally stored in PDS), we will also save it
+        // to a setting that is backed up.
+        // TODO(b/330943343) - Consider a full fidelity DisplayBackupHelper for this instead.
+        if (mFlags.isResolutionBackupRestoreEnabled() && displayId == Display.DEFAULT_DISPLAY) {
+            // Checks to see which of the two resolutions is selected
+            // TODO(b/330906790) Uses the same logic as Settings, but should be made to support
+            //     more than two resolutions using explicit mode enums long-term.
+            Point[] resolutions = displayDevice.getSupportedResolutionsLocked();
+            if (resolutions.length == 2) {
+                Point newMode = new Point(mode.getPhysicalWidth(), mode.getPhysicalHeight());
+                int resolutionMode = newMode.equals(resolutions[0]) ? RESOLUTION_MODE_HIGH
+                        : newMode.equals(resolutions[1]) ? RESOLUTION_MODE_FULL
+                        : RESOLUTION_MODE_UNKNOWN;
+                Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.SCREEN_RESOLUTION_MODE, resolutionMode,
+                        UserHandle.USER_CURRENT);
+            }
+        }
+
         displayDevice.setUserPreferredDisplayModeLocked(mode);
     }
 
@@ -3110,16 +3199,23 @@ public final class DisplayManagerService extends SystemService {
         for (int i = 0; i < mTempCallbacks.size(); i++) {
             CallbackRecord callbackRecord = mTempCallbacks.get(i);
             final int uid = callbackRecord.mUid;
+            final int pid = callbackRecord.mPid;
             if (isUidCached(uid)) {
                 // For cached apps, save the pending event until it becomes non-cached
                 synchronized (mPendingCallbackSelfLocked) {
-                    PendingCallback pendingCallback = mPendingCallbackSelfLocked.get(uid);
+                    SparseArray<PendingCallback> pendingCallbacks = mPendingCallbackSelfLocked.get(
+                            uid);
                     if (extraLogging(callbackRecord.mPackageName)) {
-                        Slog.i(TAG,
-                                "Uid is cached: " + uid + ", pendingCallback: " + pendingCallback);
+                        Slog.i(TAG, "Uid is cached: " + uid
+                                + ", pendingCallbacks: " + pendingCallbacks);
                     }
+                    if (pendingCallbacks == null) {
+                        pendingCallbacks = new SparseArray<>();
+                        mPendingCallbackSelfLocked.put(uid, pendingCallbacks);
+                    }
+                    PendingCallback pendingCallback = pendingCallbacks.get(pid);
                     if (pendingCallback == null) {
-                        mPendingCallbackSelfLocked.put(uid,
+                        pendingCallbacks.put(pid,
                                 new PendingCallback(callbackRecord, displayId, event));
                     } else {
                         pendingCallback.addDisplayEvent(displayId, event);

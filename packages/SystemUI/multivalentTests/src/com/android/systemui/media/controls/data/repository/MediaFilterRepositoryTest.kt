@@ -16,8 +16,11 @@
 
 package com.android.systemui.media.controls.data.repository
 
+import android.R
+import android.graphics.drawable.Icon
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.InstanceId
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
@@ -44,16 +47,17 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val selectedUserEntries by collectLastValue(underTest.selectedUserEntries)
 
-            val userMedia = MediaData().copy(active = true)
+            val instanceId = InstanceId.fakeInstanceId(123)
+            val userMedia = MediaData().copy(active = true, instanceId = instanceId)
 
-            underTest.addSelectedUserMediaEntry(KEY, userMedia)
+            underTest.addSelectedUserMediaEntry(userMedia)
 
-            assertThat(selectedUserEntries?.get(KEY)).isEqualTo(userMedia)
+            assertThat(selectedUserEntries?.get(instanceId)).isEqualTo(userMedia)
 
-            underTest.addSelectedUserMediaEntry(KEY, userMedia.copy(active = false))
+            underTest.addSelectedUserMediaEntry(userMedia.copy(active = false))
 
-            assertThat(selectedUserEntries?.get(KEY)).isNotEqualTo(userMedia)
-            assertThat(selectedUserEntries?.get(KEY)?.active).isFalse()
+            assertThat(selectedUserEntries?.get(instanceId)).isNotEqualTo(userMedia)
+            assertThat(selectedUserEntries?.get(instanceId)?.active).isFalse()
         }
 
     @Test
@@ -61,13 +65,14 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val selectedUserEntries by collectLastValue(underTest.selectedUserEntries)
 
-            val userMedia = MediaData()
+            val instanceId = InstanceId.fakeInstanceId(123)
+            val userMedia = MediaData().copy(instanceId = instanceId)
 
-            underTest.addSelectedUserMediaEntry(KEY, userMedia)
+            underTest.addSelectedUserMediaEntry(userMedia)
 
-            assertThat(selectedUserEntries?.get(KEY)).isEqualTo(userMedia)
+            assertThat(selectedUserEntries?.get(instanceId)).isEqualTo(userMedia)
 
-            assertThat(underTest.removeSelectedUserMediaEntry(KEY, userMedia)).isTrue()
+            assertThat(underTest.removeSelectedUserMediaEntry(instanceId, userMedia)).isTrue()
         }
 
     @Test
@@ -75,13 +80,14 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val selectedUserEntries by collectLastValue(underTest.selectedUserEntries)
 
-            val userMedia = MediaData()
+            val instanceId = InstanceId.fakeInstanceId(123)
+            val userMedia = MediaData().copy(instanceId = instanceId)
 
-            underTest.addSelectedUserMediaEntry(KEY, userMedia)
+            underTest.addSelectedUserMediaEntry(userMedia)
 
-            assertThat(selectedUserEntries?.get(KEY)).isEqualTo(userMedia)
+            assertThat(selectedUserEntries?.get(instanceId)).isEqualTo(userMedia)
 
-            assertThat(underTest.removeSelectedUserMediaEntry(KEY)).isEqualTo(userMedia)
+            assertThat(underTest.removeSelectedUserMediaEntry(instanceId)).isEqualTo(userMedia)
         }
 
     @Test
@@ -120,11 +126,12 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val smartspaceMediaData by collectLastValue(underTest.smartspaceMediaData)
 
+            val icon = Icon.createWithResource(context, R.drawable.ic_media_play)
             val mediaRecommendation =
                 SmartspaceMediaData(
                     targetId = KEY_MEDIA_SMARTSPACE,
                     isActive = true,
-                    recommendations = MediaTestHelper.getValidRecommendationList(context),
+                    recommendations = MediaTestHelper.getValidRecommendationList(icon),
                 )
 
             underTest.setRecommendation(mediaRecommendation)

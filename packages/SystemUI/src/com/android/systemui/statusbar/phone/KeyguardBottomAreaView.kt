@@ -23,12 +23,12 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.annotation.StringRes
 import com.android.keyguard.LockIconViewController
-import com.android.systemui.res.R
 import com.android.systemui.keyguard.ui.binder.KeyguardBottomAreaViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardBottomAreaViewBinder.bind
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
 
 /**
@@ -155,13 +155,13 @@ constructor(
                 // make top of ambient indication view the bottom of the lock icon
                 it.layout(
                     ambientLeft,
-                    lockIconViewController?.bottom?.toInt() ?: 0,
+                    lockIconViewController?.getBottom()?.toInt() ?: 0,
                     right - ambientLeft,
                     ambientTop + it.measuredHeight
                 )
             } else {
                 // make bottom of ambient indication view the top of the lock icon
-                val lockLocationTop = lockIconViewController?.top ?: 0
+                val lockLocationTop = lockIconViewController?.getTop() ?: 0
                 it.layout(
                     ambientLeft,
                     lockLocationTop.toInt() - it.measuredHeight,

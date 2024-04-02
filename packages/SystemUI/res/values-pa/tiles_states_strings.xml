@@ -152,7 +152,7 @@
     <item msgid="8998632451221157987">"ਚਾਲੂ ਹੈ"</item>
   </string-array>
   <string-array name="tile_states_controls">
-    <item msgid="8199009425335668294">"ਅਣਉਪਲਬਧ ਹੈ"</item>
+    <item msgid="8199009425335668294">"ਅਣਉਪਲਬਧ ਹਨ"</item>
     <item msgid="4544919905196727508">"ਬੰਦ ਹੈ"</item>
     <item msgid="3422023746567004609">"ਚਾਲੂ ਹੈ"</item>
   </string-array>
@@ -186,4 +186,7 @@
     <item msgid="2478289035899842865">"ਬੰਦ"</item>
     <item msgid="5137565285664080143">"ਚਾਲੂ"</item>
   </string-array>
+    <!-- no translation found for tile_states_hearing_devices:0 (1235334096484287173) -->
+    <!-- no translation found for tile_states_hearing_devices:1 (3079622119444911877) -->
+    <!-- no translation found for tile_states_hearing_devices:2 (3028994095749238254) -->
 </resources>

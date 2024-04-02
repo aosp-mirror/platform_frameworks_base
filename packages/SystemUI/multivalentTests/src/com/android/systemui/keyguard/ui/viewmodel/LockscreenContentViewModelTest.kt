@@ -21,6 +21,7 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardClockSwitch
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.authController
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
@@ -96,7 +97,7 @@ class LockscreenContentViewModelTest : SysuiTestCase() {
                 shadeRepository.setShadeMode(ShadeMode.Split)
                 kosmos.fakeKeyguardClockRepository.setClockSize(KeyguardClockSwitch.LARGE)
 
-                assertThat(underTest.areNotificationsVisible).isTrue()
+                assertThat(collectLastValue(underTest.areNotificationsVisible).invoke()).isTrue()
             }
         }
     @Test
@@ -104,7 +105,7 @@ class LockscreenContentViewModelTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 kosmos.fakeKeyguardClockRepository.setClockSize(KeyguardClockSwitch.SMALL)
-                assertThat(underTest.areNotificationsVisible).isTrue()
+                assertThat(collectLastValue(underTest.areNotificationsVisible).invoke()).isTrue()
             }
         }
 
@@ -113,7 +114,7 @@ class LockscreenContentViewModelTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 kosmos.fakeKeyguardClockRepository.setClockSize(KeyguardClockSwitch.LARGE)
-                assertThat(underTest.areNotificationsVisible).isFalse()
+                assertThat(collectLastValue(underTest.areNotificationsVisible).invoke()).isFalse()
             }
         }
 
@@ -122,7 +123,8 @@ class LockscreenContentViewModelTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 shadeRepository.setShadeMode(ShadeMode.Split)
-                assertThat(underTest.shouldUseSplitNotificationShade).isTrue()
+                assertThat(collectLastValue(underTest.shouldUseSplitNotificationShade).invoke())
+                    .isTrue()
             }
         }
 
@@ -131,16 +133,8 @@ class LockscreenContentViewModelTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 shadeRepository.setShadeMode(ShadeMode.Single)
-                assertThat(underTest.shouldUseSplitNotificationShade).isFalse()
-            }
-        }
-
-    @Test
-    fun sceneKey() =
-        with(kosmos) {
-            testScope.runTest {
-                shadeRepository.setShadeMode(ShadeMode.Single)
-                assertThat(underTest.shouldUseSplitNotificationShade).isFalse()
+                assertThat(collectLastValue(underTest.shouldUseSplitNotificationShade).invoke())
+                    .isFalse()
             }
         }
 }

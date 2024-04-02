@@ -86,7 +86,7 @@ final class WakeLockLog {
     private static final int TAG_DATABASE_SIZE = 128;
     private static final int TAG_DATABASE_SIZE_MAX = 128;
 
-    private static final int LEVEL_UNKNOWN = 0;
+    private static final int LEVEL_SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK = 0;
     private static final int LEVEL_PARTIAL_WAKE_LOCK = 1;
     private static final int LEVEL_FULL_WAKE_LOCK = 2;
     private static final int LEVEL_SCREEN_DIM_WAKE_LOCK = 3;
@@ -96,7 +96,7 @@ final class WakeLockLog {
     private static final int LEVEL_DRAW_WAKE_LOCK = 7;
 
     private static final String[] LEVEL_TO_STRING = {
-        "unknown",
+        "override",
         "partial",
         "full",
         "screen-dim",
@@ -310,6 +310,9 @@ final class WakeLockLog {
                 break;
             case PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK:
                 newFlags = LEVEL_PROXIMITY_SCREEN_OFF_WAKE_LOCK;
+                break;
+            case PowerManager.SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK:
+                newFlags = LEVEL_SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK;
                 break;
             default:
                 Slog.w(TAG, "Unsupported lock level for logging, flags: " + flags);

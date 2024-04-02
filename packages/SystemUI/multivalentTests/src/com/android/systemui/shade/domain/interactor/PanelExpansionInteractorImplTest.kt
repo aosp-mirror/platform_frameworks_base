@@ -52,6 +52,7 @@ class PanelExpansionInteractorImplTest : SysuiTestCase() {
     private val deviceEntryRepository = kosmos.fakeDeviceEntryRepository
     private val deviceUnlockedInteractor = kosmos.deviceUnlockedInteractor
     private val sceneInteractor = kosmos.sceneInteractor
+    private val shadeAnimationInteractor = kosmos.shadeAnimationInteractor
     private val transitionState =
         MutableStateFlow<ObservableTransitionState>(
             ObservableTransitionState.Idle(Scenes.Lockscreen)
@@ -112,6 +113,40 @@ class PanelExpansionInteractorImplTest : SysuiTestCase() {
             changeScene(Scenes.Communal) { assertThat(panelExpansion).isEqualTo(1f) }
             assertThat(panelExpansion).isEqualTo(1f)
         }
+
+    @Test
+    @EnableSceneContainer
+    fun shouldHideStatusBarIconsWhenExpanded_goneScene() =
+        testScope.runTest {
+            underTest = kosmos.panelExpansionInteractorImpl
+            shadeAnimationInteractor.setIsLaunchingActivity(false)
+            changeScene(Scenes.Gone)
+
+            assertThat(underTest.shouldHideStatusBarIconsWhenExpanded()).isFalse()
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun shouldHideStatusBarIconsWhenExpanded_lockscreenScene() =
+        testScope.runTest {
+            underTest = kosmos.panelExpansionInteractorImpl
+            shadeAnimationInteractor.setIsLaunchingActivity(false)
+            changeScene(Scenes.Lockscreen)
+
+            assertThat(underTest.shouldHideStatusBarIconsWhenExpanded()).isTrue()
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun shouldHideStatusBarIconsWhenExpanded_activityLaunch() =
+        testScope.runTest {
+            underTest = kosmos.panelExpansionInteractorImpl
+            changeScene(Scenes.Gone)
+            shadeAnimationInteractor.setIsLaunchingActivity(true)
+
+            assertThat(underTest.shouldHideStatusBarIconsWhenExpanded()).isFalse()
+        }
+
     private fun TestScope.setUnlocked(isUnlocked: Boolean) {
         val isDeviceUnlocked by collectLastValue(deviceUnlockedInteractor.isDeviceUnlocked)
         deviceEntryRepository.setUnlocked(isUnlocked)

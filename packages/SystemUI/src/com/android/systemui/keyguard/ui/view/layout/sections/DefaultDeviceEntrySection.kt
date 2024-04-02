@@ -34,6 +34,7 @@ import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.DeviceEntryIconViewBinder
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
@@ -72,7 +73,7 @@ constructor(
     override fun addViews(constraintLayout: ConstraintLayout) {
         if (
             !KeyguardBottomAreaRefactor.isEnabled &&
-                !DeviceEntryUdfpsRefactor.isEnabled &&
+                !MigrateClocksToBlueprint.isEnabled &&
                 !DeviceEntryUdfpsRefactor.isEnabled
         ) {
             return

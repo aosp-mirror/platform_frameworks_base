@@ -270,6 +270,7 @@ public class SecureSettings {
         Settings.Secure.VISUAL_QUERY_ACCESSIBILITY_DETECTION_ENABLED,
         Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS,
         Settings.Secure.AUDIO_DEVICE_INVENTORY,
+        Settings.Secure.SCREEN_RESOLUTION_MODE,
         Settings.Secure.ACCESSIBILITY_FLOATING_MENU_TARGETS
     };
 }

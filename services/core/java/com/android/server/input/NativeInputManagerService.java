@@ -273,6 +273,8 @@ interface NativeInputManagerService {
      */
     void setAccessibilityStickyKeysEnabled(boolean enabled);
 
+    void setInputMethodConnectionIsActive(boolean isActive);
+
     /** The native implementation of InputManagerService methods. */
     class NativeImpl implements NativeInputManagerService {
         /** Pointer to native input manager service object, used by native code. */
@@ -549,5 +551,8 @@ interface NativeInputManagerService {
 
         @Override
         public native void setAccessibilityStickyKeysEnabled(boolean enabled);
+
+        @Override
+        public native void setInputMethodConnectionIsActive(boolean isActive);
     }
 }

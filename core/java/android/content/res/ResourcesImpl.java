@@ -146,6 +146,11 @@ public class ResourcesImpl {
 
     // Cyclical cache used for recently-accessed XML files.
     private int mLastCachedXmlBlockIndex = -1;
+
+    // The number of shared libraries registered within this ResourcesImpl, which is designed to
+    // help to determine whether this ResourcesImpl is outdated on shared library information and
+    // needs to be replaced.
+    private int mSharedLibCount;
     private final int[] mCachedXmlBlockCookies = new int[XML_BLOCK_CACHE_SIZE];
     private final String[] mCachedXmlBlockFiles = new String[XML_BLOCK_CACHE_SIZE];
     private final XmlBlock[] mCachedXmlBlocks = new XmlBlock[XML_BLOCK_CACHE_SIZE];
@@ -206,6 +211,7 @@ public class ResourcesImpl {
             for (int i = 0; i < size; i++) {
                 assets.addSharedLibraryPaths(sharedLibMap.valueAt(i).getAllAssetPaths());
             }
+            mSharedLibCount = sharedLibMap.size();
         }
         mMetrics.setToDefaults();
         mDisplayAdjustments = displayAdjustments;
@@ -222,6 +228,11 @@ public class ResourcesImpl {
         return mAssets;
     }
 
+    @UnsupportedAppUsage
+    public DisplayMetrics getMetrics() {
+        return mMetrics;
+    }
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     DisplayMetrics getDisplayMetrics() {
         if (DEBUG_CONFIG) Slog.v(TAG, "Returning DisplayMetrics: " + mMetrics.widthPixels
@@ -229,7 +240,8 @@ public class ResourcesImpl {
         return mMetrics;
     }
 
-    Configuration getConfiguration() {
+    @UnsupportedAppUsage
+    public Configuration getConfiguration() {
         return mConfiguration;
     }
 
@@ -1601,5 +1613,9 @@ public class ResourcesImpl {
         public void pop() {
             mSize--;
         }
+    }
+
+    public int getSharedLibCount() {
+        return mSharedLibCount;
     }
 }

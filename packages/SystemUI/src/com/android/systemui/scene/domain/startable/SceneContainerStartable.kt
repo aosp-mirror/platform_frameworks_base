@@ -40,6 +40,7 @@ import com.android.systemui.model.updateFlags
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.FalsingManager.FalsingBeliefListener
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.logger.SceneLogger
@@ -94,6 +95,7 @@ constructor(
     private val deviceProvisioningInteractor: DeviceProvisioningInteractor,
     private val centralSurfaces: CentralSurfaces,
     private val headsUpInteractor: HeadsUpNotificationInteractor,
+    private val occlusionInteractor: SceneContainerOcclusionInteractor,
 ) : CoreStartable {
 
     override fun start() {
@@ -126,41 +128,40 @@ constructor(
     private fun hydrateVisibility() {
         applicationScope.launch {
             // TODO(b/296114544): Combine with some global hun state to make it visible!
-            combine(
-                    deviceProvisioningInteractor.isDeviceProvisioned,
-                    deviceProvisioningInteractor.isFactoryResetProtectionActive,
-                ) { isDeviceProvisioned, isFrpActive ->
-                    isDeviceProvisioned && !isFrpActive
-                }
+            deviceProvisioningInteractor.isDeviceProvisioned
                 .distinctUntilChanged()
                 .flatMapLatest { isAllowedToBeVisible ->
                     if (isAllowedToBeVisible) {
-                        sceneInteractor.transitionState
-                            .mapNotNull { state ->
-                                when (state) {
-                                    is ObservableTransitionState.Idle -> {
-                                        if (state.scene != Scenes.Gone) {
-                                            true to "scene is not Gone"
-                                        } else {
-                                            false to "scene is Gone"
+                        combine(
+                                sceneInteractor.transitionState.mapNotNull { state ->
+                                    when (state) {
+                                        is ObservableTransitionState.Idle -> {
+                                            if (state.scene != Scenes.Gone) {
+                                                true to "scene is not Gone"
+                                            } else {
+                                                false to "scene is Gone"
+                                            }
+                                        }
+                                        is ObservableTransitionState.Transition -> {
+                                            if (state.fromScene == Scenes.Gone) {
+                                                true to "scene transitioning away from Gone"
+                                            } else {
+                                                null
+                                            }
                                         }
                                     }
-                                    is ObservableTransitionState.Transition -> {
-                                        if (state.fromScene == Scenes.Gone) {
-                                            true to "scene transitioning away from Gone"
-                                        } else {
-                                            null
-                                        }
-                                    }
-                                }
-                            }
-                            .combine(headsUpInteractor.isHeadsUpOrAnimatingAway) {
+                                },
+                                headsUpInteractor.isHeadsUpOrAnimatingAway,
+                                occlusionInteractor.invisibleDueToOcclusion,
+                            ) {
                                 visibilityForTransitionState,
-                                isHeadsUpOrAnimatingAway ->
-                                if (isHeadsUpOrAnimatingAway) {
-                                    true to "showing a HUN"
-                                } else {
-                                    visibilityForTransitionState
+                                isHeadsUpOrAnimatingAway,
+                                invisibleDueToOcclusion,
+                                ->
+                                when {
+                                    isHeadsUpOrAnimatingAway -> true to "showing a HUN"
+                                    invisibleDueToOcclusion -> false to "invisible due to occlusion"
+                                    else -> visibilityForTransitionState
                                 }
                             }
                             .distinctUntilChanged()
@@ -316,15 +317,23 @@ constructor(
     /** Keeps [SysUiState] up-to-date */
     private fun hydrateSystemUiState() {
         applicationScope.launch {
-            sceneInteractor.transitionState
-                .mapNotNull { it as? ObservableTransitionState.Idle }
-                .map { it.scene }
-                .distinctUntilChanged()
-                .collect { sceneKey ->
+            combine(
+                    sceneInteractor.transitionState
+                        .mapNotNull { it as? ObservableTransitionState.Idle }
+                        .map { it.scene }
+                        .distinctUntilChanged(),
+                    occlusionInteractor.invisibleDueToOcclusion,
+                ) { sceneKey, invisibleDueToOcclusion ->
+                    SceneContainerPlugin.SceneContainerPluginState(
+                        scene = sceneKey,
+                        invisibleDueToOcclusion = invisibleDueToOcclusion,
+                    )
+                }
+                .collect { sceneContainerPluginState ->
                     sysUiState.updateFlags(
                         displayId,
                         *SceneContainerPlugin.EvaluatorByFlag.map { (flag, evaluator) ->
-                                flag to evaluator.invoke(sceneKey)
+                                flag to evaluator.invoke(sceneContainerPluginState)
                             }
                             .toTypedArray(),
                     )

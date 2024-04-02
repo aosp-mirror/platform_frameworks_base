@@ -73,9 +73,9 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
     private static final String TAG = "CDM_BleCompanionDeviceScanner";
 
     interface Callback {
-        void onBleCompanionDeviceFound(int associationId);
+        void onBleCompanionDeviceFound(int associationId, int userId);
 
-        void onBleCompanionDeviceLost(int associationId);
+        void onBleCompanionDeviceLost(int associationId, int userId);
     }
 
     private final @NonNull AssociationStore mAssociationStore;
@@ -259,7 +259,7 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
         if (DEBUG) Log.d(TAG, "  > associations=" + Arrays.toString(associations.toArray()));
 
         for (AssociationInfo association : associations) {
-            mCallback.onBleCompanionDeviceFound(association.getId());
+            mCallback.onBleCompanionDeviceFound(association.getId(), association.getUserId());
         }
     }
 
@@ -272,7 +272,7 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
         if (DEBUG) Log.d(TAG, "  > associations=" + Arrays.toString(associations.toArray()));
 
         for (AssociationInfo association : associations) {
-            mCallback.onBleCompanionDeviceLost(association.getId());
+            mCallback.onBleCompanionDeviceLost(association.getId(), association.getUserId());
         }
     }
 

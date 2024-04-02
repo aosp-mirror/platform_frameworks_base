@@ -39,12 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Kol stengiamės padaryti, kad ateityje nereikėtų naudoti slaptažodžių, jie vis dar bus pasiekiami kartu su prieigos raktais."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Pasirinkite, kur išsaugoti „<xliff:g id="CREATETYPES">%1$s</xliff:g>“"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Pasirinkite slaptažodžių tvarkyklę, kurią naudodami galėsite išsaugoti informaciją ir kitą kartą prisijungti greičiau"</string>
-    <!-- no translation found for choose_create_option_passkey_title (8762295821604276511) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (4481366993598649224) -->
-    <skip />
-    <!-- no translation found for choose_create_option_sign_in_title (7092914088455358079) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Sukurti prieigos raktą, skirtą prisijungti prie „<xliff:g id="APP_NAME">%1$s</xliff:g>“?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"Sukurti slaptažodį, skirtą prisijungti prie „<xliff:g id="APP_NAME">%1$s</xliff:g>“?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Išsaugoti prisijungimo prie „<xliff:g id="APP_NAME">%1$s</xliff:g>“ informaciją?"</string>
     <string name="passkey" msgid="632353688396759522">"„passkey“"</string>
     <string name="password" msgid="6738570945182936667">"slaptažodis"</string>
     <string name="passkeys" msgid="5733880786866559847">"prieigos raktas"</string>
@@ -73,8 +70,7 @@
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Atsisakyti"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Naudoti išsaugotą „passkey“ programai „<xliff:g id="APP_NAME">%1$s</xliff:g>“?"</string>
     <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Naudoti išsaugotą slaptažodį programai „<xliff:g id="APP_NAME">%1$s</xliff:g>“?"</string>
-    <!-- no translation found for get_dialog_title_single_tap_for (2057945648748859483) -->
-    <skip />
+    <string name="get_dialog_title_single_tap_for" msgid="2057945648748859483">"Naudodami ekrano užraktą prisijunkite prie „<xliff:g id="APP_NAME">%1$s</xliff:g>“ kaip <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Naudoti prisijungimo informaciją programai „<xliff:g id="APP_NAME">%1$s</xliff:g>“?"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Atrakinti prisijungimo prie „<xliff:g id="APP_NAME">%1$s</xliff:g>“ parinktis?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Išsaugoto prieigos rakto, skirto „<xliff:g id="APP_NAME">%1$s</xliff:g>“, pasirinkimas"</string>

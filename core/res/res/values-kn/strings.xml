@@ -84,8 +84,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"ಮೊಬೈಲ್‌ ನೆಟ್‌ವರ್ಕ್ ತಲುಪಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ಆದ್ಯತೆಗೊಳಿಸಿದ ನೆಟ್‌ವರ್ಕ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಲು ಪ್ರಯತ್ನಿಸಿ. ಬದಲಾಯಿಸಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ತುರ್ತು ಕರೆ ಮಾಡುವಿಕೆ ಲಭ್ಯವಿಲ್ಲ"</string>
-    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
-    <skip />
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"ತುರ್ತು ಕರೆಗಳಿಗೆ ಮೊಬೈಲ್ ನೆಟ್‌ವರ್ಕ್‌ನ ಅಗತ್ಯವಿದೆ"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ಎಚ್ಚರಿಕೆಗಳು"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"ಕರೆ ಫಾರ್ವರ್ಡ್‌ ಮಾಡುವಿಕೆ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"ತುರ್ತು ಕಾಲ್‌ಬ್ಯಾಕ್‌ ಮೋಡ್‌"</string>
@@ -616,7 +615,7 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"ಕೀಲಾಕ್ ಮತ್ತು ಯಾವುದೇ ಸಂಬಂಧಿತ ಭದ್ರತಾ ಪಾಸ್‍‍ವರ್ಡ್ ಭದ್ರತೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿ ನೀಡುತ್ತದೆ. ಉದಾಹರಣೆಗೆ, ಒಳಬರುವ ಕರೆಯನ್ನು ಸ್ವೀಕರಿಸುವಾಗ ಕೀಲಾಕ್ ಅನ್ನು ಫೋನ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ, ನಂತರ ಕರೆಯು ಅಂತ್ಯಗೊಂಡಾಗ ಕೀಲಾಕ್ ಅನ್ನು ಮರು ಸಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಸಂಕೀರ್ಣತೆಯನ್ನು ವಿನಂತಿಸಿ"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"ಆ್ಯಪ್‌ಗೆ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಸಂಕೀರ್ಣತೆ ಮಟ್ಟವನ್ನು (ಅಧಿಕ, ಮಧ್ಯಮ, ಕಡಿಮೆ ಅಥವಾ ಯಾವುದೂ ಅಲ್ಲ) ತಿಳಿದುಕೊಳ್ಳಲು ಅನುಮತಿಸುತ್ತದೆ, ಅದು ಉದ್ದದ ಸಂಭವನೀಯ ಶ್ರೇಣಿ ಮತ್ತು ಸ್ಕ್ರೀನ್ ಲಾಕ್‌ನ ವಿಧವನ್ನು ಸೂಚಿಸುತ್ತದೆ. ಬಳಕೆದಾರರು ನಿರ್ದಿಷ್ಟ ಹಂತದವರೆಗೆ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಅನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡಬಹುದು, ಆದರೆ ಅವರು ಅದನ್ನು ನಿರ್ಲಕ್ಷಿಸಬಹುದು ಮತ್ತು ಅದರಿಂದ ಹೊರಬರಬಹುದು ಎಂಬುದನ್ನು ಸಹ ಆ್ಯಪ್ ಬಳಕೆದಾರರಿಗೆ ಸೂಚಿಸುತ್ತದೆ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಅನ್ನು ಪಠ್ಯದ ರೂಪದಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾಗಿರುವುದಿಲ್ಲ, ಇದರಿಂದಾಗಿ ಆ್ಯಪ್‌ಗೆ ಸರಿಯಾದ ಪಾಸ್‌ವರ್ಡ್ ಗೊತ್ತಿರುವುದಿಲ್ಲ ಎಂಬುದನ್ನು ಗಮನಿಸಿ."</string>
-    <string name="permlab_postNotification" msgid="4875401198597803658">"ಅಧಿಸೂಚನೆಗಳನ್ನು ತೋರಿಸಿ"</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"ನೋಟಿಫಿಕೇಶನ್‌ಗಳನ್ನು ತೋರಿಸಿ"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"ಅಧಿಸೂಚನೆಗಳನ್ನು ತೋರಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
     <string name="permlab_turnScreenOn" msgid="219344053664171492">"ಸ್ಕ್ರೀನ್ ಅನ್ನು ಆನ್ ಮಾಡಿ"</string>
     <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"ಸ್ಕ್ರೀನ್ ಅನ್ನು ಆನ್ ಮಾಡಲು ಆ್ಯಪ್ ಅನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
@@ -1184,10 +1183,8 @@
     <string name="deleteText" msgid="4200807474529938112">"ಅಳಿಸಿ"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ಇನ್‌ಪುಟ್ ವಿಧಾನ"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"ಪಠ್ಯದ ಕ್ರಮಗಳು"</string>
-    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
-    <skip />
-    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
-    <skip />
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"ಈ ಫೀಲ್ಡ್‌ನಲ್ಲಿ ಕೈಬರಹವನ್ನು ಬೆಂಬಲಿಸಲಾಗುವುದಿಲ್ಲ"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"ಪಾಸ್‌ವರ್ಡ್ ಫೀಲ್ಡ್‌ಗಳಲ್ಲಿ ಕೈಬರಹವನ್ನು ಬೆಂಬಲಿಸಲಾಗುವುದಿಲ್ಲ"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"ಹಿಂದಕ್ಕೆ"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ಇನ್‌ಪುಟ್ ವಿಧಾನವನ್ನು ಬದಲಿಸಿ"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"ಸಂಗ್ರಹಣೆ ಸ್ಥಳವು ತುಂಬಿದೆ"</string>
@@ -1932,6 +1929,12 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಮೂಲಕ ನಿರ್ವಹಿಸಲಾಗಿದೆ"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ಆನ್ ಆಗಿದೆ"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ಆಫ್ ಆಗಿದೆ"</string>
+    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
+    <skip />
+    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
+    <skip />
+    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
+    <skip />
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ಧ್ವನಿ ಮ್ಯೂಟ್ ಮಾಡುತ್ತಿದ್ದಾರೆ"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆಂತರಿಕ ಸಮಸ್ಯೆಯಿದೆ ಹಾಗೂ ನೀವು ಫ್ಯಾಕ್ಟರಿ ಡೇಟಾವನ್ನು ರೀಸೆಟ್ ಮಾಡುವವರೆಗೂ ಅದು ಅಸ್ಥಿರವಾಗಬಹುದು."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆಂತರಿಕ ಸಮಸ್ಯೆಯಿದೆ. ವಿವರಗಳಿಗಾಗಿ ನಿಮ್ಮ ತಯಾರಕರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
@@ -1977,7 +1980,7 @@
     <string name="language_selection_title" msgid="52674936078683285">"ಭಾಷೆ ಸೇರಿಸಿ"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"ಪ್ರದೇಶ ಪ್ರಾಶಸ್ತ್ಯ"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ಭಾಷೆ ಹೆಸರನ್ನು ಟೈಪ್ ಮಾಡಿ"</string>
-    <string name="language_picker_section_suggested" msgid="6556199184638990447">"ಸೂಚಿತ ಭಾಷೆ"</string>
+    <string name="language_picker_section_suggested" msgid="6556199184638990447">"ಸೂಚಿತ ಭಾಷೆಗಳು"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"ಸೂಚಿಸಲಾಗಿರುವುದು"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"ಸೂಚಿಸಲಾದ ಭಾಷೆಗಳು"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"ಸೂಚಿಸಲಾದ ಪ್ರದೇಶಗಳು"</string>

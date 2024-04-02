@@ -99,6 +99,7 @@ public class SettingsHelper {
         sBroadcastOnRestore.add(Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED);
         sBroadcastOnRestore.add(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS);
         sBroadcastOnRestore.add(Settings.Secure.ACCESSIBILITY_QS_TARGETS);
+        sBroadcastOnRestore.add(Settings.Secure.SCREEN_RESOLUTION_MODE);
         sBroadcastOnRestoreSystemUI = new ArraySet<String>(2);
         sBroadcastOnRestoreSystemUI.add(Settings.Secure.QS_TILES);
         sBroadcastOnRestoreSystemUI.add(Settings.Secure.QS_AUTO_ADDED_TILES);

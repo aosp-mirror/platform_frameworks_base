@@ -23,11 +23,19 @@ import com.android.systemui.communal.data.repository.CommunalRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalSettingsRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalTutorialRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalWidgetRepositoryModule
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.widgets.CommunalWidgetModule
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarterImpl
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.scene.shared.model.SceneContainerConfig
+import com.android.systemui.scene.shared.model.SceneDataSource
+import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
+import kotlinx.coroutines.CoroutineScope
 
 @Module(
     includes =
@@ -47,4 +55,24 @@ interface CommunalModule {
     fun bindEditWidgetsActivityStarter(
         starter: EditWidgetsActivityStarterImpl
     ): EditWidgetsActivityStarter
+
+    @Binds
+    @Communal
+    fun bindCommunalSceneDataSource(@Communal delegator: SceneDataSourceDelegator): SceneDataSource
+
+    companion object {
+        @Provides
+        @Communal
+        @SysUISingleton
+        fun providesCommunalSceneDataSourceDelegator(
+            @Application applicationScope: CoroutineScope
+        ): SceneDataSourceDelegator {
+            val config =
+                SceneContainerConfig(
+                    sceneKeys = listOf(CommunalScenes.Blank, CommunalScenes.Communal),
+                    initialSceneKey = CommunalScenes.Blank
+                )
+            return SceneDataSourceDelegator(applicationScope, config)
+        }
+    }
 }

@@ -15,11 +15,10 @@
  */
 package com.android.internal.accessibility.dialog;
 
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
-import static android.view.accessibility.AccessibilityManager.ShortcutType;
-
 import static com.android.internal.accessibility.common.ShortcutConstants.ShortcutMenuMode;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getInstalledTargets;
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getTargets;
 import static com.android.internal.accessibility.util.AccessibilityUtils.isUserSetupCompleted;
@@ -37,7 +36,6 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.Flags;
 import android.widget.AdapterView;
 
 import com.android.internal.R;
@@ -51,8 +49,8 @@ import java.util.List;
  * activity or allowlisting feature for volume key shortcut.
  */
 public class AccessibilityShortcutChooserActivity extends Activity {
-    @ShortcutType
-    private final int mShortcutType = ACCESSIBILITY_SHORTCUT_KEY;
+    @UserShortcutType
+    private final int mShortcutType = HARDWARE;
     private static final String KEY_ACCESSIBILITY_SHORTCUT_MENU_MODE =
             "accessibility_shortcut_menu_mode";
     private final List<AccessibilityTarget> mTargets = new ArrayList<>();
@@ -216,7 +214,7 @@ public class AccessibilityShortcutChooserActivity extends Activity {
                 mTargetAdapter.getShortcutMenuMode() == ShortcutMenuMode.EDIT;
         final int selectDialogTitleId = R.string.accessibility_select_shortcut_menu_title;
         final int editDialogTitleId =
-                mShortcutType == ACCESSIBILITY_BUTTON
+                mShortcutType == SOFTWARE
                         ? R.string.accessibility_edit_shortcut_menu_button_title
                         : R.string.accessibility_edit_shortcut_menu_volume_title;
 
@@ -248,12 +246,10 @@ public class AccessibilityShortcutChooserActivity extends Activity {
 
         boolean allowEditing = isUserSetupCompleted(this);
         boolean showWhenLocked = false;
-        if (Flags.allowShortcutChooserOnLockscreen()) {
-            final KeyguardManager keyguardManager = getSystemService(KeyguardManager.class);
-            if (keyguardManager != null && keyguardManager.isKeyguardLocked()) {
-                allowEditing = false;
-                showWhenLocked = true;
-            }
+        final KeyguardManager keyguardManager = getSystemService(KeyguardManager.class);
+        if (keyguardManager != null && keyguardManager.isKeyguardLocked()) {
+            allowEditing = false;
+            showWhenLocked = true;
         }
         if (allowEditing) {
             final String positiveButtonText =

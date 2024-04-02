@@ -222,6 +222,30 @@
     <!-- Connected device settings. Message when the left-side and right-side hearing aids device are active. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_hearing_aid_left_and_right_active">Active, left and right</string>
 
+    <!-- Connected devices settings. Message when Bluetooth is connected and active for media only, showing remote device status and battery level. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_active_media_only_battery_level">Active (media only), <xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected and active for media only, showing remote device status and battery level for untethered headset. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_active_media_only_battery_level_untethered">Active (media only), L: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g> battery, R: <xliff:g id="battery_level_as_percentage" example="25%">%2$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level, supports audio sharing. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_battery_level_lea_support">Connected (supports audio sharing), <xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level for untethered headset, supports audio sharing. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_battery_level_untethered_lea_support">Connected (supports audio sharing), L: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g> battery, R: <xliff:g id="battery_level_as_percentage" example="25%">%2$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level for the left part of the untethered headset, supports audio sharing. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_battery_level_untethered_left_lea_support">Connected (supports audio sharing), left <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g></string>
+    <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level for the right part of the untethered headset, supports audio sharing. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_battery_level_untethered_right_lea_support">Connected (supports audio sharing), right <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g></string>
+    <!-- Connected devices settings. Message when Bluetooth is connected and active for media only but no battery information, showing remote device status. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_active_media_only_no_battery_level">Active (media only)</string>
+    <!-- Connected devices settings. Message shown when bluetooth device is disconnected but is a known, previously connected device, supports audio sharing [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_saved_device_lea_support">Supports audio sharing</string>
+
+    <!-- Connected device settings. Message when the left-side hearing aid device is active for media only. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_hearing_aid_media_only_left_active">Active (media only), left only</string>
+    <!-- Connected device settings. Message when the right-side hearing aid device is active for media only. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_hearing_aid_media_only_right_active">Active (media only), right only</string>
+    <!-- Connected device settings. Message when the left-side and right-side hearing aids device are active for media only. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active">Active (media only), left and right</string>
+
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the A2DP profile. -->
     <string name="bluetooth_profile_a2dp">Media audio</string>
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the headset or handsfree profile. -->
@@ -1030,13 +1054,6 @@
     <!-- Settings item title to select whether to disable cache for transcoding. [CHAR LIMIT=85] -->
     <string name="transcode_disable_cache">Disable transcoding cache</string>
 
-    <!-- Developer settings title: widevine settings screen. [CHAR LIMIT=50] -->
-    <string name="widevine_settings_title">Widevine settings</string>
-     <!-- Developer settings title: select whether to enable Force L3 fallback. [CHAR LIMIT=50] -->
-    <string name="force_l3_fallback_title">Force L3 fallback</string>
-     <!-- Developer settings summary: select whether to enable Force L3 fallback.[CHAR LIMIT=NONE] -->
-    <string name="force_l3_fallback_summary">Select to force L3 fallback</string>
-
     <!-- Services settings screen, setting option name for the user to go to the screen to view running services -->
     <string name="runningservices_settings_title">Running services</string>
     <!-- Services settings screen, setting option summary for the user to go to the screen to view running services  -->
@@ -1547,10 +1564,6 @@
     <string name="guest_notification_non_ephemeral_non_first_login">Reset to delete session
         activity now, or you can save or delete activity on exit</string>
 
-    <!-- An option in a photo selection dialog to take a new photo [CHAR LIMIT=50] -->
-    <string name="user_image_take_photo">Take a photo</string>
-    <!-- An option in a photo selection dialog to choose a pre-existing image [CHAR LIMIT=50] -->
-    <string name="user_image_choose_photo">Choose an image</string>
     <!-- Accessibility message for the photo selector which is a button/popup with the current photo [CHAR LIMIT=50] -->
     <string name="user_image_photo_selector">Select photo</string>
 
@@ -1667,12 +1680,6 @@
     <!-- Content description of the no calling for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_no_calling">No calling.</string>
 
-
-    <!-- Title for a screen allowing the user to choose a profile picture. [CHAR LIMIT=NONE] -->
-    <string name="avatar_picker_title">Choose a profile picture</string>
-
-    <!-- Content description for a default user icon. [CHAR LIMIT=NONE] -->
-    <string name="default_user_icon_description">Default user icon</string>
 
     <!-- Title for the 'physical keyboard' settings screen. [CHAR LIMIT=35] -->
     <string name="physical_keyboard_title">Physical keyboard</string>

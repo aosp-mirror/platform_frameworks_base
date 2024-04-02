@@ -29,6 +29,7 @@ import android.util.SparseArray;
 
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import java.io.File;
 import java.io.IOException;
@@ -111,17 +112,20 @@ final class PackageMetrics {
 
         long versionCode = 0, apksSize = 0;
         if (success) {
-            // TODO: Remove temp try-catch to avoid IllegalStateException. The reason is because
-            //  the scan result is null for installExistingPackageAsUser(). Because it's installing
-            //  a package that's already existing, there's no scanning or parsing involved
-            try {
+            if (mInstallRequest.isInstallForUsers()) {
+                // In case of installExistingPackageAsUser, there's no scanned PackageSetting
+                // in the request but the pkg object should be readily available
+                AndroidPackage pkg = mInstallRequest.getPkg();
+                if (pkg != null) {
+                    versionCode = pkg.getLongVersionCode();
+                    apksSize = getApksSize(new File(pkg.getPath()));
+                }
+            } else {
                 final PackageSetting ps = mInstallRequest.getScannedPackageSetting();
                 if (ps != null) {
                     versionCode = ps.getVersionCode();
                     apksSize = getApksSize(ps.getPath());
                 }
-            } catch (IllegalStateException | NullPointerException e) {
-                // no-op
             }
         }
 

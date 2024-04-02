@@ -265,7 +265,7 @@
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"பிழை அறிக்கையைப் பெற பவர் மெனுவில் விருப்பத்தைக் காட்டு"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"செயலில் வைத்திரு"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"சார்ஜ் ஏறும்போது திரை எப்போதும் உறக்கநிலைக்குச் செல்லாது"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"புளூடூத் HCI ஸ்னுப் பதிவை இயக்கு"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"புளூடூத் HCI ஸ்னுப் பதிவை இயக்குதல்"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"புளூடூத் பேக்கெட்டுகளைக் கண்டறி. (இந்த அமைப்பை மாற்றிய பின்பு, புளூடூத்தை மாற்று)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM திறத்தல்"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"பூட்லோடரைத் திறக்க அனுமதி"</string>
@@ -437,9 +437,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"ஆப்ஸ் மாடர்ன் வடிவங்களை ஆதரிக்கும்படி அமை"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"குறிமாற்ற அறிவிப்புகளைக் காட்டு"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"குறிமாற்றத்திற்கான தற்காலிக சேமிப்பை முடக்குதல்"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine அமைப்புகள்"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"L3 ஃபால்பேக்கை இயக்குதல்"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"L3 ஃபால்பேக்கை இயக்குவதற்குத் தேர்ந்தெடுக்கலாம்"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"இயங்கும் சேவைகள்"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"தற்போது இயக்கத்தில் இருக்கும் சேவைகளைப் பார்த்து கட்டுப்படுத்து"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView செயல்படுத்தல்"</string>

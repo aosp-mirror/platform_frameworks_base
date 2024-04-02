@@ -82,7 +82,6 @@ import kotlinx.coroutines.launch
 /** Bind occludingAppDeviceEntryMessageViewModel to run whenever the keyguard view is attached. */
 @OptIn(ExperimentalCoroutinesApi::class)
 object KeyguardRootViewBinder {
-
     @SuppressLint("ClickableViewAccessibility")
     @JvmStatic
     fun bind(
@@ -102,14 +101,6 @@ object KeyguardRootViewBinder {
     ): DisposableHandle {
         var onLayoutChangeListener: OnLayoutChange? = null
         val childViews = mutableMapOf<Int, View>()
-        val statusViewId = R.id.keyguard_status_view
-        val burnInLayerId = R.id.burn_in_layer
-        val aodNotificationIconContainerId = R.id.aod_notification_icon_container
-        val largeClockId = R.id.lockscreen_clock_view_large
-        val indicationArea = R.id.keyguard_indication_area
-        val startButton = R.id.start_button
-        val endButton = R.id.end_button
-        val lockIcon = R.id.lock_icon_view
 
         if (KeyguardBottomAreaRefactor.isEnabled) {
             view.setOnTouchListener { _, event ->
@@ -214,7 +205,7 @@ object KeyguardRootViewBinder {
                                 val px = state.value ?: return@collect
                                 when {
                                     state.isToOrFrom(KeyguardState.AOD) -> {
-                                        childViews[largeClockId]?.translationX = px
+                                        // Large Clock is not translated in the x direction
                                         childViews[burnInLayerId]?.translationX = px
                                         childViews[aodNotificationIconContainerId]?.translationX =
                                             px
@@ -436,7 +427,7 @@ object KeyguardRootViewBinder {
             oldRight: Int,
             oldBottom: Int
         ) {
-            childViews[R.id.nssl_placeholder]?.let { notificationListPlaceholder ->
+            childViews[nsslPlaceholderId]?.let { notificationListPlaceholder ->
                 // After layout, ensure the notifications are positioned correctly
                 viewModel.onNotificationContainerBoundsChanged(
                     notificationListPlaceholder.top.toFloat(),
@@ -460,14 +451,14 @@ object KeyguardRootViewBinder {
                                 )
                             }
                         } else {
-                            childViews[R.id.keyguard_status_view]?.top ?: 0
+                            childViews[statusViewId]?.top ?: 0
                         }
                 )
             }
         }
 
         private fun isUserVisible(view: View): Boolean {
-            return view.id != R.id.burn_in_layer &&
+            return view.id != burnInLayerId &&
                 view.visibility == VISIBLE &&
                 view.width > 0 &&
                 view.height > 0
@@ -588,6 +579,17 @@ object KeyguardRootViewBinder {
 
     private fun ViewPropertyAnimator.animateInIconTranslation(): ViewPropertyAnimator =
         setInterpolator(Interpolators.DECELERATE_QUINT).translationY(0f)
+
+    private val statusViewId = R.id.keyguard_status_view
+    private val burnInLayerId = R.id.burn_in_layer
+    private val aodNotificationIconContainerId = R.id.aod_notification_icon_container
+    private val largeClockId = R.id.lockscreen_clock_view_large
+    private val smallClockId = R.id.lockscreen_clock_view
+    private val indicationArea = R.id.keyguard_indication_area
+    private val startButton = R.id.start_button
+    private val endButton = R.id.end_button
+    private val lockIcon = R.id.lock_icon_view
+    private val nsslPlaceholderId = R.id.nssl_placeholder
 
     private const val ID = "occluding_app_device_entry_unlock_msg"
     private const val AOD_ICONS_APPEAR_DURATION: Long = 200

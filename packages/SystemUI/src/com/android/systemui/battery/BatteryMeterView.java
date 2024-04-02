@@ -27,6 +27,7 @@ import android.animation.ObjectAnimator;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -52,6 +53,7 @@ import com.android.systemui.DualToneHandler;
 import com.android.systemui.battery.unified.BatteryColors;
 import com.android.systemui.battery.unified.BatteryDrawableState;
 import com.android.systemui.battery.unified.BatteryLayersDrawable;
+import com.android.systemui.battery.unified.ColorProfile;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.res.R;
@@ -252,7 +254,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
                     new BatteryDrawableState(
                             level,
                             mUnifiedBatteryState.getShowPercent(),
-                            level <= 20,
+                            getCurrentColorProfile(),
                             attr
                     );
 
@@ -261,6 +263,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
     }
 
     // Potentially reloads any attribution. Should not be called if the state hasn't changed
+    @SuppressLint("UseCompatLoadingForDrawables")
     private Drawable getBatteryAttribution(boolean isCharging) {
         if (!newStatusBarIcons()) return null;
 
@@ -281,6 +284,30 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         return attr;
     }
 
+    /** Calculate the appropriate color for the current state */
+    private ColorProfile getCurrentColorProfile() {
+        return getColorProfile(
+                mPowerSaveEnabled,
+                mIsBatteryDefender && mDisplayShieldEnabled,
+                mPluggedIn,
+                mLevel <= 20);
+    }
+
+    /** pure function to compute the correct color profile for our battery icon */
+    private ColorProfile getColorProfile(
+            boolean isPowerSave,
+            boolean isBatteryDefender,
+            boolean isCharging,
+            boolean isLowBattery
+    ) {
+        if (isCharging)  return ColorProfile.Active;
+        if (isPowerSave) return ColorProfile.Warning;
+        if (isBatteryDefender) return ColorProfile.None;
+        if (isLowBattery) return ColorProfile.Error;
+
+        return ColorProfile.None;
+    }
+
     void onPowerSaveChanged(boolean isPowerSave) {
         if (isPowerSave == mPowerSaveEnabled) {
             return;
@@ -293,7 +320,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
                     new BatteryDrawableState(
                             mUnifiedBatteryState.getLevel(),
                             mUnifiedBatteryState.getShowPercent(),
-                            mUnifiedBatteryState.getShowErrorState(),
+                            getCurrentColorProfile(),
                             getBatteryAttribution(isCharging())
                     )
             );
@@ -318,7 +345,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
                     new BatteryDrawableState(
                             mUnifiedBatteryState.getLevel(),
                             mUnifiedBatteryState.getShowPercent(),
-                            mUnifiedBatteryState.getShowErrorState(),
+                            getCurrentColorProfile(),
                             getBatteryAttribution(isCharging())
                     )
             );
@@ -334,7 +361,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
                         new BatteryDrawableState(
                                 mUnifiedBatteryState.getLevel(),
                                 mUnifiedBatteryState.getShowPercent(),
-                                mUnifiedBatteryState.getShowErrorState(),
+                                getCurrentColorProfile(),
                                 getBatteryAttribution(isCharging())
                         )
                 );
@@ -522,7 +549,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
                 new BatteryDrawableState(
                         mUnifiedBatteryState.getLevel(),
                         shouldShow,
-                        mUnifiedBatteryState.getShowErrorState(),
+                        mUnifiedBatteryState.getColor(),
                         mUnifiedBatteryState.getAttribution()
                 )
         );
@@ -755,6 +782,9 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         pw.println("    mPluggedIn: " + mPluggedIn);
         pw.println("    mLevel: " + mLevel);
         pw.println("    mMode: " + mShowPercentMode);
+        if (newStatusBarIcons()) {
+            pw.println("    mUnifiedBatteryState: " + mUnifiedBatteryState);
+        }
     }
 
     @VisibleForTesting

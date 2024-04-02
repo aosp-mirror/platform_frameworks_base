@@ -39,12 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Pasahitzik gabeko etorkizun baterantz goazen arren, pasahitzek sarbide-gakoen bizikide izaten jarraituko dute."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Aukeratu non gorde <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Hautatu informazioa gordetzeko pasahitz-kudeatzaile bat eta hasi saioa bizkorrago hurrengoan"</string>
-    <!-- no translation found for choose_create_option_passkey_title (8762295821604276511) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (4481366993598649224) -->
-    <skip />
-    <!-- no translation found for choose_create_option_sign_in_title (7092914088455358079) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioan saioa hasteko sarbide-gako bat sortu nahi duzu?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioan saioa hasteko pasahitza gorde nahi duzu?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioan saioa hasteko informazioa gorde nahi duzu?"</string>
     <string name="passkey" msgid="632353688396759522">"sarbide-gakoa"</string>
     <string name="password" msgid="6738570945182936667">"pasahitza"</string>
     <string name="passkeys" msgid="5733880786866559847">"sarbide-gakoak"</string>
@@ -73,8 +70,7 @@
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Baztertu"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako gorde duzun sarbide-gakoa erabili nahi duzu?"</string>
     <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako gordetako pasahitza erabili nahi duzu?"</string>
-    <!-- no translation found for get_dialog_title_single_tap_for (2057945648748859483) -->
-    <skip />
+    <string name="get_dialog_title_single_tap_for" msgid="2057945648748859483">"Erabili pantailaren blokeoa <xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioan <xliff:g id="USERNAME">%2$s</xliff:g> kontuarekin saioa hasteko"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"<xliff:g id="APP_NAME">%1$s</xliff:g> zerbitzuan saioa hasteko kredentzialak erabili nahi dituzu?"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioan saioa hasteko aukerak desblokeatu nahi dituzu?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Aukeratu <xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako gordetako sarbide-gakoa"</string>

@@ -25,6 +25,7 @@ import android.os.UserManager
 import android.provider.Settings
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.communal.data.repository.CommunalMediaRepository
 import com.android.systemui.communal.data.repository.CommunalPrefsRepository
@@ -80,6 +81,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 
 /** Encapsulates business-logic related to communal mode. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -142,13 +144,12 @@ constructor(
             )
 
     /**
-     * Target scene as requested by the underlying [SceneTransitionLayout] or through
-     * [onSceneChanged].
+     * Target scene as requested by the underlying [SceneTransitionLayout] or through [changeScene].
      *
      * If [isCommunalAvailable] is false, will return [CommunalScenes.Blank]
      */
     val desiredScene: Flow<SceneKey> =
-        communalRepository.desiredScene.combine(isCommunalAvailable) { scene, available ->
+        communalRepository.currentScene.combine(isCommunalAvailable) { scene, available ->
             if (available) scene else CommunalScenes.Blank
         }
 
@@ -239,10 +240,14 @@ constructor(
      * This will not be true while transitioning to the hub and will turn false immediately when a
      * swipe to exit the hub starts.
      */
-    val isIdleOnCommunal: Flow<Boolean> =
-        communalRepository.transitionState.map {
-            it is ObservableTransitionState.Idle && it.scene == CommunalScenes.Communal
-        }
+    val isIdleOnCommunal: StateFlow<Boolean> =
+        communalRepository.transitionState
+            .map { it is ObservableTransitionState.Idle && it.scene == CommunalScenes.Communal }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = false,
+            )
 
     /**
      * Flow that emits a boolean if any portion of the communal UI is visible at all.
@@ -254,9 +259,12 @@ constructor(
             !(it is ObservableTransitionState.Idle && it.scene == CommunalScenes.Blank)
         }
 
-    /** Callback received whenever the [SceneTransitionLayout] finishes a scene transition. */
-    fun onSceneChanged(newScene: SceneKey) {
-        communalRepository.setDesiredScene(newScene)
+    /**
+     * Asks for an asynchronous scene witch to [newScene], which will use the corresponding
+     * installed transition or the one specified by [transitionKey], if provided.
+     */
+    fun changeScene(newScene: SceneKey, transitionKey: TransitionKey? = null) {
+        communalRepository.changeScene(newScene, transitionKey)
     }
 
     fun setEditModeOpen(isOpen: Boolean) {
@@ -264,8 +272,11 @@ constructor(
     }
 
     /** Show the widget editor Activity. */
-    fun showWidgetEditor(preselectedKey: String? = null) {
-        editWidgetsActivityStarter.startActivity(preselectedKey)
+    fun showWidgetEditor(
+        preselectedKey: String? = null,
+        shouldOpenWidgetPickerOnStart: Boolean = false,
+    ) {
+        editWidgetsActivityStarter.startActivity(preselectedKey, shouldOpenWidgetPickerOnStart)
     }
 
     /**

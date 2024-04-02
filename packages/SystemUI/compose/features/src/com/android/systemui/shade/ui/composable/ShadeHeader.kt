@@ -114,6 +114,11 @@ fun SceneScope.CollapsedShadeHeader(
     statusBarIconController: StatusBarIconController,
     modifier: Modifier = Modifier,
 ) {
+    val isDisabled by viewModel.isDisabled.collectAsState()
+    if (isDisabled) {
+        return
+    }
+
     val formatProgress =
         animateSceneFloatAsState(0f, ShadeHeader.Keys.transitionProgress)
             .unsafeCompositionState(initialValue = 0f)
@@ -251,6 +256,11 @@ fun SceneScope.ExpandedShadeHeader(
     statusBarIconController: StatusBarIconController,
     modifier: Modifier = Modifier,
 ) {
+    val isDisabled by viewModel.isDisabled.collectAsState()
+    if (isDisabled) {
+        return
+    }
+
     val formatProgress =
         animateSceneFloatAsState(1f, ShadeHeader.Keys.transitionProgress)
             .unsafeCompositionState(initialValue = 1f)

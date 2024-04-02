@@ -30,7 +30,6 @@ import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample
-import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import com.android.wm.shell.animation.Interpolators
 import javax.inject.Inject
@@ -40,7 +39,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -104,21 +102,14 @@ constructor(
             scope.launch {
                 keyguardInteractor.primaryBouncerShowing
                     .sample(
-                        startedKeyguardTransitionStep,
                         powerInteractor.isAwake,
                         keyguardInteractor.isActiveDreamLockscreenHosted,
                         communalInteractor.isIdleOnCommunal
                     )
-                    .filter { (_, startedStep, _, _) ->
-                        startedStep.to == KeyguardState.PRIMARY_BOUNCER
-                    }
+                    .filterRelevantKeyguardState()
                     .collect {
-                        (
-                            isBouncerShowing,
-                            _,
-                            isAwake,
-                            isActiveDreamLockscreenHosted,
-                            isIdleOnCommunal) ->
+                        (isBouncerShowing, isAwake, isActiveDreamLockscreenHosted, isIdleOnCommunal)
+                        ->
                         if (
                             !maybeStartTransitionToOccludedOrInsecureCamera() &&
                                 !isBouncerShowing &&
@@ -140,69 +131,45 @@ constructor(
                 keyguardInteractor.primaryBouncerShowing
                     .sample(
                         powerInteractor.isAwake,
-                        startedKeyguardTransitionStep,
                         keyguardInteractor.isKeyguardOccluded,
                         keyguardInteractor.isDreaming,
                         keyguardInteractor.isActiveDreamLockscreenHosted,
                         communalInteractor.isIdleOnCommunal,
                     )
-                    .collect {
-                        (
-                            isBouncerShowing,
-                            isAwake,
-                            lastStartedTransitionStep,
-                            occluded,
-                            isDreaming,
-                            isActiveDreamLockscreenHosted,
-                            isIdleOnCommunal) ->
-                        if (
-                            !isBouncerShowing &&
-                                lastStartedTransitionStep.to == KeyguardState.PRIMARY_BOUNCER &&
-                                isAwake &&
-                                !isActiveDreamLockscreenHosted
-                        ) {
-                            val toState =
-                                if (occluded && !isDreaming) {
-                                    KeyguardState.OCCLUDED
-                                } else if (isIdleOnCommunal) {
-                                    KeyguardState.GLANCEABLE_HUB
-                                } else if (isDreaming) {
-                                    KeyguardState.DREAMING
-                                } else {
-                                    KeyguardState.LOCKSCREEN
-                                }
-                            startTransitionTo(toState)
-                        }
+                    .filterRelevantKeyguardStateAnd {
+                        (isBouncerShowing, isAwake, _, _, isActiveDreamLockscreenHosted, _) ->
+                        !isBouncerShowing && isAwake && !isActiveDreamLockscreenHosted
+                    }
+                    .collect { (_, _, occluded, isDreaming, _, isIdleOnCommunal) ->
+                        val toState =
+                            if (occluded && !isDreaming) {
+                                KeyguardState.OCCLUDED
+                            } else if (isIdleOnCommunal) {
+                                KeyguardState.GLANCEABLE_HUB
+                            } else if (isDreaming) {
+                                KeyguardState.DREAMING
+                            } else {
+                                KeyguardState.LOCKSCREEN
+                            }
+                        startTransitionTo(toState)
                     }
             }
         }
     }
 
     private fun listenForPrimaryBouncerToAsleep() {
-        scope.launch { listenForSleepTransition(from = KeyguardState.PRIMARY_BOUNCER) }
+        scope.launch { listenForSleepTransition() }
     }
 
     private fun listenForPrimaryBouncerToDreamingLockscreenHosted() {
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
-                .sample(
-                    combine(
-                        keyguardInteractor.isActiveDreamLockscreenHosted,
-                        startedKeyguardTransitionStep,
-                        ::Pair
-                    ),
-                    ::toTriple
-                )
-                .collect {
-                    (isBouncerShowing, isActiveDreamLockscreenHosted, lastStartedTransitionStep) ->
-                    if (
-                        !isBouncerShowing &&
-                            isActiveDreamLockscreenHosted &&
-                            lastStartedTransitionStep.to == KeyguardState.PRIMARY_BOUNCER
-                    ) {
-                        startTransitionTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
-                    }
+                .sample(keyguardInteractor.isActiveDreamLockscreenHosted, ::Pair)
+                .filterRelevantKeyguardStateAnd { (isBouncerShowing, isActiveDreamLockscreenHosted)
+                    ->
+                    !isBouncerShowing && isActiveDreamLockscreenHosted
                 }
+                .collect { startTransitionTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED) }
         }
     }
 
@@ -216,33 +183,28 @@ constructor(
 
         scope.launch {
             keyguardInteractor.isKeyguardGoingAway
-                .sample(startedKeyguardTransitionStep, ::Pair)
-                .collect { (isKeyguardGoingAway, lastStartedTransitionStep) ->
-                    if (
-                        isKeyguardGoingAway &&
-                            lastStartedTransitionStep.to == KeyguardState.PRIMARY_BOUNCER
-                    ) {
-                        val securityMode =
-                            keyguardSecurityModel.getSecurityMode(
-                                selectedUserInteractor.getSelectedUserId()
-                            )
-                        // IME for password requires a slightly faster animation
-                        val duration =
-                            if (securityMode == KeyguardSecurityModel.SecurityMode.Password) {
-                                TO_GONE_SHORT_DURATION
-                            } else {
-                                TO_GONE_DURATION
-                            }
-
-                        startTransitionTo(
-                            toState = KeyguardState.GONE,
-                            animator =
-                                getDefaultAnimatorForTransitionsToState(KeyguardState.GONE).apply {
-                                    this.duration = duration.inWholeMilliseconds
-                                },
-                            modeOnCanceled = TransitionModeOnCanceled.RESET,
+                .filterRelevantKeyguardStateAnd { isKeyguardGoingAway -> isKeyguardGoingAway }
+                .collect {
+                    val securityMode =
+                        keyguardSecurityModel.getSecurityMode(
+                            selectedUserInteractor.getSelectedUserId()
                         )
-                    }
+                    // IME for password requires a slightly faster animation
+                    val duration =
+                        if (securityMode == KeyguardSecurityModel.SecurityMode.Password) {
+                            TO_GONE_SHORT_DURATION
+                        } else {
+                            TO_GONE_DURATION
+                        }
+
+                    startTransitionTo(
+                        toState = KeyguardState.GONE,
+                        animator =
+                            getDefaultAnimatorForTransitionsToState(KeyguardState.GONE).apply {
+                                this.duration = duration.inWholeMilliseconds
+                            },
+                        modeOnCanceled = TransitionModeOnCanceled.RESET,
+                    )
                 }
         }
     }

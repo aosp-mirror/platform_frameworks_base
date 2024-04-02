@@ -25,6 +25,7 @@ import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_HOVER_ENTER;
 import static android.view.MotionEvent.ACTION_HOVER_EXIT;
+import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
 import static android.view.WindowInsets.Type.statusBars;
 
@@ -493,6 +494,12 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         (int) e.getRawX(), (int) e.getRawY());
                 final boolean isTransparentCaption =
                         TaskInfoKt.isTransparentCaptionBarAppearance(decoration.mTaskInfo);
+                // MotionEvent's coordinates are relative to view, we want location in window
+                // to offset position relative to caption as a whole.
+                int[] viewLocation = new int[2];
+                v.getLocationInWindow(viewLocation);
+                final boolean isResizeEvent = decoration.shouldResizeListenerHandleEvent(e,
+                        new Point(viewLocation[0], viewLocation[1]));
                 // The caption window may be a spy window when the caption background is
                 // transparent, which means events will fall through to the app window. Make
                 // sure to cancel these events if they do not happen in the intersection of the
@@ -500,11 +507,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 // the drag-move or other caption gestures should take priority outside those
                 // regions.
                 mShouldPilferCaptionEvents = !(downInCustomizableCaptionRegion
-                        && downInExclusionRegion && isTransparentCaption);
+                        && downInExclusionRegion && isTransparentCaption) && !isResizeEvent;
             }
 
             if (!mShouldPilferCaptionEvents) {
-                // The event will be handled by a window below.
+                // The event will be handled by a window below or pilfered by resize handler.
                 return false;
             }
             // Otherwise pilfer so that windows below receive cancellations for this gesture, and
@@ -604,7 +611,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     // prevent the button's ripple effect from showing.
                     return !touchingButton;
                 }
-                case MotionEvent.ACTION_MOVE: {
+                case ACTION_MOVE: {
                     // If a decor's resize drag zone is active, don't also try to reposition it.
                     if (decoration.isHandlingDragResize()) break;
                     decoration.closeMaximizeMenu();
@@ -788,7 +795,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         if (relevantDecor == null || relevantDecor.checkTouchEventInCaption(ev)) {
             return;
         }
-
+        relevantDecor.updateHoverAndPressStatus(ev);
         final int action = ev.getActionMasked();
         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
             if (!mTransitionDragActive) {
@@ -805,34 +812,42 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
      */
     private void handleCaptionThroughStatusBar(MotionEvent ev,
             DesktopModeWindowDecoration relevantDecor) {
+        if (relevantDecor == null) {
+            if (ev.getActionMasked() == ACTION_UP) {
+                mMoveToDesktopAnimator = null;
+                mTransitionDragActive = false;
+            }
+            return;
+        }
         switch (ev.getActionMasked()) {
+            case MotionEvent.ACTION_HOVER_EXIT:
+            case MotionEvent.ACTION_HOVER_MOVE:
+            case MotionEvent.ACTION_HOVER_ENTER: {
+                relevantDecor.updateHoverAndPressStatus(ev);
+                break;
+            }
             case MotionEvent.ACTION_DOWN: {
                 // Begin drag through status bar if applicable.
-                if (relevantDecor != null) {
-                    mDragToDesktopAnimationStartBounds.set(
-                            relevantDecor.mTaskInfo.configuration.windowConfiguration.getBounds());
-                    boolean dragFromStatusBarAllowed = false;
-                    if (DesktopModeStatus.isEnabled()) {
-                        // In proto2 any full screen or multi-window task can be dragged to
-                        // freeform.
-                        final int windowingMode = relevantDecor.mTaskInfo.getWindowingMode();
-                        dragFromStatusBarAllowed = windowingMode == WINDOWING_MODE_FULLSCREEN
-                                || windowingMode == WINDOWING_MODE_MULTI_WINDOW;
-                    }
+                relevantDecor.checkTouchEvent(ev);
+                relevantDecor.updateHoverAndPressStatus(ev);
+                mDragToDesktopAnimationStartBounds.set(
+                        relevantDecor.mTaskInfo.configuration.windowConfiguration.getBounds());
+                boolean dragFromStatusBarAllowed = false;
+                if (DesktopModeStatus.isEnabled()) {
+                    // In proto2 any full screen or multi-window task can be dragged to
+                    // freeform.
+                    final int windowingMode = relevantDecor.mTaskInfo.getWindowingMode();
+                    dragFromStatusBarAllowed = windowingMode == WINDOWING_MODE_FULLSCREEN
+                            || windowingMode == WINDOWING_MODE_MULTI_WINDOW;
+                }
 
-                    if (dragFromStatusBarAllowed
-                            && relevantDecor.checkTouchEventInFocusedCaptionHandle(ev)) {
-                        mTransitionDragActive = true;
-                    }
+                if (dragFromStatusBarAllowed
+                        && relevantDecor.checkTouchEventInFocusedCaptionHandle(ev)) {
+                    mTransitionDragActive = true;
                 }
                 break;
             }
             case MotionEvent.ACTION_UP: {
-                if (relevantDecor == null) {
-                    mMoveToDesktopAnimator = null;
-                    mTransitionDragActive = false;
-                    return;
-                }
                 if (mTransitionDragActive) {
                     final DesktopModeVisualIndicator.IndicatorType indicatorType =
                             mDesktopTasksController.updateVisualIndicator(relevantDecor.mTaskInfo,
@@ -847,6 +862,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mMoveToDesktopAnimator = null;
                         return;
                     } else if (mMoveToDesktopAnimator != null) {
+                        // Though this isn't a hover event, we need to update handle's hover state
+                        // as it likely will change.
+                        relevantDecor.updateHoverAndPressStatus(ev);
                         mDesktopTasksController.onDragPositioningEndThroughStatusBar(
                                 new PointF(ev.getRawX(), ev.getRawY()),
                                 relevantDecor.mTaskInfo,
@@ -859,11 +877,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mDesktopTasksController.releaseVisualIndicator();
                     }
                 }
-                relevantDecor.checkClickEvent(ev);
+                relevantDecor.checkTouchEvent(ev);
                 break;
             }
 
-            case MotionEvent.ACTION_MOVE: {
+            case ACTION_MOVE: {
                 if (relevantDecor == null) {
                     return;
                 }

@@ -36,7 +36,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.modules.expresslog.Counter;
 import com.android.systemui.Flags;
 import com.android.systemui.util.settings.SecureSettings;
@@ -418,18 +417,11 @@ class MenuView extends FrameLayout implements
         onPositionChanged();
     }
 
-    void incrementTexMetricForAllTargets(String metric) {
+    void incrementTexMetric(String metric) {
         if (!Flags.floatingMenuDragToEdit()) {
             return;
         }
-        for (AccessibilityTarget target : mTargetFeatures) {
-            incrementTexMetric(metric, target.getUid());
-        }
-    }
-
-    @VisibleForTesting
-    void incrementTexMetric(String metric, int uid) {
-        Counter.logIncrementWithUid(metric, uid);
+        Counter.logIncrement(metric);
     }
 
     private InstantInsetLayerDrawable getContainerViewInsetLayer() {

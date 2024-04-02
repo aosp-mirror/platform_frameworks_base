@@ -20,7 +20,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.window.BackEvent;
 
-import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.shared.annotations.ExternalThread;
 
 /**
  * Interface for external process to get access to the Back animation related methods.

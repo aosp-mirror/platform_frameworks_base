@@ -86,8 +86,7 @@
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"স্ক্ৰীনশ্বট লোৱাটো আপোনাৰ আইটি প্ৰশাসকে অৱৰোধ কৰিছে"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"সম্পাদনা কৰক"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"স্ক্ৰীনশ্বট সম্পাদনা কৰক"</string>
-    <!-- no translation found for screenshot_share_label (1653061117238861559) -->
-    <skip />
+    <string name="screenshot_share_label" msgid="1653061117238861559">"শ্বেয়াৰ কৰক"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"স্ক্ৰীনশ্বট শ্বেয়াৰ কৰক"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"অধিক কেপচাৰ কৰক"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"স্ক্ৰীনশ্বট অগ্ৰাহ্য কৰক"</string>
@@ -152,6 +151,7 @@
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"চেহেৰা স্কেন কৰি থকা হৈছে"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"পঠিয়াওক"</string>
     <string name="cancel" msgid="1089011503403416730">"বাতিল কৰক"</string>
+    <string name="biometric_dialog_logo" msgid="7681107853070774595">"এপৰ ল’গ’"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"নিশ্চিত কৰক"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"আকৌ চেষ্টা কৰক"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ বাতিল কৰিবলৈ টিপক"</string>
@@ -166,6 +166,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"মুখাৱয়ব চিনাক্ত কৰা হৈছে। অব্যাহত ৰাখিবলৈ আনলক কৰক চিহ্নটোত টিপক।"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰা হ’ল"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ বাতিল কৰক"</string>
+    <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"অধিক বিকল্প"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"পিন ব্যৱহাৰ কৰক"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"আৰ্হি ব্যৱহাৰ কৰক"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"পাছৱৰ্ড ব্যৱহাৰ কৰক"</string>
@@ -264,7 +265,7 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"অসুবিধা নিদিব"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ব্লুটুথ"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"কোনো যোৰা লগোৱা ডিভাইচ উপলব্ধ নহয়।"</string>
-    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"এটা ডিভাইচৰ সংযোগ কৰিবলৈ অথবা ডিভাইচটোৰ সৈতে সংযোগ বিচ্ছিন্ন কৰিবলৈ টিপক"</string>
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"ডিভাইচ সংযোগ কৰিবলৈ অথবা সংযোগ বিচ্ছিন্ন কৰিবলৈ টিপক"</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"নতুন ডিভাইচ পেয়াৰ কৰক"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"আটাইবোৰ চাওক"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ব্লুটুথ ব্যৱহাৰ কৰক"</string>
@@ -362,6 +363,8 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"মানক"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"মধ্যমীয়া"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"উচ্চ"</string>
+    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ডিভাইচৰ মাইক্ৰ\'ফ\'ন অৱৰোধৰ পৰা আঁতৰাবনে?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ডিভাইচৰ কেমেৰা অৱৰোধৰ পৰা আঁতৰাবনে?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ডিভাইচৰ কেমেৰা আৰু মাইক্ৰ\'ফ\'ন অৱৰোধৰ পৰা আঁতৰাবনে?"</string>
@@ -439,6 +442,10 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"আঁতৰাওক"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ৱিজেট যোগ দিয়ক"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"কৰা হ’ল"</string>
+    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
+    <skip />
+    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
+    <skip />
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"লক স্ক্ৰীনত যিকোনো ৱিজেটৰ অনুমতি দিবনে?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"ছেটিং খোলক"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"কাম সম্পৰ্কীয় এপ্ আনপজ কৰিবনে?"</string>
@@ -540,10 +547,8 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"এই ডিভাইচটো আপোনাৰ অভিভাৱকে পৰিচালনা কৰে। আপোনাৰ অভিভাৱকে আপুনি ব্যৱহাৰ কৰা এপ্‌, আপোনাৰ অৱস্থান আৰু আপুনি ডিভাইচত অতিবাহিত কৰা সময়ৰ দৰে তথ্য চাব আৰু পৰিচালনা কৰিব পাৰে।"</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"ভিপিএন"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgentএ আনলক কৰি ৰাখিছে"</string>
-    <!-- no translation found for kg_prompt_after_adaptive_auth_lock (2587481497846342760) -->
-    <skip />
-    <!-- no translation found for keyguard_indication_after_adaptive_auth_lock (2323400645470712787) -->
-    <skip />
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"ডিভাইচ লক কৰা হৈছে, বিশ্বাসযোগ্যতা প্ৰমাণীকৰণৰ অতি বেছিসংখ্যক প্ৰয়াস"</string>
+    <string name="keyguard_indication_after_adaptive_auth_lock" msgid="2323400645470712787">"ডিভাইচ লক কৰা হৈছে\nবিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰিব পৰা নগ’ল"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"ধ্বনিৰ ছেটিং"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"স্বয়ংক্ৰিয় কেপশ্বন মিডিয়া"</string>
@@ -765,10 +770,8 @@
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"বৰ্তমানৰ এপৰ জৰিয়তে বিভাজিত স্ক্ৰীনৰ সোঁফালৰ স্ক্ৰীনখনত সোমাওক"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"বৰ্তমানৰ এপৰ জৰিয়তে বিভাজিত স্ক্ৰীনৰ বাওঁফালৰ স্ক্ৰীনখনত সোমাওক"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"বিভাজিত স্ক্ৰীনৰ পৰা পূৰ্ণ স্ক্ৰীনলৈ সলনি কৰক"</string>
-    <!-- no translation found for system_multitasking_splitscreen_focus_rhs (3838578650313318508) -->
-    <skip />
-    <!-- no translation found for system_multitasking_splitscreen_focus_lhs (3164261844398662518) -->
-    <skip />
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"বিভাজিত স্ক্ৰীন ব্যৱহাৰ কৰাৰ সময়ত সোঁফালে অথবা তলত থকা এপলৈ সলনি কৰক"</string>
+    <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"বিভাজিত স্ক্ৰীন ব্যৱহাৰ কৰাৰ সময়ত বাওঁফালে অথবা ওপৰত থকা এপলৈ সলনি কৰক"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"বিভাজিত স্ক্ৰীনৰ ব্যৱহাৰ কৰাৰ সময়ত: কোনো এপ্ এখন স্ক্ৰীনৰ পৰা আনখনলৈ নিয়ক"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"ইনপুট"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"পৰৱৰ্তী ভাষাটোলৈ সলনি কৰক"</string>

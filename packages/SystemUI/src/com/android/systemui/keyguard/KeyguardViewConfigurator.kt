@@ -29,11 +29,14 @@ import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
+import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.SceneTransitionLayout
+import com.android.compose.animation.scene.transitions
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.keyguard.KeyguardStatusView
 import com.android.keyguard.KeyguardStatusViewController
+import com.android.keyguard.LegacyLockIconViewController
 import com.android.keyguard.LockIconView
-import com.android.keyguard.LockIconViewController
 import com.android.keyguard.dagger.KeyguardStatusViewComponent
 import com.android.systemui.CoreStartable
 import com.android.systemui.common.ui.ConfigurationState
@@ -92,7 +95,7 @@ constructor(
     private val configuration: ConfigurationState,
     private val context: Context,
     private val keyguardIndicationController: KeyguardIndicationController,
-    private val lockIconViewController: Lazy<LockIconViewController>,
+    private val lockIconViewController: Lazy<LegacyLockIconViewController>,
     private val shadeInteractor: ShadeInteractor,
     private val interactionJankMonitor: InteractionJankMonitor,
     private val deviceEntryHapticsInteractor: DeviceEntryHapticsInteractor,
@@ -109,6 +112,7 @@ constructor(
 
     private var rootViewHandle: DisposableHandle? = null
     private var indicationAreaHandle: DisposableHandle? = null
+    private val sceneKey = SceneKey("root-view-scene-key")
 
     var keyguardStatusViewController: KeyguardStatusViewController? = null
         get() {
@@ -219,12 +223,25 @@ constructor(
             blueprints.mapNotNull { it as? ComposableLockscreenSceneBlueprint }.toSet()
         return ComposeView(context).apply {
             setContent {
-                LockscreenContent(
-                        viewModel = viewModel,
-                        blueprints = sceneBlueprints,
-                        clockInteractor = clockInteractor
-                    )
-                    .Content(modifier = Modifier.fillMaxSize())
+                // STL is used solely to provide a SceneScope to enable us to invoke SceneScope
+                // composables.
+                SceneTransitionLayout(
+                    currentScene = sceneKey,
+                    onChangeScene = {},
+                    transitions = transitions {},
+                ) {
+                    scene(sceneKey) {
+                        with(
+                            LockscreenContent(
+                                viewModel = viewModel,
+                                blueprints = sceneBlueprints,
+                                clockInteractor = clockInteractor
+                            )
+                        ) {
+                            Content(modifier = Modifier.fillMaxSize())
+                        }
+                    }
+                }
             }
         }
     }

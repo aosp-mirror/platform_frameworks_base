@@ -18,6 +18,7 @@ package com.android.wm.shell.desktopmode
 
 import android.testing.AndroidTestingRunner
 import android.view.Display.DEFAULT_DISPLAY
+import android.view.Display.INVALID_DISPLAY
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestShellExecutor
@@ -235,6 +236,27 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
 
         assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(0)
         assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(4)
+    }
+
+    /**
+     * When a task vanishes, the displayId of the task is set to INVALID_DISPLAY.
+     * This tests that task is removed from the last parent display when it vanishes.
+     */
+    @Test
+    fun updateVisibleFreeformTasks_removeVisibleTasksRemovesTaskWithInvalidDisplay() {
+        val listener = TestVisibilityListener()
+        val executor = TestShellExecutor()
+        repo.addVisibleTasksListener(listener, executor)
+        repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 1, visible = true)
+        repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 2, visible = true)
+        executor.flushAll()
+
+        assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(2)
+        repo.updateVisibleFreeformTasks(INVALID_DISPLAY, taskId = 1, visible = false)
+        executor.flushAll()
+
+        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(3)
+        assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(1)
     }
 
     @Test

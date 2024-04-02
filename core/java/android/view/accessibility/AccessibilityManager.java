@@ -69,7 +69,6 @@ import android.view.accessibility.AccessibilityEvent.EventType;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.common.ShortcutConstants;
-import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IntPair;
 
@@ -161,22 +160,6 @@ public final class AccessibilityManager {
     public static final String ACTION_CHOOSE_ACCESSIBILITY_BUTTON =
             "com.android.internal.intent.action.CHOOSE_ACCESSIBILITY_BUTTON";
 
-    /**
-     * Used as an int value for accessibility chooser activity to represent the accessibility button
-     * shortcut type.
-     *
-     * @hide
-     */
-    public static final int ACCESSIBILITY_BUTTON = 0;
-
-    /**
-     * Used as an int value for accessibility chooser activity to represent hardware key shortcut,
-     * such as volume key button.
-     *
-     * @hide
-     */
-    public static final int ACCESSIBILITY_SHORTCUT_KEY = 1;
-
     /** @hide */
     public static final int FLASH_REASON_CALL = 1;
 
@@ -188,35 +171,6 @@ public final class AccessibilityManager {
 
     /** @hide */
     public static final int FLASH_REASON_PREVIEW = 4;
-
-    /**
-     * Annotations for the shortcut type.
-     * <p>Note: Keep in sync with {@link #SHORTCUT_TYPES}.</p>
-     * @hide
-     */
-    // TODO(b/323686675): reuse the one defined in ShortcutConstants
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(value = {
-            // LINT.IfChange(shortcut_type_intdef)
-            ACCESSIBILITY_BUTTON,
-            ACCESSIBILITY_SHORTCUT_KEY,
-            UserShortcutType.QUICK_SETTINGS,
-            // LINT.ThenChange(:shortcut_type_array)
-    })
-    public @interface ShortcutType {}
-
-    /**
-     * Used for iterating through {@link ShortcutType}.
-     * <p>Note: Keep in sync with {@link ShortcutType}.</p>
-     * @hide
-     */
-    public static final int[] SHORTCUT_TYPES = {
-            // LINT.IfChange(shortcut_type_array)
-            ACCESSIBILITY_BUTTON,
-            ACCESSIBILITY_SHORTCUT_KEY,
-            UserShortcutType.QUICK_SETTINGS,
-            // LINT.ThenChange(:shortcut_type_intdef)
-    };
 
     /**
      * Annotations for content flag of UI.
@@ -1648,7 +1602,7 @@ public final class AccessibilityManager {
      */
     @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
     public void enableShortcutsForTargets(boolean enable,
-            @UserShortcutType int shortcutTypes, @NonNull Set<String> targets,
+            @ShortcutConstants.UserShortcutType int shortcutTypes, @NonNull Set<String> targets,
             @UserIdInt int userId) {
         final IAccessibilityManager service;
         synchronized (mLock) {
@@ -1862,7 +1816,8 @@ public final class AccessibilityManager {
     @TestApi
     @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
     @NonNull
-    public List<String> getAccessibilityShortcutTargets(@ShortcutType int shortcutType) {
+    public List<String> getAccessibilityShortcutTargets(
+            @ShortcutConstants.UserShortcutType int shortcutType) {
         final IAccessibilityManager service;
         synchronized (mLock) {
             service = getServiceLocked();
