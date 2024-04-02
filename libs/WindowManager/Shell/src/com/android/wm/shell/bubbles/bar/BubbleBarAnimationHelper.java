@@ -166,13 +166,8 @@ public class BubbleBarAnimationHelper {
         bbev.setTaskViewAlpha(0f);
         bbev.setVisibility(VISIBLE);
 
-        // Set the pivot point for the scale, so the view animates out from the bubble bar.
-        Rect bubbleBarBounds = mPositioner.getBubbleBarBounds();
-        mExpandedViewContainerMatrix.setScale(
-                1f - EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT,
-                1f - EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT,
-                bubbleBarBounds.centerX(),
-                bubbleBarBounds.top);
+        setScaleFromBubbleBar(mExpandedViewContainerMatrix,
+                1f - EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT);
 
         bbev.setAnimationMatrix(mExpandedViewContainerMatrix);
 
@@ -214,8 +209,8 @@ public class BubbleBarAnimationHelper {
         }
         bbev.setScaleX(1f);
         bbev.setScaleY(1f);
-        mExpandedViewContainerMatrix.setScaleX(1f);
-        mExpandedViewContainerMatrix.setScaleY(1f);
+
+        setScaleFromBubbleBar(mExpandedViewContainerMatrix, 1f);
 
         PhysicsAnimator.getInstance(mExpandedViewContainerMatrix).cancel();
         PhysicsAnimator.getInstance(mExpandedViewContainerMatrix)
@@ -238,6 +233,16 @@ public class BubbleBarAnimationHelper {
                 })
                 .start();
         mExpandedViewAlphaAnimator.reverse();
+    }
+
+    private void setScaleFromBubbleBar(AnimatableScaleMatrix matrix, float scale) {
+        // Set the pivot point for the scale, so the view animates out from the bubble bar.
+        Rect bubbleBarBounds = mPositioner.getBubbleBarBounds();
+        matrix.setScale(
+                scale,
+                scale,
+                bubbleBarBounds.centerX(),
+                bubbleBarBounds.top);
     }
 
     /**
