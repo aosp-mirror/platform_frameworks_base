@@ -61,6 +61,7 @@ import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import com.android.internal.protolog.common.LogLevel;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.policy.WindowManagerPolicy;
 
@@ -586,7 +587,7 @@ class WindowStateAnimator {
                             mWin.mAttrs, attr, TRANSIT_OLD_NONE);
                 }
             }
-            if (ProtoLog.isEnabled(WM_DEBUG_ANIM)) {
+            if (ProtoLog.isEnabled(WM_DEBUG_ANIM, LogLevel.VERBOSE)) {
                 ProtoLog.v(WM_DEBUG_ANIM, "applyAnimation: win=%s"
                         + " anim=%d attr=0x%x a=%s transit=%d type=%d isEntrance=%b Callers %s",
                         this, anim, attr, a, transit, mAttrType, isEntrance, Debug.getCallers(20));
