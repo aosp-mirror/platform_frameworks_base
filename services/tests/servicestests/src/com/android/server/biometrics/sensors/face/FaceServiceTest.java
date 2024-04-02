@@ -161,7 +161,7 @@ public class FaceServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
+    @RequiresFlagsEnabled({Flags.FLAG_DE_HIDL, Flags.FLAG_FACE_VHAL_FEATURE})
     public void registerAuthenticatorsLegacy_virtualOnly() throws Exception {
         initService();
         Settings.Secure.putInt(mSettingsRule.mockContentResolver(mContext),
