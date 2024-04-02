@@ -207,12 +207,12 @@ public class RankingHelperTest extends UiServiceTestCase {
                 .build();
         mRecentlyIntrusive = new NotificationRecord(mContext, new StatusBarNotification(
                 mPkg, mPkg, 1, null, 0, 0, n, mUser,
-                null, System.currentTimeMillis()+100), getDefaultChannel());
+                null, 100), getDefaultChannel());
         mRecentlyIntrusive.setRecentlyIntrusive(true);
 
         mNewest = new NotificationRecord(mContext, new StatusBarNotification(
                 mPkg, mPkg, 2, null, 0, 0, n, mUser,
-                null, System.currentTimeMillis()+10000), getDefaultChannel());
+                null, 10000), getDefaultChannel());
     }
 
     private NotificationChannel getLowChannel() {
