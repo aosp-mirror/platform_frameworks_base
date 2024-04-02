@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.EventLog
 import com.android.systemui.util.settings.GlobalSettings
+import com.android.systemui.util.settings.SystemSettings
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 
@@ -61,7 +62,8 @@ constructor(
     private val systemClock: SystemClock,
     private val uiEventLogger: UiEventLogger,
     private val userTracker: UserTracker,
-    private val avalancheProvider: AvalancheProvider
+    private val avalancheProvider: AvalancheProvider,
+    private val systemSettings: SystemSettings
 ) : VisualInterruptionDecisionProvider {
 
     init {
@@ -170,7 +172,7 @@ constructor(
         addFilter(AlertKeyguardVisibilitySuppressor(keyguardNotificationVisibilityProvider))
 
         if (NotificationAvalancheSuppression.isEnabled) {
-            addFilter(AvalancheSuppressor(avalancheProvider, systemClock))
+            addFilter(AvalancheSuppressor(avalancheProvider, systemClock, systemSettings))
             avalancheProvider.register()
         }
         started = true

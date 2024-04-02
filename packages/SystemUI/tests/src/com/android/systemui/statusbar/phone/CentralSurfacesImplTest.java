@@ -181,7 +181,9 @@ import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.MessageRouterImpl;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.FakeGlobalSettings;
+import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.GlobalSettings;
+import com.android.systemui.util.settings.SystemSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.volume.VolumeComponent;
@@ -325,6 +327,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeGlobalSettings mFakeGlobalSettings = new FakeGlobalSettings();
+    private final SystemSettings mSystemSettings = new FakeSettings();
     private final FakeEventLog mFakeEventLog = new FakeEventLog();
     private final FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
     private final FakeExecutor mUiBgExecutor = new FakeExecutor(mFakeSystemClock);
@@ -375,7 +378,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                         mFakeSystemClock,
                         mock(UiEventLogger.class),
                         mUserTracker,
-                        mAvalancheProvider);
+                        mAvalancheProvider,
+                        mSystemSettings);
         mVisualInterruptionDecisionProvider.start();
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
