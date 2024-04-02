@@ -133,8 +133,8 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.R;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
+import com.android.internal.util.test.LocalServiceKeeperRule;
 import com.android.modules.utils.testing.ExtendedMockitoRule;
-import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.display.DisplayManagerService.DeviceStateListener;
@@ -217,6 +217,9 @@ public class DisplayManagerServiceTest {
             new SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT);
     @Rule
     public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
+
+    @Rule(order = 2)
+    public LocalServiceKeeperRule mLocalServiceKeeperRule = new LocalServiceKeeperRule();
 
     private Context mContext;
 
@@ -354,6 +357,7 @@ public class DisplayManagerServiceTest {
     @Mock SensorManager mSensorManager;
     @Mock DisplayDeviceConfig mMockDisplayDeviceConfig;
     @Mock PackageManagerInternal mMockPackageManagerInternal;
+    @Mock DisplayManagerInternal mMockDisplayManagerInternal;
     @Mock DisplayAdapter mMockDisplayAdapter;
 
     @Captor ArgumentCaptor<ContentRecordingSession> mContentRecordingSessionCaptor;
@@ -371,20 +375,20 @@ public class DisplayManagerServiceTest {
         when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(false);
         mSetFlagsRule.disableFlags(Flags.FLAG_INTERACTIVE_SCREEN_MIRROR);
 
-        LocalServices.removeServiceForTest(InputManagerInternal.class);
-        LocalServices.addService(InputManagerInternal.class, mMockInputManagerInternal);
-        LocalServices.removeServiceForTest(WindowManagerInternal.class);
-        LocalServices.addService(WindowManagerInternal.class, mMockWindowManagerInternal);
-        LocalServices.removeServiceForTest(LightsManager.class);
-        LocalServices.addService(LightsManager.class, mMockLightsManager);
-        LocalServices.removeServiceForTest(SensorManagerInternal.class);
-        LocalServices.addService(SensorManagerInternal.class, mMockSensorManagerInternal);
-        LocalServices.removeServiceForTest(VirtualDeviceManagerInternal.class);
-        LocalServices.addService(
+        mLocalServiceKeeperRule.overrideLocalService(
+                InputManagerInternal.class, mMockInputManagerInternal);
+        mLocalServiceKeeperRule.overrideLocalService(
+                WindowManagerInternal.class, mMockWindowManagerInternal);
+        mLocalServiceKeeperRule.overrideLocalService(
+                LightsManager.class, mMockLightsManager);
+        mLocalServiceKeeperRule.overrideLocalService(
+                SensorManagerInternal.class, mMockSensorManagerInternal);
+        mLocalServiceKeeperRule.overrideLocalService(
                 VirtualDeviceManagerInternal.class, mMockVirtualDeviceManagerInternal);
-        LocalServices.removeServiceForTest(PackageManagerInternal.class);
-        LocalServices.addService(PackageManagerInternal.class, mMockPackageManagerInternal);
-        // TODO: b/287945043
+        mLocalServiceKeeperRule.overrideLocalService(
+                PackageManagerInternal.class, mMockPackageManagerInternal);
+        mLocalServiceKeeperRule.overrideLocalService(
+                DisplayManagerInternal.class, mMockDisplayManagerInternal);
         Display display = mock(Display.class);
         when(display.getDisplayAdjustments()).thenReturn(new DisplayAdjustments());
         when(display.getBrightnessInfo()).thenReturn(mock(BrightnessInfo.class));
@@ -3000,6 +3004,7 @@ public class DisplayManagerServiceTest {
                 new DisplayManagerService(mContext, mBasicInjector);
 
         displayManager.systemReady(false /* safeMode */);
+        displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
         ArgumentMatcher<IntentFilter> matchesFilter =
                 (filter) -> Intent.ACTION_SETTING_RESTORED.equals(filter.getAction(0));
         verify(mContext, times(0)).registerReceiver(any(BroadcastReceiver.class),

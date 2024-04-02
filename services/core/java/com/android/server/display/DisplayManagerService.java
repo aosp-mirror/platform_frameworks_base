@@ -2763,6 +2763,7 @@ public final class DisplayManagerService extends SystemService {
                             + requestedRefreshRate + " on Display: " + displayId);
                 }
             }
+
             mDisplayModeDirector.getAppRequestObserver().setAppRequest(
                     displayId, requestedModeId, requestedMinRefreshRate, requestedMaxRefreshRate);
 
@@ -4935,6 +4936,18 @@ public final class DisplayManagerService extends SystemService {
                 config = device.getDisplayDeviceConfig();
             }
             return config.getRefreshRateLimitations();
+        }
+
+        @Override
+        public boolean isVrrSupportEnabled(int displayId) {
+            DisplayDevice device;
+            synchronized (mSyncRoot) {
+                device = getDeviceForDisplayLocked(displayId);
+            }
+            if (device == null) {
+                return false;
+            }
+            return device.getDisplayDeviceConfig().isVrrSupportEnabled();
         }
 
         @Override

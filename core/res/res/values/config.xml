@@ -4334,9 +4334,6 @@
     -->
     <bool name="config_wallpaperTopApp">false</bool>
 
-    <!-- True if the device supports dVRR  -->
-    <bool name="config_supportsDvrr">false</bool>
-
     <!-- True if the device supports at least one form of multi-window.
          E.g. freeform, split-screen, picture-in-picture. -->
     <bool name="config_supportsMultiWindow">true</bool>

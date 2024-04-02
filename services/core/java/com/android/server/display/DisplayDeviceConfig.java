@@ -587,7 +587,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *              </point>
  *          </luxThresholds>
  *     </idleScreenRefreshRateTimeout>
- *
+ *     <supportsVrr>true</supportsVrr>
  *
  *    </displayConfiguration>
  *  }
@@ -902,6 +902,8 @@ public class DisplayDeviceConfig {
      * Maximum screen brightness setting when screen brightness capped in Wear Bedtime mode.
      */
     private float mBrightnessCapForWearBedtimeMode;
+
+    private boolean mVrrSupportEnabled;
 
     private final DisplayManagerFlags mFlags;
 
@@ -1941,6 +1943,13 @@ public class DisplayDeviceConfig {
         return mBrightnessCapForWearBedtimeMode;
     }
 
+    /**
+     * @return true if display supports dvrr
+     */
+    public boolean isVrrSupportEnabled() {
+        return mVrrSupportEnabled;
+    }
+
     @Override
     public String toString() {
         return "DisplayDeviceConfig{"
@@ -2076,6 +2085,8 @@ public class DisplayDeviceConfig {
                 + "\n"
                 + "mEvenDimmerBrightnessData:" + (mEvenDimmerBrightnessData != null
                 ? mEvenDimmerBrightnessData.toString() : "null")
+                + "\n"
+                + "mVrrSupported= " + mVrrSupportEnabled + "\n"
                 + "}";
     }
 
@@ -2150,6 +2161,7 @@ public class DisplayDeviceConfig {
                 mHdrBrightnessData = HdrBrightnessData.loadConfig(config);
                 loadBrightnessCapForWearBedtimeMode(config);
                 loadIdleScreenRefreshRateTimeoutConfigs(config);
+                mVrrSupportEnabled = config.getSupportsVrr();
             } else {
                 Slog.w(TAG, "DisplayDeviceConfig file is null");
             }
