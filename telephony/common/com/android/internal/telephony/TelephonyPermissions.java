@@ -793,7 +793,7 @@ public final class TelephonyPermissions {
         if (isGranted) return;
 
         if (allowCarrierPrivilegeOnAnySub) {
-            if (checkCarrierPrivilegeForAnySubId(context, Binder.getCallingUid())) return;
+            if (checkCarrierPrivilegeForAnySubId(context, uid)) return;
         } else {
             if (checkCarrierPrivilegeForSubId(context, subId)) return;
         }
