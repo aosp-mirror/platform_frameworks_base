@@ -57,10 +57,7 @@ class BouncerToGoneFlowsTest : SysuiTestCase() {
 
     private val kosmos =
         testKosmos().apply {
-            fakeFeatureFlagsClassic.apply {
-                set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false)
-                set(Flags.FULL_SCREEN_USER_SWITCHER, false)
-            }
+            fakeFeatureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
         }
     private val testScope = kosmos.testScope
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
@@ -72,6 +69,7 @@ class BouncerToGoneFlowsTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_REFACTOR_KEYGUARD_DISMISS_INTENT)
         whenever(primaryBouncerInteractor.willRunDismissFromKeyguard()).thenReturn(false)
         sysuiStatusBarStateController.setLeaveOpenOnKeyguardHide(false)
     }

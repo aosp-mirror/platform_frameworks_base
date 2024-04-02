@@ -73,10 +73,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     val kosmos =
         testKosmos().apply {
-            fakeFeatureFlagsClassic.apply {
-                set(Flags.FULL_SCREEN_USER_SWITCHER, false)
-                set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false)
-            }
+            fakeFeatureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
         }
 
     init {
@@ -97,6 +94,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_REFACTOR_KEYGUARD_DISMISS_INTENT)
         overrideResource(R.bool.config_use_split_notification_shade, false)
         movementFlow = MutableStateFlow(BurnInModel())
         whenever(aodBurnInViewModel.movement(any())).thenReturn(movementFlow)

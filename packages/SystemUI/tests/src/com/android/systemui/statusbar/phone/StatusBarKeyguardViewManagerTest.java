@@ -76,8 +76,6 @@ import com.android.systemui.bouncer.ui.BouncerView;
 import com.android.systemui.bouncer.ui.BouncerViewDelegate;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dreams.DreamOverlayStateController;
-import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardSurfaceBehindInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
@@ -145,7 +143,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock private SysUIUnfoldComponent mSysUiUnfoldComponent;
     @Mock private DreamOverlayStateController mDreamOverlayStateController;
     @Mock private LatencyTracker mLatencyTracker;
-    private FakeFeatureFlags mFeatureFlags;
     @Mock private KeyguardSecurityModel mKeyguardSecurityModel;
     @Mock private PrimaryBouncerCallbackInteractor mPrimaryBouncerCallbackInteractor;
     @Mock private PrimaryBouncerInteractor mPrimaryBouncerInteractor;
@@ -188,11 +185,10 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 .thenReturn(mKeyguardMessageAreaController);
         when(mBouncerView.getDelegate()).thenReturn(mBouncerViewDelegate);
         when(mBouncerViewDelegate.getBackCallback()).thenReturn(mBouncerViewDelegateBackCallback);
-        mFeatureFlags = new FakeFeatureFlags();
-        mFeatureFlags.set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false);
         mSetFlagsRule.disableFlags(
                 com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR,
-                com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR
+                com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR,
+                com.android.systemui.Flags.FLAG_REFACTOR_KEYGUARD_DISMISS_INTENT
         );
 
         when(mNotificationShadeWindowController.getWindowRootView())
@@ -218,7 +214,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         () -> mShadeController,
                         mLatencyTracker,
                         mKeyguardSecurityModel,
-                        mFeatureFlags,
                         mPrimaryBouncerCallbackInteractor,
                         mPrimaryBouncerInteractor,
                         mBouncerView,
@@ -728,7 +723,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         () -> mShadeController,
                         mLatencyTracker,
                         mKeyguardSecurityModel,
-                        mFeatureFlags,
                         mPrimaryBouncerCallbackInteractor,
                         mPrimaryBouncerInteractor,
                         mBouncerView,

@@ -36,6 +36,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -45,15 +46,18 @@ import org.junit.runner.RunWith
 class AlternateBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
     val kosmos =
         testKosmos().apply {
-            fakeFeatureFlagsClassic.apply {
-                set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false)
-                set(Flags.FULL_SCREEN_USER_SWITCHER, false)
-            }
+            fakeFeatureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
         }
+
     private val testScope = kosmos.testScope
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
     private val sysuiStatusBarStateController = kosmos.sysuiStatusBarStateController
     private val underTest by lazy { kosmos.alternateBouncerToGoneTransitionViewModel }
+
+    @Before
+    fun setup() {
+        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_REFACTOR_KEYGUARD_DISMISS_INTENT)
+    }
 
     @Test
     fun deviceEntryParentViewDisappear() =
