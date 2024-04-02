@@ -37,6 +37,7 @@ import static android.net.NetworkTemplate.OEM_MANAGED_ALL;
 import static android.net.NetworkTemplate.OEM_MANAGED_PAID;
 import static android.net.NetworkTemplate.OEM_MANAGED_PRIVATE;
 import static android.os.Debug.getIonHeapsSizeKb;
+import static android.os.Process.INVALID_UID;
 import static android.os.Process.LAST_SHARED_APPLICATION_GID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.getUidForPid;
@@ -3537,17 +3538,23 @@ public class StatsPullAtomService extends SystemService {
                     String roleName = roleEntry.getKey();
                     Set<String> packageNames = roleEntry.getValue();
 
-                    for (String packageName : packageNames) {
-                        PackageInfo pkg;
-                        try {
-                            pkg = pm.getPackageInfoAsUser(packageName, 0, userId);
-                        } catch (PackageManager.NameNotFoundException e) {
-                            Slog.w(TAG, "Role holder " + packageName + " not found");
-                            return StatsManager.PULL_SKIP;
-                        }
+                    if (!packageNames.isEmpty()) {
+                        for (String packageName : packageNames) {
+                            PackageInfo pkg;
+                            try {
+                                pkg = pm.getPackageInfoAsUser(packageName, 0, userId);
+                            } catch (PackageManager.NameNotFoundException e) {
+                                Slog.w(TAG, "Role holder " + packageName + " not found");
+                                return StatsManager.PULL_SKIP;
+                            }
 
+                            pulledData.add(FrameworkStatsLog.buildStatsEvent(
+                                    atomTag, pkg.applicationInfo.uid, packageName, roleName));
+                        }
+                    } else {
+                        // Ensure that roles set to None are logged with an empty state.
                         pulledData.add(FrameworkStatsLog.buildStatsEvent(
-                                atomTag, pkg.applicationInfo.uid, packageName, roleName));
+                                atomTag, INVALID_UID, "", roleName));
                     }
                 }
             }
