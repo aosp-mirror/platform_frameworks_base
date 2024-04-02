@@ -518,7 +518,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Usar idiomas do sistema"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Non se puido abrir a configuración de <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Este método de introdución de texto pode recompilar todo o que escribas, incluídos os datos persoais como os contrasinais e os números de tarxetas de crédito. Provén da aplicación <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Queres usar este método de introdución de texto?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Nota: Tras un reinicio, non se pode iniciar esta aplicación ata que desbloquees o teléfono"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Nota: Tras un reinicio, non se poderá iniciar esta aplicación ata que se desbloquee o teléfono"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"Estado de rexistro de IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Rexistrado"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Non rexistrado"</string>

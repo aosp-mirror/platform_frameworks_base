@@ -389,7 +389,7 @@
     <string name="show_non_rect_clip" msgid="7499758654867881817">"စတုဂံပုံမကျသော ဖြတ်ပိုင်း လုပ်ဆောင်ချက်များကို အမှားဖယ်ရှားရန်"</string>
     <string name="track_frame_time" msgid="522674651937771106">"HWUI ပရိုဖိုင် ဆောင်ရွက်ခြင်း"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU အမှားရှာအလွှာဖွင့်ရန်"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"အမှားရှာအက်ပ်များအတွက် GPU အမှားရှာအလွှာများ ထည့်သွင်းခွင့်ပြုပါ"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"အမှားရှာအက်ပ်များအတွက် GPU အမှားရှာအလွှာများ ဖွင့်ခွင့်ပြုသည်"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"အကျယ်ရှင်းလင်းချက်ပံ့ပိုးသူ မှတ်တမ်းဖွင့်ရန်"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"ချွတ်ယွင်းမှု အစီရင်ခံချက်တွင် စက်ပစ္စည်းအလိုက် ထုတ်လုပ်သူမှတ်တမ်းများကို ထည့်သွင်းခြင်းဖြင့် ကိုယ်ရေးကိုယ်တာ အချက်အလက်များ ပါဝင်ခြင်း၊ ဘက်ထရီပိုသုံးခြင်း နှင့်/သို့မဟုတ် သိုလှောင်ခန်းပိုသုံးခြင်းတို့ ဖြစ်စေနိုင်သည်။"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"လှုပ်ရှားသက်ဝင်ပုံစကေး"</string>
