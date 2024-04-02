@@ -8855,6 +8855,7 @@ public class AudioService extends IAudioService.Stub
             boolean changed;
             int oldIndex;
             final boolean isCurrentDevice;
+            final StringBuilder aliasStreamIndexes = new StringBuilder();
             synchronized (mSettingsLock) {
                 synchronized (VolumeStreamState.class) {
                     oldIndex = getIndex(device);
@@ -8881,12 +8882,16 @@ public class AudioService extends IAudioService.Stub
                                 (changed || !aliasStreamState.hasIndexForDevice(device))) {
                             final int scaledIndex =
                                     rescaleIndex(aliasIndex, mStreamType, streamType);
-                            aliasStreamState.setIndex(scaledIndex, device, caller,
-                                    hasModifyAudioSettings);
+                            boolean changedAlias = aliasStreamState.setIndex(scaledIndex, device,
+                                    caller, hasModifyAudioSettings);
                             if (isCurrentDevice) {
-                                aliasStreamState.setIndex(scaledIndex,
+                                changedAlias |= aliasStreamState.setIndex(scaledIndex,
                                         getDeviceForStream(streamType), caller,
                                         hasModifyAudioSettings);
+                            }
+                            if (changedAlias) {
+                                aliasStreamIndexes.append(AudioSystem.streamToString(streamType))
+                                        .append(":").append((scaledIndex + 5) / 10).append(" ");
                             }
                         }
                     }
@@ -8927,8 +8932,15 @@ public class AudioService extends IAudioService.Stub
                                 oldIndex);
                         mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE_ALIAS,
                                 mStreamVolumeAlias[mStreamType]);
-                        AudioService.sVolumeLogger.enqueue(new VolChangedBroadcastEvent(
-                                mStreamType, mStreamVolumeAlias[mStreamType], index, oldIndex));
+                        if (mStreamType == mStreamVolumeAlias[mStreamType]) {
+                            String aliasStreamIndexesString = "";
+                            if (!aliasStreamIndexes.isEmpty()) {
+                                aliasStreamIndexesString =
+                                        " aliased streams: " + aliasStreamIndexes;
+                            }
+                            AudioService.sVolumeLogger.enqueue(new VolChangedBroadcastEvent(
+                                    mStreamType, aliasStreamIndexesString, index, oldIndex));
+                        }
                         sendBroadcastToAll(mVolumeChanged, mVolumeChangedOptions);
                     }
                 }
