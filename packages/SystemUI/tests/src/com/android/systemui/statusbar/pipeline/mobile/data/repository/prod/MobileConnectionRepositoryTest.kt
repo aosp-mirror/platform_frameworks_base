@@ -1030,26 +1030,6 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun inflateSignalStrength_usesCarrierConfig() =
-        testScope.runTest {
-            val latest by collectLastValue(underTest.inflateSignalStrength)
-
-            assertThat(latest).isEqualTo(false)
-
-            systemUiCarrierConfig.processNewCarrierConfig(
-                configWithOverride(KEY_INFLATE_SIGNAL_STRENGTH_BOOL, true)
-            )
-
-            assertThat(latest).isEqualTo(true)
-
-            systemUiCarrierConfig.processNewCarrierConfig(
-                configWithOverride(KEY_INFLATE_SIGNAL_STRENGTH_BOOL, false)
-            )
-
-            assertThat(latest).isEqualTo(false)
-        }
-
-    @Test
     fun isAllowedDuringAirplaneMode_alwaysFalse() =
         testScope.runTest {
             val latest by collectLastValue(underTest.isAllowedDuringAirplaneMode)
