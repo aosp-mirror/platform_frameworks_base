@@ -65,6 +65,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import perfetto.protos.Protolog;
 import perfetto.protos.ProtologCommon;
@@ -95,6 +96,7 @@ public class PerfettoProtoLogImplTest {
     private PerfettoProtoLogImpl mProtoLog;
     private Protolog.ProtoLogViewerConfig.Builder mViewerConfigBuilder;
     private File mFile;
+    private Runnable mCacheUpdater;
 
     private ProtoLogViewerConfigReader mReader;
 
@@ -152,9 +154,11 @@ public class PerfettoProtoLogImplTest {
         Mockito.when(viewerConfigInputStreamProvider.getInputStream())
                 .thenAnswer(it -> new ProtoInputStream(mViewerConfigBuilder.build().toByteArray()));
 
+        mCacheUpdater = () -> {};
         mReader = Mockito.spy(new ProtoLogViewerConfigReader(viewerConfigInputStreamProvider));
-        mProtoLog =
-                new PerfettoProtoLogImpl(viewerConfigInputStreamProvider, mReader, new TreeMap<>());
+        mProtoLog = new PerfettoProtoLogImpl(
+                viewerConfigInputStreamProvider, mReader, new TreeMap<>(),
+                () -> mCacheUpdater.run());
     }
 
     @After
@@ -500,7 +504,8 @@ public class PerfettoProtoLogImplTest {
         PerfettoTraceMonitor traceMonitor =
                 PerfettoTraceMonitor.newBuilder().enableProtoLog(true,
                         List.of(new PerfettoTraceMonitor.Builder.ProtoLogGroupOverride(
-                                TestProtoLogGroup.TEST_GROUP.toString(), LogLevel.DEBUG, true)))
+                                TestProtoLogGroup.TEST_GROUP.toString(), LogLevel.DEBUG,
+                                true)))
                         .build();
         try {
             traceMonitor.start();
@@ -524,6 +529,142 @@ public class PerfettoProtoLogImplTest {
                 .doesNotContain(ProtoLogImpl.class.getSimpleName() + ".java");
         Truth.assertThat(stacktrace).contains(PerfettoProtoLogImplTest.class.getSimpleName());
         Truth.assertThat(stacktrace).contains("stackTraceTrimmed");
+    }
+
+    @Test
+    public void cacheIsUpdatedWhenTracesStartAndStop() {
+        final AtomicInteger cacheUpdateCallCount = new AtomicInteger(0);
+        mCacheUpdater = cacheUpdateCallCount::incrementAndGet;
+
+        PerfettoTraceMonitor traceMonitor1 =
+                PerfettoTraceMonitor.newBuilder().enableProtoLog(true,
+                                List.of(new PerfettoTraceMonitor.Builder.ProtoLogGroupOverride(
+                                        TestProtoLogGroup.TEST_GROUP.toString(), LogLevel.WARN,
+                                        false)))
+                        .build();
+
+        PerfettoTraceMonitor traceMonitor2 =
+                PerfettoTraceMonitor.newBuilder().enableProtoLog(true,
+                                List.of(new PerfettoTraceMonitor.Builder.ProtoLogGroupOverride(
+                                        TestProtoLogGroup.TEST_GROUP.toString(), LogLevel.DEBUG,
+                                        false)))
+                        .build();
+
+        Truth.assertThat(cacheUpdateCallCount.get()).isEqualTo(0);
+
+        try {
+            traceMonitor1.start();
+
+            Truth.assertThat(cacheUpdateCallCount.get()).isEqualTo(1);
+
+            try {
+                traceMonitor2.start();
+
+                Truth.assertThat(cacheUpdateCallCount.get()).isEqualTo(2);
+            } finally {
+                traceMonitor2.stop(mWriter);
+            }
+
+            Truth.assertThat(cacheUpdateCallCount.get()).isEqualTo(3);
+
+        } finally {
+            traceMonitor1.stop(mWriter);
+        }
+
+        Truth.assertThat(cacheUpdateCallCount.get()).isEqualTo(4);
+    }
+
+    @Test
+    public void isEnabledUpdatesBasedOnRunningTraces() {
+        Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.DEBUG))
+                .isFalse();
+        Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.VERBOSE))
+                .isFalse();
+        Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.INFO))
+                .isFalse();
+        Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.WARN))
+                .isFalse();
+        Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.ERROR))
+                .isFalse();
+        Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.WTF)).isTrue();
+
+        PerfettoTraceMonitor traceMonitor1 =
+                PerfettoTraceMonitor.newBuilder().enableProtoLog(true,
+                                List.of(new PerfettoTraceMonitor.Builder.ProtoLogGroupOverride(
+                                        TestProtoLogGroup.TEST_GROUP.toString(), LogLevel.WARN,
+                                        false)))
+                        .build();
+
+        PerfettoTraceMonitor traceMonitor2 =
+                PerfettoTraceMonitor.newBuilder().enableProtoLog(true,
+                                List.of(new PerfettoTraceMonitor.Builder.ProtoLogGroupOverride(
+                                        TestProtoLogGroup.TEST_GROUP.toString(), LogLevel.DEBUG,
+                                        false)))
+                        .build();
+
+        try {
+            traceMonitor1.start();
+
+            Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.DEBUG))
+                    .isFalse();
+            Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.VERBOSE))
+                    .isFalse();
+            Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.INFO))
+                    .isFalse();
+            Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.WARN))
+                    .isTrue();
+            Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.ERROR))
+                    .isTrue();
+            Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.WTF))
+                    .isTrue();
+
+            try {
+                traceMonitor2.start();
+
+                Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.DEBUG))
+                        .isTrue();
+                Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP,
+                        LogLevel.VERBOSE)).isTrue();
+                Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.INFO))
+                        .isTrue();
+                Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.WARN))
+                        .isTrue();
+                Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.ERROR))
+                        .isTrue();
+                Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.WTF))
+                        .isTrue();
+            } finally {
+                traceMonitor2.stop(mWriter);
+            }
+
+            Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.DEBUG))
+                    .isFalse();
+            Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.VERBOSE))
+                    .isFalse();
+            Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.INFO))
+                    .isFalse();
+            Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.WARN))
+                    .isTrue();
+            Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.ERROR))
+                    .isTrue();
+            Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.WTF))
+                    .isTrue();
+        } finally {
+            traceMonitor1.stop(mWriter);
+        }
+
+        Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.DEBUG))
+                .isFalse();
+        Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.VERBOSE))
+                .isFalse();
+        Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.INFO))
+                .isFalse();
+        Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.WARN))
+                .isFalse();
+        Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.ERROR))
+                .isFalse();
+        Truth.assertThat(mProtoLog.isEnabled(TestProtoLogGroup.TEST_GROUP, LogLevel.WTF))
+                .isTrue();
     }
 
     private enum TestProtoLogGroup implements IProtoLogGroup {
