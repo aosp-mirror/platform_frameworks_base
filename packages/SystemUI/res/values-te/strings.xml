@@ -365,6 +365,12 @@
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"అధికం"</string>
     <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
     <skip />
+    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
+    <skip />
+    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
+    <skip />
+    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"పరికరం మైక్రోఫోన్‌ను అన్‌బ్లాక్ చేయమంటారా?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"పరికరంలోని కెమెరాను అన్‌బ్లాక్ చేయమంటారా?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"పరికరంలోని కెమెరా, మైక్రోఫోన్‌లను అన్‌బ్లాక్ చేయమంటారా?"</string>
@@ -442,10 +448,8 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"తీసివేయండి"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"విడ్జెట్‌ను జోడించండి"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"పూర్తయింది"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"విడ్జెట్‌లను జోడించండి"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"మీ టాబ్లెట్‌ను అన్‌లాక్ చేయకుండానే మీకు ఇష్టమైన యాప్ విడ్జెట్‌లకు క్విక్ యాక్సెస్‌ను పొందండి."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"లాక్ స్క్రీన్‌లో ఏదైనా విడ్జెట్‌ను అనుమతించాలా?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"సెట్టింగ్‌లను తెరవండి"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"వర్క్ యాప్స్ అన్‌పాజ్ చేయాలా?"</string>
@@ -603,7 +607,7 @@
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"నాయిస్ కంట్రోల్"</string>
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"స్పేషియల్ ఆడియో"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"ఆఫ్ చేయండి"</string>
-    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"ఆరంభించండి"</string>
+    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"ఫిక్స్‌డ్"</string>
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"హెడ్ ట్రాకింగ్"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"రింగర్ మోడ్‌ను మార్చడానికి ట్యాప్ చేయండి"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"మ్యూట్ చేయి"</string>

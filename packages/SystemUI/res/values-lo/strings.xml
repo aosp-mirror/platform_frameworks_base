@@ -363,7 +363,12 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"ມາດຕະຖານ"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"ປານກາງ"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"ສູງ"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"ອຸປະກອນຊ່ວຍຟັງ"</string>
+    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
+    <skip />
+    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
+    <skip />
+    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
     <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ປົດບລັອກໄມໂຄຣໂຟນອຸປະກອນບໍ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ປົດບລັອກກ້ອງຖ່າຍຮູບອຸ​ປະ​ກອນບໍ?"</string>
@@ -442,10 +447,8 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"ລຶບອອກ"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ເພີ່ມວິດເຈັດ"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"ແລ້ວໆ"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"ເພີ່ມວິດເຈັດ"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"ຮັບການເຂົ້າເຖິງດ່ວນຫາແອັບວິດເຈັດທີ່ທ່ານມັກໂດຍບໍ່ຕ້ອງປົດລັອກແທັບເລັດຂອງທ່ານ."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"ອະນຸຍາດວິດເຈັດໃດກໍຕາມຢູ່ໜ້າຈໍລັອກບໍ?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"ເປີດການຕັ້ງຄ່າ"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"ຍົກເລີກການຢຸດຊົ່ວຄາວແອັບບ່ອນເຮັດວຽກບໍ?"</string>

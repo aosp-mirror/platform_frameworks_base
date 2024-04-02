@@ -365,6 +365,12 @@
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"ଅଧିକ"</string>
     <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
     <skip />
+    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
+    <skip />
+    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
+    <skip />
+    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ଡିଭାଇସର ମାଇକ୍ରୋଫୋନକୁ ଅନବ୍ଲକ କରିବେ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ଡିଭାଇସର କେମେରାକୁ ଅନବ୍ଲକ କରିବେ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ଡିଭାଇସର କ୍ୟାମେରା ଏବଂ ମାଇକ୍ରୋଫୋନକୁ ଅନବ୍ଲକ୍ କରିବେ?"</string>
@@ -442,10 +448,8 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ୱିଜେଟ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"ହୋଇଗଲା"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"ୱିଜେଟଗୁଡ଼ିକୁ ଯୋଗ କରନ୍ତୁ"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"ଆପଣଙ୍କ ଟାବଲେଟକୁ ଅନଲକ ନକରି ଆପଣଙ୍କ ପସନ୍ଦର ଆପ ୱିଜେଟଗୁଡ଼ିକୁ କୁଇକ ଆକ୍ସେସ ପାଆନ୍ତୁ।"</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"ଲକସ୍କ୍ରିନରେ ଯେ କୌଣସି ୱିଜେଟକୁ ଅନୁମତି ଦେବେ?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"ସେଟିଂସ ଖୋଲନ୍ତୁ"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"ୱାର୍କ ଆପ୍ସକୁ ପୁଣି ଚାଲୁ କରିବେ?"</string>
@@ -579,11 +583,11 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"ନାହିଁ, ଥାଉ"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"ଆପ୍ ପିନ୍ କରାଯାଇଛି"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"ଆପ୍ ଅନପିନ୍ କରାଯାଇଛି"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"କଲ୍ କରନ୍ତୁ"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"କଲ କରନ୍ତୁ"</string>
     <string name="stream_system" msgid="7663148785370565134">"ସିଷ୍ଟମ"</string>
     <string name="stream_ring" msgid="7550670036738697526">"ରିଙ୍ଗ"</string>
     <string name="stream_music" msgid="2188224742361847580">"ମିଡିଆ"</string>
-    <string name="stream_alarm" msgid="16058075093011694">"ଆଲାରାମ୍"</string>
+    <string name="stream_alarm" msgid="16058075093011694">"ଆଲାରାମ"</string>
     <string name="stream_notification" msgid="7930294049046243939">"ବିଜ୍ଞପ୍ତି"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"ବ୍ଲୁଟୁଥ୍‍‌"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"ଡୁଆଲ୍‍ ମଲ୍ଟି ଟୋନ୍‍ ଫ୍ରିକ୍ୱେନ୍ସୀ"</string>
@@ -617,7 +621,7 @@
     <string name="volume_panel_hint_mute" msgid="6962563028495243738">"%sକୁ ମ୍ୟୁଟ କରନ୍ତୁ"</string>
     <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"%sକୁ ଅନମ୍ୟୁଟ କରନ୍ତୁ"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g>ରେ ପ୍ଲେ କରାଯାଉଛି"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"ଅଡିଓ ପ୍ଲେ ହେବ"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"ଅଡିଓ ଏଥିରେ ପ୍ଲେ ହେବ"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"ସିଷ୍ଟମ୍ UI ଟ୍ୟୁନର୍‍"</string>
     <string name="status_bar" msgid="4357390266055077437">"ଷ୍ଟାଟସ୍‍ ବାର୍‍"</string>
     <string name="demo_mode" msgid="263484519766901593">"ସିଷ୍ଟମ୍‌ UI ଡେମୋ ମୋଡ୍‌"</string>

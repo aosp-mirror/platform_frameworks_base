@@ -329,7 +329,7 @@
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Geschäftliche Apps"</string>
     <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"Pausiert"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Nachtlicht"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"An bei Sonnenuntergang"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"An: Sonnenuntergang"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Bis Sonnenaufgang"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"An um <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Bis <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -364,6 +364,12 @@
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Mittel"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Hoch"</string>
     <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <skip />
+    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
+    <skip />
+    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
+    <skip />
+    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
     <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Blockierung des Gerätemikrofons aufheben?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Blockierung der Gerätekamera aufheben?"</string>
@@ -579,7 +585,7 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Nein danke"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Bildschirm wurde fixiert"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"App vom Bildschirm losgelöst"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"Anruf"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"Anrufen"</string>
     <string name="stream_system" msgid="7663148785370565134">"System"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Klingelton"</string>
     <string name="stream_music" msgid="2188224742361847580">"Medien"</string>
@@ -594,17 +600,17 @@
     <string name="media_device_cast" msgid="4786241789687569892">"Stream"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Nicht verfügbar, da Klingelton stumm"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Nicht verfügbar, weil „Bitte nicht stören“ an ist"</string>
-    <string name="stream_media_unavailable" msgid="6823020894438959853">"Nicht verfügbar, weil „Bitte nicht stören“ an ist"</string>
+    <string name="stream_media_unavailable" msgid="6823020894438959853">"Nicht verfügbar, weil „Bitte nicht stören“ an"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Zum Aufheben der Stummschaltung tippen."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Tippen, um Vibrieren festzulegen. Bedienungshilfen werden unter Umständen stummgeschaltet."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Zum Stummschalten tippen. Bedienungshilfen werden unter Umständen stummgeschaltet."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Zum Aktivieren der Vibration tippen."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Zum Stummschalten tippen."</string>
-    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Geräuschunterdrückung"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Geräusch­unterdrückung"</string>
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"Spatial Audio"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"Aus"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Statisch"</string>
-    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Erfassung von Kopfbewegungen"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Erfassung von Kopfbewe­gungen"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Zum Ändern des Klingeltonmodus tippen"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"Stummschalten"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"Aufheben der Stummschaltung"</string>
