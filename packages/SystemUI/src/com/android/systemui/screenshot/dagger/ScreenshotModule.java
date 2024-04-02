@@ -94,8 +94,8 @@ public abstract class ScreenshotModule {
             ScreenshotSoundControllerImpl screenshotSoundProviderImpl);
 
     @Binds
-    abstract ScreenshotActionsProvider bindScreenshotActionsProvider(
-            DefaultScreenshotActionsProvider defaultScreenshotActionsProvider);
+    abstract ScreenshotActionsProvider.Factory bindScreenshotActionsProviderFactory(
+            DefaultScreenshotActionsProvider.Factory defaultScreenshotActionsProviderFactory);
 
     @Provides
     @SysUISingleton
