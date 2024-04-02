@@ -19,6 +19,7 @@ package com.android.wm.shell.windowdecor;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.windowingModeToString;
+import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
 
@@ -752,7 +753,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         final int action = ev.getActionMasked();
         // The comparison against ACTION_UP is needed for the cancel drag to desktop case.
         handle.setHovered(inHandle && action != ACTION_UP);
-        handle.setPressed(inHandle && action == ACTION_DOWN);
+        // We want handle to remain pressed if the pointer moves outside of it during a drag.
+        handle.setPressed((inHandle && action == ACTION_DOWN)
+                || (handle.isPressed() && action != ACTION_UP && action != ACTION_CANCEL));
         if (isHandleMenuActive()) {
             mHandleMenu.checkMotionEvent(ev);
         }
