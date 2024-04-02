@@ -365,6 +365,12 @@
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"વધુ"</string>
     <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
     <skip />
+    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
+    <skip />
+    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
+    <skip />
+    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ડિવાઇસના માઇક્રોફોનને અનબ્લૉક કરીએ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ડિવાઇસના કૅમેરાને અનબ્લૉક કરીએ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ડિવાઇસના કૅમેરા અને માઇક્રોફોનને અનબ્લૉક કરીએ?"</string>
@@ -442,10 +448,8 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"કાઢી નાખો"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"વિજેટ ઉમેરો"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"થઈ ગયું"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"વિજેટ ઉમેરો"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"તમારું ટૅબ્લેટ અનલૉક કર્યા વિના તમારા મનપસંદ ઍપ વિજેટનો ઝડપી ઍક્સેસ મેળવો."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"લૉક સ્ક્રીન પર કોઈપણ વિજેટને મંજૂરી આપીએ?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"સેટિંગ ખોલો"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"ઑફિસની થોભાવેલી ઍપ ચાલુ કરીએ?"</string>
@@ -602,9 +606,9 @@
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. મ્યૂટ કરવા માટે ટૅપ કરો."</string>
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"અવાજનું નિયંત્રણ"</string>
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"સ્પેશલ ઑડિયો"</string>
-    <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"બંધ કરો"</string>
+    <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"બંધ"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"ફિક્સ્ડ"</string>
-    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"હેડ ટ્રૅકિંગ"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"હૅડ ટ્રૅકિંગ"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"રિંગર મોડ બદલવા માટે ટૅપ કરો"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"મ્યૂટ કરો"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"અનમ્યૂટ કરો"</string>

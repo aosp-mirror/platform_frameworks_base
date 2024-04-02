@@ -365,6 +365,12 @@
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Υψηλή"</string>
     <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
     <skip />
+    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
+    <skip />
+    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
+    <skip />
+    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Κατάργηση αποκλεισμού μικροφώνου συσκευής;"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Κατάργηση αποκλεισμού κάμερας συσκευής;"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Κατάργηση αποκλεισμού κάμερας και μικροφώνου συσκευής;"</string>
@@ -442,10 +448,8 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Κατάργηση"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Προσθήκη γραφικού στοιχείου"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Τέλος"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"Προσθήκη γραφικών στοιχείων"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Αποκτήστε γρήγορα πρόσβαση στα αγαπημένα σας γραφικά στοιχεία εφαρμογών χωρίς να ξεκλειδώσετε το tablet σας."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Να επιτρέπονται όλα τα γραφικά στοιχεία στην οθόνη κλειδώματος;"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Άνοιγμα ρυθμίσεων"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Αναίρ. παύσης εφαρμ. εργασιών;"</string>
@@ -581,7 +585,7 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Η εφαρμογή ξεκαρφιτσώθηκε."</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"Κλήση"</string>
     <string name="stream_system" msgid="7663148785370565134">"Σύστημα"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Κλήση"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Ήχος κλήσης"</string>
     <string name="stream_music" msgid="2188224742361847580">"Μέσα"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Ξυπνητήρι"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Ειδοποίηση"</string>

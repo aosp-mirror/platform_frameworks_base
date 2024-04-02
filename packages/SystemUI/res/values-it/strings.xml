@@ -363,7 +363,12 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Standard"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Medio"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Alto"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Apparecchi acustici"</string>
+    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
+    <skip />
+    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
+    <skip />
+    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
     <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Vuoi sbloccare il microfono del dispositivo?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Vuoi sbloccare la fotocamera del dispositivo?"</string>
@@ -442,10 +447,8 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Rimuovi"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Aggiungi widget"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Fine"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"Aggiungi widget"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Accedi rapidamente ai widget delle tue app preferite senza sbloccare il tablet."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Consentire tutti i widget nella schermata di blocco?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Apri impostazioni"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Riattivare le app di lavoro?"</string>
@@ -582,7 +585,7 @@
     <string name="stream_voice_call" msgid="7468348170702375660">"Chiamata"</string>
     <string name="stream_system" msgid="7663148785370565134">"Sistema"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Suoneria"</string>
-    <string name="stream_music" msgid="2188224742361847580">"Supporti multimediali"</string>
+    <string name="stream_music" msgid="2188224742361847580">"Contenuti multimediali"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Sveglia"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Notifica"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
@@ -594,7 +597,7 @@
     <string name="media_device_cast" msgid="4786241789687569892">"Trasmissione"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Non disponibile con l\'audio disattivato"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Non disponibile: modalità Non disturbare attiva"</string>
-    <string name="stream_media_unavailable" msgid="6823020894438959853">"Non disponibile: modalità Non disturbare attiva"</string>
+    <string name="stream_media_unavailable" msgid="6823020894438959853">"Non disponibili con \"Non disturbare\" attiva"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Tocca per riattivare l\'audio."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Tocca per attivare la vibrazione. L\'audio dei servizi di accessibilità può essere disattivato."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Tocca per disattivare l\'audio. L\'audio dei servizi di accessibilità può essere disattivato."</string>

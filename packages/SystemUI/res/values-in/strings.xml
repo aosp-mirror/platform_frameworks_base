@@ -365,6 +365,12 @@
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Tinggi"</string>
     <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
     <skip />
+    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
+    <skip />
+    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
+    <skip />
+    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Berhenti memblokir mikrofon perangkat?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Berhenti memblokir kamera perangkat?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Berhenti memblokir kamera dan mikrofon perangkat?"</string>
@@ -442,10 +448,8 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Hapus"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Tambahkan widget"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Selesai"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"Tambahkan widget"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Dapatkan akses cepat ke widget aplikasi favorit Anda tanpa perlu membuka kunci tablet."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Izinkan widget di layar kunci?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Buka setelan"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Batalkan jeda aplikasi kerja?"</string>
@@ -592,9 +596,9 @@
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Getar"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Nonaktifkan"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"Transmisi"</string>
-    <string name="stream_notification_unavailable" msgid="4313854556205836435">"Tidak tersedia karena volume dering dibisukan"</string>
-    <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Tidak tersedia karena fitur Jangan Ganggu aktif"</string>
-    <string name="stream_media_unavailable" msgid="6823020894438959853">"Tidak tersedia karena fitur Jangan Ganggu aktif"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"Tidak tersedia - Volume dering dibisukan"</string>
+    <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Tidak tersedia - Fitur Jangan Ganggu aktif"</string>
+    <string name="stream_media_unavailable" msgid="6823020894438959853">"Tidak tersedia - Fitur Jangan Ganggu aktif"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Ketuk untuk menyuarakan."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Ketuk untuk menyetel agar bergetar. Layanan aksesibilitas mungkin dibisukan."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Ketuk untuk membisukan. Layanan aksesibilitas mungkin dibisukan."</string>
@@ -672,10 +676,10 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Status:&lt;/b&gt; Didemosikan menjadi Senyap"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Status:&lt;/b&gt; Diberi Peringkat Lebih Tinggi"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status:&lt;/b&gt; Diberi Peringkat Lebih Rendah"</string>
-    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci"</string>
-    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci, ditampilkan sebagai balon"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci, mengganggu mode Jangan Ganggu"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci, ditampilkan sebagai balon, mengganggu mode Jangan Ganggu"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Muncul teratas di notifikasi percakapan dan sebagai foto profil di layar kunci"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Muncul teratas di notifikasi percakapan dan sebagai foto profil di layar kunci, ditampilkan sebagai balon"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Muncul teratas di notifikasi percakapan dan sebagai foto profil di layar kunci, menimpa mode Jangan Ganggu"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Muncul teratas di notifikasi percakapan dan sebagai foto profil di layar kunci, ditampilkan sebagai balon, menimpa mode Jangan Ganggu"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritas"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak mendukung fitur percakapan"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Notifikasi ini tidak dapat diubah."</string>
@@ -1121,7 +1125,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Membuka percakapan"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widget Percakapan"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Ketuk percakapan untuk menambahkannya ke Layar utama"</string>
-    <string name="no_conversations_text" msgid="5354115541282395015">"Percakapan terbaru Anda akan ditampilkan di sini"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Percakapan terbaru akan muncul di sini"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Percakapan prioritas"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Percakapan terbaru"</string>
     <string name="days_timestamp" msgid="5821854736213214331">"<xliff:g id="DURATION">%1$s</xliff:g> hari lalu"</string>

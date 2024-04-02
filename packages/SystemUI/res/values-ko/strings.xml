@@ -365,6 +365,12 @@
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"높음"</string>
     <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
     <skip />
+    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
+    <skip />
+    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
+    <skip />
+    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"기기 마이크를 차단 해제하시겠습니까?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"기기 카메라를 차단 해제하시겠습니까?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"기기 카메라 및 마이크를 차단 해제하시겠습니까?"</string>
@@ -442,10 +448,8 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"삭제"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"위젯 추가"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"완료"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"위젯 추가"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"태블릿을 잠금 해제하지 않고도 즐겨 사용하는 앱 위젯에 빠르게 액세스하세요"</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"잠금 화면에서 위젯 사용을 허용하시겠습니까?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"설정 열기"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"직장 앱 일시중지를 해제하시겠습니까?"</string>
@@ -593,8 +597,8 @@
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"음소거"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"전송"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"벨소리가 음소거되어 있으므로 사용할 수 없음"</string>
-    <string name="stream_alarm_unavailable" msgid="4059817189292197839">"방해 금지 모드가 사용 설정되어 있어 사용할 수 없음"</string>
-    <string name="stream_media_unavailable" msgid="6823020894438959853">"방해 금지 모드가 사용 설정되어 있어 사용할 수 없음"</string>
+    <string name="stream_alarm_unavailable" msgid="4059817189292197839">"방해 금지 모드로 설정되어 있어 사용할 수 없음"</string>
+    <string name="stream_media_unavailable" msgid="6823020894438959853">"방해 금지 모드로 설정되어 있어 사용할 수 없음"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. 탭하여 음소거를 해제하세요."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. 탭하여 진동으로 설정하세요. 접근성 서비스가 음소거될 수 있습니다."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. 탭하여 음소거로 설정하세요. 접근성 서비스가 음소거될 수 있습니다."</string>
@@ -610,7 +614,7 @@
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"음소거 해제"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"진동"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s 볼륨 컨트롤"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"전화 및 알림이 오면 벨소리가 울립니다(<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"전화 및 알림이 오면 벨소리가 울립니다(<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)."</string>
     <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"출력 설정 열기"</string>
     <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"볼륨 슬라이더 펼침"</string>
     <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"볼륨 슬라이더 접힘"</string>

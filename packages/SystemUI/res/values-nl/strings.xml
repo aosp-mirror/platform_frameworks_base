@@ -365,6 +365,12 @@
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Hoog"</string>
     <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
     <skip />
+    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
+    <skip />
+    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
+    <skip />
+    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Microfoon van apparaat niet meer blokkeren?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Apparaatcamera niet meer blokkeren?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Blokkeren van apparaatcamera en -microfoon opheffen?"</string>
@@ -442,10 +448,8 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Verwijderen"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Widget toevoegen"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Klaar"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"Widgets toevoegen"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Krijg snel toegang tot je favoriete app-widgets zonder je tablet te ontgrendelen."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Elke widget toestaan op het vergrendelscherm?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Instellingen openen"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Werk-apps hervatten?"</string>
@@ -1041,7 +1045,7 @@
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Pincode bevat letters of symbolen"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> verifiëren"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Onjuiste pincode"</string>
-    <string name="controls_pin_instructions" msgid="6363309783822475238">"Geef de pincode op"</string>
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"Voer pincode in"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Andere pincode proberen"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"Bevestig de wijziging voor <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Swipe om meer te zien"</string>
@@ -1121,7 +1125,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Gesprek openen"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Gesprekswidgets"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Tik op een gesprek om het toe te voegen aan je startscherm"</string>
-    <string name="no_conversations_text" msgid="5354115541282395015">"Je ziet je recente gesprekken hier"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Hier staan je recente gesprekken"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Prioriteitsgesprekken"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Recente gesprekken"</string>
     <string name="days_timestamp" msgid="5821854736213214331">"<xliff:g id="DURATION">%1$s</xliff:g> dagen geleden"</string>

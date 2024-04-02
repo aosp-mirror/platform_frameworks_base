@@ -363,7 +363,12 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"মানক"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"মধ্যমীয়া"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"উচ্চ"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"শুনাৰ ডিভাইচ"</string>
+    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
+    <skip />
+    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
+    <skip />
+    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
     <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ডিভাইচৰ মাইক্ৰ\'ফ\'ন অৱৰোধৰ পৰা আঁতৰাবনে?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ডিভাইচৰ কেমেৰা অৱৰোধৰ পৰা আঁতৰাবনে?"</string>
@@ -442,10 +447,8 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"আঁতৰাওক"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ৱিজেট যোগ দিয়ক"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"কৰা হ’ল"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"ৱিজেট যোগ দিয়ক"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"আপোনাৰ টেবলেটটো আনলক নকৰাকৈ আপোনাৰ প্ৰিয় এপৰ ৱিজেটসমূহলৈ ক্ষিপ্ৰভাৱে এক্সেছ পাওক।"</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"লক স্ক্ৰীনত যিকোনো ৱিজেটৰ অনুমতি দিবনে?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"ছেটিং খোলক"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"কাম সম্পৰ্কীয় এপ্ আনপজ কৰিবনে?"</string>
@@ -904,7 +907,7 @@
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"ৱাই-ফাই অফ অৱস্থাত আছে"</string>
-    <string name="bt_is_off" msgid="7436344904889461591">"ব্লুটুথ অফ অৱস্থাত আছে"</string>
+    <string name="bt_is_off" msgid="7436344904889461591">"ব্লুটুথ অফ আছে"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"অসুবিধা নিদিব অফ অৱস্থাত আছে"</string>
     <string name="dnd_is_on" msgid="7009368176361546279">"অসুবিধা নিদিব অন অৱস্থাত আছে"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"অসুবিধা নিদিব-ক এটা স্বয়ংক্ৰিয় নিয়ম (<xliff:g id="ID_1">%s</xliff:g>)এ অন কৰিলে।"</string>

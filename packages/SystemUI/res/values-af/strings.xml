@@ -365,6 +365,12 @@
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Hoog"</string>
     <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
     <skip />
+    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
+    <skip />
+    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
+    <skip />
+    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Deblokkeer toestelmikrofoon?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Deblokkeer toestelkamera?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Deblokkeer toestelkamera en mikrofoon?"</string>
@@ -551,7 +557,7 @@
     <string name="keyguard_indication_after_adaptive_auth_lock" msgid="2323400645470712787">"Toestel is gesluit\nKon nie staaf nie"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Klankinstellings"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Gee outomaties mediaopskrifte"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Verskaf outomaties onderskrifte vir media"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Maak wenk oor onderskrifte toe"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Onderskrifteoorlegger"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"aktiveer"</string>
