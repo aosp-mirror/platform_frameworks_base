@@ -106,6 +106,28 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"ใช้งานอยู่ เฉพาะข้างซ้าย"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"ใช้งานอยู่ เฉพาะข้างขวา"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"ใช้งานอยู่ ข้างซ้ายและขวา"</string>
+    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
+    <skip />
+    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
+    <skip />
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"เสียงของสื่อ"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"โทรศัพท์"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"การถ่ายโอนไฟล์"</string>
@@ -515,7 +537,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"ใช้ภาษาของระบบ"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"ไม่สามารถเปิดการตั้งค่าสำหรับ <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"วิธีการป้อนข้อมูลนี้อาจเก็บข้อความทั้งหมดที่คุณพิมพ์ รวมถึงข้อมูลส่วนบุคคล เช่น รหัสผ่านและหมายเลขบัตรเครดิต โดยมาจากแอปพลิเคชัน <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ใช้วิธีการป้อนข้อมูลนี้หรือไม่"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"หมายเหตุ: หลังจากเริ่มต้นใหม่ แอปนี้จะไม่สามารถเริ่มการทำงานได้จนกว่าคุณจะปลดล็อกโทรศัพท์"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"หมายเหตุ: หลังจากรีบูต แอปนี้จะไม่สามารถเริ่มการทำงานได้จนกว่าคุณจะปลดล็อกโทรศัพท์"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"สถานะการลงทะเบียน IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"ลงทะเบียนแล้ว"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"ไม่ได้ลงทะเบียน"</string>
@@ -552,7 +574,7 @@
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"แท็บเล็ตเครื่องนี้"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"แท่นวางลำโพง"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"แท่นชาร์จที่มีลำโพง"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"อุปกรณ์ภายนอก"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"อุปกรณ์ที่เชื่อมต่อ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"โทรศัพท์เครื่องนี้"</string>
@@ -643,8 +665,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"ระบบจะลบกิจกรรมทั้งหมดเมื่อออก"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"คุณสามารถบันทึกหรือลบกิจกรรมเมื่อออก"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"รีเซ็ตเพื่อลบกิจกรรมของเซสชันตอนนี้เลย หรือจะ​บันทึกหรือลบกิจกรรมเมื่อออกก็ได้"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"ถ่ายรูป"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"เลือกรูปภาพ"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"เลือกรูปภาพ"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"ใช้ความพยายามหลายครั้งเกินไป ระบบจะลบข้อมูลในอุปกรณ์เครื่องนี้"</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"ใช้ความพยายามหลายครั้งเกินไป ระบบจะลบผู้ใช้รายนี้"</string>
@@ -684,8 +704,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ยกเลิกการเชื่อมต่ออีเทอร์เน็ตแล้ว"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"อีเทอร์เน็ต"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"ไม่มีการโทร"</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"เลือกรูปโปรไฟล์"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"ไอคอนผู้ใช้เริ่มต้น"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"แป้นพิมพ์จริง"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"เลือกรูปแบบแป้นพิมพ์"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"ค่าเริ่มต้น"</string>

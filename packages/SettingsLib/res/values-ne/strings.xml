@@ -106,6 +106,28 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"बायाँ मात्र अन छ"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"सक्रिय, दायाँ मात्र"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"सक्रिय, बायाँ र दायाँ"</string>
+    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
+    <skip />
+    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
+    <skip />
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"मिडिया अडियो"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"फोन कलहरू"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"फाइल स्थानान्तरण"</string>
@@ -515,7 +537,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"सिष्टममा भएका भाषा प्रयोग गरियोस्"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>का लागि सेटिङहरू खोल्न विफल भयो।"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"यस इनपुट विधिले तपाईँले टाइप गर्नुहुने सम्पूर्ण पाठ बटु्ल्न सक्छ, व्यक्तिगत डेटा जस्तै पासवर्ड र क्रेडिट कार्ड नम्बर लगायतका। यो <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> अनुप्रयोगबाट आउँदछ। यो इनपुट विधि प्रयोग गर्ने हो?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"टिपोट: पुनःबुट पछि तपाईँले आफ्नो फोनलाई अनलक नगरेसम्म यो एप सुरु हुन सक्दैन"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"नोट: रिबुट गरेपछि तपाईंले आफ्नो फोन अनलक नगरेसम्म यो एप सुरु हुँदैन"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS दर्ताको स्थिति"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"दर्ता गरिएको"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"दर्ता नगरिएको"</string>
@@ -643,8 +665,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"अतिथि मोडबाट बाहिरिँदा सबै क्रियाकलाप मेटाइने छ"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"तपाईं अतिथि मोडबाट बाहिरिँदा आफ्ना क्रियाकलाप सेभ गर्ने वा मेटाउने विकल्प रोज्न सक्नुहुन्छ"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"यो सत्रमा गरिएका क्रियाकलाप अहिले नै मेटाउन रिसेट गर्नुहोस्, अथवा तपाईं अतिथि मोडबाट बाहिरिँदा आफ्ना क्रियाकलाप सेभ गर्ने वा मेटाउने विकल्प रोज्न सक्नुहुन्छ"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"फोटो खिच्नुहोस्"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"कुनै फोटो छनौट गर्नुहोस्"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"फोटो चयन गर्नुहोस्"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"धेरै पटक गलत तरिकाले अनलक गर्ने प्रयास गरियो। यो डिभाइसमा भएको डेटा मेटाइने छ।"</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"धेरै पटक गलत तरिकाले अनलक गर्ने प्रयास गरियो। यो प्रयोगकर्ता मेटाइने छ।"</string>
@@ -684,8 +704,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"इथरनेट विच्छेद भयो।"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"इथरनेट।"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"कल गर्ने सुविधा उपलब्ध छैन।"</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"प्रोफाइल फोटो छान्नुहोस्"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"प्रयोगकर्ताको डिफल्ट आइकन"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"भौतिक किबोर्ड"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"किबोर्ड लेआउट छान्नुहोस्"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"डिफल्ट"</string>

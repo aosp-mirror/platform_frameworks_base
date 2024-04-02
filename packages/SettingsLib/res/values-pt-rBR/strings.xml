@@ -106,6 +106,28 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Ativo, apenas o esquerdo"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Ativo, apenas o direito"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Ativo, esquerdo e direito"</string>
+    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
+    <skip />
+    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
+    <skip />
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Áudio da mídia"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Chamadas telefônicas"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transferência de arquivo"</string>
@@ -519,7 +541,7 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"Estado do registro de IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Registrado"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Não registrado"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"Não disponível"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"Indisponível"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"O MAC é randomizado"</string>
     <string name="wifi_tether_connected_summary" msgid="5100712926640492336">"{count,plural, =1{1 dispositivo conectado}one{# dispositivo conectado}other{# dispositivos conectados}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Mais tempo."</string>
@@ -616,7 +638,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Falha ao criar um novo usuário"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Falha ao criar um novo convidado"</string>
     <string name="user_nickname" msgid="262624187455825083">"Apelido"</string>
-    <string name="edit_user_info_message" msgid="6677556031419002895">"O nome e a foto escolhidos ficarão visíveis para qualquer pessoa que usar este dispositivo."</string>
+    <string name="edit_user_info_message" msgid="6677556031419002895">"O nome e a foto que você escolher ficarão visíveis para qualquer pessoa que usar este dispositivo."</string>
     <string name="user_add_user" msgid="7876449291500212468">"Adicionar usuário"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Adicionar visitante"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Remover visitante"</string>
@@ -643,8 +665,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Todas as atividades serão excluídas ao sair"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Você pode salvar ou excluir sua atividade ao sair"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Redefina para excluir a atividade da sessão agora. Salve ou exclua a atividade ao sair"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"Tirar uma foto"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"Escolher uma imagem"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Selecionar foto"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Excesso de tentativas incorretas. Os dados deste dispositivo serão excluídos."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Excesso de tentativas incorretas. O usuário será excluído."</string>
@@ -684,8 +704,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet desconectada."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Sem chamadas."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Escolher a foto do perfil"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"Ícone de usuário padrão"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Teclado físico"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Escolha o layout do teclado"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Padrão"</string>

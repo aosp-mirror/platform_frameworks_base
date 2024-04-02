@@ -106,6 +106,28 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"സജീവമാണ്, ഇടത്തേത് മാത്രം"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"സജീവമാണ്, വലത്തേത് മാത്രം"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"സജീവമാണ്, ഇടത്തേതും വലത്തേതും"</string>
+    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
+    <skip />
+    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
+    <skip />
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"മീഡിയ ഓഡിയോ"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ഫോണ്‍‌ കോളുകൾ"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ഫയൽ കൈമാറൽ"</string>
@@ -643,8 +665,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"പുറത്തുകടക്കുമ്പോൾ എല്ലാ ആക്‌റ്റിവിറ്റിയും ഇല്ലാതാക്കും"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"പുറത്തുകടക്കുമ്പോൾ ആക്‌റ്റിവിറ്റി സംരക്ഷിക്കുകയോ ഇല്ലാതാക്കുകയോ ചെയ്യാം"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"സെഷൻ ആക്‌റ്റിവിറ്റി ഇപ്പോൾ ഇല്ലാതാക്കാൻ റീസെറ്റ് ചെയ്യുക അല്ലെങ്കിൽ പുറത്തുകടക്കുമ്പോൾ ആക്‌റ്റിവിറ്റി സംരക്ഷിക്കുകയോ ഇല്ലാതാക്കുകയോ ചെയ്യാം"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"ഒരു ഫോട്ടോ എടുക്കുക"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"ഒരു ചിത്രം തിരഞ്ഞെടുക്കുക"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ഫോട്ടോ തിരഞ്ഞെടുക്കുക"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"ഒരുപാട് തെറ്റായ ശ്രമങ്ങൾ. ഈ ഉപകരണത്തിലെ ഡാറ്റ ഇല്ലാതാക്കപ്പെടും."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"ഒരുപാട് തെറ്റായ ശ്രമങ്ങൾ. ഈ ഉപയോക്താവ് ഇല്ലാതാക്കപ്പെടും."</string>
@@ -684,8 +704,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ഇതർനെറ്റ് വിച്ഛേദിച്ചു."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ഇതർനെറ്റ്."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"വോയ്‌സ് കോൾ ലഭ്യമല്ല."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"പ്രൊഫൈൽ ചിത്രം തിരഞ്ഞെടുക്കുക"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"ഡിഫോൾട്ട് ഉപയോക്തൃ ഐക്കൺ"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"ഫിസിക്കൽ കീബോർഡ്"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"കീബോർഡ് ലേഔട്ട് തിരഞ്ഞെടുക്കുക"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"ഡിഫോൾട്ട്"</string>
