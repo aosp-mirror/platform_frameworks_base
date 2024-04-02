@@ -34,6 +34,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.RemoteException;
+import android.view.Choreographer;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationTarget;
@@ -192,7 +193,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
 
         applyTransform(mClosingTarget.leash, mClosingCurrentRect, mCornerRadius);
         applyTransform(mEnteringTarget.leash, mEnteringCurrentRect, mCornerRadius);
-        mTransaction.apply();
+        applyTransaction();
 
         mBackground.onBackProgressed(progress);
     }
@@ -242,6 +243,11 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
                 .setCornerRadius(leash, cornerRadius);
     }
 
+    private void applyTransaction() {
+        mTransaction.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
+        mTransaction.apply();
+    }
+
     private void finishAnimation() {
         if (mEnteringTarget != null) {
             mEnteringTarget.leash.release();
@@ -255,8 +261,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
         if (mBackground != null) {
             mBackground.removeBackground(mTransaction);
         }
-
-        mTransaction.apply();
+        applyTransaction();
         mBackInProgress = false;
         mTransformMatrix.reset();
         mClosingCurrentRect.setEmpty();
@@ -303,7 +308,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
             if (progress > 1 - UPDATE_SYSUI_FLAGS_THRESHOLD) {
                 mBackground.resetStatusBarCustomization();
             }
-            mTransaction.apply();
+            applyTransaction();
         });
 
         valueAnimator.addListener(new AnimatorListenerAdapter() {
