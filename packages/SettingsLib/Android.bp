@@ -22,7 +22,7 @@ android_library {
         "guava",
 
         "WifiTrackerLibRes",
-        "iconloader",
+        "//frameworks/libs/systemui:iconloader",
         "setupdesign",
 
         "SettingsLibActionBarShadow",

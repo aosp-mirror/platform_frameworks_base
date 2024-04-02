@@ -57,6 +57,7 @@ filegroup {
         "src-release/**/*.kt",
         "src-release/**/*.java",
     ],
+    visibility: ["//visibility:private"],
 }
 
 filegroup {
@@ -65,6 +66,7 @@ filegroup {
         "src-debug/**/*.kt",
         "src-debug/**/*.java",
     ],
+    visibility: ["//visibility:private"],
 }
 
 //Create a library to expose SystemUI's resources to other modules.
@@ -105,6 +107,7 @@ android_library {
     },
     use_resource_processor: true,
     static_libs: [
+        "//frameworks/libs/systemui:compilelib",
         "SystemUI-res",
         "WifiTrackerLib",
         "WindowManager-Shell",
@@ -117,7 +120,7 @@ android_library {
         "SystemUI-statsd",
         "SettingsLib",
         "com_android_systemui_flags_lib",
-        "com_android_systemui_shared_flags_lib",
+        "//frameworks/libs/systemui:com_android_systemui_shared_flags_lib",
         "androidx.core_core-ktx",
         "androidx.viewpager2_viewpager2",
         "androidx.legacy_legacy-support-v4",
@@ -145,7 +148,7 @@ android_library {
         "device_state_flags_lib",
         "kotlinx_coroutines_android",
         "kotlinx_coroutines",
-        "iconloader_base",
+        "//frameworks/libs/systemui:iconloader_base",
         "SystemUI-tags",
         "SystemUI-proto",
         "monet",
@@ -156,7 +159,7 @@ android_library {
         "lottie",
         "LowLightDreamLib",
         "TraceurCommon",
-        "motion_tool_lib",
+        "//frameworks/libs/systemui:motion_tool_lib",
         "notification_flags_lib",
         "PlatformComposeCore",
         "PlatformComposeSceneTransitionLayout",
@@ -263,7 +266,7 @@ android_library {
         "SystemUI-statsd",
         "SettingsLib",
         "com_android_systemui_flags_lib",
-        "com_android_systemui_shared_flags_lib",
+        "//frameworks/libs/systemui:com_android_systemui_shared_flags_lib",
         "flag-junit-base",
         "platform-parametric-runner-lib",
         "androidx.viewpager2_viewpager2",
@@ -293,7 +296,7 @@ android_library {
         "kotlinx-coroutines-core",
         "kotlinx_coroutines_test",
         "kotlin-reflect",
-        "iconloader_base",
+        "//frameworks/libs/systemui:iconloader_base",
         "SystemUI-tags",
         "SystemUI-proto",
         "metrics-helper-lib",
@@ -307,7 +310,7 @@ android_library {
         "jsr330",
         "WindowManager-Shell",
         "LowLightDreamLib",
-        "motion_tool_lib",
+        "//frameworks/libs/systemui:motion_tool_lib",
         "androidx.core_core-animation-testing",
         "androidx.compose.ui_ui",
         "flag-junit",
@@ -344,6 +347,7 @@ android_library {
         "compose/facade/enabled/src/**/*.kt",
     ],
     static_libs: [
+        "//frameworks/libs/systemui:compilelib",
         "SystemUI-tests-base",
         "androidx.test.uiautomator_uiautomator",
         "androidx.core_core-animation-testing",
@@ -398,6 +402,7 @@ android_app {
         "compose/facade/enabled/src/**/*.kt",
     ],
     static_libs: [
+        "//frameworks/libs/systemui:compilelib",
         "SystemUI-tests-base",
         "androidx.compose.runtime_runtime",
     ],
