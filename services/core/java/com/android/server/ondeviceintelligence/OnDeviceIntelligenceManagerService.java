@@ -539,10 +539,14 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                 Manifest.permission.USE_ON_DEVICE_INTELLIGENCE, TAG);
         synchronized (mLock) {
             mTemporaryServiceNames = componentNames;
-            mRemoteInferenceService.unbind();
-            mRemoteOnDeviceIntelligenceService.unbind();
-            mRemoteOnDeviceIntelligenceService = null;
-            mRemoteInferenceService = null;
+            if (mRemoteInferenceService != null) {
+                mRemoteInferenceService.unbind();
+                mRemoteInferenceService = null;
+            }
+            if (mRemoteOnDeviceIntelligenceService != null) {
+                mRemoteOnDeviceIntelligenceService.unbind();
+                mRemoteOnDeviceIntelligenceService = null;
+            }
             if (mTemporaryHandler == null) {
                 mTemporaryHandler = new Handler(Looper.getMainLooper(), null, true) {
                     @Override
