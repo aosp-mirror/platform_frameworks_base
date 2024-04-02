@@ -416,6 +416,7 @@ public class SecureSettingsValidators {
                 BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.DND_CONFIGS_MIGRATED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.HUB_MODE_TUTORIAL_STATE, NON_NEGATIVE_INTEGER_VALIDATOR);
+        VALIDATORS.put(Secure.GLANCEABLE_HUB_ENABLED, new InclusiveIntegerRangeValidator(0, 1));
         VALIDATORS.put(Secure.STYLUS_BUTTONS_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.STYLUS_HANDWRITING_ENABLED,
                 new DiscreteValueValidator(new String[] {"-1", "0", "1"}));

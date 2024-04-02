@@ -21,6 +21,7 @@ import android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL
 import android.appwidget.AppWidgetProviderInfo
 import android.content.IntentFilter
 import android.content.pm.UserInfo
+import android.provider.Settings
 import com.android.systemui.Flags.communalHub
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.communal.data.model.CommunalEnabledState
@@ -116,12 +117,12 @@ constructor(
 
     private fun getEnabledByUser(user: UserInfo): Flow<Boolean> =
         secureSettings
-            .observerFlow(userId = user.id, names = arrayOf(GLANCEABLE_HUB_ENABLED))
+            .observerFlow(userId = user.id, names = arrayOf(Settings.Secure.GLANCEABLE_HUB_ENABLED))
             // Force an update
             .onStart { emit(Unit) }
             .map {
                 secureSettings.getIntForUser(
-                    GLANCEABLE_HUB_ENABLED,
+                    Settings.Secure.GLANCEABLE_HUB_ENABLED,
                     ENABLED_SETTING_DEFAULT,
                     user.id,
                 ) == 1
@@ -138,7 +139,6 @@ constructor(
             .map { devicePolicyManager.areKeyguardWidgetsAllowed(user.id) }
 
     companion object {
-        const val GLANCEABLE_HUB_ENABLED = "glanceable_hub_enabled"
         const val GLANCEABLE_HUB_CONTENT_SETTING = "glanceable_hub_content_setting"
         private const val ENABLED_SETTING_DEFAULT = 1
     }
