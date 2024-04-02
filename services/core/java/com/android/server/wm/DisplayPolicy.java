@@ -1914,9 +1914,9 @@ public class DisplayPolicy {
             final Rect mConfigInsets = new Rect();
 
             /**
-             * Legacy value of mConfigInsets for app compatibility purpose.
+             * Override value of mConfigInsets for app compatibility purpose.
              */
-            final Rect mLegacyConfigInsets = new Rect();
+            final Rect mOverrideConfigInsets = new Rect();
 
             /** The display frame available after excluding {@link #mNonDecorInsets}. */
             final Rect mNonDecorFrame = new Rect();
@@ -1929,9 +1929,9 @@ public class DisplayPolicy {
             final Rect mConfigFrame = new Rect();
 
             /**
-             * Legacy value of mConfigFrame for app compatibility purpose.
+             * Override value of mConfigFrame for app compatibility purpose.
              */
-            final Rect mLegacyConfigFrame = new Rect();
+            final Rect mOverrideConfigFrame = new Rect();
 
             private boolean mNeedUpdate = true;
 
@@ -1947,22 +1947,22 @@ public class DisplayPolicy {
                         ? decor
                         : insetsState.calculateInsets(displayFrame, dc.mWmService.mConfigTypes,
                                 true /* ignoreVisibility */);
-                final Insets legacyConfigInsets = dc.mWmService.mConfigTypes
-                        == dc.mWmService.mLegacyConfigTypes
+                final Insets overrideConfigInsets = dc.mWmService.mConfigTypes
+                        == dc.mWmService.mOverrideConfigTypes
                         ? configInsets
                         : insetsState.calculateInsets(displayFrame,
-                                dc.mWmService.mLegacyConfigTypes, true /* ignoreVisibility */);
+                                dc.mWmService.mOverrideConfigTypes, true /* ignoreVisibility */);
                 mNonDecorInsets.set(decor.left, decor.top, decor.right, decor.bottom);
                 mConfigInsets.set(configInsets.left, configInsets.top, configInsets.right,
                         configInsets.bottom);
-                mLegacyConfigInsets.set(legacyConfigInsets.left, legacyConfigInsets.top,
-                        legacyConfigInsets.right, legacyConfigInsets.bottom);
+                mOverrideConfigInsets.set(overrideConfigInsets.left, overrideConfigInsets.top,
+                        overrideConfigInsets.right, overrideConfigInsets.bottom);
                 mNonDecorFrame.set(displayFrame);
                 mNonDecorFrame.inset(mNonDecorInsets);
                 mConfigFrame.set(displayFrame);
                 mConfigFrame.inset(mConfigInsets);
-                mLegacyConfigFrame.set(displayFrame);
-                mLegacyConfigFrame.inset(mLegacyConfigInsets);
+                mOverrideConfigFrame.set(displayFrame);
+                mOverrideConfigFrame.inset(mOverrideConfigInsets);
                 mNeedUpdate = false;
                 return insetsState;
             }
@@ -1970,10 +1970,10 @@ public class DisplayPolicy {
             void set(Info other) {
                 mNonDecorInsets.set(other.mNonDecorInsets);
                 mConfigInsets.set(other.mConfigInsets);
-                mLegacyConfigInsets.set(other.mLegacyConfigInsets);
+                mOverrideConfigInsets.set(other.mOverrideConfigInsets);
                 mNonDecorFrame.set(other.mNonDecorFrame);
                 mConfigFrame.set(other.mConfigFrame);
-                mLegacyConfigFrame.set(other.mLegacyConfigFrame);
+                mOverrideConfigFrame.set(other.mOverrideConfigFrame);
                 mNeedUpdate = false;
             }
 
@@ -2086,7 +2086,7 @@ public class DisplayPolicy {
         final InsetsState newInsetsState = newInfo.update(mDisplayContent, rotation, dw, dh);
         final DecorInsets.Info currentInfo = getDecorInsetsInfo(rotation, dw, dh);
         if (newInfo.mConfigFrame.equals(currentInfo.mConfigFrame)
-                && newInfo.mLegacyConfigFrame.equals(currentInfo.mLegacyConfigFrame)) {
+                && newInfo.mOverrideConfigFrame.equals(currentInfo.mOverrideConfigFrame)) {
             // Even if the config frame is not changed in current rotation, it may change the
             // insets in other rotations if the frame of insets source is changed.
             final InsetsState currentInsetsState = mDisplayContent.mDisplayFrames.mInsetsState;
