@@ -34,7 +34,6 @@ public final class LmkdStatsReporter {
     static final String TAG = TAG_WITH_CLASS_NAME ? "LmkdStatsReporter" : TAG_AM;
 
     public static final int KILL_OCCURRED_MSG_SIZE = 80;
-    public static final int STATE_CHANGED_MSG_SIZE = 8;
 
     private static final int PRESSURE_AFTER_KILL = 0;
     private static final int NOT_RESPONDING = 1;
@@ -78,16 +77,6 @@ public final class LmkdStatsReporter {
             Slog.e(TAG, "Invalid buffer data. Failed to log LMK_KILL_OCCURRED");
             return;
         }
-    }
-
-    /**
-     * Processes the LMK_STATE_CHANGED packet
-     * Logs the change in LMKD state which is used as start/stop boundaries for logging
-     * LMK_KILL_OCCURRED event.
-     * Code: LMK_STATE_CHANGED = 54
-     */
-    public static void logStateChanged(int state) {
-        FrameworkStatsLog.write(FrameworkStatsLog.LMK_STATE_CHANGED, state);
     }
 
     private static int mapKillReason(int reason) {

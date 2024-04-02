@@ -349,7 +349,7 @@ public final class ProcessList {
     // LMK_PROCKILL
     // LMK_UPDATE_PROPS
     // LMK_KILL_OCCURRED
-    // LMK_STATE_CHANGED
+    // LMK_START_MONITORING
     static final byte LMK_TARGET = 0;
     static final byte LMK_PROCPRIO = 1;
     static final byte LMK_PROCREMOVE = 2;
@@ -359,7 +359,6 @@ public final class ProcessList {
     static final byte LMK_PROCKILL = 6; // Note: this is an unsolicited command
     static final byte LMK_UPDATE_PROPS = 7;
     static final byte LMK_KILL_OCCURRED = 8; // Msg to subscribed clients on kill occurred event
-    static final byte LMK_STATE_CHANGED = 9; // Msg to subscribed clients on state changed
     static final byte LMK_START_MONITORING = 9; // Start monitoring if delayed earlier
 
     // Low Memory Killer Daemon command codes.
@@ -959,14 +958,6 @@ public final class ProcessList {
                                         LmkdStatsReporter.logKillOccurred(inputData,
                                                 foregroundServices.first,
                                                 foregroundServices.second);
-                                        return true;
-                                    case LMK_STATE_CHANGED:
-                                        if (receivedLen
-                                                != LmkdStatsReporter.STATE_CHANGED_MSG_SIZE) {
-                                            return false;
-                                        }
-                                        final int state = inputData.readInt();
-                                        LmkdStatsReporter.logStateChanged(state);
                                         return true;
                                     default:
                                         return false;
