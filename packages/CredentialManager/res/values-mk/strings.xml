@@ -39,12 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Како што се движиме кон иднина без лозинки, лозинките сепак ќе бидат достапни покрај криптографските клучеви."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Изберете каде да ги зачувате вашите <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Изберете управник со лозинки за да ги зачувате вашите податоци и да се најавите побрзо следниот пат"</string>
-    <!-- no translation found for choose_create_option_passkey_title (8762295821604276511) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (4481366993598649224) -->
-    <skip />
-    <!-- no translation found for choose_create_option_sign_in_title (7092914088455358079) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Да се создаде криптографски клуч за најавување на <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"Да се зачува лозинката за најавување на <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Да се зачуваат податоците за најавување за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"криптографски клуч"</string>
     <string name="password" msgid="6738570945182936667">"лозинка"</string>
     <string name="passkeys" msgid="5733880786866559847">"криптографски клучеви"</string>
@@ -73,8 +70,7 @@
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Отфрли"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Да се користи вашиот зачуван криптографски клуч за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Да се користат зачуваните лозинки за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <!-- no translation found for get_dialog_title_single_tap_for (2057945648748859483) -->
-    <skip />
+    <string name="get_dialog_title_single_tap_for" msgid="2057945648748859483">"Користете го заклучувањето екран за да се најавувате на <xliff:g id="APP_NAME">%1$s</xliff:g> со <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Да се користи вашето најавување за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Да се отклучат опциите за најавување за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Изберете зачуван криптографски клуч за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
