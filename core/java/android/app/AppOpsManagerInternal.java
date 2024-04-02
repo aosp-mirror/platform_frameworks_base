@@ -53,9 +53,10 @@ public abstract class AppOpsManagerInternal {
          * @param superImpl The super implementation.
          * @return The app op check result.
          */
-        int checkOperation(int code, int uid, String packageName, @Nullable String attributionTag,
-                int virtualDeviceId, boolean raw, HexFunction<Integer, Integer, String, String,
-                Integer, Boolean, Integer> superImpl);
+        int checkOperation(int code, int uid, @Nullable String packageName,
+                @Nullable String attributionTag, int virtualDeviceId, boolean raw,
+                @NonNull HexFunction<Integer, Integer, String, String, Integer, Boolean, Integer>
+                        superImpl);
 
         /**
          * Allows overriding check audio operation behavior.
@@ -67,8 +68,8 @@ public abstract class AppOpsManagerInternal {
          * @param superImpl The super implementation.
          * @return The app op check result.
          */
-        int checkAudioOperation(int code, int usage, int uid, String packageName,
-                QuadFunction<Integer, Integer, Integer, String, Integer> superImpl);
+        int checkAudioOperation(int code, int usage, int uid, @Nullable String packageName,
+                @NonNull QuadFunction<Integer, Integer, Integer, String, Integer> superImpl);
 
         /**
          * Allows overriding note operation behavior.
@@ -125,7 +126,7 @@ public abstract class AppOpsManagerInternal {
          * @param superImpl The super implementation.
          * @return The app op note result.
          */
-        SyncNotedAppOp startOperation(IBinder token, int code, int uid,
+        SyncNotedAppOp startOperation(@NonNull IBinder token, int code, int uid,
                 @Nullable String packageName, @Nullable String attributionTag, int virtualDeviceId,
                 boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
                 @Nullable String message, boolean shouldCollectMessage,
@@ -152,8 +153,9 @@ public abstract class AppOpsManagerInternal {
          */
         SyncNotedAppOp startProxyOperation(@NonNull IBinder clientId, int code,
                 @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
-                boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
-                boolean skipProxyOperation, @AttributionFlags int proxyAttributionFlags,
+                boolean shouldCollectAsyncNotedOp, @Nullable String message,
+                boolean shouldCollectMessage, boolean skipProxyOperation,
+                @AttributionFlags int proxyAttributionFlags,
                 @AttributionFlags int proxiedAttributionFlags, int attributionChainId,
                 @NonNull UndecFunction<IBinder, Integer, AttributionSource, Boolean,
                         Boolean, String, Boolean, Boolean, Integer, Integer, Integer,
