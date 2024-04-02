@@ -482,7 +482,8 @@ final class LogicalDisplay {
             int maskedWidth = deviceInfo.width - maskingInsets.left - maskingInsets.right;
             int maskedHeight = deviceInfo.height - maskingInsets.top - maskingInsets.bottom;
 
-            if (mIsAnisotropyCorrectionEnabled && deviceInfo.xDpi > 0 && deviceInfo.yDpi > 0) {
+            if (mIsAnisotropyCorrectionEnabled && deviceInfo.type == Display.TYPE_EXTERNAL
+                        && deviceInfo.xDpi > 0 && deviceInfo.yDpi > 0) {
                 if (deviceInfo.xDpi > deviceInfo.yDpi * DisplayDevice.MAX_ANISOTROPY) {
                     maskedHeight = (int) (maskedHeight * deviceInfo.xDpi / deviceInfo.yDpi + 0.5);
                 } else if (deviceInfo.xDpi * DisplayDevice.MAX_ANISOTROPY < deviceInfo.yDpi) {
@@ -711,8 +712,8 @@ final class LogicalDisplay {
         var displayLogicalWidth = displayInfo.logicalWidth;
         var displayLogicalHeight = displayInfo.logicalHeight;
 
-        if (mIsAnisotropyCorrectionEnabled && displayDeviceInfo.xDpi > 0
-                    && displayDeviceInfo.yDpi > 0) {
+        if (mIsAnisotropyCorrectionEnabled && displayDeviceInfo.type == Display.TYPE_EXTERNAL
+                    && displayDeviceInfo.xDpi > 0 && displayDeviceInfo.yDpi > 0) {
             if (displayDeviceInfo.xDpi > displayDeviceInfo.yDpi * DisplayDevice.MAX_ANISOTROPY) {
                 var scalingFactor = displayDeviceInfo.yDpi / displayDeviceInfo.xDpi;
                 if (rotated) {

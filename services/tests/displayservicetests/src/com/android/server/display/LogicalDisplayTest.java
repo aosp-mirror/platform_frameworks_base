@@ -142,8 +142,39 @@ public class LogicalDisplayTest {
         assertEquals(new Point(0, DISPLAY_HEIGHT / 4), mLogicalDisplay.getDisplayPosition());
     }
 
+
+    @Test
+    public void testNoLetterbox_noAnisotropyCorrectionForInternalDisplay() {
+        mDisplayDeviceInfo.type = Display.TYPE_INTERNAL;
+        mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice,
+                /*isAnisotropyCorrectionEnabled=*/ true,
+                /*isAlwaysRotateDisplayDeviceEnabled=*/ true);
+
+        // In case of Anisotropy of pixels, then the content should be rescaled so it would adjust
+        // to using the whole screen. This is because display will rescale it back to fill the
+        // screen (in case the display menu setting is set to stretch the pixels across the display)
+        mDisplayDeviceInfo.xDpi = 0.5f;
+        mDisplayDeviceInfo.yDpi = 1.0f;
+
+        mLogicalDisplay.updateLocked(mDeviceRepo);
+        var originalDisplayInfo = mLogicalDisplay.getDisplayInfoLocked();
+        // Content width not scaled
+        assertEquals(DISPLAY_WIDTH, originalDisplayInfo.logicalWidth);
+        assertEquals(DISPLAY_HEIGHT, originalDisplayInfo.logicalHeight);
+
+        SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+        mLogicalDisplay.configureDisplayLocked(t, mDisplayDevice, false);
+
+        // Applications need to think that they are shown on a display with square pixels.
+        // as applications can be displayed on multiple displays simultaneously (mirrored).
+        // Content is too wide, should have become letterboxed - but it won't because of anisotropy
+        // correction
+        assertEquals(new Point(0, 0), mLogicalDisplay.getDisplayPosition());
+    }
+
     @Test
     public void testNoLetterbox_anisotropyCorrection() {
+        mDisplayDeviceInfo.type = Display.TYPE_EXTERNAL;
         mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice,
                 /*isAnisotropyCorrectionEnabled=*/ true,
                 /*isAlwaysRotateDisplayDeviceEnabled=*/ true);
@@ -172,6 +203,7 @@ public class LogicalDisplayTest {
 
     @Test
     public void testLetterbox_anisotropyCorrectionYDpi() {
+        mDisplayDeviceInfo.type = Display.TYPE_EXTERNAL;
         mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice,
                 /*isAnisotropyCorrectionEnabled=*/ true,
                 /*isAlwaysRotateDisplayDeviceEnabled=*/ true);
@@ -229,6 +261,7 @@ public class LogicalDisplayTest {
 
     @Test
     public void testPillarbox_anisotropyCorrection() {
+        mDisplayDeviceInfo.type = Display.TYPE_EXTERNAL;
         mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice,
                 /*isAnisotropyCorrectionEnabled=*/ true,
                 /*isAlwaysRotateDisplayDeviceEnabled=*/ true);
@@ -257,6 +290,7 @@ public class LogicalDisplayTest {
 
     @Test
     public void testNoPillarbox_anisotropyCorrectionYDpi() {
+        mDisplayDeviceInfo.type = Display.TYPE_EXTERNAL;
         mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice,
                 /*isAnisotropyCorrectionEnabled=*/ true,
                 /*isAlwaysRotateDisplayDeviceEnabled=*/ true);
@@ -318,6 +352,7 @@ public class LogicalDisplayTest {
 
     @Test
     public void testGetDisplayPositionAlwaysRotateDisplayEnabled() {
+        mDisplayDeviceInfo.type = Display.TYPE_EXTERNAL;
         mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice,
                 /*isAnisotropyCorrectionEnabled=*/ true,
                 /*isAlwaysRotateDisplayDeviceEnabled=*/ true);

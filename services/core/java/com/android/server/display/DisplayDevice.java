@@ -160,8 +160,8 @@ abstract class DisplayDevice {
         DisplayDeviceInfo displayDeviceInfo = getDisplayDeviceInfoLocked();
         var width = displayDeviceInfo.width;
         var height = displayDeviceInfo.height;
-        if (mIsAnisotropyCorrectionEnabled && displayDeviceInfo.yDpi > 0
-                    && displayDeviceInfo.xDpi > 0) {
+        if (mIsAnisotropyCorrectionEnabled && displayDeviceInfo.type == Display.TYPE_EXTERNAL
+                    && displayDeviceInfo.yDpi > 0 && displayDeviceInfo.xDpi > 0) {
             if (displayDeviceInfo.xDpi > displayDeviceInfo.yDpi * MAX_ANISOTROPY) {
                 height = (int) (height * displayDeviceInfo.xDpi / displayDeviceInfo.yDpi + 0.5);
             } else if (displayDeviceInfo.xDpi * MAX_ANISOTROPY < displayDeviceInfo.yDpi) {
