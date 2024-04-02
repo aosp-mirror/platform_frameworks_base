@@ -104,7 +104,7 @@ constructor(
 ) {
 
     /** Track the media player setting status on lock screen. */
-    private var allowMediaPlayerOnLockScreen: Boolean = true
+    private var allowMediaPlayerOnLockScreen: Boolean = getMediaLockScreenSetting()
     private val lockScreenMediaPlayerUri =
         secureSettings.getUriFor(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN)
 
@@ -461,6 +461,7 @@ constructor(
                         mediaCarouselController.logSmartspaceImpression(qsExpanded)
                     }
                     updateUserVisibility()
+                    mediaCarouselController.updateHostVisibility()
                 }
 
                 override fun onDozeAmountChanged(linear: Float, eased: Float) {
@@ -533,7 +534,6 @@ constructor(
         mediaCarouselController.updateHostVisibility = {
             mediaHosts.forEach { it?.updateViewVisibility() }
         }
-
         panelEventsEvents.addShadeStateEventsListener(
             object : ShadeStateEventsListener {
                 override fun onExpandImmediateChanged(isExpandImmediateEnabled: Boolean) {
@@ -547,12 +547,8 @@ constructor(
             object : ContentObserver(handler) {
                 override fun onChange(selfChange: Boolean, uri: Uri?) {
                     if (uri == lockScreenMediaPlayerUri) {
-                        allowMediaPlayerOnLockScreen =
-                            secureSettings.getBoolForUser(
-                                Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN,
-                                true,
-                                UserHandle.USER_CURRENT
-                            )
+                        allowMediaPlayerOnLockScreen = getMediaLockScreenSetting()
+                        mediaCarouselController.updateHostVisibility()
                     }
                 }
             }
@@ -560,6 +556,14 @@ constructor(
             Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN,
             settingsObserver,
             UserHandle.USER_ALL
+        )
+    }
+
+    private fun getMediaLockScreenSetting(): Boolean {
+        return secureSettings.getBoolForUser(
+            Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN,
+            true,
+            UserHandle.USER_CURRENT
         )
     }
 
@@ -600,6 +604,13 @@ constructor(
     /** Close the guts in all players in [MediaCarouselController]. */
     fun closeGuts() {
         mediaCarouselController.closeGuts()
+    }
+
+    /** Return true if the carousel should be hidden because lockscreen is currently visible */
+    fun isLockedAndHidden(): Boolean {
+        return !allowMediaPlayerOnLockScreen &&
+            (statusbarState == StatusBarState.SHADE_LOCKED ||
+                statusbarState == StatusBarState.KEYGUARD)
     }
 
     private fun createUniqueObjectHost(): UniqueObjectHostView {
