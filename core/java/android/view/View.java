@@ -43,6 +43,7 @@ import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.view.flags.Flags.toolkitFrameRateBySizeReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateDefaultNormalReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateSmallUsesPercentReadOnly;
+import static android.view.flags.Flags.toolkitFrameRateViewEnablingReadOnly;
 import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
 import static android.view.flags.Flags.viewVelocityApi;
@@ -2439,6 +2440,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private static final boolean sToolkitFrameRateSmallUsesPercentReadOnlyFlagValue =
             toolkitFrameRateSmallUsesPercentReadOnly();
+    private static final boolean sToolkitFrameRateViewEnablingReadOnlyFlagValue =
+            toolkitFrameRateViewEnablingReadOnly();
 
     // Used to set frame rate compatibility.
     @Surface.FrameRateCompatibility int mFrameRateCompatibility =
@@ -20794,7 +20797,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         // For VRR to vote the preferred frame rate
-        if (sToolkitSetFrameRateReadOnlyFlagValue) {
+        if (sToolkitSetFrameRateReadOnlyFlagValue
+                && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
             votePreferredFrameRate();
         }
 
@@ -20901,7 +20905,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected void damageInParent() {
         if (mParent != null && mAttachInfo != null) {
             // For VRR to vote the preferred frame rate
-            if (sToolkitSetFrameRateReadOnlyFlagValue) {
+            if (sToolkitSetFrameRateReadOnlyFlagValue
+                    && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
                 votePreferredFrameRate();
             }
             mParent.onDescendantInvalidated(this, this);
@@ -23592,7 +23597,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         mPrivateFlags4 = (mPrivateFlags4 & ~PFLAG4_HAS_MOVED) | PFLAG4_HAS_DRAWN;
-        if (sToolkitSetFrameRateReadOnlyFlagValue) {
+        if (sToolkitSetFrameRateReadOnlyFlagValue
+                && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
             updateInfrequentCount();
         }
 
@@ -25508,7 +25514,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private void sizeChange(int newWidth, int newHeight, int oldWidth, int oldHeight) {
-        if (mAttachInfo != null) {
+        if (mAttachInfo != null && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
             boolean isSmall;
             if (sToolkitFrameRateSmallUsesPercentReadOnlyFlagValue) {
                 int size = newWidth * newHeight;
