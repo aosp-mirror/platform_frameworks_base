@@ -555,7 +555,7 @@
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Este tablet"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Altifalante estação carregam."</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Altifalante estação carregamento"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositivo externo"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispositivo associado"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este telemóvel"</string>

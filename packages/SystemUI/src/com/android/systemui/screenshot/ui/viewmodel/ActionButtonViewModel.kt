@@ -20,6 +20,7 @@ import android.graphics.drawable.Drawable
 
 data class ActionButtonViewModel(
     val icon: Drawable?,
-    val name: String?,
+    val name: CharSequence?,
+    val description: CharSequence,
     val onClicked: (() -> Unit)?
 )

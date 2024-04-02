@@ -643,7 +643,7 @@
     <string name="guest_exit_button" msgid="5774985819191803960">"અતિથિ મોડમાંથી બહાર નીકળો"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"અતિથિ સત્ર રીસેટ કરો"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"અતિથિ મોડમાંથી બહાર નીકળો"</string>
-    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"બહાર નીકળતી વખતે તમામ પ્રવૃત્તિ ડિલીટ કરવામાં આવશે"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"બહાર નીકળતી વખતે તમામ ઍક્ટિવિટી ડિલીટ કરવામાં આવશે"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"બહાર નીકળતી વખતે તમે પ્રવૃત્તિ સાચવી કે ડિલીટ કરી શકશો"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"સત્રની પ્રવૃત્તિ હમણાં ડિલીટ કરવા માટે રીસેટ કરો અથવા બહાર નીકળતી વખતે તમે પ્રવૃત્તિ સાચવી કે ડિલીટ કરી શકશો"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ફોટો લો"</string>

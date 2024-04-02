@@ -481,7 +481,7 @@
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - Mengecas"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Tidak diketahui"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Mengecas"</string>
-    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Mengecas dgn cepat"</string>
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Mengecas pantas"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Mengecas perlahan"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Mengecas tanpa wayar"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Pengecasan"</string>

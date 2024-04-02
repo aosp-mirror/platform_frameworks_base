@@ -565,7 +565,7 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Deixouse de fixar a aplicación"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"Chamada"</string>
     <string name="stream_system" msgid="7663148785370565134">"Sistema"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Ton"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Son"</string>
     <string name="stream_music" msgid="2188224742361847580">"Multimedia"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Alarma"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Notificación"</string>
@@ -576,7 +576,7 @@
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Vibrar"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Silenciar"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"Emitir"</string>
-    <string name="stream_notification_unavailable" msgid="4313854556205836435">"Non dispoñible (o son está silenciado)"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"Non dispoñible: o son está silenciado"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Toca para activar o son."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Toca para establecer a vibración. Pódense silenciar os servizos de accesibilidade."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Toca para silenciar. Pódense silenciar os servizos de accesibilidade."</string>
@@ -590,7 +590,7 @@
     <string name="volume_dialog_title" msgid="6502703403483577940">"Controis de volume de %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"As chamadas e as notificacións soarán (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"Reproducindo <xliff:g id="LABEL">%s</xliff:g> en"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Audio reproducido en"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Reproducirase en"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Configurador da IU do sistema"</string>
     <string name="status_bar" msgid="4357390266055077437">"Barra de estado"</string>
     <string name="demo_mode" msgid="263484519766901593">"Modo de demostración da IU do sistema"</string>

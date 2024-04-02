@@ -566,7 +566,7 @@
     <string name="stream_voice_call" msgid="7468348170702375660">"Повик"</string>
     <string name="stream_system" msgid="7663148785370565134">"Систем"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Ѕвони"</string>
-    <string name="stream_music" msgid="2188224742361847580">"Аудио-визуелни содржини"</string>
+    <string name="stream_music" msgid="2188224742361847580">"Аудиовизуелни содржини"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Аларм"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Известување"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>

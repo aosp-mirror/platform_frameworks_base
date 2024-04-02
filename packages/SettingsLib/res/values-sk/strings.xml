@@ -483,7 +483,7 @@
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Nabíja sa"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Rýchle nabíjanie"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Pomalé nabíjanie"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Nabíja sa bezdrôtovo"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Bezdrôtové nabíjanie"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Nabíja sa"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nenabíja sa"</string>
     <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Pripojené, ale nenabíja sa"</string>

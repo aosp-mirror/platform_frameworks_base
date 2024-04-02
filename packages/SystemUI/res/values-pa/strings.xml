@@ -582,7 +582,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s। ਮਿਊਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ। ਪਹੁੰਚਯੋਗਤਾ ਸੇਵਾਵਾਂ ਮਿਊਟ ਹੋ ਸਕਦੀਆਂ ਹਨ।"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s। ਥਰਥਰਾਹਟ \'ਤੇ ਸੈੱਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s। ਮਿਊਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
-    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"ਸ਼ੋਰ ਨੂੰ ਕੰਟਰੋਲ ਕਰੋ"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"ਨੋਇਸ ਕੰਟਰੋਲ"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"ਰਿੰਗਰ ਮੋਡ ਨੂੰ ਬਦਲਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"ਮਿਊਟ ਕਰੋ"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ਅਣਮਿਊਟ ਕਰੋ"</string>

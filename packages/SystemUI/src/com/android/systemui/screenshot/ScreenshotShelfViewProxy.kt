@@ -20,8 +20,10 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.app.Notification
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Rect
+import android.net.Uri
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.ScrollCaptureResponse
@@ -37,6 +39,7 @@ import com.android.systemui.screenshot.LogConfig.DEBUG_ACTIONS
 import com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS
 import com.android.systemui.screenshot.LogConfig.DEBUG_INPUT
 import com.android.systemui.screenshot.LogConfig.DEBUG_WINDOW
+import com.android.systemui.screenshot.ScreenshotController.SavedImageData
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER
 import com.android.systemui.screenshot.scroll.ScrollCaptureController
 import com.android.systemui.screenshot.ui.ScreenshotAnimationController
@@ -54,10 +57,9 @@ class ScreenshotShelfViewProxy
 constructor(
     private val logger: UiEventLogger,
     private val viewModel: ScreenshotViewModel,
-    private val staticActionsProvider: ScreenshotActionsProvider,
     @Assisted private val context: Context,
     @Assisted private val displayId: Int
-) : ScreenshotViewProxy {
+) : ScreenshotViewProxy, ScreenshotActionsProvider.ScreenshotActionsCallback {
     override val view: ScreenshotShelfView =
         LayoutInflater.from(context).inflate(R.layout.screenshot_shelf, null) as ScreenshotShelfView
     override val screenshotPreview: View
@@ -75,6 +77,8 @@ constructor(
     override var isPendingSharedTransition = false
 
     private val animationController = ScreenshotAnimationController(view)
+    private var imageData: SavedImageData? = null
+    private var runOnImageDataAcquired: ((SavedImageData) -> Unit)? = null
 
     init {
         ScreenshotShelfViewBinder.bind(view, viewModel, LayoutInflater.from(context))
@@ -87,8 +91,9 @@ constructor(
     override fun reset() {
         animationController.cancel()
         isPendingSharedTransition = false
-        viewModel.setScreenshotBitmap(null)
-        viewModel.setActions(listOf())
+        imageData = null
+        viewModel.reset()
+        runOnImageDataAcquired = null
     }
     override fun updateInsets(insets: WindowInsets) {}
     override fun updateOrientation(insets: WindowInsets) {}
@@ -99,18 +104,9 @@ constructor(
 
     override fun addQuickShareChip(quickShareAction: Notification.Action) {}
 
-    override fun setChipIntents(imageData: ScreenshotController.SavedImageData) {
-        val staticActions =
-            staticActionsProvider.getActions(context, imageData.owner).map {
-                ActionButtonViewModel(it.icon, it.text) {
-                    val intent = it.retrieveIntent(imageData.uri)
-                    debugLog(DEBUG_ACTIONS) { "Action tapped: $intent" }
-                    isPendingSharedTransition = true
-                    callbacks?.onAction(intent, imageData.owner, it.overrideTransition)
-                }
-            }
-
-        viewModel.setActions(staticActions)
+    override fun setChipIntents(data: SavedImageData) {
+        imageData = data
+        runOnImageDataAcquired?.invoke(data)
     }
 
     override fun requestDismissal(event: ScreenshotEvent) {
@@ -222,5 +218,42 @@ constructor(
     @AssistedFactory
     interface Factory : ScreenshotViewProxy.Factory {
         override fun getProxy(context: Context, displayId: Int): ScreenshotShelfViewProxy
+    }
+
+    override fun setPreviewAction(overrideTransition: Boolean, retrieveIntent: (Uri) -> Intent) {
+        viewModel.setPreviewAction {
+            imageData?.let {
+                val intent = retrieveIntent(it.uri)
+                debugLog(DEBUG_ACTIONS) { "Preview tapped: $intent" }
+                isPendingSharedTransition = true
+                callbacks?.onAction(intent, it.owner, overrideTransition)
+            }
+        }
+    }
+
+    override fun addActions(actions: List<ScreenshotActionsProvider.ScreenshotAction>) {
+        viewModel.addActions(
+            actions.map { action ->
+                ActionButtonViewModel(action.icon, action.text, action.description) {
+                    val actionRunnable =
+                        getActionRunnable(action.retrieveIntent, action.overrideTransition)
+                    imageData?.let { actionRunnable(it) }
+                        ?: run { runOnImageDataAcquired = actionRunnable }
+                }
+            }
+        )
+    }
+
+    private fun getActionRunnable(
+        retrieveIntent: (Uri) -> Intent,
+        overrideTransition: Boolean
+    ): (SavedImageData) -> Unit {
+        val onClick: (SavedImageData) -> Unit = {
+            val intent = retrieveIntent(it.uri)
+            debugLog(DEBUG_ACTIONS) { "Action tapped: $intent" }
+            isPendingSharedTransition = true
+            callbacks!!.onAction(intent, it.owner, overrideTransition)
+        }
+        return onClick
     }
 }

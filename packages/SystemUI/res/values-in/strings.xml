@@ -576,7 +576,7 @@
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Getar"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Nonaktifkan"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"Transmisi"</string>
-    <string name="stream_notification_unavailable" msgid="4313854556205836435">"Tidak tersedia karena volume dering dibisukan"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"Tidak tersedia - Volume dering dibisukan"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Ketuk untuk menyuarakan."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Ketuk untuk menyetel agar bergetar. Layanan aksesibilitas mungkin dibisukan."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Ketuk untuk membisukan. Layanan aksesibilitas mungkin dibisukan."</string>
@@ -645,10 +645,10 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Status:&lt;/b&gt; Didemosikan menjadi Senyap"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Status:&lt;/b&gt; Diberi Peringkat Lebih Tinggi"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status:&lt;/b&gt; Diberi Peringkat Lebih Rendah"</string>
-    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci"</string>
-    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci, ditampilkan sebagai balon"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci, mengganggu mode Jangan Ganggu"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci, ditampilkan sebagai balon, mengganggu mode Jangan Ganggu"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Muncul teratas di notifikasi percakapan dan sebagai foto profil di layar kunci"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Muncul teratas di notifikasi percakapan dan sebagai foto profil di layar kunci, ditampilkan sebagai balon"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Muncul teratas di notifikasi percakapan dan sebagai foto profil di layar kunci, menimpa mode Jangan Ganggu"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Muncul teratas di notifikasi percakapan dan sebagai foto profil di layar kunci, ditampilkan sebagai balon, menimpa mode Jangan Ganggu"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritas"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak mendukung fitur percakapan"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Notifikasi ini tidak dapat diubah."</string>
@@ -1093,7 +1093,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Membuka percakapan"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widget Percakapan"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Ketuk percakapan untuk menambahkannya ke Layar utama"</string>
-    <string name="no_conversations_text" msgid="5354115541282395015">"Percakapan terbaru Anda akan ditampilkan di sini"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Percakapan terbaru akan muncul di sini"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Percakapan prioritas"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Percakapan terbaru"</string>
     <string name="days_timestamp" msgid="5821854736213214331">"<xliff:g id="DURATION">%1$s</xliff:g> hari lalu"</string>

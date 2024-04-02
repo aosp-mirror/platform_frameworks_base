@@ -576,7 +576,7 @@
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Vibrar"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Desativar som"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"Transmitir"</string>
-    <string name="stream_notification_unavailable" msgid="4313854556205836435">"Indisponível com o toque foi silenciado"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"Indisponível com o toque silenciado"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Toque para ativar o som."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Toque para configurar para vibrar. É possível que os serviços de acessibilidade sejam silenciados."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Toque para silenciar. É possível que os serviços de acessibilidade sejam silenciados."</string>

@@ -522,7 +522,7 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"Estado do registro de IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Registrado"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Não registrado"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"Não disponível"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"Indisponível"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"O MAC é randomizado"</string>
     <string name="wifi_tether_connected_summary" msgid="5100712926640492336">"{count,plural, =1{1 dispositivo conectado}one{# dispositivo conectado}other{# dispositivos conectados}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Mais tempo."</string>

@@ -828,7 +828,7 @@
     <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Permite aplicației să actualizeze starea verificării cheilor E2EE deținute de alte aplicații"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Să seteze reguli pentru parolă"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Stabilește lungimea și tipul de caractere permise pentru parolele și codurile PIN de blocare a ecranului."</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"Să monitorizeze încercările de deblocare a ecranului"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"să monitorizeze încercările de deblocare a ecranului"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Monitorizează numărul de parole incorecte introduse la deblocarea ecranului și blochează tableta sau șterge datele acesteia dacă sunt introduse prea multe parole incorecte."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Monitorizează numărul de parole incorecte introduse la deblocarea ecranului și blochează dispozitivul Android TV sau șterge toate datele de pe acesta dacă se introduc prea multe parole incorecte."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Monitorizează numărul de parole incorecte introduse la deblocarea ecranului și blochează sistemul de infotainment sau șterge toate datele acestuia dacă sunt introduse prea multe parole incorecte."</string>
@@ -841,7 +841,7 @@
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Modifică blocarea ecranului."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Să blocheze ecranul"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Stabilește cum și când se blochează ecranul."</string>
-    <string name="policylab_wipeData" msgid="1359485247727537311">"Să șteargă toate datele"</string>
+    <string name="policylab_wipeData" msgid="1359485247727537311">"să șteargă toate datele"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Șterge datele de pe tabletă fără avertisment, efectuând resetarea configurării din fabrică."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Șterge datele de pe dispozitivul Android TV fără avertisment, efectuând o revenire la setările din fabrică."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Șterge datele din sistemul de infotainment fără avertisment, prin revenirea la setările din fabrică."</string>

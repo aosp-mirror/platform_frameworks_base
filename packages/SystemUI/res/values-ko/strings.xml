@@ -588,7 +588,7 @@
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"음소거 해제"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"진동"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s 볼륨 컨트롤"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"전화 및 알림이 오면 벨소리가 울립니다(<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"전화 및 알림이 오면 벨소리가 울립니다(<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)."</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> 재생 위치:"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"오디오 재생 위치:"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"시스템 UI 튜너"</string>

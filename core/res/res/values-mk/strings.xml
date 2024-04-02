@@ -1303,7 +1303,7 @@
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"Слика од меморијата на <xliff:g id="PROC">%1$s</xliff:g> ви е достапна за споделување. Бидете внимателни: оваа слика од меморијата можеби ги содржи сите чувствителни лични информации до коишто процесот има пристап, што може да вклучуваат работи што сте ги напишале."</string>
     <string name="sendText" msgid="493003724401350724">"Избери дејство за текст"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Јачина на звук на ѕвонче"</string>
-    <string name="volume_music" msgid="7727274216734955095">"Јачина на аудио/видео звук"</string>
+    <string name="volume_music" msgid="7727274216734955095">"Јачина на звук за аудио/видео"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Се репродуцира преку Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Поставено ѕвонење на тивко"</string>
     <string name="volume_call" msgid="7625321655265747433">"Јачина на звук на дојдовен повик"</string>
@@ -1314,7 +1314,7 @@
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Јачина на звук на Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Јачина на звук на мелодија"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"Јачина на звук на повик"</string>
-    <string name="volume_icon_description_media" msgid="4997633254078171233">"Јачина на аудио/видео звук"</string>
+    <string name="volume_icon_description_media" msgid="4997633254078171233">"Јачина на звук за аудио/видео"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Јачина на звук за известување"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Стандардна мелодија"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Стандардна (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1987,7 +1987,7 @@
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Прекини ја паузата"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Итен случај"</string>
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Поставете заклучување екран"</string>
-    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Поставување заклучување екран"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Поставете заклучување екран"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"За да користите „Приватен простор“, поставете заклучување екран на уредов"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Апликацијата не е достапна"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> не е достапна во моментов."</string>

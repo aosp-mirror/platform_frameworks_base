@@ -2368,8 +2368,8 @@
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"デュアル スクリーン"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"デュアル スクリーン: ON"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>は 2 画面でコンテンツを表示しています"</string>
-    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"デバイスが熱くなりすぎています"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"スマートフォンが熱くなりすぎているため、デュアル スクリーンを使用できません"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"デバイスが熱くなっています"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"スマートフォンが熱いため、デュアル スクリーンを使用できません"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"デュアル スクリーンを使用できません"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"バッテリー セーバーが ON のため、デュアル スクリーンを使用できません。この動作は設定で OFF にできます。"</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"設定に移動"</string>

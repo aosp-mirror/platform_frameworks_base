@@ -1281,7 +1281,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Қолданбалар іске қосылуда."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Қосуды аяқтауда."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Қуат түймесін бастыңыз. Бұл әдетте экранды өшіреді.\n\nСаусақ ізін реттеу үшін, оны жайлап түртіп көріңіз."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Реттеуді аяқтау үшін экранды өшіріңіз"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Реттеуді аяқтау үшін экранды өшіріңіз."</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Өшіру"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Саусақ ізін растауды жалғастырасыз ба?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Қуат түймесін бастыңыз. Бұл әдетте экранды өшіреді.\n\nСаусақ ізін растау үшін, оны жайлап түртіп көріңіз."</string>
@@ -1559,7 +1559,7 @@
     <string name="sync_really_delete" msgid="5657871730315579051">"Бұл нәрселер жойылсын"</string>
     <string name="sync_undo_deletes" msgid="5786033331266418896">"Жойылғандарды кері орындау"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"Қазір ешқандай әрекет жасамаңыз"</string>
-    <string name="choose_account_label" msgid="5557833752759831548">"Аккаунт таңдау"</string>
+    <string name="choose_account_label" msgid="5557833752759831548">"Аккаунт таңдаңыз"</string>
     <string name="add_account_label" msgid="4067610644298737417">"Аккаунт қосу"</string>
     <string name="add_account_button_label" msgid="322390749416414097">"Аккаунт қосу."</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Арттыру"</string>
