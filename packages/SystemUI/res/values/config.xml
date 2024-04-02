@@ -116,9 +116,6 @@
          The syntax is setting-name:spec. If the tile is a TileService, the spec should be specified
          as custom(package/class). Relative class name is supported. -->
     <string-array name="config_quickSettingsAutoAdd" translatable="false">
-        <item>accessibility_display_daltonizer_enabled:color_correction</item>
-        <item>accessibility_display_inversion_enabled:inversion</item>
-        <item>one_handed_mode_enabled:onehanded</item>
         <item>accessibility_font_scaling_has_been_changed:font_scaling</item>
     </string-array>
 
