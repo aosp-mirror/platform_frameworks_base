@@ -52,9 +52,11 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.android.credentialmanager.CredentialSelectorViewModel
 import com.android.credentialmanager.R
+import com.android.credentialmanager.common.BiometricFlowType
+import com.android.credentialmanager.common.BiometricPromptState
 import com.android.credentialmanager.common.ProviderActivityState
 import com.android.credentialmanager.common.material.ModalBottomSheetDefaults
-import com.android.credentialmanager.common.runBiometricFlow
+import com.android.credentialmanager.common.runBiometricFlowForGet
 import com.android.credentialmanager.common.ui.ActionButton
 import com.android.credentialmanager.common.ui.ActionEntry
 import com.android.credentialmanager.common.ui.ConfirmButton
@@ -154,7 +156,11 @@ fun GetCredentialScreen(
                                 onBiometricEntrySelected =
                                 viewModel::getFlowOnEntrySelected,
                                 fallbackToOriginalFlow =
-                                viewModel::getFlowOnBackToPrimarySelectionScreen,
+                                viewModel::fallbackFromBiometricToNormalFlow,
+                                getBiometricPromptState =
+                                viewModel::getBiometricPromptState,
+                                onBiometricPromptStateChange =
+                                viewModel::onBiometricPromptStateChange
                             )
                         } else {
                             AllSignInOptionCard(
@@ -218,19 +224,23 @@ internal fun BiometricSelectionPage(
     providerInfoList: List<ProviderInfo>,
     providerDisplayInfo: ProviderDisplayInfo,
     onBiometricEntrySelected: (EntryInfo, BiometricPrompt.AuthenticationResult?) -> Unit,
-    fallbackToOriginalFlow: () -> Unit,
+    fallbackToOriginalFlow: (BiometricFlowType) -> Unit,
+    getBiometricPromptState: () -> BiometricPromptState,
+    onBiometricPromptStateChange: (BiometricPromptState) -> Unit,
 ) {
     if (biometricEntry == null) {
-        fallbackToOriginalFlow()
+        fallbackToOriginalFlow(BiometricFlowType.GET)
         return
     }
-    runBiometricFlow(
+    runBiometricFlowForGet(
         biometricEntry = biometricEntry,
         context = LocalContext.current,
         openMoreOptionsPage = onMoreOptionSelected,
         sendDataToProvider = onBiometricEntrySelected,
         onCancelFlowAndFinish = onCancelFlowAndFinish,
         onIllegalStateAndFinish = onIllegalStateAndFinish,
+        getBiometricPromptState = getBiometricPromptState,
+        onBiometricPromptStateChange = onBiometricPromptStateChange,
         getRequestDisplayInfo = requestDisplayInfo,
         getProviderInfoList = providerInfoList,
         getProviderDisplayInfo = providerDisplayInfo,

@@ -46,11 +46,13 @@ import androidx.core.graphics.drawable.toBitmap
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.credentialmanager.CredentialSelectorViewModel
 import com.android.credentialmanager.R
+import com.android.credentialmanager.common.BiometricFlowType
+import com.android.credentialmanager.common.BiometricPromptState
 import com.android.credentialmanager.model.EntryInfo
 import com.android.credentialmanager.model.CredentialType
 import com.android.credentialmanager.common.ProviderActivityState
 import com.android.credentialmanager.common.material.ModalBottomSheetDefaults
-import com.android.credentialmanager.common.runBiometricFlow
+import com.android.credentialmanager.common.runBiometricFlowForCreate
 import com.android.credentialmanager.common.ui.ActionButton
 import com.android.credentialmanager.common.ui.BodyMediumText
 import com.android.credentialmanager.common.ui.BodySmallText
@@ -111,7 +113,11 @@ fun CreateCredentialScreen(
                                 onBiometricEntrySelected =
                                 viewModel::createFlowOnEntrySelected,
                                 fallbackToOriginalFlow =
-                                viewModel::getFlowOnBackToPrimarySelectionScreen,
+                                viewModel::fallbackFromBiometricToNormalFlow,
+                                getBiometricPromptState =
+                                viewModel::getBiometricPromptState,
+                                onBiometricPromptStateChange =
+                                viewModel::onBiometricPromptStateChange
                             )
                         CreateScreenState.MORE_OPTIONS_SELECTION -> MoreOptionsSelectionCard(
                                 requestDisplayInfo = createCredentialUiState.requestDisplayInfo,
@@ -578,18 +584,22 @@ internal fun BiometricSelectionPage(
     onBiometricEntrySelected: (EntryInfo, BiometricPrompt.AuthenticationResult) -> Unit,
     onCancelFlowAndFinish: () -> Unit,
     onIllegalScreenStateAndFinish: (String) -> Unit,
-    fallbackToOriginalFlow: () -> Unit,
+    fallbackToOriginalFlow: (BiometricFlowType) -> Unit,
+    getBiometricPromptState: () -> BiometricPromptState,
+    onBiometricPromptStateChange: (BiometricPromptState) -> Unit,
 ) {
     if (biometricEntry == null) {
-        fallbackToOriginalFlow()
+        fallbackToOriginalFlow(BiometricFlowType.CREATE)
         return
     }
-    runBiometricFlow(
+    runBiometricFlowForCreate(
         biometricEntry = biometricEntry,
         context = LocalContext.current,
         openMoreOptionsPage = onMoreOptionSelected,
         sendDataToProvider = onBiometricEntrySelected,
         onCancelFlowAndFinish = onCancelFlowAndFinish,
+        getBiometricPromptState = getBiometricPromptState,
+        onBiometricPromptStateChange = onBiometricPromptStateChange,
         createRequestDisplayInfo = requestDisplayInfo,
         createProviderInfo = enabledProviderInfo,
         onBiometricFailureFallback = fallbackToOriginalFlow,

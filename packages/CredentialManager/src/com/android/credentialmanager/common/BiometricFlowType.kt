@@ -16,7 +16,7 @@
 
 package com.android.credentialmanager.common
 
-enum class FlowType {
+enum class BiometricFlowType {
     GET,
     CREATE
 }

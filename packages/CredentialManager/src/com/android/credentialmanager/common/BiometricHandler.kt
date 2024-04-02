@@ -59,7 +59,7 @@ import java.lang.Exception
  * ).
  *
  * The above are examples; the credential type can change depending on scenario.
- * // TODO(b/326243891) : Finalize once all the strings and create flow is iterated to completion
+ * // TODO(b/333445112) : Finalize once all the strings and create flow is iterated to completion
  */
 data class BiometricDisplayInfo(
     val providerIcon: Bitmap,
@@ -75,7 +75,8 @@ data class BiometricDisplayInfo(
  * additional states that may improve the flow.
  */
 data class BiometricState(
-    val biometricResult: BiometricResult? = null
+    val biometricResult: BiometricResult? = null,
+    val biometricStatus: BiometricPromptState = BiometricPromptState.INACTIVE
 )
 
 /**
@@ -104,58 +105,115 @@ data class BiometricHelp(
 )
 
 /**
- * This will handle the logic for integrating credential manager with the biometric prompt for the
- * single account biometric experience. This simultaneously handles both the get and create flows,
- * by retrieving all the data from credential manager, and properly parsing that data into the
- * biometric prompt.
+ * This is the entry point to start the integrated biometric prompt for 'get' flows. It captures
+ * information specific to the get flow, along with required shared callbacks and more general
+ * info across both flows, such as the tapped [EntryInfo] or [sendDataToProvider].
  */
-fun runBiometricFlow(
+fun runBiometricFlowForGet(
     biometricEntry: EntryInfo,
     context: Context,
     openMoreOptionsPage: () -> Unit,
     sendDataToProvider: (EntryInfo, BiometricPrompt.AuthenticationResult) -> Unit,
     onCancelFlowAndFinish: () -> Unit,
     onIllegalStateAndFinish: (String) -> Unit,
+    getBiometricPromptState: () -> BiometricPromptState,
+    onBiometricPromptStateChange: (BiometricPromptState) -> Unit,
+    onBiometricFailureFallback: (BiometricFlowType) -> Unit,
     getRequestDisplayInfo: RequestDisplayInfo? = null,
     getProviderInfoList: List<ProviderInfo>? = null,
     getProviderDisplayInfo: ProviderDisplayInfo? = null,
-    onBiometricFailureFallback: () -> Unit,
+) {
+    if (getBiometricPromptState() != BiometricPromptState.INACTIVE) {
+        // Screen is already up, do not re-launch
+        return
+    }
+    onBiometricPromptStateChange(BiometricPromptState.PENDING)
+    val biometricDisplayInfo = validateAndRetrieveBiometricGetDisplayInfo(
+        getRequestDisplayInfo,
+        getProviderInfoList,
+        getProviderDisplayInfo,
+        context, biometricEntry
+    )
+
+    if (biometricDisplayInfo == null) {
+        onBiometricFailureFallback(BiometricFlowType.GET)
+        return
+    }
+
+    val callback: BiometricPrompt.AuthenticationCallback =
+        setupBiometricAuthenticationCallback(sendDataToProvider, biometricEntry,
+            onCancelFlowAndFinish, onIllegalStateAndFinish, onBiometricPromptStateChange)
+
+    Log.d(TAG, "The BiometricPrompt API call begins.")
+    runBiometricFlow(context, biometricDisplayInfo, callback, openMoreOptionsPage,
+        onBiometricFailureFallback, BiometricFlowType.GET)
+}
+
+/**
+ * This is the entry point to start the integrated biometric prompt for 'create' flows. It captures
+ * information specific to the create flow, along with required shared callbacks and more general
+ * info across both flows, such as the tapped [EntryInfo] or [sendDataToProvider].
+ */
+fun runBiometricFlowForCreate(
+    biometricEntry: EntryInfo,
+    context: Context,
+    openMoreOptionsPage: () -> Unit,
+    sendDataToProvider: (EntryInfo, BiometricPrompt.AuthenticationResult) -> Unit,
+    onCancelFlowAndFinish: () -> Unit,
+    onIllegalStateAndFinish: (String) -> Unit,
+    getBiometricPromptState: () -> BiometricPromptState,
+    onBiometricPromptStateChange: (BiometricPromptState) -> Unit,
+    onBiometricFailureFallback: (BiometricFlowType) -> Unit,
     createRequestDisplayInfo: com.android.credentialmanager.createflow
     .RequestDisplayInfo? = null,
     createProviderInfo: EnabledProviderInfo? = null,
 ) {
-    // TODO(b/330396089) : Add rotation configuration fix with state machine
-    var biometricDisplayInfo: BiometricDisplayInfo? = null
-    var flowType = FlowType.GET
-    if (getRequestDisplayInfo != null) {
-        biometricDisplayInfo = validateAndRetrieveBiometricGetDisplayInfo(getRequestDisplayInfo,
-            getProviderInfoList,
-            getProviderDisplayInfo,
-            context, biometricEntry)
-    } else if (createRequestDisplayInfo != null) {
-        flowType = FlowType.CREATE
-        biometricDisplayInfo = validateAndRetrieveBiometricCreateDisplayInfo(
-            createRequestDisplayInfo,
-            createProviderInfo,
-            context, biometricEntry)
+    if (getBiometricPromptState() != BiometricPromptState.INACTIVE) {
+        // Screen is already up, do not re-launch
+        return
     }
+    onBiometricPromptStateChange(BiometricPromptState.PENDING)
+    val biometricDisplayInfo = validateAndRetrieveBiometricCreateDisplayInfo(
+        createRequestDisplayInfo,
+        createProviderInfo,
+        context, biometricEntry
+    )
 
     if (biometricDisplayInfo == null) {
-        onBiometricFailureFallback()
+        onBiometricFailureFallback(BiometricFlowType.CREATE)
         return
     }
 
-    val biometricPrompt = setupBiometricPrompt(context, biometricDisplayInfo, openMoreOptionsPage,
-        biometricDisplayInfo.biometricRequestInfo.allowedAuthenticators, flowType)
-
     val callback: BiometricPrompt.AuthenticationCallback =
         setupBiometricAuthenticationCallback(sendDataToProvider, biometricEntry,
-            onCancelFlowAndFinish, onIllegalStateAndFinish)
+            onCancelFlowAndFinish, onIllegalStateAndFinish, onBiometricPromptStateChange)
+
+    Log.d(TAG, "The BiometricPrompt API call begins.")
+    runBiometricFlow(context, biometricDisplayInfo, callback, openMoreOptionsPage,
+        onBiometricFailureFallback, BiometricFlowType.CREATE)
+}
+
+/**
+ * This will handle the logic for integrating credential manager with the biometric prompt for the
+ * single account biometric experience. This simultaneously handles both the get and create flows,
+ * by retrieving all the data from credential manager, and properly parsing that data into the
+ * biometric prompt.
+ */
+private fun runBiometricFlow(
+    context: Context,
+    biometricDisplayInfo: BiometricDisplayInfo,
+    callback: BiometricPrompt.AuthenticationCallback,
+    openMoreOptionsPage: () -> Unit,
+    onBiometricFailureFallback: (BiometricFlowType) -> Unit,
+    biometricFlowType: BiometricFlowType
+) {
+    val biometricPrompt = setupBiometricPrompt(context, biometricDisplayInfo, openMoreOptionsPage,
+        biometricDisplayInfo.biometricRequestInfo, biometricFlowType)
 
     val cancellationSignal = CancellationSignal()
     cancellationSignal.setOnCancelListener {
         Log.d(TAG, "Your cancellation signal was called.")
-        // TODO(b/326243754) : Migrate towards passing along the developer cancellation signal
+        // TODO(b/333445112) : Migrate towards passing along the developer cancellation signal
         // or validate the necessity for this
     }
 
@@ -165,27 +223,28 @@ fun runBiometricFlow(
         biometricPrompt.authenticate(cancellationSignal, executor, callback)
     } catch (e: IllegalArgumentException) {
         Log.w(TAG, "Calling the biometric prompt API failed with: /n${e.localizedMessage}\n")
-        onBiometricFailureFallback()
+        onBiometricFailureFallback(biometricFlowType)
     }
 }
 
 /**
  * Sets up the biometric prompt with the UI specific bits.
- * // TODO(b/326243754) : Pass in opId once dependency is confirmed via CryptoObject
+ * // TODO(b/333445112) : Pass in opId once dependency is confirmed via CryptoObject
  */
 private fun setupBiometricPrompt(
     context: Context,
     biometricDisplayInfo: BiometricDisplayInfo,
     openMoreOptionsPage: () -> Unit,
-    requestAllowedAuthenticators: Int,
-    flowType: FlowType,
+    biometricRequestInfo: BiometricRequestInfo,
+    biometricFlowType: BiometricFlowType,
 ): BiometricPrompt {
-    val finalAuthenticators = removeDeviceCredential(requestAllowedAuthenticators)
+    val finalAuthenticators = removeDeviceCredential(biometricRequestInfo.allowedAuthenticators)
 
     val biometricPrompt = BiometricPrompt.Builder(context)
         .setTitle(biometricDisplayInfo.displayTitleText)
-        // TODO(b/326243754) : Migrate to using new methods recently aligned upon
-        .setNegativeButton(context.getString(if (flowType == FlowType.GET) R.string
+        // TODO(b/333445112) : Migrate to using new methods and strings recently aligned upon
+        .setNegativeButton(context.getString(if (biometricFlowType == BiometricFlowType.GET)
+            R.string
                 .dropdown_presentation_more_sign_in_options_text else R.string.string_more_options),
             getMainExecutor(context)) { _, _ ->
             openMoreOptionsPage()
@@ -200,7 +259,7 @@ private fun setupBiometricPrompt(
     return biometricPrompt
 }
 
-// TODO(b/326243754) : Remove after larger level alignments made on fallback negative button
+// TODO(b/333445112) : Remove after larger level alignments made on fallback negative button
 // For the time being, we do not support the pin fallback until UX is decided.
 private fun removeDeviceCredential(requestAllowedAuthenticators: Int): Int {
     var finalAuthenticators = requestAllowedAuthenticators
@@ -230,16 +289,18 @@ private fun setupBiometricAuthenticationCallback(
     selectedEntry: EntryInfo,
     onCancelFlowAndFinish: () -> Unit,
     onIllegalStateAndFinish: (String) -> Unit,
+    onBiometricPromptStateChange: (BiometricPromptState) -> Unit
 ): BiometricPrompt.AuthenticationCallback {
     val callback: BiometricPrompt.AuthenticationCallback =
         object : BiometricPrompt.AuthenticationCallback() {
-            // TODO(b/326243754) : Validate remaining callbacks
+            // TODO(b/333445772) : Validate remaining callbacks
             override fun onAuthenticationSucceeded(
                 authResult: BiometricPrompt.AuthenticationResult?
             ) {
                 super.onAuthenticationSucceeded(authResult)
                 try {
                     if (authResult != null) {
+                        onBiometricPromptStateChange(BiometricPromptState.COMPLETE)
                         sendDataToProvider(selectedEntry, authResult)
                     } else {
                         onIllegalStateAndFinish("The biometric flow succeeded but unexpectedly " +
@@ -254,26 +315,24 @@ private fun setupBiometricAuthenticationCallback(
             override fun onAuthenticationHelp(helpCode: Int, helpString: CharSequence?) {
                 super.onAuthenticationHelp(helpCode, helpString)
                 Log.d(TAG, "Authentication help discovered: $helpCode and $helpString")
-                // TODO(b/326243754) : Decide on strategy with provider (a simple log probably
-                // suffices here)
             }
 
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence?) {
                 super.onAuthenticationError(errorCode, errString)
                 Log.d(TAG, "Authentication error-ed out: $errorCode and $errString")
+                onBiometricPromptStateChange(BiometricPromptState.COMPLETE)
                 if (errorCode == BiometricPrompt.BIOMETRIC_ERROR_USER_CANCELED) {
                     // Note that because the biometric prompt is imbued directly
                     // into the selector, parity applies to the selector's cancellation instead
                     // of the provider's biometric prompt cancellation.
                     onCancelFlowAndFinish()
                 }
-                // TODO(b/326243754) : Propagate to provider
+                // TODO(b/333445772) : Propagate to provider
             }
 
             override fun onAuthenticationFailed() {
                 super.onAuthenticationFailed()
                 Log.d(TAG, "Authentication failed.")
-                // TODO(b/326243754) : Propagate to provider
             }
         }
     return callback
@@ -299,7 +358,7 @@ private fun validateAndRetrieveBiometricGetDisplayInfo(
     if (getRequestDisplayInfo != null && getProviderInfoList != null &&
         getProviderDisplayInfo != null) {
         if (selectedEntry !is CredentialEntryInfo) { return null }
-        return getBiometricDisplayValues(getProviderInfoList,
+        return retrieveBiometricGetDisplayValues(getProviderInfoList,
             context, getRequestDisplayInfo, selectedEntry)
     }
     return null
@@ -308,7 +367,8 @@ private fun validateAndRetrieveBiometricGetDisplayInfo(
 /**
  * Creates the [BiometricDisplayInfo] for create flows, and early handles conditional
  * checking between the two. The reason for this method matches the logic for the
- * [validateBiometricGetFlow] with the only difference being that this is for the create flow.
+ * [validateAndRetrieveBiometricGetDisplayInfo] with the only difference being that this is for
+ * the create flow.
  */
 private fun validateAndRetrieveBiometricCreateDisplayInfo(
     createRequestDisplayInfo: com.android.credentialmanager.createflow.RequestDisplayInfo?,
@@ -318,8 +378,8 @@ private fun validateAndRetrieveBiometricCreateDisplayInfo(
 ): BiometricDisplayInfo? {
     if (createRequestDisplayInfo != null && createProviderInfo != null) {
         if (selectedEntry !is CreateOptionInfo) { return null }
-        return createBiometricDisplayValues(createRequestDisplayInfo, createProviderInfo, context,
-            selectedEntry)
+        return retrieveBiometricCreateDisplayValues(createRequestDisplayInfo, createProviderInfo,
+            context, selectedEntry)
     }
     return null
 }
@@ -330,16 +390,16 @@ private fun validateAndRetrieveBiometricCreateDisplayInfo(
  * to the original selector. Note that these redundant checks are just failsafe; the original
  * flow should never reach here with invalid params.
  */
-private fun getBiometricDisplayValues(
+private fun retrieveBiometricGetDisplayValues(
     getProviderInfoList: List<ProviderInfo>,
     context: Context,
     getRequestDisplayInfo: RequestDisplayInfo,
     selectedEntry: CredentialEntryInfo,
 ): BiometricDisplayInfo? {
-    var icon: Bitmap? = null
-    var providerName: String? = null
-    var displayTitleText: String? = null
-    var descriptionText: String? = null
+    val icon: Bitmap?
+    val providerName: String?
+    val displayTitleText: String?
+    val descriptionText: String?
     val primaryAccountsProviderInfo = retrievePrimaryAccountProviderInfo(selectedEntry.providerId,
         getProviderInfoList)
     icon = primaryAccountsProviderInfo?.icon?.toBitmap()
@@ -373,7 +433,7 @@ private fun getBiometricDisplayValues(
  * if this is called, a result is guaranteed. Specifically, this is guaranteed to return a non-null
  * value unlike the get counterpart.
  */
-private fun createBiometricDisplayValues(
+private fun retrieveBiometricCreateDisplayValues(
     createRequestDisplayInfo: com.android.credentialmanager.createflow.RequestDisplayInfo,
     createProviderInfo: EnabledProviderInfo,
     context: Context,
@@ -401,7 +461,7 @@ private fun createBiometricDisplayValues(
         },
         createRequestDisplayInfo.appName,
     )
-    // TODO(b/327620327) : Add a subtitle and any other recently aligned ideas
+    // TODO(b/333445112) : Add a subtitle and any other recently aligned ideas
     return BiometricDisplayInfo(providerIcon = icon, providerName = providerName,
         displayTitleText = displayTitleText, descriptionForCredential = descriptionText,
         biometricRequestInfo = selectedEntry.biometricRequest as BiometricRequestInfo)
