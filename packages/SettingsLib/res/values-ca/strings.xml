@@ -491,7 +491,7 @@
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Totalment carregada"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Càrrega en espera"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlat per l\'administrador"</string>
-    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Controlat per la configuració restringida"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Controlat per l\'opció de configuració restringida"</string>
     <string name="disabled" msgid="8017887509554714950">"Desactivat"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Amb permís"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Sense permís"</string>

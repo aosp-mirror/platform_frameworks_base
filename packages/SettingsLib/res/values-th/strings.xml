@@ -518,7 +518,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"ใช้ภาษาของระบบ"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"ไม่สามารถเปิดการตั้งค่าสำหรับ <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"วิธีการป้อนข้อมูลนี้อาจเก็บข้อความทั้งหมดที่คุณพิมพ์ รวมถึงข้อมูลส่วนบุคคล เช่น รหัสผ่านและหมายเลขบัตรเครดิต โดยมาจากแอปพลิเคชัน <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ใช้วิธีการป้อนข้อมูลนี้หรือไม่"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"หมายเหตุ: หลังจากเริ่มต้นใหม่ แอปนี้จะไม่สามารถเริ่มการทำงานได้จนกว่าคุณจะปลดล็อกโทรศัพท์"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"หมายเหตุ: หลังจากรีบูต แอปนี้จะไม่สามารถเริ่มการทำงานได้จนกว่าคุณจะปลดล็อกโทรศัพท์"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"สถานะการลงทะเบียน IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"ลงทะเบียนแล้ว"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"ไม่ได้ลงทะเบียน"</string>
@@ -555,7 +555,7 @@
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"แท็บเล็ตเครื่องนี้"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"แท่นวางลำโพง"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"แท่นชาร์จที่มีลำโพง"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"อุปกรณ์ภายนอก"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"อุปกรณ์ที่เชื่อมต่อ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"โทรศัพท์เครื่องนี้"</string>

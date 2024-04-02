@@ -518,7 +518,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Gebruik systeemtalen"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Instellingen openen voor <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> mislukt"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Deze invoermethode verzamelt mogelijk alle tekst die je typt, inclusief persoonsgegevens zoals wachtwoorden en creditcardnummers. De methode is afkomstig uit de app <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Deze invoermethode aanzetten?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Opmerking: Wanneer je telefoon opnieuw is opgestart, kan deze app pas worden gestart nadat je je telefoon hebt ontgrendeld"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Opmerking: Nadat je de telefoon opnieuw opstart, wordt deze app pas gestart nadat je de telefoon ontgrendelt"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS-registratiestatus"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Geregistreerd"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Niet geregistreerd"</string>
