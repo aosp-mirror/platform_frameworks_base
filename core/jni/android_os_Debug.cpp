@@ -16,44 +16,46 @@
 
 #define LOG_TAG "android.os.Debug"
 
+#include "android_os_Debug.h"
+
+#include <android-base/file.h>
+#include <android-base/logging.h>
+#include <android-base/properties.h>
+#include <android-base/strings.h>
 #include <assert.h>
+#include <binderdebug/BinderDebug.h>
+#include <bionic/malloc.h>
 #include <ctype.h>
+#include <debuggerd/client.h>
+#include <dmabufinfo/dmabuf_sysfs_stats.h>
+#include <dmabufinfo/dmabufinfo.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
+#include <log/log.h>
 #include <malloc.h>
+#include <meminfo/androidprocheaps.h>
+#include <meminfo/procmeminfo.h>
+#include <meminfo/sysmeminfo.h>
+#include <memtrack/memtrack.h>
+#include <memunreachable/memunreachable.h>
+#include <nativehelper/JNIPlatformHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
+#include <utils/String8.h>
+#include <utils/misc.h>
+#include <vintf/KernelConfigs.h>
 
 #include <iomanip>
 #include <string>
 #include <vector>
 
-#include <android-base/logging.h>
-#include <android-base/properties.h>
-#include <bionic/malloc.h>
-#include <debuggerd/client.h>
-#include <log/log.h>
-#include <utils/misc.h>
-#include <utils/String8.h>
-
-#include <nativehelper/JNIPlatformHelp.h>
-#include <nativehelper/ScopedUtfChars.h>
 #include "jni.h"
-#include <dmabufinfo/dmabuf_sysfs_stats.h>
-#include <dmabufinfo/dmabufinfo.h>
-#include <meminfo/androidprocheaps.h>
-#include <meminfo/procmeminfo.h>
-#include <meminfo/sysmeminfo.h>
-#include <memtrack/memtrack.h>
-#include <memunreachable/memunreachable.h>
-#include <android-base/strings.h>
-#include "android_os_Debug.h"
-#include <vintf/KernelConfigs.h>
 
 namespace android
 {
@@ -579,6 +581,15 @@ static bool dumpTraces(JNIEnv* env, jint pid, jstring fileName, jint timeoutSecs
         return false;
     }
 
+    std::string binderState;
+    android::status_t status = android::getBinderTransactions(pid, binderState);
+    if (status == android::OK) {
+        if (!android::base::WriteStringToFd(binderState, fd)) {
+            PLOG(ERROR) << "Failed to dump binder state info for pid: " << pid;
+        }
+    } else {
+        PLOG(ERROR) << "Failed to get binder state info for pid: " << pid << " status: " << status;
+    }
     int res = dump_backtrace_to_file_timeout(pid, dumpType, timeoutSecs, fd);
     if (fdatasync(fd.get()) != 0) {
         PLOG(ERROR) << "Failed flushing trace.";
