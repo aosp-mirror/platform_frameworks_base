@@ -31,15 +31,16 @@ class MoveToDesktopAnimator @JvmOverloads constructor(
 
     private val animatedTaskWidth
         get() = dragToDesktopAnimator.animatedValue as Float * startBounds.width()
+    val scale: Float
+        get() = dragToDesktopAnimator.animatedValue as Float
     private val dragToDesktopAnimator: ValueAnimator = ValueAnimator.ofFloat(1f,
             DRAG_FREEFORM_SCALE)
             .setDuration(ANIMATION_DURATION.toLong())
             .apply {
                 val t = SurfaceControl.Transaction()
                 val cornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context)
-                addUpdateListener { animation ->
-                    val animatorValue = animation.animatedValue as Float
-                    t.setScale(taskSurface, animatorValue, animatorValue)
+                addUpdateListener {
+                    t.setScale(taskSurface, scale, scale)
                             .setCornerRadius(taskSurface, cornerRadius)
                             .apply()
                 }
@@ -90,9 +91,9 @@ class MoveToDesktopAnimator @JvmOverloads constructor(
     }
 
     /**
-     * Ends the animation, setting the scale and position to the final animation value
+     * Cancels the animation, intended to be used when another animator will take over.
      */
-    fun endAnimator() {
-        dragToDesktopAnimator.end()
+    fun cancelAnimator() {
+        dragToDesktopAnimator.cancel()
     }
 }

@@ -190,7 +190,7 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
         handler.cancelDragToDesktopTransition()
 
         // Cancel animation should run since it had already started.
-        verify(dragAnimator).endAnimator()
+        verify(dragAnimator).cancelAnimator()
     }
 
     @Test

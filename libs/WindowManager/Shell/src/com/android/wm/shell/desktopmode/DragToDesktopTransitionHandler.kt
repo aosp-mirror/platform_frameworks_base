@@ -369,67 +369,50 @@ class DragToDesktopTransitionHandler(
             val startBounds = draggedTaskChange.startAbsBounds
             val endBounds = draggedTaskChange.endAbsBounds
 
-            // TODO(b/301106941): Instead of forcing-finishing the animation that scales the
-            //  surface down and then starting another that scales it back up to the final size,
-            //  blend the two animations.
-            state.dragAnimator.endAnimator()
-            // Using [DRAG_FREEFORM_SCALE] to calculate animated width/height is possible because
-            // it is known that the animation scale is finished because the animation was
-            // force-ended above. This won't be true when the two animations are blended.
-            val animStartWidth = (startBounds.width() * DRAG_FREEFORM_SCALE).toInt()
-            val animStartHeight = (startBounds.height() * DRAG_FREEFORM_SCALE).toInt()
-            // Using end bounds here to find the left/top also assumes the center animation has
-            // finished and the surface is placed exactly in the center of the screen which matches
-            // the end/default bounds of the now freeform task.
-            val animStartLeft = endBounds.centerX() - (animStartWidth / 2)
-            val animStartTop = endBounds.centerY() - (animStartHeight / 2)
-            val animStartBounds = Rect(
-                    animStartLeft,
-                    animStartTop,
-                    animStartLeft + animStartWidth,
-                    animStartTop + animStartHeight
+            // Pause any animation that may be currently playing; we will use the relevant
+            // details of that animation here.
+            state.dragAnimator.cancelAnimator()
+            // We still apply scale to task bounds; as we animate the bounds to their
+            // end value, animate scale to 1.
+            val startScale = state.dragAnimator.scale
+            val startPosition = state.dragAnimator.position
+            val unscaledStartWidth = startBounds.width()
+            val unscaledStartHeight = startBounds.height()
+            val unscaledStartBounds = Rect(
+                startPosition.x.toInt(),
+                startPosition.y.toInt(),
+                startPosition.x.toInt() + unscaledStartWidth,
+                startPosition.y.toInt() + unscaledStartHeight
             )
 
-
             dragToDesktopStateListener?.onCommitToDesktopAnimationStart(t)
-            t.apply {
-                setScale(draggedTaskLeash, 1f, 1f)
-                setPosition(
-                        draggedTaskLeash,
-                        animStartBounds.left.toFloat(),
-                        animStartBounds.top.toFloat()
-                )
-                setWindowCrop(
-                        draggedTaskLeash,
-                        animStartBounds.width(),
-                        animStartBounds.height()
-                )
-            }
             // Accept the merge by applying the merging transaction (applied by #showResizeVeil)
             // and finish callback. Show the veil and position the task at the first frame before
             // starting the final animation.
-            onTaskResizeAnimationListener.onAnimationStart(state.draggedTaskId, t, animStartBounds)
+            onTaskResizeAnimationListener.onAnimationStart(state.draggedTaskId, t,
+                unscaledStartBounds)
             finishCallback.onTransitionFinished(null /* wct */)
 
-            // Because the task surface was scaled down during the drag, we must use the animated
-            // bounds instead of the [startAbsBounds].
             val tx: SurfaceControl.Transaction = transactionSupplier.get()
-            ValueAnimator.ofObject(rectEvaluator, animStartBounds, endBounds)
+            ValueAnimator.ofObject(rectEvaluator, unscaledStartBounds, endBounds)
                     .setDuration(DRAG_TO_DESKTOP_FINISH_ANIM_DURATION_MS)
                     .apply {
                         addUpdateListener { animator ->
                             val animBounds = animator.animatedValue as Rect
+                            val animFraction = animator.animatedFraction
+                            // Progress scale from starting value to 1 as animation plays.
+                            val animScale = startScale + animFraction * (1 - startScale)
                             tx.apply {
-                                setScale(draggedTaskLeash, 1f, 1f)
-                                 setPosition(
-                                         draggedTaskLeash,
-                                         animBounds.left.toFloat(),
-                                         animBounds.top.toFloat()
-                                 )
+                                setScale(draggedTaskLeash, animScale, animScale)
+                                setPosition(
+                                     draggedTaskLeash,
+                                     animBounds.left.toFloat(),
+                                     animBounds.top.toFloat()
+                                )
                                 setWindowCrop(
-                                        draggedTaskLeash,
-                                        animBounds.width(),
-                                        animBounds.height()
+                                    draggedTaskLeash,
+                                    animBounds.width(),
+                                    animBounds.height()
                                 )
                             }
                             onTaskResizeAnimationListener.onBoundsChange(
@@ -493,10 +476,8 @@ class DragToDesktopTransitionHandler(
         val draggedTaskChange = state.draggedTaskChange
                 ?: throw IllegalStateException("Expected non-null task change")
         val sc = draggedTaskChange.leash
-        // TODO(b/301106941): Don't end the animation and start one to scale it back, merge them
-        //  instead.
-        // End the animation that shrinks the window when task is first dragged from fullscreen
-        dragToDesktopAnimator.endAnimator()
+        // Pause the animation that shrinks the window when task is first dragged from fullscreen
+        dragToDesktopAnimator.cancelAnimator()
         // Then animate the scaled window back to its original bounds.
         val x: Float = dragToDesktopAnimator.position.x
         val y: Float = dragToDesktopAnimator.position.y
