@@ -582,7 +582,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s। म्यूट गर्नाका लागि ट्याप गर्नुहोस्। पहुँच सम्बन्धी सेवाहरू म्यूट हुन सक्छन्।"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s। कम्पन मोडमा सेट गर्न ट्याप गर्नुहोस्।"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s। म्यूट गर्न ट्याप गर्नुहोस्।"</string>
-    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"नोइज कन्ट्रोल"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"न्वाइज कन्ट्रोल"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"रिङ्गर मोड बदल्न ट्याप गर्नुहोस्"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"म्युट गर्नुहोस्"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"अनम्युट गर्नुहोस्"</string>
@@ -590,7 +590,7 @@
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s भोल्युमका नियन्त्रणहरू"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"कल तथा सूचनाहरू आउँदा घन्टी बज्ने छ (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> प्ले गरिँदै छ"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"अडियो प्ले भइरहने छ"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"अडियो यसमा प्ले हुने छ"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"सिस्टम UI ट्युनर"</string>
     <string name="status_bar" msgid="4357390266055077437">"स्थिति पट्टी"</string>
     <string name="demo_mode" msgid="263484519766901593">"सिस्टम UI को डेमो मोड"</string>

@@ -1013,7 +1013,7 @@
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Pincode bevat letters of symbolen"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> verifiëren"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Onjuiste pincode"</string>
-    <string name="controls_pin_instructions" msgid="6363309783822475238">"Geef de pincode op"</string>
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"Voer pincode in"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Andere pincode proberen"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"Bevestig de wijziging voor <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Swipe om meer te zien"</string>
@@ -1093,7 +1093,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Gesprek openen"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Gesprekswidgets"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Tik op een gesprek om het toe te voegen aan je startscherm"</string>
-    <string name="no_conversations_text" msgid="5354115541282395015">"Je ziet je recente gesprekken hier"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Hier staan je recente gesprekken"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Prioriteitsgesprekken"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Recente gesprekken"</string>
     <string name="days_timestamp" msgid="5821854736213214331">"<xliff:g id="DURATION">%1$s</xliff:g> dagen geleden"</string>

@@ -565,7 +565,7 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"အက်ပ်ကို ပင်ဖြုတ်လိုက်သည်"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"ဖုန်းခေါ်ရန်"</string>
     <string name="stream_system" msgid="7663148785370565134">"စနစ်"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"အသံမြည်စေသည်"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"ဖုန်းမြည်သံ"</string>
     <string name="stream_music" msgid="2188224742361847580">"မီဒီယာ"</string>
     <string name="stream_alarm" msgid="16058075093011694">"နှိုးစက်"</string>
     <string name="stream_notification" msgid="7930294049046243939">"အကြောင်းကြားချက်"</string>
@@ -590,7 +590,7 @@
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s အသံအတိုးအလျှော့ ခလုတ်များ"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"ခေါ်ဆိုမှုများနှင့် အကြောင်းကြားချက်များအတွက် အသံမြည်နှုန်း (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>) ဖြစ်သည်"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> ကို ဖွင့်နေသည်"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"အောက်တွင်အသံဖွင့်မည်"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"အသံဖွင့်မည့်နေရာ"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"စနစ် UI ဖမ်းစက်"</string>
     <string name="status_bar" msgid="4357390266055077437">"အခြေအနေပြနေရာ"</string>
     <string name="demo_mode" msgid="263484519766901593">"စနစ် UI စရုပ်ပြမုဒ်"</string>
@@ -647,7 +647,7 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;အခြေအနေ-&lt;/b&gt; အဆင့်လျှော့ထားသည်"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"စကားဝိုင်း အကြောင်းကြားချက်များ၏ ထိပ်ပိုင်းတွင် ပြ၍ လော့ခ်မျက်နှာပြင်တွင် ပရိုဖိုင်ပုံအဖြစ် ပြသည်"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"စကားဝိုင်း အကြောင်းကြားချက်များ၏ ထိပ်ပိုင်းတွင် ပြ၍ လော့ခ်မျက်နှာပြင်တွင် ပရိုဖိုင်ပုံအဖြစ် ပြကာ ပူဖောင်းကွက်အဖြစ် မြင်ရသည်"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"စကားဝိုင်း အကြောင်းကြားချက်များ၏ ထိပ်ပိုင်းနှင့် ပရိုဖိုင်ပုံအဖြစ် လော့ခ်မျက်နှာပြင်တွင် ပြသည်။ ပူဖောင်းကွက်အဖြစ် မြင်ရပြီး ‘မနှောင့်ယှက်ရ’ ကို ကြားဖြတ်သည်"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"စကားဝိုင်း အကြောင်းကြားချက်များ၏ ထိပ်ပိုင်းတွင်နှင့် လော့ခ်မျက်နှာပြင်တွင် ပရိုဖိုင်ပုံအဖြစ်  ပြသည်။ ‘မနှောင့်ယှက်ရ’ ကို ကြားဖြတ်သည်"</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"စကားဝိုင်း အကြောင်းကြားချက်များ၏ ထိပ်ပိုင်းနှင့် ပရိုဖိုင်ပုံအဖြစ် လော့ခ်မျက်နှာပြင်တွင် ပြသည်။ ပူဖောင်းကွက်အဖြစ် မြင်ရပြီး ‘မနှောင့်ယှက်ရ’ ကို ကြားဖြတ်သည်"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ဦးစားပေး"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> က စကားဝိုင်းဝန်ဆောင်မှုများကို မပံ့ပိုးပါ"</string>

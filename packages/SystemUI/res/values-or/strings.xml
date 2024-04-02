@@ -563,11 +563,11 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"ନାହିଁ, ଥାଉ"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"ଆପ୍ ପିନ୍ କରାଯାଇଛି"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"ଆପ୍ ଅନପିନ୍ କରାଯାଇଛି"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"କଲ୍ କରନ୍ତୁ"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"କଲ କରନ୍ତୁ"</string>
     <string name="stream_system" msgid="7663148785370565134">"ସିଷ୍ଟମ"</string>
     <string name="stream_ring" msgid="7550670036738697526">"ରିଙ୍ଗ"</string>
     <string name="stream_music" msgid="2188224742361847580">"ମିଡିଆ"</string>
-    <string name="stream_alarm" msgid="16058075093011694">"ଆଲାରାମ୍"</string>
+    <string name="stream_alarm" msgid="16058075093011694">"ଆଲାରାମ"</string>
     <string name="stream_notification" msgid="7930294049046243939">"ବିଜ୍ଞପ୍ତି"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"ବ୍ଲୁଟୁଥ୍‍‌"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"ଡୁଆଲ୍‍ ମଲ୍ଟି ଟୋନ୍‍ ଫ୍ରିକ୍ୱେନ୍ସୀ"</string>
@@ -590,7 +590,7 @@
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s ଭଲ୍ୟୁମ୍ ନିୟନ୍ତ୍ରଣ"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"କଲ୍ ଓ ବିଜ୍ଞପ୍ତି ପାଇଁ (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)ରେ ରିଙ୍ଗ ହେବ"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g>ରେ ପ୍ଲେ କରାଯାଉଛି"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"ଅଡିଓ ପ୍ଲେ ହେବ"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"ଅଡିଓ ଏଥିରେ ପ୍ଲେ ହେବ"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"ସିଷ୍ଟମ୍ UI ଟ୍ୟୁନର୍‍"</string>
     <string name="status_bar" msgid="4357390266055077437">"ଷ୍ଟାଟସ୍‍ ବାର୍‍"</string>
     <string name="demo_mode" msgid="263484519766901593">"ସିଷ୍ଟମ୍‌ UI ଡେମୋ ମୋଡ୍‌"</string>

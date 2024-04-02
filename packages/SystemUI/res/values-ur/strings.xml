@@ -590,7 +590,7 @@
     <string name="volume_dialog_title" msgid="6502703403483577940">"‏‎%s والیوم کے کنٹرولز"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"کالز اور اطلاعات موصول ہونے پر گھنٹی بجے گی (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> پر چل رہی ہے"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"آڈیو چلتی رہے گی"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"آڈیو اس پر چلے گی"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"‏سسٹم UI ٹیونر"</string>
     <string name="status_bar" msgid="4357390266055077437">"اسٹیٹس بار"</string>
     <string name="demo_mode" msgid="263484519766901593">"‏سسٹم UI ڈیمو موڈ"</string>

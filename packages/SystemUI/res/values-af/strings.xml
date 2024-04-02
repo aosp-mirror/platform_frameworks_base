@@ -535,7 +535,7 @@
     <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"Diefstalbeskerming\nToestel gesluit; te veel pogings om te ontsluit"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Klankinstellings"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Gee outomaties mediaopskrifte"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Verskaf outomaties onderskrifte vir media"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Maak wenk oor onderskrifte toe"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Onderskrifteoorlegger"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"aktiveer"</string>
