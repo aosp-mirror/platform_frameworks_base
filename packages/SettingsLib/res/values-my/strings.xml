@@ -106,6 +106,28 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"ဖွင့်ထားသည်၊ ဘယ်သီးသန့်"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"ဖွင့်ထားသည်၊ ညာသီးသန့်"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"ဖွင့်ထားသည်၊ ဘယ်နှင့် ညာ"</string>
+    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
+    <skip />
+    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
+    <skip />
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"မီဒီယာ အသံ"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ဖုန်းခေါ်ဆိုမှုများ"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ဖိုင်လွဲပြောင်းခြင်း"</string>
@@ -389,7 +411,7 @@
     <string name="show_non_rect_clip" msgid="7499758654867881817">"စတုဂံပုံမကျသော ဖြတ်ပိုင်း လုပ်ဆောင်ချက်များကို အမှားဖယ်ရှားရန်"</string>
     <string name="track_frame_time" msgid="522674651937771106">"HWUI ပရိုဖိုင် ဆောင်ရွက်ခြင်း"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU အမှားရှာအလွှာဖွင့်ရန်"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"အမှားရှာအက်ပ်များအတွက် GPU အမှားရှာအလွှာများ ထည့်သွင်းခွင့်ပြုပါ"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"အမှားရှာအက်ပ်များအတွက် GPU အမှားရှာအလွှာများ ဖွင့်ခွင့်ပြုသည်"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"အကျယ်ရှင်းလင်းချက်ပံ့ပိုးသူ မှတ်တမ်းဖွင့်ရန်"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"ချွတ်ယွင်းမှု အစီရင်ခံချက်တွင် စက်ပစ္စည်းအလိုက် ထုတ်လုပ်သူမှတ်တမ်းများကို ထည့်သွင်းခြင်းဖြင့် ကိုယ်ရေးကိုယ်တာ အချက်အလက်များ ပါဝင်ခြင်း၊ ဘက်ထရီပိုသုံးခြင်း နှင့်/သို့မဟုတ် သိုလှောင်ခန်းပိုသုံးခြင်းတို့ ဖြစ်စေနိုင်သည်။"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"လှုပ်ရှားသက်ဝင်ပုံစကေး"</string>
@@ -643,8 +665,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"ထွက်သည့်အခါ လုပ်ဆောင်ချက်အားလုံးကို ဖျက်လိုက်မည်"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"ထွက်သည့်အခါ လုပ်ဆောင်ချက်ကို သိမ်းနိုင် (သို့) ဖျက်နိုင်သည်"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"စက်ရှင်လုပ်ဆောင်ချက်ကို ယခုဖျက်ရန် ပြင်ဆင်သတ်မှတ်နိုင်သည် (သို့) ထွက်သည့်အခါ သိမ်းနိုင်၊ ဖျက်နိုင်သည်"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"ဓာတ်ပုံရိုက်ရန်"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"ပုံရွေးရန်"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ဓာတ်ပုံရွေးရန်"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"မှားယွင်းသည့် အကြိမ်ရေ အလွန်များနေပါပြီ။ ဤစက်၏ ဒေတာကို ဖျက်လိုက်ပါမည်။"</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"မှားယွင်းသည့် အကြိမ်ရေ အလွန်များနေပါပြီ။ ဤအသုံးပြုသူကို ဖျက်လိုက်ပါမည်။"</string>
@@ -684,8 +704,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet နှင့်ချိတ်ဆက်မှုပြတ်တောက်"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"အီသာနက်။"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"ခေါ်ဆိုမှု မရှိပါ။"</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"ပရိုဖိုင်ပုံ ရွေးပါ"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"မူရင်းအသုံးပြုသူ သင်္ကေတ"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"ပကတိ ကီးဘုတ်"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"လက်ကွက်အပြင်အဆင်ရွေးချယ်ခြင်း"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"မူရင်း"</string>

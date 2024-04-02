@@ -106,6 +106,28 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Activo; solo oído izquierdo"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Activo; solo oído derecho"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Activo; oídos izquierdo y derecho"</string>
+    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
+    <skip />
+    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
+    <skip />
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Audio multimedia"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Llamadas telefónicas"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transferencia de archivos"</string>
@@ -552,7 +574,7 @@
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Esta tablet"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Bocina del conector"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Bocina de la estación de carga"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositivo externo"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispositivo conectado"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este teléfono"</string>
@@ -643,8 +665,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Cuando salgas, se borrará toda la actividad"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Puedes guardar o borrar la actividad cuando salgas"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Restablece la sesión para eliminar la actividad ahora; o guarda o borra la actividad cuando salgas"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"Tomar una foto"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"Elegir una imagen"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Seleccionar foto"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Hubo demasiados intentos incorrectos. Se borrarán los datos de este dispositivo."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Hubo demasiados intentos incorrectos. Se borrará este usuario."</string>
@@ -684,8 +704,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet desconectada"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Sin llamadas."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Elige una foto de perfil"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"Ícono de usuario predeterminado"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Teclado físico"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Elige el diseño de teclado"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Predeterminada"</string>

@@ -106,6 +106,28 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Activo, solo oído izquierdo"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Activo, solo oído derecho"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Activo, oídos izquierdo y derecho"</string>
+    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
+    <skip />
+    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
+    <skip />
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Audio multimedia"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Llamadas de teléfono"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transferencia de archivos"</string>
@@ -313,7 +335,7 @@
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Si este modo está habilitado, es posible que la dirección MAC del dispositivo cambie cada vez que se conecte a una red que tenga habilitada la aleatorización de MAC."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Medida"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"No medida"</string>
-    <string name="select_logd_size_title" msgid="1604578195914595173">"Tamaños del búfer de registro"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"Tamaños de los búferes de registro"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Elige el tamaño del Logger por búfer"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"¿Borrar almacenamiento continuo del registrador?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Cuando ya no supervisamos la actividad con el registrador de forma continua, estamos obligados a borrar los datos del registrador almacenados en el dispositivo."</string>
@@ -643,8 +665,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Toda la actividad se eliminará cuando salgas"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Puedes guardar o eliminar tu actividad al salir"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Restablece la sesión para eliminar la actividad ahora, o guarda o borra la actividad al salir"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"Hacer foto"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"Seleccionar una imagen"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Seleccionar foto"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Ha habido demasiados intentos fallidos. Los datos de este dispositivo se eliminarán."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Ha habido demasiados intentos fallidos. Este usuario se eliminará."</string>
@@ -684,8 +704,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Conexión Ethernet desconectada."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Sin llamadas."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Elige una imagen de perfil"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"Icono de usuario predeterminado"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Teclado físico"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Elige el diseño del teclado"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Predeterminado"</string>

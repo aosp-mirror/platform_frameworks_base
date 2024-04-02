@@ -106,6 +106,28 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"फक्त डावे अ‍ॅक्टिव्ह आहे"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"फक्त उजवे अ‍ॅक्टिव्ह आहे"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"डावे आणि उजवे अ‍ॅक्टिव्ह आहे"</string>
+    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
+    <skip />
+    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
+    <skip />
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"मीडिया ऑडिओ"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"फोन कॉल"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"फाइल स्थानांतरण"</string>
@@ -643,8 +665,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"बाहेर पडल्यावर सर्व अ‍ॅक्टिव्हिटी हटवली जाईल"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"बाहेर पडल्यावर तुमची अ‍ॅक्टिव्हिटी सेव्ह करू किंवा हटवू शकता"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"सत्र अ‍ॅक्टिव्हिटी आता हटवण्यासाठी रीसेट करा किंवा तुम्ही बाहेर पडल्यावर अ‍ॅक्टिव्हिटी सेव्ह करू अथवा हटवू शकता"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"फोटो काढा"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"इमेज निवडा"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"फोटो निवडा"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"बरेच चुकीचे प्रयत्‍न. या डिव्‍हाइसचा डेटा हटवला जाईल."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"बरेच चुकीचे प्रयत्‍न. हा वापरकर्ता हटवला जाईल."</string>
@@ -684,8 +704,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"इथरनेट डिस्कनेक्ट केले."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"इथरनेट."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"कॉलिंग उपलब्ध नाही."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"प्रोफाइल फोटो निवडा"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"डीफॉल्ट वापरकर्ता आयकन"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"वास्तविक कीबोर्ड"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"किबोर्ड लेआउट निवडा"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"डीफॉल्ट"</string>

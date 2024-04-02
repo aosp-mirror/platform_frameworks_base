@@ -106,6 +106,28 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Đang hoạt động, chỉ tai bên trái"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Đang hoạt động, chỉ tai phải"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Đang hoạt động, cả tai phải và tai trái"</string>
+    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
+    <skip />
+    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
+    <skip />
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Âm thanh nội dung nghe nhìn"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Cuộc gọi điện thoại"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Chuyển tệp"</string>
@@ -643,8 +665,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Mọi hoạt động sẽ bị xoá khi thoát"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Bạn có thể lưu hoặc xoá hoạt động của mình khi thoát"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Đặt lại để xoá hoạt động trong phiên ngay bây giờ, hoặc bạn có thể lưu hoặc xoá hoạt động khi thoát"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"Chụp ảnh"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"Chọn một hình ảnh"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Chọn ảnh"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Quá nhiều lần thử không chính xác. Dữ liệu trên thiết bị này sẽ bị xoá."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Quá nhiều lần thử không chính xác. Người dùng này sẽ bị xoá."</string>
@@ -684,8 +704,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Đã ngắt kết nối Ethernet."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Không thể gọi điện."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Chọn một ảnh hồ sơ"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"Biểu tượng người dùng mặc định"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Bàn phím thực"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Chọn bố cục bàn phím"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Mặc định"</string>

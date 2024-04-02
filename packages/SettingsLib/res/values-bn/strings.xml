@@ -106,6 +106,28 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"শুধুমাত্র বাঁদিকের হিয়ারিং এড অ্যাক্টিভ"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"শুধুমাত্র ডানদিকের হিয়ারিং এড অ্যাক্টিভ"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"বাঁ ও ডানদিকের হিয়ারিং এড, অ্যাক্টিভ"</string>
+    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
+    <skip />
+    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
+    <skip />
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"মিডিয়া অডিও"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ফোন কল"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ফাইল স্থানান্তর"</string>
@@ -643,8 +665,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"ছেড়ে বেরিয়ে যাওয়ার সময় সব অ্যাক্টিভিটি মুছে দেওয়া হবে"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"ছেড়ে বেরিয়ে যাওয়ার সময় আপনি অ্যাক্টিভিটি সেভ করতে পারবেন বা মুছতে পারবেন"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"সেশন অ্যাক্টিভিটি মুছে দিতে এখন রিসেট করুন বা ছেড়ে বেরিয়ে আসার সময় আপনি অ্যাক্টিভিটি সেভ করতে বা মুছতে পারবেন"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"ফটো তুলুন"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"একটি ইমেজ বেছে নিন"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ফটো বেছে নিন"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"একাধিকবার ভুল ইনপুট দিয়েছেন। এই ডিভাইসের ডেটা মুছে ফেলা হবে।"</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"একাধিকবার ভুল ইনপুট দিয়েছেন। এই ব্যবহারকারীর প্রোফাইল মুছে ফেলা হবে।"</string>
@@ -684,8 +704,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ইথারনেটের সংযোগ বিচ্ছিন্ন হয়েছে৷"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ইথারনেট।"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"কল করবেন না।"</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"একটি প্রোফাইল ছবি বেছে নিন"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"ডিফল্ট ব্যবহারকারীর আইকন"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"ফিজিক্যাল কীবোর্ড"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"কীবোর্ড লেআউট বেছে নিন"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"ডিফল্ট"</string>
