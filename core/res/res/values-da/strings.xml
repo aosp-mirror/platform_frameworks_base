@@ -827,7 +827,7 @@
     <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Giver appen tilladelse til at opdatere tilstandene for verificering E2EE-kontaktnøgler, som ejes af andre apps"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Angiv regler for adgangskoder"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Tjek længden samt tilladte tegn i adgangskoder og pinkoder til skærmlåsen."</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"Overvåg forsøg på oplåsning af skærm"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"Overvåge forsøg på oplåsning af skærm"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Overvåg antallet af forkert indtastede adgangskoder, når du låser skærmen op, og lås din tablet, eller slet alle data i den, hvis der er indtastet for mange forkerte adgangskoder."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Registrer antallet af forkerte adgangskoder, der angives ved oplåsning af skærmen, og lås din Android TV-enhed, eller ryd alle dataene på din Android TV-enhed, hvis adgangskoden angives forkert for mange gange."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Registrer antallet af forkert indtastede adgangskoder, når du låser skærmen op, og lås infotainmentsystemet, eller slet alle data i infotainmentsystemet, hvis der er indtastet for mange forkerte adgangskoder."</string>
@@ -1929,12 +1929,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Administreres af <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Til"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Fra"</string>
-    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>-<xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Alle kalendere"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> slår nogle lyde fra"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Der er et internt problem med enheden, og den vil muligvis være ustabil, indtil du gendanner fabriksdataene."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Der er et internt problem med enheden. Kontakt producenten for at få yderligere oplysninger."</string>
@@ -2397,6 +2394,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Fælles"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
+    <skip />
     <string name="satellite_notification_title" msgid="4026338973463121526">"Der blev automatisk oprettet forbindelse til satellit"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Du kan sende og modtage beskeder uden et mobil- eller Wi-Fi-netværk"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Åbn Beskeder"</string>

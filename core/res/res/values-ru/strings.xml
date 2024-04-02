@@ -1285,7 +1285,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Запуск приложений."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Окончание загрузки..."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Вы нажали кнопку питания. Обычно это приводит к отключению экрана.\n\nПри добавлении отпечатка пальца слегка прикоснитесь к кнопке."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Для завершения нужно отключить экран"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Для завершения нужно отключить экран."</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Отключить"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Продолжить сканирование отпечатка?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Вы нажали кнопку питания. Обычно это приводит к отключению экрана.\n\nЧтобы отсканировать отпечаток пальца, слегка прикоснитесь к кнопке."</string>
@@ -1931,12 +1931,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Под управлением приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Включено"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Отключено"</string>
-    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Любой календарь"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> приглушает некоторые звуки."</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Произошла внутренняя ошибка, и устройство может работать нестабильно, пока вы не выполните сброс настроек."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Произошла внутренняя ошибка. Обратитесь к производителю устройства за подробными сведениями."</string>
@@ -2399,6 +2396,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Тестовый"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Совместный"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
+    <skip />
     <string name="satellite_notification_title" msgid="4026338973463121526">"Автоматически подключено к системам спутниковой связи"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Вы можете отправлять и получать сообщения без доступа к мобильной сети или Wi-Fi."</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Открыть Сообщения"</string>

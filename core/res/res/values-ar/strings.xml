@@ -319,7 +319,7 @@
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"الوصول إلى جهات اتصالك"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"الموقع الجغرافي"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"الوصول إلى موقع هذا الجهاز"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"التقويم"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"‏تقويم Google"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"الوصول إلى تقويمك"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"‏إرسال رسائل قصيرة SMS وعرضها"</string>
@@ -1933,12 +1933,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"تحت إدارة \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"مفعَّل"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"غير مفعَّل"</string>
-    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">"، "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"من <xliff:g id="START">%1$s</xliff:g> إلى <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"أي تقويم"</string>
     <string name="muted_by" msgid="91464083490094950">"يعمل <xliff:g id="THIRD_PARTY">%1$s</xliff:g> على كتم بعض الأصوات."</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"حدثت مشكلة داخلية في جهازك، وقد لا يستقر وضعه حتى إجراء إعادة الضبط على الإعدادات الأصلية."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"حدثت مشكلة داخلية في جهازك. يمكنك الاتصال بالمصنِّع للحصول على تفاصيل."</string>
@@ -2000,7 +1997,7 @@
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"الطوارئ"</string>
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"ضبط قفل شاشة"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"ضبط قفل الشاشة"</string>
-    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"لاستخدام مساحتك الخاصة، يجب ضبط قفل شاشة على هذا الجهاز."</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"لاستخدام مساحتك الخاصة، يجب ضبط قفل شاشة على هذا الجهاز"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"التطبيق غير متاح"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> غير متاح الآن."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"تطبيق <xliff:g id="ACTIVITY">%1$s</xliff:g> غير متاح"</string>
@@ -2401,6 +2398,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"ملف شخصي تجريبي"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"ملف شخصي مشترك"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
+    <skip />
     <string name="satellite_notification_title" msgid="4026338973463121526">"تم الاتصال تلقائيًا بالقمر الصناعي"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"‏يمكنك إرسال الرسائل واستلامها بدون شبكة الجوّال أو شبكة Wi-Fi."</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"فتح تطبيق \"الرسائل\""</string>
