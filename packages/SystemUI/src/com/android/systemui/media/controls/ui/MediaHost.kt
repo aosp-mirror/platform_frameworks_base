@@ -199,7 +199,9 @@ constructor(
      */
     fun updateViewVisibility() {
         state.visible =
-            if (showsOnlyActiveMedia) {
+            if (mediaHierarchyManager.isLockedAndHidden()) {
+                false
+            } else if (showsOnlyActiveMedia) {
                 mediaDataManager.hasActiveMediaOrRecommendation()
             } else {
                 mediaDataManager.hasAnyMediaOrRecommendation()
