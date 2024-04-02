@@ -1283,7 +1283,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Запуск приложений."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Окончание загрузки..."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Вы нажали кнопку питания. Обычно это приводит к отключению экрана.\n\nПри добавлении отпечатка пальца слегка прикоснитесь к кнопке."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Для завершения нужно отключить экран"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Для завершения нужно отключить экран."</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Отключить"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Продолжить сканирование отпечатка?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Вы нажали кнопку питания. Обычно это приводит к отключению экрана.\n\nЧтобы отсканировать отпечаток пальца, слегка прикоснитесь к кнопке."</string>

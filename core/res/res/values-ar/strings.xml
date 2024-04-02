@@ -319,7 +319,7 @@
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"الوصول إلى جهات اتصالك"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"الموقع الجغرافي"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"الوصول إلى موقع هذا الجهاز"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"التقويم"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"‏تقويم Google"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"الوصول إلى تقويمك"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"‏إرسال رسائل قصيرة SMS وعرضها"</string>
@@ -1992,7 +1992,7 @@
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"الطوارئ"</string>
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"ضبط قفل شاشة"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"ضبط قفل الشاشة"</string>
-    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"لاستخدام مساحتك الخاصة، يجب ضبط قفل شاشة على هذا الجهاز."</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"لاستخدام مساحتك الخاصة، يجب ضبط قفل شاشة على هذا الجهاز"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"التطبيق غير متاح"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> غير متاح الآن."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"تطبيق <xliff:g id="ACTIVITY">%1$s</xliff:g> غير متاح"</string>

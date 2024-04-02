@@ -1628,7 +1628,7 @@
     <string name="validity_period" msgid="1717724283033175968">"Վավերականություն`"</string>
     <string name="issued_on" msgid="5855489688152497307">"Թողարկվել է`"</string>
     <string name="expires_on" msgid="1623640879705103121">"Սպառվում է`"</string>
-    <string name="serial_number" msgid="3479576915806623429">"Հերթական համարը`"</string>
+    <string name="serial_number" msgid="3479576915806623429">"Հերթական համար`"</string>
     <string name="fingerprints" msgid="148690767172613723">"Մատնահետքերը`"</string>
     <string name="sha256_fingerprint" msgid="7103976380961964600">"SHA-256 մատնահետք`"</string>
     <string name="sha1_fingerprint" msgid="2339915142825390774">"SHA-1 մատնահետք`"</string>
