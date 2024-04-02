@@ -309,6 +309,7 @@ cc_library_shared_for_libandroid_runtime {
                 "libdebuggerd_client",
                 "libutils",
                 "libbinder",
+                "libbinderdebug",
                 "libbinder_ndk",
                 "libui",
                 "libgraphicsenv",
