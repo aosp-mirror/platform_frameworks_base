@@ -388,11 +388,23 @@ class InsetsStateController {
                 onRequestedVisibleTypesChanged(newControlTargets.valueAt(i));
             }
             newControlTargets.clear();
+            // Check for and try to run the scheduled show IME request (if it exists), as we
+            // now applied the surface transaction and notified the target of the new control.
+            getImeSourceProvider().checkShowImePostLayout();
         });
     }
 
     void notifyInsetsChanged() {
         mDisplayContent.notifyInsetsChanged(mDispatchInsetsChanged);
+    }
+
+    /**
+     * Checks if the control target has pending controls.
+     *
+     * @param target the control target to check.
+     */
+    boolean hasPendingControls(@NonNull InsetsControlTarget target) {
+        return mPendingControlChanged.contains(target);
     }
 
     void dump(String prefix, PrintWriter pw) {

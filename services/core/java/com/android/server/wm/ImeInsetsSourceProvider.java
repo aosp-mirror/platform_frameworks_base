@@ -67,8 +67,9 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
     /** @see #setServerVisible(boolean) */
     private boolean mServerVisible;
 
-    ImeInsetsSourceProvider(InsetsSource source,
-            InsetsStateController stateController, DisplayContent displayContent) {
+    ImeInsetsSourceProvider(@NonNull InsetsSource source,
+            @NonNull InsetsStateController stateController,
+            @NonNull DisplayContent displayContent) {
         super(source, stateController, displayContent);
     }
 
@@ -230,7 +231,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
         if (mImeRequesterStatsToken != null) {
             // Cancel the pre-existing stats token, if any.
             // Log state on pre-existing request cancel.
-            logShowImePostLayoutState();
+            logShowImePostLayoutState(false /* aborted */);
             ImeTracker.forLogging().onCancelled(
                     mImeRequesterStatsToken, ImeTracker.PHASE_WM_SHOW_IME_RUNNER);
         }
@@ -310,7 +311,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
         ProtoLog.d(WM_DEBUG_IME, "abortShowImePostLayout");
         if (mImeRequesterStatsToken != null) {
             // Log state on abort.
-            logShowImePostLayoutState();
+            logShowImePostLayoutState(true /* aborted */);
             ImeTracker.forLogging().onFailed(
                     mImeRequesterStatsToken, ImeTracker.PHASE_WM_ABORT_SHOW_IME_POST_LAYOUT);
             mImeRequesterStatsToken = null;
@@ -333,11 +334,30 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
         //  actual IME target.
         final InsetsControlTarget dcTarget = mDisplayContent.getImeTarget(IME_TARGET_LAYERING);
         if (dcTarget == null || mImeRequester == null) {
+            // Not ready to show if there is no IME layering target, or no IME requester.
             return false;
         }
-        // Not ready to show if there is no IME control target.
-        final InsetsControlTarget controlTarget = mDisplayContent.getImeTarget(IME_TARGET_CONTROL);
+        final InsetsControlTarget controlTarget = getControlTarget();
         if (controlTarget == null) {
+            // Not ready to show if there is no IME control target.
+            return false;
+        }
+        if (controlTarget != mDisplayContent.getImeTarget(IME_TARGET_CONTROL)) {
+            // Not ready to show if control target does not match the one in DisplayContent.
+            return false;
+        }
+        if (!mServerVisible || mFrozen) {
+            // Not ready to show if the window container is not available and considered visible.
+            // If frozen, the server visibility is not set until unfrozen.
+            return false;
+        }
+        if (mStateController.hasPendingControls(controlTarget)) {
+            // Not ready to show if control target has pending controls.
+            return false;
+        }
+        if (getLeash(controlTarget) == null) {
+            // Not ready to show if control target has no source control leash (or leash is not
+            // ready for dispatching).
             return false;
         }
 
@@ -353,35 +373,56 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
     }
 
     /**
-     * Logs the current state required for scheduleShowImePostLayout's runnable to be triggered.
+     * Logs the current state required for showImePostLayout to be triggered.
+     *
+     * @param aborted whether the showImePostLayout was aborted or cancelled.
      */
-    private void logShowImePostLayoutState() {
+    private void logShowImePostLayoutState(boolean aborted) {
         final var windowState = mWindowContainer != null ? mWindowContainer.asWindowState() : null;
         final var dcTarget = mDisplayContent.getImeTarget(IME_TARGET_LAYERING);
-        final var controlTarget = mDisplayContent.getImeTarget(IME_TARGET_CONTROL);
+        final var controlTarget = getControlTarget();
         final var sb = new StringBuilder();
-        sb.append("mWindowContainer: ").append(mWindowContainer);
-        sb.append(" windowState: ").append(windowState);
+        sb.append("showImePostLayout ").append(aborted ? "aborted" : "cancelled");
+        sb.append(", mWindowContainer is: ");
+        sb.append(mWindowContainer != null ? "non-null" : "null");
+        sb.append(", windowState: ").append(windowState);
         if (windowState != null) {
-            sb.append(" windowState.isDrawn(): ").append(windowState.isDrawn());
-            sb.append(" windowState.mGivenInsetsPending: ").append(windowState.mGivenInsetsPending);
+            sb.append(", windowState.isDrawn(): ");
+            sb.append(windowState.isDrawn());
+            sb.append(", windowState.mGivenInsetsPending: ");
+            sb.append(windowState.mGivenInsetsPending);
         }
-        sb.append(" mIsImeLayoutDrawn: ").append(mIsImeLayoutDrawn);
-        sb.append(" mShowImeRunner: ").append(mShowImeRunner);
-        sb.append(" mImeRequester: ").append(mImeRequester);
-        sb.append(" dcTarget: ").append(dcTarget);
-        sb.append(" controlTarget: ").append(controlTarget);
-        sb.append(" isReadyToShowIme(): ").append(isReadyToShowIme());
+        sb.append(", mIsImeLayoutDrawn: ").append(mIsImeLayoutDrawn);
+        sb.append(", mShowImeRunner: ").append(mShowImeRunner);
+        sb.append(", mImeRequester: ").append(mImeRequester);
+        sb.append(", dcTarget: ").append(dcTarget);
+        sb.append(", controlTarget: ").append(controlTarget);
+        sb.append("\n");
+        sb.append("isReadyToShowIme(): ").append(isReadyToShowIme());
         if (mImeRequester != null && dcTarget != null && controlTarget != null) {
-            sb.append(" isImeLayeringTarget: ");
+            sb.append(", controlTarget == DisplayContent.controlTarget: ");
+            sb.append(controlTarget == mDisplayContent.getImeTarget(IME_TARGET_CONTROL));
+            sb.append(", hasPendingControls: ");
+            sb.append(mStateController.hasPendingControls(controlTarget));
+            sb.append(", serverVisible: ");
+            sb.append(mServerVisible);
+            sb.append(", frozen: ");
+            sb.append(mFrozen);
+            sb.append(", leash is: ");
+            sb.append(getLeash(controlTarget) != null ? "non-null" : "null");
+            sb.append(", control is: ");
+            sb.append(mControl != null ? "non-null" : "null");
+            sb.append(", mIsLeashReadyForDispatching: ");
+            sb.append(mIsLeashReadyForDispatching);
+            sb.append(", isImeLayeringTarget: ");
             sb.append(isImeLayeringTarget(mImeRequester, dcTarget));
-            sb.append(" isAboveImeLayeringTarget: ");
+            sb.append(", isAboveImeLayeringTarget: ");
             sb.append(isAboveImeLayeringTarget(mImeRequester, dcTarget));
-            sb.append(" isImeFallbackTarget: ");
+            sb.append(", isImeFallbackTarget: ");
             sb.append(isImeFallbackTarget(mImeRequester));
-            sb.append(" isImeInputTarget: ");
+            sb.append(", isImeInputTarget: ");
             sb.append(isImeInputTarget(mImeRequester));
-            sb.append(" sameAsImeControlTarget: ");
+            sb.append(", sameAsImeControlTarget: ");
             sb.append(sameAsImeControlTarget());
         }
         Slog.d(TAG, sb.toString());

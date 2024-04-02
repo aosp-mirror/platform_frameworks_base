@@ -552,6 +552,24 @@ public class InsetsStateControllerTest extends WindowTestsBase {
                 control2.getInsetsHint().bottom);
     }
 
+    @Test
+    public void testHasPendingControls() {
+        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        getController().getOrCreateSourceProvider(ID_STATUS_BAR, statusBars())
+                .setWindowContainer(statusBar, null, null);
+        // No controls dispatched yet.
+        assertFalse(getController().hasPendingControls(app));
+
+        getController().onBarControlTargetChanged(app, null, null, null);
+        // Controls pending to be dispatched.
+        assertTrue(getController().hasPendingControls(app));
+
+        performSurfacePlacementAndWaitForWindowAnimator();
+        // Pending controls were dispatched.
+        assertFalse(getController().hasPendingControls(app));
+    }
+
     /** Creates a window which is associated with ActivityRecord. */
     private WindowState createTestWindow(String name) {
         final WindowState win = createWindow(null, TYPE_APPLICATION, name);

@@ -64,15 +64,16 @@ class InsetsSourceProvider {
 
     private static final Rect EMPTY_RECT = new Rect();
 
-    protected final DisplayContent mDisplayContent;
     protected final @NonNull InsetsSource mSource;
-    protected WindowContainer mWindowContainer;
+    protected final @NonNull DisplayContent mDisplayContent;
+    protected final @NonNull InsetsStateController mStateController;
+    protected @Nullable WindowContainer mWindowContainer;
+    protected @Nullable InsetsSourceControl mControl;
+    protected boolean mIsLeashReadyForDispatching;
 
     private final Rect mTmpRect = new Rect();
-    private final InsetsStateController mStateController;
     private final InsetsSourceControl mFakeControl;
     private final Consumer<Transaction> mSetLeashPositionConsumer;
-    private @Nullable InsetsSourceControl mControl;
     private @Nullable InsetsControlTarget mControlTarget;
     private @Nullable InsetsControlTarget mPendingControlTarget;
     private @Nullable InsetsControlTarget mFakeControlTarget;
@@ -82,7 +83,6 @@ class InsetsSourceProvider {
     private SparseArray<TriFunction<DisplayFrames, WindowContainer, Rect, Integer>>
             mOverrideFrameProviders;
     private final SparseArray<Rect> mOverrideFrames = new SparseArray<Rect>();
-    private boolean mIsLeashReadyForDispatching;
     private final Rect mSourceFrame = new Rect();
     private final Rect mLastSourceFrame = new Rect();
     private @NonNull Insets mInsetsHint = Insets.NONE;
@@ -114,8 +114,9 @@ class InsetsSourceProvider {
      */
     private boolean mCropToProvidingInsets = false;
 
-    InsetsSourceProvider(InsetsSource source, InsetsStateController stateController,
-            DisplayContent displayContent) {
+    InsetsSourceProvider(@NonNull InsetsSource source,
+            @NonNull InsetsStateController stateController,
+            @NonNull DisplayContent displayContent) {
         mClientVisible = (WindowInsets.Type.defaultVisible() & source.getType()) != 0;
         mSource = source;
         mDisplayContent = displayContent;
@@ -560,7 +561,7 @@ class InsetsSourceProvider {
         mDisplayContent.mWmService.mWindowPlacerLocked.requestTraversal();
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
     void setServerVisible(boolean serverVisible) {
         mServerVisible = serverVisible;
         updateSourceFrameForServerVisibility();
@@ -575,6 +576,14 @@ class InsetsSourceProvider {
                 mServerVisible, mClientVisible);
     }
 
+    /**
+     * Gets the source control for the given control target. If this is the provider's control
+     * target, but the leash is not ready for dispatching, a new source control object with the
+     * leash set to {@code null} is returned.
+     *
+     * @param target the control target to get the source control for.
+     */
+    @Nullable
     InsetsSourceControl getControl(InsetsControlTarget target) {
         if (target == mControlTarget) {
             if (!mIsLeashReadyForDispatching && mControl != null) {
@@ -593,10 +602,25 @@ class InsetsSourceProvider {
         return null;
     }
 
+    /**
+     * Gets the leash of the source control for the given control target. If this is not the
+     * provider's control target, or the leash is not ready for dispatching, this will
+     * return {@code null}.
+     *
+     * @param target the control target to get the source control leash for.
+     */
+    @Nullable
+    protected SurfaceControl getLeash(@NonNull InsetsControlTarget target) {
+        return target == mControlTarget && mIsLeashReadyForDispatching && mControl != null
+                ? mControl.getLeash() : null;
+    }
+
+    @Nullable
     InsetsControlTarget getControlTarget() {
         return mControlTarget;
     }
 
+    @Nullable
     InsetsControlTarget getFakeControlTarget() {
         return mFakeControlTarget;
     }
