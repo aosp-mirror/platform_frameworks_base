@@ -1929,12 +1929,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Stýrt af <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Kveikt"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Slökkt"</string>
-    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Öll dagatöl"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> þaggar í einhverjum hljóðum"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Innra vandamál kom upp í tækinu og það kann að vera óstöðugt þangað til þú núllstillir það."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Innra vandamál kom upp í tækinu. Hafðu samband við framleiðanda til að fá nánari upplýsingar."</string>
@@ -1977,7 +1974,7 @@
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Viltu leyfa <xliff:g id="APP">%1$s</xliff:g> að stofna nýjan notanda með <xliff:g id="ACCOUNT">%2$s</xliff:g> (notandi með þennan reikning er þegar fyrir hendi)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Leyfa <xliff:g id="APP">%1$s</xliff:g> að stofna nýjan notanda með <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"Bæta við stýrðum notanda"</string>
-    <string name="language_selection_title" msgid="52674936078683285">"Bæta við tungumáli"</string>
+    <string name="language_selection_title" msgid="52674936078683285">"Bæta tungumáli við"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Svæðisval"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Sláðu inn heiti tungumáls"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Tillögur"</string>
@@ -1995,7 +1992,7 @@
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Ljúka hléi"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Neyðartilvik"</string>
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Stilltu skjálás"</string>
-    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Stilltu skjálás"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Stilla skjálás"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Stilltu skjálás í tækinu til að nota leynirými"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Forrit er ekki tiltækt"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> er ekki tiltækt núna."</string>
@@ -2397,6 +2394,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Prófun"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Sameiginlegt"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
+    <skip />
     <string name="satellite_notification_title" msgid="4026338973463121526">"Tengdist sjálfkrafa við gervihnött"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Þú getur sent og móttekið skilaboð án tengingar við farsímakerfi eða Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Opna Messages"</string>

@@ -1929,12 +1929,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> によって管理されています"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ON"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"OFF"</string>
-    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">"、 "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>～<xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"すべてのカレンダー"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> により一部の音はミュートに設定"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"デバイスで内部的な問題が発生しました。データが初期化されるまで不安定になる可能性があります。"</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"デバイスで内部的な問題が発生しました。詳しくはメーカーにお問い合わせください。"</string>
@@ -2376,8 +2373,8 @@
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"デュアル スクリーン"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"デュアル スクリーン: ON"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>は 2 画面でコンテンツを表示しています"</string>
-    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"デバイスが熱くなりすぎています"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"スマートフォンが熱くなりすぎているため、デュアル スクリーンを使用できません"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"デバイスが熱くなっています"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"スマートフォンが熱いため、デュアル スクリーンを使用できません"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"デュアル スクリーンを使用できません"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"バッテリー セーバーが ON のため、デュアル スクリーンを使用できません。この動作は設定で OFF にできます。"</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"設定に移動"</string>
@@ -2397,6 +2394,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"テスト"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"共用"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
+    <skip />
     <string name="satellite_notification_title" msgid="4026338973463121526">"衛星に自動接続しました"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"モバイル ネットワークや Wi-Fi ネットワークを使わずにメッセージを送受信できます"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"メッセージ アプリを開く"</string>
