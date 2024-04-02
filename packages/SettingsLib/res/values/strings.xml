@@ -1131,6 +1131,16 @@
     <!-- [CHAR_LIMIT=80] Label for battery charging future pause -->
     <string name="power_charging_future_paused"><xliff:g id="level">%1$s</xliff:g> - Charging</string>
 
+    <!-- [CHAR_LIMIT=40] Label for battery level when fast charging with duration. -->
+    <string name="power_fast_charging_duration_v2"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="status">%2$s</xliff:g> - Full by <xliff:g id="time">%3$s</xliff:g></string>
+    <!-- [CHAR_LIMIT=40] Label for battery level when non-fast charging with duration. -->
+    <string name="power_charging_duration_v2"><xliff:g id="level">%1$s</xliff:g> - Fully charged by <xliff:g id="time">%2$s</xliff:g></string>
+
+    <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery charging. -->
+    <string name="power_remaining_charging_duration_only_v2">Fully charged by <xliff:g id="time">%1$s</xliff:g></string>
+    <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery charging. -->
+    <string name="power_remaining_fast_charging_duration_only_v2">Full by <xliff:g id="time">%1$s</xliff:g></string>
+
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_unknown">Unknown</string>
     <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when charging from an unknown source.  -->
@@ -1153,6 +1163,11 @@
     <string name="battery_info_status_full_charged">Fully Charged</string>
     <!-- [CHAR_LIMIT=None] Battery Info screen. Value for a status item. A state which device charging on hold -->
     <string name="battery_info_status_charging_on_hold">Charging on hold</string>
+
+    <!-- [CHAR_LIMIT=20] Battery use screen. Battery status shown in chart label when charging isn't fast. -->
+    <string name="battery_info_status_charging_v2">Charging</string>
+    <!-- [CHAR_LIMIT=20] Battery use screen. Battery status shown in chart label when charging speed is fast. -->
+    <string name="battery_info_status_charging_fast_v2">Fast charging</string>
 
     <!-- Summary for settings preference disabled by administrator [CHAR LIMIT=50] -->
     <string name="disabled_by_admin_summary_text">Controlled by admin</string>
