@@ -291,21 +291,6 @@ class FullMobileConnectionRepository(
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.dataEnabled.value)
 
-    override val inflateSignalStrength =
-        activeRepo
-            .flatMapLatest { it.inflateSignalStrength }
-            .logDiffsForTable(
-                tableLogBuffer,
-                columnPrefix = "",
-                columnName = "inflate",
-                initialValue = activeRepo.value.inflateSignalStrength.value,
-            )
-            .stateIn(
-                scope,
-                SharingStarted.WhileSubscribed(),
-                activeRepo.value.inflateSignalStrength.value
-            )
-
     override val numberOfLevels =
         activeRepo
             .flatMapLatest { it.numberOfLevels }
