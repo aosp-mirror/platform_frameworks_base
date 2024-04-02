@@ -94,7 +94,7 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         whenever(dprLazy.get()).thenReturn(devicePolicyResolver)
         whenever(sysuiState.setFlag(anyInt(), anyBoolean())).thenReturn(sysuiState)
-        whenever(screenCaptureDisabledDialogDelegate.createDialog())
+        whenever(screenCaptureDisabledDialogDelegate.createSysUIDialog())
             .thenReturn(screenCaptureDisabledDialog)
         whenever(
                 userFileManager.getSharedPreferences(

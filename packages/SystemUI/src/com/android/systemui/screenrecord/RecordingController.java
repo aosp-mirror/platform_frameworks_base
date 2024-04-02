@@ -164,7 +164,7 @@ public class RecordingController
         if (mFlags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES)
                 && mDevicePolicyResolver.get()
                         .isScreenCaptureCompletelyDisabled(getHostUserHandle())) {
-            return mScreenCaptureDisabledDialogDelegate.createDialog();
+            return mScreenCaptureDisabledDialogDelegate.createSysUIDialog();
         }
 
         mMediaProjectionMetricsLogger.notifyProjectionInitiated(
