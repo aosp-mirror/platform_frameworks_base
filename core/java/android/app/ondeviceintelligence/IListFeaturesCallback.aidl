@@ -9,7 +9,7 @@ import android.os.PersistableBundle;
   *
   * @hide
   */
-interface IListFeaturesCallback {
+oneway interface IListFeaturesCallback {
     void onSuccess(in List<Feature> result) = 1;
     void onFailure(int errorCode, in String errorMessage, in PersistableBundle errorParams) = 2;
 }
