@@ -16,11 +16,41 @@
 -->
 
 <resources>
+    <!-- Material next state on color-->
+    <color name="settingslib_state_on_color">@color/settingslib_materialColorPrimaryContainer</color>
+
+    <!-- Material next state off color-->
+    <color name="settingslib_state_off_color">@color/settingslib_materialColorPrimaryContainer</color>
+
+    <!-- Material next thumb disable color-->
+    <color name="settingslib_thumb_disabled_color">@color/settingslib_materialColorOutline</color>
+
+    <!-- Material next thumb off color-->
+    <color name="settingslib_thumb_on_color">@color/settingslib_materialColorOnPrimary</color>
+
+    <!-- Material next thumb off color-->
+    <color name="settingslib_thumb_off_color">@color/settingslib_materialColorOutline</color>
+
+    <!-- Material next track on color-->
+    <color name="settingslib_track_on_color">@color/settingslib_materialColorPrimary</color>
+
+    <!-- Material next track off color-->
+    <color name="settingslib_track_off_color">@color/settingslib_materialColorSurfaceContainerHighest</color>
+
+    <!-- Dialog background color. -->
+    <color name="settingslib_dialog_background">@color/settingslib_materialColorSurfaceInverse</color>
+
+    <!-- Material next track outline color-->
+    <color name="settingslib_track_online_color">@color/settingslib_switch_track_outline_color</color>
+
+    <color name="settingslib_colorSurfaceHeader">@color/settingslib_materialColorSurfaceVariant</color>
+
+    <color name="settingslib_text_color_preference_category_title">@color/settingslib_materialColorPrimary</color>
+
     <!-- The text color of spinner title -->
     <color name="settingslib_spinner_title_color">@color/settingslib_materialColorOnPrimaryContainer</color>
     <!-- The text color of dropdown item title -->
     <color name="settingslib_spinner_dropdown_color">@color/settingslib_materialColorOnPrimaryContainer</color>
-
 
     <color name="settingslib_materialColorOnSecondaryFixedVariant">@android:color/system_on_secondary_fixed_variant</color>
     <color name="settingslib_materialColorOnTertiaryFixedVariant">@android:color/system_on_tertiary_fixed_variant</color>
