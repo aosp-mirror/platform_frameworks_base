@@ -32,6 +32,7 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.DisplayId
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.model.SceneContainerPlugin
@@ -63,6 +64,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -96,6 +99,7 @@ constructor(
     private val centralSurfaces: CentralSurfaces,
     private val headsUpInteractor: HeadsUpNotificationInteractor,
     private val occlusionInteractor: SceneContainerOcclusionInteractor,
+    private val faceUnlockInteractor: DeviceEntryFaceAuthInteractor,
 ) : CoreStartable {
 
     override fun start() {
@@ -108,6 +112,7 @@ constructor(
             respondToFalsingDetections()
             hydrateWindowFocus()
             hydrateInteractionState()
+            handleBouncerOverscroll()
         } else {
             sceneLogger.logFrameworkEnabled(
                 isEnabled = false,
@@ -227,7 +232,7 @@ constructor(
                             is ObservableTransitionState.Idle -> setOf(transitionState.scene)
                             is ObservableTransitionState.Transition ->
                                 setOf(
-                                    transitionState.progress,
+                                    transitionState.fromScene,
                                     transitionState.toScene,
                                 )
                         }
@@ -294,12 +299,17 @@ constructor(
                     val canSwipeToEnter = deviceEntryInteractor.canSwipeToEnter.value
                     val isUnlocked = deviceEntryInteractor.isUnlocked.value
                     if (isUnlocked && canSwipeToEnter == false) {
-                        switchToScene(
-                            targetSceneKey = Scenes.Gone,
-                            loggingReason =
-                                "device is waking up while unlocked without the ability" +
-                                    " to swipe up on lockscreen to enter.",
-                        )
+                        val isTransitioningToLockscreen =
+                            sceneInteractor.transitioningTo.value == Scenes.Lockscreen
+                        if (!isTransitioningToLockscreen) {
+                            switchToScene(
+                                targetSceneKey = Scenes.Gone,
+                                loggingReason =
+                                    "device is waking up while unlocked without the ability to" +
+                                        " swipe up on lockscreen to enter and not on or" +
+                                        " transitioning to, the lockscreen scene.",
+                            )
+                        }
                     } else if (
                         authenticationInteractor.get().getAuthenticationMethod() ==
                             AuthenticationMethodModel.Sim
@@ -453,6 +463,33 @@ constructor(
                         )
                     }
                 }
+        }
+    }
+
+    private fun handleBouncerOverscroll() {
+        applicationScope.launch {
+            sceneInteractor.transitionState
+                // Only consider transitions.
+                .filterIsInstance<ObservableTransitionState.Transition>()
+                // Only consider user-initiated (e.g. drags) that go from bouncer to lockscreen.
+                .filter { transition ->
+                    transition.fromScene == Scenes.Bouncer &&
+                        transition.toScene == Scenes.Lockscreen &&
+                        transition.isInitiatedByUserInput
+                }
+                .flatMapLatest { it.progress }
+                // Figure out the direction of scrolling.
+                .map { progress ->
+                    when {
+                        progress > 0 -> 1
+                        progress < 0 -> -1
+                        else -> 0
+                    }
+                }
+                .distinctUntilChanged()
+                // Only consider negative scrolling, AKA overscroll.
+                .filter { it == -1 }
+                .collect { faceUnlockInteractor.onSwipeUpOnBouncer() }
         }
     }
 
