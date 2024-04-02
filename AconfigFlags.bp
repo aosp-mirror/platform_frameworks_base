@@ -1262,6 +1262,13 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+java_aconfig_library {
+    name: "android.crashrecovery.flags-aconfig-java-host",
+    aconfig_declarations: "android.crashrecovery.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+    host_supported: true,
+}
+
 // Backup
 java_aconfig_library {
     name: "backup_flags_lib",
