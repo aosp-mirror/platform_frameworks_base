@@ -52,4 +52,14 @@ constructor(
             .distinctUntilChanged()
             .flowOn(bgContext)
             .conflate()
+
+    val statusBarHeaderHeightKeyguard: Flow<Int> =
+        configurationController.onConfigChanged
+            .onStart<Any> { emit(Unit) }
+            .flowOn(mainContext)
+            .conflate()
+            .map { proxy.getStatusBarHeaderHeightKeyguard() }
+            .distinctUntilChanged()
+            .flowOn(bgContext)
+            .conflate()
 }

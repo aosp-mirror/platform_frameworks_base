@@ -12,20 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
-import javax.inject.Inject
+import com.android.systemui.keyguard.domain.interactor.keyguardBlueprintInteractor
+import com.android.systemui.kosmos.Kosmos
 
-class KeyguardBlueprintViewModel
-@Inject
-constructor(
-    keyguardBlueprintInteractor: KeyguardBlueprintInteractor,
-) {
-    val blueprint = keyguardBlueprintInteractor.blueprint
-    val blueprintId = keyguardBlueprintInteractor.blueprintId
-    val refreshTransition = keyguardBlueprintInteractor.refreshTransition
-}
+val Kosmos.keyguardBlueprintViewModel by
+    Kosmos.Fixture { KeyguardBlueprintViewModel(keyguardBlueprintInteractor) }

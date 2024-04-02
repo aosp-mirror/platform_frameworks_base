@@ -105,7 +105,7 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
     @Test
     fun replaceViews() {
         val constraintLayout = ConstraintLayout(context, null)
-        underTest.replaceViews(null, constraintLayout)
+        underTest.replaceViews(constraintLayout)
         underTest.sections.forEach { verify(it)?.addViews(constraintLayout) }
     }
 
@@ -116,7 +116,7 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
         whenever(prevBlueprint.sections)
             .thenReturn(underTest.sections.minus(mDefaultDeviceEntrySection).plus(someSection))
         val constraintLayout = ConstraintLayout(context, null)
-        underTest.replaceViews(prevBlueprint, constraintLayout)
+        underTest.replaceViews(constraintLayout, prevBlueprint)
         underTest.sections.minus(mDefaultDeviceEntrySection).forEach {
             verify(it, never())?.addViews(constraintLayout)
         }
@@ -128,7 +128,7 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
     @Test
     fun deviceEntryIconIsOnTop() {
         val constraintLayout = ConstraintLayout(context, null)
-        underTest.replaceViews(null, constraintLayout)
+        underTest.replaceViews(constraintLayout)
         underTest.sections.forEach { verify(it)?.addViews(constraintLayout) }
     }
 

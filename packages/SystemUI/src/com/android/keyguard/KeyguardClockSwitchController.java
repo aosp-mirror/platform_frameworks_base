@@ -68,14 +68,14 @@ import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.settings.SecureSettings;
 
+import kotlinx.coroutines.DisposableHandle;
+
 import java.io.PrintWriter;
 import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
-
-import kotlinx.coroutines.DisposableHandle;
 
 /**
  * Injectable controller for {@link KeyguardClockSwitch}.
@@ -593,7 +593,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     boolean isClockTopAligned() {
         if (MigrateClocksToBlueprint.isEnabled()) {
-            return mKeyguardClockInteractor.getClockSize().getValue() == LARGE;
+            return mKeyguardClockInteractor.getClockSize().getValue().getLegacyValue() == LARGE;
         }
         return mLargeClockFrame.getVisibility() != View.VISIBLE;
     }

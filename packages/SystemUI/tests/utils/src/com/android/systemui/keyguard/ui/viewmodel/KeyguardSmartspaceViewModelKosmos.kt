@@ -16,24 +16,17 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import android.content.res.mainResources
-import com.android.systemui.common.ui.domain.interactor.configurationInteractor
-import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardSmartspaceInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.shade.domain.interactor.shadeInteractor
-import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationsKeyguardInteractor
-import com.android.systemui.statusbar.ui.systemBarUtilsProxy
+import com.android.systemui.util.mockito.mock
 
-val Kosmos.keyguardClockViewModel by
+val Kosmos.keyguardSmartspaceViewModel by
     Kosmos.Fixture {
-        KeyguardClockViewModel(
-            keyguardClockInteractor = keyguardClockInteractor,
+        KeyguardSmartspaceViewModel(
             applicationScope = applicationCoroutineScope,
-            notifsKeyguardInteractor = notificationsKeyguardInteractor,
-            shadeInteractor = shadeInteractor,
-            systemBarUtils = systemBarUtilsProxy,
-            configurationInteractor = configurationInteractor,
-            resources = mainResources
+            smartspaceController = mock(),
+            keyguardClockViewModel = keyguardClockViewModel,
+            smartspaceInteractor = keyguardSmartspaceInteractor,
         )
     }

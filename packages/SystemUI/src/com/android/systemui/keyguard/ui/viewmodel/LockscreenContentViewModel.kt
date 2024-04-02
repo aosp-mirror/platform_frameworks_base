@@ -17,13 +17,14 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.res.Resources
-import com.android.keyguard.KeyguardClockSwitch
+import com.android.internal.annotations.VisibleForTesting
 import com.android.keyguard.KeyguardClockSwitch.SMALL
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
+import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
@@ -49,12 +50,10 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     private val unfoldTransitionInteractor: UnfoldTransitionInteractor,
 ) {
-    private val clockSize = clockInteractor.clockSize
+    @VisibleForTesting val clockSize = clockInteractor.clockSize
 
     val isUdfpsVisible: Boolean
         get() = authController.isUdfpsSupported
-    val isLargeClockVisible: Boolean
-        get() = clockSize.value == KeyguardClockSwitch.LARGE
 
     val shouldUseSplitNotificationShade: StateFlow<Boolean> =
         shadeInteractor.shadeMode
@@ -66,10 +65,11 @@ constructor(
             )
 
     val areNotificationsVisible: StateFlow<Boolean> =
-        combine(clockSize, shouldUseSplitNotificationShade) {
+        combine(
                 clockSize,
-                shouldUseSplitNotificationShade ->
-                clockSize == SMALL || shouldUseSplitNotificationShade
+                shouldUseSplitNotificationShade,
+            ) { clockSize, shouldUseSplitNotificationShade ->
+                clockSize == ClockSize.SMALL || shouldUseSplitNotificationShade
             }
             .stateIn(
                 scope = applicationScope,
@@ -95,7 +95,7 @@ constructor(
             )
 
     fun getSmartSpacePaddingTop(resources: Resources): Int {
-        return if (isLargeClockVisible) {
+        return if (clockSize.value == ClockSize.LARGE) {
             resources.getDimensionPixelSize(R.dimen.keyguard_smartspace_top_offset) +
                 resources.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin)
         } else {

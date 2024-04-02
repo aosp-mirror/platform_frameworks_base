@@ -24,8 +24,10 @@ import kotlinx.coroutines.flow.StateFlow
 @SysUISingleton
 class KeyguardSmartspaceInteractor
 @Inject
-constructor(private val keyguardSmartspaceRepository: KeyguardSmartspaceRepository) {
-    var bcSmartspaceVisibility: StateFlow<Int> = keyguardSmartspaceRepository.bcSmartspaceVisibility
+constructor(
+    private val keyguardSmartspaceRepository: KeyguardSmartspaceRepository,
+) {
+    val bcSmartspaceVisibility: StateFlow<Int> = keyguardSmartspaceRepository.bcSmartspaceVisibility
 
     fun setBcSmartspaceVisibility(visibility: Int) {
         keyguardSmartspaceRepository.setBcSmartspaceVisibility(visibility)

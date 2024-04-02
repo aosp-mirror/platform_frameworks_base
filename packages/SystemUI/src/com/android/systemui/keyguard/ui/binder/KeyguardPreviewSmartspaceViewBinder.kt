@@ -23,7 +23,7 @@ import androidx.core.view.isInvisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.tracing.coroutines.launch
-import com.android.systemui.keyguard.shared.model.SettingsClockSize
+import com.android.systemui.keyguard.shared.model.ClockSizeSetting
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardPreviewSmartspaceViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 
@@ -43,12 +43,12 @@ object KeyguardPreviewSmartspaceViewBinder {
                     viewModel.selectedClockSize.collect {
                         val topPadding =
                             when (it) {
-                                SettingsClockSize.DYNAMIC ->
+                                ClockSizeSetting.DYNAMIC ->
                                     viewModel.getLargeClockSmartspaceTopPadding(
                                         splitShadePreview,
                                         previewContext,
                                     )
-                                SettingsClockSize.SMALL ->
+                                ClockSizeSetting.SMALL ->
                                     viewModel.getSmallClockSmartspaceTopPadding(
                                         splitShadePreview,
                                         previewContext,

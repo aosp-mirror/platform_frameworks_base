@@ -12,20 +12,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-package com.android.systemui.keyguard.ui.viewmodel
+@file:OptIn(ExperimentalCoroutinesApi::class)
 
-import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
-import javax.inject.Inject
+package com.android.systemui.keyguard.domain.interactor
 
-class KeyguardBlueprintViewModel
-@Inject
-constructor(
-    keyguardBlueprintInteractor: KeyguardBlueprintInteractor,
-) {
-    val blueprint = keyguardBlueprintInteractor.blueprint
-    val blueprintId = keyguardBlueprintInteractor.blueprintId
-    val refreshTransition = keyguardBlueprintInteractor.refreshTransition
+import com.android.systemui.keyguard.data.repository.keyguardSmartspaceRepository
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+
+var Kosmos.keyguardSmartspaceInteractor by Fixture {
+    KeyguardSmartspaceInteractor(
+        keyguardSmartspaceRepository = keyguardSmartspaceRepository,
+    )
 }

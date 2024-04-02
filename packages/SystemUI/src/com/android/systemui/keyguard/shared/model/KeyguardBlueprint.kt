@@ -35,16 +35,18 @@ interface KeyguardBlueprint {
      * @param bindData: Whether to bind the data or not.
      */
     fun replaceViews(
-        previousBlueprint: KeyguardBlueprint?,
         constraintLayout: ConstraintLayout,
+        previousBlueprint: KeyguardBlueprint? = null,
         bindData: Boolean = true
     ) {
-        previousBlueprint?.let { previousBlueprint ->
-            previousBlueprint.sections.subtract(sections).forEach {
-                it.removeViews(constraintLayout)
+        val prevSections =
+            previousBlueprint?.let { prev ->
+                prev.sections.subtract(sections).forEach { it.removeViews(constraintLayout) }
+                prev.sections
             }
-        }
-        sections.subtract((previousBlueprint?.sections ?: setOf()).toSet()).forEach {
+                ?: listOf()
+
+        sections.subtract(prevSections).forEach {
             it.addViews(constraintLayout)
             if (bindData) {
                 it.bindData(constraintLayout)

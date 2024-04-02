@@ -18,7 +18,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.Context
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
-import com.android.systemui.keyguard.shared.model.SettingsClockSize
+import com.android.systemui.keyguard.shared.model.ClockSizeSetting
 import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -35,7 +35,7 @@ constructor(
     val clockViewModel: KeyguardClockViewModel,
 ) {
 
-    val selectedClockSize: StateFlow<SettingsClockSize> = interactor.selectedClockSize
+    val selectedClockSize: StateFlow<ClockSizeSetting> = interactor.selectedClockSize
 
     val shouldHideSmartspace: Flow<Boolean> =
         combine(
@@ -48,8 +48,8 @@ constructor(
                     // TODO (b/284122375) This is temporary. We should use clockController
                     //      .largeClock.config.hasCustomWeatherDataDisplay instead, but
                     //      ClockRegistry.createCurrentClock is not reliable.
-                    SettingsClockSize.DYNAMIC -> currentClockId == "DIGITAL_CLOCK_WEATHER"
-                    SettingsClockSize.SMALL -> false
+                    ClockSizeSetting.DYNAMIC -> currentClockId == "DIGITAL_CLOCK_WEATHER"
+                    ClockSizeSetting.SMALL -> false
                 }
             }
 
