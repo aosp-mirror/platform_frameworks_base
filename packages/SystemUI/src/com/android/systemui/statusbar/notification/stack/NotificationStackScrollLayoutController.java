@@ -98,6 +98,7 @@ import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
+import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -166,6 +167,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     private final NotificationGutsManager mNotificationGutsManager;
     private final NotificationsController mNotificationsController;
     private final NotificationVisibilityProvider mVisibilityProvider;
+    private final NotificationWakeUpCoordinator mWakeUpCoordinator;
     private final HeadsUpManager mHeadsUpManager;
     private final NotificationRoundnessManager mNotificationRoundnessManager;
     private final TunerService mTunerService;
@@ -701,6 +703,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             NotificationGutsManager notificationGutsManager,
             NotificationsController notificationsController,
             NotificationVisibilityProvider visibilityProvider,
+            NotificationWakeUpCoordinator wakeUpCoordinator,
             HeadsUpManager headsUpManager,
             NotificationRoundnessManager notificationRoundnessManager,
             TunerService tunerService,
@@ -752,6 +755,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         mNotificationGutsManager = notificationGutsManager;
         mNotificationsController = notificationsController;
         mVisibilityProvider = visibilityProvider;
+        mWakeUpCoordinator = wakeUpCoordinator;
         mHeadsUpManager = headsUpManager;
         mNotificationRoundnessManager = notificationRoundnessManager;
         mTunerService = tunerService;
@@ -790,6 +794,9 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         mActivityStarter = activityStarter;
         mSensitiveNotificationProtectionController = sensitiveNotificationProtectionController;
         mView.passSplitShadeStateController(splitShadeStateController);
+        if (SceneContainerFlag.isEnabled()) {
+            mWakeUpCoordinator.setStackScroller(this);
+        }
         mDumpManager.registerDumpable(this);
         updateResources();
         setUpView();
@@ -1479,7 +1486,8 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void setDozing(boolean dozing, boolean animate) {
-        mView.setDozing(dozing, animate);
+        SceneContainerFlag.assertInLegacyMode();
+        mView.setDozing(dozing);
     }
 
     public void setPulsing(boolean pulsing, boolean animatePulse) {

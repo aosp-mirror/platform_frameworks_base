@@ -4385,7 +4385,8 @@ public class NotificationStackScrollLayout
     /**
      * See {@link AmbientState#setDozing}.
      */
-    public void setDozing(boolean dozing, boolean animate) {
+    @Override
+    public void setDozing(boolean dozing) {
         if (mAmbientState.isDozing() == dozing) {
             return;
         }

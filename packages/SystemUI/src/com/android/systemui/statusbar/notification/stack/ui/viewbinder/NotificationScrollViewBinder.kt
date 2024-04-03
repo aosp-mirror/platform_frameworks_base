@@ -84,6 +84,7 @@ constructor(
         launch { viewModel.headsUpTop.collect { view.setHeadsUpTop(it) } }
         launch { viewModel.expandFraction.collect { view.setExpandFraction(it) } }
         launch { viewModel.isScrollable.collect { view.setScrollingEnabled(it) } }
+        launch { viewModel.isDozing.collect { isDozing -> view.setDozing(isDozing) } }
 
         launchAndDispose {
             view.setSyntheticScrollConsumer(viewModel.syntheticScrollConsumer)

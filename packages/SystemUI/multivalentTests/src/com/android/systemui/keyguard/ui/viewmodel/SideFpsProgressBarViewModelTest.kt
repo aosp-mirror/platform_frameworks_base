@@ -59,6 +59,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -69,6 +70,7 @@ class SideFpsProgressBarViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private lateinit var underTest: SideFpsProgressBarViewModel
     private val testScope = kosmos.testScope
+    private val dozeServiceHost = spy(kosmos.dozeServiceHost)
     private lateinit var mTestableLooper: TestableLooper
 
     @Before
@@ -175,7 +177,7 @@ class SideFpsProgressBarViewModelTest : SysuiTestCase() {
 
             runCurrent()
 
-            verify(kosmos.dozeServiceHost).fireSideFpsAcquisitionStarted()
+            verify(dozeServiceHost).fireSideFpsAcquisitionStarted()
         }
 
     private fun createViewModel() =
@@ -184,7 +186,7 @@ class SideFpsProgressBarViewModelTest : SysuiTestCase() {
             kosmos.biometricStatusInteractor,
             kosmos.deviceEntryFingerprintAuthInteractor,
             kosmos.sideFpsSensorInteractor,
-            kosmos.dozeServiceHost,
+            dozeServiceHost,
             kosmos.keyguardInteractor,
             kosmos.displayStateInteractor,
             kosmos.testDispatcher,

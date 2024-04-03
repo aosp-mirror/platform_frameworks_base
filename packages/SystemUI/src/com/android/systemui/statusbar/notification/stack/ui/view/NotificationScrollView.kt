@@ -58,4 +58,7 @@ interface NotificationScrollView {
 
     /** sets the current expand fraction */
     fun setExpandFraction(expandFraction: Float)
+
+    /** Sets whether the view is displayed in doze mode. */
+    fun setDozing(dozing: Boolean)
 }
