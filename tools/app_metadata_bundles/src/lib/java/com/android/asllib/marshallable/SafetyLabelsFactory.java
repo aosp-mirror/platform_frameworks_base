@@ -44,6 +44,22 @@ public class SafetyLabelsFactory implements AslMarshallableFactory<SafetyLabels>
                                                 safetyLabelsEle,
                                                 XmlUtils.HR_TAG_DATA_LABELS,
                                                 false)));
-        return new SafetyLabels(version, dataLabels);
+        SecurityLabels securityLabels =
+                new SecurityLabelsFactory()
+                        .createFromHrElements(
+                                XmlUtils.listOf(
+                                        XmlUtils.getSingleChildElement(
+                                                safetyLabelsEle,
+                                                XmlUtils.HR_TAG_SECURITY_LABELS,
+                                                false)));
+        ThirdPartyVerification thirdPartyVerification =
+                new ThirdPartyVerificationFactory()
+                        .createFromHrElements(
+                                XmlUtils.listOf(
+                                        XmlUtils.getSingleChildElement(
+                                                safetyLabelsEle,
+                                                XmlUtils.HR_TAG_THIRD_PARTY_VERIFICATION,
+                                                false)));
+        return new SafetyLabels(version, dataLabels, securityLabels, thirdPartyVerification);
     }
 }
