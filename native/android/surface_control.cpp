@@ -367,7 +367,7 @@ void ASurfaceTransaction_reparent(ASurfaceTransaction* aSurfaceTransaction,
 
 void ASurfaceTransaction_setVisibility(ASurfaceTransaction* aSurfaceTransaction,
                                        ASurfaceControl* aSurfaceControl,
-                                       int8_t visibility) {
+                                       ASurfaceTransactionVisibility visibility) {
     CHECK_NOT_NULL(aSurfaceTransaction);
     CHECK_NOT_NULL(aSurfaceControl);
 
@@ -496,7 +496,7 @@ void ASurfaceTransaction_setScale(ASurfaceTransaction* aSurfaceTransaction,
 
 void ASurfaceTransaction_setBufferTransparency(ASurfaceTransaction* aSurfaceTransaction,
                                                ASurfaceControl* aSurfaceControl,
-                                               int8_t transparency) {
+                                               ASurfaceTransactionTransparency transparency) {
     CHECK_NOT_NULL(aSurfaceTransaction);
     CHECK_NOT_NULL(aSurfaceControl);
 
