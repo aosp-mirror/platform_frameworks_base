@@ -72,7 +72,6 @@ public class UtilsTest {
     private static final String PERCENTAGE_49 = "49%";
     private static final String PERCENTAGE_50 = "50%";
     private static final String PERCENTAGE_100 = "100%";
-    private static final long CURRENT_TIMESTAMP = System.currentTimeMillis();
 
     private AudioManager mAudioManager;
     private Context mContext;
