@@ -1570,7 +1570,12 @@ public class PackageManagerServiceUtils {
     /**
      * Extract the app.metadata file from apk.
      */
-    public static boolean extractAppMetadataFromApk(AndroidPackage pkg, File appMetadataFile) {
+    public static boolean extractAppMetadataFromApk(AndroidPackage pkg,
+            String appMetadataFilePath) {
+        if (appMetadataFilePath == null) {
+            return false;
+        }
+        File appMetadataFile = new File(appMetadataFilePath);
         Map<String, Property> properties = pkg.getProperties();
         if (!properties.containsKey(PROPERTY_ANDROID_SAFETY_LABEL_PATH)) {
             return false;
@@ -1596,6 +1601,7 @@ public class PackageManagerServiceUtils {
                 }
             } catch (Exception e) {
                 Slog.e(TAG, e.getMessage());
+                appMetadataFile.delete();
             }
         }
         return false;

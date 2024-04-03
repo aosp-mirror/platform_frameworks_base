@@ -19,6 +19,7 @@ package com.android.server.pm;
 import static android.content.pm.Flags.disallowSdkLibsToBeApps;
 import static android.content.pm.PackageManager.APP_METADATA_SOURCE_APK;
 import static android.content.pm.PackageManager.APP_METADATA_SOURCE_INSTALLER;
+import static android.content.pm.PackageManager.APP_METADATA_SOURCE_UNKNOWN;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
@@ -2210,6 +2211,7 @@ final class InstallPackageHelper {
                     Map<String, PackageManager.Property> properties = parsedPackage.getProperties();
                     if (Flags.aslInApkAppMetadataSource()
                             && properties.containsKey(PROPERTY_ANDROID_SAFETY_LABEL_PATH)) {
+                        // ASL file extraction is done in post-install
                         ps.setAppMetadataFilePath(appMetadataFile.getAbsolutePath());
                         ps.setAppMetadataSource(APP_METADATA_SOURCE_APK);
                     } else {
@@ -2809,6 +2811,20 @@ final class InstallPackageHelper {
         }
 
         if (succeeded) {
+            if (Flags.aslInApkAppMetadataSource()
+                    && pkgSetting.getAppMetadataSource() == APP_METADATA_SOURCE_APK) {
+                if (!PackageManagerServiceUtils.extractAppMetadataFromApk(request.getPkg(),
+                        pkgSetting.getAppMetadataFilePath())) {
+                    synchronized (mPm.mLock) {
+                        PackageSetting setting = mPm.mSettings.getPackageLPr(packageName);
+                        if (setting != null) {
+                            setting.setAppMetadataFilePath(null)
+                                    .setAppMetadataSource(APP_METADATA_SOURCE_UNKNOWN);
+                        }
+                    }
+                }
+            }
+
             // Clear the uid cache after we installed a new package.
             mPm.mPerUidReadTimeoutsCache = null;
 

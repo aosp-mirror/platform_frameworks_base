@@ -19,8 +19,6 @@ import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
 import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.admin.flags.Flags.crossUserSuspensionEnabledRo;
-import static android.content.pm.PackageManager.APP_METADATA_SOURCE_APK;
-import static android.content.pm.PackageManager.APP_METADATA_SOURCE_UNKNOWN;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
@@ -5232,26 +5230,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 return null;
             }
             File file = new File(filePath);
-            if (Flags.aslInApkAppMetadataSource() && !file.exists()
-                    && ps.getAppMetadataSource() == APP_METADATA_SOURCE_APK) {
-                AndroidPackageInternal pkg = ps.getPkg();
-                if (pkg == null) {
-                    Slog.w(TAG, "Unable to to extract app metadata for " + packageName
-                            + ". APK missing from device");
-                    return null;
-                }
-                if (!PackageManagerServiceUtils.extractAppMetadataFromApk(pkg, file)) {
-                    if (file.exists()) {
-                        file.delete();
-                    }
-                    synchronized (mLock) {
-                        PackageSetting pkgSetting = mSettings.getPackageLPr(packageName);
-                        pkgSetting.setAppMetadataFilePath(null);
-                        pkgSetting.setAppMetadataSource(APP_METADATA_SOURCE_UNKNOWN);
-                    }
-                    return null;
-                }
-            }
             try {
                 return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
             } catch (FileNotFoundException e) {
