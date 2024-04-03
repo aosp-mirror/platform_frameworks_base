@@ -1069,7 +1069,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         }
 
         private boolean allAppsAreTranslucent(ArrayList<TaskState> tasks) {
-            if (tasks == null || tasks.isEmpty()) {
+            if (tasks == null) {
                 return false;
             }
             for (int i = tasks.size() - 1; i >= 0; --i) {
