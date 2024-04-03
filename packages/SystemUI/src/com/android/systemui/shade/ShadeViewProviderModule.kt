@@ -22,6 +22,7 @@ import android.os.Handler
 import android.view.LayoutInflater
 import android.view.ViewStub
 import androidx.constraintlayout.motion.widget.MotionLayout
+import com.android.compose.animation.scene.SceneKey
 import com.android.keyguard.logging.ScrimLogger
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
@@ -76,6 +77,7 @@ abstract class ShadeViewProviderModule {
             sceneDataSourceDelegator: Provider<SceneDataSourceDelegator>,
         ): WindowRootView {
             return if (sceneContainerFlags.isEnabled()) {
+                checkNoSceneDuplicates(scenesProvider.get())
                 val sceneWindowRootView =
                     layoutInflater.inflate(R.layout.scene_window_root, null) as SceneWindowRootView
                 sceneWindowRootView.init(
@@ -270,6 +272,22 @@ abstract class ShadeViewProviderModule {
             @Named(SHADE_HEADER) header: MotionLayout,
         ): StatusIconContainer {
             return header.requireViewById(R.id.statusIcons)
+        }
+
+        private fun checkNoSceneDuplicates(scenes: Set<Scene>) {
+            val keys = mutableSetOf<SceneKey>()
+            val duplicates = mutableSetOf<SceneKey>()
+            scenes
+                .map { it.key }
+                .forEach { sceneKey ->
+                    if (keys.contains(sceneKey)) {
+                        duplicates.add(sceneKey)
+                    } else {
+                        keys.add(sceneKey)
+                    }
+                }
+
+            check(duplicates.isEmpty()) { "Duplicate scenes detected: $duplicates" }
         }
     }
 }
