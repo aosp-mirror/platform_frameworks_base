@@ -25,6 +25,8 @@ import android.util.Printer;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
+import dalvik.annotation.optimization.CriticalNative;
+
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -78,6 +80,7 @@ public final class MessageQueue {
     private native static void nativeDestroy(long ptr);
     @UnsupportedAppUsage
     private native void nativePollOnce(long ptr, int timeoutMillis); /*non-static for callbacks*/
+    @CriticalNative
     private native static void nativeWake(long ptr);
     private native static boolean nativeIsPolling(long ptr);
     private native static void nativeSetFileDescriptorEvents(long ptr, int fd, int events);
