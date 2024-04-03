@@ -1445,6 +1445,9 @@ class PermissionService(private val service: AccessCheckingService) :
         val packageStates = packageManagerLocal.withUnfilteredSnapshot().use { it.packageStates }
         service.mutateState {
             packageStates.forEach { (packageName, packageState) ->
+                if (Flags.ignoreApexPermissions() && packageState.isApex) {
+                    return@forEach
+                }
                 val androidPackage = packageState.androidPackage ?: return@forEach
                 androidPackage.requestedPermissions.forEach { permissionName ->
                     updatePermissionFlags(
@@ -1877,6 +1880,9 @@ class PermissionService(private val service: AccessCheckingService) :
         packageManagerLocal.withUnfilteredSnapshot().use { snapshot ->
             service.mutateState {
                 snapshot.packageStates.forEach { (_, packageState) ->
+                    if (Flags.ignoreApexPermissions() && packageState.isApex) {
+                        return@forEach
+                    }
                     with(policy) { resetRuntimePermissions(packageState.packageName, userId) }
                     with(devicePolicy) { resetRuntimePermissions(packageState.packageName, userId) }
                 }
@@ -1918,8 +1924,11 @@ class PermissionService(private val service: AccessCheckingService) :
         }
 
         packageManagerLocal.withUnfilteredSnapshot().use { snapshot ->
-            snapshot.packageStates.forEach packageStates@{ (_, packageState) ->
-                val androidPackage = packageState.androidPackage ?: return@packageStates
+            snapshot.packageStates.forEach { (_, packageState) ->
+                if (Flags.ignoreApexPermissions() && packageState.isApex) {
+                    return@forEach
+                }
+                val androidPackage = packageState.androidPackage ?: return@forEach
                 if (permissionName in androidPackage.requestedPermissions) {
                     packageNames += androidPackage.packageName
                 }
@@ -1934,6 +1943,9 @@ class PermissionService(private val service: AccessCheckingService) :
         val permissions = service.getState { with(policy) { getPermissions() } }
         packageManagerLocal.withUnfilteredSnapshot().use { snapshot ->
             snapshot.packageStates.forEach packageStates@{ (_, packageState) ->
+                if (Flags.ignoreApexPermissions() && packageState.isApex) {
+                    return@packageStates
+                }
                 val androidPackage = packageState.androidPackage ?: return@packageStates
                 androidPackage.requestedPermissions.forEach requestedPermissions@{ permissionName ->
                     val permission = permissions[permissionName] ?: return@requestedPermissions
@@ -2060,6 +2072,9 @@ class PermissionService(private val service: AccessCheckingService) :
 
         val appIdPackageNames = MutableIndexedMap<Int, MutableIndexedSet<String>>()
         packageStates.forEach { (_, packageState) ->
+            if (Flags.ignoreApexPermissions() && packageState.isApex) {
+                return@forEach
+            }
             appIdPackageNames
                 .getOrPut(packageState.appId) { MutableIndexedSet() }
                 .add(packageState.packageName)
@@ -2313,6 +2328,10 @@ class PermissionService(private val service: AccessCheckingService) :
         isInstantApp: Boolean,
         oldPackage: AndroidPackage?
     ) {
+        if (Flags.ignoreApexPermissions() && packageState.isApex) {
+            return
+        }
+
         synchronized(storageVolumeLock) {
             // Accumulating the package names here because we want to maintain the same call order
             // of onPackageAdded() and reuse this order in onStorageVolumeAdded(). We need the
@@ -2339,6 +2358,10 @@ class PermissionService(private val service: AccessCheckingService) :
         params: PermissionManagerServiceInternal.PackageInstalledParams,
         userId: Int
     ) {
+        if (Flags.ignoreApexPermissions() && androidPackage.isApex) {
+            return
+        }
+
         if (params === PermissionManagerServiceInternal.PackageInstalledParams.DEFAULT) {
             // TODO: We should actually stop calling onPackageInstalled() when we are passing
             //  PackageInstalledParams.DEFAULT in InstallPackageHelper, because there's actually no
@@ -2391,6 +2414,10 @@ class PermissionService(private val service: AccessCheckingService) :
         sharedUserPkgs: List<AndroidPackage>,
         userId: Int
     ) {
+        if (Flags.ignoreApexPermissions() && packageState.isApex) {
+            return
+        }
+
         val userIds =
             if (userId == UserHandle.USER_ALL) {
                 userManagerService.userIdsIncludingPreCreated
