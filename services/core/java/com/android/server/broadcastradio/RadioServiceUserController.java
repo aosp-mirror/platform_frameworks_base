@@ -48,8 +48,8 @@ public final class RadioServiceUserController {
      * @return foreground user id.
      */
     public static int getCurrentUser() {
-        final long identity = Binder.clearCallingIdentity();
         int userId = UserHandle.USER_NULL;
+        final long identity = Binder.clearCallingIdentity();
         try {
             userId = ActivityManager.getCurrentUser();
         } catch (RuntimeException e) {

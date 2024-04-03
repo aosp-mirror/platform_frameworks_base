@@ -25,7 +25,8 @@ import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioTuner;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Slog;
+
+import com.android.server.utils.Slogf;
 
 import java.util.List;
 import java.util.Map;
@@ -42,8 +43,8 @@ class TunerCallback implements ITunerCallback {
      */
     private final long mNativeContext;
 
-    @NonNull private final Tuner mTuner;
-    @NonNull private final ITunerCallback mClientCallback;
+    private final Tuner mTuner;
+    private final ITunerCallback mClientCallback;
 
     private final AtomicReference<ProgramList.Filter> mProgramListFilter = new AtomicReference<>();
     private boolean mInitialConfigurationDone = false;
@@ -76,7 +77,7 @@ class TunerCallback implements ITunerCallback {
         try {
             func.run();
         } catch (RemoteException e) {
-            Slog.e(TAG, "client died", e);
+            Slogf.e(TAG, "client died", e);
         }
     }
 
@@ -107,7 +108,7 @@ class TunerCallback implements ITunerCallback {
 
     @Override
     public void onTuneFailed(int result, ProgramSelector selector) {
-        Slog.e(TAG, "Not applicable for HAL 1.x");
+        Slogf.e(TAG, "Not applicable for HAL 1.x");
     }
 
     @Override
@@ -160,7 +161,7 @@ class TunerCallback implements ITunerCallback {
         try {
             modified = mTuner.getProgramList(filter.getVendorFilter());
         } catch (IllegalStateException ex) {
-            Slog.d(TAG, "Program list not ready yet");
+            Slogf.d(TAG, "Program list not ready yet");
             return;
         }
         Set<RadioManager.ProgramInfo> modifiedSet = modified.stream().collect(Collectors.toSet());
@@ -175,12 +176,12 @@ class TunerCallback implements ITunerCallback {
 
     @Override
     public void onConfigFlagUpdated(int flag, boolean value) {
-        Slog.w(TAG, "Not applicable for HAL 1.x");
+        Slogf.w(TAG, "Not applicable for HAL 1.x");
     }
 
     @Override
     public void onParametersUpdated(Map<String, String> parameters) {
-        Slog.w(TAG, "Not applicable for HAL 1.x");
+        Slogf.w(TAG, "Not applicable for HAL 1.x");
     }
 
     @Override
