@@ -53,7 +53,6 @@ import android.util.Slog;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.Flags;
 import android.widget.Toast;
 
 import com.android.internal.R;
@@ -369,23 +368,17 @@ public class AccessibilityShortcutController {
                         })
                 .setPositiveButton(R.string.accessibility_shortcut_off,
                         (DialogInterface d, int which) -> {
-                            if (Flags.updateAlwaysOnA11yService()) {
-                                Set<String> targetServices =
-                                        ShortcutUtils.getShortcutTargetsFromSettings(
-                                                mContext,
-                                                HARDWARE,
-                                                userId);
+                            Set<String> targetServices =
+                                    ShortcutUtils.getShortcutTargetsFromSettings(
+                                            mContext,
+                                            HARDWARE,
+                                            userId);
 
-                                Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                                        Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, "",
-                                        userId);
-                                ShortcutUtils.updateInvisibleToggleAccessibilityServiceEnableState(
-                                        mContext, targetServices, userId);
-                            } else {
-                                Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                                        Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, "",
-                                        userId);
-                            }
+                            Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                                    Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, "",
+                                    userId);
+                            ShortcutUtils.updateInvisibleToggleAccessibilityServiceEnableState(
+                                    mContext, targetServices, userId);
 
                             // If canceled, treat as if the dialog has never been shown
                             Settings.Secure.putIntForUser(mContext.getContentResolver(),
