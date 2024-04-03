@@ -240,6 +240,16 @@ public final class PermissionManager {
     public static final String EXTRA_PERMISSION_USAGES =
             "android.permission.extra.PERMISSION_USAGES";
 
+    /**
+     * Specify what permissions are device aware. Only device aware permissions can be granted to
+     * a remote device.
+     * @hide
+     */
+    public static final Set<String> DEVICE_AWARE_PERMISSIONS =
+            Flags.deviceAwarePermissionsEnabled()
+                    ? Set.of(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
+                    : Collections.emptySet();
+
     private final @NonNull Context mContext;
 
     private final IPackageManager mPackageManager;
