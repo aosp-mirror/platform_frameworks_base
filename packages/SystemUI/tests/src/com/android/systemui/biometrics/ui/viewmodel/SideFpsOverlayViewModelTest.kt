@@ -75,6 +75,8 @@ import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.res.R
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
 import com.android.systemui.statusbar.phone.dozeServiceHost
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -233,6 +235,8 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 mContext,
                 deviceEntryFingerprintAuthRepository,
+                kosmos.fakeSceneContainerFlags,
+                kosmos.sceneInteractor,
                 primaryBouncerInteractor,
                 alternateBouncerInteractor,
                 keyguardUpdateMonitor
