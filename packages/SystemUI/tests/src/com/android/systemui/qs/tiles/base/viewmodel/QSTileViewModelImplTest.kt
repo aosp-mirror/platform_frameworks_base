@@ -77,7 +77,7 @@ class QSTileViewModelImplTest : SysuiTestCase() {
         underTest =
             QSTileViewModelImpl(
                 QSTileConfigTestBuilder.build {
-                    policy = QSTilePolicy.Restricted("test_restriction")
+                    policy = QSTilePolicy.Restricted(listOf("test_restriction"))
                 },
                 { tileUserActionInteractor },
                 { tileDataInteractor },

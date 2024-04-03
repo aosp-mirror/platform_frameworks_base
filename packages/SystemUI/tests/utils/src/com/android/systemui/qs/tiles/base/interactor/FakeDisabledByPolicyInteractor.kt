@@ -17,16 +17,21 @@
 package com.android.systemui.qs.tiles.base.interactor
 
 import android.os.UserHandle
+import com.android.settingslib.RestrictedLockUtils
 
 class FakeDisabledByPolicyInteractor : DisabledByPolicyInteractor {
-
-    var policyResult: DisabledByPolicyInteractor.PolicyResult =
-        DisabledByPolicyInteractor.PolicyResult.TileEnabled
 
     override suspend fun isDisabled(
         user: UserHandle,
         userRestriction: String?
-    ): DisabledByPolicyInteractor.PolicyResult = policyResult
+    ): DisabledByPolicyInteractor.PolicyResult =
+        if (userRestriction == DISABLED_RESTRICTION || userRestriction == DISABLED_RESTRICTION_2) {
+            DisabledByPolicyInteractor.PolicyResult.TileDisabled(
+                RestrictedLockUtils.EnforcedAdmin()
+            )
+        } else {
+            DisabledByPolicyInteractor.PolicyResult.TileEnabled
+        }
 
     override fun handlePolicyResult(
         policyResult: DisabledByPolicyInteractor.PolicyResult
@@ -35,4 +40,10 @@ class FakeDisabledByPolicyInteractor : DisabledByPolicyInteractor {
             is DisabledByPolicyInteractor.PolicyResult.TileEnabled -> false
             is DisabledByPolicyInteractor.PolicyResult.TileDisabled -> true
         }
+
+    companion object {
+        const val DISABLED_RESTRICTION = "disabled_restriction"
+        const val DISABLED_RESTRICTION_2 = "disabled_restriction_2"
+        const val ENABLED_RESTRICTION = "test_restriction"
+    }
 }
