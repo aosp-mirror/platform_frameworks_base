@@ -382,6 +382,18 @@ stubs_defaults {
     ],
 }
 
+soong_config_module_type {
+    name: "non_updatable_exportable_droidstubs",
+    module_type: "droidstubs",
+    config_namespace: "ANDROID",
+    bool_variables: [
+        "release_hidden_api_exportable_stubs",
+    ],
+    properties: [
+        "dists",
+    ],
+}
+
 // We resolve dependencies on APIs in modules by depending on a prebuilt of the whole
 // platform (sdk_system_current_android). That prebuilt does not include module-lib APIs,
 // so use the prebuilt module-lib stubs for modules that export module-lib stubs that the
