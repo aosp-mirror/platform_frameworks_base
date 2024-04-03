@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.data.repository
 
+import android.app.backup.BackupManager
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_CONFIGURATION_OPTIONAL
@@ -68,6 +69,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var providerInfoA: AppWidgetProviderInfo
     @Mock private lateinit var communalWidgetHost: CommunalWidgetHost
     @Mock private lateinit var communalWidgetDao: CommunalWidgetDao
+    @Mock private lateinit var backupManager: BackupManager
 
     private lateinit var logBuffer: LogBuffer
     private lateinit var fakeWidgets: MutableStateFlow<Map<CommunalItemRank, CommunalWidgetItem>>
@@ -106,6 +108,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                 communalWidgetHost,
                 communalWidgetDao,
                 logBuffer,
+                backupManager,
             )
     }
 
@@ -129,6 +132,9 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         priority = communalItemRankEntry.rank,
                     )
                 )
+
+            // Verify backup not requested
+            verify(backupManager, never()).dataChanged()
         }
 
     @Test
@@ -152,6 +158,9 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
 
             verify(communalWidgetHost).allocateIdAndBindWidget(provider, user)
             verify(communalWidgetDao).addWidget(id, provider, priority)
+
+            // Verify backup requested
+            verify(backupManager).dataChanged()
         }
 
     @Test
@@ -176,6 +185,9 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             verify(communalWidgetHost).allocateIdAndBindWidget(provider, user)
             verify(communalWidgetDao, never()).addWidget(id, provider, priority)
             verify(appWidgetHost).deleteAppWidgetId(id)
+
+            // Verify backup not requested
+            verify(backupManager, never()).dataChanged()
         }
 
     @Test
@@ -202,6 +214,9 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             verify(communalWidgetHost).allocateIdAndBindWidget(provider, user)
             verify(communalWidgetDao, never()).addWidget(id, provider, priority)
             verify(appWidgetHost).deleteAppWidgetId(id)
+
+            // Verify backup not requested
+            verify(backupManager, never()).dataChanged()
         }
 
     @Test
@@ -225,10 +240,13 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
 
             verify(communalWidgetHost).allocateIdAndBindWidget(provider, user)
             verify(communalWidgetDao).addWidget(id, provider, priority)
+
+            // Verify backup requested
+            verify(backupManager).dataChanged()
         }
 
     @Test
-    fun deleteWidget_deletefromDbTrue_alsoDeleteFromHost() =
+    fun deleteWidget_deleteFromDbTrue_alsoDeleteFromHost() =
         testScope.runTest {
             val id = 1
             whenever(communalWidgetDao.deleteWidgetById(eq(id))).thenReturn(true)
@@ -237,10 +255,13 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
 
             verify(communalWidgetDao).deleteWidgetById(id)
             verify(appWidgetHost).deleteAppWidgetId(id)
+
+            // Verify backup requested
+            verify(backupManager).dataChanged()
         }
 
     @Test
-    fun deleteWidget_deletefromDbFalse_doesNotDeleteFromHost() =
+    fun deleteWidget_deleteFromDbFalse_doesNotDeleteFromHost() =
         testScope.runTest {
             val id = 1
             whenever(communalWidgetDao.deleteWidgetById(eq(id))).thenReturn(false)
@@ -249,6 +270,9 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
 
             verify(communalWidgetDao).deleteWidgetById(id)
             verify(appWidgetHost, never()).deleteAppWidgetId(id)
+
+            // Verify backup not requested
+            verify(backupManager, never()).dataChanged()
         }
 
     @Test
@@ -259,6 +283,9 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             runCurrent()
 
             verify(communalWidgetDao).updateWidgetOrder(widgetIdToPriorityMap)
+
+            // Verify backup requested
+            verify(backupManager).dataChanged()
         }
 
     private fun installedProviders(providers: List<AppWidgetProviderInfo>) {

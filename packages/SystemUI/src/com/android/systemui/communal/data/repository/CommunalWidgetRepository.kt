@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.data.repository
 
+import android.app.backup.BackupManager
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.os.UserHandle
@@ -82,6 +83,7 @@ constructor(
     private val communalWidgetHost: CommunalWidgetHost,
     private val communalWidgetDao: CommunalWidgetDao,
     @CommunalLog logBuffer: LogBuffer,
+    private val backupManager: BackupManager,
 ) : CommunalWidgetRepository {
     companion object {
         const val TAG = "CommunalWidgetRepository"
@@ -143,6 +145,7 @@ constructor(
                     provider = provider,
                     priority = priority,
                 )
+                backupManager.dataChanged()
             } else {
                 appWidgetHost.deleteAppWidgetId(id)
             }
@@ -155,6 +158,7 @@ constructor(
             if (communalWidgetDao.deleteWidgetById(widgetId)) {
                 appWidgetHost.deleteAppWidgetId(widgetId)
                 logger.i("Deleted widget with id $widgetId.")
+                backupManager.dataChanged()
             }
         }
     }
@@ -165,6 +169,7 @@ constructor(
             logger.i({ "Updated the order of widget list with ids: $str1." }) {
                 str1 = widgetIdToPriorityMap.toString()
             }
+            backupManager.dataChanged()
         }
     }
 
