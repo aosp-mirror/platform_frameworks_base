@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.server.companion.presence;
+package com.android.server.companion.devicepresence;
 
 import static android.companion.DevicePresenceEvent.EVENT_BT_CONNECTED;
 import static android.companion.DevicePresenceEvent.EVENT_BT_DISCONNECTED;
-
-import static com.android.server.companion.presence.DevicePresenceProcessor.DEBUG;
-import static com.android.server.companion.utils.Utils.btDeviceToString;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
@@ -32,8 +29,6 @@ import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.ParcelUuid;
 import android.os.UserHandle;
-import android.os.UserManager;
-import android.util.Log;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.server.companion.association.AssociationStore;
@@ -45,10 +40,10 @@ import java.util.List;
 import java.util.Map;
 
 @SuppressLint("LongLogTag")
-public class BluetoothCompanionDeviceConnectionListener
+public class BluetoothDeviceProcessor
         extends BluetoothAdapter.BluetoothConnectionCallback
         implements AssociationStore.OnChangeListener {
-    private static final String TAG = "CDM_BluetoothCompanionDeviceConnectionListener";
+    private static final String TAG = "CDM_BluetoothDeviceProcessor";
 
     interface Callback {
         void onBluetoothCompanionDeviceConnected(int associationId, int userId);
@@ -58,24 +53,25 @@ public class BluetoothCompanionDeviceConnectionListener
         void onDevicePresenceEventByUuid(ObservableUuid uuid, int event);
     }
 
-    private final @NonNull AssociationStore mAssociationStore;
-    private final @NonNull Callback mCallback;
+    @NonNull
+    private final AssociationStore mAssociationStore;
+    @NonNull
+    private final ObservableUuidStore mObservableUuidStore;
+    @NonNull
+    private final Callback mCallback;
+
     /** A set of ALL connected BT device (not only companion.) */
-    private final @NonNull Map<MacAddress, BluetoothDevice> mAllConnectedDevices = new HashMap<>();
+    @NonNull
+    private final Map<MacAddress, BluetoothDevice> mAllConnectedDevices = new HashMap<>();
 
-    private final @NonNull ObservableUuidStore mObservableUuidStore;
-
-    BluetoothCompanionDeviceConnectionListener(UserManager userManager,
-            @NonNull AssociationStore associationStore,
+    BluetoothDeviceProcessor(@NonNull AssociationStore associationStore,
             @NonNull ObservableUuidStore observableUuidStore, @NonNull Callback callback) {
         mAssociationStore = associationStore;
         mObservableUuidStore = observableUuidStore;
         mCallback = callback;
     }
 
-    public void init(@NonNull BluetoothAdapter btAdapter) {
-        if (DEBUG) Log.i(TAG, "init()");
-
+    void init(@NonNull BluetoothAdapter btAdapter) {
         btAdapter.registerBluetoothConnectionCallback(
                 new HandlerExecutor(Handler.getMain()), /* callback */this);
         mAssociationStore.registerLocalListener(this);
@@ -87,13 +83,9 @@ public class BluetoothCompanionDeviceConnectionListener
      */
     @Override
     public void onDeviceConnected(@NonNull BluetoothDevice device) {
-        if (DEBUG) Log.i(TAG, "onDevice_Connected() " + btDeviceToString(device));
-
         final MacAddress macAddress = MacAddress.fromString(device.getAddress());
-        final int userId = UserHandle.myUserId();
 
         if (mAllConnectedDevices.put(macAddress, device) != null) {
-            if (DEBUG) Log.w(TAG, "Device " + btDeviceToString(device) + " is already connected.");
             return;
         }
 
@@ -108,18 +100,9 @@ public class BluetoothCompanionDeviceConnectionListener
     @Override
     public void onDeviceDisconnected(@NonNull BluetoothDevice device,
             int reason) {
-        if (DEBUG) {
-            Log.i(TAG, "onDevice_Disconnected() " + btDeviceToString(device));
-            Log.d(TAG, "  reason=" + disconnectReasonToString(reason));
-        }
-
         final MacAddress macAddress = MacAddress.fromString(device.getAddress());
-        final int userId = UserHandle.myUserId();
 
         if (mAllConnectedDevices.remove(macAddress) == null) {
-            if (DEBUG) {
-                Log.w(TAG, "The device wasn't tracked as connected " + btDeviceToString(device));
-            }
             return;
         }
 
@@ -130,22 +113,6 @@ public class BluetoothCompanionDeviceConnectionListener
         int userId = UserHandle.myUserId();
         final List<AssociationInfo> associations =
                 mAssociationStore.getActiveAssociationsByAddress(device.getAddress());
-        final List<ObservableUuid> observableUuids =
-                mObservableUuidStore.getObservableUuidsForUser(userId);
-        final ParcelUuid[] bluetoothDeviceUuids = device.getUuids();
-
-        final List<ParcelUuid> deviceUuids = ArrayUtils.isEmpty(bluetoothDeviceUuids)
-                ? Collections.emptyList() : Arrays.asList(bluetoothDeviceUuids);
-
-        if (DEBUG) {
-            Log.d(TAG, "onDevice_ConnectivityChanged() " + btDeviceToString(device)
-                    + " connected=" + connected);
-            if (associations.isEmpty()) {
-                Log.d(TAG, "  > No CDM associations");
-            } else {
-                Log.d(TAG, "  > associations=" + Arrays.toString(associations.toArray()));
-            }
-        }
 
         for (AssociationInfo association : associations) {
             if (!association.isNotifyOnDeviceNearby()) continue;
@@ -157,44 +124,25 @@ public class BluetoothCompanionDeviceConnectionListener
             }
         }
 
+        final List<ObservableUuid> observableUuids =
+                mObservableUuidStore.getObservableUuidsForUser(userId);
+        final ParcelUuid[] bluetoothDeviceUuids = device.getUuids();
+        final List<ParcelUuid> deviceUuids = ArrayUtils.isEmpty(bluetoothDeviceUuids)
+                ? Collections.emptyList() : Arrays.asList(bluetoothDeviceUuids);
+
         for (ObservableUuid uuid : observableUuids) {
             if (deviceUuids.contains(uuid.getUuid())) {
                 mCallback.onDevicePresenceEventByUuid(uuid, connected ? EVENT_BT_CONNECTED
-                                : EVENT_BT_DISCONNECTED);
+                        : EVENT_BT_DISCONNECTED);
             }
         }
     }
 
     @Override
     public void onAssociationAdded(AssociationInfo association) {
-        if (DEBUG) Log.d(TAG, "onAssociation_Added() " + association);
-
         if (mAllConnectedDevices.containsKey(association.getDeviceMacAddress())) {
             mCallback.onBluetoothCompanionDeviceConnected(
                     association.getId(), association.getUserId());
         }
-    }
-
-    @Override
-    public void onAssociationRemoved(AssociationInfo association) {
-        // Intentionally do nothing: CompanionDevicePresenceMonitor will do all the bookkeeping
-        // required.
-    }
-
-    @Override
-    public void onAssociationUpdated(AssociationInfo association, boolean addressChanged) {
-        if (DEBUG) {
-            Log.d(TAG, "onAssociation_Updated() addrChange=" + addressChanged
-                    + " " + association);
-        }
-
-        if (!addressChanged) {
-            // Don't need to do anything.
-            return;
-        }
-
-        // At the moment CDM does allow changing association addresses, so we will never come here.
-        // This will be implemented when CDM support updating addresses.
-        throw new IllegalArgumentException("Address changes are not supported.");
     }
 }

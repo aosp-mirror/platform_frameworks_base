@@ -15,26 +15,14 @@
  */
 
 
-package com.android.server.companion.presence;
+package com.android.server.companion.devicepresence;
 
 import static android.bluetooth.BluetoothAdapter.ACTION_BLE_STATE_CHANGED;
 import static android.bluetooth.BluetoothAdapter.ACTION_STATE_CHANGED;
-import static android.bluetooth.BluetoothAdapter.EXTRA_PREVIOUS_STATE;
-import static android.bluetooth.BluetoothAdapter.EXTRA_STATE;
-import static android.bluetooth.BluetoothAdapter.nameForState;
-import static android.bluetooth.le.ScanCallback.SCAN_FAILED_ALREADY_STARTED;
-import static android.bluetooth.le.ScanCallback.SCAN_FAILED_APPLICATION_REGISTRATION_FAILED;
-import static android.bluetooth.le.ScanCallback.SCAN_FAILED_FEATURE_UNSUPPORTED;
-import static android.bluetooth.le.ScanCallback.SCAN_FAILED_INTERNAL_ERROR;
-import static android.bluetooth.le.ScanCallback.SCAN_FAILED_OUT_OF_HARDWARE_RESOURCES;
-import static android.bluetooth.le.ScanCallback.SCAN_FAILED_SCANNING_TOO_FREQUENTLY;
 import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_ALL_MATCHES;
 import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_FIRST_MATCH;
 import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_MATCH_LOST;
 import static android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_POWER;
-
-import static com.android.server.companion.presence.DevicePresenceProcessor.DEBUG;
-import static com.android.server.companion.utils.Utils.btDeviceToString;
 
 import static java.util.Objects.requireNonNull;
 
@@ -56,21 +44,19 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.util.Slog;
 
 import com.android.server.companion.association.AssociationStore;
 import com.android.server.companion.association.AssociationStore.ChangeType;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 @SuppressLint("LongLogTag")
-class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
-    private static final String TAG = "CDM_BleCompanionDeviceScanner";
+class BleDeviceProcessor implements AssociationStore.OnChangeListener {
+    private static final String TAG = "CDM_BleDeviceProcessor";
 
     interface Callback {
         void onBleCompanionDeviceFound(int associationId, int userId);
@@ -78,26 +64,27 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
         void onBleCompanionDeviceLost(int associationId, int userId);
     }
 
-    private final @NonNull AssociationStore mAssociationStore;
-    private final @NonNull Callback mCallback;
+    @NonNull
+    private final AssociationStore mAssociationStore;
+    @NonNull
+    private final Callback mCallback;
 
     // Non-null after init().
-    private @Nullable BluetoothAdapter mBtAdapter;
+    @Nullable
+    private BluetoothAdapter mBtAdapter;
     // Non-null after init() and when BLE is available. Otherwise - null.
-    private @Nullable BluetoothLeScanner mBleScanner;
+    @Nullable
+    private BluetoothLeScanner mBleScanner;
     // Only accessed from the Main thread.
     private boolean mScanning = false;
 
-    BleCompanionDeviceScanner(
-            @NonNull AssociationStore associationStore, @NonNull Callback callback) {
+    BleDeviceProcessor(@NonNull AssociationStore associationStore, @NonNull Callback callback) {
         mAssociationStore = associationStore;
         mCallback = callback;
     }
 
     @MainThread
     void init(@NonNull Context context, @NonNull BluetoothAdapter btAdapter) {
-        if (DEBUG) Log.i(TAG, "init()");
-
         if (mBtAdapter != null) {
             throw new IllegalStateException(getClass().getSimpleName() + " is already initialized");
         }
@@ -113,9 +100,7 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
     final void restartScan() {
         enforceInitialized();
 
-        if (DEBUG) Log.i(TAG , "restartScan()");
         if (mBleScanner == null) {
-            if (DEBUG) Log.d(TAG, "  > BLE is not available");
             return;
         }
 
@@ -138,12 +123,8 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
         enforceInitialized();
 
         final boolean bleAvailable = mBtAdapter.isLeEnabled();
-        if (DEBUG) {
-            Log.i(TAG, "checkBleState() bleAvailable=" + bleAvailable);
-        }
         if ((bleAvailable && mBleScanner != null) || (!bleAvailable && mBleScanner == null)) {
             // Nothing changed.
-            if (DEBUG) Log.i(TAG, "  > BLE status did not change");
             return;
         }
 
@@ -153,12 +134,9 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
                 // Oops, that's a race condition. Can return.
                 return;
             }
-            if (DEBUG) Log.i(TAG, "  > BLE is now available");
 
             startScan();
         } else {
-            if (DEBUG) Log.i(TAG, "  > BLE is now unavailable");
-
             stopScanIfNeeded();
             mBleScanner = null;
         }
@@ -194,13 +172,7 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
             }
         }
         if (macAddresses.isEmpty()) {
-            if (DEBUG) Log.i(TAG, "  > there are no (associated) devices to Scan for.");
             return;
-        } else {
-            if (DEBUG) {
-                Log.d(TAG, "  > addresses=(n=" + macAddresses.size() + ")"
-                        + "[" + String.join(", ", macAddresses) + "]");
-            }
         }
 
         final List<ScanFilter> filters = new ArrayList<>(macAddresses.size());
@@ -230,7 +202,6 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
 
         Slog.i(TAG, "stopBleScan()");
         if (!mScanning) {
-            if (DEBUG) Log.d(TAG, "  > not scanning.");
             return;
         }
         // mScanCallback is non-null here - it cannot be null when mScanning is true.
@@ -252,26 +223,16 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
 
     @MainThread
     private void notifyDeviceFound(@NonNull BluetoothDevice device) {
-        if (DEBUG) Log.i(TAG, "notifyDevice_Found()" + btDeviceToString(device));
-
-        final List<AssociationInfo> associations =
-                mAssociationStore.getActiveAssociationsByAddress(device.getAddress());
-        if (DEBUG) Log.d(TAG, "  > associations=" + Arrays.toString(associations.toArray()));
-
-        for (AssociationInfo association : associations) {
+        for (AssociationInfo association : mAssociationStore.getActiveAssociationsByAddress(
+                device.getAddress())) {
             mCallback.onBleCompanionDeviceFound(association.getId(), association.getUserId());
         }
     }
 
     @MainThread
     private void notifyDeviceLost(@NonNull BluetoothDevice device) {
-        if (DEBUG) Log.i(TAG, "notifyDevice_Lost()" + btDeviceToString(device));
-
-        final List<AssociationInfo> associations =
-                mAssociationStore.getActiveAssociationsByAddress(device.getAddress());
-        if (DEBUG) Log.d(TAG, "  > associations=" + Arrays.toString(associations.toArray()));
-
-        for (AssociationInfo association : associations) {
+        for (AssociationInfo association : mAssociationStore.getActiveAssociationsByAddress(
+                device.getAddress())) {
             mCallback.onBleCompanionDeviceLost(association.getId(), association.getUserId());
         }
     }
@@ -280,17 +241,6 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
         final BroadcastReceiver receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                final int prevState = intent.getIntExtra(EXTRA_PREVIOUS_STATE, -1);
-                final int state = intent.getIntExtra(EXTRA_STATE, -1);
-
-                if (DEBUG) {
-                    // The action is either STATE_CHANGED or BLE_STATE_CHANGED.
-                    final String action =
-                            intent.getAction().replace("android.bluetooth.adapter.", "bt.");
-                    Log.d(TAG, "on(Broadcast)Receive() " + action + ": "
-                            + nameForBtState(prevState) + "->" + nameForBtState(state));
-                }
-
                 checkBleState();
             }
         };
@@ -313,16 +263,6 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
         public void onScanResult(int callbackType, ScanResult result) {
             final BluetoothDevice device = result.getDevice();
 
-            if (DEBUG) {
-                Log.d(TAG, "onScanResult() " + nameForBleScanCallbackType(callbackType)
-                        + " device=" + btDeviceToString(device));
-                Log.v(TAG, "  > scanResult=" + result);
-
-                final List<AssociationInfo> associations =
-                        mAssociationStore.getActiveAssociationsByAddress(device.getAddress());
-                Log.v(TAG, "  > associations=" + Arrays.toString(associations.toArray()));
-            }
-
             switch (callbackType) {
                 case CALLBACK_TYPE_FIRST_MATCH:
                     notifyDeviceFound(device);
@@ -342,58 +282,18 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
         @MainThread
         @Override
         public void onScanFailed(int errorCode) {
-            if (DEBUG) Log.w(TAG, "onScanFailed() " + nameForBleScanErrorCode(errorCode));
             mScanning = false;
         }
     };
 
-    private static String nameForBtState(int state) {
-        return nameForState(state) + "(" + state + ")";
-    }
-
     private static String nameForBleScanCallbackType(int callbackType) {
-        final String name;
-        switch (callbackType) {
-            case CALLBACK_TYPE_ALL_MATCHES:
-                name = "ALL_MATCHES";
-                break;
-            case CALLBACK_TYPE_FIRST_MATCH:
-                name = "FIRST_MATCH";
-                break;
-            case CALLBACK_TYPE_MATCH_LOST:
-                name = "MATCH_LOST";
-                break;
-            default:
-                name = "Unknown";
-        }
+        final String name = switch (callbackType) {
+            case CALLBACK_TYPE_ALL_MATCHES -> "ALL_MATCHES";
+            case CALLBACK_TYPE_FIRST_MATCH -> "FIRST_MATCH";
+            case CALLBACK_TYPE_MATCH_LOST -> "MATCH_LOST";
+            default -> "Unknown";
+        };
         return name + "(" + callbackType + ")";
-    }
-
-    private static String nameForBleScanErrorCode(int errorCode) {
-        final String name;
-        switch (errorCode) {
-            case SCAN_FAILED_ALREADY_STARTED:
-                name = "ALREADY_STARTED";
-                break;
-            case SCAN_FAILED_APPLICATION_REGISTRATION_FAILED:
-                name = "APPLICATION_REGISTRATION_FAILED";
-                break;
-            case SCAN_FAILED_INTERNAL_ERROR:
-                name = "INTERNAL_ERROR";
-                break;
-            case SCAN_FAILED_FEATURE_UNSUPPORTED:
-                name = "FEATURE_UNSUPPORTED";
-                break;
-            case SCAN_FAILED_OUT_OF_HARDWARE_RESOURCES:
-                name = "OUT_OF_HARDWARE_RESOURCES";
-                break;
-            case SCAN_FAILED_SCANNING_TOO_FREQUENTLY:
-                name = "SCANNING_TOO_FREQUENTLY";
-                break;
-            default:
-                name = "Unknown";
-        }
-        return name + "(" + errorCode + ")";
     }
 
     private static final ScanSettings SCAN_SETTINGS = new ScanSettings.Builder()

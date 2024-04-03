@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.companion.presence;
+package com.android.server.companion.devicepresence;
 
 import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
 import static android.companion.DevicePresenceEvent.EVENT_BLE_APPEARED;
@@ -24,6 +24,7 @@ import static android.companion.DevicePresenceEvent.EVENT_BT_DISCONNECTED;
 import static android.companion.DevicePresenceEvent.EVENT_SELF_MANAGED_APPEARED;
 import static android.companion.DevicePresenceEvent.EVENT_SELF_MANAGED_DISAPPEARED;
 import static android.companion.DevicePresenceEvent.NO_ASSOCIATION;
+import static android.content.Context.BLUETOOTH_SERVICE;
 import static android.os.Process.ROOT_UID;
 import static android.os.Process.SHELL_UID;
 
@@ -35,6 +36,7 @@ import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.companion.AssociationInfo;
 import android.companion.DeviceNotAssociatedException;
 import android.companion.DevicePresenceEvent;
@@ -49,7 +51,6 @@ import android.os.ParcelUuid;
 import android.os.PowerManagerInternal;
 import android.os.RemoteException;
 import android.os.UserManager;
-import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -80,8 +81,7 @@ import java.util.Set;
  */
 @SuppressLint("LongLogTag")
 public class DevicePresenceProcessor implements AssociationStore.OnChangeListener,
-        BluetoothCompanionDeviceConnectionListener.Callback, BleCompanionDeviceScanner.Callback {
-    static final boolean DEBUG = false;
+        BluetoothDeviceProcessor.Callback, BleDeviceProcessor.Callback {
     private static final String TAG = "CDM_DevicePresenceProcessor";
 
     @NonNull
@@ -93,9 +93,9 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
     @NonNull
     private final ObservableUuidStore mObservableUuidStore;
     @NonNull
-    private final BluetoothCompanionDeviceConnectionListener mBtConnectionListener;
+    private final BluetoothDeviceProcessor mBluetoothDeviceProcessor;
     @NonNull
-    private final BleCompanionDeviceScanner mBleScanner;
+    private final BleDeviceProcessor mBleDeviceProcessor;
     @NonNull
     private final PowerManagerInternal mPowerManagerInternal;
     @NonNull
@@ -142,7 +142,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
 
     public DevicePresenceProcessor(@NonNull Context context,
             @NonNull CompanionAppBinder companionAppBinder,
-            UserManager userManager,
+            @NonNull UserManager userManager,
             @NonNull AssociationStore associationStore,
             @NonNull ObservableUuidStore observableUuidStore,
             @NonNull PowerManagerInternal powerManagerInternal) {
@@ -151,25 +151,27 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
         mAssociationStore = associationStore;
         mObservableUuidStore = observableUuidStore;
         mUserManager = userManager;
-        mBtConnectionListener = new BluetoothCompanionDeviceConnectionListener(userManager,
-                associationStore, mObservableUuidStore,
-                /* BluetoothCompanionDeviceConnectionListener.Callback */ this);
-        mBleScanner = new BleCompanionDeviceScanner(associationStore,
-                /* BleCompanionDeviceScanner.Callback */ this);
+        mBluetoothDeviceProcessor = new BluetoothDeviceProcessor(associationStore,
+                mObservableUuidStore, this);
+        mBleDeviceProcessor = new BleDeviceProcessor(associationStore, this);
         mPowerManagerInternal = powerManagerInternal;
     }
 
     /** Initialize {@link DevicePresenceProcessor} */
     public void init(Context context) {
-        if (DEBUG) Slog.i(TAG, "init()");
-
-        final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (btAdapter != null) {
-            mBtConnectionListener.init(btAdapter);
-            mBleScanner.init(context, btAdapter);
-        } else {
-            Slog.w(TAG, "BluetoothAdapter is NOT available.");
+        BluetoothManager bm = (BluetoothManager) context.getSystemService(BLUETOOTH_SERVICE);
+        if (bm == null) {
+            Slog.w(TAG, "BluetoothManager is not available.");
+            return;
         }
+        final BluetoothAdapter btAdapter = bm.getAdapter();
+        if (btAdapter == null) {
+            Slog.w(TAG, "BluetoothAdapter is NOT available.");
+            return;
+        }
+
+        mBluetoothDeviceProcessor.init(btAdapter);
+        mBleDeviceProcessor.init(context, btAdapter);
 
         mAssociationStore.registerLocalListener(this);
     }
@@ -280,7 +282,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
      * For legacy device presence below Android V.
      *
      * @deprecated Use {@link #startObservingDevicePresence(ObservingDevicePresenceRequest, String,
-     *             int)}
+     * int)}
      */
     @Deprecated
     public void startObservingDevicePresence(int userId, String packageName, String deviceAddress)
@@ -310,7 +312,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
      * For legacy device presence below Android V.
      *
      * @deprecated Use {@link #stopObservingDevicePresence(ObservingDevicePresenceRequest, String,
-     *             int)}
+     * int)}
      */
     @Deprecated
     public void stopObservingDevicePresence(int userId, String packageName, String deviceAddress)
@@ -496,7 +498,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
 
             // Stop the BLE scan if all devices report BT connected status and BLE was present.
             if (canStopBleScan()) {
-                mBleScanner.stopScanIfNeeded();
+                mBleDeviceProcessor.stopScanIfNeeded();
             }
 
         }
@@ -513,7 +515,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
         }
 
         // Start BLE scanning when the device is disconnected.
-        mBleScanner.startScan();
+        mBleDeviceProcessor.startScan();
 
         onDevicePresenceEvent(mConnectedBtDevices, associationId, EVENT_BT_DISCONNECTED);
         // If current device is BLE present but BT is disconnected , means it will be
@@ -724,7 +726,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
         final ParcelUuid parcelUuid = uuid.getUuid();
         final int userId = uuid.getUserId();
         if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
-            onDeviceLocked(/* associationId */ -1, userId, eventType, parcelUuid);
+            onDeviceLocked(NO_ASSOCIATION, userId, eventType, parcelUuid);
             return;
         }
 
@@ -930,10 +932,6 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
     @Override
     public void onAssociationRemoved(@NonNull AssociationInfo association) {
         final int id = association.getId();
-        if (DEBUG) {
-            Log.i(TAG, "onAssociationRemoved() id=" + id);
-            Log.d(TAG, "  > association=" + association);
-        }
 
         mConnectedBtDevices.remove(id);
         mNearbyBleDevices.remove(id);
@@ -1004,8 +1002,8 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
                     if (deviceEvents != null) {
                         deviceEvents.removeIf(deviceEvent ->
                                 deviceEvent.getEvent() == EVENT_BLE_APPEARED
-                                && Objects.equals(deviceEvent.getUuid(), uuid)
-                                && deviceEvent.getAssociationId() == associationId);
+                                        && Objects.equals(deviceEvent.getUuid(), uuid)
+                                        && deviceEvent.getAssociationId() == associationId);
                     }
                 }
             }
@@ -1018,8 +1016,8 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
                     if (deviceEvents != null) {
                         deviceEvents.removeIf(deviceEvent ->
                                 deviceEvent.getEvent() == EVENT_BT_CONNECTED
-                                && Objects.equals(deviceEvent.getUuid(), uuid)
-                                && deviceEvent.getAssociationId() == associationId);
+                                        && Objects.equals(deviceEvent.getUuid(), uuid)
+                                        && deviceEvent.getAssociationId() == associationId);
                     }
                 }
             }
@@ -1054,7 +1052,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
                     return;
                 }
 
-                switch(event) {
+                switch (event) {
                     case EVENT_BLE_APPEARED:
                         onBleCompanionDeviceFound(
                                 associationInfo.getId(), associationInfo.getUserId());

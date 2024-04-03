@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.companion.presence;
+package com.android.server.companion.devicepresence;
 
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
