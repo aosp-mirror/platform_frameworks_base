@@ -128,7 +128,7 @@ public class RecordingControllerTest extends SysuiTestCase {
         );
 
         mFeatureFlags = new FakeFeatureFlags();
-        when(mScreenCaptureDisabledDialogDelegate.createDialog())
+        when(mScreenCaptureDisabledDialogDelegate.createSysUIDialog())
                 .thenReturn(mScreenCaptureDisabledDialog);
         when(mScreenRecordDialogFactory.create(any(), any()))
                 .thenReturn(mScreenRecordDialogDelegate);

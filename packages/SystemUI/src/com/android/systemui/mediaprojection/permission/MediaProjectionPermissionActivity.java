@@ -319,7 +319,7 @@ public class MediaProjectionPermissionActivity extends Activity
         final UserHandle hostUserHandle = getHostUserHandle();
         if (mScreenCaptureDevicePolicyResolver.get()
                 .isScreenCaptureCompletelyDisabled(hostUserHandle)) {
-            AlertDialog dialog = mScreenCaptureDisabledDialogDelegate.createDialog();
+            AlertDialog dialog = mScreenCaptureDisabledDialogDelegate.createPlainDialog();
             setUpDialog(dialog);
             dialog.show();
             return true;

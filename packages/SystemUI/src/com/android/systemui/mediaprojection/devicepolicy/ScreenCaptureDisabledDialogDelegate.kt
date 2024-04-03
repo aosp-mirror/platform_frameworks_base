@@ -15,6 +15,8 @@
  */
 package com.android.systemui.mediaprojection.devicepolicy
 
+import android.app.AlertDialog
+import android.content.Context
 import android.content.DialogInterface.BUTTON_POSITIVE
 import android.content.res.Resources
 import com.android.systemui.dagger.qualifiers.Main
@@ -23,22 +25,33 @@ import com.android.systemui.statusbar.phone.SystemUIDialog
 import javax.inject.Inject
 
 /** Dialog that shows that screen capture is disabled on this device. */
-class ScreenCaptureDisabledDialogDelegate @Inject constructor(
-        @Main private val resources: Resources,
-        private val systemUIDialogFactory: SystemUIDialog.Factory
-) : SystemUIDialog.Delegate {
+class ScreenCaptureDisabledDialogDelegate
+@Inject
+constructor(
+    private val context: Context,
+    @Main private val resources: Resources,
+) {
 
-    override fun createDialog(): SystemUIDialog {
-        val dialog = systemUIDialogFactory.create(this)
-        dialog.setTitle(resources.getString(R.string.screen_capturing_disabled_by_policy_dialog_title))
+    fun createPlainDialog(): AlertDialog {
+        return AlertDialog.Builder(context, R.style.Theme_SystemUI_Dialog).create().also {
+            initDialog(it)
+        }
+    }
+
+    fun createSysUIDialog(): AlertDialog {
+        return SystemUIDialog(context).also { initDialog(it) }
+    }
+
+    private fun initDialog(dialog: AlertDialog) {
+        dialog.setTitle(
+            resources.getString(R.string.screen_capturing_disabled_by_policy_dialog_title)
+        )
         dialog.setMessage(
             resources.getString(R.string.screen_capturing_disabled_by_policy_dialog_description)
         )
         dialog.setIcon(R.drawable.ic_cast)
-        dialog.setButton(BUTTON_POSITIVE, resources.getString(android.R.string.ok)) {
-            _, _ -> dialog.cancel()
+        dialog.setButton(BUTTON_POSITIVE, resources.getString(android.R.string.ok)) { _, _ ->
+            dialog.cancel()
         }
-
-        return dialog
     }
 }
