@@ -30,7 +30,7 @@ enum class ColorProfile {
     Active,
     // Yellow for e.g., battery saver
     Warning,
-    // Red for e.t., low battery
+    // Red for e.g., low battery
     Error,
 }
 
@@ -108,17 +108,17 @@ sealed interface BatteryColors {
         // 22% alpha white
         override val bg: Int = Color.valueOf(1f, 1f, 1f, 0.22f).toArgb()
 
+        // GM Gray 500
+        override val fill = Color.parseColor("#9AA0A6")
         // GM Gray 600
-        override val fill = Color.parseColor("#80868B")
-        // GM Gray 700
-        override val fillOnly = Color.parseColor("#5F6368")
+        override val fillOnly = Color.parseColor("#80868B")
 
-        // GM Green 700
-        override val activeFill = Color.parseColor("#188038")
+        // GM Green 500
+        override val activeFill = Color.parseColor("#34A853")
         // GM Yellow 500
         override val warnFill = Color.parseColor("#FBBC04")
-        // GM Red 600
-        override val errorFill = Color.parseColor("#D93025")
+        // GM Red 500
+        override val errorFill = Color.parseColor("#EA4335")
     }
 
     /** Color scheme appropriate for dark mode (light icons) */
@@ -132,12 +132,12 @@ sealed interface BatteryColors {
         // GM Gray 400
         override val fillOnly = Color.parseColor("#BDC1C6")
 
-        // GM Green 500
-        override val activeFill = Color.parseColor("#34A853")
-        // GM Yellow
-        override val warnFill = Color.parseColor("#FBBC04")
-        // GM Red 600
-        override val errorFill = Color.parseColor("#D93025")
+        // GM Green 700
+        override val activeFill = Color.parseColor("#188038")
+        // GM Yellow 700
+        override val warnFill = Color.parseColor("#F29900")
+        // GM Red 700
+        override val errorFill = Color.parseColor("#C5221F")
     }
 
     companion object {
