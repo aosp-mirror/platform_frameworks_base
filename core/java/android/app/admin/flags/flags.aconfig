@@ -36,13 +36,6 @@ flag {
 }
 
 flag {
-  name: "cross_user_suspension_enabled"
-  namespace: "enterprise"
-  description: "Allow holders of INTERACT_ACROSS_USERS_FULL to suspend apps in different users."
-  bug: "263464464"
-}
-
-flag {
   name: "cross_user_suspension_enabled_ro"
   namespace: "enterprise"
   description: "Allow holders of INTERACT_ACROSS_USERS_FULL to suspend apps in different users."
