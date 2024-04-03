@@ -193,7 +193,7 @@ constructor(
     val isKeyguardShowing: Flow<Boolean> = repository.isKeyguardShowing
 
     /** Whether the keyguard is dismissible or not. */
-    val isKeyguardDismissible: Flow<Boolean> = repository.isKeyguardDismissible
+    val isKeyguardDismissible: StateFlow<Boolean> = repository.isKeyguardDismissible
 
     /** Whether the keyguard is occluded (covered by an activity). */
     @Deprecated("Use KeyguardTransitionInteractor + KeyguardState.OCCLUDED")
