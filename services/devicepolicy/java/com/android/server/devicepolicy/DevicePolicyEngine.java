@@ -1640,6 +1640,10 @@ final class DevicePolicyEngine {
                     mAdminPolicySize.get(admin.getUserId()).get(admin) - sizeOf(
                             policyState.getPoliciesSetByAdmins().get(admin)));
         }
+        if (!mAdminPolicySize.contains(admin.getUserId())
+                || !mAdminPolicySize.get(admin.getUserId()).containsKey(admin)) {
+            return;
+        }
         if (mAdminPolicySize.get(admin.getUserId()).get(admin) <= 0) {
             mAdminPolicySize.get(admin.getUserId()).remove(admin);
         }
