@@ -21,7 +21,7 @@ import android.media.session.MediaController.PlaybackInfo
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.res.R
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaDeviceSessionInteractor
-import com.android.systemui.volume.panel.component.mediaoutput.domain.model.MediaDeviceSession
+import com.android.systemui.volume.panel.component.mediaoutput.shared.model.MediaDeviceSession
 import com.android.systemui.volume.panel.component.volume.domain.interactor.VolumeSliderInteractor
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory

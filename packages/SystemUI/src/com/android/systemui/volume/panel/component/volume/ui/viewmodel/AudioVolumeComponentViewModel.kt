@@ -20,8 +20,8 @@ import android.media.AudioManager
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaDeviceSessionInteractor
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputInteractor
-import com.android.systemui.volume.panel.component.mediaoutput.domain.model.MediaDeviceSession
-import com.android.systemui.volume.panel.component.mediaoutput.domain.model.isTheSameSession
+import com.android.systemui.volume.panel.component.mediaoutput.shared.model.MediaDeviceSession
+import com.android.systemui.volume.panel.component.mediaoutput.shared.model.isTheSameSession
 import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.AudioStreamSliderViewModel
 import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.CastVolumeSliderViewModel
 import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.SliderViewModel

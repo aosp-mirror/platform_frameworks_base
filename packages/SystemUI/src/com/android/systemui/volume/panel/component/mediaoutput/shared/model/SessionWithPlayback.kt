@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.component.mediaoutput.domain.model
+package com.android.systemui.volume.panel.component.mediaoutput.shared.model
 
-import android.media.session.MediaSession
+import android.media.session.PlaybackState
 
-/** Represents media playing on the connected device. */
-data class MediaDeviceSession(
-    val appLabel: CharSequence,
-    val packageName: String,
-    val sessionToken: MediaSession.Token,
-    val canAdjustVolume: Boolean,
+data class SessionWithPlayback(
+    val session: MediaDeviceSession,
+    val playback: PlaybackState,
 )
-
-/** Returns true when [other] controls the same sessions as [this]. */
-fun MediaDeviceSession.isTheSameSession(other: MediaDeviceSession?): Boolean =
-    sessionToken == other?.sessionToken

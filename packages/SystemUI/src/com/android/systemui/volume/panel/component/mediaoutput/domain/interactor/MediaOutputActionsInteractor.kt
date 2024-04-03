@@ -21,7 +21,7 @@ import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.media.dialog.MediaOutputDialogManager
-import com.android.systemui.volume.panel.component.mediaoutput.domain.model.MediaDeviceSession
+import com.android.systemui.volume.panel.component.mediaoutput.shared.model.SessionWithPlayback
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import javax.inject.Inject
 
@@ -33,10 +33,10 @@ constructor(
     private val mediaOutputDialogManager: MediaOutputDialogManager,
 ) {
 
-    fun onBarClick(session: MediaDeviceSession, isPlaybackActive: Boolean, expandable: Expandable) {
-        if (isPlaybackActive) {
+    fun onBarClick(sessionWithPlayback: SessionWithPlayback?, expandable: Expandable) {
+        if (sessionWithPlayback?.playback?.isActive == true) {
             mediaOutputDialogManager.createAndShowWithController(
-                session.packageName,
+                sessionWithPlayback.session.packageName,
                 false,
                 expandable.dialogController()
             )
