@@ -1,12 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.om."
-        }
-      ]
+      "name": "FrameworksServicesTests_om"
     },
     {
       "name": "PackageManagerServiceHostTests",
@@ -15,12 +10,6 @@
           "include-filter": "com.android.server.pm.test.OverlayActorVisibilityTest"
         }
       ]
-    }
-  ],
-  "postsubmit": [
-    {
-      // b/331020193, Move to presubmit early april 2024
-      "name": "FrameworksServicesTests_om"
     }
   ]
 }
