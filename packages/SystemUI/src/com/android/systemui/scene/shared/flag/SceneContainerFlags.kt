@@ -28,6 +28,7 @@ import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.media.controls.util.MediaInSceneContainerFlag
+import com.android.systemui.statusbar.phone.PredictiveBackSysUiFlag
 import dagger.Module
 import dagger.Provides
 
@@ -44,7 +45,8 @@ object SceneContainerFlag {
                 MigrateClocksToBlueprint.isEnabled &&
                 ComposeLockscreen.isEnabled &&
                 MediaInSceneContainerFlag.isEnabled &&
-                KeyguardWmStateRefactor.isEnabled
+                KeyguardWmStateRefactor.isEnabled &&
+                PredictiveBackSysUiFlag.isEnabled
     // NOTE: Changes should also be made in getSecondaryFlags and @EnableSceneContainer
 
     /** The main aconfig flag. */
