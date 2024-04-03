@@ -790,7 +790,7 @@ class ActivityTransitionAnimator(
                     controller,
                     endState,
                     windowBackgroundColor,
-                    fadeOutWindowBackgroundLayer = !controller.isBelowAnimatingWindow,
+                    fadeWindowBackgroundLayer = !controller.isBelowAnimatingWindow,
                     drawHole = !controller.isBelowAnimatingWindow,
                 )
         }
