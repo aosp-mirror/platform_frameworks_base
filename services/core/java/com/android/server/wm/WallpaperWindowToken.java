@@ -274,6 +274,12 @@ class WallpaperWindowToken extends WindowToken {
     }
 
     @Override
+    boolean isSyncFinished(BLASTSyncEngine.SyncGroup group) {
+        // TODO(b/233286785): Support sync state for wallpaper. See WindowState#prepareSync.
+        return !mVisibleRequested || !hasVisibleNotDrawnWallpaper();
+    }
+
+    @Override
     public String toString() {
         if (stringName == null) {
             StringBuilder sb = new StringBuilder();
