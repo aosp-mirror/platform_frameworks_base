@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
-import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.shade.domain.interactor.shadeInteractor
@@ -26,7 +25,6 @@ import com.android.systemui.statusbar.notification.stack.domain.interactor.notif
 val Kosmos.keyguardClockViewModel by
     Kosmos.Fixture {
         KeyguardClockViewModel(
-            keyguardInteractor = keyguardInteractor,
             keyguardClockInteractor = keyguardClockInteractor,
             applicationScope = applicationCoroutineScope,
             notifsKeyguardInteractor = notificationsKeyguardInteractor,

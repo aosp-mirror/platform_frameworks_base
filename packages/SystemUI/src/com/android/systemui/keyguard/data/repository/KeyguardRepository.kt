@@ -206,7 +206,11 @@ interface KeyguardRepository {
     )
     val keyguardDoneAnimationsFinished: Flow<Unit>
 
-    /** Receive whether clock should be centered on lockscreen. */
+    /**
+     * Receive whether clock should be centered on lockscreen.
+     *
+     * @deprecated When scene container flag is on use clockShouldBeCentered from domain level.
+     */
     val clockShouldBeCentered: Flow<Boolean>
 
     /**
