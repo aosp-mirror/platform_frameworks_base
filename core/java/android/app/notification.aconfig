@@ -111,3 +111,10 @@ flag {
   description: "No notifs can use USAGE_UNKNOWN or USAGE_MEDIA"
   bug: "331793339"
 }
+
+flag {
+  name: "clean_up_spans_and_new_lines"
+  namespace: "systemui"
+  description: "Cleans up spans and unnecessary new lines from standard notification templates"
+  bug: "313439845"
+}
