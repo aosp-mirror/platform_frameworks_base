@@ -101,14 +101,6 @@ public interface WindowInsetsController {
     int APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS = 1 << 9;
 
     /**
-     * Appearance flags that can be implied from system UI flags.
-     * @hide
-     */
-    int COMPATIBLE_APPEARANCE_FLAGS = APPEARANCE_LOW_PROFILE_BARS
-            | APPEARANCE_LIGHT_STATUS_BARS
-            | APPEARANCE_LIGHT_NAVIGATION_BARS;
-
-    /**
      * Determines the appearance of system bars.
      * @hide
      */
@@ -271,10 +263,23 @@ public interface WindowInsetsController {
     void setSystemBarsAppearance(@Appearance int appearance, @Appearance int mask);
 
     /**
+     * Similar to {@link #setSystemBarsAppearance} but the given flag will only take effect when it
+     * is not controlled by {@link #setSystemBarsAppearance}.
+     *
+     * @see WindowInsetsController#getSystemBarsAppearance()
+     * @see android.R.attr#windowLightStatusBar
+     * @see android.R.attr#windowLightNavigationBar
+     * @hide
+     */
+    void setSystemBarsAppearanceFromResource(@Appearance int appearance, @Appearance int mask);
+
+    /**
      * Retrieves the requested appearance of system bars.
      *
      * @return The requested bitmask of system bar appearance controlled by this window.
      * @see #setSystemBarsAppearance(int, int)
+     * @see android.R.attr#windowLightStatusBar
+     * @see android.R.attr#windowLightNavigationBar
      */
     @Appearance int getSystemBarsAppearance();
 

@@ -437,6 +437,71 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
     }
 
+    @Override
+    public void addOverridePermissionState(int uid, String permission, int result)
+            throws RemoteException {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+        final int callingUid = Binder.getCallingUid();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mActivityManager.addOverridePermissionState(callingUid, uid, permission, result);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void removeOverridePermissionState(int uid, String permission) throws RemoteException {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+        final int callingUid = Binder.getCallingUid();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mActivityManager.removeOverridePermissionState(callingUid, uid, permission);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void clearOverridePermissionStates(int uid) throws RemoteException {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+        final int callingUid = Binder.getCallingUid();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mActivityManager.clearOverridePermissionStates(callingUid, uid);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void clearAllOverridePermissionStates() throws RemoteException {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+        final int callingUid = Binder.getCallingUid();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mActivityManager.clearAllOverridePermissionStates(callingUid);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
     public class Repeater implements Runnable {
         // Continuously read readFrom and write back to writeTo until EOF is encountered
         private final InputStream readFrom;

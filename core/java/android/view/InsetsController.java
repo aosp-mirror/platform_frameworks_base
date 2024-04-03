@@ -142,10 +142,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
          */
         @Appearance int getSystemBarsAppearance();
 
-        default boolean isSystemBarsAppearanceControlled() {
-            return false;
-        }
-
         /**
          * @see WindowInsetsController#setSystemBarsBehavior
          */
@@ -155,10 +151,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
          * @see WindowInsetsController#getSystemBarsBehavior
          */
         @Behavior int getSystemBarsBehavior();
-
-        default boolean isSystemBarsBehaviorControlled() {
-            return false;
-        }
 
         /**
          * Releases a surface and ensure that this is done after {@link #applySurfaceParams} has
@@ -672,6 +664,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private int mImeCaptionBarInsetsHeight = 0;
     private boolean mAnimationsDisabled;
     private boolean mCompatSysUiVisibilityStaled;
+    private @Appearance int mAppearanceControlled;
+    private @Appearance int mAppearanceFromResource;
+    private boolean mBehaviorControlled;
 
     private final Runnable mPendingControlTimeout = this::abortPendingImeControlRequest;
     private final ArrayList<OnControllableInsetsChangedListener> mControllableInsetsChangedListeners
@@ -1884,20 +1879,28 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @Override
     public void setSystemBarsAppearance(@Appearance int appearance, @Appearance int mask) {
+        mAppearanceControlled |= mask;
         mHost.setSystemBarsAppearance(appearance, mask);
     }
 
     @Override
+    public void setSystemBarsAppearanceFromResource(@Appearance int appearance,
+            @Appearance int mask) {
+        mAppearanceFromResource = (mAppearanceFromResource & ~mask) | (appearance & mask);
+
+        // Don't change the flags which are already controlled by setSystemBarsAppearance.
+        mHost.setSystemBarsAppearance(appearance, mask & ~mAppearanceControlled);
+    }
+
+    @Override
     public @Appearance int getSystemBarsAppearance() {
-        @Appearance int appearance = mHost.getSystemBarsAppearance();
-
         // We only return the requested appearance, not the implied one.
-        appearance &= ~APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS;
-        if (!mHost.isSystemBarsAppearanceControlled()) {
-            appearance &= ~COMPATIBLE_APPEARANCE_FLAGS;
-        }
+        return (mHost.getSystemBarsAppearance() & mAppearanceControlled)
+                | (mAppearanceFromResource & ~mAppearanceControlled);
+    }
 
-        return appearance;
+    public @Appearance int getAppearanceControlled() {
+        return mAppearanceControlled;
     }
 
     @Override
@@ -1949,16 +1952,21 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @Override
     public void setSystemBarsBehavior(@Behavior int behavior) {
+        mBehaviorControlled = true;
         mHost.setSystemBarsBehavior(behavior);
     }
 
     @Override
     public @Behavior int getSystemBarsBehavior() {
-        if (!mHost.isSystemBarsBehaviorControlled()) {
+        if (!mBehaviorControlled) {
             // We only return the requested behavior, not the implied one.
-            return 0;
+            return BEHAVIOR_DEFAULT;
         }
         return mHost.getSystemBarsBehavior();
+    }
+
+    public boolean isBehaviorControlled() {
+        return mBehaviorControlled;
     }
 
     @Override

@@ -2705,7 +2705,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * Returns true if the specified UID has access to this display.
      */
     boolean hasAccess(int uid) {
-        return mDisplay.hasAccess(uid);
+        int userId = UserHandle.getUserId(uid);
+        boolean isUserVisibleOnDisplay = mWmService.mUmInternal.isUserVisible(
+                userId, mDisplayId);
+        return mDisplay.hasAccess(uid)
+                && (userId == UserHandle.USER_SYSTEM || isUserVisibleOnDisplay);
     }
 
     boolean isPrivate() {
@@ -4562,7 +4566,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
         }
 
-        void attachAndShow(Transaction t) {
+        /**
+         * Attaches the snapshot of IME (a snapshot will be taken if there wasn't one) to the IME
+         * target task and shows it. If the given {@param anyTargetTask} is true, the snapshot won't
+         * be skipped by the activity type of IME target task.
+         */
+        void attachAndShow(Transaction t, boolean anyTargetTask) {
             final DisplayContent dc = mImeTarget.getDisplayContent();
             // Prepare IME screenshot for the target if it allows to attach into.
             final Task task = mImeTarget.getTask();
@@ -4570,7 +4579,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             final boolean renewImeSurface = mImeSurface == null
                     || mImeSurface.getWidth() != dc.mInputMethodWindow.getFrame().width()
                     || mImeSurface.getHeight() != dc.mInputMethodWindow.getFrame().height();
-            if (task != null && !task.isActivityTypeHomeOrRecents()) {
+            // The exclusion of home/recents is an optimization for regular task switch because
+            // home/recents won't appear in recents task.
+            if (task != null && (anyTargetTask || !task.isActivityTypeHomeOrRecents())) {
                 ScreenCapture.ScreenshotHardwareBuffer imeBuffer = renewImeSurface
                         ? dc.mWmService.mTaskSnapshotController.snapshotImeFromAttachedTask(task)
                         : null;
@@ -4638,7 +4649,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         removeImeSurfaceImmediately();
         mImeScreenshot = new ImeScreenshot(
                 mWmService.mSurfaceControlFactory.apply(null), imeTarget);
-        mImeScreenshot.attachAndShow(t);
+        // If the caller requests to hide IME, then allow to show IME snapshot for any target task.
+        // So IME won't look like suddenly disappeared. It usually happens when turning off screen.
+        mImeScreenshot.attachAndShow(t, hideImeWindow /* anyTargetTask */);
         if (mInputMethodWindow != null && hideImeWindow) {
             // Hide the IME window when deciding to show IME snapshot on demand.
             // InsetsController will make IME visible again before animating it.
@@ -6997,7 +7010,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // by finishing the recents animation and moving it to top. That also avoids flickering
             // due to wait for previous activity to be paused if it supports PiP that ignores the
             // effect of resume-while-pausing.
-            if (r == null || r == mAnimatingRecents) {
+            if (r == null || r == mAnimatingRecents || r.getDisplayId() != mDisplayId) {
                 return;
             }
             if (mAnimatingRecents != null && mRecentsWillBeTop) {

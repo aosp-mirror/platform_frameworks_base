@@ -35,7 +35,6 @@ import com.android.systemui.volume.mediaControllerRepository
 import com.android.systemui.volume.mediaDeviceSessionInteractor
 import com.android.systemui.volume.mediaOutputActionsInteractor
 import com.android.systemui.volume.mediaOutputInteractor
-import com.android.systemui.volume.panel.volumePanelViewModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
@@ -62,7 +61,6 @@ class MediaOutputViewModelTest : SysuiTestCase() {
                 MediaOutputViewModel(
                     applicationContext,
                     testScope.backgroundScope,
-                    volumePanelViewModel,
                     mediaOutputActionsInteractor,
                     mediaDeviceSessionInteractor,
                     mediaOutputInteractor,

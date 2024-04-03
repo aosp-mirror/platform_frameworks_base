@@ -18,7 +18,6 @@ package com.android.systemui.shade;
 
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_OPTIMIZE_MEASURE;
 
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
@@ -290,12 +289,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mLp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         mLp.privateFlags |= PRIVATE_FLAG_OPTIMIZE_MEASURE;
 
-        // We use BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE here, however, there is special logic in
-        // window manager which disables the transient show behavior.
-        // TODO: Clean this up once that behavior moves into the Shell.
-        mLp.privateFlags |= PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
-        mLp.insetsFlags.behavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
-
         if (mSceneContainerFlags.isEnabled()) {
             // This prevents the appearance and disappearance of the software keyboard (also known
             // as the "IME") from scrolling/panning the window to make room for the keyboard.
@@ -306,6 +299,14 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         }
 
         mWindowManager.addView(mWindowRootView, mLp);
+
+        // We use BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE here, however, there is special logic in
+        // window manager which disables the transient show behavior.
+        // TODO: Clean this up once that behavior moves into the Shell.
+        if (mWindowRootView.getWindowInsetsController() != null) {
+            mWindowRootView.getWindowInsetsController().setSystemBarsBehavior(
+                    BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        }
 
         mLpChanged.copyFrom(mLp);
         onThemeChanged();

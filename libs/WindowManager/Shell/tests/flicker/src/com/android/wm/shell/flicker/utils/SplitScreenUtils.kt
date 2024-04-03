@@ -179,12 +179,13 @@ object SplitScreenUtils {
         val displayBounds =
             wmHelper.currentState.layerState.displays.firstOrNull { !it.isVirtual }?.layerStackSpace
                 ?: error("Display not found")
+        val swipeXCoordinate = displayBounds.centerX() / 2
 
         // Pull down the notifications
         device.swipe(
-            displayBounds.centerX(),
+            swipeXCoordinate,
             5,
-            displayBounds.centerX(),
+            swipeXCoordinate,
             displayBounds.bottom,
             50 /* steps */
         )

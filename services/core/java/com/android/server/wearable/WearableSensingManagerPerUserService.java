@@ -25,10 +25,12 @@ import android.annotation.UserIdInt;
 import android.app.AppGlobals;
 import android.app.ambientcontext.AmbientContextEvent;
 import android.app.wearable.Flags;
+import android.app.wearable.IWearableSensingCallback;
 import android.app.wearable.WearableSensingManager;
 import android.companion.CompanionDeviceManager;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.os.Bundle;
@@ -46,6 +48,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.infra.AndroidFuture;
 import com.android.server.LocalServices;
 import com.android.server.infra.AbstractPerUserSystemService;
 
@@ -61,12 +64,17 @@ final class WearableSensingManagerPerUserService extends
                 WearableSensingManagerService> {
     private static final String TAG = WearableSensingManagerPerUserService.class.getSimpleName();
 
+    private final PackageManagerInternal mPackageManagerInternal;
+
     @Nullable
     @VisibleForTesting
     RemoteWearableSensingService mRemoteService;
 
     @Nullable private VoiceInteractionManagerInternal mVoiceInteractionManagerInternal;
+
+    @GuardedBy("mLock")
     private ComponentName mComponentName;
+
     private final Object mSecureChannelLock = new Object();
 
     @GuardedBy("mSecureChannelLock")
@@ -75,6 +83,7 @@ final class WearableSensingManagerPerUserService extends
     WearableSensingManagerPerUserService(
             @NonNull WearableSensingManagerService master, Object lock, @UserIdInt int userId) {
         super(master, lock, userId);
+        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
     }
 
     public static void notifyStatusCallback(RemoteCallback statusCallback, int statusCode) {
@@ -190,14 +199,19 @@ final class WearableSensingManagerPerUserService extends
      * service.
      */
     public void onProvideConnection(
-            ParcelFileDescriptor wearableConnection, RemoteCallback callback) {
+            ParcelFileDescriptor wearableConnection,
+            IWearableSensingCallback wearableSensingCallback,
+            RemoteCallback statusCallback) {
         Slog.i(TAG, "onProvideConnection in per user service.");
+        final IWearableSensingCallback wrappedWearableSensingCallback;
         synchronized (mLock) {
             if (!setUpServiceIfNeeded()) {
                 Slog.w(TAG, "Detection service is not available at this moment.");
-                notifyStatusCallback(callback, WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
+                notifyStatusCallback(
+                        statusCallback, WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
                 return;
             }
+            wrappedWearableSensingCallback = wrapWearableSensingCallback(wearableSensingCallback);
         }
         synchronized (mSecureChannelLock) {
             if (mSecureChannel != null) {
@@ -218,7 +232,9 @@ final class WearableSensingManagerPerUserService extends
                                         synchronized (mLock) {
                                             ensureRemoteServiceInitiated();
                                             mRemoteService.provideSecureConnection(
-                                                    secureTransport, callback);
+                                                    secureTransport,
+                                                    wrappedWearableSensingCallback,
+                                                    statusCallback);
                                         }
                                     }
 
@@ -237,7 +253,7 @@ final class WearableSensingManagerPerUserService extends
                                         }
                                         if (Flags.enableProvideWearableConnectionApi()) {
                                             notifyStatusCallback(
-                                                    callback,
+                                                    statusCallback,
                                                     WearableSensingManager.STATUS_CHANNEL_ERROR);
                                         }
                                     }
@@ -246,7 +262,8 @@ final class WearableSensingManagerPerUserService extends
             } catch (IOException ex) {
                 Slog.e(TAG, "Unable to create the secure channel.", ex);
                 if (Flags.enableProvideWearableConnectionApi()) {
-                    notifyStatusCallback(callback, WearableSensingManager.STATUS_CHANNEL_ERROR);
+                    notifyStatusCallback(
+                            statusCallback, WearableSensingManager.STATUS_CHANNEL_ERROR);
                 }
             }
         }
@@ -257,17 +274,22 @@ final class WearableSensingManagerPerUserService extends
      */
     public void onProvideDataStream(
             ParcelFileDescriptor parcelFileDescriptor,
-            RemoteCallback callback) {
+            @Nullable IWearableSensingCallback wearableSensingCallback,
+            RemoteCallback statusCallback) {
         Slog.i(TAG, "onProvideDataStream in per user service.");
         synchronized (mLock) {
             if (!setUpServiceIfNeeded()) {
                 Slog.w(TAG, "Detection service is not available at this moment.");
-                notifyStatusCallback(callback, WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
+                notifyStatusCallback(
+                        statusCallback, WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
                 return;
             }
             Slog.i(TAG, "calling over to remote servvice.");
             ensureRemoteServiceInitiated();
-            mRemoteService.provideDataStream(parcelFileDescriptor, callback);
+            mRemoteService.provideDataStream(
+                    parcelFileDescriptor,
+                    wrapWearableSensingCallback(wearableSensingCallback),
+                    statusCallback);
         }
     }
 
@@ -453,6 +475,39 @@ final class WearableSensingManagerPerUserService extends
             public void onError(String errorMessage) {
                 Slog.i(TAG, "hotwordDetectionCallback onError. ErrorMessage: " + errorMessage);
                 stopActiveHotwordAudio();
+            }
+        };
+    }
+
+    @GuardedBy("mLock")
+    private @Nullable IWearableSensingCallback wrapWearableSensingCallback(
+            IWearableSensingCallback callbackFromAppProcess) {
+        if (callbackFromAppProcess == null) {
+            return null;
+        }
+        if (mComponentName == null) {
+            Slog.w(TAG, "Cannot create WearableSensingCallback because mComponentName is null.");
+            return null;
+        }
+        if (Binder.getCallingUid()
+                != mPackageManagerInternal.getPackageUid(
+                        mComponentName.getPackageName(), /* flags= */ 0, mUserId)) {
+            Slog.d(
+                    TAG,
+                    "Caller does not belong to the package that provides the WearableSensingService"
+                            + " implementation. Do not forward WearableSensingCallback to"
+                            + " WearableSensingService.");
+            return null;
+        }
+        return new IWearableSensingCallback.Stub() {
+            @Override
+            public void openFile(
+                    String filename,
+                    AndroidFuture<ParcelFileDescriptor> futureFromWearableSensingService)
+                    throws RemoteException {
+                // TODO(b/331395522): Intercept the PFD received from the app process and verify it
+                // is read-only
+                callbackFromAppProcess.openFile(filename, futureFromWearableSensingService);
             }
         };
     }

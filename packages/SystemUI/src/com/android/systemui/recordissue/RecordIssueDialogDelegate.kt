@@ -131,7 +131,7 @@ constructor(
                     .isScreenCaptureCompletelyDisabled(UserHandle.of(userTracker.userId))
         ) {
             mainExecutor.execute {
-                screenCaptureDisabledDialogDelegate.createDialog().show()
+                screenCaptureDisabledDialogDelegate.createSysUIDialog().show()
                 screenRecordSwitch.isChecked = false
             }
             return

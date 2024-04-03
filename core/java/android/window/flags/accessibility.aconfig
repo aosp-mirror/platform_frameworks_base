@@ -27,3 +27,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "delay_notification_to_magnification_when_recents_window_to_front_transition"
+  namespace: "accessibility"
+  description: "The flag controls whether the delaying of notification for recents window to-front transition is needed. In accessibilityController other callbacks will decide sending or canceling the delayed notification."
+  bug: "324949652"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

@@ -1814,7 +1814,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 final AccessibilityController accessibilityController =
                         dc.mWmService.mAccessibilityController;
                 if (accessibilityController.hasCallbacks()) {
-                    accessibilityController.onWMTransition(dc.getDisplayId(), mType);
+                    accessibilityController.onWMTransition(dc.getDisplayId(), mType, mFlags);
                 }
             }
         } else {

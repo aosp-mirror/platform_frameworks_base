@@ -24,7 +24,6 @@ import static android.app.ActivityManagerInternal.ServiceNotificationPolicy.NOT_
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR;
 import static android.app.Flags.lifetimeExtensionRefactor;
-import static android.app.Flags.updateRankingTime;
 import static android.app.Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
 import static android.app.Notification.EXTRA_BUILDER_APPLICATION_INFO;
 import static android.app.Notification.EXTRA_LARGE_ICON_BIG;
@@ -589,6 +588,8 @@ public class NotificationManagerService extends SystemService {
     static final long MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES = 308670109L;
 
     private static final Duration POST_WAKE_LOCK_TIMEOUT = Duration.ofSeconds(30);
+
+    static final long NOTIFICATION_TTL = Duration.ofDays(3).toMillis();
 
     private IActivityManager mAm;
     private ActivityTaskManagerInternal mAtm;
@@ -1319,7 +1320,29 @@ public class NotificationManagerService extends SystemService {
                 // Notifications that have been interacted with should no longer be lifetime
                 // extended.
                 if (lifetimeExtensionRefactor()) {
-                    r.getSbn().getNotification().flags &= ~FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+                    // Enqueue a cancellation; this cancellation should only work if
+                    // the notification still has FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY
+                    // We wait for 200 milliseconds before posting the cancel, to allow the app
+                    // time to update the notification in response instead.
+                    // If that update goes through, the notification won't have the lifetime
+                    // extended flag, and this cancellation will be dropped.
+                    mHandler.scheduleCancelNotification(
+                            new CancelNotificationRunnable(
+                                    callingUid,
+                                    callingPid,
+                                    r.getSbn().getPackageName(),
+                                    r.getSbn().getTag(),
+                                    r.getSbn().getId(),
+                                    FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY /*=mustHaveFlags*/,
+                                    FLAG_NO_DISMISS /*=mustNotHaveFlags*/,
+                                    false /*=sendDelete*/,
+                                    r.getUserId(),
+                                    REASON_APP_CANCEL,
+                                    -1 /*=rank*/,
+                                    -1 /*=count*/,
+                                    null /*=listener*/,
+                                    SystemClock.elapsedRealtime()),
+                            200);
                 }
             }
         }
@@ -7581,6 +7604,12 @@ public class NotificationManagerService extends SystemService {
 
         // Remote views? Are they too big?
         checkRemoteViews(pkg, tag, id, notification);
+
+        if (Flags.allNotifsNeedTtl()) {
+            if (notification.getTimeoutAfter() == 0) {
+                notification.setTimeoutAfter(NOTIFICATION_TTL);
+            }
+        }
     }
 
     /**
@@ -9329,12 +9358,17 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        protected void scheduleCancelNotification(CancelNotificationRunnable cancelRunnable) {
-            if (Flags.notificationReduceMessagequeueUsage()) {
-                sendMessage(Message.obtain(this, cancelRunnable));
+        protected void scheduleCancelNotification(CancelNotificationRunnable cancelRunnable,
+                                                  int delay) {
+            if (lifetimeExtensionRefactor()) {
+                sendMessageDelayed(Message.obtain(this, cancelRunnable), delay);
             } else {
-                if (!hasCallbacks(cancelRunnable)) {
+                if (Flags.notificationReduceMessagequeueUsage()) {
                     sendMessage(Message.obtain(this, cancelRunnable));
+                } else {
+                    if (!hasCallbacks(cancelRunnable)) {
+                        sendMessage(Message.obtain(this, cancelRunnable));
+                    }
                 }
             }
         }
@@ -9690,7 +9724,7 @@ public class NotificationManagerService extends SystemService {
         // remove notification call ends up in not removing the notification.
         mHandler.scheduleCancelNotification(new CancelNotificationRunnable(callingUid, callingPid,
                 pkg, tag, id, mustHaveFlags, mustNotHaveFlags, sendDelete, userId, reason, rank,
-                count, listener, SystemClock.elapsedRealtime()));
+                count, listener, SystemClock.elapsedRealtime()), 0);
     }
 
     /**

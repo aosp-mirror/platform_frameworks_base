@@ -49,6 +49,7 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
+import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import javax.inject.Provider
@@ -279,12 +280,16 @@ constructor(
      * signal should be sent directly to transitions.
      */
     val dismissAlpha: Flow<Float?> =
-        combine(
-                shadeRepository.legacyShadeExpansion,
+        shadeRepository.legacyShadeExpansion
+            .filter { it < 1f }
+            .sampleCombine(
                 statusBarState,
                 keyguardTransitionInteractor.currentKeyguardState,
                 isKeyguardDismissible,
-            ) { legacyShadeExpansion, statusBarState, currentKeyguardState, isKeyguardDismissible ->
+            )
+            .map {
+                (legacyShadeExpansion, statusBarState, currentKeyguardState, isKeyguardDismissible)
+                ->
                 if (
                     statusBarState == StatusBarState.KEYGUARD &&
                         isKeyguardDismissible &&

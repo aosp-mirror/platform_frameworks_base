@@ -154,7 +154,8 @@ public class ViewRootImplTest {
     public void adjustLayoutParamsForCompatibility_layoutFullscreen() {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
         attrs.systemUiVisibility = SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
-        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
+        ViewRootImpl.adjustLayoutParamsForCompatibility(
+                attrs, 0 /* appearanceControlled */, false /* behaviorControlled */);
 
         // Type.statusBars() must be removed.
         assertEquals(0, attrs.getFitInsetsTypes() & Type.statusBars());
@@ -164,7 +165,8 @@ public class ViewRootImplTest {
     public void adjustLayoutParamsForCompatibility_layoutInScreen() {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
         attrs.flags = FLAG_LAYOUT_IN_SCREEN;
-        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
+        ViewRootImpl.adjustLayoutParamsForCompatibility(
+                attrs, 0 /* appearanceControlled */, false /* behaviorControlled */);
 
         // Type.statusBars() must be removed.
         assertEquals(0, attrs.getFitInsetsTypes() & Type.statusBars());
@@ -174,7 +176,8 @@ public class ViewRootImplTest {
     public void adjustLayoutParamsForCompatibility_layoutHideNavigation() {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
         attrs.systemUiVisibility = SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
-        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
+        ViewRootImpl.adjustLayoutParamsForCompatibility(
+                attrs, 0 /* appearanceControlled */, false /* behaviorControlled */);
 
         // Type.systemBars() must be removed.
         assertEquals(0, attrs.getFitInsetsTypes() & Type.systemBars());
@@ -183,7 +186,8 @@ public class ViewRootImplTest {
     @Test
     public void adjustLayoutParamsForCompatibility_toast() {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_TOAST);
-        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
+        ViewRootImpl.adjustLayoutParamsForCompatibility(
+                attrs, 0 /* appearanceControlled */, false /* behaviorControlled */);
 
         assertTrue(attrs.isFitInsetsIgnoringVisibility());
     }
@@ -191,7 +195,8 @@ public class ViewRootImplTest {
     @Test
     public void adjustLayoutParamsForCompatibility_systemAlert() {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_SYSTEM_ALERT);
-        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
+        ViewRootImpl.adjustLayoutParamsForCompatibility(
+                attrs, 0 /* appearanceControlled */, false /* behaviorControlled */);
 
         assertTrue(attrs.isFitInsetsIgnoringVisibility());
     }
@@ -199,7 +204,8 @@ public class ViewRootImplTest {
     @Test
     public void adjustLayoutParamsForCompatibility_fitSystemBars() {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
-        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
+        ViewRootImpl.adjustLayoutParamsForCompatibility(
+                attrs, 0 /* appearanceControlled */, false /* behaviorControlled */);
 
         assertEquals(Type.systemBars(), attrs.getFitInsetsTypes());
     }
@@ -208,7 +214,8 @@ public class ViewRootImplTest {
     public void adjustLayoutParamsForCompatibility_fitSystemBarsAndIme() {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
         attrs.softInputMode |= SOFT_INPUT_ADJUST_RESIZE;
-        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
+        ViewRootImpl.adjustLayoutParamsForCompatibility(
+                attrs, 0 /* appearanceControlled */, false /* behaviorControlled */);
 
         assertEquals(Type.systemBars() | Type.ime(), attrs.getFitInsetsTypes());
     }
@@ -223,7 +230,8 @@ public class ViewRootImplTest {
         attrs.setFitInsetsTypes(types);
         attrs.setFitInsetsSides(sides);
         attrs.setFitInsetsIgnoringVisibility(fitMaxInsets);
-        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
+        ViewRootImpl.adjustLayoutParamsForCompatibility(
+                attrs, 0 /* appearanceControlled */, false /* behaviorControlled */);
 
         // Fit-insets related fields must not be adjusted due to legacy system UI visibility
         // after calling fit-insets related methods.
@@ -234,14 +242,16 @@ public class ViewRootImplTest {
 
     @Test
     public void adjustLayoutParamsForCompatibility_noAdjustAppearance() {
-        final WindowInsetsController controller = mViewRootImpl.getInsetsController();
+        final InsetsController controller = mViewRootImpl.getInsetsController();
         final WindowManager.LayoutParams attrs = mViewRootImpl.mWindowAttributes;
         final int appearance = APPEARANCE_OPAQUE_STATUS_BARS;
         controller.setSystemBarsAppearance(appearance, 0xffffffff);
         attrs.systemUiVisibility = SYSTEM_UI_FLAG_LOW_PROFILE
                 | SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
                 | SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
+        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs,
+                controller.getAppearanceControlled(),
+                controller.isBehaviorControlled());
 
         // Appearance must not be adjusted due to legacy system UI visibility after calling
         // setSystemBarsAppearance.
@@ -255,12 +265,14 @@ public class ViewRootImplTest {
 
     @Test
     public void adjustLayoutParamsForCompatibility_noAdjustBehavior() {
-        final WindowInsetsController controller = mViewRootImpl.getInsetsController();
+        final InsetsController controller = mViewRootImpl.getInsetsController();
         final WindowManager.LayoutParams attrs = mViewRootImpl.mWindowAttributes;
         final int behavior = BEHAVIOR_DEFAULT;
         controller.setSystemBarsBehavior(behavior);
         attrs.systemUiVisibility = SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
+        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs,
+                controller.getAppearanceControlled(),
+                controller.isBehaviorControlled());
 
         // Behavior must not be adjusted due to legacy system UI visibility after calling
         // setSystemBarsBehavior.

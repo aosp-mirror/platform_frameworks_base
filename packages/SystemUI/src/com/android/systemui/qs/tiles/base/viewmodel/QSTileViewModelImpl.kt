@@ -178,7 +178,8 @@ class QSTileViewModelImpl<DATA_TYPE>(
     /**
      * Creates a user input flow which:
      * - filters false inputs with [falsingManager]
-     * - takes care of a tile being disable by policy using [disabledByPolicyInteractor]
+     * - takes care of a tile being disable by policy using [disabledByPolicyInteractor]. The
+     *   restrictions will be checked sequentially and the first one to block will be considered.
      * - notifies [userActionInteractor] about the action
      * - logs it accordingly using [qsTileLogger] and [qsTileAnalytics]
      *
@@ -201,18 +202,22 @@ class QSTileViewModelImpl<DATA_TYPE>(
             .onEach { userActionInteractor().handleInput(it.input) }
             .flowOn(backgroundDispatcher)
 
+    /**
+     * The restrictions will be checked sequentially and the first one to block will be considered.
+     */
     private fun Flow<QSTileUserAction>.filterByPolicy(user: UserHandle): Flow<QSTileUserAction> =
         config.policy.let { policy ->
             when (policy) {
                 is QSTilePolicy.NoRestrictions -> this@filterByPolicy
                 is QSTilePolicy.Restricted ->
                     filter { action ->
-                        val result =
-                            disabledByPolicyInteractor.isDisabled(user, policy.userRestriction)
-                        !disabledByPolicyInteractor.handlePolicyResult(result).also { isDisabled ->
-                            if (isDisabled) {
-                                qsTileLogger.logUserActionRejectedByPolicy(action, spec)
+                        policy.userRestrictions.none {
+                            val result = disabledByPolicyInteractor.isDisabled(user, it)
+                            val handleResult = disabledByPolicyInteractor.handlePolicyResult(result)
+                            if (handleResult) {
+                                qsTileLogger.logUserActionRejectedByPolicy(action, spec, it)
                             }
+                            handleResult
                         }
                     }
             }

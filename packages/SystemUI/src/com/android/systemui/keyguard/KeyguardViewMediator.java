@@ -178,8 +178,6 @@ import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.wallpapers.data.repository.WallpaperRepository;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
 
-import dagger.Lazy;
-
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -189,6 +187,7 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
+import dagger.Lazy;
 import kotlinx.coroutines.CoroutineDispatcher;
 
 /**
@@ -964,6 +963,13 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     @VisibleForTesting
     final ActivityTransitionAnimator.Controller mOccludeAnimationController =
             new ActivityTransitionAnimator.Controller() {
+                private boolean mIsLaunching = true;
+
+                @Override
+                public boolean isLaunching() {
+                    return mIsLaunching;
+                }
+
                 @Override
                 public void onTransitionAnimationStart(boolean isExpandingFullyAbove) {
                     mOccludeAnimationPlaying = true;
@@ -2147,13 +2153,6 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         mInteractionJankMonitor.cancel(CUJ_LOCKSCREEN_TRANSITION_FROM_AOD);
 
         synchronized (KeyguardViewMediator.this) {
-            if (mHiding && isOccluded) {
-                // We're in the process of going away but WindowManager wants to show a
-                // SHOW_WHEN_LOCKED activity instead.
-                // TODO(bc-unlock): Migrate to remote animation.
-                startKeyguardExitAnimation(0, 0);
-            }
-
             mPowerGestureIntercepted =
                     isOccluded && mUpdateMonitor.isSecureCameraLaunchedOverKeyguard();
 

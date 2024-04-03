@@ -17,10 +17,12 @@
 package com.android.systemui.media.controls.domain.pipeline.interactor
 
 import android.content.applicationContext
+import com.android.systemui.broadcast.broadcastSender
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.media.controls.data.repository.mediaFilterRepository
 import com.android.systemui.media.controls.domain.pipeline.mediaDataProcessor
+import com.android.systemui.plugins.activityStarter
 
 val Kosmos.mediaRecommendationsInteractor by
     Kosmos.Fixture {
@@ -29,5 +31,7 @@ val Kosmos.mediaRecommendationsInteractor by
             applicationContext = applicationContext,
             repository = mediaFilterRepository,
             mediaDataProcessor = mediaDataProcessor,
+            broadcastSender = broadcastSender,
+            activityStarter = activityStarter,
         )
     }

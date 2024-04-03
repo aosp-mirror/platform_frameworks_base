@@ -23,7 +23,7 @@ import com.android.settingslib.volume.data.repository.MediaControllerChange
 import com.android.settingslib.volume.data.repository.MediaControllerRepository
 import com.android.settingslib.volume.data.repository.stateChanges
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.volume.panel.component.mediaoutput.domain.model.MediaDeviceSession
+import com.android.systemui.volume.panel.component.mediaoutput.shared.model.MediaDeviceSession
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext

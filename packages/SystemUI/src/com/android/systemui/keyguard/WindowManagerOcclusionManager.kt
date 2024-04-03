@@ -263,6 +263,7 @@ constructor(
     @VisibleForTesting
     val occludeAnimationController: ActivityTransitionAnimator.Controller =
         object : ActivityTransitionAnimator.Controller {
+            override val isLaunching: Boolean = true
 
             override var transitionContainer: ViewGroup
                 get() = keyguardViewController.get().getViewRootImpl().view as ViewGroup

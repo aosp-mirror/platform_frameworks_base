@@ -22,6 +22,7 @@ import android.animation.ValueAnimator.AnimatorUpdateListener
 import android.annotation.FloatRange
 import android.os.Trace
 import android.util.Log
+import com.android.app.tracing.coroutines.withContext
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -41,7 +42,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.withContext
 
 /**
  * The source of truth for all keyguard transitions.
@@ -150,7 +150,7 @@ constructor(
         _currentTransitionInfo.value = info
 
         // Animators must be started on the main thread.
-        return withContext(mainDispatcher) {
+        return withContext("$TAG#startTransition", mainDispatcher) {
             if (lastStep.from == info.from && lastStep.to == info.to) {
                 Log.i(TAG, "Duplicate call to start the transition, rejecting: $info")
                 return@withContext null

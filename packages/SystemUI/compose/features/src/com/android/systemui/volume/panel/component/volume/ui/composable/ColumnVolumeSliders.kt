@@ -28,9 +28,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -57,6 +56,8 @@ import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.Sl
 
 private const val EXPAND_DURATION_MILLIS = 500
 private const val COLLAPSE_DURATION_MILLIS = 300
+private const val SHRINK_FRACTION = 0.55f
+private const val SCALE_FRACTION = 0.9f
 
 /** Volume sliders laid out in a collapsable column */
 @OptIn(ExperimentalAnimationApi::class)
@@ -107,34 +108,33 @@ fun ColumnVolumeSliders(
         transition.AnimatedVisibility(
             visible = { it },
             enter =
-                expandVertically(
-                    animationSpec = tween(durationMillis = EXPAND_DURATION_MILLIS),
-                    expandFrom = Alignment.CenterVertically,
-                ),
+                expandVertically(animationSpec = tween(durationMillis = EXPAND_DURATION_MILLIS)),
             exit =
-                shrinkVertically(
-                    animationSpec = tween(durationMillis = COLLAPSE_DURATION_MILLIS),
-                    shrinkTowards = Alignment.CenterVertically,
-                ),
+                shrinkVertically(animationSpec = tween(durationMillis = COLLAPSE_DURATION_MILLIS)),
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                for (index in 1..viewModels.lastIndex) {
-                    val sliderViewModel: SliderViewModel = viewModels[index]
-                    val sliderState by sliderViewModel.slider.collectAsState()
-                    transition.AnimatedVisibility(
-                        visible = { it },
-                        enter = enterTransition(index = index, totalCount = viewModels.size),
-                        exit = exitTransition(index = index, totalCount = viewModels.size)
-                    ) {
-                        VolumeSlider(
-                            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-                            state = sliderState,
-                            onValueChange = { newValue: Float ->
-                                sliderViewModel.onValueChanged(sliderState, newValue)
-                            },
-                            onIconTapped = { sliderViewModel.toggleMuted(sliderState) },
-                            sliderColors = sliderColors,
-                        )
+            // This box allows sliders to slide towards top when the container is shrinking and
+            // slide from top when the container is expanding.
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
+                Column {
+                    for (index in 1..viewModels.lastIndex) {
+                        val sliderViewModel: SliderViewModel = viewModels[index]
+                        val sliderState by sliderViewModel.slider.collectAsState()
+                        transition.AnimatedVisibility(
+                            modifier = Modifier.padding(top = 16.dp),
+                            visible = { it },
+                            enter = enterTransition(index = index, totalCount = viewModels.size),
+                            exit = exitTransition(index = index, totalCount = viewModels.size)
+                        ) {
+                            VolumeSlider(
+                                modifier = Modifier.fillMaxWidth(),
+                                state = sliderState,
+                                onValueChange = { newValue: Float ->
+                                    sliderViewModel.onValueChanged(sliderState, newValue)
+                                },
+                                onIconTapped = { sliderViewModel.toggleMuted(sliderState) },
+                                sliderColors = sliderColors,
+                            )
+                        }
                     }
                 }
             }
@@ -175,19 +175,14 @@ private fun ExpandButton(
 private fun enterTransition(index: Int, totalCount: Int): EnterTransition {
     val enterDelay = ((totalCount - index + 1) * 10).coerceAtLeast(0)
     val enterDuration = (EXPAND_DURATION_MILLIS - enterDelay).coerceAtLeast(100)
-    return slideInVertically(
-        initialOffsetY = { (it * 0.25).toInt() },
+    return scaleIn(
+        initialScale = SCALE_FRACTION,
         animationSpec = tween(durationMillis = enterDuration, delayMillis = enterDelay),
     ) +
-        scaleIn(
-            initialScale = 0.9f,
-            animationSpec = tween(durationMillis = enterDuration, delayMillis = enterDelay),
-        ) +
         expandVertically(
-            initialHeight = { (it * 0.65).toInt() },
+            initialHeight = { (it * SHRINK_FRACTION).toInt() },
             animationSpec = tween(durationMillis = enterDuration, delayMillis = enterDelay),
             clip = false,
-            expandFrom = Alignment.CenterVertically,
         ) +
         fadeIn(
             animationSpec = tween(durationMillis = enterDuration, delayMillis = enterDelay),
@@ -196,19 +191,14 @@ private fun enterTransition(index: Int, totalCount: Int): EnterTransition {
 
 private fun exitTransition(index: Int, totalCount: Int): ExitTransition {
     val exitDuration = (COLLAPSE_DURATION_MILLIS - (totalCount - index + 1) * 10).coerceAtLeast(100)
-    return slideOutVertically(
-        targetOffsetY = { (it * 0.25).toInt() },
+    return scaleOut(
+        targetScale = SCALE_FRACTION,
         animationSpec = tween(durationMillis = exitDuration),
     ) +
-        scaleOut(
-            targetScale = 0.9f,
-            animationSpec = tween(durationMillis = exitDuration),
-        ) +
         shrinkVertically(
-            targetHeight = { (it * 0.65).toInt() },
+            targetHeight = { (it * SHRINK_FRACTION).toInt() },
             animationSpec = tween(durationMillis = exitDuration),
             clip = false,
-            shrinkTowards = Alignment.CenterVertically,
         ) +
         fadeOut(animationSpec = tween(durationMillis = exitDuration))
 }

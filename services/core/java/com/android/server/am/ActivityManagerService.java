@@ -51,7 +51,6 @@ import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_PROCESS_END;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_SHELL;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_SYSTEM_INIT;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_UI_VISIBILITY;
-import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_BACKUP;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_INSTRUMENTATION;
@@ -251,7 +250,6 @@ import android.app.PendingIntentStats;
 import android.app.ProcessMemoryState;
 import android.app.ProfilerInfo;
 import android.app.ServiceStartNotAllowedException;
-import android.app.SyncNotedAppOp;
 import android.app.WaitResult;
 import android.app.assist.ActivityId;
 import android.app.backup.BackupAnnotations.BackupDestination;
@@ -427,17 +425,11 @@ import com.android.internal.os.Zygote;
 import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.function.DodecFunction;
-import com.android.internal.util.function.HexFunction;
-import com.android.internal.util.function.OctFunction;
-import com.android.internal.util.function.QuadFunction;
-import com.android.internal.util.function.UndecFunction;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.BootReceiver;
 import com.android.server.DeviceIdleInternal;
@@ -769,6 +761,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @GuardedBy("mDeliveryGroupPolicyIgnoredActions")
     private final ArraySet<String> mDeliveryGroupPolicyIgnoredActions = new ArraySet();
+
+    private AccessCheckDelegateHelper mAccessCheckDelegateHelper;
 
     /**
      * Uids of apps with current active camera sessions.  Access synchronized on
@@ -6935,6 +6929,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                     LocalServices.getService(PermissionManagerServiceInternal.class);
         }
         return mPermissionManagerInt;
+    }
+
+    private AccessCheckDelegateHelper getAccessCheckDelegateHelper() {
+        // Intentionally hold no locks: in case of race conditions, the mPermissionManagerInt will
+        // be set to the same value anyway.
+        if (mAccessCheckDelegateHelper == null) {
+            mAccessCheckDelegateHelper = new AccessCheckDelegateHelper(mProcLock,
+                    mActiveInstrumentation, mAppOpsService, getPermissionManagerInternal());
+        }
+        return mAccessCheckDelegateHelper;
     }
 
     /** Returns whether the given package was ever launched since install */
@@ -16598,8 +16602,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         // Go back to the default mode of denying OP_NO_ISOLATED_STORAGE app op.
                         mAppOpsService.setMode(AppOpsManager.OP_NO_ISOLATED_STORAGE, app.uid,
                                 app.info.packageName, AppOpsManager.MODE_ERRORED);
-                        mAppOpsService.setAppOpsServiceDelegate(null);
-                        getPermissionManagerInternal().stopShellPermissionIdentityDelegation();
+                        getAccessCheckDelegateHelper()
+                                .onInstrumentationFinished(app.uid, app.info.packageName);
                         mHandler.obtainMessage(SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG,
                                 instr.mUiAutomationConnection).sendToTarget();
                     }
@@ -18122,7 +18126,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         public ComponentName startSdkSandboxService(Intent service, int clientAppUid,
                 String clientAppPackage, String processName) throws RemoteException {
             validateSdkSandboxParams(service, clientAppUid, clientAppPackage, processName);
-            if (mAppOpsService.checkPackage(clientAppUid, clientAppPackage) != MODE_ALLOWED) {
+            if (mAppOpsService.checkPackage(clientAppUid, clientAppPackage)
+                    != AppOpsManager.MODE_ALLOWED) {
                 throw new IllegalArgumentException("uid does not belong to provided package");
             }
             // TODO(b/269598719): Is passing the application thread of the system_server alright?
@@ -18191,7 +18196,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 String processName, long flags)
                 throws RemoteException {
             validateSdkSandboxParams(service, clientAppUid, clientAppPackage, processName);
-            if (mAppOpsService.checkPackage(clientAppUid, clientAppPackage) != MODE_ALLOWED) {
+            if (mAppOpsService.checkPackage(clientAppUid, clientAppPackage)
+                    != AppOpsManager.MODE_ALLOWED) {
                 throw new IllegalArgumentException("uid does not belong to provided package");
             }
             if (conn == null) {
@@ -20499,268 +20505,41 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void startDelegateShellPermissionIdentity(int delegateUid,
             @Nullable String[] permissions) {
-        if (UserHandle.getCallingAppId() != Process.SHELL_UID
-                && UserHandle.getCallingAppId() != Process.ROOT_UID) {
-            throw new SecurityException("Only the shell can delegate its permissions");
-        }
-
-        // We allow delegation only to one instrumentation started from the shell
-        synchronized (mProcLock) {
-            // If the delegate is already set up for the target UID, nothing to do.
-            if (mAppOpsService.getAppOpsServiceDelegate() != null) {
-                if (!(mAppOpsService.getAppOpsServiceDelegate() instanceof ShellDelegate)) {
-                    throw new IllegalStateException("Bad shell delegate state");
-                }
-                final ShellDelegate delegate = (ShellDelegate) mAppOpsService
-                        .getAppOpsServiceDelegate();
-                if (delegate.getDelegateUid() != delegateUid) {
-                    throw new SecurityException("Shell can delegate permissions only "
-                            + "to one instrumentation at a time");
-                }
-            }
-
-            final int instrCount = mActiveInstrumentation.size();
-            for (int i = 0; i < instrCount; i++) {
-                final ActiveInstrumentation instr = mActiveInstrumentation.get(i);
-                if (instr.mTargetInfo.uid != delegateUid) {
-                    continue;
-                }
-                // If instrumentation started from the shell the connection is not null
-                if (instr.mUiAutomationConnection == null) {
-                    throw new SecurityException("Shell can delegate its permissions" +
-                            " only to an instrumentation started from the shell");
-                }
-
-                // Hook them up...
-                final ShellDelegate shellDelegate = new ShellDelegate(delegateUid,
-                        permissions);
-                mAppOpsService.setAppOpsServiceDelegate(shellDelegate);
-                final String packageName = instr.mTargetInfo.packageName;
-                final List<String> permissionNames = permissions != null ?
-                        Arrays.asList(permissions) : null;
-                getPermissionManagerInternal().startShellPermissionIdentityDelegation(
-                        delegateUid, packageName, permissionNames);
-                return;
-            }
-        }
+        getAccessCheckDelegateHelper()
+                .startDelegateShellPermissionIdentity(delegateUid, permissions);
     }
 
     @Override
     public void stopDelegateShellPermissionIdentity() {
-        if (UserHandle.getCallingAppId() != Process.SHELL_UID
-                && UserHandle.getCallingAppId() != Process.ROOT_UID) {
-            throw new SecurityException("Only the shell can delegate its permissions");
-        }
-        synchronized (mProcLock) {
-            mAppOpsService.setAppOpsServiceDelegate(null);
-            getPermissionManagerInternal().stopShellPermissionIdentityDelegation();
-        }
+        getAccessCheckDelegateHelper().stopDelegateShellPermissionIdentity();
     }
 
     @Override
     public List<String> getDelegatedShellPermissions() {
-        if (UserHandle.getCallingAppId() != Process.SHELL_UID
-                && UserHandle.getCallingAppId() != Process.ROOT_UID) {
-            throw new SecurityException("Only the shell can get delegated permissions");
-        }
-        synchronized (mProcLock) {
-            return getPermissionManagerInternal().getDelegatedShellPermissions();
-        }
+        return getAccessCheckDelegateHelper().getDelegatedShellPermissions();
     }
 
-    private class ShellDelegate implements CheckOpsDelegate {
-        private final int mTargetUid;
-        @Nullable
-        private final String[] mPermissions;
+    @Override
+    public void addOverridePermissionState(int originatingUid, int uid, String permission,
+            int result) {
+        getAccessCheckDelegateHelper()
+                .addOverridePermissionState(originatingUid, uid, permission, result);
+    }
 
-        ShellDelegate(int targetUid, @Nullable String[] permissions) {
-            mTargetUid = targetUid;
-            mPermissions = permissions;
-        }
+    @Override
+    public void removeOverridePermissionState(int originatingUid, int uid, String permission) {
+        getAccessCheckDelegateHelper()
+                .removeOverridePermissionState(originatingUid, uid, permission);
+    }
 
-        int getDelegateUid() {
-            return mTargetUid;
-        }
+    @Override
+    public void clearOverridePermissionStates(int originatingUid, int uid) {
+        getAccessCheckDelegateHelper().clearOverridePermissionStates(originatingUid, uid);
+    }
 
-        @Override
-        public int checkOperation(int code, int uid, String packageName, String attributionTag,
-                int virtualDeviceId, boolean raw, HexFunction<Integer, Integer, String, String,
-                        Integer, Boolean, Integer> superImpl) {
-            if (uid == mTargetUid && isTargetOp(code)) {
-                final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
-                        Process.SHELL_UID);
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    return superImpl.apply(code, shellUid, "com.android.shell", null,
-                            virtualDeviceId, raw);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-            return superImpl.apply(code, uid, packageName, attributionTag, virtualDeviceId, raw);
-        }
-
-        @Override
-        public int checkAudioOperation(int code, int usage, int uid, String packageName,
-                QuadFunction<Integer, Integer, Integer, String, Integer> superImpl) {
-            if (uid == mTargetUid && isTargetOp(code)) {
-                final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
-                        Process.SHELL_UID);
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    return superImpl.apply(code, usage, shellUid, "com.android.shell");
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-            return superImpl.apply(code, usage, uid, packageName);
-        }
-
-        @Override
-        public SyncNotedAppOp noteOperation(int code, int uid, @Nullable String packageName,
-                @Nullable String featureId, int virtualDeviceId, boolean shouldCollectAsyncNotedOp,
-                @Nullable String message, boolean shouldCollectMessage,
-                @NonNull OctFunction<Integer, Integer, String, String, Integer, Boolean, String,
-                        Boolean, SyncNotedAppOp> superImpl) {
-            if (uid == mTargetUid && isTargetOp(code)) {
-                final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
-                        Process.SHELL_UID);
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    return superImpl.apply(code, shellUid, "com.android.shell", featureId,
-                            virtualDeviceId, shouldCollectAsyncNotedOp, message,
-                            shouldCollectMessage);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-            return superImpl.apply(code, uid, packageName, featureId, virtualDeviceId,
-                    shouldCollectAsyncNotedOp, message, shouldCollectMessage);
-        }
-
-        @Override
-        public SyncNotedAppOp noteProxyOperation(int code,
-                @NonNull AttributionSource attributionSource, boolean shouldCollectAsyncNotedOp,
-                @Nullable String message, boolean shouldCollectMessage, boolean skiProxyOperation,
-                @NonNull HexFunction<Integer, AttributionSource, Boolean, String, Boolean,
-                                Boolean, SyncNotedAppOp> superImpl) {
-            if (attributionSource.getUid() == mTargetUid && isTargetOp(code)) {
-                final int shellUid = UserHandle.getUid(UserHandle.getUserId(
-                        attributionSource.getUid()), Process.SHELL_UID);
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    return superImpl.apply(code, new AttributionSource(shellUid,
-                            Process.INVALID_PID, "com.android.shell",
-                            attributionSource.getAttributionTag(), attributionSource.getToken(),
-                            /*renouncedPermissions*/ null, attributionSource.getDeviceId(),
-                            attributionSource.getNext()),
-                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                            skiProxyOperation);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-            return superImpl.apply(code, attributionSource, shouldCollectAsyncNotedOp,
-                    message, shouldCollectMessage, skiProxyOperation);
-        }
-
-        @Override
-        public SyncNotedAppOp startOperation(IBinder token, int code, int uid,
-                @Nullable String packageName, @Nullable String attributionTag, int virtualDeviceId,
-                boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
-                @Nullable String message, boolean shouldCollectMessage,
-                @AttributionFlags int attributionFlags, int attributionChainId,
-                @NonNull DodecFunction<IBinder, Integer, Integer, String, String, Integer, Boolean,
-                        Boolean, String, Boolean, Integer, Integer, SyncNotedAppOp> superImpl) {
-            if (uid == mTargetUid && isTargetOp(code)) {
-                final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
-                        Process.SHELL_UID);
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    return superImpl.apply(token, code, shellUid, "com.android.shell",
-                            attributionTag, virtualDeviceId, startIfModeDefault,
-                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                            attributionFlags, attributionChainId);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-            return superImpl.apply(token, code, uid, packageName, attributionTag, virtualDeviceId,
-                    startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                    attributionFlags, attributionChainId);
-        }
-
-        @Override
-        public SyncNotedAppOp startProxyOperation(@NonNull IBinder clientId, int code,
-                @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
-                boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
-                boolean skipProxyOperation, @AttributionFlags int proxyAttributionFlags,
-                @AttributionFlags int proxiedAttributionFlags, int attributionChainId,
-                @NonNull UndecFunction<IBinder, Integer, AttributionSource,
-                        Boolean, Boolean, String, Boolean, Boolean, Integer, Integer, Integer,
-                        SyncNotedAppOp> superImpl) {
-            if (attributionSource.getUid() == mTargetUid && isTargetOp(code)) {
-                final int shellUid = UserHandle.getUid(UserHandle.getUserId(
-                        attributionSource.getUid()), Process.SHELL_UID);
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    return superImpl.apply(clientId, code, new AttributionSource(shellUid,
-                            Process.INVALID_PID, "com.android.shell",
-                            attributionSource.getAttributionTag(), attributionSource.getToken(),
-                            /*renouncedPermissions*/ null, attributionSource.getDeviceId(),
-                            attributionSource.getNext()),
-                            startIfModeDefault, shouldCollectAsyncNotedOp, message,
-                            shouldCollectMessage, skipProxyOperation, proxyAttributionFlags,
-                            proxiedAttributionFlags, attributionChainId);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-            return superImpl.apply(clientId, code, attributionSource, startIfModeDefault,
-                    shouldCollectAsyncNotedOp, message, shouldCollectMessage, skipProxyOperation,
-                    proxyAttributionFlags, proxiedAttributionFlags, attributionChainId);
-        }
-
-        @Override
-        public void finishProxyOperation(@NonNull IBinder clientId, int code,
-                @NonNull AttributionSource attributionSource, boolean skipProxyOperation,
-                @NonNull QuadFunction<IBinder, Integer, AttributionSource, Boolean,
-                        Void> superImpl) {
-            if (attributionSource.getUid() == mTargetUid && isTargetOp(code)) {
-                final int shellUid = UserHandle.getUid(UserHandle.getUserId(
-                        attributionSource.getUid()), Process.SHELL_UID);
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    superImpl.apply(clientId, code, new AttributionSource(shellUid,
-                            Process.INVALID_PID, "com.android.shell",
-                            attributionSource.getAttributionTag(), attributionSource.getToken(),
-                            /*renouncedPermissions*/ null, attributionSource.getDeviceId(),
-                            attributionSource.getNext()),
-                            skipProxyOperation);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-            superImpl.apply(clientId, code, attributionSource, skipProxyOperation);
-        }
-
-        private boolean isTargetOp(int code) {
-            // null permissions means all ops are targeted
-            if (mPermissions == null) {
-                return true;
-            }
-            // no permission for the op means the op is targeted
-            final String permission = AppOpsManager.opToPermission(code);
-            if (permission == null) {
-                return true;
-            }
-            return isTargetPermission(permission);
-        }
-
-        private boolean isTargetPermission(@NonNull String permission) {
-            // null permissions means all permissions are targeted
-            return (mPermissions == null || ArrayUtils.contains(mPermissions, permission));
-        }
+    @Override
+    public void clearAllOverridePermissionStates(int originatingUid) {
+        getAccessCheckDelegateHelper().clearAllOverridePermissionStates(originatingUid);
     }
 
     /**

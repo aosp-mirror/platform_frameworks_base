@@ -17,5 +17,5 @@
         xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
         android:shape="rectangle">
     <corners android:radius="@dimen/screenrecord_spinner_background_radius"/>
-    <solid android:color="?androidprv:attr/colorAccentSecondary" />
+    <solid android:color="?androidprv:attr/materialColorSurfaceContainer" />
 </shape>

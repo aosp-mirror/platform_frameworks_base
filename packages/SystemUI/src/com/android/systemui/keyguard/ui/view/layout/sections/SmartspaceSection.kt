@@ -96,12 +96,8 @@ constructor(
     override fun applyConstraints(constraintSet: ConstraintSet) {
         if (!MigrateClocksToBlueprint.isEnabled) return
         if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) return
-        val horizontalPaddingStart =
-            context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_start) +
-                context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
-        val horizontalPaddingEnd =
-            context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_end) +
-                context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
+        val horizontalPaddingStart = KeyguardSmartspaceViewModel.getSmartspaceStartMargin(context)
+        val horizontalPaddingEnd = KeyguardSmartspaceViewModel.getSmartspaceEndMargin(context)
         constraintSet.apply {
             // migrate addDateWeatherView, addWeatherView from KeyguardClockSwitchController
             constrainHeight(sharedR.id.date_smartspace_view, ConstraintSet.WRAP_CONTENT)

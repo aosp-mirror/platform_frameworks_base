@@ -3114,6 +3114,14 @@ class ContextImpl extends Context {
         if (mIsExplicitDeviceId) {
             return;
         }
+
+        if ((displayId == Display.DEFAULT_DISPLAY || displayId == Display.INVALID_DISPLAY)
+                && mDeviceId == DEVICE_ID_DEFAULT) {
+            // DEFAULT_DISPLAY & INVALID_DISPLAY are associated with default device.
+            // Return early avoiding instantiating VDM when it's not needed.
+            return;
+        }
+
         VirtualDeviceManager vdm = getSystemService(VirtualDeviceManager.class);
         if (vdm != null) {
             int deviceId = vdm.getDeviceIdForDisplayId(displayId);

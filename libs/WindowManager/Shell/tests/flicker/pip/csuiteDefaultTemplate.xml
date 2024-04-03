@@ -38,6 +38,8 @@
         <!-- Increase trace size: 20mb for WM and 80mb for SF -->
         <option name="run-command" value="cmd window tracing size 20480"/>
         <option name="run-command" value="su root service call SurfaceFlinger 1029 i32 81920"/>
+        <!-- uninstall Maps, so that latest version can be installed from pStash directly -->
+        <option name="run-command" value="su root pm uninstall -k --user 0 com.google.android.apps.maps"/>
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
         <option name="test-user-token" value="%TEST_USER%"/>
@@ -69,6 +71,7 @@
         <option name="install-arg" value="-g"/>
         <option name="install-arg" value="-r"/>
         <option name="test-file-name" value="pstash://com.netflix.mediaclient"/>
+        <option name="test-file-name" value="pstash://com.google.android.apps.maps"/>
     </target_preparer>
 
     <!-- Enable mocking GPS location by the test app -->

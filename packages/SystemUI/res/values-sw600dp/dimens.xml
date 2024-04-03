@@ -110,4 +110,6 @@
     <dimen name="controls_content_padding">24dp</dimen>
     <dimen name="control_list_vertical_spacing">8dp</dimen>
     <dimen name="control_list_horizontal_spacing">16dp</dimen>
+    <!-- For portrait direction in unfold foldable device, we don't need keyguard_smartspace_top_offset-->
+    <dimen name="keyguard_smartspace_top_offset">0dp</dimen>
 </resources>

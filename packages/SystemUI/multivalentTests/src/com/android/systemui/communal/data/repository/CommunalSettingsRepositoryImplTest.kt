@@ -25,13 +25,13 @@ import android.content.Intent
 import android.content.pm.UserInfo
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.communal.data.model.DisabledReason
-import com.android.systemui.communal.data.repository.CommunalSettingsRepositoryImpl.Companion.GLANCEABLE_HUB_ENABLED
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
 import com.android.systemui.flags.fakeFeatureFlagsClassic
@@ -95,15 +95,27 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
     @Test
     fun hubIsDisabledByUser() =
         testScope.runTest {
-            kosmos.fakeSettings.putIntForUser(GLANCEABLE_HUB_ENABLED, 0, PRIMARY_USER.id)
+            kosmos.fakeSettings.putIntForUser(
+                Settings.Secure.GLANCEABLE_HUB_ENABLED,
+                0,
+                PRIMARY_USER.id
+            )
             val enabledState by collectLastValue(underTest.getEnabledState(PRIMARY_USER))
             assertThat(enabledState?.enabled).isFalse()
             assertThat(enabledState).containsExactly(DisabledReason.DISABLED_REASON_USER_SETTING)
 
-            kosmos.fakeSettings.putIntForUser(GLANCEABLE_HUB_ENABLED, 1, SECONDARY_USER.id)
+            kosmos.fakeSettings.putIntForUser(
+                Settings.Secure.GLANCEABLE_HUB_ENABLED,
+                1,
+                SECONDARY_USER.id
+            )
             assertThat(enabledState?.enabled).isFalse()
 
-            kosmos.fakeSettings.putIntForUser(GLANCEABLE_HUB_ENABLED, 1, PRIMARY_USER.id)
+            kosmos.fakeSettings.putIntForUser(
+                Settings.Secure.GLANCEABLE_HUB_ENABLED,
+                1,
+                PRIMARY_USER.id
+            )
             assertThat(enabledState?.enabled).isTrue()
         }
 
@@ -126,7 +138,11 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
             val enabledState by collectLastValue(underTest.getEnabledState(PRIMARY_USER))
             assertThat(enabledState?.enabled).isTrue()
 
-            kosmos.fakeSettings.putIntForUser(GLANCEABLE_HUB_ENABLED, 0, PRIMARY_USER.id)
+            kosmos.fakeSettings.putIntForUser(
+                Settings.Secure.GLANCEABLE_HUB_ENABLED,
+                0,
+                PRIMARY_USER.id
+            )
             setKeyguardFeaturesDisabled(PRIMARY_USER, KEYGUARD_DISABLE_WIDGETS_ALL)
 
             assertThat(enabledState?.enabled).isFalse()

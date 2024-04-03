@@ -3807,6 +3807,13 @@ public class Notification implements Parcelable
     }
 
     /**
+     * @hide
+     */
+    public void setTimeoutAfter(long timeout) {
+        mTimeout = timeout;
+    }
+
+    /**
      * Returns what icon should be shown for this notification if it is being displayed in a
      * Launcher that supports badging. Will be one of {@link #BADGE_ICON_NONE},
      * {@link #BADGE_ICON_SMALL}, or {@link #BADGE_ICON_LARGE}.

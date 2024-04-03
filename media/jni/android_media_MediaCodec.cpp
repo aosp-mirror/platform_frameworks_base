@@ -389,6 +389,14 @@ status_t JMediaCodec::setSurface(
     return err;
 }
 
+status_t JMediaCodec::detachOutputSurface() {
+    status_t err = mCodec->detachOutputSurface();
+    if (err == OK) {
+        mSurfaceTextureClient.clear();
+    }
+    return err;
+}
+
 status_t JMediaCodec::createInputSurface(
         sp<IGraphicBufferProducer>* bufferProducer) {
     return mCodec->createInputSurface(bufferProducer);
@@ -1795,6 +1803,20 @@ static void android_media_MediaCodec_native_setSurface(
     }
 
     status_t err = codec->setSurface(bufferProducer);
+    throwExceptionAsNecessary(env, err, codec);
+}
+
+static void android_media_MediaCodec_native_detachOutputSurface(
+        JNIEnv *env,
+        jobject thiz) {
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+
+    if (codec == NULL || codec->initCheck() != OK) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION, codec);
+        return;
+    }
+
+    status_t err = codec->detachOutputSurface();
     throwExceptionAsNecessary(env, err, codec);
 }
 
@@ -4106,6 +4128,10 @@ static const JNINativeMethod gMethods[] = {
     { "native_setSurface",
       "(Landroid/view/Surface;)V",
       (void *)android_media_MediaCodec_native_setSurface },
+
+    { "native_detachOutputSurface",
+      "()V",
+      (void *)android_media_MediaCodec_native_detachOutputSurface },
 
     { "createInputSurface", "()Landroid/view/Surface;",
       (void *)android_media_MediaCodec_createInputSurface },

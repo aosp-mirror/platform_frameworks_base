@@ -498,8 +498,8 @@ public class ScreenshotController {
         mViewProxy.reset();
 
         if (screenshotShelfUi()) {
-            mActionsProvider = mActionsProviderFactory.create(mContext, screenshot.getUserHandle(),
-                    ((ScreenshotActionsProvider.ScreenshotActionsCallback) mViewProxy));
+            mActionsProvider =
+                    mActionsProviderFactory.create(screenshot, this::createWindowTransition);
         }
 
         if (mViewProxy.isAttachedToWindow()) {
@@ -529,7 +529,11 @@ public class ScreenshotController {
     }
 
     boolean isPendingSharedTransition() {
-        return mViewProxy.isPendingSharedTransition();
+        if (screenshotShelfUi()) {
+            return mActionsProvider != null && mActionsProvider.isPendingSharedTransition();
+        } else {
+            return mViewProxy.isPendingSharedTransition();
+        }
     }
 
     // Any cleanup needed when the service is being destroyed.
@@ -682,7 +686,8 @@ public class ScreenshotController {
                         mImageCapture.captureDisplay(mDisplayId, getFullScreenRect());
 
                 if (newScreenshot != null) {
-                    // delay starting scroll capture to make sure scrim is up before the app moves
+                    // delay starting scroll capture to make sure scrim is up before the app
+                    // moves
                     mViewProxy.prepareScrollingTransition(
                             response, mScreenBitmap, newScreenshot, mScreenshotTakenInPortrait,
                             () -> runBatchScrollCapture(response, owner));
@@ -951,13 +956,17 @@ public class ScreenshotController {
      */
     private void showUiOnActionsReady(ScreenshotController.SavedImageData imageData) {
         logSuccessOnActionsReady(imageData);
-        if (DEBUG_UI) {
-            Log.d(TAG, "Showing UI actions");
-        }
-
         mScreenshotHandler.resetTimeout();
 
+        if (screenshotShelfUi()) {
+            mActionsProvider.setCompletedScreenshot(imageData);
+            return;
+        }
+
         if (imageData.uri != null) {
+            if (DEBUG_UI) {
+                Log.d(TAG, "Showing UI actions");
+            }
             if (!imageData.owner.equals(Process.myUserHandle())) {
                 Log.d(TAG, "Screenshot saved to user " + imageData.owner + " as "
                         + imageData.uri);

@@ -35,6 +35,7 @@ import static android.app.Notification.FLAG_CAN_COLORIZE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.Notification.FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
 import static android.app.Notification.FLAG_NO_CLEAR;
+import static android.app.Notification.FLAG_NO_DISMISS;
 import static android.app.Notification.FLAG_ONGOING_EVENT;
 import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
 import static android.app.Notification.FLAG_USER_INITIATED_JOB;
@@ -112,6 +113,7 @@ import static com.android.server.am.PendingIntentRecord.FLAG_BROADCAST_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_SERVICE_SENDER;
 import static com.android.server.notification.NotificationManagerService.BITMAP_DURATION;
 import static com.android.server.notification.NotificationManagerService.DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE;
+import static com.android.server.notification.NotificationManagerService.NOTIFICATION_TTL;
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_ADJUSTED;
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_POSTED;
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_UPDATED;
@@ -6047,7 +6049,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
 
         verify(handler, timeout(300).times(0)).scheduleSendRankingUpdate();
-        verify(handler, times(1)).scheduleCancelNotification(any());
+        verify(handler, times(1)).scheduleCancelNotification(any(), eq(0));
     }
 
     @Test
@@ -6306,7 +6308,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                         NotificationManagerService.CancelNotificationRunnable.class);
 
         verify(handler, times(1)).scheduleCancelNotification(
-                captor.capture());
+                captor.capture(), eq(0));
 
         // Run the runnable given to the cancel notification, and see if it logs properly
         NotificationManagerService.CancelNotificationRunnable runnable = captor.getValue();
@@ -8650,34 +8652,128 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testOnNotificationActionClickLifetimeExtendedEnds() {
+    public void testActionClickLifetimeExtendedCancel() throws Exception {
         mSetFlagsRule.enableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR);
+
         final Notification.Action action =
                 new Notification.Action.Builder(null, "text", PendingIntent.getActivity(
                         mContext, 0, new Intent(), PendingIntent.FLAG_IMMUTABLE)).build();
-        final boolean generatedByAssistant = false;
 
         // Creates a notification marked as being lifetime extended.
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         r.getSbn().getNotification().flags |= FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
         mService.addNotification(r);
+
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(mPkg);
+        assertThat(notifs.length).isEqualTo(1);
+        assertThat(mService.getNotificationRecordCount()).isEqualTo(1);
+
         // Call on action click.
         NotificationVisibility notificationVisibility =
                 NotificationVisibility.obtain(r.getKey(), 1, 2, true);
         mService.mNotificationDelegate.onNotificationActionClick(
                 10, 10, r.getKey(), /*actionIndex=*/2, action, notificationVisibility,
                 /*generatedByAssistant=*/false);
-        // The flag is removed, so the notification is no longer lifetime extended.
-        assertThat(r.getSbn().getNotification().flags
-                & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isEqualTo(0);
 
-        // The record is sent out without the flag.
-        ArgumentCaptor<NotificationRecord> captor =
-                ArgumentCaptor.forClass(NotificationRecord.class);
-        verify(mAssistants, times(1)).notifyAssistantActionClicked(
-                captor.capture(), eq(action), eq(generatedByAssistant));
-        assertThat(captor.getValue().getNotification().flags
-                & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isEqualTo(0);
+        // Lifetime extended flag persists.
+        assertThat(r.getSbn().getNotification().flags
+                & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isGreaterThan(0);
+
+        mTestableLooper.moveTimeForward(210);
+        waitForIdle();
+        verify(mWorkerHandler, times(1))
+                .scheduleCancelNotification(
+                        any(NotificationManagerService.CancelNotificationRunnable.class), eq(200));
+
+        // Check that the cancelation occurred and the notification is gone.
+        notifs = mBinderService.getActiveNotifications(mPkg);
+        assertThat(notifs.length).isEqualTo(0);
+        assertThat(mService.getNotificationRecordCount()).isEqualTo(0);
+    }
+
+    @Test
+    public void testActionClickLifetimeExtendedCancel_PreventByNoDismiss() throws Exception {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR);
+
+        final Notification.Action action =
+                new Notification.Action.Builder(null, "text", PendingIntent.getActivity(
+                        mContext, 0, new Intent(), PendingIntent.FLAG_IMMUTABLE)).build();
+
+        // Creates a notification marked as being lifetime extended.
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        r.getSbn().getNotification().flags |= FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+        // Make the notification non-dismissable
+        r.getSbn().getNotification().flags |= FLAG_NO_DISMISS;
+        mService.addNotification(r);
+
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(mPkg);
+        assertThat(notifs.length).isEqualTo(1);
+        assertThat(mService.getNotificationRecordCount()).isEqualTo(1);
+
+        // Call on action click.
+        NotificationVisibility notificationVisibility =
+                NotificationVisibility.obtain(r.getKey(), 1, 2, true);
+        mService.mNotificationDelegate.onNotificationActionClick(
+                10, 10, r.getKey(), /*actionIndex=*/2, action, notificationVisibility,
+                /*generatedByAssistant=*/false);
+
+        // Lifetime extended flag persists.
+        assertThat(r.getSbn().getNotification().flags
+                & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isGreaterThan(0);
+
+        mTestableLooper.moveTimeForward(210);
+        waitForIdle();
+        verify(mWorkerHandler, times(1))
+                .scheduleCancelNotification(
+                        any(NotificationManagerService.CancelNotificationRunnable.class), eq(200));
+
+        // The cancellation is dropped and the notification is still present, with the update.
+        notifs = mBinderService.getActiveNotifications(mPkg);
+        assertThat(notifs.length).isEqualTo(1);
+        assertThat(mService.getNotificationRecordCount()).isEqualTo(1);
+    }
+
+    @Test
+    public void testUpdateOnActionClickDropsLifetimeExtendedCancel() throws Exception {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR);
+
+        final Notification.Action action =
+                new Notification.Action.Builder(null, "text", PendingIntent.getActivity(
+                        mContext, 0, new Intent(), PendingIntent.FLAG_IMMUTABLE)).build();
+
+        // Creates a notification marked as being lifetime extended.
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        r.getSbn().getNotification().flags |= FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+        mService.addNotification(r);
+
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(mPkg);
+        assertThat(notifs.length).isEqualTo(1);
+        assertThat(mService.getNotificationRecordCount()).isEqualTo(1);
+
+        // Call on action click.
+        NotificationVisibility notificationVisibility =
+                NotificationVisibility.obtain(r.getKey(), 1, 2, true);
+        mService.mNotificationDelegate.onNotificationActionClick(
+                10, 10, r.getKey(), /*actionIndex=*/2, action, notificationVisibility,
+                /*generatedByAssistant=*/false);
+
+        // The "app" sends an update of the notification in response.
+        mBinderService.enqueueNotificationWithTag(mPkg, mPkg, r.getSbn().getTag(),
+                r.getSbn().getId(), r.getSbn().getNotification(), r.getSbn().getUserId());
+
+        mTestableLooper.moveTimeForward(210);
+        waitForIdle();
+        verify(mWorkerHandler, times(1))
+                .scheduleCancelNotification(
+                        any(NotificationManagerService.CancelNotificationRunnable.class), eq(200));
+
+        // The cancellation is dropped and the notification is still present, with the update.
+        notifs = mBinderService.getActiveNotifications(mPkg);
+        assertThat(notifs.length).isEqualTo(1);
+        assertThat(mService.getNotificationRecordCount()).isEqualTo(1);
     }
 
     @Test
@@ -8704,6 +8800,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 NotificationRecordLogger.NotificationEvent.NOTIFICATION_ASSIST_ACTION_CLICKED_1,
                 mNotificationRecordLogger.event(0));
     }
+
 
     @Test
     public void testLogSmartSuggestionsVisible_triggerOnExpandAndVisible() {
@@ -14896,6 +14993,31 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         assertThat(captor.getValue().getChannel().getAudioAttributes().getUsage())
                 .isEqualTo(USAGE_NOTIFICATION);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ALL_NOTIFS_NEED_TTL)
+    public void testFixNotification_missingTtl() throws Exception {
+        Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .build();
+
+        mService.fixNotification(n, mPkg, "tag", 0, mUserId, mUid, NOT_FOREGROUND_SERVICE, true);
+
+        assertThat(n.getTimeoutAfter()).isEqualTo(NOTIFICATION_TTL);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ALL_NOTIFS_NEED_TTL)
+    public void testFixNotification_doesNotOverwriteTtl() throws Exception {
+        Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setTimeoutAfter(20)
+                .build();
+
+        mService.fixNotification(n, mPkg, "tag", 0, mUserId, mUid, NOT_FOREGROUND_SERVICE, true);
+
+        assertThat(n.getTimeoutAfter()).isEqualTo(20);
     }
 
     private NotificationRecord createAndPostCallStyleNotification(String packageName,

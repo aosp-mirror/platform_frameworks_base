@@ -67,7 +67,6 @@ import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.settingslib.utils.BuildCompatUtils;
 
-import java.time.Duration;
 import java.util.List;
 
 public class Utils {
@@ -76,20 +75,9 @@ public class Utils {
 
     public static final String INCOMPATIBLE_CHARGER_WARNING_DISABLED =
             "incompatible_charger_warning_disabled";
-    public static final String WIRELESS_CHARGING_NOTIFICATION_TIMESTAMP =
-            "wireless_charging_notification_timestamp";
 
     @VisibleForTesting
     static final String STORAGE_MANAGER_ENABLED_PROPERTY = "ro.storage_manager.enabled";
-
-    @VisibleForTesting static final long WIRELESS_CHARGING_DEFAULT_TIMESTAMP = -1L;
-
-    @VisibleForTesting
-    static final long WIRELESS_CHARGING_NOTIFICATION_THRESHOLD_MILLIS =
-            Duration.ofDays(30).toMillis();
-
-    @VisibleForTesting
-    static final String WIRELESS_CHARGING_WARNING_ENABLED = "wireless_charging_warning_enabled";
 
     private static Signature[] sSystemSignature;
     private static String sPermissionControllerPackageName;

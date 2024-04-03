@@ -75,6 +75,8 @@ class NotificationTransitionAnimatorController(
     private val notificationEntry = notification.entry
     private val notificationKey = notificationEntry.sbn.key
 
+    override val isLaunching: Boolean = true
+
     override var transitionContainer: ViewGroup
         get() = notification.rootView as ViewGroup
         set(ignored) {

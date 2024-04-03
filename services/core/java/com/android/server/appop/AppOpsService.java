@@ -2671,14 +2671,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    public CheckOpsDelegate getAppOpsServiceDelegate() {
-        synchronized (AppOpsService.this) {
-            final CheckOpsDelegateDispatcher dispatcher = mCheckOpsDelegateDispatcher;
-            return (dispatcher != null) ? dispatcher.getCheckOpsDelegate() : null;
-        }
-    }
-
-    public void setAppOpsServiceDelegate(CheckOpsDelegate delegate) {
+    /**
+     * Sets the CheckOpDelegate
+     */
+    public void setCheckOpsDelegate(CheckOpsDelegate delegate) {
         synchronized (AppOpsService.this) {
             final CheckOpsDelegateDispatcher oldDispatcher = mCheckOpsDelegateDispatcher;
             final CheckOpsDelegate policy = (oldDispatcher != null) ? oldDispatcher.mPolicy : null;
@@ -7155,10 +7151,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                 @Nullable CheckOpsDelegate checkOpsDelegate) {
             mPolicy = policy;
             mCheckOpsDelegate = checkOpsDelegate;
-        }
-
-        public @NonNull CheckOpsDelegate getCheckOpsDelegate() {
-            return mCheckOpsDelegate;
         }
 
         public int checkOperation(int code, int uid, String packageName,

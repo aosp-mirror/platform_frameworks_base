@@ -1450,7 +1450,8 @@ public class InternetDialogController implements AccessPointController.AccessPoi
 
     Intent getConfiguratorQrCodeGeneratorIntentOrNull(WifiEntry wifiEntry) {
         if (!mFeatureFlags.isEnabled(Flags.SHARE_WIFI_QS_BUTTON) || wifiEntry == null
-                || mWifiManager == null || !wifiEntry.canShare()) {
+                || mWifiManager == null || !wifiEntry.canShare()
+                || wifiEntry.getWifiConfiguration() == null) {
             return null;
         }
         Intent intent = new Intent();

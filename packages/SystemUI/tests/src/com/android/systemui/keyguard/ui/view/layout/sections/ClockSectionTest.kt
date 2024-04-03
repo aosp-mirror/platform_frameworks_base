@@ -29,7 +29,8 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.res.R
-import com.android.systemui.statusbar.policy.SplitShadeStateController
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.util.Utils
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
@@ -51,12 +52,13 @@ import org.mockito.MockitoAnnotations
 class ClockSectionTest : SysuiTestCase() {
     @Mock private lateinit var keyguardClockInteractor: KeyguardClockInteractor
     @Mock private lateinit var keyguardClockViewModel: KeyguardClockViewModel
-    @Mock private lateinit var splitShadeStateController: SplitShadeStateController
+    @Mock private lateinit var shadeInteractor: ShadeInteractor
     @Mock private lateinit var smartspaceViewModel: KeyguardSmartspaceViewModel
     @Mock private lateinit var blueprintInteractor: Lazy<KeyguardBlueprintInteractor>
     private val bcSmartspaceVisibility: MutableStateFlow<Int> = MutableStateFlow(VISIBLE)
     private val clockShouldBeCentered: MutableStateFlow<Boolean> = MutableStateFlow(true)
     private val isAodIconsVisible: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    private val shadeMode: MutableStateFlow<ShadeMode> = MutableStateFlow(ShadeMode.Single)
 
     private lateinit var underTest: ClockSection
 
@@ -114,14 +116,15 @@ class ClockSectionTest : SysuiTestCase() {
 
         whenever(keyguardClockViewModel.clockShouldBeCentered).thenReturn(clockShouldBeCentered)
         whenever(keyguardClockViewModel.isAodIconsVisible).thenReturn(isAodIconsVisible)
+        whenever(shadeInteractor.shadeMode).thenReturn(shadeMode)
+        whenever(keyguardClockViewModel.shadeInteractor).thenReturn(shadeInteractor)
         whenever(smartspaceViewModel.bcSmartspaceVisibility).thenReturn(bcSmartspaceVisibility)
 
         underTest =
             ClockSection(
                 keyguardClockInteractor,
                 keyguardClockViewModel,
-                mContext,
-                splitShadeStateController,
+                context,
                 smartspaceViewModel,
                 blueprintInteractor
             )
@@ -138,7 +141,7 @@ class ClockSectionTest : SysuiTestCase() {
         assertLargeClockTop(cs, expectedLargeClockTopMargin)
 
         val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_SPLIT_SHADE
-        assertSmallClockTop(cs, expectedSmallClockTopMargin)
+        assertSmallClockTop(cs)
     }
 
     @Test
@@ -152,7 +155,7 @@ class ClockSectionTest : SysuiTestCase() {
         assertLargeClockTop(cs, expectedLargeClockTopMargin)
 
         val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_NON_SPLIT_SHADE
-        assertSmallClockTop(cs, expectedSmallClockTopMargin)
+        assertSmallClockTop(cs)
     }
 
     @Test
@@ -167,7 +170,7 @@ class ClockSectionTest : SysuiTestCase() {
         assertLargeClockTop(cs, expectedLargeClockTopMargin)
 
         val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_SPLIT_SHADE
-        assertSmallClockTop(cs, expectedSmallClockTopMargin)
+        assertSmallClockTop(cs)
     }
 
     @Test
@@ -182,7 +185,7 @@ class ClockSectionTest : SysuiTestCase() {
         assertLargeClockTop(cs, expectedLargeClockTopMargin)
 
         val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_NON_SPLIT_SHADE
-        assertSmallClockTop(cs, expectedSmallClockTopMargin)
+        assertSmallClockTop(cs)
     }
 
     @Test
@@ -196,7 +199,7 @@ class ClockSectionTest : SysuiTestCase() {
         assertLargeClockTop(cs, expectedLargeClockTopMargin)
 
         val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_SPLIT_SHADE
-        assertSmallClockTop(cs, expectedSmallClockTopMargin)
+        assertSmallClockTop(cs)
     }
 
     @Test
@@ -209,7 +212,7 @@ class ClockSectionTest : SysuiTestCase() {
         assertLargeClockTop(cs, expectedLargeClockTopMargin)
 
         val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_NON_SPLIT_SHADE
-        assertSmallClockTop(cs, expectedSmallClockTopMargin)
+        assertSmallClockTop(cs)
     }
 
     @Test
@@ -251,8 +254,11 @@ class ClockSectionTest : SysuiTestCase() {
     }
 
     private fun setSplitShade(isInSplitShade: Boolean) {
-        whenever(splitShadeStateController.shouldUseSplitNotificationShade(context.resources))
-            .thenReturn(isInSplitShade)
+        if (isInSplitShade) {
+            shadeMode.value = ShadeMode.Split
+        } else {
+            shadeMode.value = ShadeMode.Single
+        }
     }
 
     private fun assertLargeClockTop(cs: ConstraintSet, expectedLargeClockTopMargin: Int) {
@@ -261,11 +267,9 @@ class ClockSectionTest : SysuiTestCase() {
         assertThat(largeClockConstraint.layout.topMargin).isEqualTo(expectedLargeClockTopMargin)
     }
 
-    private fun assertSmallClockTop(cs: ConstraintSet, expectedSmallClockTopMargin: Int) {
+    private fun assertSmallClockTop(cs: ConstraintSet) {
         val smallClockGuidelineConstraint = cs.getConstraint(R.id.small_clock_guideline_top)
         assertThat(smallClockGuidelineConstraint.layout.topToTop).isEqualTo(-1)
-        assertThat(smallClockGuidelineConstraint.layout.guideBegin)
-            .isEqualTo(expectedSmallClockTopMargin)
 
         val smallClockConstraint = cs.getConstraint(R.id.lockscreen_clock_view)
         assertThat(smallClockConstraint.layout.topToBottom)

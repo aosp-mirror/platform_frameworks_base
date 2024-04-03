@@ -258,6 +258,7 @@ public class SecureSettings {
         Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
         Settings.Secure.SEARCH_ALL_ENTRYPOINTS_ENABLED,
         Settings.Secure.HUB_MODE_TUTORIAL_STATE,
+        Settings.Secure.GLANCEABLE_HUB_ENABLED,
         Settings.Secure.STYLUS_BUTTONS_ENABLED,
         Settings.Secure.STYLUS_HANDWRITING_ENABLED,
         Settings.Secure.DEFAULT_NOTE_TASK_PROFILE,

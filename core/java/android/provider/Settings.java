@@ -10225,6 +10225,13 @@ public final class Settings {
                 "screensaver_complications_enabled";
 
         /**
+         * Defines the enabled state for the glanceable hub.
+         *
+         * @hide
+         */
+        public static final String GLANCEABLE_HUB_ENABLED = "glanceable_hub_enabled";
+
+        /**
          * Whether home controls are enabled to be shown over the screensaver by the user.
          *
          * @hide

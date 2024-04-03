@@ -81,15 +81,19 @@ constructor(
                             model = isEnabled,
                             iconColor =
                                 Color.Attribute(
-                                    if (isChecked)
+                                    if (isChecked) {
                                         com.android.internal.R.attr.materialColorOnPrimaryContainer
-                                    else com.android.internal.R.attr.materialColorOnSurfaceVariant
+                                    } else {
+                                        com.android.internal.R.attr.materialColorOnSurfaceVariant
+                                    }
                                 ),
                             labelColor =
                                 Color.Attribute(
-                                    if (isChecked)
+                                    if (isChecked) {
                                         com.android.internal.R.attr.materialColorOnSurface
-                                    else com.android.internal.R.attr.materialColorOutline
+                                    } else {
+                                        com.android.internal.R.attr.materialColorOnSurfaceVariant
+                                    }
                                 ),
                         )
                     }

@@ -894,7 +894,14 @@ public class UsbService extends IUsbManager.Stub {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
 
         if (android.hardware.usb.flags.Flags.enableUsbDataSignalStaking()) {
-            if (!shouldUpdateUsbSignaling(portId, enable, Binder.getCallingUid())) return false;
+            if (!shouldUpdateUsbSignaling(portId, enable, Binder.getCallingUid())) {
+                try {
+                    callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "enableUsbData: Failed to call onOperationComplete", e);
+                }
+                return false;
+            }
         }
 
         final long ident = Binder.clearCallingIdentity();
@@ -950,8 +957,19 @@ public class UsbService extends IUsbManager.Stub {
                 "enableUsbDataWhileDocked: callback must not be null. opId:"
                 + operationId);
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        if (android.hardware.usb.flags.Flags.enableUsbDataSignalStaking()) {
+            if (!shouldUpdateUsbSignaling(portId, true, Binder.getCallingUid())) {
+                try {
+                    callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "enableUsbDataWhileDocked: Failed to call onOperationComplete", e);
+                }
+                return;
+            }
+        }
+
         final long ident = Binder.clearCallingIdentity();
-        boolean wait;
         try {
             if (mPortManager != null) {
                 mPortManager.enableUsbDataWhileDocked(portId, operationId, callback, null);

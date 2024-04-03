@@ -26,6 +26,7 @@ import static com.google.common.truth.Truth.assertThat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.view.Display;
 import android.view.SurfaceControl;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -72,12 +73,23 @@ public class DisplayDeviceTest {
 
     @Test
     public void testGetDisplaySurfaceDefaultSizeLocked_notRotated_anisotropyCorrection() {
+        mDisplayDeviceInfo.type = Display.TYPE_EXTERNAL;
         mDisplayDeviceInfo.xDpi = 0.5f;
         mDisplayDeviceInfo.yDpi = 1.0f;
         DisplayDevice displayDevice = new FakeDisplayDevice(mDisplayDeviceInfo,
                 mMockDisplayAdapter, /*isAnisotropyCorrectionEnabled=*/ true);
         assertThat(displayDevice.getDisplaySurfaceDefaultSizeLocked()).isEqualTo(
                 PORTRAIT_DOUBLE_WIDTH);
+    }
+
+    @Test
+    public void testGetDisplaySurfaceDefaultSizeLocked_notRotated_noAnisotropyCorrection() {
+        mDisplayDeviceInfo.type = Display.TYPE_INTERNAL;
+        mDisplayDeviceInfo.xDpi = 0.5f;
+        mDisplayDeviceInfo.yDpi = 1.0f;
+        DisplayDevice displayDevice = new FakeDisplayDevice(mDisplayDeviceInfo,
+                mMockDisplayAdapter, /*isAnisotropyCorrectionEnabled=*/ true);
+        assertThat(displayDevice.getDisplaySurfaceDefaultSizeLocked()).isEqualTo(PORTRAIT_SIZE);
     }
 
     @Test
@@ -97,6 +109,7 @@ public class DisplayDeviceTest {
 
     @Test
     public void testGetDisplaySurfaceDefaultSizeLocked_rotation90_anisotropyCorrection() {
+        mDisplayDeviceInfo.type = Display.TYPE_EXTERNAL;
         mDisplayDeviceInfo.xDpi = 0.5f;
         mDisplayDeviceInfo.yDpi = 1.0f;
         DisplayDevice displayDevice = new FakeDisplayDevice(mDisplayDeviceInfo,
@@ -104,6 +117,17 @@ public class DisplayDeviceTest {
         displayDevice.setProjectionLocked(mMockTransaction, ROTATION_90, new Rect(), new Rect());
         assertThat(displayDevice.getDisplaySurfaceDefaultSizeLocked()).isEqualTo(
                 LANDSCAPE_DOUBLE_HEIGHT);
+    }
+
+    @Test
+    public void testGetDisplaySurfaceDefaultSizeLocked_rotation90_noAnisotropyCorrection() {
+        mDisplayDeviceInfo.type = Display.TYPE_INTERNAL;
+        mDisplayDeviceInfo.xDpi = 0.5f;
+        mDisplayDeviceInfo.yDpi = 1.0f;
+        DisplayDevice displayDevice = new FakeDisplayDevice(mDisplayDeviceInfo,
+                mMockDisplayAdapter, /*isAnisotropyCorrectionEnabled=*/ true);
+        displayDevice.setProjectionLocked(mMockTransaction, ROTATION_90, new Rect(), new Rect());
+        assertThat(displayDevice.getDisplaySurfaceDefaultSizeLocked()).isEqualTo(LANDSCAPE_SIZE);
     }
 
     @Test

@@ -9890,6 +9890,16 @@ public class CarrierConfigManager {
             "satellite_entitlement_app_name_string";
 
     /**
+     * URL to redirect user to get more information about the carrier support for satellite.
+     *
+     * The default value is empty string.
+     *
+     * @hide
+     */
+    public static final String KEY_SATELLITE_INFORMATION_REDIRECT_URL_STRING =
+            "satellite_information_redirect_url_string";
+
+    /**
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
      * the default APN (i.e. internet) will be used for tethering.
      *
@@ -11034,6 +11044,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_SATELLITE_ENTITLEMENT_STATUS_REFRESH_DAYS_INT, 7);
         sDefaults.putBoolean(KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL, false);
         sDefaults.putString(KEY_SATELLITE_ENTITLEMENT_APP_NAME_STRING, "androidSatmode");
+        sDefaults.putString(KEY_SATELLITE_INFORMATION_REDIRECT_URL_STRING, "");
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);

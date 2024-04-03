@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.component.mediaoutput.domain.model
+package com.android.systemui.brightness.domain.interactor
 
-import android.media.session.MediaSession
+import com.android.systemui.brightness.data.repository.screenBrightnessRepository
+import com.android.systemui.kosmos.Kosmos
 
-/** Represents media playing on the connected device. */
-data class MediaDeviceSession(
-    val appLabel: CharSequence,
-    val packageName: String,
-    val sessionToken: MediaSession.Token,
-    val canAdjustVolume: Boolean,
-)
-
-/** Returns true when [other] controls the same sessions as [this]. */
-fun MediaDeviceSession.isTheSameSession(other: MediaDeviceSession?): Boolean =
-    sessionToken == other?.sessionToken
+val Kosmos.screenBrightnessInteractor by
+    Kosmos.Fixture { ScreenBrightnessInteractor(screenBrightnessRepository) }
