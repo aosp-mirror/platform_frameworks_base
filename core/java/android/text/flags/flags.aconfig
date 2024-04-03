@@ -53,6 +53,19 @@ flag {
 }
 
 flag {
+  name: "complete_font_load_in_system_services_ready"
+  namespace: "text"
+  description: "Fix to ensure that font loading is complete on system-services-ready boot phase."
+  # Make read only, as font loading is in the critical boot path which happens before the read-write
+  # flags propagate to the device.
+  is_fixed_read_only: true
+  bug: "327941215"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "phrase_strict_fallback"
   namespace: "text"
   description: "Feature flag for automatic fallback from phrase based line break to strict line break."

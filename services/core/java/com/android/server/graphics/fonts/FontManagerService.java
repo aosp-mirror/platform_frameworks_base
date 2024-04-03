@@ -165,7 +165,11 @@ public final class FontManagerService extends IFontManager.Stub {
 
         @Override
         public void onBootPhase(int phase) {
-            if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+            final int latestFontLoadBootPhase =
+                    (Flags.completeFontLoadInSystemServicesReady())
+                            ? SystemService.PHASE_SYSTEM_SERVICES_READY
+                            : SystemService.PHASE_ACTIVITY_MANAGER_READY;
+            if (phase == latestFontLoadBootPhase) {
                 // Wait for FontManagerService to start since it will be needed after this point.
                 mServiceStarted.join();
             }
