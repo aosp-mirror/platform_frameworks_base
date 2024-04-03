@@ -18,9 +18,15 @@ package com.android.systemui.dreams.touch;
 
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
+import static com.android.systemui.shared.Flags.bouncerAreaExclusion;
+
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.RemoteException;
+import android.util.Log;
 import android.view.GestureDetector;
+import android.view.ISystemGestureExclusionListener;
+import android.view.IWindowManager;
 import android.view.InputEvent;
 import android.view.MotionEvent;
 
@@ -31,6 +37,8 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.touch.dagger.InputSessionComponent;
 import com.android.systemui.shared.system.InputChannelCompat;
@@ -58,8 +66,23 @@ import javax.inject.Inject;
 public class DreamOverlayTouchMonitor {
     // This executor is used to protect {@code mActiveTouchSessions} from being modified
     // concurrently. Any operation that adds or removes values should use this executor.
-    private final Executor mExecutor;
+    public String TAG = "DreamOverlayTouchMonitor";
+    private final Executor mMainExecutor;
+    private final Executor mBackgroundExecutor;
     private final Lifecycle mLifecycle;
+    private Rect mExclusionRect = null;
+
+    private ISystemGestureExclusionListener mGestureExclusionListener =
+            new ISystemGestureExclusionListener.Stub() {
+                @Override
+                public void onSystemGestureExclusionChanged(int displayId,
+                        Region systemGestureExclusion,
+                        Region systemGestureExclusionUnrestricted) {
+                    mExclusionRect = systemGestureExclusion.getBounds();
+                }
+            };
+
+
 
     /**
      * Adds a new {@link TouchSessionImpl} to participate in receiving future touches and gestures.
@@ -67,7 +90,7 @@ public class DreamOverlayTouchMonitor {
     private ListenableFuture<DreamTouchHandler.TouchSession> push(
             TouchSessionImpl touchSessionImpl) {
         return CallbackToFutureAdapter.getFuture(completer -> {
-            mExecutor.execute(() -> {
+            mMainExecutor.execute(() -> {
                 if (!mActiveTouchSessions.remove(touchSessionImpl)) {
                     completer.set(null);
                     return;
@@ -90,7 +113,7 @@ public class DreamOverlayTouchMonitor {
     private ListenableFuture<DreamTouchHandler.TouchSession> pop(
             TouchSessionImpl touchSessionImpl) {
         return CallbackToFutureAdapter.getFuture(completer -> {
-            mExecutor.execute(() -> {
+            mMainExecutor.execute(() -> {
                 if (mActiveTouchSessions.remove(touchSessionImpl)) {
                     touchSessionImpl.onRemoved();
 
@@ -240,6 +263,17 @@ public class DreamOverlayTouchMonitor {
      */
     private void startMonitoring() {
         stopMonitoring(true);
+        if (bouncerAreaExclusion()) {
+            mBackgroundExecutor.execute(() -> {
+                try {
+                    mWindowManagerService.registerSystemGestureExclusionListener(
+                            mGestureExclusionListener, mDisplayId);
+                } catch (RemoteException e) {
+                    // Handle the exception
+                    Log.e(TAG, "Failed to register gesture exclusion listener", e);
+                }
+            });
+        }
         mCurrentInputSession = mInputSessionFactory.create(
                 "dreamOverlay",
                 mInputEventListener,
@@ -252,6 +286,18 @@ public class DreamOverlayTouchMonitor {
      * Destroys any active {@link InputSession}.
      */
     private void stopMonitoring(boolean force) {
+        mExclusionRect = null;
+        if (bouncerAreaExclusion()) {
+            mBackgroundExecutor.execute(() -> {
+                try {
+                    mWindowManagerService.unregisterSystemGestureExclusionListener(
+                            mGestureExclusionListener, mDisplayId);
+                } catch (RemoteException e) {
+                    // Handle the exception
+                    Log.e(TAG, "unregisterSystemGestureExclusionListener: failed", e);
+                }
+            });
+        }
         if (mCurrentInputSession == null) {
             return;
         }
@@ -263,7 +309,7 @@ public class DreamOverlayTouchMonitor {
 
         // When we stop monitoring touches, we must ensure that all active touch sessions and
         // descendants informed of the removal so any cleanup for active tracking can proceed.
-        mExecutor.execute(() -> mActiveTouchSessions.forEach(touchSession -> {
+        mMainExecutor.execute(() -> mActiveTouchSessions.forEach(touchSession -> {
             while (touchSession != null) {
                 touchSession.onRemoved();
                 touchSession = touchSession.getPredecessor();
@@ -295,11 +341,15 @@ public class DreamOverlayTouchMonitor {
                             if (!handler.isEnabled()) {
                                 continue;
                             }
-                    final Rect maxBounds = mDisplayHelper.getMaxBounds(ev.getDisplayId(),
-                            TYPE_APPLICATION_OVERLAY);
-
-                    final Region initiationRegion = Region.obtain();
-                    handler.getTouchInitiationRegion(maxBounds, initiationRegion);
+                            final Rect maxBounds = mDisplayHelper.getMaxBounds(ev.getDisplayId(),
+                                    TYPE_APPLICATION_OVERLAY);
+                            final Region initiationRegion = Region.obtain();
+                            Rect exclusionRect = null;
+                            if (bouncerAreaExclusion()) {
+                                exclusionRect = getCurrentExclusionRect();
+                            }
+                            handler.getTouchInitiationRegion(
+                                            maxBounds, initiationRegion, exclusionRect);
 
                     if (!initiationRegion.isEmpty()) {
                         // Initiation regions require a motion event to determine pointer location
@@ -335,6 +385,9 @@ public class DreamOverlayTouchMonitor {
                     .flatMap(Collection::stream)
                     .forEach(inputEventListener -> inputEventListener.onInputEvent(ev));
         }
+                    private Rect getCurrentExclusionRect() {
+                        return mExclusionRect;
+                    }
     };
 
     /**
@@ -416,6 +469,9 @@ public class DreamOverlayTouchMonitor {
 
     private InputSessionComponent.Factory mInputSessionFactory;
     private InputSession mCurrentInputSession;
+    private final int mDisplayId;
+    private final IWindowManager mWindowManagerService;
+
 
     /**
      * Designated constructor for {@link DreamOverlayTouchMonitor}
@@ -432,15 +488,21 @@ public class DreamOverlayTouchMonitor {
     @Inject
     public DreamOverlayTouchMonitor(
             @Main Executor executor,
+            @Background Executor backgroundExecutor,
             Lifecycle lifecycle,
             InputSessionComponent.Factory inputSessionFactory,
             DisplayHelper displayHelper,
-            Set<DreamTouchHandler> handlers) {
+            Set<DreamTouchHandler> handlers,
+            IWindowManager windowManagerService,
+            @DisplayId int displayId) {
+        mDisplayId = displayId;
         mHandlers = handlers;
         mInputSessionFactory = inputSessionFactory;
-        mExecutor = executor;
+        mMainExecutor = executor;
+        mBackgroundExecutor = backgroundExecutor;
         mLifecycle = lifecycle;
         mDisplayHelper = displayHelper;
+        mWindowManagerService = windowManagerService;
     }
 
     /**

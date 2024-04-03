@@ -104,7 +104,7 @@ public interface DreamTouchHandler {
      * indicating the entire screen should be considered.
      * @param region A {@link Region} that is passed in to the target entry touch region.
      */
-    default void getTouchInitiationRegion(Rect bounds, Region region) {
+    default void getTouchInitiationRegion(Rect bounds, Region region, Rect exclusionRect) {
     }
 
     /**
