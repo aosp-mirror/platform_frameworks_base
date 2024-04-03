@@ -1718,10 +1718,11 @@ public class UserManagerService extends IUserManager.Stub {
                     }
 
                     final KeyguardManager km = mContext.getSystemService(KeyguardManager.class);
-                    if (km != null && km.isDeviceSecure()) {
+                    int parentUserId = getProfileParentId(userId);
+                    if (km != null && km.isDeviceSecure(parentUserId)) {
                         showConfirmCredentialToDisableQuietMode(userId, target, callingPackage);
                         return false;
-                    } else if (km != null && !km.isDeviceSecure()
+                    } else if (km != null && !km.isDeviceSecure(parentUserId)
                             && android.multiuser.Flags.showSetScreenLockDialog()
                             // TODO(b/330720545): Add a better way to accomplish this, also use it
                             //  to block profile creation w/o device credentials present.
@@ -1731,7 +1732,8 @@ public class UserManagerService extends IUserManager.Stub {
                                 SetScreenLockDialogActivity
                                         .createBaseIntent(LAUNCH_REASON_DISABLE_QUIET_MODE);
                         setScreenLockPromptIntent.putExtra(EXTRA_ORIGIN_USER_ID, userId);
-                        mContext.startActivity(setScreenLockPromptIntent);
+                        mContext.startActivityAsUser(setScreenLockPromptIntent,
+                                UserHandle.of(parentUserId));
                         return false;
                     } else {
                         Slog.w(LOG_TAG, "Allowing profile unlock even when device credentials "
