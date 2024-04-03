@@ -99,7 +99,7 @@ class PinBouncerViewModel(
             .map { if (it) ActionButtonAppearance.Hidden else ActionButtonAppearance.Shown }
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.Eagerly,
+                started = SharingStarted.WhileSubscribed(),
                 initialValue = ActionButtonAppearance.Hidden,
             )
 
