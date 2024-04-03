@@ -4227,6 +4227,7 @@ public final class ViewRootImpl implements ViewParent,
                 ? mFrameRateCategoryLowCount - 1 : mFrameRateCategoryLowCount;
         mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
         mPreferredFrameRate = -1;
+        mFrameRateCompatibility = FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
         mIsFrameRateConflicted = false;
     }
 
@@ -12496,6 +12497,7 @@ public final class ViewRootImpl implements ViewParent,
     private void setPreferredFrameRateCategory(int preferredFrameRateCategory) {
         if (!shouldSetFrameRateCategory()
                 || (mFrameRateCompatibility == FRAME_RATE_COMPATIBILITY_GTE
+                && mPreferredFrameRate > 0
                 && sToolkitFrameRateVelocityMappingReadOnlyFlagValue)) {
             return;
         }
