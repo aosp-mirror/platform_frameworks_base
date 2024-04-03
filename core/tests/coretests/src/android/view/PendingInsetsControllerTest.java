@@ -18,6 +18,7 @@ package android.view;
 
 import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.systemBars;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 
@@ -154,8 +155,8 @@ public class PendingInsetsControllerTest {
         mPendingInsetsController.replayAndAttach(mReplayedController);
         mPendingInsetsController.setSystemBarsAppearance(
                 APPEARANCE_LIGHT_STATUS_BARS, APPEARANCE_LIGHT_STATUS_BARS);
-        verify(mReplayedController).setSystemBarsAppearance(eq(APPEARANCE_LIGHT_STATUS_BARS),
-                eq(APPEARANCE_LIGHT_STATUS_BARS));
+        verify(mReplayedController).setSystemBarsAppearance(
+                eq(APPEARANCE_LIGHT_STATUS_BARS), eq(APPEARANCE_LIGHT_STATUS_BARS));
     }
 
     @Test
@@ -165,6 +166,24 @@ public class PendingInsetsControllerTest {
         mPendingInsetsController.replayAndAttach(mReplayedController);
         assertEquals(mPendingInsetsController.getSystemBarsAppearance(),
                 APPEARANCE_LIGHT_STATUS_BARS);
+    }
+
+    @Test
+    public void testAppearanceFromResource() {
+        mPendingInsetsController.setSystemBarsAppearanceFromResource(
+                APPEARANCE_LIGHT_STATUS_BARS, APPEARANCE_LIGHT_STATUS_BARS);
+        mPendingInsetsController.replayAndAttach(mReplayedController);
+        verify(mReplayedController).setSystemBarsAppearanceFromResource(
+                eq(APPEARANCE_LIGHT_STATUS_BARS), eq(APPEARANCE_LIGHT_STATUS_BARS));
+    }
+
+    @Test
+    public void testAppearanceFromResource_direct() {
+        mPendingInsetsController.replayAndAttach(mReplayedController);
+        mPendingInsetsController.setSystemBarsAppearanceFromResource(
+                APPEARANCE_LIGHT_STATUS_BARS, APPEARANCE_LIGHT_STATUS_BARS);
+        verify(mReplayedController).setSystemBarsAppearanceFromResource(
+                eq(APPEARANCE_LIGHT_STATUS_BARS), eq(APPEARANCE_LIGHT_STATUS_BARS));
     }
 
     @Test
@@ -201,8 +220,10 @@ public class PendingInsetsControllerTest {
     public void testReplayTwice() {
         mPendingInsetsController.show(systemBars());
         mPendingInsetsController.setSystemBarsBehavior(BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-        mPendingInsetsController.setSystemBarsAppearance(APPEARANCE_LIGHT_STATUS_BARS,
-                APPEARANCE_LIGHT_STATUS_BARS);
+        mPendingInsetsController.setSystemBarsAppearance(
+                APPEARANCE_LIGHT_STATUS_BARS, APPEARANCE_LIGHT_STATUS_BARS);
+        mPendingInsetsController.setSystemBarsAppearanceFromResource(
+                APPEARANCE_LIGHT_STATUS_BARS, APPEARANCE_LIGHT_STATUS_BARS);
         mPendingInsetsController.addOnControllableInsetsChangedListener(
                 (controller, typeMask) -> {});
         mPendingInsetsController.replayAndAttach(mReplayedController);
@@ -235,15 +256,29 @@ public class PendingInsetsControllerTest {
     public void testDetachReattach() {
         mPendingInsetsController.show(systemBars());
         mPendingInsetsController.setSystemBarsBehavior(BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-        mPendingInsetsController.setSystemBarsAppearance(APPEARANCE_LIGHT_STATUS_BARS,
-                APPEARANCE_LIGHT_STATUS_BARS);
+        mPendingInsetsController.setSystemBarsAppearance(
+                APPEARANCE_LIGHT_STATUS_BARS, APPEARANCE_LIGHT_STATUS_BARS);
+        mPendingInsetsController.setSystemBarsAppearanceFromResource(
+                APPEARANCE_LIGHT_STATUS_BARS, APPEARANCE_LIGHT_STATUS_BARS);
         mPendingInsetsController.replayAndAttach(mReplayedController);
         mPendingInsetsController.detach();
         mPendingInsetsController.show(navigationBars());
+        mPendingInsetsController.setSystemBarsAppearance(
+                APPEARANCE_LIGHT_NAVIGATION_BARS, APPEARANCE_LIGHT_NAVIGATION_BARS);
+        mPendingInsetsController.setSystemBarsAppearanceFromResource(
+                APPEARANCE_LIGHT_NAVIGATION_BARS, APPEARANCE_LIGHT_NAVIGATION_BARS);
         InsetsController secondController = mock(InsetsController.class);
         mPendingInsetsController.replayAndAttach(secondController);
 
         verify(mReplayedController).show(eq(systemBars()));
+        verify(mReplayedController).setSystemBarsAppearance(
+                eq(APPEARANCE_LIGHT_STATUS_BARS), eq(APPEARANCE_LIGHT_STATUS_BARS));
+        verify(mReplayedController).setSystemBarsAppearanceFromResource(
+                eq(APPEARANCE_LIGHT_STATUS_BARS), eq(APPEARANCE_LIGHT_STATUS_BARS));
         verify(secondController).show(eq(navigationBars()));
+        verify(secondController).setSystemBarsAppearance(
+                eq(APPEARANCE_LIGHT_NAVIGATION_BARS), eq(APPEARANCE_LIGHT_NAVIGATION_BARS));
+        verify(secondController).setSystemBarsAppearanceFromResource(
+                eq(APPEARANCE_LIGHT_NAVIGATION_BARS), eq(APPEARANCE_LIGHT_NAVIGATION_BARS));
     }
 }

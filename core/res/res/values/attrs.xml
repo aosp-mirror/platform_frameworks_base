@@ -2400,7 +2400,9 @@
              have been requested to be translucent with
              {@link android.R.attr#windowTranslucentStatus}.
              Corresponds to setting {@link android.view.View#SYSTEM_UI_FLAG_LIGHT_STATUS_BAR} on
-             the decor view. -->
+             the decor view and
+             {@link android.view.WindowInsetsController#APPEARANCE_LIGHT_STATUS_BARS} on the
+             {@link android.view.WindowInsetsController}. -->
         <attr name="windowLightStatusBar" format="boolean" />
 
         <!-- Reference to a drawable to be used as the splash screen content of the window. This
@@ -2422,7 +2424,9 @@
              have been requested to be translucent with
              {@link android.R.attr#windowTranslucentNavigation}.
              Corresponds to setting {@link android.view.View#SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR} on
-             the decor view. -->
+             the decor view and
+             {@link android.view.WindowInsetsController#APPEARANCE_LIGHT_NAVIGATION_BARS} on the
+             {@link android.view.WindowInsetsController}. -->
         <attr name="windowLightNavigationBar" format="boolean" />
 
         <!-- Controls how the window is laid out if there is a {@code DisplayCutout}.
