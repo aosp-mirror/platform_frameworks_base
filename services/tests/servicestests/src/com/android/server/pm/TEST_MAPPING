@@ -21,7 +21,7 @@
   "postsubmit": [
     {
       // Presubmit is intentional here while testing with SLO checker.
-      // b/331020193, Move to presubmit early april 2024
+      // Tests are flaky, waiting to bypass.
       "name": "FrameworksServicesTests_pm_presubmit"
     },
     {
