@@ -27,7 +27,12 @@
 // These modules provide source files for the stub libraries
 /////////////////////////////////////////////////////////////////////
 
-droidstubs {
+soong_config_module_type_import {
+    from: "frameworks/base/api/Android.bp",
+    module_types: ["non_updatable_exportable_droidstubs"],
+}
+
+non_updatable_exportable_droidstubs {
     name: "api-stubs-docs-non-updatable",
     defaults: [
         "android-non-updatable-stubs-defaults",
@@ -54,15 +59,35 @@ droidstubs {
             targets: ["sdk"],
             dir: "apistubs/android/public/api",
             dest: "android-non-updatable.txt",
-            tag: ".api.txt",
         },
         {
             targets: ["sdk"],
             dir: "apistubs/android/public/api",
             dest: "android-non-updatable-removed.txt",
-            tag: ".removed-api.txt",
         },
     ],
+    soong_config_variables: {
+        release_hidden_api_exportable_stubs: {
+            dists: [
+                {
+                    tag: ".exportable.api.txt",
+                },
+                {
+                    tag: ".exportable.removed-api.txt",
+                },
+            ],
+            conditions_default: {
+                dists: [
+                    {
+                        tag: ".api.txt",
+                    },
+                    {
+                        tag: ".removed-api.txt",
+                    },
+                ],
+            },
+        },
+    },
     api_surface: "public",
 }
 
@@ -86,7 +111,7 @@ module_libs = [
         "\\)",
 ]
 
-droidstubs {
+non_updatable_exportable_droidstubs {
     name: "system-api-stubs-docs-non-updatable",
     defaults: [
         "android-non-updatable-stubs-defaults",
@@ -114,19 +139,39 @@ droidstubs {
             targets: ["sdk"],
             dir: "apistubs/android/system/api",
             dest: "android-non-updatable.txt",
-            tag: ".api.txt",
         },
         {
             targets: ["sdk"],
             dir: "apistubs/android/system/api",
             dest: "android-non-updatable-removed.txt",
-            tag: ".removed-api.txt",
         },
     ],
+    soong_config_variables: {
+        release_hidden_api_exportable_stubs: {
+            dists: [
+                {
+                    tag: ".exportable.api.txt",
+                },
+                {
+                    tag: ".exportable.removed-api.txt",
+                },
+            ],
+            conditions_default: {
+                dists: [
+                    {
+                        tag: ".api.txt",
+                    },
+                    {
+                        tag: ".removed-api.txt",
+                    },
+                ],
+            },
+        },
+    },
     api_surface: "system",
 }
 
-droidstubs {
+non_updatable_exportable_droidstubs {
     name: "test-api-stubs-docs-non-updatable",
     defaults: [
         "android-non-updatable-stubs-defaults",
@@ -149,31 +194,61 @@ droidstubs {
             targets: ["sdk"],
             dir: "apistubs/android/test/api",
             dest: "android.txt",
-            tag: ".api.txt",
         },
         {
             targets: ["sdk"],
             dir: "apistubs/android/test/api",
             dest: "removed.txt",
-            tag: ".removed-api.txt",
         },
         {
             targets: ["sdk"],
             dir: "apistubs/android/test/api",
             dest: "android-non-updatable.txt",
-            tag: ".api.txt",
         },
         {
             targets: ["sdk"],
             dir: "apistubs/android/test/api",
             dest: "android-non-updatable-removed.txt",
-            tag: ".removed-api.txt",
         },
     ],
+    soong_config_variables: {
+        release_hidden_api_exportable_stubs: {
+            dists: [
+                {
+                    tag: ".exportable.api.txt",
+                },
+                {
+                    tag: ".exportable.removed-api.txt",
+                },
+                {
+                    tag: ".exportable.api.txt",
+                },
+                {
+                    tag: ".exportable.removed-api.txt",
+                },
+            ],
+            conditions_default: {
+                dists: [
+                    {
+                        tag: ".api.txt",
+                    },
+                    {
+                        tag: ".removed-api.txt",
+                    },
+                    {
+                        tag: ".api.txt",
+                    },
+                    {
+                        tag: ".removed-api.txt",
+                    },
+                ],
+            },
+        },
+    },
     api_surface: "test",
 }
 
-droidstubs {
+non_updatable_exportable_droidstubs {
     name: "module-lib-api-stubs-docs-non-updatable",
     defaults: [
         "android-non-updatable-stubs-defaults",
@@ -201,15 +276,35 @@ droidstubs {
             targets: ["sdk"],
             dir: "apistubs/android/module-lib/api",
             dest: "android-non-updatable.txt",
-            tag: ".api.txt",
         },
         {
             targets: ["sdk"],
             dir: "apistubs/android/module-lib/api",
             dest: "android-non-updatable-removed.txt",
-            tag: ".removed-api.txt",
         },
     ],
+    soong_config_variables: {
+        release_hidden_api_exportable_stubs: {
+            dists: [
+                {
+                    tag: ".exportable.api.txt",
+                },
+                {
+                    tag: ".exportable.removed-api.txt",
+                },
+            ],
+            conditions_default: {
+                dists: [
+                    {
+                        tag: ".api.txt",
+                    },
+                    {
+                        tag: ".removed-api.txt",
+                    },
+                ],
+            },
+        },
+    },
     api_surface: "module-lib",
 }
 
