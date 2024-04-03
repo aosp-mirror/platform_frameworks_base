@@ -165,6 +165,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                     mQuickShareData.quickShareAction, mScreenshotId, uri, mImageTime, image,
                     mParams.owner);
             mImageData.subject = getSubjectString(mImageTime);
+            mImageData.imageTime = mImageTime;
 
             mParams.mActionsReadyListener.onActionsReady(mImageData);
             if (DEBUG_CALLBACK) {
