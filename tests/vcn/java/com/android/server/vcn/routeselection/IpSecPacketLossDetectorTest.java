@@ -19,7 +19,6 @@ package com.android.server.vcn.routeselection;
 import static android.net.vcn.VcnManager.VCN_NETWORK_SELECTION_IPSEC_PACKET_LOSS_PERCENT_THRESHOLD_KEY;
 import static android.net.vcn.VcnManager.VCN_NETWORK_SELECTION_POLL_IPSEC_STATE_INTERVAL_SECONDS_KEY;
 
-import static com.android.server.vcn.routeselection.IpSecPacketLossDetector.PACKET_LOSS_UNAVALAIBLE;
 import static com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import static org.junit.Assert.assertEquals;
@@ -44,6 +43,7 @@ import android.net.IpSecTransformState;
 import android.os.OutcomeReceiver;
 import android.os.PowerManager;
 
+import com.android.server.vcn.routeselection.IpSecPacketLossDetector.PacketLossCalculationResult;
 import com.android.server.vcn.routeselection.IpSecPacketLossDetector.PacketLossCalculator;
 import com.android.server.vcn.routeselection.NetworkMetricMonitor.IpSecTransformWrapper;
 import com.android.server.vcn.routeselection.NetworkMetricMonitor.NetworkMetricMonitorCallback;
@@ -293,7 +293,9 @@ public class IpSecPacketLossDetectorTest extends NetworkEvaluationTestBase {
     }
 
     private void checkHandleLossRate(
-            int mockPacketLossRate, boolean isLastStateExpectedToUpdate, boolean isCallbackExpected)
+            PacketLossCalculationResult mockPacketLossRate,
+            boolean isLastStateExpectedToUpdate,
+            boolean isCallbackExpected)
             throws Exception {
         final OutcomeReceiver<IpSecTransformState, RuntimeException> xfrmStateReceiver =
                 startMonitorAndCaptureStateReceiver();
@@ -327,26 +329,32 @@ public class IpSecPacketLossDetectorTest extends NetworkEvaluationTestBase {
     @Test
     public void testHandleLossRate_validationPass() throws Exception {
         checkHandleLossRate(
-                2, true /* isLastStateExpectedToUpdate */, true /* isCallbackExpected */);
+                PacketLossCalculationResult.valid(2),
+                true /* isLastStateExpectedToUpdate */,
+                true /* isCallbackExpected */);
     }
 
     @Test
     public void testHandleLossRate_validationFail() throws Exception {
         checkHandleLossRate(
-                22, true /* isLastStateExpectedToUpdate */, true /* isCallbackExpected */);
+                PacketLossCalculationResult.valid(22),
+                true /* isLastStateExpectedToUpdate */,
+                true /* isCallbackExpected */);
         verify(mConnectivityManager).reportNetworkConnectivity(mNetwork, false);
     }
 
     @Test
     public void testHandleLossRate_resultUnavalaible() throws Exception {
         checkHandleLossRate(
-                PACKET_LOSS_UNAVALAIBLE,
+                PacketLossCalculationResult.invalid(),
                 false /* isLastStateExpectedToUpdate */,
                 false /* isCallbackExpected */);
     }
 
     private void checkGetPacketLossRate(
-            IpSecTransformState oldState, IpSecTransformState newState, int expectedLossRate)
+            IpSecTransformState oldState,
+            IpSecTransformState newState,
+            PacketLossCalculationResult expectedLossRate)
             throws Exception {
         assertEquals(
                 expectedLossRate,
@@ -362,14 +370,30 @@ public class IpSecPacketLossDetectorTest extends NetworkEvaluationTestBase {
             throws Exception {
         final IpSecTransformState newState =
                 newTransformState(rxSeqNo, packetCount, newReplayBitmap(packetInWin));
+        checkGetPacketLossRate(
+                oldState, newState, PacketLossCalculationResult.valid(expectedDataLossRate));
+    }
+
+    private void checkGetPacketLossRate(
+            IpSecTransformState oldState,
+            int rxSeqNo,
+            int packetCount,
+            int packetInWin,
+            PacketLossCalculationResult expectedDataLossRate)
+            throws Exception {
+        final IpSecTransformState newState =
+                newTransformState(rxSeqNo, packetCount, newReplayBitmap(packetInWin));
         checkGetPacketLossRate(oldState, newState, expectedDataLossRate);
     }
 
     @Test
     public void testGetPacketLossRate_replayWindowUnchanged() throws Exception {
         checkGetPacketLossRate(
-                mTransformStateInitial, mTransformStateInitial, PACKET_LOSS_UNAVALAIBLE);
-        checkGetPacketLossRate(mTransformStateInitial, 3000, 2000, 2000, PACKET_LOSS_UNAVALAIBLE);
+                mTransformStateInitial,
+                mTransformStateInitial,
+                PacketLossCalculationResult.invalid());
+        checkGetPacketLossRate(
+                mTransformStateInitial, 3000, 2000, 2000, PacketLossCalculationResult.invalid());
     }
 
     @Test
