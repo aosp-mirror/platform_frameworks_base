@@ -91,7 +91,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
 
     private final PointF mInitialTouchPos = new PointF();
     private final Interpolator mPostAnimationInterpolator = Interpolators.EMPHASIZED;
-    private final Interpolator mProgressInterpolator = Interpolators.STANDARD_DECELERATE;
+    private final Interpolator mProgressInterpolator = Interpolators.BACK_GESTURE;
     private final Interpolator mVerticalMoveInterpolator = new DecelerateInterpolator();
     private final Matrix mTransformMatrix = new Matrix();
 

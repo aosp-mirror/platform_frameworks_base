@@ -86,7 +86,7 @@ class CrossActivityBackAnimation @Inject constructor(
     private val enteringStartOffset =
         context.resources.getDimension(R.dimen.cross_activity_back_entering_start_offset)
 
-    private val gestureInterpolator = Interpolators.STANDARD_DECELERATE
+    private val gestureInterpolator = Interpolators.BACK_GESTURE
     private val postCommitInterpolator = Interpolators.FAST_OUT_SLOW_IN
     private val verticalMoveInterpolator: Interpolator = DecelerateInterpolator()
 
@@ -287,7 +287,7 @@ class CrossActivityBackAnimation @Inject constructor(
             // in case we're still animating an onBackCancelled event, let's remove the finish-
             // callback from the progress animator to prevent calling finishAnimation() before
             // restarting a new animation
-            progressAnimator.removeOnBackCancelledFinishCallback();
+            progressAnimator.removeOnBackCancelledFinishCallback()
 
             startBackAnimation(backMotionEvent)
             progressAnimator.onBackStarted(backMotionEvent) { backEvent: BackEvent ->

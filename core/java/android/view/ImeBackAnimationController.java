@@ -28,6 +28,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Insets;
 import android.util.Log;
+import android.view.animation.BackGestureInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.window.BackEvent;
@@ -44,7 +45,7 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
     private static final int POST_COMMIT_DURATION_MS = 200;
     private static final int POST_COMMIT_CANCEL_DURATION_MS = 50;
     private static final float PEEK_FRACTION = 0.1f;
-    private static final Interpolator STANDARD_DECELERATE = new PathInterpolator(0f, 0f, 0f, 1f);
+    private static final Interpolator BACK_GESTURE = new BackGestureInterpolator();
     private static final Interpolator EMPHASIZED_DECELERATE = new PathInterpolator(
             0.05f, 0.7f, 0.1f, 1f);
     private static final Interpolator STANDARD_ACCELERATE = new PathInterpolator(0.3f, 0f, 1f, 1f);
@@ -140,7 +141,7 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
             float hiddenY = mWindowInsetsAnimationController.getHiddenStateInsets().bottom;
             float shownY = mWindowInsetsAnimationController.getShownStateInsets().bottom;
             float imeHeight = shownY - hiddenY;
-            float interpolatedProgress = STANDARD_DECELERATE.getInterpolation(progress);
+            float interpolatedProgress = BACK_GESTURE.getInterpolation(progress);
             int newY = (int) (imeHeight - interpolatedProgress * (imeHeight * PEEK_FRACTION));
             mWindowInsetsAnimationController.setInsetsAndAlpha(Insets.of(0, 0, 0, newY), 1f,
                     progress);
