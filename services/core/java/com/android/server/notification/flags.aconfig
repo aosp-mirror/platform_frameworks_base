@@ -86,3 +86,11 @@ flag {
   description: "This flag controls the polite notification attention behavior updates as per UXR feedback"
   bug: "270456865"
 }
+
+flag {
+  name: "all_notifs_need_ttl"
+  namespace: "systemui"
+  description: "This flag sets a TTL on all notifications that don't already have an app provided one"
+  bug: "331967355"
+}
+
