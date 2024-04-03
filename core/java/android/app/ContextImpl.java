@@ -21,14 +21,12 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.StrictMode.vmIncorrectContextUseEnabled;
 import static android.view.WindowManager.LayoutParams.WindowType;
 
-import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.UiContext;
-import android.companion.virtual.VirtualDevice;
 import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AttributionSource;
@@ -2290,35 +2288,7 @@ class ContextImpl extends Context {
             Log.v(TAG, "Treating renounced permission " + permission + " as denied");
             return PERMISSION_DENIED;
         }
-
-        // When checking a device-aware permission on a remote device, if the permission is CAMERA
-        // or RECORD_AUDIO we need to check remote device's corresponding capability. If the remote
-        // device doesn't have capability fall back to checking permission on the default device.
-        // Note: we only perform permission check redirection when the device id is not explicitly
-        // set in the context.
-        int deviceId = getDeviceId();
-        if (deviceId != Context.DEVICE_ID_DEFAULT
-                && !mIsExplicitDeviceId
-                && PermissionManager.DEVICE_AWARE_PERMISSIONS.contains(permission)) {
-            VirtualDeviceManager virtualDeviceManager =
-                    getSystemService(VirtualDeviceManager.class);
-            VirtualDevice virtualDevice = virtualDeviceManager.getVirtualDevice(deviceId);
-            if (virtualDevice != null) {
-                if ((Objects.equals(permission, Manifest.permission.RECORD_AUDIO)
-                                && !virtualDevice.hasCustomAudioInputSupport())
-                        || (Objects.equals(permission, Manifest.permission.CAMERA)
-                                && !virtualDevice.hasCustomCameraSupport())) {
-                    deviceId = Context.DEVICE_ID_DEFAULT;
-                }
-            } else {
-                Slog.e(
-                        TAG,
-                        "virtualDevice is not found when device id is not default. deviceId = "
-                                + deviceId);
-            }
-        }
-
-        return PermissionManager.checkPermission(permission, pid, uid, deviceId);
+        return PermissionManager.checkPermission(permission, pid, uid, getDeviceId());
     }
 
     /** @hide */
