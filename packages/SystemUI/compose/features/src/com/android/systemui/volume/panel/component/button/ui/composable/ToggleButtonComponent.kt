@@ -32,8 +32,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -62,7 +64,10 @@ class ToggleButtonComponent(
         ) {
             OutlinedIconToggleButton(
                 modifier =
-                    Modifier.height(64.dp).fillMaxWidth().semantics { contentDescription = label },
+                    Modifier.height(64.dp).fillMaxWidth().semantics {
+                        role = Role.Switch
+                        contentDescription = label
+                    },
                 checked = viewModel.isChecked,
                 onCheckedChange = onCheckedChange,
                 shape = RoundedCornerShape(28.dp),
