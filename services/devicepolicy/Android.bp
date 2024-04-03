@@ -17,8 +17,10 @@ filegroup {
 java_library_static {
     name: "services.devicepolicy",
     defaults: ["platform_service_defaults"],
-    srcs: [":services.devicepolicy-sources"],
-
+    srcs: [
+        ":services.devicepolicy-sources",
+        ":statslog-devicepolicy-java-gen",
+    ],
     libs: [
         "services.core",
         "app-compat-annotations",
@@ -26,4 +28,12 @@ java_library_static {
         "device_policy_aconfig_flags_lib",
         "androidx.annotation_annotation",
     ],
+}
+
+genrule {
+    name: "statslog-devicepolicy-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module devicepolicy" +
+        " --javaPackage com.android.server.devicepolicy --javaClass DevicePolicyStatsLog",
+    out: ["com/android/server/devicepolicy/DevicePolicyStatsLog.java"],
 }

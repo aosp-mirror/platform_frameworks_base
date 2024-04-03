@@ -109,6 +109,7 @@ import static android.app.AppOpsManager.OPSTR_SYSTEM_EXEMPT_FROM_POWER_RESTRICTI
 import static android.app.AppOpsManager.OPSTR_SYSTEM_EXEMPT_FROM_SUSPENSION;
 import static android.app.AppOpsManager.OP_RUN_ANY_IN_BACKGROUND;
 import static android.app.AppOpsManager.OP_RUN_IN_BACKGROUND;
+import static android.app.StatsManager.PULL_SUCCESS;
 import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_AFFILIATED;
 import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER;
 import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
@@ -265,12 +266,26 @@ import static android.provider.Telephony.Carriers.INVALID_APN_ID;
 import static android.security.keystore.AttestationUtils.USE_INDIVIDUAL_ATTESTATION;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.PROVISIONING_ENTRY_POINT_ADB;
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.server.SystemTimeZone.TIME_ZONE_CONFIDENCE_HIGH;
 import static com.android.server.am.ActivityManagerService.STOCK_PM_FLAGS;
 import static com.android.server.devicepolicy.DevicePolicyEngine.DEFAULT_POLICY_SIZE_LIMIT;
+import static com.android.server.devicepolicy.DevicePolicyStatsLog.DEVICE_POLICY_MANAGEMENT_MODE;
+import static com.android.server.devicepolicy.DevicePolicyStatsLog.DEVICE_POLICY_MANAGEMENT_MODE__MANAGEMENT_MODE__COPE;
+import static com.android.server.devicepolicy.DevicePolicyStatsLog.DEVICE_POLICY_MANAGEMENT_MODE__MANAGEMENT_MODE__DEVICE_OWNER;
+import static com.android.server.devicepolicy.DevicePolicyStatsLog.DEVICE_POLICY_MANAGEMENT_MODE__MANAGEMENT_MODE__DEVICE_OWNER_FINANCED;
+import static com.android.server.devicepolicy.DevicePolicyStatsLog.DEVICE_POLICY_MANAGEMENT_MODE__MANAGEMENT_MODE__MANAGEMENT_MODE_UNSPECIFIED;
+import static com.android.server.devicepolicy.DevicePolicyStatsLog.DEVICE_POLICY_MANAGEMENT_MODE__MANAGEMENT_MODE__PROFILE_OWNER;
+import static com.android.server.devicepolicy.DevicePolicyStatsLog.DEVICE_POLICY_STATE;
+import static com.android.server.devicepolicy.DevicePolicyStatsLog.DEVICE_POLICY_STATE__PASSWORD_COMPLEXITY__COMPLEXITY_HIGH;
+import static com.android.server.devicepolicy.DevicePolicyStatsLog.DEVICE_POLICY_STATE__PASSWORD_COMPLEXITY__COMPLEXITY_LEGACY;
+import static com.android.server.devicepolicy.DevicePolicyStatsLog.DEVICE_POLICY_STATE__PASSWORD_COMPLEXITY__COMPLEXITY_LOW;
+import static com.android.server.devicepolicy.DevicePolicyStatsLog.DEVICE_POLICY_STATE__PASSWORD_COMPLEXITY__COMPLEXITY_MEDIUM;
+import static com.android.server.devicepolicy.DevicePolicyStatsLog.DEVICE_POLICY_STATE__PASSWORD_COMPLEXITY__COMPLEXITY_NONE;
+import static com.android.server.devicepolicy.DevicePolicyStatsLog.DEVICE_POLICY_STATE__PASSWORD_COMPLEXITY__COMPLEXITY_UNSPECIFIED;
 import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_DEVICE_OWNER;
 import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_PROFILE_OWNER;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
@@ -305,6 +320,7 @@ import android.app.IServiceConnection;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.StatsManager;
 import android.app.StatusBarManager;
 import android.app.admin.AccountTypePolicyKey;
 import android.app.admin.BooleanPolicyValue;
@@ -477,6 +493,7 @@ import android.util.IntArray;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.StatsEvent;
 import android.util.Xml;
 import android.view.IWindowManager;
 import android.view.accessibility.AccessibilityManager;
@@ -3348,6 +3365,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 synchronized (getLockObject()) {
                     mDevicePolicyEngine.reapplyAllPoliciesOnBootLocked();
                 }
+                if (Flags.managementModePolicyMetrics()) {
+                    registerStatsCallbacks();
+                }
                 break;
             case SystemService.PHASE_ACTIVITY_MANAGER_READY:
                 synchronized (getLockObject()) {
@@ -3487,6 +3507,121 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return true;
     }
 
+    /** Register callbacks for statsd pulled atoms. */
+    private void registerStatsCallbacks() {
+        final StatsManager statsManager = mContext.getSystemService(StatsManager.class);
+        if (statsManager == null) {
+            Slog.wtf(LOG_TAG, "StatsManager system service not found.");
+            return;
+        }
+        statsManager.setPullAtomCallback(
+                DEVICE_POLICY_MANAGEMENT_MODE,
+                null, // use defaultPullAtomMetadata values
+                DIRECT_EXECUTOR,
+                this::onPullManagementModeAtom);
+        statsManager.setPullAtomCallback(
+                DEVICE_POLICY_STATE,
+                null, // use defaultPullAtomMetadata values
+                DIRECT_EXECUTOR,
+                this::onPullPolicyStateAtom);
+    }
+
+    /** Writes the pulled atoms. */
+    private int onPullManagementModeAtom(int atomTag, List<StatsEvent> statsEvents) {
+        synchronized (getLockObject()) {
+            statsEvents.add(DevicePolicyStatsLog.buildStatsEvent(
+                    DEVICE_POLICY_MANAGEMENT_MODE,
+                    getStatsManagementModeLocked().managementMode()));
+            return PULL_SUCCESS;
+        }
+    }
+
+    /** Writes the pulled atoms. */
+    private int onPullPolicyStateAtom(int atomTag, List<StatsEvent> statsEvents) {
+        synchronized (getLockObject()) {
+            StatsManagementMode statsManagementMode = getStatsManagementModeLocked();
+            if (statsManagementMode.admin() != null) {
+                statsEvents.add(DevicePolicyStatsLog.buildStatsEvent(DEVICE_POLICY_STATE,
+                        getRequiredPasswordComplexityStatsLocked(statsManagementMode.admin()),
+                        statsManagementMode.managementMode()
+                        ));
+            } else {
+                statsEvents.add(DevicePolicyStatsLog.buildStatsEvent(DEVICE_POLICY_STATE,
+                        DEVICE_POLICY_STATE__PASSWORD_COMPLEXITY__COMPLEXITY_NONE,
+                        DEVICE_POLICY_MANAGEMENT_MODE__MANAGEMENT_MODE__MANAGEMENT_MODE_UNSPECIFIED
+                ));
+            }
+            return PULL_SUCCESS;
+        }
+    }
+
+    private StatsManagementMode getStatsManagementModeLocked() {
+        int managementMode =
+                DEVICE_POLICY_MANAGEMENT_MODE__MANAGEMENT_MODE__MANAGEMENT_MODE_UNSPECIFIED;
+        ActiveAdmin admin = getDeviceOwnerAdminLocked();
+        if (admin != null) {
+            managementMode = getDeviceOwnerTypeLocked(
+                    getDeviceOwnerComponent(false).getPackageName())
+                    != DEVICE_OWNER_TYPE_FINANCED
+                    ? DEVICE_POLICY_MANAGEMENT_MODE__MANAGEMENT_MODE__DEVICE_OWNER
+                    : DEVICE_POLICY_MANAGEMENT_MODE__MANAGEMENT_MODE__DEVICE_OWNER_FINANCED;
+        } else {
+            // Find the first user with managing_app.
+            for (Integer profileUserId : mOwners.getProfileOwnerKeys()) {
+                if (isManagedProfile(profileUserId)) {
+                    admin = getProfileOwnerAdminLocked(profileUserId);
+                    managementMode = mOwners.isProfileOwnerOfOrganizationOwnedDevice(
+                            profileUserId)
+                            ? DEVICE_POLICY_MANAGEMENT_MODE__MANAGEMENT_MODE__COPE
+                            : DEVICE_POLICY_MANAGEMENT_MODE__MANAGEMENT_MODE__PROFILE_OWNER;
+                    break;
+                }
+            }
+        }
+        return new StatsManagementMode(managementMode, admin);
+    }
+
+    private record StatsManagementMode(int managementMode, ActiveAdmin admin) {
+    }
+
+    @GuardedBy("getLockObject()")
+    private int getRequiredPasswordComplexityStatsLocked(ActiveAdmin admin) {
+        int userId = admin.getUserHandle().getIdentifier();
+        EnforcingAdmin enforcingAdmin = EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                admin.info.getComponent(),
+                userId,
+                admin);
+
+        Integer passwordComplexity = mDevicePolicyEngine.getLocalPolicySetByAdmin(
+                PolicyDefinition.PASSWORD_COMPLEXITY,
+                enforcingAdmin,
+                userId);
+        if (passwordComplexity == null) {
+            return admin.mPasswordPolicy.quality != PASSWORD_QUALITY_UNSPECIFIED
+                    ? DEVICE_POLICY_STATE__PASSWORD_COMPLEXITY__COMPLEXITY_LEGACY
+                    : DEVICE_POLICY_STATE__PASSWORD_COMPLEXITY__COMPLEXITY_UNSPECIFIED;
+        }
+        switch (passwordComplexity) {
+            case PASSWORD_COMPLEXITY_NONE -> {
+                return DEVICE_POLICY_STATE__PASSWORD_COMPLEXITY__COMPLEXITY_NONE;
+            }
+            case PASSWORD_COMPLEXITY_LOW -> {
+                return DEVICE_POLICY_STATE__PASSWORD_COMPLEXITY__COMPLEXITY_LOW;
+            }
+            case PASSWORD_COMPLEXITY_MEDIUM -> {
+                return DEVICE_POLICY_STATE__PASSWORD_COMPLEXITY__COMPLEXITY_MEDIUM;
+            }
+            case PASSWORD_COMPLEXITY_HIGH -> {
+                return DEVICE_POLICY_STATE__PASSWORD_COMPLEXITY__COMPLEXITY_HIGH;
+            }
+            default -> {
+                Slogf.wtf(LOG_TAG, "Unhandled password complexity: " + passwordComplexity);
+                // The following line is unreachable as Slogf.wtf crashes the process.
+                // But we need this to avoid compilation error missing return statement.
+                return DEVICE_POLICY_STATE__PASSWORD_COMPLEXITY__COMPLEXITY_UNSPECIFIED;
+            }
+        }
+    }
 
     private void applyManagedSubscriptionsPolicyIfRequired() {
         int copeProfileUserId = getOrganizationOwnedProfileUserId();
