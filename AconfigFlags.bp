@@ -348,6 +348,7 @@ java_aconfig_library {
     apex_available: [
         "//apex_available:platform",
         "com.android.mediaprovider",
+        "com.android.permission",
     ],
 }
 
