@@ -17,8 +17,10 @@
 package com.android.server.vcn.routeselection;
 
 import static android.net.vcn.VcnManager.VCN_NETWORK_SELECTION_IPSEC_PACKET_LOSS_PERCENT_THRESHOLD_KEY;
+import static android.net.vcn.VcnManager.VCN_NETWORK_SELECTION_MAX_SEQ_NUM_INCREASE_PER_SECOND_KEY;
 import static android.net.vcn.VcnManager.VCN_NETWORK_SELECTION_POLL_IPSEC_STATE_INTERVAL_SECONDS_KEY;
 
+import static com.android.server.vcn.routeselection.IpSecPacketLossDetector.getMaxSeqNumIncreasePerSecond;
 import static com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import static org.junit.Assert.assertEquals;
@@ -65,6 +67,7 @@ public class IpSecPacketLossDetectorTest extends NetworkEvaluationTestBase {
     private static final int REPLAY_BITMAP_LEN_BYTE = 512;
     private static final int REPLAY_BITMAP_LEN_BIT = REPLAY_BITMAP_LEN_BYTE * 8;
     private static final int IPSEC_PACKET_LOSS_PERCENT_THRESHOLD = 5;
+    private static final int MAX_SEQ_NUM_INCREASE_DEFAULT_DISABLED = -1;
     private static final long POLL_IPSEC_STATE_INTERVAL_MS = TimeUnit.SECONDS.toMillis(30L);
 
     @Mock private IpSecTransformWrapper mIpSecTransform;
@@ -91,6 +94,9 @@ public class IpSecPacketLossDetectorTest extends NetworkEvaluationTestBase {
                         eq(VCN_NETWORK_SELECTION_IPSEC_PACKET_LOSS_PERCENT_THRESHOLD_KEY),
                         anyInt()))
                 .thenReturn(IPSEC_PACKET_LOSS_PERCENT_THRESHOLD);
+        when(mCarrierConfig.getInt(
+                        eq(VCN_NETWORK_SELECTION_MAX_SEQ_NUM_INCREASE_PER_SECOND_KEY), anyInt()))
+                .thenReturn(MAX_SEQ_NUM_INCREASE_DEFAULT_DISABLED);
 
         when(mDependencies.getPacketLossCalculator()).thenReturn(mPacketLossCalculator);
 
@@ -109,6 +115,20 @@ public class IpSecPacketLossDetectorTest extends NetworkEvaluationTestBase {
                 .setRxHighestSequenceNumber(rxSeqNo)
                 .setPacketCount(packtCount)
                 .setReplayBitmap(replayBitmap)
+                .build();
+    }
+
+    private static IpSecTransformState newNextTransformState(
+            IpSecTransformState before,
+            long timeDiffMillis,
+            long rxSeqNoDiff,
+            long packtCountDiff,
+            int packetInWin) {
+        return new IpSecTransformState.Builder()
+                .setTimestampMillis(before.getTimestampMillis() + timeDiffMillis)
+                .setRxHighestSequenceNumber(before.getRxHighestSequenceNumber() + rxSeqNoDiff)
+                .setPacketCount(before.getPacketCount() + packtCountDiff)
+                .setReplayBitmap(newReplayBitmap(packetInWin))
                 .build();
     }
 
@@ -165,7 +185,7 @@ public class IpSecPacketLossDetectorTest extends NetworkEvaluationTestBase {
         // Verify the first polled state is stored
         assertEquals(mTransformStateInitial, mIpSecPacketLossDetector.getLastTransformState());
         verify(mPacketLossCalculator, never())
-                .getPacketLossRatePercentage(any(), any(), anyString());
+                .getPacketLossRatePercentage(any(), any(), anyInt(), anyString());
 
         // Verify next poll is scheduled
         assertNull(mTestLooper.nextMessage());
@@ -278,7 +298,7 @@ public class IpSecPacketLossDetectorTest extends NetworkEvaluationTestBase {
 
         xfrmStateReceiver.onResult(newTransformState(1, 1, newReplayBitmap(1)));
         verify(mPacketLossCalculator, never())
-                .getPacketLossRatePercentage(any(), any(), anyString());
+                .getPacketLossRatePercentage(any(), any(), anyInt(), anyString());
     }
 
     @Test
@@ -289,7 +309,7 @@ public class IpSecPacketLossDetectorTest extends NetworkEvaluationTestBase {
 
         xfrmStateReceiver.onError(new RuntimeException("Test"));
         verify(mPacketLossCalculator, never())
-                .getPacketLossRatePercentage(any(), any(), anyString());
+                .getPacketLossRatePercentage(any(), any(), anyInt(), anyString());
     }
 
     private void checkHandleLossRate(
@@ -301,7 +321,7 @@ public class IpSecPacketLossDetectorTest extends NetworkEvaluationTestBase {
                 startMonitorAndCaptureStateReceiver();
         doReturn(mockPacketLossRate)
                 .when(mPacketLossCalculator)
-                .getPacketLossRatePercentage(any(), any(), anyString());
+                .getPacketLossRatePercentage(any(), any(), anyInt(), anyString());
 
         // Mock receiving two states with mTransformStateInitial and an arbitrary transformNew
         final IpSecTransformState transformNew = newTransformState(1, 1, newReplayBitmap(1));
@@ -311,7 +331,10 @@ public class IpSecPacketLossDetectorTest extends NetworkEvaluationTestBase {
         // Verifications
         verify(mPacketLossCalculator)
                 .getPacketLossRatePercentage(
-                        eq(mTransformStateInitial), eq(transformNew), anyString());
+                        eq(mTransformStateInitial),
+                        eq(transformNew),
+                        eq(MAX_SEQ_NUM_INCREASE_DEFAULT_DISABLED),
+                        anyString());
 
         if (isLastStateExpectedToUpdate) {
             assertEquals(transformNew, mIpSecPacketLossDetector.getLastTransformState());
@@ -351,6 +374,22 @@ public class IpSecPacketLossDetectorTest extends NetworkEvaluationTestBase {
                 false /* isCallbackExpected */);
     }
 
+    @Test
+    public void testHandleLossRate_unusualSeqNumLeap_highLossRate() throws Exception {
+        checkHandleLossRate(
+                PacketLossCalculationResult.unusualSeqNumLeap(22),
+                true /* isLastStateExpectedToUpdate */,
+                false /* isCallbackExpected */);
+    }
+
+    @Test
+    public void testHandleLossRate_unusualSeqNumLeap_lowLossRate() throws Exception {
+        checkHandleLossRate(
+                PacketLossCalculationResult.unusualSeqNumLeap(2),
+                true /* isLastStateExpectedToUpdate */,
+                true /* isCallbackExpected */);
+    }
+
     private void checkGetPacketLossRate(
             IpSecTransformState oldState,
             IpSecTransformState newState,
@@ -358,7 +397,8 @@ public class IpSecPacketLossDetectorTest extends NetworkEvaluationTestBase {
             throws Exception {
         assertEquals(
                 expectedLossRate,
-                mPacketLossCalculator.getPacketLossRatePercentage(oldState, newState, TAG));
+                mPacketLossCalculator.getPacketLossRatePercentage(
+                        oldState, newState, MAX_SEQ_NUM_INCREASE_DEFAULT_DISABLED, TAG));
     }
 
     private void checkGetPacketLossRate(
@@ -443,6 +483,45 @@ public class IpSecPacketLossDetectorTest extends NetworkEvaluationTestBase {
         checkGetPacketLossRate(oldState, 20000, 14000, 3000, 10);
     }
 
+    private void checkGetPktLossRate_unusualSeqNumLeap(
+            int maxSeqNumIncreasePerSecond,
+            int timeDiffMillis,
+            int rxSeqNoDiff,
+            PacketLossCalculationResult expected)
+            throws Exception {
+        final IpSecTransformState oldState = mTransformStateInitial;
+        final IpSecTransformState newState =
+                newNextTransformState(
+                        oldState,
+                        timeDiffMillis,
+                        rxSeqNoDiff,
+                        1 /* packtCountDiff */,
+                        1 /* packetInWin */);
+
+        assertEquals(
+                expected,
+                mPacketLossCalculator.getPacketLossRatePercentage(
+                        oldState, newState, maxSeqNumIncreasePerSecond, TAG));
+    }
+
+    @Test
+    public void testGetPktLossRate_unusualSeqNumLeap() throws Exception {
+        checkGetPktLossRate_unusualSeqNumLeap(
+                10000 /* maxSeqNumIncreasePerSecond */,
+                (int) TimeUnit.SECONDS.toMillis(2L),
+                30000 /* rxSeqNoDiff */,
+                PacketLossCalculationResult.unusualSeqNumLeap(100));
+    }
+
+    @Test
+    public void testGetPktLossRate_unusualSeqNumLeap_smallSeqNumDiff() throws Exception {
+        checkGetPktLossRate_unusualSeqNumLeap(
+                10000 /* maxSeqNumIncreasePerSecond */,
+                (int) TimeUnit.SECONDS.toMillis(2L),
+                5000 /* rxSeqNoDiff */,
+                PacketLossCalculationResult.valid(100));
+    }
+
     // Verify the polling event is scheduled with expected delays
     private void verifyPollEventDelayAndScheduleNext(long expectedDelayMs) {
         if (expectedDelayMs > 0) {
@@ -468,5 +547,25 @@ public class IpSecPacketLossDetectorTest extends NetworkEvaluationTestBase {
 
         // Verify the 3rd poll is scheduled with configured delay
         verifyPollEventDelayAndScheduleNext(POLL_IPSEC_STATE_INTERVAL_MS);
+    }
+
+    @Test
+    public void testGetMaxSeqNumIncreasePerSecond() throws Exception {
+        final int seqNumLeapNegative = 500_000;
+        when(mCarrierConfig.getInt(
+                        eq(VCN_NETWORK_SELECTION_MAX_SEQ_NUM_INCREASE_PER_SECOND_KEY), anyInt()))
+                .thenReturn(seqNumLeapNegative);
+        assertEquals(seqNumLeapNegative, getMaxSeqNumIncreasePerSecond(mCarrierConfig));
+    }
+
+    @Test
+    public void testGetMaxSeqNumIncreasePerSecond_negativeValue() throws Exception {
+        final int seqNumLeapNegative = -10;
+        when(mCarrierConfig.getInt(
+                        eq(VCN_NETWORK_SELECTION_MAX_SEQ_NUM_INCREASE_PER_SECOND_KEY), anyInt()))
+                .thenReturn(seqNumLeapNegative);
+        assertEquals(
+                MAX_SEQ_NUM_INCREASE_DEFAULT_DISABLED,
+                getMaxSeqNumIncreasePerSecond(mCarrierConfig));
     }
 }
