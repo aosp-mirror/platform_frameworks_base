@@ -83,6 +83,7 @@ aconfig_declarations_group {
         "com.android.internal.pm.pkg.component.flags-aconfig-java",
         "com.android.media.flags.bettertogether-aconfig-java",
         "com.android.media.flags.editing-aconfig-java",
+        "com.android.media.flags.performance-aconfig-java",
         "com.android.media.flags.projection-aconfig-java",
         "com.android.net.thread.platform.flags-aconfig-java",
         "com.android.server.flags.services-aconfig-java",
@@ -591,6 +592,21 @@ aconfig_declarations {
 java_aconfig_library {
     name: "com.android.media.flags.projection-aconfig-java",
     aconfig_declarations: "com.android.media.flags.projection-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Media Performance
+aconfig_declarations {
+    name: "com.android.media.flags.performance-aconfig",
+    package: "com.android.media.performance.flags",
+    srcs: [
+        "media/java/android/media/flags/performance.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "com.android.media.flags.performance-aconfig-java",
+    aconfig_declarations: "com.android.media.flags.performance-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
