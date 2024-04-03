@@ -69,8 +69,7 @@ public class SelinuxAuditLogsCollectorTest {
         // Ignore what was written in the event logs by previous tests.
         mSelinuxAutidLogsCollector.mLastWrite = Instant.now();
 
-        mMockitoSession =
-                mockitoSession().initMocks(this).mockStatic(FrameworkStatsLog.class).startMocking();
+        mMockitoSession = mockitoSession().mockStatic(FrameworkStatsLog.class).startMocking();
     }
 
     @After
