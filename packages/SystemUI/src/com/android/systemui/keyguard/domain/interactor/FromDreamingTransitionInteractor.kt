@@ -35,7 +35,9 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -106,6 +108,7 @@ constructor(
         }
     }
 
+    @OptIn(FlowPreview::class)
     private fun listenForDreamingToOccluded() {
         if (KeyguardWmStateRefactor.isEnabled) {
             scope.launch {
@@ -121,13 +124,24 @@ constructor(
             scope.launch {
                 combine(
                         keyguardInteractor.isKeyguardOccluded,
-                        keyguardInteractor.isDreaming,
+                        keyguardInteractor.isDreaming
+                            // Debounce the dreaming signal since there is a race condition between
+                            // the occluded and dreaming signals. We therefore add a small delay
+                            // to give enough time for occluded to flip to false when the dream
+                            // ends, to avoid transitioning to OCCLUDED erroneously when exiting
+                            // the dream.
+                            .debounce(100.milliseconds),
                         ::Pair
                     )
                     .filterRelevantKeyguardStateAnd { (isOccluded, isDreaming) ->
                         isOccluded && !isDreaming
                     }
-                    .collect { startTransitionTo(KeyguardState.OCCLUDED) }
+                    .collect {
+                        startTransitionTo(
+                            toState = KeyguardState.OCCLUDED,
+                            ownerReason = "Occluded but no longer dreaming",
+                        )
+                    }
             }
         }
     }
