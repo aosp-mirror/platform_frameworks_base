@@ -17,6 +17,7 @@
 package android.service.dreams;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.service.dreams.Flags.dreamHandlesConfirmKeys;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IdRes;
@@ -29,6 +30,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.TestApi;
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.KeyguardManager;
 import android.app.Service;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -280,6 +282,8 @@ public class DreamService extends Service implements Window.Callback {
 
     private IDreamOverlayCallback mOverlayCallback;
 
+    private Integer mTrackingConfirmKey = null;
+
 
     public DreamService() {
         mDreamManager = IDreamManager.Stub.asInterface(ServiceManager.getService(DREAM_SERVICE));
@@ -296,7 +300,54 @@ public class DreamService extends Service implements Window.Callback {
     /** {@inheritDoc} */
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        // TODO: create more flexible version of mInteractive that allows use of KEYCODE_BACK
+        if (dreamHandlesConfirmKeys()) {
+            // In the case of an interactive dream that consumes the event, do not process further.
+            if (mInteractive && mWindow.superDispatchKeyEvent(event)) {
+                return true;
+            }
+
+            // If the key is a confirm key and on up, either unlock (no auth) or show bouncer.
+            if (KeyEvent.isConfirmKey(event.getKeyCode())) {
+                switch (event.getAction()) {
+                    case KeyEvent.ACTION_DOWN -> {
+                        if (mTrackingConfirmKey != null) {
+                            return true;
+                        }
+
+                        mTrackingConfirmKey = event.getKeyCode();
+                    }
+                    case KeyEvent.ACTION_UP -> {
+                        if (mTrackingConfirmKey != event.getKeyCode()) {
+                            return true;
+                        }
+
+                        mTrackingConfirmKey = null;
+
+                        final KeyguardManager keyguardManager =
+                                getSystemService(KeyguardManager.class);
+
+                        // Simply wake up in the case the device is not locked.
+                        if (!keyguardManager.isKeyguardLocked()) {
+                            wakeUp();
+                            return true;
+                        }
+
+                        keyguardManager.requestDismissKeyguard(getActivity(),
+                                new KeyguardManager.KeyguardDismissCallback() {
+                                    @Override
+                                    public void onDismissError() {
+                                        Log.e(TAG, "Could not dismiss keyguard on confirm key");
+                                    }
+                                });
+                    }
+                }
+
+                // All key events for matching key codes should be consumed to prevent other actions
+                // from triggering.
+                return true;
+            }
+        }
+
         if (!mInteractive) {
             if (mDebug) Slog.v(mTag, "Waking up on keyEvent");
             wakeUp();
