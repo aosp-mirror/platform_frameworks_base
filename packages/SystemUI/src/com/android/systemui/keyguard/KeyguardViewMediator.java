@@ -2153,13 +2153,6 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         mInteractionJankMonitor.cancel(CUJ_LOCKSCREEN_TRANSITION_FROM_AOD);
 
         synchronized (KeyguardViewMediator.this) {
-            if (mHiding && isOccluded) {
-                // We're in the process of going away but WindowManager wants to show a
-                // SHOW_WHEN_LOCKED activity instead.
-                // TODO(bc-unlock): Migrate to remote animation.
-                startKeyguardExitAnimation(0, 0);
-            }
-
             mPowerGestureIntercepted =
                     isOccluded && mUpdateMonitor.isSecureCameraLaunchedOverKeyguard();
 
