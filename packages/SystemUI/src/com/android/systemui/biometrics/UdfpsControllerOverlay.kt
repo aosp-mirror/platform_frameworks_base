@@ -318,6 +318,15 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         addViewRunnable = null
     }
 
+    fun updateOverlayParams(updatedOverlayParams: UdfpsOverlayParams) {
+        DeviceEntryUdfpsRefactor.isUnexpectedlyInLegacyMode()
+        overlayParams = updatedOverlayParams
+        sensorBounds = updatedOverlayParams.sensorBounds
+        getTouchOverlay()?.let {
+            windowManager.updateViewLayout(it, coreLayoutParams.updateDimensions(null))
+        }
+    }
+
     fun inflateUdfpsAnimation(
         view: UdfpsView,
         controller: UdfpsController
