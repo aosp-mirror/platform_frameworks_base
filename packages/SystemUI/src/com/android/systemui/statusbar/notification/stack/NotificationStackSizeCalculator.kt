@@ -17,14 +17,15 @@
 package com.android.systemui.statusbar.notification.stack
 
 import android.content.res.Resources
+import android.os.SystemProperties
 import android.util.Log
 import android.view.View.GONE
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.Flags.notificationMinimalismPrototype
-import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.StatusBarState.KEYGUARD
 import com.android.systemui.statusbar.SysuiStatusBarStateController
@@ -177,8 +178,8 @@ constructor(
 
         // TODO: Avoid making this split shade assumption by simply checking the stack for media
         val isMediaShowing = mediaDataManager.hasActiveMediaOrRecommendation()
-        val isMediaShowingInStack = isMediaShowing && !splitShadeStateController
-                .shouldUseSplitNotificationShade(resources)
+        val isMediaShowingInStack =
+            isMediaShowing && !splitShadeStateController.shouldUseSplitNotificationShade(resources)
 
         log { "\tGet maxNotifWithoutSavingSpace ---" }
         val maxNotifWithoutSavingSpace =
@@ -378,8 +379,17 @@ constructor(
     }
 
     fun updateResources() {
-        maxKeyguardNotifications = if (notificationMinimalismPrototype()) 1
-            else infiniteIfNegative(resources.getInteger(R.integer.keyguard_max_notification_count))
+        maxKeyguardNotifications =
+            infiniteIfNegative(
+                if (notificationMinimalismPrototype()) {
+                    SystemProperties.getInt(
+                        "persist.notification_minimalism_prototype.lock_screen_max_notifs",
+                        1
+                    )
+                } else {
+                    resources.getInteger(R.integer.keyguard_max_notification_count)
+                }
+            )
         maxNotificationsExcludesMedia = notificationMinimalismPrototype()
 
         dividerHeight =
