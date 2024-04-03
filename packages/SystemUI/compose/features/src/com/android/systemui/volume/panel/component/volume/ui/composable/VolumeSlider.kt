@@ -16,13 +16,15 @@
 
 package com.android.systemui.volume.panel.component.volume.ui.composable
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -84,27 +86,29 @@ fun VolumeSlider(
         valueRange = state.valueRange,
         onValueChange = onValueChange,
         enabled = state.isEnabled,
-        icon = { isDragging ->
-            if (isDragging) {
-                Text(text = state.valueText, color = LocalContentColor.current)
-            } else {
-                state.icon?.let {
-                    SliderIcon(
-                        icon = it,
-                        onIconTapped = onIconTapped,
-                        isTappable = state.isMutable,
-                    )
-                }
+        icon = {
+            state.icon?.let {
+                SliderIcon(
+                    icon = it,
+                    onIconTapped = onIconTapped,
+                    isTappable = state.isMutable,
+                )
             }
         },
         colors = sliderColors,
-        label = {
-            VolumeSliderContent(
-                modifier = Modifier,
-                label = state.label,
-                isEnabled = state.isEnabled,
-                disabledMessage = state.disabledMessage,
-            )
+        label = { isDragging ->
+            AnimatedVisibility(
+                visible = !isDragging,
+                enter = fadeIn(tween(150)),
+                exit = fadeOut(tween(150)),
+            ) {
+                VolumeSliderContent(
+                    modifier = Modifier,
+                    label = state.label,
+                    isEnabled = state.isEnabled,
+                    disabledMessage = state.disabledMessage,
+                )
+            }
         }
     )
 }
