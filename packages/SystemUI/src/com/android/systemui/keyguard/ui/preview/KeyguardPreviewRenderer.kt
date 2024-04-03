@@ -47,6 +47,7 @@ import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.core.view.isInvisible
+import com.android.internal.policy.SystemBarUtils
 import com.android.keyguard.ClockEventController
 import com.android.keyguard.KeyguardClockSwitch
 import com.android.systemui.animation.view.LaunchableImageView
@@ -536,7 +537,7 @@ constructor(
                     )
                 )
             layoutParams.topMargin =
-                KeyguardPreviewSmartspaceViewModel.getStatusBarHeight(resources) +
+                SystemBarUtils.getStatusBarHeight(previewContext) +
                     resources.getDimensionPixelSize(
                         com.android.systemui.customization.R.dimen.small_clock_padding_top
                     )
