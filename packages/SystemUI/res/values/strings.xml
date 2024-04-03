@@ -2023,12 +2023,12 @@
     <!-- User visible title for the keyboard shortcut that pulls up Notes app for quick memo. [CHAR LIMIT=70] -->
     <string name="group_system_quick_memo">Take a note</string>
 
-    <!-- User visible title for the system multitasking keyboard shortcuts list. [CHAR LIMIT=70] -->
-    <string name="keyboard_shortcut_group_system_multitasking">System multitasking</string>
-    <!-- User visible title for the keyboard shortcut that enters split screen with current app to RHS [CHAR LIMIT=70] -->
-    <string name="system_multitasking_rhs">Enter split screen with current app to RHS</string>
-    <!-- User visible title for the keyboard shortcut that enters split screen with current app to LHS [CHAR LIMIT=70] -->
-    <string name="system_multitasking_lhs">Enter split screen with current app to LHS</string>
+    <!-- User visible title for the multitasking keyboard shortcuts list. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_system_multitasking">Multitasking</string>
+    <!-- User visible title for the keyboard shortcut that enters split screen with current app on the right [CHAR LIMIT=70] -->
+    <string name="system_multitasking_rhs">Use split screen with current app on the right</string>
+    <!-- User visible title for the keyboard shortcut that enters split screen with current app on the left [CHAR LIMIT=70] -->
+    <string name="system_multitasking_lhs">Use split screen with current app on the left</string>
     <!-- User visible title for the keyboard shortcut that switches from split screen to full screen [CHAR LIMIT=70] -->
     <string name="system_multitasking_full_screen">Switch from split screen to full screen</string>
     <!-- User visible title for the keyboard shortcut that switches to app on right or below while using split screen [CHAR LIMIT=70] -->
