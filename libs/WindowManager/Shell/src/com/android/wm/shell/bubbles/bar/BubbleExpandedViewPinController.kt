@@ -17,8 +17,8 @@
 package com.android.wm.shell.bubbles.bar
 
 import android.content.Context
+import android.graphics.Point
 import android.graphics.Rect
-import android.graphics.RectF
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
@@ -37,31 +37,25 @@ class BubbleExpandedViewPinController(
     private val context: Context,
     private val container: FrameLayout,
     private val positioner: BubblePositioner
-) : BaseBubblePinController() {
+) : BaseBubblePinController({ positioner.availableRect.let { Point(it.width(), it.height()) } }) {
 
     private var dropTargetView: View? = null
     private val tempRect: Rect by lazy(LazyThreadSafetyMode.NONE) { Rect() }
 
-    override fun getScreenCenterX(): Int {
-        return positioner.screenRect.centerX()
+    private val exclRectWidth: Float by lazy {
+        context.resources.getDimension(R.dimen.bubble_bar_dismiss_zone_width)
     }
 
-    override fun getExclusionRect(): RectF {
-        val rect =
-            RectF(
-                0f,
-                0f,
-                context.resources.getDimension(R.dimen.bubble_bar_dismiss_zone_width),
-                context.resources.getDimension(R.dimen.bubble_bar_dismiss_zone_height)
-            )
+    private val exclRectHeight: Float by lazy {
+        context.resources.getDimension(R.dimen.bubble_bar_dismiss_zone_height)
+    }
 
-        val screenRect = positioner.screenRect
-        // Center it around the bottom center of the screen
-        rect.offsetTo(
-            screenRect.exactCenterX() - rect.width() / 2f,
-            screenRect.bottom - rect.height()
-        )
-        return rect
+    override fun getExclusionRectWidth(): Float {
+        return exclRectWidth
+    }
+
+    override fun getExclusionRectHeight(): Float {
+        return exclRectHeight
     }
 
     override fun createDropTargetView(): View {
