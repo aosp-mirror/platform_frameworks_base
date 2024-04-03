@@ -43,8 +43,6 @@ import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockFaceLayout
 import com.android.systemui.res.R
 import com.android.systemui.shared.R as sharedR
-import com.android.systemui.statusbar.policy.SplitShadeStateController
-import com.android.systemui.util.Utils
 import dagger.Lazy
 import javax.inject.Inject
 
@@ -64,7 +62,6 @@ constructor(
     private val clockInteractor: KeyguardClockInteractor,
     protected val keyguardClockViewModel: KeyguardClockViewModel,
     private val context: Context,
-    private val splitShadeStateController: SplitShadeStateController,
     val smartspaceViewModel: KeyguardSmartspaceViewModel,
     val blueprintInteractor: Lazy<KeyguardBlueprintInteractor>,
 ) : KeyguardSection() {
@@ -162,12 +159,7 @@ constructor(
             connect(R.id.lockscreen_clock_view_large, START, PARENT_ID, START)
             connect(R.id.lockscreen_clock_view_large, END, guideline, END)
             connect(R.id.lockscreen_clock_view_large, BOTTOM, R.id.device_entry_icon_view, TOP)
-            var largeClockTopMargin =
-                context.resources.getDimensionPixelSize(R.dimen.status_bar_height) +
-                    context.resources.getDimensionPixelSize(
-                        customizationR.dimen.small_clock_padding_top
-                    ) +
-                    context.resources.getDimensionPixelSize(R.dimen.keyguard_smartspace_top_offset)
+            var largeClockTopMargin = KeyguardClockViewModel.getLargeClockTopMargin(context)
             largeClockTopMargin += getDimen(DATE_WEATHER_VIEW_HEIGHT)
             largeClockTopMargin += getDimen(ENHANCED_SMARTSPACE_HEIGHT)
 
@@ -187,14 +179,7 @@ constructor(
                 context.resources.getDimensionPixelSize(customizationR.dimen.clock_padding_start) +
                     context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
             )
-            val smallClockTopMargin =
-                if (splitShadeStateController.shouldUseSplitNotificationShade(context.resources)) {
-                    context.resources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin)
-                } else {
-                    context.resources.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin) +
-                        Utils.getStatusBarHeaderHeightKeyguard(context)
-                }
-
+            val smallClockTopMargin = keyguardClockViewModel.getSmallClockTopMargin(context)
             create(R.id.small_clock_guideline_top, ConstraintSet.HORIZONTAL_GUIDELINE)
             setGuidelineBegin(R.id.small_clock_guideline_top, smallClockTopMargin)
             connect(R.id.lockscreen_clock_view, TOP, R.id.small_clock_guideline_top, BOTTOM)

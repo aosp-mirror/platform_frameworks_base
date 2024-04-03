@@ -16,9 +16,11 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardSmartspaceInteractor
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -83,4 +85,16 @@ constructor(
 
     /* trigger clock and smartspace constraints change when smartspace appears */
     var bcSmartspaceVisibility: StateFlow<Int> = smartspaceInteractor.bcSmartspaceVisibility
+
+    companion object {
+        fun getSmartspaceStartMargin(context: Context): Int {
+            return context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_start) +
+                context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
+        }
+
+        fun getSmartspaceEndMargin(context: Context): Int {
+            return context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_end) +
+                context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
+        }
+    }
 }

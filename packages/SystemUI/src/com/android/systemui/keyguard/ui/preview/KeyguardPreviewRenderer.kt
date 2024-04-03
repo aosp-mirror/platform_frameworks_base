@@ -46,7 +46,6 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
-import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
 import androidx.core.view.isInvisible
 import com.android.keyguard.ClockEventController
 import com.android.keyguard.KeyguardClockSwitch
@@ -325,13 +324,9 @@ constructor(
         smartSpaceView = lockscreenSmartspaceController.buildAndConnectDateView(parentView)
 
         val topPadding: Int =
-            KeyguardPreviewSmartspaceViewModel.getLargeClockSmartspaceTopPadding(
-                previewContext.resources,
-            )
-        val startPadding: Int =
-            previewContext.resources.getDimensionPixelSize(R.dimen.below_clock_padding_start)
-        val endPadding: Int =
-            previewContext.resources.getDimensionPixelSize(R.dimen.below_clock_padding_end)
+            smartspaceViewModel.getLargeClockSmartspaceTopPadding(previewInSplitShade())
+        val startPadding: Int = smartspaceViewModel.getSmartspaceStartPadding()
+        val endPadding: Int = smartspaceViewModel.getSmartspaceEndPadding()
 
         smartSpaceView?.let {
             it.setPaddingRelative(startPadding, topPadding, endPadding, 0)
@@ -426,7 +421,15 @@ constructor(
         }
 
         setUpSmartspace(previewContext, rootView)
-        smartSpaceView?.let { KeyguardPreviewSmartspaceViewBinder.bind(it, smartspaceViewModel) }
+
+        smartSpaceView?.let {
+            KeyguardPreviewSmartspaceViewBinder.bind(
+                context,
+                it,
+                previewInSplitShade(),
+                smartspaceViewModel
+            )
+        }
         setupCommunalTutorialIndicator(keyguardRootView)
     }
 
@@ -703,6 +706,14 @@ constructor(
         }
         smallClockHostView.removeAllViews()
         smallClockHostView.addView(clock.smallClock.view)
+    }
+
+    /*
+     * When multi_crop_preview_ui_flag is on, we can preview portrait in split shadow direction
+     * or vice versa. So we need to decide preview direction by width and height
+     */
+    private fun previewInSplitShade(): Boolean {
+        return width > height
     }
 
     companion object {
