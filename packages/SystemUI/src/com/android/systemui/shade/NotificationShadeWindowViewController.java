@@ -563,6 +563,11 @@ public class NotificationShadeWindowViewController implements Dumpable {
             public boolean dispatchKeyEvent(KeyEvent event) {
                 return mSysUIKeyEventHandler.dispatchKeyEvent(event);
             }
+
+            @Override
+            public void collectKeyEvent(KeyEvent event) {
+                mFalsingCollector.onKeyEvent(event);
+            }
         });
 
         mView.setOnHierarchyChangeListener(new ViewGroup.OnHierarchyChangeListener() {

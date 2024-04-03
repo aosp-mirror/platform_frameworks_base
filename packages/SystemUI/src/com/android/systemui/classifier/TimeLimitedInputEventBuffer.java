@@ -16,7 +16,7 @@
 
 package com.android.systemui.classifier;
 
-import android.view.MotionEvent;
+import android.view.InputEvent;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,31 +25,31 @@ import java.util.List;
 import java.util.ListIterator;
 
 /**
- * Maintains an ordered list of the last N milliseconds of MotionEvents.
+ * Maintains an ordered list of the last N milliseconds of InputEvents.
  *
  * This class is simply a convenience class designed to look like a simple list, but that
- * automatically discards old MotionEvents. It functions much like a queue - first in first out -
+ * automatically discards old InputEvents. It functions much like a queue - first in first out -
  * but does not have a fixed size like a circular buffer.
  */
-public class TimeLimitedMotionEventBuffer implements List<MotionEvent> {
+public class TimeLimitedInputEventBuffer<T extends InputEvent> implements List<T> {
 
-    private final List<MotionEvent> mMotionEvents;
+    private final List<T> mInputEvents;
     private final long mMaxAgeMs;
 
-    public TimeLimitedMotionEventBuffer(long maxAgeMs) {
+    public TimeLimitedInputEventBuffer(long maxAgeMs) {
         super();
         mMaxAgeMs = maxAgeMs;
-        mMotionEvents = new ArrayList<>();
+        mInputEvents = new ArrayList<>();
     }
 
     private void ejectOldEvents() {
-        if (mMotionEvents.isEmpty()) {
+        if (mInputEvents.isEmpty()) {
             return;
         }
-        Iterator<MotionEvent> iter = listIterator();
-        long mostRecentMs = mMotionEvents.get(mMotionEvents.size() - 1).getEventTime();
+        Iterator<T> iter = listIterator();
+        long mostRecentMs = mInputEvents.get(mInputEvents.size() - 1).getEventTime();
         while (iter.hasNext()) {
-            MotionEvent ev = iter.next();
+            T ev = iter.next();
             if (mostRecentMs - ev.getEventTime() > mMaxAgeMs) {
                 iter.remove();
                 ev.recycle();
@@ -58,140 +58,140 @@ public class TimeLimitedMotionEventBuffer implements List<MotionEvent> {
     }
 
     @Override
-    public void add(int index, MotionEvent element) {
+    public void add(int index, T element) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public MotionEvent remove(int index) {
-        return mMotionEvents.remove(index);
+    public T remove(int index) {
+        return mInputEvents.remove(index);
     }
 
     @Override
     public int indexOf(Object o) {
-        return mMotionEvents.indexOf(o);
+        return mInputEvents.indexOf(o);
     }
 
     @Override
     public int lastIndexOf(Object o) {
-        return mMotionEvents.lastIndexOf(o);
+        return mInputEvents.lastIndexOf(o);
     }
 
     @Override
     public int size() {
-        return mMotionEvents.size();
+        return mInputEvents.size();
     }
 
     @Override
     public boolean isEmpty() {
-        return mMotionEvents.isEmpty();
+        return mInputEvents.isEmpty();
     }
 
     @Override
     public boolean contains(Object o) {
-        return mMotionEvents.contains(o);
+        return mInputEvents.contains(o);
     }
 
     @Override
-    public Iterator<MotionEvent> iterator() {
-        return mMotionEvents.iterator();
+    public Iterator<T> iterator() {
+        return mInputEvents.iterator();
     }
 
     @Override
     public Object[] toArray() {
-        return mMotionEvents.toArray();
+        return mInputEvents.toArray();
     }
 
     @Override
-    public <T> T[] toArray(T[] a) {
-        return mMotionEvents.toArray(a);
+    public <T2> T2[] toArray(T2[] a) {
+        return mInputEvents.toArray(a);
     }
 
     @Override
-    public boolean add(MotionEvent element) {
-        boolean result = mMotionEvents.add(element);
+    public boolean add(T element) {
+        boolean result = mInputEvents.add(element);
         ejectOldEvents();
         return result;
     }
 
     @Override
     public boolean remove(Object o) {
-        return mMotionEvents.remove(o);
+        return mInputEvents.remove(o);
     }
 
     @Override
     public boolean containsAll(Collection<?> c) {
-        return mMotionEvents.containsAll(c);
+        return mInputEvents.containsAll(c);
     }
 
     @Override
-    public boolean addAll(Collection<? extends MotionEvent> collection) {
-        boolean result = mMotionEvents.addAll(collection);
+    public boolean addAll(Collection<? extends T> collection) {
+        boolean result = mInputEvents.addAll(collection);
         ejectOldEvents();
         return result;
     }
 
     @Override
-    public boolean addAll(int index, Collection<? extends MotionEvent> elements) {
+    public boolean addAll(int index, Collection<? extends T> elements) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        return mMotionEvents.removeAll(c);
+        return mInputEvents.removeAll(c);
     }
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        return mMotionEvents.retainAll(c);
+        return mInputEvents.retainAll(c);
     }
 
     @Override
     public void clear() {
-        mMotionEvents.clear();
+        mInputEvents.clear();
     }
 
     @Override
     public boolean equals(Object o) {
-        return mMotionEvents.equals(o);
+        return mInputEvents.equals(o);
     }
 
     @Override
     public int hashCode() {
-        return mMotionEvents.hashCode();
+        return mInputEvents.hashCode();
     }
 
     @Override
-    public MotionEvent get(int index) {
-        return mMotionEvents.get(index);
+    public T get(int index) {
+        return mInputEvents.get(index);
     }
 
     @Override
-    public MotionEvent set(int index, MotionEvent element) {
+    public T set(int index, T element) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public ListIterator<MotionEvent> listIterator() {
+    public ListIterator<T> listIterator() {
         return new Iter(0);
     }
 
     @Override
-    public ListIterator<MotionEvent> listIterator(int index) {
+    public ListIterator<T> listIterator(int index) {
         return new Iter(index);
     }
 
     @Override
-    public List<MotionEvent> subList(int fromIndex, int toIndex) {
-        return mMotionEvents.subList(fromIndex, toIndex);
+    public List<T> subList(int fromIndex, int toIndex) {
+        return mInputEvents.subList(fromIndex, toIndex);
     }
 
-    class Iter implements ListIterator<MotionEvent> {
+    class Iter implements ListIterator<T> {
 
-        private final ListIterator<MotionEvent> mIterator;
+        private final ListIterator<T> mIterator;
 
         Iter(int index) {
-            this.mIterator = mMotionEvents.listIterator(index);
+            this.mIterator = mInputEvents.listIterator(index);
         }
 
         @Override
@@ -200,7 +200,7 @@ public class TimeLimitedMotionEventBuffer implements List<MotionEvent> {
         }
 
         @Override
-        public MotionEvent next() {
+        public T next() {
             return mIterator.next();
         }
 
@@ -210,7 +210,7 @@ public class TimeLimitedMotionEventBuffer implements List<MotionEvent> {
         }
 
         @Override
-        public MotionEvent previous() {
+        public T previous() {
             return mIterator.previous();
         }
 
@@ -230,12 +230,12 @@ public class TimeLimitedMotionEventBuffer implements List<MotionEvent> {
         }
 
         @Override
-        public void set(MotionEvent motionEvent) {
+        public void set(T inputEvent) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public void add(MotionEvent element) {
+        public void add(T element) {
             throw new UnsupportedOperationException();
         }
     }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.classifier;
 
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 /**
@@ -48,6 +49,14 @@ public interface FalsingCollector {
 
     /** */
     void onBouncerHidden();
+
+    /**
+     * Call this to record a KeyEvent in the {@link com.android.systemui.plugins.FalsingManager}.
+     *
+     * This may decide to only collect certain KeyEvents and ignore others. Do not assume all
+     * KeyEvents are collected.
+     */
+    void onKeyEvent(KeyEvent ev);
 
     /**
      * Call this to record a MotionEvent in the {@link com.android.systemui.plugins.FalsingManager}.
