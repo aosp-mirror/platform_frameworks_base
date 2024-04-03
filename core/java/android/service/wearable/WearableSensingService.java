@@ -20,13 +20,16 @@ import android.annotation.BinderThread;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.app.ambientcontext.AmbientContextEvent;
 import android.app.ambientcontext.AmbientContextEventRequest;
 import android.app.wearable.Flags;
+import android.app.wearable.IWearableSensingCallback;
 import android.app.wearable.WearableSensingDataRequest;
 import android.app.wearable.WearableSensingManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -34,18 +37,28 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteCallback;
+import android.os.RemoteException;
 import android.os.SharedMemory;
 import android.service.ambientcontext.AmbientContextDetectionResult;
 import android.service.ambientcontext.AmbientContextDetectionServiceStatus;
 import android.service.voice.HotwordAudioStream;
+import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.infra.AndroidFuture;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 /**
@@ -102,8 +115,13 @@ public abstract class WearableSensingService extends Service {
     public static final String SERVICE_INTERFACE =
             "android.service.wearable.WearableSensingService";
 
+    // Timeout to prevent thread from waiting on the openFile future indefinitely.
+    private static final Duration OPEN_FILE_TIMEOUT = Duration.ofSeconds(5);
+
     private final SparseArray<WearableSensingDataRequester> mDataRequestObserverIdToRequesterMap =
             new SparseArray<>();
+
+    private IWearableSensingCallback mWearableSensingCallback;
 
     @Nullable
     @Override
@@ -113,8 +131,13 @@ public abstract class WearableSensingService extends Service {
                 /** {@inheritDoc} */
                 @Override
                 public void provideSecureConnection(
-                        ParcelFileDescriptor secureWearableConnection, RemoteCallback callback) {
+                        ParcelFileDescriptor secureWearableConnection,
+                        IWearableSensingCallback wearableSensingCallback,
+                        RemoteCallback callback) {
                     Objects.requireNonNull(secureWearableConnection);
+                    if (wearableSensingCallback != null) {
+                        mWearableSensingCallback = wearableSensingCallback;
+                    }
                     Consumer<Integer> consumer = createWearableStatusConsumer(callback);
                     WearableSensingService.this.onSecureConnectionProvided(
                             secureWearableConnection, consumer);
@@ -123,8 +146,13 @@ public abstract class WearableSensingService extends Service {
                 /** {@inheritDoc} */
                 @Override
                 public void provideDataStream(
-                        ParcelFileDescriptor parcelFileDescriptor, RemoteCallback callback) {
+                        ParcelFileDescriptor parcelFileDescriptor,
+                        IWearableSensingCallback wearableSensingCallback,
+                        RemoteCallback callback) {
                     Objects.requireNonNull(parcelFileDescriptor);
+                    if (wearableSensingCallback != null) {
+                        mWearableSensingCallback = wearableSensingCallback;
+                    }
                     Consumer<Integer> consumer = createWearableStatusConsumer(callback);
                     WearableSensingService.this.onDataStreamProvided(
                             parcelFileDescriptor, consumer);
@@ -569,6 +597,64 @@ public abstract class WearableSensingService extends Service {
     public abstract void onQueryServiceStatus(@NonNull Set<Integer> eventTypes,
             @NonNull String packageName,
             @NonNull Consumer<AmbientContextDetectionServiceStatus> consumer);
+
+    /**
+     * Overrides {@link Context#openFileInput} to read files with the given {@code fileName} under
+     * the internal app storage of the APK providing the implementation for this class. {@link
+     * Context#getFilesDir()} will be added as a prefix to the provided {@code fileName}.
+     *
+     * <p>This method is only functional after {@link
+     * #onSecureConnectionProvided(ParcelFileDescriptor, Consumer)} or {@link
+     * #onDataStreamProvided(ParcelFileDescriptor, Consumer)} has been called as a result of a
+     * process owned by the same APK calling {@link
+     * WearableSensingManager#provideConnection(ParcelFileDescriptor, Executor, Consumer)} or {@link
+     * WearableSensingManager#provideDataStream(ParcelFileDescriptor, Executor, Consumer)}.
+     * Otherwise, it will throw an {@link IllegalStateException}. This is because this method
+     * proxies the file read via that process. Also, the APK needs to have a targetSdkVersion of 35
+     * or newer.
+     *
+     * @param fileName Relative path of a file under {@link Context#getFilesDir()}.
+     * @throws IllegalStateException if the above condition is not satisfied.
+     * @throws FileNotFoundException if the file does not exist or cannot be opened, or an error
+     *     occurred during the RPC to proxy the file read via a non-isolated process.
+     */
+    // SuppressLint is needed because the parent Context class does not specify the nullability of
+    // the parameter filename. If we remove the @NonNull annotation, the linter will complain about
+    // MissingNullability
+    @Override
+    public @NonNull FileInputStream openFileInput(
+            @SuppressLint("InvalidNullabilityOverride") @NonNull String fileName)
+            throws FileNotFoundException {
+        if (fileName == null) {
+            throw new IllegalArgumentException("filename cannot be null");
+        }
+        try {
+            if (mWearableSensingCallback == null) {
+                throw new IllegalStateException(
+                        "Cannot open file from WearableSensingService. WearableSensingCallback is"
+                                + " not available.");
+            }
+            AndroidFuture<ParcelFileDescriptor> future = new AndroidFuture<>();
+            mWearableSensingCallback.openFile(fileName, future);
+            ParcelFileDescriptor pfd =
+                    future.get(OPEN_FILE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
+            if (pfd == null) {
+                throw new FileNotFoundException(
+                        TextUtils.formatSimple(
+                                "File %s not found or unable to be opened in read-only mode.",
+                                fileName));
+            }
+            return new FileInputStream(pfd.getFileDescriptor());
+        } catch (RemoteException | ExecutionException | TimeoutException e) {
+            throw (FileNotFoundException)
+                    new FileNotFoundException("Cannot open file due to remote service failure")
+                            .initCause(e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw (FileNotFoundException)
+                    new FileNotFoundException("Interrupted when opening a file.").initCause(e);
+        }
+    }
 
     @NonNull
     private static Integer[] intArrayToIntegerArray(@NonNull int[] integerSet) {
