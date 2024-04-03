@@ -32,6 +32,7 @@ import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.hardware.input.InputManager;
 import android.net.Uri;
@@ -71,6 +72,7 @@ import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.sysui.ConfigurationChangeListener;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -81,7 +83,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Controls the window animation run when a user initiates a back gesture.
  */
-public class BackAnimationController implements RemoteCallable<BackAnimationController> {
+public class BackAnimationController implements RemoteCallable<BackAnimationController>,
+        ConfigurationChangeListener {
     private static final String TAG = "ShellBackPreview";
     private static final int SETTING_VALUE_OFF = 0;
     private static final int SETTING_VALUE_ON = 1;
@@ -248,6 +251,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mShellController.addExternalInterface(KEY_EXTRA_SHELL_BACK_ANIMATION,
                 this::createExternalInterface, this);
         mShellCommandHandler.addDumpCallback(this::dump, this);
+        mShellController.addConfigurationChangeListener(this);
     }
 
     private void setupAnimationDeveloperSettingsObserver(
@@ -295,6 +299,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     }
 
     private final BackAnimationImpl mBackAnimation = new BackAnimationImpl();
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        mShellBackAnimationRegistry.onConfigurationChanged(newConfig);
+    }
 
     @Override
     public Context getContext() {

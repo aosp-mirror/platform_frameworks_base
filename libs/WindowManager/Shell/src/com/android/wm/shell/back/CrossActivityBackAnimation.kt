@@ -67,7 +67,7 @@ class CrossActivityBackAnimation @Inject constructor(
 
     private val backAnimRect = Rect()
 
-    private val cornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context)
+    private var cornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context)
 
     private val backAnimationRunner = BackAnimationRunner(
         Callback(), Runner(), context, Cuj.CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY
@@ -92,6 +92,10 @@ class CrossActivityBackAnimation @Inject constructor(
 
     private var scrimLayer: SurfaceControl? = null
     private var maxScrimAlpha: Float = 0f
+
+    override fun onConfigurationChanged(newConfiguration: Configuration) {
+        cornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context)
+    }
 
     override fun getRunner() = backAnimationRunner
 
@@ -287,7 +291,7 @@ class CrossActivityBackAnimation @Inject constructor(
             // in case we're still animating an onBackCancelled event, let's remove the finish-
             // callback from the progress animator to prevent calling finishAnimation() before
             // restarting a new animation
-            progressAnimator.removeOnBackCancelledFinishCallback();
+            progressAnimator.removeOnBackCancelledFinishCallback()
 
             startBackAnimation(backMotionEvent)
             progressAnimator.onBackStarted(backMotionEvent) { backEvent: BackEvent ->
