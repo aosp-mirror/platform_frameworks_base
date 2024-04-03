@@ -32,6 +32,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
@@ -76,7 +77,8 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
     @Mock private UiEventLogger mUiEventLogger;
     @Mock private JavaAdapter mJavaAdapter;
     @Mock private ShadeInteractor mShadeInteractor;
-    private AvalancheController mAvalancheController = new AvalancheController();
+    @Mock private DumpManager dumpManager;
+    private AvalancheController mAvalancheController;
 
     private static final class TestableHeadsUpManagerPhone extends HeadsUpManagerPhone {
         TestableHeadsUpManagerPhone(
@@ -154,6 +156,8 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
         mDependency.injectMockDependency(NotificationShadeWindowController.class);
         mContext.getOrCreateTestableResources().addOverride(
                 R.integer.ambient_notification_extension_time, 500);
+
+        mAvalancheController = new AvalancheController(dumpManager);
     }
 
     @Test
