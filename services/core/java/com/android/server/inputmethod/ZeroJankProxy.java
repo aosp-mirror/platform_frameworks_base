@@ -196,7 +196,10 @@ public class ZeroJankProxy extends IInputMethodManager.Stub {
         return true;
     }
 
-    private void sendResultReceiverFailure(ResultReceiver resultReceiver) {
+    private void sendResultReceiverFailure(@Nullable ResultReceiver resultReceiver) {
+        if (resultReceiver == null) {
+            return;
+        }
         resultReceiver.send(
                 mIsInputShown.getAsBoolean()
                         ? InputMethodManager.RESULT_UNCHANGED_SHOWN
