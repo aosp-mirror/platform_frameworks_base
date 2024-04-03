@@ -35,6 +35,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -750,35 +751,31 @@ public class InfoMediaManagerTest {
 
     @Test
     public void onTransferred_getAvailableRoutes_shouldAddMediaDevice() {
-        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
-        final RoutingSessionInfo sessionInfo = mock(RoutingSessionInfo.class);
-        routingSessionInfos.add(sessionInfo);
-        final List<String> selectedRoutes = new ArrayList<>();
-        selectedRoutes.add(TEST_ID);
-        when(sessionInfo.getSelectedRoutes()).thenReturn(selectedRoutes);
-        mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
+        mInfoMediaManager.mRouterManager = mRouterManager;
+        // Since test is running in Robolectric, return a fake session to avoid NPE.
+        when(mRouterManager.getRoutingSessions(anyString()))
+                .thenReturn(List.of(TEST_SYSTEM_ROUTING_SESSION));
+        when(mRouterManager.getSelectedRoutes(any()))
+                .thenReturn(List.of(TEST_SELECTED_SYSTEM_ROUTE));
 
-        final MediaRoute2Info info = mock(MediaRoute2Info.class);
         mInfoMediaManager.registerCallback(mCallback);
 
-        when(info.getDeduplicationIds()).thenReturn(Set.of());
-        when(info.getId()).thenReturn(TEST_ID);
-        when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        MediaDevice mediaDevice = mInfoMediaManager.getCurrentConnectedDevice();
+        assertThat(mediaDevice).isNotNull();
+        assertThat(mediaDevice.getId()).isEqualTo(TEST_SYSTEM_ROUTE_ID);
 
-        final List<MediaRoute2Info> routes = new ArrayList<>();
-        routes.add(info);
-        mShadowRouter2Manager.setTransferableRoutes(routes);
+        when(mRouterManager.getRoutingSessions(anyString()))
+                .thenReturn(List.of(TEST_SYSTEM_ROUTING_SESSION, TEST_REMOTE_ROUTING_SESSION));
+        when(mRouterManager.getSelectedRoutes(any())).thenReturn(List.of(TEST_REMOTE_ROUTE));
 
-        final MediaDevice mediaDevice = mInfoMediaManager.findMediaDevice(TEST_ID);
-        assertThat(mediaDevice).isNull();
-
-        mInfoMediaManager.mMediaRouterCallback.onTransferred(sessionInfo, sessionInfo);
+        mInfoMediaManager.mMediaRouterCallback.onTransferred(
+                TEST_SYSTEM_ROUTING_SESSION, TEST_REMOTE_ROUTING_SESSION);
 
         final MediaDevice infoDevice = mInfoMediaManager.mMediaDevices.get(0);
-        assertThat(infoDevice.getId()).isEqualTo(TEST_ID);
+        assertThat(infoDevice).isNotNull();
+        assertThat(infoDevice.getId()).isEqualTo(TEST_REMOTE_ROUTE.getId());
         assertThat(mInfoMediaManager.getCurrentConnectedDevice()).isEqualTo(infoDevice);
-        assertThat(mInfoMediaManager.mMediaDevices).hasSize(routes.size());
-        verify(mCallback).onConnectedDeviceChanged(TEST_ID);
+        verify(mCallback).onConnectedDeviceChanged(TEST_REMOTE_ROUTE.getId());
     }
 
     @Test
@@ -794,7 +791,8 @@ public class InfoMediaManagerTest {
 
         mInfoMediaManager.mMediaRouterCallback.onSessionUpdated(TEST_SYSTEM_ROUTING_SESSION);
 
-        verify(mCallback).onDeviceListAdded(any());
+        // Expecting 1st call after registerCallback() and 2nd call after onSessionUpdated().
+        verify(mCallback, times(2)).onDeviceListAdded(any());
     }
 
     @Test

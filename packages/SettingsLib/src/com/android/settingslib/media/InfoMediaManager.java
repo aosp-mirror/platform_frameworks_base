@@ -173,11 +173,7 @@ public abstract class InfoMediaManager {
     }
 
     public void startScan() {
-        mMediaDevices.clear();
-        registerRouter();
         startScanOnRouter();
-        updateRouteListingPreference();
-        refreshDevices();
     }
 
     private void updateRouteListingPreference() {
@@ -191,7 +187,6 @@ public abstract class InfoMediaManager {
 
     public final void stopScan() {
         stopScanOnRouter();
-        unregisterRouter();
     }
 
     protected abstract void stopScanOnRouter();
@@ -278,14 +273,37 @@ public abstract class InfoMediaManager {
         return null;
     }
 
-    protected final void registerCallback(MediaDeviceCallback callback) {
+    /**
+     * Registers the specified {@code callback} to receive state updates about routing information.
+     *
+     * <p>As long as there is a registered {@link MediaDeviceCallback}, {@link InfoMediaManager}
+     * will receive state updates from the platform.
+     *
+     * <p>Call {@link #unregisterCallback(MediaDeviceCallback)} once you no longer need platform
+     * updates.
+     */
+    public final void registerCallback(@NonNull MediaDeviceCallback callback) {
+        boolean wasEmpty = mCallbacks.isEmpty();
         if (!mCallbacks.contains(callback)) {
             mCallbacks.add(callback);
+            if (wasEmpty) {
+                mMediaDevices.clear();
+                registerRouter();
+                updateRouteListingPreference();
+                refreshDevices();
+            }
         }
     }
 
-    protected final void unregisterCallback(MediaDeviceCallback callback) {
-        mCallbacks.remove(callback);
+    /**
+     * Unregisters the specified {@code callback}.
+     *
+     * @see #registerCallback(MediaDeviceCallback)
+     */
+    public final void unregisterCallback(@NonNull MediaDeviceCallback callback) {
+        if (mCallbacks.remove(callback) && mCallbacks.isEmpty()) {
+            unregisterRouter();
+        }
     }
 
     private void dispatchDeviceListAdded(@NonNull List<MediaDevice> devices) {

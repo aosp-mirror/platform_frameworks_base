@@ -35,6 +35,7 @@ import com.android.settingslib.flags.Flags.legacyLeAudioSharing
 import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
 import com.android.settingslib.media.PhoneMediaDevice
+import com.android.settingslib.media.flags.Flags
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.controls.shared.model.MediaData
@@ -178,7 +179,9 @@ constructor(
             bgExecutor.execute {
                 if (!started) {
                     localMediaManager.registerCallback(this)
-                    localMediaManager.startScan()
+                    if (!Flags.removeUnnecessaryRouteScanning()) {
+                        localMediaManager.startScan()
+                    }
                     muteAwaitConnectionManager.startListening()
                     playbackType = controller?.playbackInfo?.playbackType ?: PLAYBACK_TYPE_UNKNOWN
                     playbackVolumeControlId = controller?.playbackInfo?.volumeControlId
@@ -195,7 +198,9 @@ constructor(
                 if (started) {
                     started = false
                     controller?.unregisterCallback(this)
-                    localMediaManager.stopScan()
+                    if (!Flags.removeUnnecessaryRouteScanning()) {
+                        localMediaManager.stopScan()
+                    }
                     localMediaManager.unregisterCallback(this)
                     muteAwaitConnectionManager.stopListening()
                     configurationController.removeCallback(configListener)
