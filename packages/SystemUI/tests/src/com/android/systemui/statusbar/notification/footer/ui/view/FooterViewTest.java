@@ -299,8 +299,6 @@ public class FooterViewTest extends SysuiTestCase {
     @Test
     public void testSetFooterLabelVisible() {
         mView.setFooterLabelVisible(true);
-        assertThat(mView.findViewById(R.id.manage_text).getVisibility()).isEqualTo(View.GONE);
-        assertThat(mView.findSecondaryView().getVisibility()).isEqualTo(View.GONE);
         assertThat(mView.findViewById(R.id.unlock_prompt_footer).getVisibility())
                 .isEqualTo(View.VISIBLE);
     }
@@ -308,8 +306,6 @@ public class FooterViewTest extends SysuiTestCase {
     @Test
     public void testSetFooterLabelInvisible() {
         mView.setFooterLabelVisible(false);
-        assertThat(mView.findViewById(R.id.manage_text).getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(mView.findSecondaryView().getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mView.findViewById(R.id.unlock_prompt_footer).getVisibility())
                 .isEqualTo(View.GONE);
     }

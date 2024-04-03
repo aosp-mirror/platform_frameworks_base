@@ -102,6 +102,11 @@ public class FooterView extends StackScrollerDecorView {
         setClearAllButtonVisible(visible, animate, /* onAnimationEnded = */ null);
     }
 
+    /** Set the visibility of the "Manage"/"History" button to {@code visible}. */
+    public void setManageOrHistoryButtonVisible(boolean visible) {
+        mManageOrHistoryButton.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
     /**
      * Set the visibility of the "Clear all" button to {@code visible}. Animate the change if
      * {@code animate} is true.
@@ -274,14 +279,23 @@ public class FooterView extends StackScrollerDecorView {
 
     /** Show a message instead of the footer buttons. */
     public void setFooterLabelVisible(boolean isVisible) {
-        if (isVisible) {
-            mManageOrHistoryButton.setVisibility(View.GONE);
-            mClearAllButton.setVisibility(View.GONE);
-            mSeenNotifsFooterTextView.setVisibility(View.VISIBLE);
+        // In the refactored code, hiding the buttons is handled in the FooterViewModel
+        if (FooterViewRefactor.isEnabled()) {
+            if (isVisible) {
+                mSeenNotifsFooterTextView.setVisibility(View.VISIBLE);
+            } else {
+                mSeenNotifsFooterTextView.setVisibility(View.GONE);
+            }
         } else {
-            mManageOrHistoryButton.setVisibility(View.VISIBLE);
-            mClearAllButton.setVisibility(View.VISIBLE);
-            mSeenNotifsFooterTextView.setVisibility(View.GONE);
+            if (isVisible) {
+                mManageOrHistoryButton.setVisibility(View.GONE);
+                mClearAllButton.setVisibility(View.GONE);
+                mSeenNotifsFooterTextView.setVisibility(View.VISIBLE);
+            } else {
+                mManageOrHistoryButton.setVisibility(View.VISIBLE);
+                mClearAllButton.setVisibility(View.VISIBLE);
+                mSeenNotifsFooterTextView.setVisibility(View.GONE);
+            }
         }
     }
 
