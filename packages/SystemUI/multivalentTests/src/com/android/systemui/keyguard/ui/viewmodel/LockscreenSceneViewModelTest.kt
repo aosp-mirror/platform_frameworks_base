@@ -121,7 +121,6 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
                     AuthenticationMethodModel.Pin
                 }
             )
-            kosmos.fakeDeviceEntryRepository.setUnlocked(canSwipeToEnter)
             sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
             kosmos.shadeRepository.setShadeMode(
                 if (isSingleShade) {

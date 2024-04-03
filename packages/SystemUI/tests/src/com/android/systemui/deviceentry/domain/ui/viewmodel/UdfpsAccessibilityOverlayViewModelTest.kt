@@ -122,7 +122,6 @@ class UdfpsAccessibilityOverlayViewModelTest : SysuiTestCase() {
         fingerprintPropertyRepository.supportsUdfps()
         biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
         deviceEntryFingerprintAuthRepository.setIsRunning(true)
-        deviceEntryRepository.setUnlocked(false)
 
         // Lockscreen
         keyguardTransitionRepository.sendTransitionStep(
