@@ -7028,7 +7028,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // by finishing the recents animation and moving it to top. That also avoids flickering
             // due to wait for previous activity to be paused if it supports PiP that ignores the
             // effect of resume-while-pausing.
-            if (r == null || r == mAnimatingRecents) {
+            if (r == null || r == mAnimatingRecents || r.getDisplayId() != mDisplayId) {
                 return;
             }
             if (mAnimatingRecents != null && mRecentsWillBeTop) {
