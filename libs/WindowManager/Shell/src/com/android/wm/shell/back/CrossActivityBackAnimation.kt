@@ -25,6 +25,7 @@ import android.graphics.PointF
 import android.graphics.Rect
 import android.graphics.RectF
 import android.os.RemoteException
+import android.view.Choreographer
 import android.view.Display
 import android.view.IRemoteAnimationFinishedCallback
 import android.view.IRemoteAnimationRunner
@@ -137,7 +138,7 @@ class CrossActivityBackAnimation @Inject constructor(
             enteringTarget!!.taskInfo.taskDescription!!.backgroundColor, transaction
         )
         ensureScrimLayer()
-        transaction.apply()
+        applyTransaction()
     }
 
     private fun onGestureProgress(backEvent: BackEvent) {
@@ -150,7 +151,7 @@ class CrossActivityBackAnimation @Inject constructor(
         currentEnteringRect.setInterpolatedRectF(startEnteringRect, targetEnteringRect, progress)
         currentEnteringRect.offset(0f, yOffset)
         applyTransform(enteringTarget?.leash, currentEnteringRect, 1f)
-        transaction.apply()
+        applyTransaction()
     }
 
     private fun getYOffset(centeredRect: RectF, touchY: Float): Float {
@@ -210,7 +211,7 @@ class CrossActivityBackAnimation @Inject constructor(
         applyTransform(closingTarget?.leash, currentClosingRect, closingAlpha)
         currentEnteringRect.setInterpolatedRectF(startEnteringRect, targetEnteringRect, progress)
         applyTransform(enteringTarget?.leash, currentEnteringRect, 1f)
-        transaction.apply()
+        applyTransaction()
     }
 
     private fun finishAnimation() {
@@ -226,7 +227,7 @@ class CrossActivityBackAnimation @Inject constructor(
         closingTarget = null
 
         background.removeBackground(transaction)
-        transaction.apply()
+        applyTransaction()
         transformMatrix.reset()
         initialTouchPos.set(0f, 0f)
         try {
@@ -248,6 +249,11 @@ class CrossActivityBackAnimation @Inject constructor(
             .setMatrix(leash, transformMatrix, tmpFloat9)
             .setCrop(leash, backAnimRect)
             .setCornerRadius(leash, cornerRadius)
+    }
+
+    private fun applyTransaction() {
+        transaction.setFrameTimelineVsync(Choreographer.getInstance().vsyncId)
+        transaction.apply()
     }
 
     private fun ensureScrimLayer() {
@@ -275,7 +281,8 @@ class CrossActivityBackAnimation @Inject constructor(
     private fun removeScrimLayer() {
         scrimLayer?.let {
             if (it.isValid) {
-                transaction.remove(it).apply()
+                transaction.remove(it)
+                applyTransaction()
             }
         }
         scrimLayer = null
@@ -287,7 +294,7 @@ class CrossActivityBackAnimation @Inject constructor(
             // in case we're still animating an onBackCancelled event, let's remove the finish-
             // callback from the progress animator to prevent calling finishAnimation() before
             // restarting a new animation
-            progressAnimator.removeOnBackCancelledFinishCallback();
+            progressAnimator.removeOnBackCancelledFinishCallback()
 
             startBackAnimation(backMotionEvent)
             progressAnimator.onBackStarted(backMotionEvent) { backEvent: BackEvent ->
