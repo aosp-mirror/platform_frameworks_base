@@ -2773,15 +2773,15 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
             code = AppOpsManager.opToSwitch(code);
             UidState uidState = getUidStateLocked(uid, false);
-            if (uidState != null
-                    && mAppOpsCheckingService.getUidMode(
-                                    uidState.uid, getPersistentId(virtualDeviceId), code)
-                            != AppOpsManager.opToDefaultMode(code)) {
-                final int rawMode =
-                        mAppOpsCheckingService.getUidMode(
-                                uidState.uid, getPersistentId(virtualDeviceId), code);
-                return raw ? rawMode : uidState.evalMode(code, rawMode);
+            if (uidState != null) {
+                int rawUidMode = mAppOpsCheckingService.getUidMode(
+                        uidState.uid, getPersistentId(virtualDeviceId), code);
+
+                if (rawUidMode != AppOpsManager.opToDefaultMode(code)) {
+                    return raw ? rawUidMode : uidState.evalMode(code, rawUidMode);
+                }
             }
+
             Op op = getOpLocked(code, uid, packageName, null, false, pvr.bypass, /* edit */ false);
             if (op == null) {
                 return AppOpsManager.opToDefaultMode(code);
@@ -3682,26 +3682,24 @@ public class AppOpsService extends IAppOpsService.Stub {
             isRestricted = isOpRestrictedLocked(uid, code, packageName, attributionTag,
                     virtualDeviceId, pvr.bypass, false);
             final int switchCode = AppOpsManager.opToSwitch(code);
+
+            int rawUidMode;
             if (isOpAllowedForUid(uid)) {
                 // Op is always allowed for the UID, do nothing.
 
                 // If there is a non-default per UID policy (we set UID op mode only if
                 // non-default) it takes over, otherwise use the per package policy.
-            } else if (mAppOpsCheckingService.getUidMode(
-                    uidState.uid, getPersistentId(virtualDeviceId), switchCode)
+            } else if ((rawUidMode =
+                            mAppOpsCheckingService.getUidMode(
+                                    uidState.uid, getPersistentId(virtualDeviceId), switchCode))
                     != AppOpsManager.opToDefaultMode(switchCode)) {
-                final int uidMode =
-                        uidState.evalMode(
-                                code,
-                                mAppOpsCheckingService.getUidMode(
-                                        uidState.uid,
-                                        getPersistentId(virtualDeviceId),
-                                        switchCode));
+                final int uidMode = uidState.evalMode(code, rawUidMode);
                 if (!shouldStartForMode(uidMode, startIfModeDefault)) {
                     if (DEBUG) {
                         Slog.d(TAG, "startOperation: uid reject #" + uidMode + " for code "
                                 + switchCode + " (" + code + ") uid " + uid + " package "
-                                + packageName + " flags: " + AppOpsManager.flagsToString(flags));
+                                + packageName + " flags: "
+                                + AppOpsManager.flagsToString(flags));
                     }
                     attributedOp.rejected(uidState.getState(), flags);
                     scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
@@ -3710,8 +3708,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     return new SyncNotedAppOp(uidMode, code, attributionTag, packageName);
                 }
             } else {
-                final Op switchOp = switchCode != code ? getOpLocked(ops, switchCode, uid, true)
-                        : op;
+                final Op switchOp =
+                        switchCode != code ? getOpLocked(ops, switchCode, uid, true) : op;
                 final int mode =
                         switchOp.uidState.evalMode(
                                 switchOp.op,
@@ -3721,9 +3719,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                                         UserHandle.getUserId(switchOp.uid)));
                 if (mode != AppOpsManager.MODE_ALLOWED
                         && (!startIfModeDefault || mode != MODE_DEFAULT)) {
-                    if (DEBUG) Slog.d(TAG, "startOperation: reject #" + mode + " for code "
-                            + switchCode + " (" + code + ") uid " + uid + " package "
-                            + packageName + " flags: " + AppOpsManager.flagsToString(flags));
+                    if (DEBUG) {
+                        Slog.d(TAG, "startOperation: reject #" + mode + " for code "
+                                + switchCode + " (" + code + ") uid " + uid + " package "
+                                + packageName + " flags: "
+                                + AppOpsManager.flagsToString(flags));
+                    }
                     attributedOp.rejected(uidState.getState(), flags);
                     scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
                             virtualDeviceId, flags, mode, startType, attributionFlags,
@@ -3731,6 +3732,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     return new SyncNotedAppOp(mode, code, attributionTag, packageName);
                 }
             }
+
             if (DEBUG) Slog.d(TAG, "startOperation: allowing code " + code + " uid " + uid
                     + " package " + packageName + " restricted: " + isRestricted
                     + " flags: " + AppOpsManager.flagsToString(flags));

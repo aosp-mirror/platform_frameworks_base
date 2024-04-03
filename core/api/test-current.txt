@@ -263,6 +263,7 @@ package android.app {
     method @RequiresPermission("android.permission.MANAGE_APPOPS") public void setHistoryParameters(int, long, int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES) public void setMode(int, int, String, int);
     method public static int strOpToOp(@NonNull String);
+    method public int unsafeCheckOpRawNoThrow(@NonNull String, @NonNull android.content.AttributionSource);
     field public static final int ATTRIBUTION_CHAIN_ID_NONE = -1; // 0xffffffff
     field public static final int ATTRIBUTION_FLAGS_NONE = 0; // 0x0
     field public static final int ATTRIBUTION_FLAG_ACCESSOR = 1; // 0x1

@@ -8790,6 +8790,18 @@ public class AppOpsManager {
      * Does not throw a security exception, does not translate {@link #MODE_FOREGROUND}.
      * @hide
      */
+    @TestApi
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    public int unsafeCheckOpRawNoThrow(
+            @NonNull String op, @NonNull AttributionSource attributionSource) {
+        return unsafeCheckOpRawNoThrow(strOpToOp(op), attributionSource);
+    }
+
+    /**
+     * Returns the <em>raw</em> mode associated with the op.
+     * Does not throw a security exception, does not translate {@link #MODE_FOREGROUND}.
+     * @hide
+     */
     public int unsafeCheckOpRawNoThrow(int op, int uid, @NonNull String packageName) {
         return unsafeCheckOpRawNoThrow(op, uid, packageName, Context.DEVICE_ID_DEFAULT);
     }
@@ -8800,8 +8812,8 @@ public class AppOpsManager {
             if (virtualDeviceId == Context.DEVICE_ID_DEFAULT) {
                 return mService.checkOperationRaw(op, uid, packageName, null);
             } else {
-                return mService.checkOperationRawForDevice(op, uid, packageName, null,
-                        Context.DEVICE_ID_DEFAULT);
+                return mService.checkOperationRawForDevice(
+                        op, uid, packageName, null, virtualDeviceId);
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
