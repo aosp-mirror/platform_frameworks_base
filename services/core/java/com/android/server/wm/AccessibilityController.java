@@ -24,6 +24,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CO
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
+import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
 
 import static com.android.internal.util.DumpUtils.dumpSparseArray;
 import static com.android.internal.util.DumpUtils.dumpSparseArrayValues;
@@ -93,6 +94,8 @@ import android.view.SurfaceControl;
 import android.view.ViewConfiguration;
 import android.view.WindowInfo;
 import android.view.WindowManager;
+import android.view.WindowManager.TransitionFlags;
+import android.view.WindowManager.TransitionType;
 import android.view.WindowManagerPolicyConstants;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -357,14 +360,15 @@ final class AccessibilityController {
         // Not relevant for the window observer.
     }
 
-    void onWMTransition(int displayId, @WindowManager.TransitionType int type) {
+    void onWMTransition(int displayId, @TransitionType int type, @TransitionFlags int flags) {
         if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
-            mAccessibilityTracing.logTrace(TAG + ".onAppWindowTransition",
-                    FLAGS_MAGNIFICATION_CALLBACK, "displayId=" + displayId + "; type=" + type);
+            mAccessibilityTracing.logTrace(TAG + ".onWMTransition",
+                    FLAGS_MAGNIFICATION_CALLBACK,
+                    "displayId=" + displayId + "; type=" + type + "; flags=" + flags);
         }
         final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
         if (displayMagnifier != null) {
-            displayMagnifier.onWMTransition(displayId, type);
+            displayMagnifier.onWMTransition(displayId, type, flags);
         }
         // Not relevant for the window observer.
     }
@@ -574,6 +578,11 @@ final class AccessibilityController {
     void onFocusChanged(InputTarget lastTarget, InputTarget newTarget) {
         if (lastTarget != null) {
             mFocusedWindow.remove(lastTarget.getDisplayId());
+            final DisplayMagnifier displayMagnifier =
+                    mDisplayMagnifiers.get(lastTarget.getDisplayId());
+            if (displayMagnifier != null) {
+                displayMagnifier.onFocusLost(lastTarget);
+            }
         }
         if (newTarget != null) {
             int displayId = newTarget.getDisplayId();
@@ -625,6 +634,7 @@ final class AccessibilityController {
         private final AccessibilityControllerInternalImpl mAccessibilityTracing;
 
         private final MagnificationCallbacks mCallbacks;
+        private final UserContextChangedNotifier mUserContextChangedNotifier;
 
         private final long mLongAnimationDuration;
 
@@ -653,6 +663,7 @@ final class AccessibilityController {
             mDisplayContent = displayContent;
             mDisplay = display;
             mHandler = new MyHandler(mService.mH.getLooper());
+            mUserContextChangedNotifier = new UserContextChangedNotifier(mHandler);
             mMagnifiedViewport = Flags.alwaysDrawMagnificationFullscreenBorder()
                     ? null : new MagnifiedViewport();
             mAccessibilityTracing =
@@ -764,40 +775,43 @@ final class AccessibilityController {
                         + " displayId: " + displayId);
             }
             final boolean isMagnifierActivated = isFullscreenMagnificationActivated();
-            if (isMagnifierActivated) {
-                switch (transition) {
-                    case WindowManager.TRANSIT_OLD_ACTIVITY_OPEN:
-                    case WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN:
-                    case WindowManager.TRANSIT_OLD_TASK_OPEN:
-                    case WindowManager.TRANSIT_OLD_TASK_TO_FRONT:
-                    case WindowManager.TRANSIT_OLD_WALLPAPER_OPEN:
-                    case WindowManager.TRANSIT_OLD_WALLPAPER_CLOSE:
-                    case WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_OPEN: {
-                        mHandler.sendEmptyMessage(MyHandler.MESSAGE_NOTIFY_USER_CONTEXT_CHANGED);
-                    }
+            if (!isMagnifierActivated) {
+                return;
+            }
+            switch (transition) {
+                case WindowManager.TRANSIT_OLD_ACTIVITY_OPEN:
+                case WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN:
+                case WindowManager.TRANSIT_OLD_TASK_OPEN:
+                case WindowManager.TRANSIT_OLD_TASK_TO_FRONT:
+                case WindowManager.TRANSIT_OLD_WALLPAPER_OPEN:
+                case WindowManager.TRANSIT_OLD_WALLPAPER_CLOSE:
+                case WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_OPEN: {
+                    mUserContextChangedNotifier.onAppWindowTransition(transition);
                 }
             }
         }
 
-        void onWMTransition(int displayId, @WindowManager.TransitionType int type) {
+        void onWMTransition(int displayId, @TransitionType int type, @TransitionFlags int flags) {
             if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
                 mAccessibilityTracing.logTrace(LOG_TAG + ".onWMTransition",
-                        FLAGS_MAGNIFICATION_CALLBACK, "displayId=" + displayId + "; type=" + type);
+                        FLAGS_MAGNIFICATION_CALLBACK,
+                        "displayId=" + displayId + "; type=" + type + "; flags=" + flags);
             }
             if (DEBUG_WINDOW_TRANSITIONS) {
                 Slog.i(LOG_TAG, "Window transition: " + WindowManager.transitTypeToString(type)
                         + " displayId: " + displayId);
             }
             final boolean isMagnifierActivated = isFullscreenMagnificationActivated();
-            if (isMagnifierActivated) {
-                // All opening/closing situations.
-                switch (type) {
-                    case WindowManager.TRANSIT_OPEN:
-                    case WindowManager.TRANSIT_TO_FRONT:
-                    case WindowManager.TRANSIT_CLOSE:
-                    case WindowManager.TRANSIT_TO_BACK:
-                        mHandler.sendEmptyMessage(MyHandler.MESSAGE_NOTIFY_USER_CONTEXT_CHANGED);
-                }
+            if (!isMagnifierActivated) {
+                return;
+            }
+            // All opening/closing situations.
+            switch (type) {
+                case WindowManager.TRANSIT_OPEN:
+                case WindowManager.TRANSIT_TO_FRONT:
+                case WindowManager.TRANSIT_CLOSE:
+                case WindowManager.TRANSIT_TO_BACK:
+                    mUserContextChangedNotifier.onWMTransition(type, flags);
             }
         }
 
@@ -813,13 +827,14 @@ final class AccessibilityController {
                         + " displayId: " + windowState.getDisplayId());
             }
             final boolean isMagnifierActivated = isFullscreenMagnificationActivated();
+            if (!isMagnifierActivated || !windowState.shouldMagnify()) {
+                return;
+            }
+            mUserContextChangedNotifier.onWindowTransition(windowState, transition);
             final int type = windowState.mAttrs.type;
             switch (transition) {
                 case WindowManagerPolicy.TRANSIT_ENTER:
                 case WindowManagerPolicy.TRANSIT_SHOW: {
-                    if (!isMagnifierActivated || !windowState.shouldMagnify()) {
-                        break;
-                    }
                     switch (type) {
                         case WindowManager.LayoutParams.TYPE_APPLICATION:
                         case WindowManager.LayoutParams.TYPE_DRAWN_APPLICATION:
@@ -857,6 +872,14 @@ final class AccessibilityController {
                     } break;
                 }
             }
+        }
+
+        void onFocusLost(InputTarget target) {
+            final boolean isMagnifierActivated = isFullscreenMagnificationActivated();
+            if (!isMagnifierActivated) {
+                return;
+            }
+            mUserContextChangedNotifier.onFocusLost(target);
         }
 
         void getMagnifiedFrameInContentCoords(Rect rect) {
@@ -1582,6 +1605,65 @@ final class AccessibilityController {
                         mCallbacks.onImeWindowVisibilityChanged(shown);
                     } break;
                 }
+            }
+        }
+
+        private class UserContextChangedNotifier {
+
+            private final Handler mHandler;
+
+            private boolean mHasDelayedNotificationForRecentsToFrontTransition;
+
+            UserContextChangedNotifier(Handler handler) {
+                mHandler = handler;
+            }
+
+            void onAppWindowTransition(int transition) {
+                sendUserContextChangedNotification();
+            }
+
+            // For b/324949652, if the onWMTransition callback is triggered when the finger down
+            // event on navigation bar to bring the recents window to front, we'll delay the
+            // notifying of the context changed, then send it if there is a following onFocusChanged
+            // callback triggered. Before the onFocusChanged, if there are some other transitions
+            // causing the notifying, or the recents/home window is removed, then we won't need the
+            // delayed notification anymore.
+            void onWMTransition(@TransitionType int type, @TransitionFlags int flags) {
+                if (Flags.delayNotificationToMagnificationWhenRecentsWindowToFrontTransition()
+                        && type == WindowManager.TRANSIT_TO_FRONT
+                        && (flags & TRANSIT_FLAG_IS_RECENTS) != 0) {
+                    // Delay the recents to front transition notification then send after if needed.
+                    mHasDelayedNotificationForRecentsToFrontTransition = true;
+                } else {
+                    sendUserContextChangedNotification();
+                }
+            }
+
+            void onWindowTransition(WindowState windowState, int transition) {
+                // If there is a delayed notification for recents to front transition but the
+                // home/recents window has been removed from screen, the delayed notification is not
+                // needed anymore.
+                if (transition == WindowManagerPolicy.TRANSIT_EXIT
+                        && windowState.isActivityTypeHomeOrRecents()
+                        && mHasDelayedNotificationForRecentsToFrontTransition) {
+                    mHasDelayedNotificationForRecentsToFrontTransition = false;
+                }
+            }
+
+            void onFocusLost(InputTarget target) {
+                // If there is a delayed notification for recents to front transition and
+                // onFocusLost is triggered, we assume that the users leave current window to
+                // the home/recents window, thus we'll need to send the delayed notification.
+                if (mHasDelayedNotificationForRecentsToFrontTransition) {
+                    sendUserContextChangedNotification();
+                }
+            }
+
+            private void sendUserContextChangedNotification() {
+                // Since the context changed will be notified, the delayed notification is
+                // not needed anymore.
+                mHasDelayedNotificationForRecentsToFrontTransition = false;
+                mHandler.sendEmptyMessage(MyHandler.MESSAGE_NOTIFY_USER_CONTEXT_CHANGED);
             }
         }
     }
