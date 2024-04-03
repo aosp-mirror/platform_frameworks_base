@@ -29,3 +29,10 @@ flag {
     description: "Enables new initial bounds for desktop windowing which adjust depending on app constraints"
     bug: "324377962"
 }
+
+flag {
+    name: "enable_desktop_windowing_task_limit"
+    namespace: "lse_desktop_experience"
+    description: "Enables a limit on the number of Tasks shown in Desktop Mode"
+    bug: "332502912"
+}
