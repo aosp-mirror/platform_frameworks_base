@@ -28,6 +28,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -46,7 +47,6 @@ import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
 
 /**
  * When necessary, adds the alternate bouncer window above most other windows (including the
@@ -92,7 +92,7 @@ constructor(
         if (!DeviceEntryUdfpsRefactor.isEnabled) {
             return
         }
-        applicationScope.launch {
+        applicationScope.launch("$TAG#alternateBouncerWindowViewModel") {
             alternateBouncerWindowViewModel.get().alternateBouncerWindowRequired.collect {
                 addAlternateBouncerWindowView ->
                 if (addAlternateBouncerWindowView) {
@@ -186,7 +186,7 @@ constructor(
         val tapGestureDetector = alternateBouncerDependencies.tapGestureDetector
         view.repeatWhenAttached { alternateBouncerViewContainer ->
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
+                launch("$TAG#viewModel.registerForDismissGestures") {
                     viewModel.registerForDismissGestures.collect { registerForDismissGestures ->
                         if (registerForDismissGestures) {
                             swipeUpAnywhereGestureHandler.addOnGestureDetectedCallback(swipeTag) { _
@@ -205,9 +205,13 @@ constructor(
                     }
                 }
 
-                launch { viewModel.scrimAlpha.collect { scrim.viewAlpha = it } }
+                launch("$TAG#viewModel.scrimAlpha") {
+                    viewModel.scrimAlpha.collect { scrim.viewAlpha = it }
+                }
 
-                launch { viewModel.scrimColor.collect { scrim.tint = it } }
+                launch("$TAG#viewModel.scrimColor") {
+                    viewModel.scrimColor.collect { scrim.tint = it }
+                }
             }
         }
     }
@@ -219,7 +223,7 @@ constructor(
     ) {
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                launch {
+                launch("$TAG#udfpsIconViewModel.iconLocation") {
                     udfpsIconViewModel.iconLocation.collect { iconLocation ->
                         // add UDFPS a11y overlay
                         val udfpsA11yOverlayViewId =
@@ -292,7 +296,9 @@ constructor(
             }
         }
     }
+    companion object {
+        private const val TAG = "AlternateBouncerViewBinder"
+        private const val swipeTag = "AlternateBouncer-SWIPE"
+        private const val tapTag = "AlternateBouncer-TAP"
+    }
 }
-
-private const val swipeTag = "AlternateBouncer-SWIPE"
-private const val tapTag = "AlternateBouncer-TAP"

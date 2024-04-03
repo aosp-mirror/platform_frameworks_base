@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -68,13 +69,13 @@ constructor(
     }
 
     fun showKeyguard() {
-        scope.launch { startTransitionTo(KeyguardState.LOCKSCREEN) }
+        scope.launch("$TAG#showKeyguard") { startTransitionTo(KeyguardState.LOCKSCREEN) }
     }
 
     // Primarily for when the user chooses to lock down the device
     private fun listenForGoneToLockscreenOrHub() {
         if (KeyguardWmStateRefactor.isEnabled) {
-            scope.launch {
+            scope.launch("$TAG#listenForGoneToLockscreenOrHub") {
                 biometricSettingsRepository.isCurrentUserInLockdown
                     .distinctUntilChanged()
                     .filterRelevantKeyguardStateAnd { inLockdown -> inLockdown }
@@ -90,7 +91,7 @@ constructor(
                     }
             }
         } else {
-            scope.launch {
+            scope.launch("$TAG#listenForGoneToLockscreenOrHub") {
                 keyguardInteractor.isKeyguardShowing
                     .filterRelevantKeyguardStateAnd { isKeyguardShowing -> isKeyguardShowing }
                     .sample(communalInteractor.isIdleOnCommunal, ::Pair)
@@ -108,7 +109,7 @@ constructor(
     }
 
     private fun listenForGoneToDreamingLockscreenHosted() {
-        scope.launch {
+        scope.launch("$TAG#listenForGoneToDreamingLockscreenHosted") {
             keyguardInteractor.isActiveDreamLockscreenHosted
                 .filterRelevantKeyguardStateAnd { isActiveDreamLockscreenHosted ->
                     isActiveDreamLockscreenHosted
@@ -118,7 +119,7 @@ constructor(
     }
 
     private fun listenForGoneToDreaming() {
-        scope.launch {
+        scope.launch("$TAG#listenForGoneToDreaming") {
             keyguardInteractor.isAbleToDream
                 .sample(keyguardInteractor.isActiveDreamLockscreenHosted, ::Pair)
                 .filterRelevantKeyguardStateAnd { (isAbleToDream, isActiveDreamLockscreenHosted) ->
@@ -129,7 +130,7 @@ constructor(
     }
 
     private fun listenForGoneToAodOrDozing() {
-        scope.launch {
+        scope.launch("$TAG#listenForGoneToAodOrDozing") {
             listenForSleepTransition(
                 modeOnCanceledFromStartedStep = { TransitionModeOnCanceled.RESET },
             )
@@ -151,6 +152,7 @@ constructor(
     }
 
     companion object {
+        private const val TAG = "FromGoneTransitionInteractor"
         private val DEFAULT_DURATION = 500.milliseconds
         val TO_DREAMING_DURATION = 933.milliseconds
         val TO_AOD_DURATION = 1300.milliseconds

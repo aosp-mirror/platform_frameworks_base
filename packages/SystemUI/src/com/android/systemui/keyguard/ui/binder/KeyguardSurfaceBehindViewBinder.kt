@@ -16,10 +16,10 @@
 
 package com.android.systemui.keyguard.ui.binder
 
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.keyguard.WindowManagerLockscreenVisibilityManager
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSurfaceBehindViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 /**
  * Binds the [WindowManagerLockscreenVisibilityManager] "view", which manages the visibility of the
@@ -32,6 +32,10 @@ object KeyguardSurfaceBehindViewBinder {
         applier: KeyguardSurfaceBehindParamsApplier,
         scope: CoroutineScope
     ) {
-        scope.launch { viewModel.surfaceBehindViewParams.collect { applier.viewParams = it } }
+        scope.launch("$TAG#viewModel.surfaceBehindViewParams") {
+            viewModel.surfaceBehindViewParams.collect { applier.viewParams = it }
+        }
     }
+
+    private const val TAG = "KeyguardSurfaceBehindViewBinder"
 }

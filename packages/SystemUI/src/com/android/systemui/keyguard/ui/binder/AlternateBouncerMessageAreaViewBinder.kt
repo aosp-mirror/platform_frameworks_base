@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.ui.binder
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launch
 import com.android.keyguard.AuthKeyguardMessageArea
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerMessageAreaViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -36,14 +37,18 @@ object AlternateBouncerMessageAreaViewBinder {
         view.setIsVisible(true)
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.message.collect { biometricMsg ->
-                    if (biometricMsg == null) {
-                        view.setMessage("", true)
-                    } else {
-                        view.setMessage(biometricMsg.message, true)
+                launch("$TAG#viewModel.message") {
+                    viewModel.message.collect { biometricMsg ->
+                        if (biometricMsg == null) {
+                            view.setMessage("", true)
+                        } else {
+                            view.setMessage(biometricMsg.message, true)
+                        }
                     }
                 }
             }
         }
     }
+
+    private const val TAG = "AlternateBouncerMessageAreaViewBinder"
 }

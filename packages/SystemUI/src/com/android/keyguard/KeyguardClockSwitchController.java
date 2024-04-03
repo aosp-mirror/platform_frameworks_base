@@ -250,7 +250,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             mLargeClockFrame = mView.findViewById(R.id.lockscreen_clock_view_large);
         }
 
-
         if (!mOnlyClock) {
             mDumpManager.unregisterDumpable(getClass().getSimpleName()); // unregister previous
             mDumpManager.registerDumpable(getClass().getSimpleName(), this);
@@ -282,7 +281,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     protected void onViewAttached() {
         mClockRegistry.registerClockChangeListener(mClockChangedListener);
         setClock(mClockRegistry.createCurrentClock());
-        mClockEventController.registerListeners(mView);
+        if (!MigrateClocksToBlueprint.isEnabled()) {
+            mClockEventController.registerListeners(mView);
+        }
         mKeyguardSmallClockTopMargin =
                 mView.getResources().getDimensionPixelSize(R.dimen.keyguard_clock_top_margin);
         mKeyguardLargeClockTopMargin =
@@ -365,7 +366,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     @Override
     protected void onViewDetached() {
         mClockRegistry.unregisterClockChangeListener(mClockChangedListener);
-        mClockEventController.unregisterListeners();
+        if (!MigrateClocksToBlueprint.isEnabled()) {
+            mClockEventController.unregisterListeners();
+        }
         setClock(null);
 
         mBgExecutor.execute(() -> {

@@ -21,12 +21,12 @@ import android.content.res.ColorStateList
 import android.view.View
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerUdfpsIconViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
 object AlternateBouncerUdfpsViewBinder {
@@ -46,13 +46,13 @@ object AlternateBouncerUdfpsViewBinder {
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 view.alpha = 0f
-                launch {
+                launch("$TAG#viewModel.accessibilityDelegateHint") {
                     viewModel.accessibilityDelegateHint.collect { hint ->
                         view.accessibilityHintType = hint
                     }
                 }
 
-                launch { viewModel.alpha.collect { view.alpha = it } }
+                launch("$TAG#viewModel.alpha") { viewModel.alpha.collect { view.alpha = it } }
             }
         }
 
@@ -77,13 +77,17 @@ object AlternateBouncerUdfpsViewBinder {
         bgView.visibility = View.VISIBLE
         bgView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
+                launch("$TAG#viewModel.bgColor") {
                     viewModel.bgColor.collect { color ->
                         bgView.imageTintList = ColorStateList.valueOf(color)
                     }
                 }
-                launch { viewModel.bgAlpha.collect { alpha -> bgView.alpha = alpha } }
+                launch("$TAG#viewModel.bgAlpha") {
+                    viewModel.bgAlpha.collect { alpha -> bgView.alpha = alpha }
+                }
             }
         }
     }
+
+    private const val TAG = "AlternateBouncerUdfpsViewBinder"
 }

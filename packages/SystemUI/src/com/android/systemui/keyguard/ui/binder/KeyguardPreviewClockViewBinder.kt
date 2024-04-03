@@ -33,6 +33,7 @@ import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.customization.R as customizationR
 import com.android.systemui.keyguard.shared.model.SettingsClockSize
 import com.android.systemui.keyguard.ui.preview.KeyguardPreviewRenderer
@@ -44,7 +45,6 @@ import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.res.R
 import com.android.systemui.util.Utils
 import kotlin.reflect.KSuspendFunction1
-import kotlinx.coroutines.launch
 
 /** Binder for the small clock view, large clock view. */
 object KeyguardPreviewClockViewBinder {
@@ -56,13 +56,17 @@ object KeyguardPreviewClockViewBinder {
     ) {
         largeClockHostView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.isLargeClockVisible.collect { largeClockHostView.isVisible = it }
+                launch("$TAG#viewModel.isLargeClockVisible") {
+                    viewModel.isLargeClockVisible.collect { largeClockHostView.isVisible = it }
+                }
             }
         }
 
         smallClockHostView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.isSmallClockVisible.collect { smallClockHostView.isVisible = it }
+                launch("$TAG#viewModel.isSmallClockVisible") {
+                    viewModel.isSmallClockVisible.collect { smallClockHostView.isVisible = it }
+                }
             }
         }
     }
@@ -76,7 +80,7 @@ object KeyguardPreviewClockViewBinder {
     ) {
         rootView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
+                launch("$TAG#viewModel.previewClock") {
                     var lastClock: ClockController? = null
                     viewModel.previewClock.collect { currentClock ->
                         lastClock?.let { clock ->
@@ -207,4 +211,5 @@ object KeyguardPreviewClockViewBinder {
 
     private const val DATE_WEATHER_VIEW_HEIGHT = "date_weather_view_height"
     private const val ENHANCED_SMARTSPACE_HEIGHT = "enhanced_smartspace_height"
+    private const val TAG = "KeyguardPreviewClockViewBinder"
 }

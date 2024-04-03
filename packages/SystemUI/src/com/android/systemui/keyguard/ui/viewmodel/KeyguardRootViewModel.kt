@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.graphics.Point
 import android.util.MathUtils
 import android.view.View.VISIBLE
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.Flags.newAodTransition
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
@@ -268,7 +269,9 @@ constructor(
         burnInJob?.cancel()
 
         burnInJob =
-            scope.launch { aodBurnInViewModel.movement(params).collect { burnInModel.value = it } }
+            scope.launch("$TAG#aodBurnInViewModel") {
+                aodBurnInViewModel.movement(params).collect { burnInModel.value = it }
+            }
     }
 
     val scale: Flow<BurnInScaleViewModel> =
@@ -367,5 +370,9 @@ constructor(
 
     fun setRootViewLastTapPosition(point: Point) {
         keyguardInteractor.setLastRootViewTapPosition(point)
+    }
+
+    companion object {
+        private const val TAG = "KeyguardRootViewModel"
     }
 }
