@@ -3956,6 +3956,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public int getNavigationBarColor() {
+        if (mEdgeToEdgeEnforced) {
+            return Color.TRANSPARENT;
+        }
         return mNavigationBarColor;
     }
 
