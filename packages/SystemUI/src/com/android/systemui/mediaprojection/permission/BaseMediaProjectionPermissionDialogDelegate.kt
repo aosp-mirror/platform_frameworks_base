@@ -47,6 +47,7 @@ abstract class BaseMediaProjectionPermissionDialogDelegate<T : AlertDialog>(
     private val mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
     @DrawableRes private val dialogIconDrawable: Int? = null,
     @ColorRes private val dialogIconTint: Int? = null,
+    @ScreenShareMode val defaultSelectedMode: Int = screenShareOptions.first().mode,
 ) : DialogDelegate<T>, AdapterView.OnItemSelectedListener {
     private lateinit var dialogTitle: TextView
     private lateinit var startButton: TextView
@@ -55,7 +56,8 @@ abstract class BaseMediaProjectionPermissionDialogDelegate<T : AlertDialog>(
     private lateinit var screenShareModeSpinner: Spinner
     protected lateinit var dialog: AlertDialog
     private var shouldLogCancel: Boolean = true
-    var selectedScreenShareOption: ScreenShareOption = screenShareOptions.first()
+    var selectedScreenShareOption: ScreenShareOption =
+        screenShareOptions.first { it.mode == defaultSelectedMode }
 
     @CallSuper
     override fun onStop(dialog: T) {
@@ -92,7 +94,7 @@ abstract class BaseMediaProjectionPermissionDialogDelegate<T : AlertDialog>(
     }
 
     private fun initScreenShareOptions() {
-        selectedScreenShareOption = screenShareOptions.first()
+        selectedScreenShareOption = screenShareOptions.first { it.mode == defaultSelectedMode }
         warning.text = warningText
         initScreenShareSpinner()
     }
@@ -118,6 +120,8 @@ abstract class BaseMediaProjectionPermissionDialogDelegate<T : AlertDialog>(
                 }
             }
         screenShareModeSpinner.isLongClickable = false
+        val defaultModePosition = screenShareOptions.indexOfFirst { it.mode == defaultSelectedMode }
+        screenShareModeSpinner.setSelection(defaultModePosition, /* animate= */ false)
     }
 
     override fun onItemSelected(adapterView: AdapterView<*>?, view: View, pos: Int, id: Long) {

@@ -93,6 +93,7 @@ class ScreenRecordPermissionDialogDelegateTest : SysuiTestCase() {
                 onStartRecordingClicked,
                 mediaProjectionMetricsLogger,
                 systemUIDialogFactory,
+                context,
             )
         dialog = delegate.createDialog()
     }
