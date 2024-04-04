@@ -16,6 +16,11 @@
 package com.android.hoststubgen
 
 /**
+ * Name of this executable. Set it in the main method.
+ */
+var executableName = "[command name not set]"
+
+/**
  * A regex that maches whitespate.
  */
 val whitespaceRegex = """\s+""".toRegex()

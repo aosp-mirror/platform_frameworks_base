@@ -40,7 +40,7 @@ public class RavenwoodTestRunnerValidationTest {
     public final RuleChain chain = RuleChain.outerRule(mThrown).around(mRavenwood);
 
     public RavenwoodTestRunnerValidationTest() {
-        Assume.assumeTrue(mRavenwood._ravenwood_private$isOptionalValidationEnabled());
+        Assume.assumeTrue(RavenwoodRule._$RavenwoodPrivate.isOptionalValidationEnabled());
         // Because RavenwoodRule will throw this error before executing the test method,
         // we can't do it in the test method itself.
         // So instead, we initialize it here.
