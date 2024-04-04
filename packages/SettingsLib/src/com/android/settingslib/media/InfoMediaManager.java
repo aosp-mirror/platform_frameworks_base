@@ -514,17 +514,20 @@ public abstract class InfoMediaManager {
     // MediaRoute2Info.getType was made public on API 34, but exists since API 30.
     @SuppressWarnings("NewApi")
     private synchronized void buildAvailableRoutes() {
-        for (MediaRoute2Info route : getAvailableRoutes()) {
+        RoutingSessionInfo activeSession = getActiveRoutingSession();
+
+        for (MediaRoute2Info route : getAvailableRoutes(activeSession)) {
             if (DEBUG) {
                 Log.d(TAG, "buildAvailableRoutes() route : " + route.getName() + ", volume : "
                         + route.getVolume() + ", type : " + route.getType());
             }
-            addMediaDevice(route);
+            addMediaDevice(route, activeSession);
         }
     }
-    private synchronized List<MediaRoute2Info> getAvailableRoutes() {
+
+    private synchronized List<MediaRoute2Info> getAvailableRoutes(
+            RoutingSessionInfo activeSession) {
         List<MediaRoute2Info> availableRoutes = new ArrayList<>();
-        RoutingSessionInfo activeSession = getActiveRoutingSession();
 
         List<MediaRoute2Info> selectedRoutes = getSelectedRoutes(activeSession);
         availableRoutes.addAll(selectedRoutes);
@@ -562,7 +565,7 @@ public abstract class InfoMediaManager {
     // MediaRoute2Info.getType was made public on API 34, but exists since API 30.
     @SuppressWarnings("NewApi")
     @VisibleForTesting
-    void addMediaDevice(MediaRoute2Info route) {
+    void addMediaDevice(MediaRoute2Info route, RoutingSessionInfo activeSession) {
         final int deviceType = route.getType();
         MediaDevice mediaDevice = null;
         switch (deviceType) {
@@ -627,14 +630,13 @@ public abstract class InfoMediaManager {
                 break;
         }
 
-        if (mediaDevice != null
-                && getActiveRoutingSession().getSelectedRoutes().contains(route.getId())) {
-            mediaDevice.setState(STATE_SELECTED);
-            if (mCurrentConnectedDevice == null) {
-                mCurrentConnectedDevice = mediaDevice;
-            }
-        }
         if (mediaDevice != null) {
+            if (activeSession.getSelectedRoutes().contains(route.getId())) {
+                mediaDevice.setState(STATE_SELECTED);
+                if (mCurrentConnectedDevice == null) {
+                    mCurrentConnectedDevice = mediaDevice;
+                }
+            }
             mMediaDevices.add(mediaDevice);
         }
     }
