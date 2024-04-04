@@ -20,6 +20,7 @@ import static android.permission.flags.Flags.sensitiveNotificationAppProtection;
 import static android.provider.Settings.Global.DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS;
 
 import static com.android.server.notification.Flags.screenshareNotificationHiding;
+import static com.android.systemui.Flags.screenshareNotificationHidingBugFix;
 
 import android.annotation.MainThread;
 import android.app.IActivityManager;
@@ -31,6 +32,7 @@ import android.media.projection.MediaProjectionManager;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.util.Log;
@@ -314,6 +316,10 @@ public class SensitiveNotificationProtectionControllerImpl
         if (sbn.getNotification().isFgsOrUij()
                 && sbn.getPackageName().equals(projection.getPackageName())) {
             return false;
+        }
+
+        if (screenshareNotificationHidingBugFix() && UserHandle.isCore(sbn.getUid())) {
+            return false; // do not hide/redact notifications from system uid
         }
 
         // Only protect/redact notifications if the developer has not explicitly set notification
