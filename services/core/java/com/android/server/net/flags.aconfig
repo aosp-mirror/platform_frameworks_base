@@ -1,4 +1,5 @@
 package: "com.android.server.net"
+container: "system"
 
 flag {
     name: "network_blocked_for_top_sleeping_and_above"
