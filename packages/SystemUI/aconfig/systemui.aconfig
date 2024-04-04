@@ -698,3 +698,10 @@ flag {
       " Compose for the UI."
     bug: "325099249"
 }
+
+flag {
+    name: "keyboard_docking_indicator"
+    namespace: "systemui"
+    description: "Glow bar indicator reveals upon keyboard docking."
+    bug: "324600132"
+}
