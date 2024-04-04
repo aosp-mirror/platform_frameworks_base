@@ -204,23 +204,24 @@ import java.util.Objects;
             Slog.w(TAG, "transferTo: Ignoring transfer request to unknown route id : " + routeId);
             return;
         }
-        // TODO: b/329929065 - Push audio manager and bluetooth operations to the handler, so that
-        // they don't run on a binder thread, so as to prevent possible deadlocks (these operations
-        // may need system_server binder threads to complete).
-        if (mediaRoute2InfoHolder.mCorrespondsToInactiveBluetoothRoute) {
-            // By default, the last connected device is the active route so we don't need to apply a
-            // routing audio policy.
-            mBluetoothRouteController.activateBluetoothDeviceWithAddress(
-                    mediaRoute2InfoHolder.mMediaRoute2Info.getAddress());
-            mAudioManager.removePreferredDeviceForStrategy(mStrategyForMedia);
-        } else {
-            AudioDeviceAttributes attr =
-                    new AudioDeviceAttributes(
-                            AudioDeviceAttributes.ROLE_OUTPUT,
-                            mediaRoute2InfoHolder.mAudioDeviceInfoType,
-                            /* address= */ ""); // This is not a BT device, hence no address needed.
-            mAudioManager.setPreferredDeviceForStrategy(mStrategyForMedia, attr);
-        }
+        Runnable transferAction = getTransferActionForRoute(mediaRoute2InfoHolder);
+        Runnable guardedTransferAction =
+                () -> {
+                    try {
+                        transferAction.run();
+                    } catch (Throwable throwable) {
+                        // We swallow the exception to avoid crashing system_server, since this
+                        // doesn't run on a binder thread.
+                        Slog.e(
+                                TAG,
+                                "Unexpected exception while transferring to route id: " + routeId,
+                                throwable);
+                        mHandler.post(this::rebuildAvailableRoutesAndNotify);
+                    }
+                };
+        // We post the transfer operation to the handler to avoid making these calls on a binder
+        // thread. See class javadoc for details.
+        mHandler.post(guardedTransferAction);
     }
 
     @RequiresPermission(
@@ -234,6 +235,28 @@ import java.util.Objects;
         // don't need to rebuild all available routes.
         rebuildAvailableRoutesAndNotify();
         return true;
+    }
+
+    private Runnable getTransferActionForRoute(MediaRoute2InfoHolder mediaRoute2InfoHolder) {
+        if (mediaRoute2InfoHolder.mCorrespondsToInactiveBluetoothRoute) {
+            String deviceAddress = mediaRoute2InfoHolder.mMediaRoute2Info.getAddress();
+            return () -> {
+                // By default, the last connected device is the active route so we don't
+                // need to apply a routing audio policy.
+                mBluetoothRouteController.activateBluetoothDeviceWithAddress(deviceAddress);
+                mAudioManager.removePreferredDeviceForStrategy(mStrategyForMedia);
+            };
+
+        } else {
+            AudioDeviceAttributes deviceAttributes =
+                    new AudioDeviceAttributes(
+                            AudioDeviceAttributes.ROLE_OUTPUT,
+                            mediaRoute2InfoHolder.mAudioDeviceInfoType,
+                            /* address= */ ""); // This is not a BT device, hence no address needed.
+            return () ->
+                    mAudioManager.setPreferredDeviceForStrategy(
+                            mStrategyForMedia, deviceAttributes);
+        }
     }
 
     @RequiresPermission(
