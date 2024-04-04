@@ -1,6 +1,7 @@
 aconfig_declarations {
     name: "com_android_wm_shell_flags",
     package: "com.android.wm.shell",
+    container: "system",
     srcs: [
         "multitasking.aconfig",
     ],
