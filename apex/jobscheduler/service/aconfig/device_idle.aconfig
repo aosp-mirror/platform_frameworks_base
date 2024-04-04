@@ -1,4 +1,5 @@
 package: "com.android.server.deviceidle"
+container: "system"
 
 flag {
     name: "disable_wakelocks_in_light_idle"
