@@ -33,6 +33,7 @@ class MoveToDesktopAnimator @JvmOverloads constructor(
         get() = dragToDesktopAnimator.animatedValue as Float * startBounds.width()
     val scale: Float
         get() = dragToDesktopAnimator.animatedValue as Float
+    private val mostRecentInput = PointF()
     private val dragToDesktopAnimator: ValueAnimator = ValueAnimator.ofFloat(1f,
             DRAG_FREEFORM_SCALE)
             .setDuration(ANIMATION_DURATION.toLong())
@@ -40,9 +41,13 @@ class MoveToDesktopAnimator @JvmOverloads constructor(
                 val t = SurfaceControl.Transaction()
                 val cornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context)
                 addUpdateListener {
+                    setTaskPosition(mostRecentInput.x, mostRecentInput.y)
                     t.setScale(taskSurface, scale, scale)
-                            .setCornerRadius(taskSurface, cornerRadius)
-                            .apply()
+                        .setCornerRadius(taskSurface, cornerRadius)
+                        .setScale(taskSurface, scale, scale)
+                        .setCornerRadius(taskSurface, cornerRadius)
+                        .setPosition(taskSurface, position.x, position.y)
+                        .apply()
                 }
             }
 
@@ -78,16 +83,25 @@ class MoveToDesktopAnimator @JvmOverloads constructor(
         // allow dragging beyond its stage across any region of the display. Because of that, the
         // rawX/Y are more true to where the gesture is on screen and where the surface should be
         // positioned.
-        position.x = ev.rawX - animatedTaskWidth / 2
-        position.y = ev.rawY
+        mostRecentInput.set(ev.rawX, ev.rawY)
 
-        if (!allowSurfaceChangesOnMove) {
+        // If animator is running, allow it to set scale and position at the same time.
+        if (!allowSurfaceChangesOnMove || dragToDesktopAnimator.isRunning) {
             return
         }
-
+        setTaskPosition(ev.rawX, ev.rawY)
         val t = transactionFactory()
         t.setPosition(taskSurface, position.x, position.y)
         t.apply()
+    }
+
+    /**
+     * Calculates the top left corner of task from input coordinates.
+     * Top left will be needed for the resulting surface control transaction.
+     */
+    private fun setTaskPosition(x: Float, y: Float) {
+        position.x = x - animatedTaskWidth / 2
+        position.y = y
     }
 
     /**
