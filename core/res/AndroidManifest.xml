@@ -7507,16 +7507,6 @@
     <permission android:name="android.permission.RECEIVE_SANDBOX_TRIGGER_AUDIO"
                 android:protectionLevel="signature|privileged|appop" />
 
-    <!-- @SystemApi Required for the privileged assistant apps targeting
-         {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}
-         that receive training data from a sandboxed {@link HotwordDetectionService} or
-         {@link VisualQueryDetectionService}.
-         <p>Protection level: internal|appop
-         @FlaggedApi("android.permission.flags.voice_activation_permission_apis")
-         @hide -->
-    <permission android:name="android.permission.RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA"
-                android:protectionLevel="internal|appop" />
-
     <!-- @SystemApi Allows requesting the framework broadcast the
          {@link Intent#ACTION_DEVICE_CUSTOMIZATION_READY} intent.
          @hide -->
