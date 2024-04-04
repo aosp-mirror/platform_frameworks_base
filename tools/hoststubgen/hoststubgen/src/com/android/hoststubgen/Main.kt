@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:JvmName("HostStubGenMain")
+@file:JvmName("Main")
 
 package com.android.hoststubgen
 
 import java.io.PrintWriter
 
+const val COMMAND_NAME = "HostStubGen"
+
 /**
  * Entry point.
  */
 fun main(args: Array<String>) {
-    executableName = "HostStubGen"
-
     var success = false
     var clanupOnError = false
 
@@ -33,7 +33,7 @@ fun main(args: Array<String>) {
         val options = HostStubGenOptions.parseArgs(args)
         clanupOnError = options.cleanUpOnError.get
 
-        log.v("$executableName started")
+        log.v("HostStubGen started")
         log.v("Options: $options")
 
         // Run.
@@ -41,7 +41,7 @@ fun main(args: Array<String>) {
 
         success = true
     } catch (e: Throwable) {
-        log.e("$executableName: Error: ${e.message}")
+        log.e("$COMMAND_NAME: Error: ${e.message}")
         if (e !is UserErrorException) {
             e.printStackTrace(PrintWriter(log.getWriter(LogLevel.Error)))
         }
@@ -49,7 +49,7 @@ fun main(args: Array<String>) {
             TODO("Remove output jars here")
         }
     } finally {
-        log.i("$executableName finished")
+        log.i("$COMMAND_NAME finished")
         log.flush()
     }
 
