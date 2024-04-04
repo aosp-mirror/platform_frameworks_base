@@ -28,6 +28,7 @@ import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.media.controls.util.MediaInSceneContainerFlag
+import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import com.android.systemui.statusbar.phone.PredictiveBackSysUiFlag
 import dagger.Module
 import dagger.Provides
@@ -41,11 +42,12 @@ object SceneContainerFlag {
     inline val isEnabled
         get() =
             sceneContainer() && // mainAconfigFlag
-            KeyguardBottomAreaRefactor.isEnabled &&
-                MigrateClocksToBlueprint.isEnabled &&
-                ComposeLockscreen.isEnabled &&
-                MediaInSceneContainerFlag.isEnabled &&
+            ComposeLockscreen.isEnabled &&
+                KeyguardBottomAreaRefactor.isEnabled &&
                 KeyguardWmStateRefactor.isEnabled &&
+                MediaInSceneContainerFlag.isEnabled &&
+                MigrateClocksToBlueprint.isEnabled &&
+                NotificationsHeadsUpRefactor.isEnabled &&
                 PredictiveBackSysUiFlag.isEnabled
     // NOTE: Changes should also be made in getSecondaryFlags and @EnableSceneContainer
 
@@ -55,11 +57,13 @@ object SceneContainerFlag {
     /** The set of secondary flags which must be enabled for scene container to work properly */
     inline fun getSecondaryFlags(): Sequence<FlagToken> =
         sequenceOf(
-            KeyguardBottomAreaRefactor.token,
-            MigrateClocksToBlueprint.token,
-            KeyguardWmStateRefactor.token,
             ComposeLockscreen.token,
+            KeyguardBottomAreaRefactor.token,
+            KeyguardWmStateRefactor.token,
             MediaInSceneContainerFlag.token,
+            MigrateClocksToBlueprint.token,
+            NotificationsHeadsUpRefactor.token,
+            PredictiveBackSysUiFlag.token,
             // NOTE: Changes should also be made in isEnabled and @EnableSceneContainer
         )
 
