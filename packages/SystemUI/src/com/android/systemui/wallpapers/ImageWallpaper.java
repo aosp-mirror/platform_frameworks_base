@@ -22,6 +22,7 @@ import static android.app.WallpaperManager.SetWallpaperFlags;
 
 import android.app.WallpaperColors;
 import android.app.WallpaperManager;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.RecordingCanvas;
@@ -183,8 +184,11 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void onDestroy() {
-            getDisplayContext().getSystemService(DisplayManager.class)
-                    .unregisterDisplayListener(this);
+            Context context = getDisplayContext();
+            if (context != null) {
+                DisplayManager displayManager = context.getSystemService(DisplayManager.class);
+                if (displayManager != null) displayManager.unregisterDisplayListener(this);
+            }
             mWallpaperLocalColorExtractor.cleanUp();
         }
 
