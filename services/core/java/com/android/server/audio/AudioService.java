@@ -11284,7 +11284,8 @@ public class AudioService extends IAudioService.Stub
         mDeviceBroker.addOrUpdateBtAudioDeviceCategoryInInventory(deviceState);
         mDeviceBroker.postPersistAudioDeviceSettings();
 
-        mSpatializerHelper.refreshDevice(deviceState.getAudioDeviceAttributes());
+        mSpatializerHelper.refreshDevice(deviceState.getAudioDeviceAttributes(),
+                false /* initState */);
         mSoundDoseHelper.setAudioDeviceCategory(addr, internalType,
                 btAudioDeviceCategory == AUDIO_DEVICE_CATEGORY_HEADPHONES);
     }
@@ -11355,11 +11356,11 @@ public class AudioService extends IAudioService.Stub
 
     /** Update the sound dose and spatializer state based on the new AdiDeviceState. */
     @VisibleForTesting(visibility = PACKAGE)
-    public void onUpdatedAdiDeviceState(AdiDeviceState deviceState) {
+    public void onUpdatedAdiDeviceState(AdiDeviceState deviceState, boolean initSA) {
         if (deviceState == null) {
             return;
         }
-        mSpatializerHelper.refreshDevice(deviceState.getAudioDeviceAttributes());
+        mSpatializerHelper.refreshDevice(deviceState.getAudioDeviceAttributes(), initSA);
         mSoundDoseHelper.setAudioDeviceCategory(deviceState.getDeviceAddress(),
                 deviceState.getInternalDeviceType(),
                 deviceState.getAudioDeviceCategory() == AUDIO_DEVICE_CATEGORY_HEADPHONES);
