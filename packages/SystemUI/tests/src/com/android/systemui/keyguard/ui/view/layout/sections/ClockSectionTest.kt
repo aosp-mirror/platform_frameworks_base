@@ -23,6 +23,7 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
+import com.android.internal.policy.SystemBarUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
@@ -70,7 +71,7 @@ class ClockSectionTest : SysuiTestCase() {
             Utils.getStatusBarHeaderHeightKeyguard(context)
 
     private val LARGE_CLOCK_TOP_WITHOUT_SMARTSPACE =
-        context.resources.getDimensionPixelSize(R.dimen.status_bar_height) +
+        SystemBarUtils.getStatusBarHeight(context) +
             context.resources.getDimensionPixelSize(
                 com.android.systemui.customization.R.dimen.small_clock_padding_top
             ) +
