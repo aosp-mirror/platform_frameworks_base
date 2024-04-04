@@ -66,6 +66,7 @@ import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
@@ -220,43 +221,36 @@ public class CrashRecoveryTest {
         RescuePartyObserver rescuePartyObserver = setUpRescuePartyObserver(watchdog);
 
         verify(rescuePartyObserver, never()).executeBootLoopMitigation(1);
-        int bootCounter = 0;
+
         for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT; i++) {
             watchdog.noteBoot();
-            bootCounter += 1;
         }
+
         verify(rescuePartyObserver).executeBootLoopMitigation(1);
         verify(rescuePartyObserver, never()).executeBootLoopMitigation(2);
 
-        for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_MITIGATION_INCREMENT; i++) {
-            watchdog.noteBoot();
-            bootCounter += 1;
-        }
+        watchdog.noteBoot();
+
         verify(rescuePartyObserver).executeBootLoopMitigation(2);
         verify(rescuePartyObserver, never()).executeBootLoopMitigation(3);
 
-        int bootLoopThreshold = PackageWatchdog.DEFAULT_BOOT_LOOP_THRESHOLD - bootCounter;
-        for (int i = 0; i < bootLoopThreshold; i++) {
-            watchdog.noteBoot();
-        }
+        watchdog.noteBoot();
+
         verify(rescuePartyObserver).executeBootLoopMitigation(3);
         verify(rescuePartyObserver, never()).executeBootLoopMitigation(4);
 
-        for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_MITIGATION_INCREMENT; i++) {
-            watchdog.noteBoot();
-        }
+        watchdog.noteBoot();
+
         verify(rescuePartyObserver).executeBootLoopMitigation(4);
         verify(rescuePartyObserver, never()).executeBootLoopMitigation(5);
 
-        for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_MITIGATION_INCREMENT; i++) {
-            watchdog.noteBoot();
-        }
+        watchdog.noteBoot();
+
         verify(rescuePartyObserver).executeBootLoopMitigation(5);
         verify(rescuePartyObserver, never()).executeBootLoopMitigation(6);
 
-        for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_MITIGATION_INCREMENT; i++) {
-            watchdog.noteBoot();
-        }
+        watchdog.noteBoot();
+
         verify(rescuePartyObserver).executeBootLoopMitigation(6);
         verify(rescuePartyObserver, never()).executeBootLoopMitigation(7);
     }
@@ -268,11 +262,11 @@ public class CrashRecoveryTest {
                 setUpRollbackPackageHealthObserver(watchdog);
 
         verify(rollbackObserver, never()).executeBootLoopMitigation(1);
-        int bootCounter = 0;
+
         for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT; i++) {
             watchdog.noteBoot();
-            bootCounter += 1;
         }
+
         verify(rollbackObserver).executeBootLoopMitigation(1);
         verify(rollbackObserver, never()).executeBootLoopMitigation(2);
 
@@ -280,19 +274,16 @@ public class CrashRecoveryTest {
         when(mRollbackManager.getAvailableRollbacks()).thenReturn(List.of(ROLLBACK_INFO_HIGH,
                 ROLLBACK_INFO_MANUAL));
 
-        int bootLoopThreshold = PackageWatchdog.DEFAULT_BOOT_LOOP_THRESHOLD - bootCounter;
-        for (int i = 0; i < bootLoopThreshold; i++) {
-            watchdog.noteBoot();
-        }
+        watchdog.noteBoot();
+
         verify(rollbackObserver).executeBootLoopMitigation(2);
         verify(rollbackObserver, never()).executeBootLoopMitigation(3);
 
         // Update the list of available rollbacks after executing bootloop mitigation once
         when(mRollbackManager.getAvailableRollbacks()).thenReturn(List.of(ROLLBACK_INFO_MANUAL));
 
-        for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_MITIGATION_INCREMENT; i++) {
-            watchdog.noteBoot();
-        }
+        watchdog.noteBoot();
+
         verify(rollbackObserver, never()).executeBootLoopMitigation(3);
     }
 
@@ -305,27 +296,21 @@ public class CrashRecoveryTest {
 
         verify(rescuePartyObserver, never()).executeBootLoopMitigation(1);
         verify(rollbackObserver, never()).executeBootLoopMitigation(1);
-        int bootCounter = 0;
         for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT; i++) {
             watchdog.noteBoot();
-            bootCounter += 1;
         }
         verify(rescuePartyObserver).executeBootLoopMitigation(1);
         verify(rescuePartyObserver, never()).executeBootLoopMitigation(2);
         verify(rollbackObserver, never()).executeBootLoopMitigation(1);
 
-        for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_MITIGATION_INCREMENT; i++) {
-            watchdog.noteBoot();
-            bootCounter += 1;
-        }
+        watchdog.noteBoot();
+
         verify(rescuePartyObserver).executeBootLoopMitigation(2);
         verify(rescuePartyObserver, never()).executeBootLoopMitigation(3);
         verify(rollbackObserver, never()).executeBootLoopMitigation(2);
 
-        for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_MITIGATION_INCREMENT; i++) {
-            watchdog.noteBoot();
-            bootCounter += 1;
-        }
+        watchdog.noteBoot();
+
         verify(rescuePartyObserver, never()).executeBootLoopMitigation(3);
         verify(rollbackObserver).executeBootLoopMitigation(1);
         verify(rollbackObserver, never()).executeBootLoopMitigation(2);
@@ -333,43 +318,46 @@ public class CrashRecoveryTest {
         when(mRollbackManager.getAvailableRollbacks()).thenReturn(List.of(ROLLBACK_INFO_HIGH,
                 ROLLBACK_INFO_MANUAL));
 
-        int bootLoopThreshold = PackageWatchdog.DEFAULT_BOOT_LOOP_THRESHOLD - bootCounter;
-        for (int i = 0; i < bootLoopThreshold; i++) {
-            watchdog.noteBoot();
-        }
+        watchdog.noteBoot();
+
         verify(rescuePartyObserver).executeBootLoopMitigation(3);
         verify(rescuePartyObserver, never()).executeBootLoopMitigation(4);
         verify(rollbackObserver, never()).executeBootLoopMitigation(2);
 
-        for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_MITIGATION_INCREMENT; i++) {
-            watchdog.noteBoot();
-        }
+        watchdog.noteBoot();
+
         verify(rescuePartyObserver).executeBootLoopMitigation(4);
         verify(rescuePartyObserver, never()).executeBootLoopMitigation(5);
         verify(rollbackObserver, never()).executeBootLoopMitigation(2);
 
-        for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_MITIGATION_INCREMENT; i++) {
-            watchdog.noteBoot();
-        }
+        watchdog.noteBoot();
+
         verify(rescuePartyObserver).executeBootLoopMitigation(5);
         verify(rescuePartyObserver, never()).executeBootLoopMitigation(6);
         verify(rollbackObserver, never()).executeBootLoopMitigation(2);
 
-        for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_MITIGATION_INCREMENT; i++) {
-            watchdog.noteBoot();
-        }
+        watchdog.noteBoot();
+
         verify(rescuePartyObserver, never()).executeBootLoopMitigation(6);
         verify(rollbackObserver).executeBootLoopMitigation(2);
         verify(rollbackObserver, never()).executeBootLoopMitigation(3);
         // Update the list of available rollbacks after executing bootloop mitigation
         when(mRollbackManager.getAvailableRollbacks()).thenReturn(List.of(ROLLBACK_INFO_MANUAL));
 
-        for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_MITIGATION_INCREMENT; i++) {
-            watchdog.noteBoot();
-        }
+        watchdog.noteBoot();
+
         verify(rescuePartyObserver).executeBootLoopMitigation(6);
         verify(rescuePartyObserver, never()).executeBootLoopMitigation(7);
         verify(rollbackObserver, never()).executeBootLoopMitigation(3);
+
+        moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_DEESCALATION_WINDOW_MS + 1);
+        Mockito.reset(rescuePartyObserver);
+
+        for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT; i++) {
+            watchdog.noteBoot();
+        }
+        verify(rescuePartyObserver).executeBootLoopMitigation(1);
+        verify(rescuePartyObserver, never()).executeBootLoopMitigation(2);
     }
 
     RollbackPackageHealthObserver setUpRollbackPackageHealthObserver(PackageWatchdog watchdog) {
@@ -506,16 +494,9 @@ public class CrashRecoveryTest {
         }
 
         try {
-            if (Flags.recoverabilityDetection()) {
-                mSpyBootThreshold = spy(watchdog.new BootThreshold(
-                    PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT,
-                    PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS,
-                    PackageWatchdog.DEFAULT_BOOT_LOOP_MITIGATION_INCREMENT));
-            } else {
-                mSpyBootThreshold = spy(watchdog.new BootThreshold(
+            mSpyBootThreshold = spy(watchdog.new BootThreshold(
                     PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT,
                     PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS));
-            }
 
             doAnswer((Answer<Integer>) invocationOnMock -> {
                 String storedValue = mCrashRecoveryPropertiesMap
@@ -640,5 +621,16 @@ public class CrashRecoveryTest {
         public long uptimeMillis() {
             return mUpTimeMillis;
         }
+        public void moveTimeForward(long milliSeconds) {
+            mUpTimeMillis += milliSeconds;
+        }
+    }
+
+    private void moveTimeForwardAndDispatch(long milliSeconds) {
+        // Exhaust all due runnables now which shouldn't be executed after time-leap
+        mTestLooper.dispatchAll();
+        mTestClock.moveTimeForward(milliSeconds);
+        mTestLooper.moveTimeForward(milliSeconds);
+        mTestLooper.dispatchAll();
     }
 }
