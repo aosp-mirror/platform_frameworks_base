@@ -29,4 +29,12 @@ data class ShadeScrimBounds(
 ) {
     /** The current height of the notification container. */
     val height: Float = bottom - top
+
+    operator fun minus(position: ViewPosition) =
+        ShadeScrimBounds(
+            left = left - position.left,
+            top = top - position.top,
+            right = right - position.left,
+            bottom = bottom - position.top,
+        )
 }

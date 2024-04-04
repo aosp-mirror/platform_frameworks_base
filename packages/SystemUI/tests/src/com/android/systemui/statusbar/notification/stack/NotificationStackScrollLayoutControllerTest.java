@@ -94,7 +94,6 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController.NotificationPanelEvent;
 import com.android.systemui.statusbar.notification.stack.NotificationSwipeHelper.NotificationCallback;
-import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor;
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationListViewBinder;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -161,7 +160,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private VisibilityLocationProviderDelegator mVisibilityLocationProviderDelegator;
     @Mock private ShadeController mShadeController;
     @Mock private Provider<WindowRootView> mWindowRootView;
-    @Mock private NotificationStackAppearanceInteractor mNotificationStackAppearanceInteractor;
     private final StackStateLogger mStackLogger = new StackStateLogger(logcatLogBuffer(),
             logcatLogBuffer());
     private final NotificationStackScrollLogger mLogger = new NotificationStackScrollLogger(
@@ -1016,7 +1014,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mViewBinder,
                 mShadeController,
                 mWindowRootView,
-                mNotificationStackAppearanceInteractor,
                 mKosmos.getInteractionJankMonitor(),
                 mStackLogger,
                 mLogger,

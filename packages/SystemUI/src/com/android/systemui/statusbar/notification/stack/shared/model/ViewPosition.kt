@@ -16,10 +16,5 @@
 
 package com.android.systemui.statusbar.notification.stack.shared.model
 
-/** Models the corner rounds of the notification stack. */
-data class ShadeScrimRounding(
-    /** Whether the top corners of the notification stack should be rounded. */
-    val isTopRounded: Boolean = false,
-    /** Whether the bottom corners of the notification stack should be rounded. */
-    val isBottomRounded: Boolean = false,
-)
+/** An offset of view, used to adjust bounds. */
+data class ViewPosition(val left: Int = 0, val top: Int = 0)

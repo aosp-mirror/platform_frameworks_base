@@ -68,11 +68,11 @@ class NotificationStackAppearanceInteractorTest : SysuiTestCase() {
 
             kosmos.shadeRepository.setShadeMode(ShadeMode.Single)
             assertThat(stackRounding)
-                .isEqualTo(ShadeScrimRounding(roundTop = true, roundBottom = false))
+                .isEqualTo(ShadeScrimRounding(isTopRounded = true, isBottomRounded = false))
 
             kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
             assertThat(stackRounding)
-                .isEqualTo(ShadeScrimRounding(roundTop = true, roundBottom = true))
+                .isEqualTo(ShadeScrimRounding(isTopRounded = true, isBottomRounded = true))
         }
 
     @Test(expected = IllegalStateException::class)

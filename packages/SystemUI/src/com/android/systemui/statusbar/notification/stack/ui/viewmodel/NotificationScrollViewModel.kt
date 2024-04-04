@@ -26,17 +26,18 @@ import com.android.systemui.scene.shared.model.Scenes.Shade
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimClipping
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape
+import com.android.systemui.statusbar.notification.stack.shared.model.ViewPosition
 import com.android.systemui.util.kotlin.FlowDumperImpl
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 /** ViewModel which represents the state of the NSSL/Controller in the world of flexiglass */
 @SysUISingleton
-class NotificationStackAppearanceViewModel
+class NotificationScrollViewModel
 @Inject
 constructor(
     dumpManager: DumpManager,
@@ -80,16 +81,48 @@ constructor(
             .dumpWhileCollecting("expandFraction")
 
     /** The bounds of the notification stack in the current scene. */
-    val shadeScrimClipping: Flow<ShadeScrimClipping> =
+    private val shadeScrimClipping: Flow<ShadeScrimClipping?> =
         combine(
                 stackAppearanceInteractor.shadeScrimBounds,
                 stackAppearanceInteractor.shadeScrimRounding,
-                ::ShadeScrimClipping
-            )
+            ) { bounds, rounding ->
+                bounds?.let { ShadeScrimClipping(it, rounding) }
+            }
             .dumpWhileCollecting("stackClipping")
 
+    fun shadeScrimShape(
+        cornerRadius: Flow<Int>,
+        viewPosition: Flow<ViewPosition>
+    ): Flow<ShadeScrimShape?> =
+        combine(shadeScrimClipping, cornerRadius, viewPosition) { clipping, radius, position ->
+                if (clipping == null) return@combine null
+                ShadeScrimShape(
+                    bounds = clipping.bounds - position,
+                    topRadius = radius.takeIf { clipping.rounding.isTopRounded } ?: 0,
+                    bottomRadius = radius.takeIf { clipping.rounding.isBottomRounded } ?: 0
+                )
+            }
+            .dumpWhileCollecting("shadeScrimShape")
+
     /** The y-coordinate in px of top of the contents of the notification stack. */
-    val stackTop: StateFlow<Float> = stackAppearanceInteractor.stackTop.dumpValue("stackTop")
+    val stackTop: Flow<Float> = stackAppearanceInteractor.stackTop.dumpValue("stackTop")
+    /** The y-coordinate in px of bottom of the contents of the notification stack. */
+    val stackBottom: Flow<Float> = stackAppearanceInteractor.stackBottom.dumpValue("stackBottom")
+    /**
+     * Whether the notification stack is scrolled to the top; i.e., it cannot be scrolled down any
+     * further.
+     */
+    val scrolledToTop: Flow<Boolean> =
+        stackAppearanceInteractor.scrolledToTop.dumpValue("scrolledToTop")
+    /** The y-coordinate in px of bottom of the contents of the HUN. */
+    val headsUpTop: Flow<Float> = stackAppearanceInteractor.headsUpTop.dumpValue("headsUpTop")
+
+    /** Receives the amount (px) that the stack should scroll due to internal expansion. */
+    val syntheticScrollConsumer: (Float) -> Unit = stackAppearanceInteractor::setSyntheticScroll
+    /** Receives the height of the contents of the notification stack. */
+    val stackHeightConsumer: (Float) -> Unit = stackAppearanceInteractor::setStackHeight
+    /** Receives the height of the heads up notification. */
+    val headsUpHeightConsumer: (Float) -> Unit = stackAppearanceInteractor::setHeadsUpHeight
 
     /** Whether the notification stack is scrollable or not. */
     val isScrollable: Flow<Boolean> =
