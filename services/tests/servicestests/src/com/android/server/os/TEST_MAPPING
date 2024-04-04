@@ -1,17 +1,6 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.os."
-        }
-      ]
-    }
-  ],
-  "postsubmit": [
-    {
-      // b/331020193, Move to presubmit early april 2024
       "name": "FrameworksServicesTests_os"
     }
   ]
