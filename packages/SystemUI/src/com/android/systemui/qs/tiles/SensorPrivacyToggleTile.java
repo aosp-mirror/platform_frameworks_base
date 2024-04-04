@@ -25,6 +25,7 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.safetycenter.SafetyCenterManager;
 import android.service.quicksettings.Tile;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Switch;
 
@@ -127,7 +128,7 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
         } else {
             state.secondaryLabel = mContext.getString(R.string.quick_settings_camera_mic_available);
         }
-        state.contentDescription = state.label;
+        state.contentDescription = TextUtils.concat(state.label, ", ", state.secondaryLabel);
         state.expandedAccessibilityClassName = Switch.class.getName();
     }
 
