@@ -213,7 +213,7 @@ void PerfettoDataSource::flushAll() {
 
 PerfettoDataSource::~PerfettoDataSource() {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    env->DeleteWeakGlobalRef(mJavaDataSource);
+    env->DeleteGlobalRef(mJavaDataSource);
 }
 
 jlong nativeCreate(JNIEnv* env, jclass clazz, jobject javaDataSource, jstring name) {
