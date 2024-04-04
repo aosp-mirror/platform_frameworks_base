@@ -88,3 +88,14 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    namespace: "haptics"
+    name: "load_haptic_feedback_vibration_customization_from_resources"
+    description: "Load haptic feedback vibrations customization from resources."
+    is_fixed_read_only: true
+    bug: "295142743"
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}
