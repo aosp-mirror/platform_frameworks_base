@@ -1,6 +1,7 @@
 aconfig_declarations {
     name: "com.android.server.utils-aconfig",
     package: "com.android.server.utils",
+    container: "system",
     srcs: ["*.aconfig"],
 }
 
