@@ -300,7 +300,7 @@ public class SystemUIApplication extends Application implements
 
                 Class<?> cls = entry.getKey();
                 Dependencies dep = cls.getAnnotation(Dependencies.class);
-                Class<? extends CoreStartable>[] deps = (dep == null ? null : dep.value());
+                Class<?>[] deps = (dep == null ? null : dep.value());
                 if (deps == null || startedStartables.containsAll(Arrays.asList(deps))) {
                     String clsName = cls.getName();
                     int i = serviceIndex;  // Copied to make lambda happy.
@@ -324,7 +324,7 @@ public class SystemUIApplication extends Application implements
                 Map.Entry<Class<?>, Provider<CoreStartable>> entry = nextQueue.removeFirst();
                 Class<?> cls = entry.getKey();
                 Dependencies dep = cls.getAnnotation(Dependencies.class);
-                Class<? extends CoreStartable>[] deps = (dep == null ? null : dep.value());
+                Class<?>[] deps = (dep == null ? null : dep.value());
                 StringJoiner stringJoiner = new StringJoiner(", ");
                 for (int i = 0; deps != null && i < deps.length; i++) {
                     if (!startedStartables.contains(deps[i])) {
