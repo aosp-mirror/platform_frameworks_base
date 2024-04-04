@@ -47,21 +47,25 @@ import java.util.Set;
 public class MotionEventTest {
     private static final int ID_SOURCE_MASK = 0x3 << 30;
 
+    private PointerCoords pointerCoords(float x, float y) {
+        final var coords = new PointerCoords();
+        coords.x = x;
+        coords.y = y;
+        return coords;
+    }
+
+    private PointerProperties fingerProperties(int id) {
+        final var props = new PointerProperties();
+        props.id = id;
+        props.toolType = TOOL_TYPE_FINGER;
+        return props;
+    }
+
     @Test
     public void testObtainWithDisplayId() {
         final int pointerCount = 1;
-        PointerProperties[] properties = new PointerProperties[pointerCount];
-        final PointerCoords[] coords = new PointerCoords[pointerCount];
-        for (int i = 0; i < pointerCount; i++) {
-            final PointerCoords c = new PointerCoords();
-            c.x = i * 10;
-            c.y = i * 20;
-            coords[i] = c;
-            final PointerProperties p = new PointerProperties();
-            p.id = i;
-            p.toolType = TOOL_TYPE_FINGER;
-            properties[i] = p;
-        }
+        final var properties = new PointerProperties[]{fingerProperties(0)};
+        final var coords = new PointerCoords[]{pointerCoords(10, 20)};
 
         int displayId = 2;
         MotionEvent motionEvent = MotionEvent.obtain(0, 0, ACTION_DOWN,
@@ -125,18 +129,8 @@ public class MotionEventTest {
     @Test
     public void testCalculatesCursorPositionForMultiTouchMouseEvents() {
         final int pointerCount = 2;
-        final PointerProperties[] properties = new PointerProperties[pointerCount];
-        final PointerCoords[] coords = new PointerCoords[pointerCount];
-
-        for (int i = 0; i < pointerCount; ++i) {
-            properties[i] = new PointerProperties();
-            properties[i].id = i;
-            properties[i].toolType = MotionEvent.TOOL_TYPE_FINGER;
-
-            coords[i] = new PointerCoords();
-            coords[i].x = 20 + i * 20;
-            coords[i].y = 60 - i * 20;
-        }
+        final var properties = new PointerProperties[]{fingerProperties(0), fingerProperties(1)};
+        final var coords = new PointerCoords[]{pointerCoords(20, 60), pointerCoords(40, 40)};
 
         final MotionEvent event = MotionEvent.obtain(0 /* downTime */,
                 0 /* eventTime */, ACTION_POINTER_DOWN, pointerCount, properties, coords,
