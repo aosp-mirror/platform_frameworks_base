@@ -33,15 +33,21 @@ import android.util.Log;
  * @hide This is the client side for IKeystoreAuthorization AIDL.
  * It shall only be used by biometric authentication providers and Gatekeeper.
  */
-public class Authorization {
-    private static final String TAG = "KeystoreAuthorization";
+public class KeyStoreAuthorization {
+    private static final String TAG = "KeyStoreAuthorization";
 
     public static final int SYSTEM_ERROR = ResponseCode.SYSTEM_ERROR;
+
+    private static final KeyStoreAuthorization sInstance = new KeyStoreAuthorization();
+
+    public static KeyStoreAuthorization getInstance() {
+        return sInstance;
+    }
 
     /**
      * @return an instance of IKeystoreAuthorization
      */
-    public static IKeystoreAuthorization getService() {
+    private IKeystoreAuthorization getService() {
         return IKeystoreAuthorization.Stub.asInterface(
                     ServiceManager.checkService("android.security.authorization"));
     }
@@ -52,7 +58,7 @@ public class Authorization {
      * @param authToken created by Android authenticators.
      * @return 0 if successful or {@code ResponseCode.SYSTEM_ERROR}.
      */
-    public static int addAuthToken(@NonNull HardwareAuthToken authToken) {
+    public int addAuthToken(@NonNull HardwareAuthToken authToken) {
         StrictMode.noteSlowCall("addAuthToken");
         try {
             getService().addAuthToken(authToken);
@@ -70,7 +76,7 @@ public class Authorization {
      * @param authToken
      * @return 0 if successful or a {@code ResponseCode}.
      */
-    public static int addAuthToken(@NonNull byte[] authToken) {
+    public int addAuthToken(@NonNull byte[] authToken) {
         return addAuthToken(AuthTokenUtils.toHardwareAuthToken(authToken));
     }
 
@@ -82,7 +88,7 @@ public class Authorization {
      *                   is LSKF (or equivalent) and thus has made the synthetic password available
      * @return 0 if successful or a {@code ResponseCode}.
      */
-    public static int onDeviceUnlocked(int userId, @Nullable byte[] password) {
+    public int onDeviceUnlocked(int userId, @Nullable byte[] password) {
         StrictMode.noteDiskWrite();
         try {
             getService().onDeviceUnlocked(userId, password);
@@ -103,7 +109,7 @@ public class Authorization {
      * @param weakUnlockEnabled - true if non-strong biometric or trust agent unlock is enabled
      * @return 0 if successful or a {@code ResponseCode}.
      */
-    public static int onDeviceLocked(int userId, @NonNull long[] unlockingSids,
+    public int onDeviceLocked(int userId, @NonNull long[] unlockingSids,
             boolean weakUnlockEnabled) {
         StrictMode.noteDiskWrite();
         try {
@@ -125,14 +131,17 @@ public class Authorization {
      * @return the last authentication time or
      * {@link BiometricConstants#BIOMETRIC_NO_AUTHENTICATION}.
      */
-    public static long getLastAuthenticationTime(
-            long userId, @HardwareAuthenticatorType int[] authenticatorTypes) {
+    public long getLastAuthTime(long userId, @HardwareAuthenticatorType int[] authenticatorTypes) {
         try {
             return getService().getLastAuthTime(userId, authenticatorTypes);
         } catch (RemoteException | NullPointerException e) {
-            Log.w(TAG, "Can not connect to keystore", e);
+            Log.w(TAG, "Error getting last auth time: " + e);
             return BiometricConstants.BIOMETRIC_NO_AUTHENTICATION;
         } catch (ServiceSpecificException e) {
+            // This is returned when the feature flag test fails in keystore2
+            if (e.errorCode == ResponseCode.PERMISSION_DENIED) {
+                throw new UnsupportedOperationException();
+            }
             return BiometricConstants.BIOMETRIC_NO_AUTHENTICATION;
         }
     }

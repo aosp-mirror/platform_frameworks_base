@@ -68,7 +68,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
-import android.security.KeyStore;
+import android.security.KeyStoreAuthorization;
 
 import androidx.test.filters.SmallTest;
 
@@ -105,7 +105,7 @@ public class AuthSessionTest {
     @Mock private IBiometricServiceReceiver mClientReceiver;
     @Mock private IStatusBarService mStatusBarService;
     @Mock private IBiometricSysuiReceiver mSysuiReceiver;
-    @Mock private KeyStore mKeyStore;
+    @Mock private KeyStoreAuthorization mKeyStoreAuthorization;
     @Mock private AuthSession.ClientDeathReceiver mClientDeathReceiver;
     @Mock private BiometricFrameworkStatsLogger mBiometricFrameworkStatsLogger;
     @Mock private BiometricCameraManager mBiometricCameraManager;
@@ -665,9 +665,10 @@ public class AuthSessionTest {
         final PreAuthInfo preAuthInfo = createPreAuthInfo(sensors, userId, promptInfo,
                 checkDevicePolicyManager);
         return new AuthSession(mContext, mBiometricContext, mStatusBarService, mSysuiReceiver,
-                mKeyStore, mRandom, mClientDeathReceiver, preAuthInfo, mToken, requestId,
-                operationId, userId, mSensorReceiver, mClientReceiver, TEST_PACKAGE, promptInfo,
-                false /* debugEnabled */, mFingerprintSensorProps, mBiometricFrameworkStatsLogger);
+                mKeyStoreAuthorization, mRandom, mClientDeathReceiver, preAuthInfo, mToken,
+                requestId, operationId, userId, mSensorReceiver, mClientReceiver, TEST_PACKAGE,
+                promptInfo, false /* debugEnabled */, mFingerprintSensorProps,
+                mBiometricFrameworkStatsLogger);
     }
 
     private PromptInfo createPromptInfo(@Authenticators.Types int authenticators) {
