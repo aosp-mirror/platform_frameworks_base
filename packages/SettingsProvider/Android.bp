@@ -87,6 +87,7 @@ android_test {
 aconfig_declarations {
     name: "device_config_service_flags",
     package: "com.android.providers.settings",
+    container: "system",
     srcs: [
         "src/com/android/providers/settings/device_config_service.aconfig",
     ],
