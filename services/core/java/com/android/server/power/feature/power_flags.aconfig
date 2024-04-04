@@ -1,4 +1,5 @@
 package: "com.android.server.power.feature.flags"
+container: "system"
 
 # Important: Flags must be accessed through PowerManagerFlags.
 

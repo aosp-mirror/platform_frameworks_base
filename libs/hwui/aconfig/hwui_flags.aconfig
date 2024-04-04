@@ -1,4 +1,5 @@
 package: "com.android.graphics.hwui.flags"
+container: "system"
 
 flag {
   name: "clip_shader"
