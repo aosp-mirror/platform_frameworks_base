@@ -1272,7 +1272,7 @@ public final class SurfaceControl implements Parcelable {
      * surface has no buffer or crop, the surface is boundless and only constrained
      * by the size of its parent bounds.
      *
-     * @param session  The surface session, must not be null.
+     * @param session  The surface session.
      * @param name     The surface name, must not be null.
      * @param w        The surface initial width.
      * @param h        The surface initial height.
