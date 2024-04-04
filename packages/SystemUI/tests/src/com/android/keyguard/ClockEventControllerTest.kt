@@ -330,7 +330,8 @@ class ClockEventControllerTest : SysuiTestCase() {
                 TransitionStep(
                     from = KeyguardState.LOCKSCREEN,
                     to = KeyguardState.AOD,
-                    value = 0.4f
+                    value = 0.4f,
+                    transitionState = TransitionState.RUNNING,
                 )
             yield()
 
