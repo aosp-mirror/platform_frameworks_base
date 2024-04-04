@@ -93,6 +93,9 @@ interface QSSceneAdapter {
     val isQsFullyCollapsed: Boolean
         get() = true
 
+    /** Request that the customizer be closed. Possibly animating it. */
+    fun requestCloseCustomizer()
+
     sealed interface State {
 
         val isVisible: Boolean
@@ -275,6 +278,10 @@ constructor(
 
     override suspend fun applyBottomNavBarPadding(padding: Int) {
         bottomNavBarSize.emit(padding)
+    }
+
+    override fun requestCloseCustomizer() {
+        qsImpl.value?.closeCustomizer()
     }
 
     private fun QSImpl.applyState(state: QSSceneAdapter.State) {

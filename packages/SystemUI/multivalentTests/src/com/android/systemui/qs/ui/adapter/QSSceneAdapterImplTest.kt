@@ -496,4 +496,16 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
             runCurrent()
             verify(qsImpl!!).setInSplitShade(true)
         }
+
+    @Test
+    fun requestCloseCustomizer() =
+        testScope.runTest {
+            val qsImpl by collectLastValue(underTest.qsImpl)
+
+            underTest.inflate(context)
+            runCurrent()
+
+            underTest.requestCloseCustomizer()
+            verify(qsImpl!!).closeCustomizer()
+        }
 }
