@@ -261,16 +261,19 @@ private fun shouldDrawElement(
     scene: Scene,
     element: Element,
 ): Boolean {
-    val transition = layoutImpl.state.currentTransition
+    val transition = layoutImpl.state.currentTransition ?: return true
 
-    // Always draw the element if there is no ongoing transition or if the element is not shared or
-    // if the current scene is the one that is currently over scrolling with [OverscrollSpec].
-    if (
-        transition == null ||
-            transition.fromScene !in element.sceneStates ||
-            transition.toScene !in element.sceneStates ||
-            transition.currentOverscrollSpec?.scene == scene.key
-    ) {
+    val inFromScene = transition.fromScene in element.sceneStates
+    val inToScene = transition.toScene in element.sceneStates
+
+    // If an element is not present in any scene, it should not be drawn.
+    if (!inFromScene && !inToScene) {
+        return false
+    }
+
+    // Always draw if the element is not shared or if the current scene is the one that is currently
+    // over scrolling with [OverscrollSpec].
+    if (!inFromScene || !inToScene || transition.currentOverscrollSpec?.scene == scene.key) {
         return true
     }
 
