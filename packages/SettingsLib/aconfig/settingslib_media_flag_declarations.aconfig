@@ -1,4 +1,5 @@
 package: "com.android.settingslib.media.flags"
+container: "system"
 
 flag {
   name: "use_media_router2_for_info_media_manager"
