@@ -1,4 +1,5 @@
 package: "com.android.egg.flags"
+container: "system"
 
 flag {
     name: "flag_flag"
