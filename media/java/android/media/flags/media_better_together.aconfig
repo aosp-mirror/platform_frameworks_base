@@ -108,6 +108,16 @@ flag {
 }
 
 flag {
+    name: "enable_mr2_service_non_main_bg_thread"
+    namespace: "media_solutions"
+    description: "Enables the use of a background thread in the media routing framework, instead of using the main thread."
+    bug: "310145678"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_screen_off_scanning"
     is_exported: true
     namespace: "media_solutions"

@@ -31,6 +31,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.MediaRoute2Info;
+import android.os.Handler;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -77,26 +78,35 @@ import java.util.stream.Collectors;
 
     @NonNull
     private final Context mContext;
-    @NonNull
-    private final BluetoothAdapter mBluetoothAdapter;
+    @NonNull private final Handler mHandler;
+    @NonNull private final BluetoothAdapter mBluetoothAdapter;
     @NonNull
     private final BluetoothRouteController.BluetoothRoutesUpdatedListener mListener;
     @NonNull
     private final BluetoothProfileMonitor mBluetoothProfileMonitor;
 
-    BluetoothDeviceRoutesManager(@NonNull Context context,
+    BluetoothDeviceRoutesManager(
+            @NonNull Context context,
+            @NonNull Handler handler,
             @NonNull BluetoothAdapter bluetoothAdapter,
             @NonNull BluetoothRouteController.BluetoothRoutesUpdatedListener listener) {
-        this(context, bluetoothAdapter,
-                new BluetoothProfileMonitor(context, bluetoothAdapter), listener);
+        this(
+                context,
+                handler,
+                bluetoothAdapter,
+                new BluetoothProfileMonitor(context, bluetoothAdapter),
+                listener);
     }
 
     @VisibleForTesting
-    BluetoothDeviceRoutesManager(@NonNull Context context,
+    BluetoothDeviceRoutesManager(
+            @NonNull Context context,
+            @NonNull Handler handler,
             @NonNull BluetoothAdapter bluetoothAdapter,
             @NonNull BluetoothProfileMonitor bluetoothProfileMonitor,
             @NonNull BluetoothRouteController.BluetoothRoutesUpdatedListener listener) {
         mContext = Objects.requireNonNull(context);
+        mHandler = handler;
         mBluetoothAdapter = Objects.requireNonNull(bluetoothAdapter);
         mBluetoothProfileMonitor = Objects.requireNonNull(bluetoothProfileMonitor);
         mListener = Objects.requireNonNull(listener);
@@ -298,6 +308,26 @@ import java.util.stream.Collectors;
         };
     }
 
+    private void handleBluetoothAdapterStateChange(int state) {
+        if (state == BluetoothAdapter.STATE_OFF || state == BluetoothAdapter.STATE_TURNING_OFF) {
+            synchronized (BluetoothDeviceRoutesManager.this) {
+                mBluetoothRoutes.clear();
+            }
+            notifyBluetoothRoutesUpdated();
+        } else if (state == BluetoothAdapter.STATE_ON) {
+            updateBluetoothRoutes();
+
+            boolean shouldCallListener;
+            synchronized (BluetoothDeviceRoutesManager.this) {
+                shouldCallListener = !mBluetoothRoutes.isEmpty();
+            }
+
+            if (shouldCallListener) {
+                notifyBluetoothRoutesUpdated();
+            }
+        }
+    }
+
     private static class BluetoothRouteInfo {
         private BluetoothDevice mBtDevice;
         private MediaRoute2Info mRoute;
@@ -308,23 +338,10 @@ import java.util.stream.Collectors;
         @Override
         public void onReceive(Context context, Intent intent) {
             int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
-            if (state == BluetoothAdapter.STATE_OFF
-                    || state == BluetoothAdapter.STATE_TURNING_OFF) {
-                synchronized (BluetoothDeviceRoutesManager.this) {
-                    mBluetoothRoutes.clear();
-                }
-                notifyBluetoothRoutesUpdated();
-            } else if (state == BluetoothAdapter.STATE_ON) {
-                updateBluetoothRoutes();
-
-                boolean shouldCallListener;
-                synchronized (BluetoothDeviceRoutesManager.this) {
-                    shouldCallListener = !mBluetoothRoutes.isEmpty();
-                }
-
-                if (shouldCallListener) {
-                    notifyBluetoothRoutesUpdated();
-                }
+            if (Flags.enableMr2ServiceNonMainBgThread()) {
+                mHandler.post(() -> handleBluetoothAdapterStateChange(state));
+            } else {
+                handleBluetoothAdapterStateChange(state);
             }
         }
     }
@@ -337,8 +354,16 @@ import java.util.stream.Collectors;
                 case BluetoothHearingAid.ACTION_CONNECTION_STATE_CHANGED:
                 case BluetoothLeAudio.ACTION_LE_AUDIO_CONNECTION_STATE_CHANGED:
                 case BluetoothDevice.ACTION_ALIAS_CHANGED:
-                    updateBluetoothRoutes();
-                    notifyBluetoothRoutesUpdated();
+                    if (Flags.enableMr2ServiceNonMainBgThread()) {
+                        mHandler.post(
+                                () -> {
+                                    updateBluetoothRoutes();
+                                    notifyBluetoothRoutesUpdated();
+                                });
+                    } else {
+                        updateBluetoothRoutes();
+                        notifyBluetoothRoutesUpdated();
+                    }
             }
         }
     }
