@@ -544,7 +544,9 @@ constructor(
                         step.copy(value = 1f - step.value)
                     },
                     keyguardTransitionInteractor.lockscreenToAodTransition,
-                )
+                ).filter {
+                    it.transitionState != TransitionState.FINISHED
+                }
                 .collect { handleDoze(it.value) }
         }
     }
