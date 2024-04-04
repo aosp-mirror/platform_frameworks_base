@@ -779,6 +779,11 @@ public class DisplayPolicy {
         return mLidState;
     }
 
+    private void onDisplaySwitchFinished() {
+        mDisplayContent.mWallpaperController.onDisplaySwitchFinished();
+        mDisplayContent.mDisplayUpdater.onDisplaySwitching(false);
+    }
+
     public void setAwake(boolean awake) {
         synchronized (mLock) {
             if (awake == mAwake) {
@@ -797,7 +802,7 @@ public class DisplayPolicy {
             mService.mAtmService.mKeyguardController.updateDeferTransitionForAod(
                     mAwake /* waiting */);
             if (!awake) {
-                mDisplayContent.mWallpaperController.onDisplaySwitchFinished();
+                onDisplaySwitchFinished();
             }
         }
     }
@@ -866,7 +871,7 @@ public class DisplayPolicy {
 
     /** It is called after {@link #finishScreenTurningOn}. This runs on PowerManager's thread. */
     public void screenTurnedOn() {
-        mDisplayContent.mWallpaperController.onDisplaySwitchFinished();
+        onDisplaySwitchFinished();
     }
 
     public void screenTurnedOff() {
@@ -2185,6 +2190,11 @@ public class DisplayPolicy {
         }
         mCachedDecorInsets.mPreserveId =
                 mDisplayContent.mTransitionController.getCollectingTransitionId();
+    }
+
+    /** If this is called, expect that there will be an onDisplayChanged about unique id. */
+    public void onDisplaySwitchStart() {
+        mDisplayContent.mDisplayUpdater.onDisplaySwitching(true);
     }
 
     @NavigationBarPosition

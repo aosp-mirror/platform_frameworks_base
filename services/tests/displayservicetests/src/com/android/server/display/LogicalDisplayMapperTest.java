@@ -79,12 +79,16 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.foldables.FoldGracePeriodProvider;
+import com.android.internal.util.test.LocalServiceKeeperRule;
+import com.android.server.LocalServices;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.layout.DisplayIdProducer;
 import com.android.server.display.layout.Layout;
+import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.utils.FoldSettingProvider;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -124,6 +128,9 @@ public class LogicalDisplayMapperTest {
 
     private DeviceStateToLayoutMap mDeviceStateToLayoutMapSpy;
 
+    @Rule
+    public LocalServiceKeeperRule mLocalServiceKeeperRule = new LocalServiceKeeperRule();
+
     @Mock LogicalDisplayMapper.Listener mListenerMock;
     @Mock Context mContextMock;
     @Mock FoldSettingProvider mFoldSettingProviderMock;
@@ -133,6 +140,7 @@ public class LogicalDisplayMapperTest {
     @Mock IThermalService mIThermalServiceMock;
     @Mock DisplayManagerFlags mFlagsMock;
     @Mock DisplayAdapter mDisplayAdapterMock;
+    @Mock WindowManagerPolicy mWindowManagerPolicy;
 
     @Captor ArgumentCaptor<LogicalDisplay> mDisplayCaptor;
     @Captor ArgumentCaptor<Integer> mDisplayEventCaptor;
@@ -142,6 +150,9 @@ public class LogicalDisplayMapperTest {
         // Share classloader to allow package private access.
         System.setProperty("dexmaker.share_classloader", "true");
         MockitoAnnotations.initMocks(this);
+
+        mLocalServiceKeeperRule.overrideLocalService(WindowManagerPolicy.class,
+                mWindowManagerPolicy);
 
         mDeviceStateToLayoutMapSpy =
                 spy(new DeviceStateToLayoutMap(mIdProducer, mFlagsMock, NON_EXISTING_FILE));
@@ -194,6 +205,7 @@ public class LogicalDisplayMapperTest {
                 mDisplayDeviceRepo,
                 mListenerMock, new DisplayManagerService.SyncRoot(), mHandler,
                 mDeviceStateToLayoutMapSpy, mFlagsMock);
+        mLogicalDisplayMapper.onWindowManagerReady();
     }
 
 
@@ -754,6 +766,44 @@ public class LogicalDisplayMapperTest {
 
         assertDisplayEnabled(foldableDisplayDevices.mOuter);
         assertDisplayDisabled(foldableDisplayDevices.mInner);
+    }
+
+    @Test
+    public void testDisplaySwappedAfterDeviceStateChange_windowManagerIsNotified() {
+        FoldableDisplayDevices foldableDisplayDevices = createFoldableDeviceStateToLayoutMap();
+        mLogicalDisplayMapper.setDeviceStateLocked(DEVICE_STATE_OPEN);
+        mLogicalDisplayMapper.onEarlyInteractivityChange(true);
+        mLogicalDisplayMapper.onBootCompleted();
+        advanceTime(1000);
+        clearInvocations(mWindowManagerPolicy);
+
+        // Switch from 'inner' to 'outer' display (fold a foldable device)
+        mLogicalDisplayMapper.setDeviceStateLocked(DEVICE_STATE_CLOSED);
+        // Continue folding device state transition by turning off the inner display
+        foldableDisplayDevices.mInner.setState(STATE_OFF);
+        notifyDisplayChanges(foldableDisplayDevices.mOuter);
+        advanceTime(TIMEOUT_STATE_TRANSITION_MILLIS);
+
+        verify(mWindowManagerPolicy).onDisplaySwitchStart(DEFAULT_DISPLAY);
+    }
+
+    @Test
+    public void testCreateNewLogicalDisplay_windowManagerIsNotNotifiedAboutSwitch() {
+        DisplayDevice device1 = createDisplayDevice(TYPE_EXTERNAL, 600, 800,
+                FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
+        when(mDeviceStateToLayoutMapSpy.size()).thenReturn(1);
+        LogicalDisplay display1 = add(device1);
+
+        assertTrue(display1.isEnabledLocked());
+
+        DisplayDevice device2 = createDisplayDevice(TYPE_INTERNAL, 600, 800,
+                FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
+        when(mDeviceStateToLayoutMapSpy.size()).thenReturn(2);
+        add(device2);
+
+        // As it is not a display switch but adding a new display, we should not notify
+        // about display switch start to window manager
+        verify(mWindowManagerPolicy, never()).onDisplaySwitchStart(anyInt());
     }
 
     @Test
