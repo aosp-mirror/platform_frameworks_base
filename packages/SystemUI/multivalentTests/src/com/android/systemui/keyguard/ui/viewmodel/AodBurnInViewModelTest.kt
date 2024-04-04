@@ -23,6 +23,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.burnInInteractor
@@ -60,10 +61,7 @@ class AodBurnInViewModelTest : SysuiTestCase() {
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
     private lateinit var underTest: AodBurnInViewModel
 
-    private var burnInParameters =
-        BurnInParameters(
-            clockControllerProvider = { clockController },
-        )
+    private var burnInParameters = BurnInParameters()
     private val burnInFlow = MutableStateFlow(BurnInModel())
 
     @Before
@@ -76,6 +74,7 @@ class AodBurnInViewModelTest : SysuiTestCase() {
         whenever(goneToAodTransitionViewModel.enterFromTopTranslationY(anyInt()))
             .thenReturn(emptyFlow())
         kosmos.goneToAodTransitionViewModel = goneToAodTransitionViewModel
+        kosmos.fakeKeyguardClockRepository.setCurrentClock(clockController)
 
         underTest = kosmos.aodBurnInViewModel
     }

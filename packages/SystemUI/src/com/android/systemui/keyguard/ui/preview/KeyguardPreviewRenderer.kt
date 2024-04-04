@@ -60,6 +60,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
+import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewClockViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewSmartspaceViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
@@ -140,6 +141,7 @@ constructor(
     private val secureSettings: SecureSettings,
     private val communalTutorialViewModel: CommunalTutorialIndicatorViewModel,
     private val defaultShortcutsSection: DefaultShortcutsSection,
+    private val keyguardClockInteractor: KeyguardClockInteractor,
 ) {
     val hostToken: IBinder? = bundle.getBinder(KEY_HOST_TOKEN)
     private val width: Int = bundle.getInt(KEY_VIEW_WIDTH)
@@ -364,6 +366,7 @@ constructor(
             ),
         )
     }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun setupKeyguardRootView(previewContext: Context, rootView: FrameLayout) {
         val keyguardRootView = KeyguardRootView(previewContext, null)
@@ -377,7 +380,7 @@ constructor(
                     chipbarCoordinator,
                     screenOffAnimationController,
                     shadeInteractor,
-                    null, // clock provider only needed for burn in
+                    keyguardClockInteractor,
                     null, // jank monitor not required for preview mode
                     null, // device entry haptics not required preview mode
                     null, // device entry haptics not required for preview mode
