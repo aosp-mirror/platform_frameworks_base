@@ -101,8 +101,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Aktīvs paziņojums par ekrāna ierakstīšanas sesiju"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Vai sākt ierakstīšanu?"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Ierakstīšanas laikā Android var piekļūt visam, kas tiek rādīts jūsu ekrānā vai atskaņots jūsu ierīcē. Tāpēc piesardzīgi apejieties ar parolēm, maksājumu informāciju, ziņojumiem, fotoattēliem un audio un video saturu."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Lietotnes ierakstīšanas laikā Android var piekļūt visam, kas tiek rādīts vai atskaņots attiecīgajā lietotnē. Tāpēc piesardzīgi apejieties ar parolēm, maksājumu informāciju, ziņojumiem, fotoattēliem un audio un video saturu."</string>
-    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Sāk ierakstīšanu"</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Lietotnes ierakstīšanas laikā Android var piekļūt visam, kas tiek rādīts vai atskaņots attiecīgajā lietotnē. Tāpēc ar parolēm, maksājumu informāciju, ziņojumiem, fotoattēliem un audio un video saturu rīkojieties piesardzīgi."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Sākt ierakstīšanu"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Ierakstīt audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Ierīces audio"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Skaņa no jūsu ierīces, piemēram, mūzika, sarunas un zvana signāli"</string>
@@ -501,7 +501,7 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Lietotne tika atsprausta"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"Zvans"</string>
     <string name="stream_system" msgid="7663148785370565134">"Sistēma"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Zvans"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Skaņas signāls"</string>
     <string name="stream_music" msgid="2188224742361847580">"Multivide"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Signāls"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Paziņojums"</string>

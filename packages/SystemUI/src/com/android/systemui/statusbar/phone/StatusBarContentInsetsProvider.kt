@@ -117,11 +117,11 @@ class StatusBarContentInsetsProvider @Inject constructor(
      * status bar area is contiguous.
      */
     fun currentRotationHasCornerCutout(): Boolean {
-        val cutout = context.display.cutout ?: return false
+        val cutout = checkNotNull(context.display).cutout ?: return false
         val topBounds = cutout.boundingRectTop
 
         val point = Point()
-        context.display.getRealSize(point)
+        checkNotNull(context.display).getRealSize(point)
 
         return topBounds.left <= 0 || topBounds.right >= point.x
     }
@@ -161,7 +161,7 @@ class StatusBarContentInsetsProvider @Inject constructor(
      */
     fun getStatusBarContentInsetsForRotation(@Rotation rotation: Int): Pair<Int, Int> =
         traceSection(tag = "StatusBarContentInsetsProvider.getStatusBarContentInsetsForRotation") {
-            val displayCutout = context.display.cutout
+            val displayCutout = checkNotNull(context.display).cutout
             val key = getCacheKey(rotation, displayCutout)
 
             val screenBounds = context.resources.configuration.windowConfiguration.maxBounds
@@ -198,7 +198,7 @@ class StatusBarContentInsetsProvider @Inject constructor(
     fun getStatusBarContentAreaForRotation(
         @Rotation rotation: Int
     ): Rect {
-        val displayCutout = context.display.cutout
+        val displayCutout = checkNotNull(context.display).cutout
         val key = getCacheKey(rotation, displayCutout)
         return insetsCache[key] ?: getAndSetCalculatedAreaForRotation(
                 rotation, displayCutout, getResourcesForRotation(rotation, context), key)

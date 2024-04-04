@@ -37,8 +37,8 @@ class BatteryStatusChip @JvmOverloads constructor(context: Context, attrs: Attri
 
     init {
         inflate(context, R.layout.battery_status_chip, this)
-        roundedContainer = findViewById(R.id.rounded_container)
-        batteryMeterView = findViewById(R.id.battery_meter_view)
+        roundedContainer = requireViewById(R.id.rounded_container)
+        batteryMeterView = requireViewById(R.id.battery_meter_view)
         updateResources()
     }
 

@@ -34,7 +34,7 @@ class StatusBarUserSwitcherContainer(
 
     override fun onFinishInflate() {
         super.onFinishInflate()
-        text = findViewById(R.id.current_user_name)
-        avatar = findViewById(R.id.current_user_avatar)
+        text = requireViewById(R.id.current_user_name)
+        avatar = requireViewById(R.id.current_user_avatar)
     }
 }
