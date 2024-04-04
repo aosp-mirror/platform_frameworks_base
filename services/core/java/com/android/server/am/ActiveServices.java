@@ -5555,6 +5555,7 @@ public final class ActiveServices {
             boolean enqueueOomAdj, @ServiceBindingOomAdjPolicy int serviceBindingOomAdjPolicy)
             throws TransactionTooLargeException {
         if (r.app != null && r.app.isThreadReady()) {
+            r.updateOomAdjSeq();
             sendServiceArgsLocked(r, execInFg, false);
             return null;
         }
