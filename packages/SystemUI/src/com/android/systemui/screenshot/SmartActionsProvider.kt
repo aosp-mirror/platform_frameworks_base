@@ -65,10 +65,9 @@ constructor(
         onAction: (Notification.Action) -> Unit
     ) {
         val bitmap = data.bitmap ?: return
-        val user = data.userHandle ?: return
         val component = data.topComponent ?: ComponentName("", "")
-        requestQuickShareAction(id, bitmap, component, user) { quickShareAction ->
-            onAction(quickShareAction)
+        requestQuickShareAction(id, bitmap, component, data.getUserOrDefault()) { quickShare ->
+            onAction(quickShare)
         }
     }
 
@@ -83,14 +82,19 @@ constructor(
     fun requestSmartActions(
         data: ScreenshotData,
         id: String,
-        result: ScreenshotController.SavedImageData,
+        result: ScreenshotSavedResult,
         onActions: (List<Notification.Action>) -> Unit
     ) {
         val bitmap = data.bitmap ?: return
-        val user = data.userHandle ?: return
-        val uri = result.uri ?: return
         val component = data.topComponent ?: ComponentName("", "")
-        requestSmartActions(id, bitmap, component, user, uri, REGULAR_SMART_ACTIONS) { actions ->
+        requestSmartActions(
+            id,
+            bitmap,
+            component,
+            data.getUserOrDefault(),
+            result.uri,
+            REGULAR_SMART_ACTIONS
+        ) { actions ->
             onActions(actions)
         }
     }
@@ -197,7 +201,7 @@ constructor(
             onActions(listOf())
             return
         }
-        var smartActionsFuture: CompletableFuture<List<Notification.Action>>
+        val smartActionsFuture: CompletableFuture<List<Notification.Action>>
         val startTimeMs = SystemClock.uptimeMillis()
         try {
             smartActionsFuture =
@@ -266,6 +270,7 @@ constructor(
             Log.e(TAG, "Error in notifyScreenshotOp: ", e)
         }
     }
+
     private fun isSmartActionsEnabled(user: UserHandle): Boolean {
         // Smart actions don't yet work for cross-user saves.
         val savingToOtherUser = user !== Process.myUserHandle()
