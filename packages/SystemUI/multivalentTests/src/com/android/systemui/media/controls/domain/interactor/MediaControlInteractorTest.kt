@@ -77,33 +77,31 @@ class MediaControlInteractorTest : SysuiTestCase() {
             whenever(notificationLockscreenUserManager.isCurrentProfile(USER_ID)).thenReturn(true)
             whenever(notificationLockscreenUserManager.isProfileAvailable(USER_ID)).thenReturn(true)
             val controlModel by collectLastValue(underTest.mediaControl)
-            var mediaData =
-                MediaData(userId = USER_ID, instanceId = instanceId, artist = SESSION_ARTIST)
+            var mediaData = MediaData(userId = USER_ID, instanceId = instanceId, artist = ARTIST)
 
             mediaDataFilter.onMediaDataLoaded(KEY, KEY, mediaData)
 
             assertThat(controlModel?.instanceId).isEqualTo(instanceId)
-            assertThat(controlModel?.artistName).isEqualTo(SESSION_ARTIST)
+            assertThat(controlModel?.artistName).isEqualTo(ARTIST)
 
-            mediaData =
-                MediaData(userId = USER_ID, instanceId = instanceId, artist = SESSION_ARTIST_2)
+            mediaData = MediaData(userId = USER_ID, instanceId = instanceId, artist = ARTIST_2)
 
             mediaDataFilter.onMediaDataLoaded(KEY, KEY, mediaData)
 
             assertThat(controlModel?.instanceId).isEqualTo(instanceId)
-            assertThat(controlModel?.artistName).isEqualTo(SESSION_ARTIST_2)
+            assertThat(controlModel?.artistName).isEqualTo(ARTIST_2)
 
             mediaData =
                 MediaData(
                     userId = USER_ID,
                     instanceId = InstanceId.fakeInstanceId(2),
-                    artist = SESSION_ARTIST
+                    artist = ARTIST
                 )
 
             mediaDataFilter.onMediaDataLoaded(KEY, KEY, mediaData)
 
             assertThat(controlModel?.instanceId).isNotEqualTo(mediaData.instanceId)
-            assertThat(controlModel?.artistName).isEqualTo(SESSION_ARTIST_2)
+            assertThat(controlModel?.artistName).isEqualTo(ARTIST_2)
         }
 
     @Test
@@ -213,7 +211,7 @@ class MediaControlInteractorTest : SysuiTestCase() {
         private const val KEY = "key"
         private const val PACKAGE_NAME = "com.example.app"
         private const val APP_NAME = "app"
-        private const val SESSION_ARTIST = "artist"
-        private const val SESSION_ARTIST_2 = "artist2"
+        private const val ARTIST = "artist"
+        private const val ARTIST_2 = "artist2"
     }
 }
