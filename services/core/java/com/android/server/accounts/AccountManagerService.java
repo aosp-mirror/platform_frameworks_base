@@ -897,6 +897,11 @@ public class AccountManagerService
                         }
                     }
                     for (String packageNameToNotify : accountRemovedReceivers) {
+                        int currentVisibility =
+                                resolveAccountVisibility(account, packageNameToNotify, accounts);
+                        if (isVisible(currentVisibility)) {
+                            continue;
+                        }
                         sendAccountRemovedBroadcast(
                                 account,
                                 packageNameToNotify,
