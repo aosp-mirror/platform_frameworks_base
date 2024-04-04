@@ -189,6 +189,7 @@ class ShadeControllerSceneImplTest : SysuiTestCase() {
 
     private fun TestScope.setDeviceEntered(isEntered: Boolean) {
         if (isEntered) {
+            // Unlock the device marking the device has entered.
             kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
                 SuccessFingerprintAuthenticationStatus(0, true)
             )
