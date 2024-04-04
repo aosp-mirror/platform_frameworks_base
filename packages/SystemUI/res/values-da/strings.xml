@@ -501,14 +501,14 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Appen er frigjort"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"Ring op"</string>
     <string name="stream_system" msgid="7663148785370565134">"System"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Ring"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Ringetone"</string>
     <string name="stream_music" msgid="2188224742361847580">"Medie"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Alarm"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Notifikation"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Tonesignalfrekvens (DTMF)"</string>
     <string name="stream_accessibility" msgid="3873610336741987152">"Hjælpefunktioner"</string>
-    <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Ring"</string>
+    <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Ringetone"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Vibration"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Slå lyden fra"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Tryk for at slå lyden til."</string>
@@ -891,12 +891,12 @@
     <string name="controls_removed" msgid="3731789252222856959">"Fjernet"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Vil du tilføje <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> kan vælge, hvilke styringselementer og hvilket indhold der skal vises her."</string>
-    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Vil du fjerne styringselementerne for <xliff:g id="APPNAME">%s</xliff:g>?"</string>
+    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Vil du fjerne sty­rings­ele­men­ter­ne for <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Angivet som favorit"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Angivet som favorit. Position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Fjernet fra favoritter"</string>
-    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"markér som favorit"</string>
-    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"fjern fra favoritter"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"markere som favorit"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"fjerne som favorit"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Flyt til position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Betjeningselementer"</string>
     <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Vælg, hvilke enhedsindstillinger du vil have hurtig adgang til"</string>

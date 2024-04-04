@@ -28,7 +28,7 @@ class EnterpriseRepository(private val context: Context) {
     }
 
     fun getEnterpriseString(updatableStringId: String, resId: Int): String =
-        resources.getString(updatableStringId) { context.getString(resId) }
+        checkNotNull(resources.getString(updatableStringId) { context.getString(resId) })
 
     fun getProfileTitle(isManagedProfile: Boolean): String = if (isManagedProfile) {
         getEnterpriseString(WORK_CATEGORY_HEADER, R.string.category_work)

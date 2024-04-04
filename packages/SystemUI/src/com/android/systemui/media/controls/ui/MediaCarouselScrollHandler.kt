@@ -127,19 +127,19 @@ class MediaCarouselScrollHandler(
         object : GestureDetector.SimpleOnGestureListener() {
             override fun onFling(
                 eStart: MotionEvent?,
-                eCurrent: MotionEvent?,
+                eCurrent: MotionEvent,
                 vX: Float,
                 vY: Float
             ) = onFling(vX, vY)
 
             override fun onScroll(
                 down: MotionEvent?,
-                lastMotion: MotionEvent?,
+                lastMotion: MotionEvent,
                 distanceX: Float,
                 distanceY: Float
-            ) = onScroll(down!!, lastMotion!!, distanceX)
+            ) = onScroll(down!!, lastMotion, distanceX)
 
-            override fun onDown(e: MotionEvent?): Boolean {
+            override fun onDown(e: MotionEvent): Boolean {
                 if (falsingProtectionNeeded) {
                     falsingCollector.onNotificationStartDismissing()
                 }
