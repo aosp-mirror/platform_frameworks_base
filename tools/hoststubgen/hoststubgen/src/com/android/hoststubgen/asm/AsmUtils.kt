@@ -34,9 +34,6 @@ val CLASS_INITIALIZER_NAME = "<clinit>"
 /** Descriptor of the class initializer method. */
 val CLASS_INITIALIZER_DESC = "()V"
 
-/** Name of constructors. */
-val CTOR_NAME = "<init>"
-
 /**
  * Find any of [anyAnnotations] from the list of visible / invisible annotations.
  */
@@ -138,10 +135,10 @@ fun writeByteCodeToPushArguments(
         // Note, long and double will consume two local variable spaces, so the extra `i++`.
         when (type) {
             Type.VOID_TYPE -> throw HostStubGenInternalException("VOID_TYPE not expected")
-            Type.BOOLEAN_TYPE, Type.CHAR_TYPE, Type.BYTE_TYPE, Type.SHORT_TYPE, Type.INT_TYPE
+            Type.BOOLEAN_TYPE, Type.INT_TYPE, Type.SHORT_TYPE, Type.CHAR_TYPE
                 -> writer.visitVarInsn(Opcodes.ILOAD, i)
-            Type.FLOAT_TYPE -> writer.visitVarInsn(Opcodes.FLOAD, i)
             Type.LONG_TYPE -> writer.visitVarInsn(Opcodes.LLOAD, i++)
+            Type.FLOAT_TYPE -> writer.visitVarInsn(Opcodes.FLOAD, i)
             Type.DOUBLE_TYPE -> writer.visitVarInsn(Opcodes.DLOAD, i++)
             else -> writer.visitVarInsn(Opcodes.ALOAD, i)
         }
@@ -157,10 +154,10 @@ fun writeByteCodeToReturn(methodDescriptor: String, writer: MethodVisitor) {
         // See https://en.wikipedia.org/wiki/List_of_Java_bytecode_instructions
         when (type) {
             Type.VOID_TYPE -> writer.visitInsn(Opcodes.RETURN)
-            Type.BOOLEAN_TYPE, Type.CHAR_TYPE, Type.BYTE_TYPE, Type.SHORT_TYPE, Type.INT_TYPE
+            Type.BOOLEAN_TYPE, Type.INT_TYPE, Type.SHORT_TYPE, Type.CHAR_TYPE
                 -> writer.visitInsn(Opcodes.IRETURN)
-            Type.FLOAT_TYPE -> writer.visitInsn(Opcodes.FRETURN)
             Type.LONG_TYPE -> writer.visitInsn(Opcodes.LRETURN)
+            Type.FLOAT_TYPE -> writer.visitInsn(Opcodes.FRETURN)
             Type.DOUBLE_TYPE -> writer.visitInsn(Opcodes.DRETURN)
             else -> writer.visitInsn(Opcodes.ARETURN)
         }

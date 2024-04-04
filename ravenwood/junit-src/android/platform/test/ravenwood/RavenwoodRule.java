@@ -28,6 +28,7 @@ import android.platform.test.annotations.DisabledOnNonRavenwood;
 import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.annotations.EnabledOnRavenwood;
 import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.util.ArraySet;
 
 import org.junit.Assume;
 import org.junit.rules.TestRule;
@@ -277,9 +278,6 @@ public class RavenwoodRule implements TestRule {
                 return false;
             }
         }
-        if (description.getTestClass().getAnnotation(DisabledOnNonRavenwood.class) != null) {
-            return false;
-        }
         return true;
     }
 
@@ -415,9 +413,10 @@ public class RavenwoodRule implements TestRule {
         };
     }
 
-    public static class _$RavenwoodPrivate {
-        public static boolean isOptionalValidationEnabled() {
-            return ENABLE_OPTIONAL_VALIDATION;
-        }
+    /**
+     * Do not use it outside ravenwood core classes.
+     */
+    public boolean _ravenwood_private$isOptionalValidationEnabled() {
+        return ENABLE_OPTIONAL_VALIDATION;
     }
 }

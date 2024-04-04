@@ -1833,7 +1833,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                         // com/android/hoststubgen/test/tinyframework/TinyFrameworkNative
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 1, methods: 11, attributes: 2
+  interfaces: 0, fields: 1, methods: 10, attributes: 2
   int value;
     descriptor: I
     flags: (0x0000)
@@ -1938,10 +1938,6 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
          x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":()V
          x: athrow
       LineNumberTable:
-
-  public static native byte nativeBytePlus(byte, byte);
-    descriptor: (BB)B
-    flags: (0x0109) ACC_PUBLIC, ACC_STATIC, ACC_NATIVE
 }
 SourceFile: "TinyFrameworkNative.java"
 RuntimeInvisibleAnnotations:
@@ -1959,7 +1955,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative_host
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                         // com/android/hoststubgen/test/tinyframework/TinyFrameworkNative_host
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 0, methods: 5, attributes: 2
+  interfaces: 0, fields: 0, methods: 4, attributes: 2
   public com.android.hoststubgen.test.tinyframework.TinyFrameworkNative_host();
     descriptor: ()V
     flags: (0x0001) ACC_PUBLIC
@@ -2017,22 +2013,6 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative_host
         Start  Length  Slot  Name   Signature
             0       7     0 source   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNative;
             0       7     1   arg   I
-
-  public static byte nativeBytePlus(byte, byte);
-    descriptor: (BB)B
-    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
-    Code:
-      stack=2, locals=2, args_size=2
-         x: iload_0
-         x: iload_1
-         x: iadd
-         x: i2b
-         x: ireturn
-      LineNumberTable:
-      LocalVariableTable:
-        Start  Length  Slot  Name   Signature
-            0       5     0  arg1   B
-            0       5     1  arg2   B
 }
 SourceFile: "TinyFrameworkNative_host.java"
 RuntimeInvisibleAnnotations:
