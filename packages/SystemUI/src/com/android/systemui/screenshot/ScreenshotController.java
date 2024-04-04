@@ -242,6 +242,7 @@ public class ScreenshotController {
     private final ExecutorService mBgExecutor;
     private final BroadcastSender mBroadcastSender;
     private final BroadcastDispatcher mBroadcastDispatcher;
+    private final ActionExecutor mActionExecutor;
 
     private final WindowManager mWindowManager;
     private final WindowManager.LayoutParams mWindowLayoutParams;
@@ -257,7 +258,7 @@ public class ScreenshotController {
     private final ScreenshotNotificationSmartActionsProvider
             mScreenshotNotificationSmartActionsProvider;
     private final TimeoutHandler mScreenshotHandler;
-    private final ActionIntentExecutor mActionExecutor;
+    private final ActionIntentExecutor mActionIntentExecutor;
     private final UserManager mUserManager;
     private final AssistContentRequester mAssistContentRequester;
 
@@ -311,7 +312,8 @@ public class ScreenshotController {
             BroadcastSender broadcastSender,
             BroadcastDispatcher broadcastDispatcher,
             ScreenshotNotificationSmartActionsProvider screenshotNotificationSmartActionsProvider,
-            ActionIntentExecutor actionExecutor,
+            ActionIntentExecutor actionIntentExecutor,
+            ActionExecutor.Factory actionExecutorFactory,
             UserManager userManager,
             AssistContentRequester assistContentRequester,
             MessageContainerController messageContainerController,
@@ -345,7 +347,7 @@ public class ScreenshotController {
         final Context displayContext = context.createDisplayContext(getDisplay());
         mContext = (WindowContext) displayContext.createWindowContext(TYPE_SCREENSHOT, null);
         mFlags = flags;
-        mActionExecutor = actionExecutor;
+        mActionIntentExecutor = actionIntentExecutor;
         mUserManager = userManager;
         mMessageContainerController = messageContainerController;
         mAssistContentRequester = assistContentRequester;
@@ -368,6 +370,12 @@ public class ScreenshotController {
 
         mConfigChanges.applyNewConfig(context.getResources());
         reloadAssets();
+
+        mActionExecutor = actionExecutorFactory.create(mWindow, mViewProxy.getScreenshotPreview(),
+                () -> {
+                    requestDismissal(null);
+                    return Unit.INSTANCE;
+                });
 
         // Sound is only reproduced from the controller of the default display.
         if (displayId == Display.DEFAULT_DISPLAY) {
@@ -447,11 +455,8 @@ public class ScreenshotController {
         if (screenshotShelfUi()) {
             final UUID requestId = UUID.randomUUID();
             final String screenshotId = String.format("Screenshot_%s", requestId);
-            mActionsProvider = mActionsProviderFactory.create(screenshot, screenshotId,
-                    this::createWindowTransition, () -> {
-                        mViewProxy.requestDismissal(null);
-                        return Unit.INSTANCE;
-                    });
+            mActionsProvider = mActionsProviderFactory.create(
+                    screenshot, screenshotId, mActionExecutor);
             saveScreenshotInBackground(screenshot, requestId, finisher);
 
             if (screenshot.getTaskId() >= 0) {
@@ -548,7 +553,7 @@ public class ScreenshotController {
 
     boolean isPendingSharedTransition() {
         if (screenshotShelfUi()) {
-            return mActionsProvider != null && mActionsProvider.isPendingSharedTransition();
+            return mActionExecutor.isPendingSharedTransition();
         } else {
             return mViewProxy.isPendingSharedTransition();
         }
@@ -599,7 +604,7 @@ public class ScreenshotController {
 
             @Override
             public void onAction(Intent intent, UserHandle owner, boolean overrideTransition) {
-                mActionExecutor.launchIntentAsync(
+                mActionIntentExecutor.launchIntentAsync(
                         intent, createWindowTransition(), owner, overrideTransition);
             }
 
