@@ -169,7 +169,7 @@ public class AudioDeviceInventory {
             if (ads != null) {
                 if (ads.getAudioDeviceCategory() != category) {
                     ads.setAudioDeviceCategory(category);
-                    mDeviceBroker.postUpdatedAdiDeviceState(ads);
+                    mDeviceBroker.postUpdatedAdiDeviceState(ads, false /*initSA*/);
                     mDeviceBroker.postPersistAudioDeviceSettings();
                 }
                 mDeviceBroker.postSynchronizeAdiDevicesInInventory(ads);
@@ -182,7 +182,7 @@ public class AudioDeviceInventory {
             mDeviceInventory.put(ads.getDeviceId(), ads);
             checkDeviceInventorySize_l();
 
-            mDeviceBroker.postUpdatedAdiDeviceState(ads);
+            mDeviceBroker.postUpdatedAdiDeviceState(ads, true /*initSA*/);
             mDeviceBroker.postPersistAudioDeviceSettings();
         }
     }
@@ -212,7 +212,7 @@ public class AudioDeviceInventory {
             checkDeviceInventorySize_l();
         }
         if (updatedCategory.get()) {
-            mDeviceBroker.postUpdatedAdiDeviceState(deviceState);
+            mDeviceBroker.postUpdatedAdiDeviceState(deviceState, false /*initSA*/);
         }
         mDeviceBroker.postSynchronizeAdiDevicesInInventory(deviceState);
     }
@@ -314,7 +314,7 @@ public class AudioDeviceInventory {
                     }
                     ads2.setAudioDeviceCategory(updatedDevice.getAudioDeviceCategory());
 
-                    mDeviceBroker.postUpdatedAdiDeviceState(ads2);
+                    mDeviceBroker.postUpdatedAdiDeviceState(ads2, false /*initSA*/);
                     AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                             "synchronizeBleDeviceInInventory synced device pair ads1="
                                     + updatedDevice + " ads2=" + ads2).printLog(TAG));
@@ -335,7 +335,7 @@ public class AudioDeviceInventory {
                     }
                     ads2.setAudioDeviceCategory(updatedDevice.getAudioDeviceCategory());
 
-                    mDeviceBroker.postUpdatedAdiDeviceState(ads2);
+                    mDeviceBroker.postUpdatedAdiDeviceState(ads2, false /*initSA*/);
                     AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                             "synchronizeBleDeviceInInventory synced device pair ads1="
                                     + updatedDevice + " peer ads2=" + ads2).printLog(TAG));
@@ -360,7 +360,7 @@ public class AudioDeviceInventory {
             }
             ads.setAudioDeviceCategory(updatedDevice.getAudioDeviceCategory());
 
-            mDeviceBroker.postUpdatedAdiDeviceState(ads);
+            mDeviceBroker.postUpdatedAdiDeviceState(ads, false /*initSA*/);
             AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                     "synchronizeDeviceProfilesInInventory synced device pair ads1="
                             + updatedDevice + " ads2=" + ads).printLog(TAG));
