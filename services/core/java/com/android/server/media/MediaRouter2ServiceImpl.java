@@ -189,12 +189,10 @@ class MediaRouter2ServiceImpl {
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
 
-        if (!Flags.disableScreenOffBroadcastReceiver()) {
-            IntentFilter screenOnOffIntentFilter = new IntentFilter();
-            screenOnOffIntentFilter.addAction(ACTION_SCREEN_ON);
-            screenOnOffIntentFilter.addAction(ACTION_SCREEN_OFF);
-            mContext.registerReceiver(mScreenOnOffReceiver, screenOnOffIntentFilter);
-        }
+        IntentFilter screenOnOffIntentFilter = new IntentFilter();
+        screenOnOffIntentFilter.addAction(ACTION_SCREEN_ON);
+        screenOnOffIntentFilter.addAction(ACTION_SCREEN_OFF);
+        mContext.registerReceiver(mScreenOnOffReceiver, screenOnOffIntentFilter);
 
         // Passing null package name to listen to all events.
         mAppOpsManager.startWatchingMode(
@@ -3435,9 +3433,7 @@ class MediaRouter2ServiceImpl {
         @NonNull
         private static List<RouterRecord> getIndividuallyActiveRouters(
                 MediaRouter2ServiceImpl service, List<RouterRecord> allRouterRecords) {
-            if (!Flags.disableScreenOffBroadcastReceiver()
-                    && !service.mPowerManager.isInteractive()
-                    && !Flags.enableScreenOffScanning()) {
+            if (!service.mPowerManager.isInteractive() && !Flags.enableScreenOffScanning()) {
                 return Collections.emptyList();
             }
 
@@ -3453,9 +3449,7 @@ class MediaRouter2ServiceImpl {
 
         private static boolean areManagersScanning(
                 MediaRouter2ServiceImpl service, List<ManagerRecord> managerRecords) {
-            if (!Flags.disableScreenOffBroadcastReceiver()
-                    && !service.mPowerManager.isInteractive()
-                    && !Flags.enableScreenOffScanning()) {
+            if (!service.mPowerManager.isInteractive() && !Flags.enableScreenOffScanning()) {
                 return false;
             }
 

@@ -25,13 +25,6 @@ flag {
 }
 
 flag {
-    name: "disable_screen_off_broadcast_receiver"
-    namespace: "media_solutions"
-    description: "Disables the broadcast receiver that prevents scanning when the screen is off."
-    bug: "304234628"
-}
-
-flag {
     name: "fallback_to_default_handling_when_media_session_has_fixed_volume_handling"
     namespace: "media_solutions"
     description: "Fallbacks to the default handling for volume adjustment when media session has fixed volume handling and its app is in the foreground and setting a media controller."
