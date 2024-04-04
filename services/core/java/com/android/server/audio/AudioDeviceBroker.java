@@ -1517,8 +1517,9 @@ public class AudioDeviceBroker {
         sendLMsgNoDelay(MSG_L_SYNCHRONIZE_ADI_DEVICES_IN_INVENTORY, SENDMSG_QUEUE, deviceState);
     }
 
-    /*package*/ void postUpdatedAdiDeviceState(AdiDeviceState deviceState) {
-        sendLMsgNoDelay(MSG_L_UPDATED_ADI_DEVICE_STATE, SENDMSG_QUEUE, deviceState);
+    /*package*/ void postUpdatedAdiDeviceState(AdiDeviceState deviceState, boolean initSA) {
+        sendILMsgNoDelay(
+                MSG_IL_UPDATED_ADI_DEVICE_STATE, SENDMSG_QUEUE, initSA ? 1 : 0, deviceState);
     }
 
     /*package*/ static final class CommunicationDeviceInfo {
@@ -2049,8 +2050,8 @@ public class AudioDeviceBroker {
                         }
                     } break;
 
-                case MSG_L_UPDATED_ADI_DEVICE_STATE:
-                    mAudioService.onUpdatedAdiDeviceState((AdiDeviceState) msg.obj);
+                case MSG_IL_UPDATED_ADI_DEVICE_STATE:
+                    mAudioService.onUpdatedAdiDeviceState((AdiDeviceState) msg.obj, msg.arg1 == 1);
                     break;
 
                 default:
@@ -2137,7 +2138,7 @@ public class AudioDeviceBroker {
     private static final int MSG_CHECK_COMMUNICATION_ROUTE_CLIENT_STATE = 56;
     private static final int MSG_I_UPDATE_LE_AUDIO_GROUP_ADDRESSES = 57;
     private static final int MSG_L_SYNCHRONIZE_ADI_DEVICES_IN_INVENTORY = 58;
-    private static final int MSG_L_UPDATED_ADI_DEVICE_STATE = 59;
+    private static final int MSG_IL_UPDATED_ADI_DEVICE_STATE = 59;
 
 
 
