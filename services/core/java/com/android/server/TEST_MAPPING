@@ -62,6 +62,18 @@
             "file_patterns": ["SensorPrivacyService\\.java"]
         },
         {
+            "name": "FrameworksMockingServicesTests",
+            "options": [
+                {
+                    "include-filter": "com.android.server.SensitiveContentProtectionManagerServiceContentTest"
+                },
+                {
+                    "include-filter": "com.android.server.SensitiveContentProtectionManagerServiceNotificationTest"
+                }
+            ],
+            "file_patterns": ["SensitiveContentProtectionManagerService\\.java"]
+        },
+        {
             "name": "FrameworksServicesTests",
             "options": [
                 {
