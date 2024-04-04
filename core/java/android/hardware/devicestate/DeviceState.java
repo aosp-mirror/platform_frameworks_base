@@ -346,10 +346,10 @@ public final class DeviceState {
     @Override
     public String toString() {
         return "DeviceState{" + "identifier=" + mIdentifier + ", name='" + mName + '\''
-                + ", app_accessible=" + !hasProperty(PROPERTY_APP_INACCESSIBLE)
-                + ", cancel_when_requester_not_on_top="
-                + hasProperty(PROPERTY_POLICY_CANCEL_WHEN_REQUESTER_NOT_ON_TOP)
-                + "}";
+                + ", app_accessible=" + !(hasProperty(PROPERTY_APP_INACCESSIBLE)
+                || hasFlag(FLAG_APP_INACCESSIBLE)) + ", cancel_when_requester_not_on_top="
+                + (hasProperty(PROPERTY_POLICY_CANCEL_WHEN_REQUESTER_NOT_ON_TOP)
+                || hasFlag(FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP)) + "}";
     }
 
     @Override
