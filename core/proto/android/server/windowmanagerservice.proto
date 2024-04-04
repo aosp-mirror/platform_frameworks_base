@@ -607,7 +607,7 @@ message ImeInsetsSourceProviderProto {
 
     optional InsetsSourceProviderProto insets_source_provider = 1;
     optional WindowStateProto ime_target_from_ime = 2;
-    optional bool is_ime_layout_drawn = 3;
+    optional bool is_ime_layout_drawn = 3 [deprecated=true];
 }
 
 message BackNavigationProto {

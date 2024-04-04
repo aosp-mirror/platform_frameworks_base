@@ -65,7 +65,7 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
         performSurfacePlacementAndWaitForWindowAnimator();
 
         mImeProvider.scheduleShowImePostLayout(appWin, ImeTracker.Token.empty());
-        assertTrue(mImeProvider.isReadyToShowIme());
+        assertTrue(mImeProvider.isScheduledAndReadyToShowIme());
     }
 
     /**
@@ -84,13 +84,13 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
 
         // Schedule (without triggering) after everything is ready.
         mImeProvider.scheduleShowImePostLayout(target, ImeTracker.Token.empty());
-        assertTrue(mImeProvider.isReadyToShowIme());
+        assertTrue(mImeProvider.isScheduledAndReadyToShowIme());
         assertFalse(mImeProvider.isImeShowing());
 
         // Manually trigger the show.
-        mImeProvider.checkShowImePostLayout();
-        // No longer ready as it was already shown.
-        assertFalse(mImeProvider.isReadyToShowIme());
+        mImeProvider.checkAndStartShowImePostLayout();
+        // No longer scheduled as it was already shown.
+        assertFalse(mImeProvider.isScheduledAndReadyToShowIme());
         assertTrue(mImeProvider.isImeShowing());
     }
 
@@ -104,7 +104,7 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
 
         // Schedule before anything is ready.
         mImeProvider.scheduleShowImePostLayout(target, ImeTracker.Token.empty());
-        assertFalse(mImeProvider.isReadyToShowIme());
+        assertFalse(mImeProvider.isScheduledAndReadyToShowIme());
         assertFalse(mImeProvider.isImeShowing());
 
         final WindowState ime = createWindow(null, TYPE_INPUT_METHOD, "ime");
@@ -115,8 +115,8 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
         mDisplayContent.updateImeInputAndControlTarget(target);
         // Performing surface placement picks up the show scheduled above.
         performSurfacePlacementAndWaitForWindowAnimator();
-        // No longer ready as it was already shown.
-        assertFalse(mImeProvider.isReadyToShowIme());
+        // No longer scheduled as it was already shown.
+        assertFalse(mImeProvider.isScheduledAndReadyToShowIme());
         assertTrue(mImeProvider.isImeShowing());
     }
 
@@ -137,19 +137,19 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
 
         // Schedule before starting the afterPrepareSurfacesRunnable.
         mImeProvider.scheduleShowImePostLayout(target, ImeTracker.Token.empty());
-        assertFalse(mImeProvider.isReadyToShowIme());
+        assertFalse(mImeProvider.isScheduledAndReadyToShowIme());
         assertFalse(mImeProvider.isImeShowing());
 
         // This tries to pick up the show scheduled above, but must fail as the
         // afterPrepareSurfacesRunnable was not started yet.
         mDisplayContent.applySurfaceChangesTransaction();
-        assertFalse(mImeProvider.isReadyToShowIme());
+        assertFalse(mImeProvider.isScheduledAndReadyToShowIme());
         assertFalse(mImeProvider.isImeShowing());
 
         // Starting the afterPrepareSurfacesRunnable picks up the show scheduled above.
         mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
-        // No longer ready as it was already shown.
-        assertFalse(mImeProvider.isReadyToShowIme());
+        // No longer scheduled as it was already shown.
+        assertFalse(mImeProvider.isScheduledAndReadyToShowIme());
         assertTrue(mImeProvider.isImeShowing());
     }
 
@@ -169,7 +169,7 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
 
         // Schedule before surface placement.
         mImeProvider.scheduleShowImePostLayout(target, ImeTracker.Token.empty());
-        assertFalse(mImeProvider.isReadyToShowIme());
+        assertFalse(mImeProvider.isScheduledAndReadyToShowIme());
         assertFalse(mImeProvider.isImeShowing());
 
         // Performing surface placement picks up the show scheduled above, and succeeds.
@@ -177,8 +177,8 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
         // applySurfaceChangesTransaction. Both of them try to trigger the show,
         // but only the second one can succeed, as it comes after onPostLayout.
         performSurfacePlacementAndWaitForWindowAnimator();
-        // No longer ready as it was already shown.
-        assertFalse(mImeProvider.isReadyToShowIme());
+        // No longer scheduled as it was already shown.
+        assertFalse(mImeProvider.isScheduledAndReadyToShowIme());
         assertTrue(mImeProvider.isImeShowing());
     }
 
