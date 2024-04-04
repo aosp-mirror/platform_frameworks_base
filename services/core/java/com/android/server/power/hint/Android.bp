@@ -1,6 +1,7 @@
 aconfig_declarations {
     name: "power_hint_flags",
     package: "com.android.server.power.hint",
+    container: "system",
     srcs: [
         "flags.aconfig",
     ],
