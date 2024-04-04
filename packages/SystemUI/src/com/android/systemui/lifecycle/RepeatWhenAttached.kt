@@ -26,7 +26,9 @@ import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.lifecycleScope
 import com.android.app.tracing.coroutines.createCoroutineTracingContext
 import com.android.app.tracing.coroutines.launch
+import com.android.systemui.Flags.coroutineTracing
 import com.android.systemui.util.Assert
+import com.android.systemui.util.Compile
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.Dispatchers
@@ -69,6 +71,12 @@ fun View.repeatWhenAttached(
     // presumably want to call view methods that require being called from said UI thread.
     val lifecycleCoroutineContext =
         Dispatchers.Main + createCoroutineTracingContext() + coroutineContext
+    val traceName =
+        if (Compile.IS_DEBUG && coroutineTracing()) {
+            traceSectionName()
+        } else {
+            DEFAULT_TRACE_NAME
+        }
     var lifecycleOwner: ViewLifecycleOwner? = null
     val onAttachListener =
         object : View.OnAttachStateChangeListener {
@@ -77,6 +85,7 @@ fun View.repeatWhenAttached(
                 lifecycleOwner?.onDestroy()
                 lifecycleOwner =
                     createLifecycleOwnerAndRun(
+                        traceName,
                         view,
                         lifecycleCoroutineContext,
                         block,
@@ -93,6 +102,7 @@ fun View.repeatWhenAttached(
     if (view.isAttachedToWindow) {
         lifecycleOwner =
             createLifecycleOwnerAndRun(
+                traceName,
                 view,
                 lifecycleCoroutineContext,
                 block,
@@ -109,18 +119,14 @@ fun View.repeatWhenAttached(
 }
 
 private fun createLifecycleOwnerAndRun(
+    nameForTrace: String,
     view: View,
     coroutineContext: CoroutineContext,
     block: suspend LifecycleOwner.(View) -> Unit,
 ): ViewLifecycleOwner {
     return ViewLifecycleOwner(view).apply {
         onCreate()
-        lifecycleScope.launch(
-            "ViewLifecycleOwner(${view::class.java.simpleName})",
-            coroutineContext
-        ) {
-            block(view)
-        }
+        lifecycleScope.launch(nameForTrace, coroutineContext) { block(view) }
     }
 }
 
@@ -186,3 +192,24 @@ class ViewLifecycleOwner(
             }
     }
 }
+
+private fun isFrameInteresting(frame: StackWalker.StackFrame): Boolean =
+    frame.className != CURRENT_CLASS_NAME && frame.className != JAVA_ADAPTER_CLASS_NAME
+
+/** Get a name for the trace section include the name of the call site. */
+private fun traceSectionName(): String {
+    val interestingFrame =
+        StackWalker.getInstance().walk { stream ->
+            stream.filter(::isFrameInteresting).limit(5).findFirst()
+        }
+    if (interestingFrame.isPresent) {
+        val frame = interestingFrame.get()
+        return "${frame.className}#${frame.methodName}:${frame.lineNumber} [$DEFAULT_TRACE_NAME]"
+    } else {
+        return DEFAULT_TRACE_NAME
+    }
+}
+
+private const val DEFAULT_TRACE_NAME = "repeatWhenAttached"
+private const val CURRENT_CLASS_NAME = "com.android.systemui.lifecycle.RepeatWhenAttachedKt"
+private const val JAVA_ADAPTER_CLASS_NAME = "com.android.systemui.util.kotlin.JavaAdapterKt"
