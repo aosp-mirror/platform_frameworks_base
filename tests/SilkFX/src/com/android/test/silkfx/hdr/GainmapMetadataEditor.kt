@@ -99,23 +99,23 @@ class GainmapMetadataEditor(val parent: ViewGroup, val renderView: View) {
         (view.getParent() as ViewGroup).removeView(view)
         parent.addView(view)
 
-        view.findViewById<Button>(R.id.gainmap_metadata_done)!!.setOnClickListener {
+        view.requireViewById<Button>(R.id.gainmap_metadata_done).setOnClickListener {
             closeEditor()
         }
 
-        view.findViewById<Button>(R.id.gainmap_metadata_reset)!!.setOnClickListener {
+        view.requireViewById<Button>(R.id.gainmap_metadata_reset).setOnClickListener {
             resetGainmapMetadata()
         }
 
         updateMetadataUi()
 
-        val gainmapMinSeek = view.findViewById<SeekBar>(R.id.gainmap_metadata_gainmapmin)
-        val gainmapMaxSeek = view.findViewById<SeekBar>(R.id.gainmap_metadata_gainmapmax)
-        val capacityMinSeek = view.findViewById<SeekBar>(R.id.gainmap_metadata_capacitymin)
-        val capacityMaxSeek = view.findViewById<SeekBar>(R.id.gainmap_metadata_capacitymax)
-        val gammaSeek = view.findViewById<SeekBar>(R.id.gainmap_metadata_gamma)
-        val offsetSdrSeek = view.findViewById<SeekBar>(R.id.gainmap_metadata_offsetsdr)
-        val offsetHdrSeek = view.findViewById<SeekBar>(R.id.gainmap_metadata_offsethdr)
+        val gainmapMinSeek = view.requireViewById<SeekBar>(R.id.gainmap_metadata_gainmapmin)
+        val gainmapMaxSeek = view.requireViewById<SeekBar>(R.id.gainmap_metadata_gainmapmax)
+        val capacityMinSeek = view.requireViewById<SeekBar>(R.id.gainmap_metadata_capacitymin)
+        val capacityMaxSeek = view.requireViewById<SeekBar>(R.id.gainmap_metadata_capacitymax)
+        val gammaSeek = view.requireViewById<SeekBar>(R.id.gainmap_metadata_gamma)
+        val offsetSdrSeek = view.requireViewById<SeekBar>(R.id.gainmap_metadata_offsetsdr)
+        val offsetHdrSeek = view.requireViewById<SeekBar>(R.id.gainmap_metadata_offsethdr)
         arrayOf(gainmapMinSeek, gainmapMaxSeek, capacityMinSeek, capacityMaxSeek, gammaSeek,
             offsetSdrSeek, offsetHdrSeek).forEach {
             it.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
@@ -140,13 +140,13 @@ class GainmapMetadataEditor(val parent: ViewGroup, val renderView: View) {
     }
 
     private fun updateMetadataUi() {
-        val gainmapMinSeek = parent.findViewById<SeekBar>(R.id.gainmap_metadata_gainmapmin)
-        val gainmapMaxSeek = parent.findViewById<SeekBar>(R.id.gainmap_metadata_gainmapmax)
-        val capacityMinSeek = parent.findViewById<SeekBar>(R.id.gainmap_metadata_capacitymin)
-        val capacityMaxSeek = parent.findViewById<SeekBar>(R.id.gainmap_metadata_capacitymax)
-        val gammaSeek = parent.findViewById<SeekBar>(R.id.gainmap_metadata_gamma)
-        val offsetSdrSeek = parent.findViewById<SeekBar>(R.id.gainmap_metadata_offsetsdr)
-        val offsetHdrSeek = parent.findViewById<SeekBar>(R.id.gainmap_metadata_offsethdr)
+        val gainmapMinSeek = parent.requireViewById<SeekBar>(R.id.gainmap_metadata_gainmapmin)
+        val gainmapMaxSeek = parent.requireViewById<SeekBar>(R.id.gainmap_metadata_gainmapmax)
+        val capacityMinSeek = parent.requireViewById<SeekBar>(R.id.gainmap_metadata_capacitymin)
+        val capacityMaxSeek = parent.requireViewById<SeekBar>(R.id.gainmap_metadata_capacitymax)
+        val gammaSeek = parent.requireViewById<SeekBar>(R.id.gainmap_metadata_gamma)
+        val offsetSdrSeek = parent.requireViewById<SeekBar>(R.id.gainmap_metadata_offsetsdr)
+        val offsetHdrSeek = parent.requireViewById<SeekBar>(R.id.gainmap_metadata_offsethdr)
 
         gainmapMinSeek.setProgress(
             ((currentMetadata.ratioMin - minRatioMin) / maxRatioMin * maxProgress).toInt())
@@ -166,19 +166,19 @@ class GainmapMetadataEditor(val parent: ViewGroup, val renderView: View) {
             ((1.0 - Math.log(currentMetadata.offsetHdr.toDouble() / Math.log(3.0)) / -11.0)
              .toFloat() * maxProgress).toInt())
 
-        parent.findViewById<TextView>(R.id.gainmap_metadata_gainmapmin_val)!!.setText(
+        parent.requireViewById<TextView>(R.id.gainmap_metadata_gainmapmin_val).setText(
             "%.3f".format(currentMetadata.ratioMin))
-        parent.findViewById<TextView>(R.id.gainmap_metadata_gainmapmax_val)!!.setText(
+        parent.requireViewById<TextView>(R.id.gainmap_metadata_gainmapmax_val).setText(
             "%.3f".format(currentMetadata.ratioMax))
-        parent.findViewById<TextView>(R.id.gainmap_metadata_capacitymin_val)!!.setText(
+        parent.requireViewById<TextView>(R.id.gainmap_metadata_capacitymin_val).setText(
             "%.3f".format(currentMetadata.capacityMin))
-        parent.findViewById<TextView>(R.id.gainmap_metadata_capacitymax_val)!!.setText(
+        parent.requireViewById<TextView>(R.id.gainmap_metadata_capacitymax_val).setText(
             "%.3f".format(currentMetadata.capacityMax))
-        parent.findViewById<TextView>(R.id.gainmap_metadata_gamma_val)!!.setText(
+        parent.requireViewById<TextView>(R.id.gainmap_metadata_gamma_val).setText(
             "%.3f".format(currentMetadata.gamma))
-        parent.findViewById<TextView>(R.id.gainmap_metadata_offsetsdr_val)!!.setText(
+        parent.requireViewById<TextView>(R.id.gainmap_metadata_offsetsdr_val).setText(
             "%.5f".format(currentMetadata.offsetSdr))
-        parent.findViewById<TextView>(R.id.gainmap_metadata_offsethdr_val)!!.setText(
+        parent.requireViewById<TextView>(R.id.gainmap_metadata_offsethdr_val).setText(
             "%.5f".format(currentMetadata.offsetHdr))
     }
 
@@ -201,7 +201,7 @@ class GainmapMetadataEditor(val parent: ViewGroup, val renderView: View) {
 
     private fun updateGainmapMin(normalized: Float) {
         val newValue = minRatioMin + normalized * (maxRatioMin - minRatioMin)
-        parent.findViewById<TextView>(R.id.gainmap_metadata_gainmapmin_val)!!.setText(
+        parent.requireViewById<TextView>(R.id.gainmap_metadata_gainmapmin_val).setText(
             "%.3f".format(newValue))
         currentMetadata.ratioMin = newValue
         if (showingEdits) {
@@ -212,7 +212,7 @@ class GainmapMetadataEditor(val parent: ViewGroup, val renderView: View) {
 
     private fun updateGainmapMax(normalized: Float) {
         val newValue = minRatioMax + normalized * (maxRatioMax - minRatioMax)
-        parent.findViewById<TextView>(R.id.gainmap_metadata_gainmapmax_val)!!.setText(
+        parent.requireViewById<TextView>(R.id.gainmap_metadata_gainmapmax_val).setText(
             "%.3f".format(newValue))
         currentMetadata.ratioMax = newValue
         if (showingEdits) {
@@ -223,7 +223,7 @@ class GainmapMetadataEditor(val parent: ViewGroup, val renderView: View) {
 
     private fun updateCapacityMin(normalized: Float) {
         val newValue = minCapacityMin + normalized * (maxCapacityMin - minCapacityMin)
-        parent.findViewById<TextView>(R.id.gainmap_metadata_capacitymin_val)!!.setText(
+        parent.requireViewById<TextView>(R.id.gainmap_metadata_capacitymin_val).setText(
             "%.3f".format(newValue))
         currentMetadata.capacityMin = newValue
         if (showingEdits) {
@@ -234,7 +234,7 @@ class GainmapMetadataEditor(val parent: ViewGroup, val renderView: View) {
 
     private fun updateCapacityMax(normalized: Float) {
         val newValue = minCapacityMax + normalized * (maxCapacityMax - minCapacityMax)
-        parent.findViewById<TextView>(R.id.gainmap_metadata_capacitymax_val)!!.setText(
+        parent.requireViewById<TextView>(R.id.gainmap_metadata_capacitymax_val).setText(
             "%.3f".format(newValue))
         currentMetadata.capacityMax = newValue
         if (showingEdits) {
@@ -245,7 +245,7 @@ class GainmapMetadataEditor(val parent: ViewGroup, val renderView: View) {
 
     private fun updateGamma(normalized: Float) {
         val newValue = minGamma + normalized * (maxGamma - minGamma)
-        parent.findViewById<TextView>(R.id.gainmap_metadata_gamma_val)!!.setText(
+        parent.requireViewById<TextView>(R.id.gainmap_metadata_gamma_val).setText(
             "%.3f".format(newValue))
         currentMetadata.gamma = newValue
         if (showingEdits) {
@@ -259,7 +259,7 @@ class GainmapMetadataEditor(val parent: ViewGroup, val renderView: View) {
         if (normalized > 0.0f ) {
             newValue = Math.pow(3.0, (1.0 - normalized.toDouble()) * -11.0).toFloat()
         }
-        parent.findViewById<TextView>(R.id.gainmap_metadata_offsetsdr_val)!!.setText(
+        parent.requireViewById<TextView>(R.id.gainmap_metadata_offsetsdr_val).setText(
             "%.5f".format(newValue))
         currentMetadata.offsetSdr = newValue
         if (showingEdits) {
@@ -273,7 +273,7 @@ class GainmapMetadataEditor(val parent: ViewGroup, val renderView: View) {
         if (normalized > 0.0f ) {
             newValue = Math.pow(3.0, (1.0 - normalized.toDouble()) * -11.0).toFloat()
         }
-        parent.findViewById<TextView>(R.id.gainmap_metadata_offsethdr_val)!!.setText(
+        parent.requireViewById<TextView>(R.id.gainmap_metadata_offsethdr_val).setText(
             "%.5f".format(newValue))
         currentMetadata.offsetHdr = newValue
         if (showingEdits) {
