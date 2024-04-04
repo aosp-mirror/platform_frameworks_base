@@ -1,4 +1,5 @@
 package: "com.android.systemui"
+container: "system"
 
 flag {
     name: "predictive_back_sysui"
