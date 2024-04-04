@@ -44,6 +44,8 @@ import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dock.DockManager
+import com.android.systemui.dock.retrieveIsDocked
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
@@ -103,6 +105,7 @@ constructor(
     private val userTracker: UserTracker,
     private val activityStarter: ActivityStarter,
     private val userManager: UserManager,
+    private val dockManager: DockManager,
     sceneInteractor: SceneInteractor,
     sceneContainerFlags: SceneContainerFlags,
     @CommunalLog logBuffer: LogBuffer,
@@ -123,7 +126,7 @@ constructor(
         and(
                 communalSettingsInteractor.isCommunalEnabled,
                 not(keyguardInteractor.isEncryptedOrLockdown),
-                or(keyguardInteractor.isKeyguardVisible, keyguardInteractor.isDreaming)
+                or(keyguardInteractor.isKeyguardShowing, keyguardInteractor.isDreaming)
             )
             .distinctUntilChanged()
             .onEach { available ->
@@ -142,6 +145,9 @@ constructor(
                 started = SharingStarted.WhileSubscribed(),
                 replay = 1,
             )
+
+    /** Whether to show communal by default */
+    val showByDefault: Flow<Boolean> = and(isCommunalAvailable, dockManager.retrieveIsDocked())
 
     /**
      * Target scene as requested by the underlying [SceneTransitionLayout] or through [changeScene].
