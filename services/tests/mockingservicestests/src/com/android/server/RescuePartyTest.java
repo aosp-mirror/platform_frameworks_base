@@ -1111,16 +1111,9 @@ public class RescuePartyTest {
 
         // mock properties in BootThreshold
         try {
-            if (Flags.recoverabilityDetection()) {
-                mSpyBootThreshold = spy(watchdog.new BootThreshold(
-                    PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT,
-                    PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS,
-                    PackageWatchdog.DEFAULT_BOOT_LOOP_MITIGATION_INCREMENT));
-            } else {
-                mSpyBootThreshold = spy(watchdog.new BootThreshold(
+            mSpyBootThreshold = spy(watchdog.new BootThreshold(
                     PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT,
                     PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS));
-            }
             mCrashRecoveryPropertiesMap = new HashMap<>();
 
             doAnswer((Answer<Integer>) invocationOnMock -> {
