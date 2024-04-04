@@ -978,6 +978,7 @@
     <dimen name="assist_disclosure_shadow_thickness">1.5dp</dimen>
 
     <!-- Keyboard shortcuts helper -->
+    <dimen name="ksh_container_horizontal_margin">32dp</dimen>
     <dimen name="ksh_layout_width">@dimen/match_parent</dimen>
     <dimen name="ksh_item_text_size">14sp</dimen>
     <dimen name="ksh_item_padding">0dp</dimen>
@@ -985,6 +986,11 @@
     <dimen name="ksh_icon_scaled_size">18dp</dimen>
     <dimen name="ksh_key_view_padding_vertical">4dp</dimen>
     <dimen name="ksh_key_view_padding_horizontal">12dp</dimen>
+    <dimen name="ksh_button_corner_radius">12dp</dimen>
+    <dimen name="ksh_dialog_top_corner_radius">28dp</dimen>
+    <dimen name="ksh_search_box_corner_radius">100dp</dimen>
+    <dimen name="ksh_app_item_minimum_height">64dp</dimen>
+    <dimen name="ksh_category_separator_margin">16dp</dimen>
 
     <!-- The size of corner radius of the arrow in the onboarding toast. -->
     <dimen name="recents_onboarding_toast_arrow_corner_radius">2dp</dimen>
