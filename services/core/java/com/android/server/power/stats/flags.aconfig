@@ -1,4 +1,5 @@
 package: "com.android.server.power.optimization"
+container: "system"
 
 flag {
     name: "power_monitor_api"
