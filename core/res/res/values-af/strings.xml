@@ -137,7 +137,7 @@
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="8383917598312067365">"Wi-Fi-oproepe | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="6865214948822061486">"<xliff:g id="SPN">%s</xliff:g>-VoWifi"</string>
     <string name="wfcSpnFormat_wifi_calling" msgid="6178935388378661755">"Wi-Fi-oproepe"</string>
-    <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi-oproepe"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
     <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Wi-fi-oproep"</string>
@@ -346,7 +346,7 @@
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Kan \'n skermkiekie neem."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"Voorskou, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"deaktiveer of verander statusbalk"</string>
-    <string name="permdesc_statusBar" msgid="5809162768651019642">"Laat die program toe om die statusbalk te deaktiveer en stelselikone by te voeg of te verwyder."</string>
+    <string name="permdesc_statusBar" msgid="5809162768651019642">"Laat die app toe om die statusbalk te deaktiveer en stelselikone by te voeg of te verwyder."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"wees die statusbalk"</string>
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Laat die program toe om die statusbalk te wees."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"vou statusbalk in of uit"</string>
@@ -1314,7 +1314,7 @@
     <string name="network_switch_metered_toast" msgid="501662047275723743">"Het oorgeskakel van <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> na <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="2255670471736226365">"mobiele data"</item>
-    <item msgid="5520925862115353992">"Wi-Fi"</item>
+    <item msgid="5520925862115353992">"Wi-fi"</item>
     <item msgid="1055487873974272842">"Bluetooth"</item>
     <item msgid="1616528372438698248">"Ethernet"</item>
     <item msgid="9177085807664964627">"VPN"</item>
@@ -1872,7 +1872,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Batterybespaarder skakel Donkertema aan en beperk of skakel agtergrondaktiwiteit, sommige visuele effekte, sekere kenmerke en sommige netwerkverbindings af"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Batterybespaarder skakel Donkertema aan en beperk of skakel agtergrondaktiwiteit, sommige visuele effekte, sekere kenmerke en sommige netwerkverbindings af"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Databespaarder verhoed sommige programme om data in die agtergrond te stuur of te aanvaar om datagebruik te help verminder. \'n Program wat jy tans gebruik kan by data ingaan, maar sal dit dalk minder gereeld doen. Dit kan byvoorbeeld beteken dat prente nie wys voordat jy op hulle tik nie."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Databespaarder verhoed sommige apps om data in die agtergrond te stuur of te aanvaar om datagebruik te help verminder. \'n App wat jy tans gebruik kan by data ingaan, maar sal dit dalk minder gereeld doen. Dit kan byvoorbeeld beteken dat prente nie wys voordat jy op hulle tik nie."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Skakel Databespaarder aan?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Skakel aan"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Een minuut lank (tot {formattedTime})}other{# minute lank (tot {formattedTime})}}"</string>
@@ -1987,7 +1987,7 @@
     <string name="pin_specific_target" msgid="7824671240625957415">"Speld <xliff:g id="LABEL">%1$s</xliff:g> vas"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Ontspeld"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"Ontspeld <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="app_info" msgid="6113278084877079851">"Programinligting"</string>
+    <string name="app_info" msgid="6113278084877079851">"Appinligting"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Begin tans demonstrasie …"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Stel toestel tans terug …"</string>

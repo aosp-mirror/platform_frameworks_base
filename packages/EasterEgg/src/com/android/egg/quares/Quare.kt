@@ -137,14 +137,12 @@ class Quare(val width: Int, val height: Int, val depth: Int) : Parcelable {
         return 0
     }
 
-    override fun writeToParcel(p: Parcel?, flags: Int) {
-        p?.let {
-            p.writeInt(width)
-            p.writeInt(height)
-            p.writeInt(depth)
-            p.writeIntArray(data)
-            p.writeIntArray(user)
-        }
+    override fun writeToParcel(p: Parcel, flags: Int) {
+        p.writeInt(width)
+        p.writeInt(height)
+        p.writeInt(depth)
+        p.writeIntArray(data)
+        p.writeIntArray(user)
     }
 
     companion object CREATOR : Parcelable.Creator<Quare> {
