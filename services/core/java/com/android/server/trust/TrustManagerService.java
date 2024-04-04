@@ -61,7 +61,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.security.Authorization;
+import android.security.KeyStoreAuthorization;
 import android.service.trust.GrantTrustResult;
 import android.service.trust.TrustAgentService;
 import android.text.TextUtils;
@@ -156,6 +156,7 @@ public class TrustManagerService extends SystemService {
     /* package */ final TrustArchive mArchive = new TrustArchive();
     private final Context mContext;
     private final LockPatternUtils mLockPatternUtils;
+    private final KeyStoreAuthorization mKeyStoreAuthorization;
     private final UserManager mUserManager;
     private final ActivityManager mActivityManager;
     private FingerprintManager mFingerprintManager;
@@ -249,25 +250,27 @@ public class TrustManagerService extends SystemService {
      * cases.
      */
     protected static class Injector {
-        private final LockPatternUtils mLockPatternUtils;
-        private final Looper mLooper;
+        private final Context mContext;
 
-        public Injector(LockPatternUtils lockPatternUtils, Looper looper) {
-            mLockPatternUtils = lockPatternUtils;
-            mLooper = looper;
+        public Injector(Context context) {
+            mContext = context;
         }
 
         LockPatternUtils getLockPatternUtils() {
-            return mLockPatternUtils;
+            return new LockPatternUtils(mContext);
+        }
+
+        KeyStoreAuthorization getKeyStoreAuthorization() {
+            return KeyStoreAuthorization.getInstance();
         }
 
         Looper getLooper() {
-            return mLooper;
+            return Looper.myLooper();
         }
     }
 
     public TrustManagerService(Context context) {
-        this(context, new Injector(new LockPatternUtils(context), Looper.myLooper()));
+        this(context, new Injector(context));
     }
 
     protected TrustManagerService(Context context, Injector injector) {
@@ -277,6 +280,7 @@ public class TrustManagerService extends SystemService {
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mActivityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
         mLockPatternUtils = injector.getLockPatternUtils();
+        mKeyStoreAuthorization = injector.getKeyStoreAuthorization();
         mStrongAuthTracker = new StrongAuthTracker(context, injector.getLooper());
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
     }
@@ -908,16 +912,16 @@ public class TrustManagerService extends SystemService {
                 int authUserId = mLockPatternUtils.isProfileWithUnifiedChallenge(userId)
                         ? resolveProfileParent(userId) : userId;
 
-                Authorization.onDeviceLocked(userId, getBiometricSids(authUserId),
+                mKeyStoreAuthorization.onDeviceLocked(userId, getBiometricSids(authUserId),
                         isWeakUnlockMethodEnabled(authUserId));
             } else {
-                Authorization.onDeviceLocked(userId, getBiometricSids(userId), false);
+                mKeyStoreAuthorization.onDeviceLocked(userId, getBiometricSids(userId), false);
             }
         } else {
             // Notify Keystore that the device is now unlocked for the user.  Note that for unlocks
             // with LSKF, this is redundant with the call from LockSettingsService which provides
             // the password.  However, for unlocks with biometric or trust agent, this is required.
-            Authorization.onDeviceUnlocked(userId, /* password= */ null);
+            mKeyStoreAuthorization.onDeviceUnlocked(userId, /* password= */ null);
         }
     }
 
