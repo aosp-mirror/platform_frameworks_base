@@ -99,6 +99,7 @@ import com.android.systemui.navigationbar.buttons.KeyButtonView;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
 import com.android.systemui.scene.shared.flag.SceneContainerFlags;
+import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeViewController;
@@ -239,6 +240,11 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                             } else {
                                 mShadeViewControllerLazy.get().finishInputFocusTransfer(velocity);
                             }
+                        } else if (action == ACTION_UP) {
+                            // Gesture was too short to be picked up by scene container touch
+                            // handling; programmatically start the transition to shade scene.
+                            mSceneInteractor.get().changeScene(
+                                    Scenes.Shade, "short launcher swipe");
                         }
                     }
                     event.recycle();
