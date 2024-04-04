@@ -85,15 +85,15 @@ public class BaseDialogResult implements Parcelable {
      */
     public static final int RESULT_CODE_DATA_PARSING_FAILURE = 3;
 
-    @NonNull
+    @Nullable
     private final IBinder mRequestToken;
 
-    public BaseDialogResult(@NonNull IBinder requestToken) {
+    public BaseDialogResult(@Nullable IBinder requestToken) {
         mRequestToken = requestToken;
     }
 
     /** Returns the unique identifier for the request that launched the operation. */
-    @NonNull
+    @Nullable
     public IBinder getRequestToken() {
         return mRequestToken;
     }
@@ -101,7 +101,6 @@ public class BaseDialogResult implements Parcelable {
     protected BaseDialogResult(@NonNull Parcel in) {
         IBinder requestToken = in.readStrongBinder();
         mRequestToken = requestToken;
-        AnnotationValidations.validate(NonNull.class, null, mRequestToken);
     }
 
     @Override

@@ -230,7 +230,7 @@ class AuthRippleController @Inject constructor(
                         lightRevealScrim.revealAmount = animator.animatedValue as Float
                     }
                     addListener(object : AnimatorListenerAdapter() {
-                        override fun onAnimationEnd(animation: Animator?) {
+                        override fun onAnimationEnd(animation: Animator) {
                             // Reset light reveal scrim to the default, so the CentralSurfaces
                             // can handle any subsequent light reveal changes
                             // (ie: from dozing changes)
