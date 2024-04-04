@@ -53,6 +53,12 @@ class AudioManagerShellCommand extends ShellCommand {
                 return getSoundDoseValue();
             case "reset-sound-dose-timeout":
                 return resetSoundDoseTimeout();
+            case "set-volume":
+                return setVolume();
+            case "adj-mute":
+                return adjMute();
+            case "adj-unmute":
+                return adjUnmute();
         }
         return 0;
     }
@@ -78,6 +84,12 @@ class AudioManagerShellCommand extends ShellCommand {
         pw.println("    Returns the current sound dose value");
         pw.println("  reset-sound-dose-timeout");
         pw.println("    Resets the sound dose timeout used for momentary exposure");
+        pw.println("  set-volume STREAM_TYPE VOLUME_INDEX");
+        pw.println("    Sets the volume for STREAM_TYPE to VOLUME_INDEX");
+        pw.println("  adj-mute STREAM_TYPE");
+        pw.println("    mutes the STREAM_TYPE");
+        pw.println("  adj-unmute STREAM_TYPE");
+        pw.println("    unmutes the STREAM_TYPE");
     }
 
     private int setSurroundFormatEnabled() {
@@ -215,5 +227,55 @@ class AudioManagerShellCommand extends ShellCommand {
         am.setCsd(-1.f);
         getOutPrintWriter().println("Reset sound dose momentary exposure timeout");
         return 0;
+    }
+
+    private int setVolume() {
+        final Context context = mService.mContext;
+        final AudioManager am = context.getSystemService(AudioManager.class);
+        final int stream = readIntArg();
+        final int index = readIntArg();
+        getOutPrintWriter().println("calling AudioManager.setStreamVolume("
+                + stream + ", " + index + ", 0)");
+        am.setStreamVolume(stream, index, 0);
+        return 0;
+    }
+
+    private int adjMute() {
+        final Context context = mService.mContext;
+        final AudioManager am = context.getSystemService(AudioManager.class);
+        final int stream = readIntArg();
+        getOutPrintWriter().println("calling AudioManager.adjustStreamVolume("
+                + stream + ", AudioManager.ADJUST_MUTE, 0)");
+        am.adjustStreamVolume(stream, AudioManager.ADJUST_MUTE, 0);
+        return 0;
+    }
+
+    private int adjUnmute() {
+        final Context context = mService.mContext;
+        final AudioManager am = context.getSystemService(AudioManager.class);
+        final int stream = readIntArg();
+        getOutPrintWriter().println("calling AudioManager.adjustStreamVolume("
+                + stream + ", AudioManager.ADJUST_UNMUTE, 0)");
+        am.adjustStreamVolume(stream, AudioManager.ADJUST_UNMUTE, 0);
+        return 0;
+    }
+
+    private int readIntArg() throws IllegalArgumentException {
+        String argText = getNextArg();
+
+        if (argText == null) {
+            getErrPrintWriter().println("Error: no argument provided");
+            throw new IllegalArgumentException("No argument provided");
+        }
+
+        int argIntVal = Integer.MIN_VALUE;
+        try {
+            argIntVal = Integer.parseInt(argText);
+        } catch (NumberFormatException e) {
+            getErrPrintWriter().println("Error: wrong format for argument " + argText);
+            throw new IllegalArgumentException("Wrong format for argument " + argText);
+        }
+
+        return argIntVal;
     }
 }
