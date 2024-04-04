@@ -52,6 +52,7 @@ import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ecm.EnhancedConfirmationManager;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.companion.IAssociationRequestCallback;
@@ -64,6 +65,7 @@ import android.companion.ObservingDevicePresenceRequest;
 import android.companion.datatransfer.PermissionSyncRequest;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -80,6 +82,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.permission.flags.Flags;
 import android.util.ArraySet;
 import android.util.ExceptionUtils;
 import android.util.Slog;
@@ -448,15 +451,26 @@ public class CompanionDeviceManagerService extends SystemService {
             }
 
             return Binder.withCleanCallingIdentity(() -> {
+                final Intent intent;
                 if (!isRestrictedSettingsAllowed(getContext(), callingPackage, callingUid)) {
                     Slog.e(TAG, "Side loaded app must enable restricted "
                             + "setting before request the notification access");
-                    return null;
+                    if (Flags.enhancedConfirmationModeApisEnabled()) {
+                        intent = getContext()
+                                .getSystemService(EnhancedConfirmationManager.class)
+                                .createRestrictedSettingDialogIntent(callingPackage,
+                                        AppOpsManager.OPSTR_ACCESS_NOTIFICATIONS);
+                    } else {
+                        return null;
+                    }
+                } else {
+                    intent = NotificationAccessConfirmationActivityContract.launcherIntent(
+                            getContext(), userId, component);
                 }
+
                 return PendingIntent.getActivityAsUser(getContext(),
                         0 /* request code */,
-                        NotificationAccessConfirmationActivityContract.launcherIntent(
-                                getContext(), userId, component),
+                        intent,
                         PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_ONE_SHOT
                                 | PendingIntent.FLAG_CANCEL_CURRENT,
                         null /* options */,
