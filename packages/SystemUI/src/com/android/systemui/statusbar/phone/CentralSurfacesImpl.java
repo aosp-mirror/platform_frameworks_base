@@ -28,7 +28,6 @@ import static androidx.lifecycle.Lifecycle.State.RESUMED;
 import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 import static com.android.systemui.Flags.lightRevealMigration;
 import static com.android.systemui.Flags.newAodTransition;
-import static com.android.systemui.Flags.predictiveBackSysui;
 import static com.android.systemui.Flags.truncatedStatusBarIconsFix;
 import static com.android.systemui.charging.WirelessChargingAnimation.UNKNOWN_BATTERY_LEVEL;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
@@ -837,7 +836,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mLightRevealScrimViewModelLazy = lightRevealScrimViewModelLazy;
         mLightRevealScrim = lightRevealScrim;
 
-        if (predictiveBackSysui()) {
+        if (PredictiveBackSysUiFlag.isEnabled()) {
             mContext.getApplicationInfo().setEnableOnBackInvokedCallback(true);
         }
     }
@@ -3061,7 +3060,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         public void onConfigChanged(Configuration newConfig) {
             updateResources();
             updateDisplaySize(); // populates mDisplayMetrics
-            if (predictiveBackSysui()) {
+            if (PredictiveBackSysUiFlag.isEnabled()) {
                 mContext.getApplicationInfo().setEnableOnBackInvokedCallback(true);
             }
 
