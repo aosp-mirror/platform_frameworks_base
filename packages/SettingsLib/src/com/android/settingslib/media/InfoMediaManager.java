@@ -174,6 +174,7 @@ public abstract class InfoMediaManager {
 
     public void startScan() {
         mMediaDevices.clear();
+        registerRouter();
         startScanOnRouter();
         updateRouteListingPreference();
         refreshDevices();
@@ -188,9 +189,18 @@ public abstract class InfoMediaManager {
         }
     }
 
-    public abstract void stopScan();
+    public final void stopScan() {
+        stopScanOnRouter();
+        unregisterRouter();
+    }
+
+    protected abstract void stopScanOnRouter();
 
     protected abstract void startScanOnRouter();
+
+    protected abstract void registerRouter();
+
+    protected abstract void unregisterRouter();
 
     protected abstract void transferToRoute(@NonNull MediaRoute2Info route);
 
