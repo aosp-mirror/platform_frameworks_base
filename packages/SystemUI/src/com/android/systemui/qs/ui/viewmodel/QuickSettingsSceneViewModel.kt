@@ -20,7 +20,6 @@ import androidx.lifecycle.LifecycleOwner
 import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
-import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.FooterActionsController
@@ -47,7 +46,9 @@ constructor(
     val destinationScenes =
         qsSceneAdapter.isCustomizing.map { customizing ->
             if (customizing) {
-                mapOf<UserAction, UserActionResult>(Back to UserActionResult(Scenes.QuickSettings))
+                // TODO(b/332749288) Empty map so there are no back handlers and back can close
+                // customizer
+                emptyMap()
                 // TODO(b/330200163) Add an Up from Bottom to be able to collapse the shade
                 // while customizing
             } else {

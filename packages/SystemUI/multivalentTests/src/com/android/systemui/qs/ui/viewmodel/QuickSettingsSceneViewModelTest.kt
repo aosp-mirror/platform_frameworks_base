@@ -133,18 +133,13 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun destinationsCustomizing() =
+    fun destinationsCustomizing_noDestinations() =
         testScope.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, false)
             val destinations by collectLastValue(underTest.destinationScenes)
             qsFlexiglassAdapter.setCustomizing(true)
 
-            assertThat(destinations)
-                .isEqualTo(
-                    mapOf(
-                        Back to UserActionResult(Scenes.QuickSettings),
-                    )
-                )
+            assertThat(destinations).isEmpty()
         }
 
     @Test
@@ -164,18 +159,13 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun destinations_whenCustomizing_inSplitShade() =
+    fun destinations_whenCustomizing_inSplitShade_noDestinations() =
         testScope.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, true)
             val destinations by collectLastValue(underTest.destinationScenes)
             qsFlexiglassAdapter.setCustomizing(true)
 
-            assertThat(destinations)
-                .isEqualTo(
-                    mapOf(
-                        Back to UserActionResult(Scenes.QuickSettings),
-                    )
-                )
+            assertThat(destinations).isEmpty()
         }
 
     @Test

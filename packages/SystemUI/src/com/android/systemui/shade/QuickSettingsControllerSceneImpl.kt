@@ -17,7 +17,6 @@
 package com.android.systemui.shade
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.plugins.qs.QSContainerController
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import javax.inject.Inject
@@ -28,7 +27,6 @@ class QuickSettingsControllerSceneImpl
 constructor(
     private val shadeInteractor: ShadeInteractor,
     private val qsSceneAdapter: QSSceneAdapter,
-    private val qsContainerController: QSContainerController,
 ) : QuickSettingsController {
 
     override val expanded: Boolean
@@ -43,7 +41,7 @@ constructor(
     }
 
     override fun closeQsCustomizer() {
-        qsContainerController.setCustomizerShowing(false)
+        qsSceneAdapter.requestCloseCustomizer()
     }
 
     @Deprecated("specific to legacy split shade")

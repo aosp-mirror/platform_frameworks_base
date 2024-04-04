@@ -17,6 +17,7 @@
 package com.android.systemui.qs.ui.composable
 
 import android.view.ViewGroup
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -122,6 +123,13 @@ private fun SceneScope.QuickSettingsScene(
     // TODO(b/280887232): implement the real UI.
     Box(modifier = modifier.fillMaxSize()) {
         val isCustomizing by viewModel.qsSceneAdapter.isCustomizing.collectAsState()
+
+        BackHandler(
+            enabled = isCustomizing,
+        ) {
+            viewModel.qsSceneAdapter.requestCloseCustomizer()
+        }
+
         val collapsedHeaderHeight =
             with(LocalDensity.current) { ShadeHeader.Dimensions.CollapsedHeight.roundToPx() }
         val lifecycleOwner = LocalLifecycleOwner.current
