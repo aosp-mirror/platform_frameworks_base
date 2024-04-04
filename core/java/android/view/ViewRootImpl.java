@@ -110,6 +110,7 @@ import static android.view.flags.Flags.toolkitFrameRateVelocityMappingReadOnly;
 import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateFunctionEnablingReadOnly;
+import static android.view.flags.Flags.toolkitFrameRateViewEnablingReadOnly;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.IME_FOCUS_CONTROLLER;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INSETS_CONTROLLER;
 
@@ -1153,6 +1154,7 @@ public final class ViewRootImpl implements ViewParent,
     private static boolean sToolkitFrameRateFunctionEnablingReadOnlyFlagValue;
     private static boolean sToolkitMetricsForFrameRateDecisionFlagValue;
     private static boolean sToolkitFrameRateTypingReadOnlyFlagValue;
+    private static final boolean sToolkitFrameRateViewEnablingReadOnlyFlagValue;
     private static boolean sToolkitFrameRateVelocityMappingReadOnlyFlagValue =
             toolkitFrameRateVelocityMappingReadOnly();;
 
@@ -1162,6 +1164,8 @@ public final class ViewRootImpl implements ViewParent,
         sToolkitFrameRateTypingReadOnlyFlagValue = toolkitFrameRateTypingReadOnly();
         sToolkitFrameRateFunctionEnablingReadOnlyFlagValue =
                 toolkitFrameRateFunctionEnablingReadOnly();
+        sToolkitFrameRateViewEnablingReadOnlyFlagValue =
+                toolkitFrameRateViewEnablingReadOnly();
     }
 
     // The latest input event from the gesture that was used to resolve the pointer icon.
@@ -2624,8 +2628,10 @@ public final class ViewRootImpl implements ViewParent,
         // no longer needed if the dVRR feature is disabled.
         if (shouldEnableDvrr()) {
             try {
-                mFrameRateTransaction.setFrameRateSelectionStrategy(sc,
+                if (sToolkitFrameRateFunctionEnablingReadOnlyFlagValue) {
+                    mFrameRateTransaction.setFrameRateSelectionStrategy(sc,
                         sc.FRAME_RATE_SELECTION_STRATEGY_SELF).applyAsyncUnsafe();
+                }
             } catch (Exception e) {
                 Log.e(mTag, "Unable to set frame rate selection strategy ", e);
             }
@@ -12536,9 +12542,11 @@ public final class ViewRootImpl implements ViewParent,
                                     + category + ", reason " + reason + ", "
                                     + sourceView);
                 }
-                mFrameRateTransaction.setFrameRateCategory(mSurfaceControl,
+                if (sToolkitFrameRateFunctionEnablingReadOnlyFlagValue) {
+                    mFrameRateTransaction.setFrameRateCategory(mSurfaceControl,
                         frameRateCategory, false).applyAsyncUnsafe();
-                mLastPreferredFrameRateCategory = frameRateCategory;
+                    mLastPreferredFrameRateCategory = frameRateCategory;
+                }
             }
         } catch (Exception e) {
             Log.e(mTag, "Unable to set frame rate category", e);
@@ -12595,9 +12603,11 @@ public final class ViewRootImpl implements ViewParent,
                                 + preferredFrameRate + " compatibility "
                                 + mFrameRateCompatibility);
                 }
-                mFrameRateTransaction.setFrameRate(mSurfaceControl, preferredFrameRate,
+                if (sToolkitFrameRateFunctionEnablingReadOnlyFlagValue) {
+                    mFrameRateTransaction.setFrameRate(mSurfaceControl, preferredFrameRate,
                     mFrameRateCompatibility).applyAsyncUnsafe();
-                mLastPreferredFrameRate = preferredFrameRate;
+                    mLastPreferredFrameRate = preferredFrameRate;
+                }
             }
         } catch (Exception e) {
             Log.e(mTag, "Unable to set frame rate", e);
@@ -12824,7 +12834,7 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean shouldEnableDvrr() {
         // uncomment this when we are ready for enabling dVRR
-        if (sToolkitFrameRateFunctionEnablingReadOnlyFlagValue) {
+        if (sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
             return sToolkitSetFrameRateReadOnlyFlagValue && isFrameRatePowerSavingsBalanced();
         }
         return false;
