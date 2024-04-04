@@ -71,9 +71,24 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
      * @param fun The tracing lambda that will be called with the tracing contexts of each active
      *            tracing instance.
      */
-    public final void trace(
-            TraceFunction<DataSourceInstanceType, TlsStateType, IncrementalStateType> fun) {
-        nativeTrace(mNativeObj, fun);
+    public final void trace(TraceFunction<TlsStateType, IncrementalStateType> fun) {
+        boolean startedIterator = nativePerfettoDsTraceIterateBegin(mNativeObj);
+
+        if (!startedIterator) {
+            return;
+        }
+
+        try {
+            do {
+                TracingContext<TlsStateType, IncrementalStateType> ctx =
+                        new TracingContext<>(mNativeObj);
+                fun.trace(ctx);
+
+                ctx.flush();
+            } while (nativePerfettoDsTraceIterateNext(mNativeObj));
+        } finally {
+            nativePerfettoDsTraceIterateBreak(mNativeObj);
+        }
     }
 
     /**
@@ -154,8 +169,6 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
             long dataSourcePtr, int bufferExhaustedPolicy);
 
     private static native long nativeCreate(DataSource thiz, String name);
-    private static native void nativeTrace(
-            long nativeDataSourcePointer, TraceFunction traceFunction);
     private static native void nativeFlushAll(long nativeDataSourcePointer);
     private static native long nativeGetFinalizer();
 
@@ -163,4 +176,8 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
             long dataSourcePtr, int dsInstanceIdx);
     private static native void nativeReleasePerfettoInstanceLocked(
             long dataSourcePtr, int dsInstanceIdx);
+
+    private static native boolean nativePerfettoDsTraceIterateBegin(long dataSourcePtr);
+    private static native boolean nativePerfettoDsTraceIterateNext(long dataSourcePtr);
+    private static native void nativePerfettoDsTraceIterateBreak(long dataSourcePtr);
 }
