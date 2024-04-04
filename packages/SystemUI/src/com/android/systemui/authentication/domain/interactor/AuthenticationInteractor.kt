@@ -243,12 +243,6 @@ constructor(
         }
 
         // Authentication failed.
-
-        if (tryAutoConfirm) {
-            // Auto-confirm is active, the failed attempt should have no side-effects.
-            return AuthenticationResult.FAILED
-        }
-
         repository.reportAuthenticationAttempt(isSuccessful = false)
 
         if (authenticationResult.lockoutDurationMs > 0) {
