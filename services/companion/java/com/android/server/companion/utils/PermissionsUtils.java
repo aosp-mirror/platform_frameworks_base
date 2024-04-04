@@ -16,6 +16,8 @@
 
 package com.android.server.companion.utils;
 
+import static android.Manifest.permission.BLUETOOTH_CONNECT;
+import static android.Manifest.permission.BLUETOOTH_SCAN;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_COMPANION_DEVICES;
 import static android.Manifest.permission.REQUEST_COMPANION_SELF_MANAGED;
@@ -209,7 +211,9 @@ public final class PermissionsUtils {
      */
     public static void enforceCallerCanObserveDevicePresenceByUuid(@NonNull Context context) {
         if (context.checkCallingPermission(REQUEST_OBSERVE_DEVICE_UUID_PRESENCE)
-                != PERMISSION_GRANTED) {
+                != PERMISSION_GRANTED
+                || context.checkCallingPermission(BLUETOOTH_SCAN) != PERMISSION_GRANTED
+                || context.checkCallingPermission(BLUETOOTH_CONNECT) != PERMISSION_GRANTED) {
             throw new SecurityException("Caller (uid=" + getCallingUid() + ") does not have "
                     + "permissions to request observing device presence base on the UUID");
         }
