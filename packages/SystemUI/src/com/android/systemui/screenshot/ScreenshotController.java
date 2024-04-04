@@ -453,6 +453,13 @@ public class ScreenshotController {
                         return Unit.INSTANCE;
                     });
             saveScreenshotInBackground(screenshot, requestId, finisher);
+
+            if (screenshot.getTaskId() >= 0) {
+                mAssistContentRequester.requestAssistContent(screenshot.getTaskId(),
+                        assistContent -> {
+                            mActionsProvider.onAssistContentAvailable(assistContent);
+                        });
+            }
         } else {
             saveScreenshotInWorkerThread(screenshot.getUserHandle(), finisher,
                     this::showUiOnActionsReady, this::showUiOnQuickShareActionReady);

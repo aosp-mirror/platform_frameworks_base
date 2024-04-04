@@ -20,6 +20,7 @@ import android.app.ActivityOptions
 import android.app.BroadcastOptions
 import android.app.ExitTransitionCoordinator
 import android.app.PendingIntent
+import android.app.assist.AssistContent
 import android.content.Context
 import android.content.Intent
 import android.os.Process
@@ -57,6 +58,8 @@ import kotlinx.coroutines.CoroutineScope
 interface ScreenshotActionsProvider {
     fun setCompletedScreenshot(result: SavedImageData)
     fun isPendingSharedTransition(): Boolean
+
+    fun onAssistContentAvailable(assistContent: AssistContent) {}
 
     interface Factory {
         fun create(
