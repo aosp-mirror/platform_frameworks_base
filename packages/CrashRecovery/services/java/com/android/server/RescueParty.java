@@ -139,7 +139,7 @@ public class RescueParty {
     static final String NAMESPACE_TO_PACKAGE_MAPPING_FLAG =
             "namespace_to_package_mapping";
     @VisibleForTesting
-    static final long DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN = 10;
+    static final long DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN = 1440;
 
     private static final String NAME = "rescue-party-observer";
 
