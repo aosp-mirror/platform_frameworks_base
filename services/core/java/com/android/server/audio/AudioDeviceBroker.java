@@ -1839,18 +1839,19 @@ public class AudioDeviceBroker {
                                     && !mBtHelper.isProfilePoxyConnected(btInfo.mProfile)) {
                                 AudioService.sDeviceLogger.enqueue((new EventLogger.StringEvent(
                                         "msg: MSG_L_SET_BT_ACTIVE_DEVICE "
-                                            + "received with null profile proxy: "
-                                            + btInfo)).printLog(TAG));
+                                                + "received with null profile proxy: "
+                                                + btInfo)).printLog(TAG));
                             } else {
-                                @AudioSystem.AudioFormatNativeEnumForBtCodec final int codec =
+                                final Pair<Integer, Boolean> codecAndChanged =
                                         mBtHelper.getCodecWithFallback(btInfo.mDevice,
                                                 btInfo.mProfile, btInfo.mIsLeOutput,
                                                 "MSG_L_SET_BT_ACTIVE_DEVICE");
-                                mDeviceInventory.onSetBtActiveDevice(btInfo, codec,
-                                        (btInfo.mProfile
-                                                != BluetoothProfile.LE_AUDIO || btInfo.mIsLeOutput)
-                                                ? mAudioService.getBluetoothContextualVolumeStream()
-                                                : AudioSystem.STREAM_DEFAULT);
+                                mDeviceInventory.onSetBtActiveDevice(btInfo,
+                                        codecAndChanged.first,
+                                        (btInfo.mProfile != BluetoothProfile.LE_AUDIO
+                                                || btInfo.mIsLeOutput)
+                                            ? mAudioService.getBluetoothContextualVolumeStream()
+                                            : AudioSystem.STREAM_DEFAULT);
                                 if (btInfo.mProfile == BluetoothProfile.LE_AUDIO
                                         || btInfo.mProfile == BluetoothProfile.HEARING_AID) {
                                     onUpdateCommunicationRouteClient(isBluetoothScoRequested(),
@@ -1884,12 +1885,13 @@ public class AudioDeviceBroker {
                 case MSG_L_BLUETOOTH_DEVICE_CONFIG_CHANGE: {
                     final BtDeviceInfo btInfo = (BtDeviceInfo) msg.obj;
                     synchronized (mDeviceStateLock) {
-                        @AudioSystem.AudioFormatNativeEnumForBtCodec final int codec =
-                                mBtHelper.getCodecWithFallback(btInfo.mDevice,
-                                        btInfo.mProfile, btInfo.mIsLeOutput,
-                                        "MSG_L_BLUETOOTH_DEVICE_CONFIG_CHANGE");
-                        mDeviceInventory.onBluetoothDeviceConfigChange(
-                                btInfo, codec, BtHelper.EVENT_DEVICE_CONFIG_CHANGE);
+                        final Pair<Integer, Boolean> codecAndChanged =
+                                mBtHelper.getCodecWithFallback(
+                                    btInfo.mDevice, btInfo.mProfile, btInfo.mIsLeOutput,
+                                    "MSG_L_BLUETOOTH_DEVICE_CONFIG_CHANGE");
+                        mDeviceInventory.onBluetoothDeviceConfigChange(btInfo,
+                                codecAndChanged.first, codecAndChanged.second,
+                                BtHelper.EVENT_DEVICE_CONFIG_CHANGE);
                     }
                 } break;
                 case MSG_BROADCAST_AUDIO_BECOMING_NOISY:
