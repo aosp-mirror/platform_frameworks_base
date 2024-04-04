@@ -12,14 +12,15 @@ import com.android.systemui.bouncer.ui.BouncerDialogFactory
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.KeyguardBouncerViewModel
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.Flags.COMPOSE_BOUNCER_ENABLED
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
 import com.android.systemui.log.BouncerLogger
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import dagger.Lazy
 import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Helper data class that allows to lazy load all the dependencies of the legacy bouncer. */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 data class LegacyBouncerDependencies
 @Inject
@@ -59,7 +60,7 @@ constructor(
     private val composeBouncerDependencies: Lazy<ComposeBouncerDependencies>,
 ) {
     fun bind(view: ViewGroup) {
-        if (COMPOSE_BOUNCER_ENABLED && composeBouncerFlags.isOnlyComposeBouncerEnabled()) {
+        if (composeBouncerFlags.isOnlyComposeBouncerEnabled()) {
             val deps = composeBouncerDependencies.get()
             ComposeBouncerViewBinder.bind(
                 view,

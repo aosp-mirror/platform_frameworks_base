@@ -1,4 +1,5 @@
 package: "com.android.server.job"
+container: "system"
 
 flag {
     name: "batch_active_bucket_jobs"

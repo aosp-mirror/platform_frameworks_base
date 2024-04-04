@@ -60,4 +60,8 @@ class FakeQSSceneAdapter(
     override suspend fun applyBottomNavBarPadding(padding: Int) {
         _navBarPadding.value = padding
     }
+
+    override fun requestCloseCustomizer() {
+        _customizing.value = false
+    }
 }

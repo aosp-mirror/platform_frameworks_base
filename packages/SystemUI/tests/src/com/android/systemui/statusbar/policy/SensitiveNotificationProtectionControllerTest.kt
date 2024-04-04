@@ -28,8 +28,10 @@ import android.app.NotificationManager.VISIBILITY_NO_OVERRIDE
 import android.content.pm.PackageManager
 import android.media.projection.MediaProjectionInfo
 import android.media.projection.MediaProjectionManager
+import android.os.Process
 import android.os.UserHandle
 import android.permission.flags.Flags.FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.annotations.RequiresFlagsDisabled
 import android.platform.test.annotations.RequiresFlagsEnabled
@@ -41,7 +43,8 @@ import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.dx.mockito.inline.extended.ExtendedMockito.verify
 import com.android.internal.util.FrameworkStatsLog
-import com.android.server.notification.Flags
+import com.android.server.notification.Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING
+import com.android.systemui.Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING_BUG_FIX
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.statusbar.RankingBuilder
@@ -77,7 +80,7 @@ import org.mockito.quality.Strictness
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
-@EnableFlags(Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+@EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
 class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
     @get:Rule val checkFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
 
@@ -384,13 +387,33 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING_BUG_FIX)
+    fun shouldProtectNotification_projectionActive_isFromCoreApp_fixDisabled_true() {
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+
+        val notificationEntry = setupCoreAppNotificationEntry(TEST_PROJECTION_PACKAGE_NAME)
+
+        assertTrue(controller.shouldProtectNotification(notificationEntry))
+    }
+
+    @Test
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING_BUG_FIX)
+    fun shouldProtectNotification_projectionActive_isFromCoreApp_false() {
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+
+        val notificationEntry = setupCoreAppNotificationEntry(TEST_PROJECTION_PACKAGE_NAME)
+
+        assertFalse(controller.shouldProtectNotification(notificationEntry))
+    }
+
+    @Test
     fun shouldProtectNotification_projectionActive_sysuiExempt_false() {
         // SystemUi context package name is exempt, but in test scenarios its
         // com.android.systemui.tests so use that instead of hardcoding
         setShareFullScreenViaSystemUi()
         mediaProjectionCallback.onStart(mediaProjectionInfo)
 
-        val notificationEntry = setupNotificationEntry(TEST_PACKAGE_NAME, false)
+        val notificationEntry = setupNotificationEntry(TEST_PACKAGE_NAME)
 
         assertFalse(controller.shouldProtectNotification(notificationEntry))
     }
@@ -407,7 +430,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
             .thenReturn(PackageManager.PERMISSION_GRANTED)
         mediaProjectionCallback.onStart(mediaProjectionInfo)
 
-        val notificationEntry = setupNotificationEntry(TEST_PACKAGE_NAME, false)
+        val notificationEntry = setupNotificationEntry(TEST_PACKAGE_NAME)
 
         assertTrue(controller.shouldProtectNotification(notificationEntry))
     }
@@ -424,7 +447,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
             .thenReturn(PackageManager.PERMISSION_GRANTED)
         mediaProjectionCallback.onStart(mediaProjectionInfo)
 
-        val notificationEntry = setupNotificationEntry(TEST_PACKAGE_NAME, false)
+        val notificationEntry = setupNotificationEntry(TEST_PACKAGE_NAME)
 
         assertFalse(controller.shouldProtectNotification(notificationEntry))
     }
@@ -434,7 +457,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
         setShareFullScreenViaBugReportHandler()
         mediaProjectionCallback.onStart(mediaProjectionInfo)
 
-        val notificationEntry = setupNotificationEntry(TEST_PACKAGE_NAME, false)
+        val notificationEntry = setupNotificationEntry(TEST_PACKAGE_NAME)
 
         assertFalse(controller.shouldProtectNotification(notificationEntry))
     }
@@ -657,6 +680,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
     private fun setupNotificationEntry(
         packageName: String,
         isFgs: Boolean = false,
+        isCoreApp: Boolean = false,
         overrideVisibility: Boolean = false,
         overrideChannelVisibility: Boolean = false,
     ): NotificationEntry {
@@ -668,8 +692,14 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
             // Developer has marked notification as public
             notification.visibility = VISIBILITY_PUBLIC
         }
-        val notificationEntry =
-            NotificationEntryBuilder().setNotification(notification).setPkg(packageName).build()
+        val notificationEntryBuilder =
+            NotificationEntryBuilder().setNotification(notification).setPkg(packageName)
+        if (isCoreApp) {
+            notificationEntryBuilder.setUid(Process.FIRST_APPLICATION_UID - 10)
+        } else {
+            notificationEntryBuilder.setUid(Process.FIRST_APPLICATION_UID + 10)
+        }
+        val notificationEntry = notificationEntryBuilder.build()
         val channel = NotificationChannel("1", "1", IMPORTANCE_HIGH)
         if (overrideChannelVisibility) {
             // User doesn't allow private notifications at the channel level
@@ -686,6 +716,10 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
 
     private fun setupFgsNotificationEntry(packageName: String): NotificationEntry {
         return setupNotificationEntry(packageName, isFgs = true)
+    }
+
+    private fun setupCoreAppNotificationEntry(packageName: String): NotificationEntry {
+        return setupNotificationEntry(packageName, isCoreApp = true)
     }
 
     private fun setupPublicNotificationEntry(packageName: String): NotificationEntry {

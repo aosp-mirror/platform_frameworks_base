@@ -6982,7 +6982,7 @@ public final class ActivityThread extends ClientTransactionHandler
                             }
                         } else {
                             // No package, perhaps it was removed?
-                            Slog.e(TAG, "Package [" + packages[i] + "] reported as REPLACED,"
+                            Slog.d(TAG, "Package [" + packages[i] + "] reported as REPLACED,"
                                     + " but missing application info. Assuming REMOVED.");
                             mPackages.remove(packages[i]);
                             mResourcePackages.remove(packages[i]);

@@ -203,9 +203,7 @@ public class Surface implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"FRAME_RATE_COMPATIBILITY_"},
-            value = {FRAME_RATE_COMPATIBILITY_DEFAULT, FRAME_RATE_COMPATIBILITY_FIXED_SOURCE,
-                    FRAME_RATE_COMPATIBILITY_EXACT, FRAME_RATE_COMPATIBILITY_NO_VOTE,
-                    FRAME_RATE_COMPATIBILITY_MIN, FRAME_RATE_COMPATIBILITY_GTE})
+            value = {FRAME_RATE_COMPATIBILITY_DEFAULT, FRAME_RATE_COMPATIBILITY_FIXED_SOURCE})
     public @interface FrameRateCompatibility {}
 
     // From native_window.h. Keep these in sync.

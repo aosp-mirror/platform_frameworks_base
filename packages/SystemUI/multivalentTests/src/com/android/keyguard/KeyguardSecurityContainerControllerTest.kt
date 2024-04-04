@@ -47,15 +47,16 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.classifier.FalsingA11yDelegate
 import com.android.systemui.classifier.FalsingCollector
-import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyboard.data.repository.FakeKeyboardRepository
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.SessionTracker
@@ -832,7 +833,9 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
 
             // While listening, going from the bouncer scene to the gone scene, does dismiss the
             // keyguard.
-            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
             runCurrent()
             fakeSceneDataSource.pause()
             sceneInteractor.changeScene(Scenes.Gone, "reason")

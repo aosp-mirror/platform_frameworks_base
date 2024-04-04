@@ -1,0 +1,108 @@
+/*
+ * Copyright (C) 2023 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.systemui.statusbar.notification.stack.ui.viewbinder
+
+import android.view.View
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
+import com.android.systemui.common.ui.ConfigurationState
+import com.android.systemui.common.ui.view.onLayoutChanged
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.dump.DumpManager
+import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.res.R
+import com.android.systemui.statusbar.notification.stack.shared.model.ViewPosition
+import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationScrollViewModel
+import com.android.systemui.util.kotlin.FlowDumperImpl
+import com.android.systemui.util.kotlin.launchAndDispose
+import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.DisposableHandle
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+
+/** Binds the [NotificationScrollView]. */
+@SysUISingleton
+class NotificationScrollViewBinder
+@Inject
+constructor(
+    dumpManager: DumpManager,
+    @Main private val mainImmediateDispatcher: CoroutineDispatcher,
+    private val view: NotificationScrollView,
+    private val viewModel: NotificationScrollViewModel,
+    private val configuration: ConfigurationState,
+) : FlowDumperImpl(dumpManager) {
+
+    private val viewPosition = MutableStateFlow(ViewPosition()).dumpValue("viewPosition")
+    private val viewTopOffset = viewPosition.map { it.top }.distinctUntilChanged()
+
+    fun bindWhileAttached(): DisposableHandle {
+        return view.asView().repeatWhenAttached(mainImmediateDispatcher) {
+            repeatOnLifecycle(Lifecycle.State.CREATED) { bind() }
+        }
+    }
+
+    suspend fun bind() = coroutineScope {
+        launchAndDispose {
+            viewPosition.value = view.asView().position
+            view.asView().onLayoutChanged { viewPosition.value = it.position }
+        }
+
+        launch {
+            viewModel.shadeScrimShape(scrimRadius, viewPosition).collect {
+                view.setScrimClippingShape(it)
+            }
+        }
+
+        launch { viewModel.stackTop.minusTopOffset().collect { view.setStackTop(it) } }
+        launch { viewModel.stackBottom.minusTopOffset().collect { view.setStackBottom(it) } }
+        launch { viewModel.scrolledToTop.collect { view.setScrolledToTop(it) } }
+        launch { viewModel.headsUpTop.minusTopOffset().collect { view.setHeadsUpTop(it) } }
+        launch { viewModel.expandFraction.collect { view.setExpandFraction(it) } }
+        launch { viewModel.isScrollable.collect { view.setScrollingEnabled(it) } }
+
+        launchAndDispose {
+            view.setSyntheticScrollConsumer(viewModel.syntheticScrollConsumer)
+            view.setStackHeightConsumer(viewModel.stackHeightConsumer)
+            view.setHeadsUpHeightConsumer(viewModel.headsUpHeightConsumer)
+            DisposableHandle {
+                view.setSyntheticScrollConsumer(null)
+                view.setStackHeightConsumer(null)
+                view.setHeadsUpHeightConsumer(null)
+            }
+        }
+    }
+
+    /** Combine with the topOffset flow and subtract that value from this flow's value */
+    private fun Flow<Float>.minusTopOffset() =
+        combine(viewTopOffset) { y, topOffset -> y - topOffset }
+
+    /** flow of the scrim clipping radius */
+    private val scrimRadius: Flow<Int>
+        get() = configuration.getDimensionPixelOffset(R.dimen.notification_scrim_corner_radius)
+
+    /** Construct a [ViewPosition] from this view using [View.getLeft] and [View.getTop] */
+    private val View.position
+        get() = ViewPosition(left = left, top = top)
+}

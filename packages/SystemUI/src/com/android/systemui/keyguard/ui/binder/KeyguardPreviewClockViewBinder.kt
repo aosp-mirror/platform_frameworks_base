@@ -34,6 +34,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.tracing.coroutines.launch
+import com.android.internal.policy.SystemBarUtils
 import com.android.systemui.customization.R as customizationR
 import com.android.systemui.keyguard.shared.model.SettingsClockSize
 import com.android.systemui.keyguard.ui.preview.KeyguardPreviewRenderer
@@ -116,7 +117,7 @@ object KeyguardPreviewClockViewBinder {
             constrainWidth(R.id.lockscreen_clock_view_large, ConstraintSet.WRAP_CONTENT)
             constrainHeight(R.id.lockscreen_clock_view_large, ConstraintSet.MATCH_CONSTRAINT)
             val largeClockTopMargin =
-                context.resources.getDimensionPixelSize(R.dimen.status_bar_height) +
+                SystemBarUtils.getStatusBarHeight(context) +
                     context.resources.getDimensionPixelSize(
                         customizationR.dimen.small_clock_padding_top
                     ) +

@@ -98,7 +98,7 @@ constructor(
 
     override fun setChipIntents(imageData: SavedImageData) {}
 
-    override fun requestDismissal(event: ScreenshotEvent) {
+    override fun requestDismissal(event: ScreenshotEvent?) {
         debugLog(DEBUG_DISMISS) { "screenshot dismissal requested: $event" }
 
         // If we're already animating out, don't restart the animation
@@ -106,7 +106,7 @@ constructor(
             debugLog(DEBUG_DISMISS) { "Already dismissing, ignoring duplicate command $event" }
             return
         }
-        logger.log(event, 0, packageName)
+        event?.let { logger.log(it, 0, packageName) }
         val animator = animationController.getExitAnimation()
         animator.addListener(
             object : AnimatorListenerAdapter() {

@@ -25,13 +25,6 @@ flag {
 }
 
 flag {
-    name: "disable_screen_off_broadcast_receiver"
-    namespace: "media_solutions"
-    description: "Disables the broadcast receiver that prevents scanning when the screen is off."
-    bug: "304234628"
-}
-
-flag {
     name: "fallback_to_default_handling_when_media_session_has_fixed_volume_handling"
     namespace: "media_solutions"
     description: "Fallbacks to the default handling for volume adjustment when media session has fixed volume handling and its app is in the foreground and setting a media controller."
@@ -108,6 +101,16 @@ flag {
 }
 
 flag {
+    name: "enable_mr2_service_non_main_bg_thread"
+    namespace: "media_solutions"
+    description: "Enables the use of a background thread in the media routing framework, instead of using the main thread."
+    bug: "310145678"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_screen_off_scanning"
     is_exported: true
     namespace: "media_solutions"
@@ -120,4 +123,14 @@ flag {
     namespace: "media_solutions"
     description: "Enables apps owning a MediaBrowserService to disconnect all connected browsers."
     bug: "185136506"
+}
+
+flag {
+    name: "enable_prevention_of_manager_scans_when_no_apps_scan"
+    namespace: "media_solutions"
+    description: "Prevents waking up route providers when no apps are scanning, even if SysUI or Settings are scanning."
+    bug: "319604673"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

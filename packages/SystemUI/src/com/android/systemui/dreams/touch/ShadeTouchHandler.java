@@ -82,7 +82,7 @@ public class ShadeTouchHandler implements DreamTouchHandler {
     }
 
     @Override
-    public void getTouchInitiationRegion(Rect bounds, Region region) {
+    public void getTouchInitiationRegion(Rect bounds, Region region, Rect exclusionRect) {
         final Rect outBounds = new Rect(bounds);
         outBounds.inset(0, 0, 0, outBounds.height() - mInitiationHeight);
         region.op(outBounds, Region.Op.UNION);

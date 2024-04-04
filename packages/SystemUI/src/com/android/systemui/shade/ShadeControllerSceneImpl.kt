@@ -23,6 +23,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.dagger.ShadeTouchLog
 import com.android.systemui.scene.domain.interactor.SceneInteractor
@@ -61,6 +62,7 @@ constructor(
     private val shadeInteractor: ShadeInteractor,
     private val sceneInteractor: SceneInteractor,
     private val deviceEntryInteractor: DeviceEntryInteractor,
+    private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
     private val notificationStackScrollLayout: NotificationStackScrollLayout,
     @ShadeTouchLog private val touchLog: LogBuffer,
     private val vibratorHelper: VibratorHelper,
@@ -148,7 +150,11 @@ constructor(
     }
 
     private fun getCollapseDestinationScene(): SceneKey {
-        return if (deviceEntryInteractor.isDeviceEntered.value) {
+        // Always check whether device is unlocked before transitioning to gone scene.
+        return if (
+            deviceUnlockedInteractor.deviceUnlockStatus.value.isUnlocked &&
+                deviceEntryInteractor.isDeviceEntered.value
+        ) {
             Scenes.Gone
         } else {
             Scenes.Lockscreen

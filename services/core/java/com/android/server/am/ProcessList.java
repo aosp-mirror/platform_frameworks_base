@@ -351,6 +351,7 @@ public final class ProcessList {
     // LMK_UPDATE_PROPS
     // LMK_KILL_OCCURRED
     // LMK_START_MONITORING
+    // LMK_BOOT_COMPLETED
     static final byte LMK_TARGET = 0;
     static final byte LMK_PROCPRIO = 1;
     static final byte LMK_PROCREMOVE = 2;
@@ -361,6 +362,7 @@ public final class ProcessList {
     static final byte LMK_UPDATE_PROPS = 7;
     static final byte LMK_KILL_OCCURRED = 8; // Msg to subscribed clients on kill occurred event
     static final byte LMK_START_MONITORING = 9; // Start monitoring if delayed earlier
+    static final byte LMK_BOOT_COMPLETED = 10;
 
     // Low Memory Killer Daemon command codes.
     // These must be kept in sync with async_event_type definitions in lmkd.h

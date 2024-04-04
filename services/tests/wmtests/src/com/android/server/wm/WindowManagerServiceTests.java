@@ -245,15 +245,6 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     }
 
     @Test
-    public void testDismissKeyguardCanWakeUp() {
-        doReturn(true).when(mWm).checkCallingPermission(anyString(), anyString());
-        doReturn(true).when(mWm.mAtmService.mKeyguardController).isShowingDream();
-        doNothing().when(mWm.mAtmService.mTaskSupervisor).wakeUp(anyString());
-        mWm.dismissKeyguard(null, "test-dismiss-keyguard");
-        verify(mWm.mAtmService.mTaskSupervisor).wakeUp(anyString());
-    }
-
-    @Test
     public void testTrackOverlayWindow() {
         final WindowProcessController wpc = mSystemServicesTestRule.addProcess(
                 "pkgName", "processName", 1000 /* pid */, Process.SYSTEM_UID);

@@ -19,6 +19,7 @@ package com.android.systemui.dreams.touch;
 import static com.android.systemui.dreams.touch.dagger.BouncerSwipeModule.SWIPE_TO_BOUNCER_FLING_ANIMATION_UTILS_CLOSING;
 import static com.android.systemui.dreams.touch.dagger.BouncerSwipeModule.SWIPE_TO_BOUNCER_FLING_ANIMATION_UTILS_OPENING;
 import static com.android.systemui.dreams.touch.dagger.BouncerSwipeModule.SWIPE_TO_BOUNCER_START_REGION;
+import static com.android.systemui.dreams.touch.dagger.BouncerSwipeModule.MIN_BOUNCER_ZONE_SCREEN_PERCENTAGE;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -81,6 +82,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
     private final LockPatternUtils mLockPatternUtils;
     private final UserTracker mUserTracker;
     private final float mBouncerZoneScreenPercentage;
+    private final float mMinBouncerZoneScreenPercentage;
 
     private final ScrimManager mScrimManager;
     private ScrimController mCurrentScrimController;
@@ -222,6 +224,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
             @Named(SWIPE_TO_BOUNCER_FLING_ANIMATION_UTILS_CLOSING)
                     FlingAnimationUtils flingAnimationUtilsClosing,
             @Named(SWIPE_TO_BOUNCER_START_REGION) float swipeRegionPercentage,
+            @Named(MIN_BOUNCER_ZONE_SCREEN_PERCENTAGE) float minRegionPercentage,
             UiEventLogger uiEventLogger) {
         mCentralSurfaces = centralSurfaces;
         mScrimManager = scrimManager;
@@ -229,6 +232,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
         mLockPatternUtils = lockPatternUtils;
         mUserTracker = userTracker;
         mBouncerZoneScreenPercentage = swipeRegionPercentage;
+        mMinBouncerZoneScreenPercentage = minRegionPercentage;
         mFlingAnimationUtils = flingAnimationUtils;
         mFlingAnimationUtilsClosing = flingAnimationUtilsClosing;
         mValueAnimatorCreator = valueAnimatorCreator;
@@ -237,23 +241,26 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
     }
 
     @Override
-    public void getTouchInitiationRegion(Rect bounds, Region region) {
+    public void getTouchInitiationRegion(Rect bounds, Region region, Rect exclusionRect) {
         final int width = bounds.width();
         final int height = bounds.height();
+        final float minBouncerHeight = height * mMinBouncerZoneScreenPercentage;
+        final int minAllowableBottom = Math.round(height * (1 - mMinBouncerZoneScreenPercentage));
 
-        if (mCentralSurfaces.map(CentralSurfaces::isBouncerShowing).orElse(false)) {
-            region.op(new Rect(0, 0, width,
-                            Math.round(
-                                    height * mBouncerZoneScreenPercentage)),
-                    Region.Op.UNION);
-        } else {
-            region.op(new Rect(0,
-                            Math.round(height * (1 - mBouncerZoneScreenPercentage)),
-                            width,
-                            height),
-                    Region.Op.UNION);
+        final boolean isBouncerShowing =
+                mCentralSurfaces.map(CentralSurfaces::isBouncerShowing).orElse(false);
+        final Rect normalRegion = isBouncerShowing
+                ? new Rect(0, 0, width, Math.round(height * mBouncerZoneScreenPercentage))
+                : new Rect(0, Math.round(height * (1 - mBouncerZoneScreenPercentage)),
+                        width, height);
+
+        if (!isBouncerShowing && exclusionRect != null) {
+            int lowestBottom = Math.min(Math.max(0, exclusionRect.bottom), minAllowableBottom);
+            normalRegion.top = Math.max(normalRegion.top, lowestBottom);
         }
+        region.union(normalRegion);
     }
+
 
     @Override
     public void onSessionStart(TouchSession session) {

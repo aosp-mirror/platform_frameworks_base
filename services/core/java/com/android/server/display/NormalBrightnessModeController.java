@@ -79,10 +79,12 @@ class NormalBrightnessModeController {
             maxBrightnessPoints = mMaxBrightnessLimits.get(BrightnessLimitMapType.ADAPTIVE);
         }
 
-        if (maxBrightnessPoints == null) {
+        // AutoBrightnessController sends ambientLux values *only* when auto brightness enabled.
+        // Temporary disabling this Controller if auto brightness is off, to avoid capping
+        // brightness based on stale ambient lux. The issue is tracked here: b/322445088
+        if (mAutoBrightnessEnabled && maxBrightnessPoints == null) {
             maxBrightnessPoints = mMaxBrightnessLimits.get(BrightnessLimitMapType.DEFAULT);
         }
-
         if (maxBrightnessPoints != null) {
             for (Map.Entry<Float, Float> brightnessPoint : maxBrightnessPoints.entrySet()) {
                 float ambientBoundary = brightnessPoint.getKey();

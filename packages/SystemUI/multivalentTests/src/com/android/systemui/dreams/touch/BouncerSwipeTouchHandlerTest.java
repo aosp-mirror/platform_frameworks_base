@@ -63,7 +63,6 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
 import java.util.Optional;
-
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
@@ -119,6 +118,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     private static final float TOUCH_REGION = .3f;
     private static final int SCREEN_WIDTH_PX = 1024;
     private static final int SCREEN_HEIGHT_PX = 100;
+    private static final float MIN_BOUNCER_HEIGHT = .05f;
 
     private static final Rect SCREEN_BOUNDS = new Rect(0, 0, 1024, 100);
     private static final UserInfo CURRENT_USER_INFO = new UserInfo(
@@ -142,6 +142,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                 mFlingAnimationUtils,
                 mFlingAnimationUtilsClosing,
                 TOUCH_REGION,
+                MIN_BOUNCER_HEIGHT,
                 mUiEventLogger);
 
         when(mScrimManager.getCurrentController()).thenReturn(mScrimController);
@@ -160,9 +161,9 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
      */
     @Test
     public void testSessionStart() {
-        mTouchHandler.getTouchInitiationRegion(SCREEN_BOUNDS, mRegion);
+        mTouchHandler.getTouchInitiationRegion(SCREEN_BOUNDS, mRegion, null);
 
-        verify(mRegion).op(mRectCaptor.capture(), eq(Region.Op.UNION));
+        verify(mRegion).union(mRectCaptor.capture());
         final Rect bounds = mRectCaptor.getValue();
 
         final Rect expected = new Rect();
@@ -192,6 +193,85 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     private enum Direction {
         DOWN,
         UP,
+    }
+
+    @Test
+    public void testSwipeUp_whenBouncerInitiallyShowing_reduceHeightWithExclusionRects() {
+        mTouchHandler.getTouchInitiationRegion(SCREEN_BOUNDS, mRegion,
+                new Rect(0, 0, SCREEN_WIDTH_PX, SCREEN_HEIGHT_PX));
+        verify(mRegion).union(mRectCaptor.capture());
+        final Rect bounds = mRectCaptor.getValue();
+
+        final Rect expected = new Rect();
+        final float minBouncerHeight =
+                SCREEN_HEIGHT_PX * MIN_BOUNCER_HEIGHT;
+        final int minAllowableBottom = SCREEN_HEIGHT_PX - Math.round(minBouncerHeight);
+
+        expected.set(0, minAllowableBottom , SCREEN_WIDTH_PX, SCREEN_HEIGHT_PX);
+
+        assertThat(bounds).isEqualTo(expected);
+
+        onSessionStartHelper(mTouchHandler, mTouchSession, mNotificationShadeWindowController);
+    }
+
+    @Test
+    public void testSwipeUp_exclusionRectAtTop_doesNotIntersectGestureArea() {
+        mTouchHandler.getTouchInitiationRegion(SCREEN_BOUNDS, mRegion,
+                new Rect(0, 0, SCREEN_WIDTH_PX, SCREEN_HEIGHT_PX / 4));
+        verify(mRegion).union(mRectCaptor.capture());
+        final Rect bounds = mRectCaptor.getValue();
+
+        final Rect expected = new Rect();
+        final int gestureAreaTop = SCREEN_HEIGHT_PX - Math.round(SCREEN_HEIGHT_PX * TOUCH_REGION);
+        expected.set(0, gestureAreaTop, SCREEN_WIDTH_PX, SCREEN_HEIGHT_PX);
+
+        assertThat(bounds).isEqualTo(expected);
+        onSessionStartHelper(mTouchHandler, mTouchSession, mNotificationShadeWindowController);
+    }
+
+    @Test
+    public void testSwipeUp_exclusionRectBetweenNormalAndMinimumSwipeArea() {
+        final int normalSwipeAreaTop = SCREEN_HEIGHT_PX
+                - Math.round(SCREEN_HEIGHT_PX * TOUCH_REGION);
+        final int minimumSwipeAreaTop = SCREEN_HEIGHT_PX
+                - Math.round(SCREEN_HEIGHT_PX * MIN_BOUNCER_HEIGHT);
+
+        Rect exclusionRect = new Rect(0, 0, SCREEN_WIDTH_PX,
+                (normalSwipeAreaTop + minimumSwipeAreaTop) / 2);
+
+        mTouchHandler.getTouchInitiationRegion(SCREEN_BOUNDS, mRegion, exclusionRect);
+
+        verify(mRegion).union(mRectCaptor.capture());
+
+        final Rect bounds = mRectCaptor.getValue();
+        final Rect expected = new Rect();
+
+        final int expectedSwipeAreaBottom = exclusionRect.bottom;
+        expected.set(0, expectedSwipeAreaBottom, SCREEN_WIDTH_PX, SCREEN_HEIGHT_PX);
+
+        assertThat(bounds).isEqualTo(expected);
+
+        onSessionStartHelper(mTouchHandler, mTouchSession, mNotificationShadeWindowController);
+    }
+
+    private static void onSessionStartHelper(BouncerSwipeTouchHandler touchHandler,
+            DreamTouchHandler.TouchSession touchSession,
+            NotificationShadeWindowController notificationShadeWindowController) {
+        touchHandler.onSessionStart(touchSession);
+        verify(notificationShadeWindowController).setForcePluginOpen(eq(true), any());
+        ArgumentCaptor<InputChannelCompat.InputEventListener> eventListenerCaptor =
+                ArgumentCaptor.forClass(InputChannelCompat.InputEventListener.class);
+        ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
+                ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
+        verify(touchSession).registerGestureListener(gestureListenerCaptor.capture());
+        verify(touchSession).registerInputListener(eventListenerCaptor.capture());
+
+        // A touch within range at the bottom of the screen should trigger listening
+        assertThat(gestureListenerCaptor.getValue()
+                .onScroll(Mockito.mock(MotionEvent.class),
+                        Mockito.mock(MotionEvent.class),
+                        1,
+                        2)).isTrue();
     }
 
     /**

@@ -37,14 +37,17 @@ package com.android.systemui.keyguard.domain.interactor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
-import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.PowerInteractor
@@ -247,14 +250,20 @@ class KeyguardOcclusionInteractorTest : SysuiTestCase() {
             val occludingActivityWillDismissKeyguard by
                 collectLastValue(underTest.occludingActivityWillDismissKeyguard)
             assertThat(occludingActivityWillDismissKeyguard).isFalse()
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+            runCurrent()
 
             // Unlock device:
-            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+            kosmos.deviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
             runCurrent()
             assertThat(occludingActivityWillDismissKeyguard).isTrue()
 
             // Re-lock device:
-            kosmos.fakeDeviceEntryRepository.setUnlocked(false)
+            kosmos.powerInteractor.setAsleepForTest()
             runCurrent()
             assertThat(occludingActivityWillDismissKeyguard).isFalse()
         }

@@ -46,7 +46,7 @@ interface ScreenshotViewProxy {
     fun createScreenshotDropInAnimation(screenRect: Rect, showFlash: Boolean): Animator
     fun addQuickShareChip(quickShareAction: Notification.Action)
     fun setChipIntents(imageData: ScreenshotController.SavedImageData)
-    fun requestDismissal(event: ScreenshotEvent)
+    fun requestDismissal(event: ScreenshotEvent?)
 
     fun showScrollChip(packageName: String, onClick: Runnable)
     fun hideScrollChip()

@@ -36,8 +36,8 @@ import com.android.server.companion.association.DisassociationProcessor;
 import com.android.server.companion.datatransfer.SystemDataTransferProcessor;
 import com.android.server.companion.datatransfer.contextsync.BitmapUtils;
 import com.android.server.companion.datatransfer.contextsync.CrossDeviceSyncController;
-import com.android.server.companion.presence.DevicePresenceProcessor;
-import com.android.server.companion.presence.ObservableUuid;
+import com.android.server.companion.devicepresence.DevicePresenceProcessor;
+import com.android.server.companion.devicepresence.ObservableUuid;
 import com.android.server.companion.transport.CompanionTransportManager;
 
 import java.io.PrintWriter;

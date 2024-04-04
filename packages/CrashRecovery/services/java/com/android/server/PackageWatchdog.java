@@ -39,15 +39,15 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.LongArrayQueue;
 import android.util.Slog;
 import android.util.Xml;
-import android.utils.BackgroundThread;
-import android.utils.LongArrayQueue;
-import android.utils.XmlUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 
@@ -137,17 +137,6 @@ public class PackageWatchdog {
     static final int DEFAULT_BOOT_LOOP_TRIGGER_COUNT = 5;
 
     static final long DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS = TimeUnit.MINUTES.toMillis(10);
-    // Boot loop at which packageWatchdog starts first mitigation
-    private static final String BOOT_LOOP_THRESHOLD =
-            "persist.device_config.configuration.boot_loop_threshold";
-    @VisibleForTesting
-    static final int DEFAULT_BOOT_LOOP_THRESHOLD = 15;
-    // Once boot_loop_threshold is surpassed next mitigation would be triggered after
-    // specified number of reboots.
-    private static final String BOOT_LOOP_MITIGATION_INCREMENT =
-            "persist.device_config.configuration..boot_loop_mitigation_increment";
-    @VisibleForTesting
-    static final int DEFAULT_BOOT_LOOP_MITIGATION_INCREMENT = 2;
 
     // Threshold level at which or above user might experience significant disruption.
     private static final String MAJOR_USER_IMPACT_LEVEL_THRESHOLD =
@@ -253,15 +242,8 @@ public class PackageWatchdog {
         mConnectivityModuleConnector = connectivityModuleConnector;
         mSystemClock = clock;
         mNumberOfNativeCrashPollsRemaining = NUMBER_OF_NATIVE_CRASH_POLLS;
-        if (Flags.recoverabilityDetection()) {
-            mBootThreshold = new BootThreshold(DEFAULT_BOOT_LOOP_TRIGGER_COUNT,
-                    DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS,
-                    SystemProperties.getInt(BOOT_LOOP_MITIGATION_INCREMENT,
-                            DEFAULT_BOOT_LOOP_MITIGATION_INCREMENT));
-        } else {
-            mBootThreshold = new BootThreshold(DEFAULT_BOOT_LOOP_TRIGGER_COUNT,
-                    DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS);
-        }
+        mBootThreshold = new BootThreshold(DEFAULT_BOOT_LOOP_TRIGGER_COUNT,
+                DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS);
 
         loadFromFile();
         sPackageWatchdog = this;
@@ -526,10 +508,16 @@ public class PackageWatchdog {
     /**
      * Called when the system server boots. If the system server is detected to be in a boot loop,
      * query each observer and perform the mitigation action with the lowest user impact.
+     *
+     * Note: PackageWatchdog considers system_server restart loop as bootloop. Full reboots
+     * are not counted in bootloop.
      */
     @SuppressWarnings("GuardedBy")
     public void noteBoot() {
         synchronized (mLock) {
+            // if boot count has reached threshold, start mitigation.
+            // We wait until threshold number of restarts only for the first time. Perform
+            // mitigations for every restart after that.
             boolean mitigate = mBootThreshold.incrementAndTest();
             if (mitigate) {
                 if (!Flags.recoverabilityDetection()) {
@@ -557,17 +545,13 @@ public class PackageWatchdog {
                 }
                 if (currentObserverToNotify != null) {
                     if (Flags.recoverabilityDetection()) {
-                        if (currentObserverImpact < getUserImpactLevelLimit()
-                                || (currentObserverImpact >= getUserImpactLevelLimit()
-                                        && mBootThreshold.getCount() >= getBootLoopThreshold())) {
-                            int currentObserverMitigationCount =
-                                    currentObserverInternal.getBootMitigationCount() + 1;
-                            currentObserverInternal.setBootMitigationCount(
-                                    currentObserverMitigationCount);
-                            saveAllObserversBootMitigationCountToMetadata(METADATA_FILE);
-                            currentObserverToNotify.executeBootLoopMitigation(
-                                    currentObserverMitigationCount);
-                        }
+                        int currentObserverMitigationCount =
+                                currentObserverInternal.getBootMitigationCount() + 1;
+                        currentObserverInternal.setBootMitigationCount(
+                                currentObserverMitigationCount);
+                        saveAllObserversBootMitigationCountToMetadata(METADATA_FILE);
+                        currentObserverToNotify.executeBootLoopMitigation(
+                                currentObserverMitigationCount);
                     } else {
                         mBootThreshold.setMitigationCount(mitigationCount);
                         mBootThreshold.saveMitigationCountToMetadata();
@@ -645,11 +629,6 @@ public class PackageWatchdog {
     private int getUserImpactLevelLimit() {
         return SystemProperties.getInt(MAJOR_USER_IMPACT_LEVEL_THRESHOLD,
                 DEFAULT_MAJOR_USER_IMPACT_LEVEL_THRESHOLD);
-    }
-
-    private int getBootLoopThreshold() {
-        return SystemProperties.getInt(BOOT_LOOP_THRESHOLD,
-                DEFAULT_BOOT_LOOP_THRESHOLD);
     }
 
     /** Possible severity values of the user impact of a {@link PackageHealthObserver#execute}. */
@@ -1827,16 +1806,10 @@ public class PackageWatchdog {
 
         private final int mBootTriggerCount;
         private final long mTriggerWindow;
-        private final int mBootMitigationIncrement;
 
         BootThreshold(int bootTriggerCount, long triggerWindow) {
-            this(bootTriggerCount, triggerWindow, /*bootMitigationIncrement=*/ 1);
-        }
-
-        BootThreshold(int bootTriggerCount, long triggerWindow, int bootMitigationIncrement) {
             this.mBootTriggerCount = bootTriggerCount;
             this.mTriggerWindow = triggerWindow;
-            this.mBootMitigationIncrement = bootMitigationIncrement;
         }
 
         public void reset() {
@@ -1915,6 +1888,7 @@ public class PackageWatchdog {
             } else {
                 readMitigationCountFromMetadataIfNecessary();
             }
+
             final long now = mSystemClock.uptimeMillis();
             if (now - getStart() < 0) {
                 Slog.e(TAG, "Window was less than zero. Resetting start to current time.");
@@ -1939,12 +1913,23 @@ public class PackageWatchdog {
                 setCount(count);
                 EventLogTags.writeRescueNote(Process.ROOT_UID, count, window);
                 if (Flags.recoverabilityDetection()) {
-                    boolean mitigate = (count >= mBootTriggerCount)
-                            && (count - mBootTriggerCount) % mBootMitigationIncrement == 0;
-                    return mitigate;
+                    // After a reboot (e.g. by WARM_REBOOT or mainline rollback) we apply
+                    // mitigations without waiting for DEFAULT_BOOT_LOOP_TRIGGER_COUNT.
+                    return (count >= mBootTriggerCount)
+                            || (performedMitigationsDuringWindow() && count > 1);
                 }
                 return count >= mBootTriggerCount;
             }
+        }
+
+        @GuardedBy("mLock")
+        private boolean performedMitigationsDuringWindow() {
+            for (ObserverInternal observerInternal: mAllObservers.values()) {
+                if (observerInternal.getBootMitigationCount() > 0) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         @GuardedBy("mLock")
@@ -1953,6 +1938,7 @@ public class PackageWatchdog {
                 final ObserverInternal observer = mAllObservers.valueAt(i);
                 observer.setBootMitigationCount(0);
             }
+            saveAllObserversBootMitigationCountToMetadata(METADATA_FILE);
         }
 
         @GuardedBy("mLock")

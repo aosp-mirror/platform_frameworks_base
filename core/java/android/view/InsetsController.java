@@ -31,7 +31,6 @@ import static android.view.WindowInsets.Type.ime;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 
-import android.animation.AnimationHandler;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TypeEvaluator;
@@ -69,7 +68,6 @@ import android.view.inputmethod.ImeTracker.InputMethodJankContext;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.util.function.TriFunction;
@@ -379,16 +377,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         private final WindowInsetsAnimationControlListener mLoggingListener;
         private final InputMethodJankContext mInputMethodJankContext;
 
-        private final ThreadLocal<AnimationHandler> mSfAnimationHandlerThreadLocal =
-                new ThreadLocal<AnimationHandler>() {
-            @Override
-            protected AnimationHandler initialValue() {
-                AnimationHandler handler = new AnimationHandler();
-                handler.setProvider(new SfVsyncFrameCallbackProvider());
-                return handler;
-            }
-        };
-
         public InternalAnimationControlListener(boolean show, boolean hasAnimationCallbacks,
                 @InsetsType int requestedTypes, @Behavior int behavior, boolean disable,
                 int floatingImeBottomInset, WindowInsetsAnimationControlListener loggingListener,
@@ -470,9 +458,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     ImeTracker.forJank().onFinishAnimation(getAnimationType());
                 }
             });
-            if (!mHasAnimationCallbacks) {
-                mAnimator.setAnimationHandler(mSfAnimationHandlerThreadLocal.get());
-            }
             mAnimator.start();
         }
 

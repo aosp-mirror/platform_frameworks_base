@@ -16,6 +16,7 @@
 
 package com.android.settingslib.applications;
 
+import android.annotation.NonNull;
 import android.app.usage.StorageStats;
 import android.app.usage.StorageStatsManager;
 import android.content.Context;
@@ -25,6 +26,7 @@ import android.os.UserHandle;
 import androidx.annotation.VisibleForTesting;
 
 import java.io.IOException;
+import java.util.UUID;
 
 /**
  * StorageStatsSource wraps the StorageStatsManager for testability purposes.
@@ -57,6 +59,10 @@ public class StorageStatsSource {
 
     public long getCacheQuotaBytes(String volumeUuid, int uid) {
         return mStorageStatsManager.getCacheQuotaBytes(volumeUuid, uid);
+    }
+
+    public long getTotalBytes(@NonNull UUID storageUuid) throws IOException {
+        return mStorageStatsManager.getTotalBytes(storageUuid);
     }
 
     /**

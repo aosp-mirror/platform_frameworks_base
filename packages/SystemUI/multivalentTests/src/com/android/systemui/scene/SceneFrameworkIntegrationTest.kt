@@ -50,6 +50,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
@@ -265,8 +266,6 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 sceneInteractor = sceneInteractor,
             )
 
-        kosmos.fakeDeviceEntryRepository.setUnlocked(false)
-
         val displayTracker = FakeDisplayTracker(context)
         val sysUiState = SysUiState(displayTracker, kosmos.sceneContainerPlugin)
         val startable =
@@ -291,6 +290,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 headsUpInteractor = kosmos.headsUpNotificationInteractor,
                 occlusionInteractor = kosmos.sceneContainerOcclusionInteractor,
                 faceUnlockInteractor = kosmos.deviceEntryFaceAuthInteractor,
+                deviceUnlockedInteractor = kosmos.deviceUnlockedInteractor,
             )
         startable.start()
 
@@ -371,8 +371,11 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     fun swipeUpOnShadeScene_withAuthMethodSwipe_lockscreenDismissed_goesToGone() =
         testScope.runTest {
             val destinationScenes by collectLastValue(shadeSceneViewModel.destinationScenes)
+            val canSwipeToEnter by collectLastValue(deviceEntryInteractor.canSwipeToEnter)
+
             setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
-            assertThat(deviceEntryInteractor.canSwipeToEnter.value).isTrue()
+
+            assertThat(canSwipeToEnter).isTrue()
             assertCurrentScene(Scenes.Lockscreen)
 
             // Emulate a user swipe to dismiss the lockscreen.
@@ -433,17 +436,6 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             assertCurrentScene(Scenes.Lockscreen)
 
             unlockDevice()
-            assertCurrentScene(Scenes.Gone)
-        }
-
-    @Test
-    fun deviceWakesUpWhileUnlocked_dismissesLockscreen() =
-        testScope.runTest {
-            unlockDevice()
-            assertCurrentScene(Scenes.Gone)
-            putDeviceToSleep(instantlyLockDevice = false)
-            assertCurrentScene(Scenes.Lockscreen)
-            wakeUpDevice()
             assertCurrentScene(Scenes.Gone)
         }
 
@@ -540,7 +532,11 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             fakeSceneDataSource.pause()
             introduceLockedSim()
             emulatePendingTransitionProgress(expectedVisible = true)
-            enterSimPin(authMethodAfterSimUnlock = AuthenticationMethodModel.None)
+            enterSimPin(
+                authMethodAfterSimUnlock = AuthenticationMethodModel.None,
+                enableLockscreen = false
+            )
+
             assertCurrentScene(Scenes.Gone)
         }
 
@@ -708,7 +704,6 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             .that(authMethod.isSecure)
             .isTrue()
 
-        kosmos.fakeDeviceEntryRepository.setUnlocked(false)
         runCurrent()
     }
 
@@ -721,9 +716,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         emulateUserDrivenTransition(Scenes.Bouncer)
         fakeSceneDataSource.pause()
         enterPin()
-        // This repository state is not changed by the AuthInteractor, it relies on
-        // KeyguardStateController.
-        kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+
         emulatePendingTransitionProgress(
             expectedVisible = false,
         )
@@ -763,7 +756,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
      * Does not assert that the device is locked or unlocked.
      */
     private fun TestScope.enterSimPin(
-        authMethodAfterSimUnlock: AuthenticationMethodModel = AuthenticationMethodModel.None
+        authMethodAfterSimUnlock: AuthenticationMethodModel = AuthenticationMethodModel.None,
+        enableLockscreen: Boolean = true,
     ) {
         assertWithMessage("Cannot enter PIN when not on the Bouncer scene!")
             .that(getCurrentSceneInUi())
@@ -778,8 +772,10 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             pinBouncerViewModel.onPinButtonClicked(digit)
         }
         pinBouncerViewModel.onAuthenticateButtonClicked()
-        setAuthMethod(authMethodAfterSimUnlock)
         kosmos.fakeMobileConnectionsRepository.isAnySimSecure.value = false
+        runCurrent()
+
+        setAuthMethod(authMethodAfterSimUnlock, enableLockscreen)
         runCurrent()
     }
 

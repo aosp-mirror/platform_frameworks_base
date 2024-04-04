@@ -41,8 +41,10 @@ import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReaso
 import com.android.systemui.flags.fakeSystemPropertiesHelper
 import com.android.systemui.keyguard.data.repository.fakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeTrustRepository
 import com.android.systemui.keyguard.shared.model.AuthenticationFlags
+import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
@@ -89,22 +91,8 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.None
             )
-            kosmos.fakeDeviceEntryRepository.apply {
-                setLockscreenEnabled(false)
-
-                // Toggle isUnlocked, twice.
-                //
-                // This is done because the underTest.isUnlocked flow doesn't receive values from
-                // just changing the state above; the actual isUnlocked state needs to change to
-                // cause the logic under test to "pick up" the current state again.
-                //
-                // It is done twice to make sure that we don't actually change the isUnlocked state
-                // from what it originally was.
-                setUnlocked(!isUnlocked.value)
-                runCurrent()
-                setUnlocked(!isUnlocked.value)
-                runCurrent()
-            }
+            kosmos.fakeDeviceEntryRepository.apply { setLockscreenEnabled(false) }
+            runCurrent()
 
             val isUnlocked by collectLastValue(underTest.isUnlocked)
             assertThat(isUnlocked).isTrue()
@@ -125,7 +113,9 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Sim
             )
-            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
 
             val isUnlocked by collectLastValue(underTest.isUnlocked)
             assertThat(isUnlocked).isFalse()
@@ -271,7 +261,6 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
     @Test
     fun isAuthenticationRequired_lockedAndSecured_true() =
         testScope.runTest {
-            kosmos.fakeDeviceEntryRepository.setUnlocked(false)
             runCurrent()
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password
@@ -283,7 +272,6 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
     @Test
     fun isAuthenticationRequired_lockedAndNotSecured_false() =
         testScope.runTest {
-            kosmos.fakeDeviceEntryRepository.setUnlocked(false)
             runCurrent()
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.None
@@ -295,7 +283,9 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
     @Test
     fun isAuthenticationRequired_unlockedAndSecured_false() =
         testScope.runTest {
-            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
             runCurrent()
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password
@@ -307,7 +297,9 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
     @Test
     fun isAuthenticationRequired_unlockedAndNotSecured_false() =
         testScope.runTest {
-            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
             runCurrent()
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.None
@@ -333,7 +325,9 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin
             )
-            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
             runCurrent()
 
             underTest.attemptDeviceEntry()

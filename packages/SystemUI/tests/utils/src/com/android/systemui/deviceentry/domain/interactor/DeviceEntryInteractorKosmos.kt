@@ -23,7 +23,6 @@ import com.android.systemui.keyguard.domain.interactor.trustInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalCoroutinesApi
@@ -35,11 +34,10 @@ val Kosmos.deviceEntryInteractor by
             authenticationInteractor = authenticationInteractor,
             sceneInteractor = sceneInteractor,
             faceAuthInteractor = deviceEntryFaceAuthInteractor,
-            trustInteractor = trustInteractor,
-            flags = sceneContainerFlags,
-            deviceUnlockedInteractor = deviceUnlockedInteractor,
             fingerprintAuthInteractor = deviceEntryFingerprintAuthInteractor,
             biometricSettingsInteractor = deviceEntryBiometricSettingsInteractor,
+            trustInteractor = trustInteractor,
+            deviceUnlockedInteractor = deviceUnlockedInteractor,
             systemPropertiesHelper = fakeSystemPropertiesHelper,
         )
     }

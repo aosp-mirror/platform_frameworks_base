@@ -868,7 +868,8 @@ public class AudioDeviceInventory {
     @GuardedBy("mDeviceBroker.mDeviceStateLock")
     /*package*/ void onBluetoothDeviceConfigChange(
             @NonNull AudioDeviceBroker.BtDeviceInfo btInfo,
-            @AudioSystem.AudioFormatNativeEnumForBtCodec int codec, int event) {
+            @AudioSystem.AudioFormatNativeEnumForBtCodec int codec,
+            boolean codecChanged, int event) {
         MediaMetrics.Item mmi = new MediaMetrics.Item(mMetricsId
                 + "onBluetoothDeviceConfigChange")
                 .set(MediaMetrics.Property.EVENT, BtHelper.deviceEventToString(event));
@@ -916,14 +917,12 @@ public class AudioDeviceInventory {
 
 
             if (event == BtHelper.EVENT_DEVICE_CONFIG_CHANGE) {
-                boolean codecChange = false;
                 if (btInfo.mProfile == BluetoothProfile.A2DP
                         || btInfo.mProfile == BluetoothProfile.LE_AUDIO
                         || btInfo.mProfile == BluetoothProfile.LE_AUDIO_BROADCAST) {
-                    if (di.mDeviceCodecFormat != codec) {
+                    if (codecChanged) {
                         di.mDeviceCodecFormat = codec;
                         mConnectedDevices.replace(key, di);
-                        codecChange = true;
                         final int res = mAudioSystem.handleDeviceConfigChange(
                                 btInfo.mAudioSystemDevice, address,
                                 BtHelper.getName(btDevice), codec);
@@ -947,7 +946,7 @@ public class AudioDeviceInventory {
                         }
                     }
                 }
-                if (!codecChange) {
+                if (!codecChanged) {
                     updateBluetoothPreferredModes_l(btDevice /*connectedDevice*/);
                 }
             }

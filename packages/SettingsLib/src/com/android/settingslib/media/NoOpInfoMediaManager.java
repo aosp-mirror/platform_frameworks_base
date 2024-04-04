@@ -63,12 +63,22 @@ import java.util.List;
     }
 
     @Override
-    public void stopScan() {
+    protected void startScanOnRouter() {
         // Do nothing.
     }
 
     @Override
-    protected void startScanOnRouter() {
+    protected void registerRouter() {
+        // Do nothing.
+    }
+
+    @Override
+    protected void stopScanOnRouter() {
+        // Do nothing.
+    }
+
+    @Override
+    protected void unregisterRouter() {
         // Do nothing.
     }
 

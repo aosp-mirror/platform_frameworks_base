@@ -1,4 +1,5 @@
 package: "com.android.systemui"
+container: "system"
 
 flag {
     name: "example_flag"
@@ -22,6 +23,13 @@ flag {
    metadata {
         purpose: PURPOSE_BUGFIX
    }
+}
+
+flag {
+    name: "notification_heads_up_cycling"
+    namespace: "systemui"
+    description: "Heads-up notification cycling animation for the Notification Avalanche feature."
+    bug: "316404716"
 }
 
 flag {

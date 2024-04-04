@@ -410,13 +410,6 @@ object Flags {
     val CLIPBOARD_SHARED_TRANSITIONS =
             unreleasedFlag("clipboard_shared_transitions", teamfood = true)
 
-    /**
-     * Whether the compose bouncer is enabled. This ensures ProGuard can
-     * remove unused code from our APK at compile time.
-     */
-    // TODO(b/280877228): Tracking Bug
-    @JvmField val COMPOSE_BOUNCER_ENABLED = false
-
     // 1900
     @JvmField val NOTE_TASKS = releasedFlag("keycode_flag")
 

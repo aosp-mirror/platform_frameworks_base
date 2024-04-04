@@ -28,10 +28,14 @@ import android.os.ParcelFileDescriptor
 import android.os.UserHandle
 import android.util.Log
 import com.android.app.tracing.traceSection
+import com.android.systemui.Flags.communalHub
+import com.android.systemui.backup.BackupHelper.Companion.ACTION_RESTORE_FINISHED
+import com.android.systemui.communal.domain.backup.CommunalPrefsBackupHelper
 import com.android.systemui.controls.controller.AuxiliaryPersistenceWrapper
 import com.android.systemui.controls.controller.ControlsFavoritePersistenceWrapper
 import com.android.systemui.keyguard.domain.backup.KeyguardQuickAffordanceBackupHelper
 import com.android.systemui.people.widget.PeopleBackupHelper
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserFileManagerImpl
 
 /**
@@ -53,6 +57,8 @@ open class BackupHelper : BackupAgentHelper() {
         private const val PEOPLE_TILES_BACKUP_KEY = "systemui.people.shared_preferences"
         private const val KEYGUARD_QUICK_AFFORDANCES_BACKUP_KEY =
             "systemui.keyguard.quickaffordance.shared_preferences"
+        private const val COMMUNAL_PREFS_BACKUP_KEY =
+            "systemui.communal.shared_preferences"
         val controlsDataLock = Any()
         const val ACTION_RESTORE_FINISHED = "com.android.systemui.backup.RESTORE_FINISHED"
         const val PERMISSION_SELF = "com.android.systemui.permission.SELF"
@@ -75,6 +81,15 @@ open class BackupHelper : BackupAgentHelper() {
                 userId = userHandle.identifier,
             ),
         )
+        if (communalEnabled()) {
+            addHelper(
+                COMMUNAL_PREFS_BACKUP_KEY,
+                CommunalPrefsBackupHelper(
+                    context = this,
+                    userId = userHandle.identifier,
+                )
+            )
+        }
     }
 
     override fun onRestoreFinished() {
@@ -98,6 +113,10 @@ open class BackupHelper : BackupAgentHelper() {
         NoOverwriteFileBackupHelper(controlsDataLock, this, controlsMap).also {
             addHelper(NO_OVERWRITE_FILES_BACKUP_KEY, it)
         }
+    }
+
+    private fun communalEnabled(): Boolean {
+        return resources.getBoolean(R.bool.config_communalServiceEnabled) && communalHub()
     }
 
     /**

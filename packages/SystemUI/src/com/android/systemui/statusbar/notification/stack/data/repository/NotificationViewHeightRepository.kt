@@ -35,7 +35,7 @@ class NotificationViewHeightRepository @Inject constructor() {
     val stackHeight = MutableStateFlow(0f)
 
     /** The height in px of the current heads up notification. */
-    val activeHeadsUpRowHeight = MutableStateFlow(0f)
+    val headsUpHeight = MutableStateFlow(0f)
 
     /**
      * The amount in px that the notification stack should scroll due to internal expansion. This

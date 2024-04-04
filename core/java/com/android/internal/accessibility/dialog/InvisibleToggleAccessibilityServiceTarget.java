@@ -16,17 +16,11 @@
 
 package com.android.internal.accessibility.dialog;
 
-import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
-import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
-import static com.android.internal.accessibility.util.AccessibilityUtils.setAccessibilityServiceState;
-import static com.android.internal.accessibility.util.ShortcutUtils.isComponentIdExistingInSettings;
-
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.UserHandle;
-import android.view.accessibility.Flags;
 
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
 import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
@@ -53,31 +47,9 @@ public class InvisibleToggleAccessibilityServiceTarget extends AccessibilityServ
 
     @Override
     public void onCheckedChanged(boolean isChecked) {
+        super.onCheckedChanged(isChecked);
         final ComponentName componentName = ComponentName.unflattenFromString(getId());
-
-        if (Flags.updateAlwaysOnA11yService()) {
-            super.onCheckedChanged(isChecked);
-            ShortcutUtils.updateInvisibleToggleAccessibilityServiceEnableState(
-                    getContext(), Set.of(componentName.flattenToString()), UserHandle.myUserId());
-        } else {
-            if (!isComponentIdExistingInOtherShortcut()) {
-                setAccessibilityServiceState(getContext(), componentName, isChecked);
-            }
-
-            super.onCheckedChanged(isChecked);
-        }
-    }
-
-    private boolean isComponentIdExistingInOtherShortcut() {
-        switch (getShortcutType()) {
-            case SOFTWARE:
-                return isComponentIdExistingInSettings(getContext(), UserShortcutType.HARDWARE,
-                        getId());
-            case HARDWARE:
-                return isComponentIdExistingInSettings(getContext(), UserShortcutType.SOFTWARE,
-                        getId());
-            default:
-                throw new IllegalStateException("Unexpected shortcut type");
-        }
+        ShortcutUtils.updateInvisibleToggleAccessibilityServiceEnableState(
+                getContext(), Set.of(componentName.flattenToString()), UserHandle.myUserId());
     }
 }

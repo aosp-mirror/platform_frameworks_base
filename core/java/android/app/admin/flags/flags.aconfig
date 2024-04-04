@@ -36,13 +36,6 @@ flag {
 }
 
 flag {
-  name: "cross_user_suspension_enabled"
-  namespace: "enterprise"
-  description: "Allow holders of INTERACT_ACROSS_USERS_FULL to suspend apps in different users."
-  bug: "263464464"
-}
-
-flag {
   name: "cross_user_suspension_enabled_ro"
   namespace: "enterprise"
   description: "Allow holders of INTERACT_ACROSS_USERS_FULL to suspend apps in different users."
@@ -208,6 +201,13 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+  name: "dmrh_can_set_app_restriction"
+  namespace: "enterprise"
+  description: "Allow DMRH to set application restrictions (both on the profile and the parent)"
+  bug: "328758346"
 }
 
 flag {

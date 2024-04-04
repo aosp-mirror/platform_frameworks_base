@@ -60,16 +60,17 @@ import libcore.io.IoUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFileAttributes;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -165,8 +166,8 @@ final class SettingsState {
 
     private static final String STORAGE_MIGRATION_FLAG =
             "core_experiments_team_internal/com.android.providers.settings.storage_test_mission_1";
-    private static final String STORAGE_MIGRATION_LOG =
-            "/metadata/aconfig/flags/storage_migration.log";
+    private static final String STORAGE_MIGRATION_MARKER_FILE =
+            "/metadata/aconfig/storage_test_mission_1";
 
     /**
      * This tag is applied to all aconfig default value-loaded flags.
@@ -1126,7 +1127,7 @@ final class SettingsState {
                     Slog.i(LOG_TAG, "[PERSIST END]");
                 }
             } catch (Throwable t) {
-                Slog.wtf(LOG_TAG, "Failed to write settings, restoring old file", t);
+                Slog.e(LOG_TAG, "Failed to write settings, restoring old file", t);
                 if (t instanceof IOException) {
                     if (t.getMessage().contains("Couldn't create directory")) {
                         if (DEBUG) {
@@ -1467,16 +1468,29 @@ final class SettingsState {
                     }
                 }
 
-                if (name != null && name.equals(STORAGE_MIGRATION_FLAG) && value.equals("true")) {
-                    File file = new File(STORAGE_MIGRATION_LOG);
-                    if (!file.exists()) {
-                        try (BufferedWriter writer =
-                                new BufferedWriter(new FileWriter(STORAGE_MIGRATION_LOG))) {
-                            final long timestamp = System.currentTimeMillis();
-                            String entry = String.format("%d | Log init", timestamp);
-                            writer.write(entry);
-                        } catch (IOException e) {
-                            Slog.e(LOG_TAG, "failed to write storage migration file", e);
+                if (isConfigSettingsKey(mKey) && name != null
+                        && name.equals(STORAGE_MIGRATION_FLAG)) {
+                    if (value.equals("true")) {
+                        Path path = Paths.get(STORAGE_MIGRATION_MARKER_FILE);
+                        if (!Files.exists(path)) {
+                            Files.createFile(path);
+                        }
+
+                        Set<PosixFilePermission> perms =
+                                Files.readAttributes(path, PosixFileAttributes.class).permissions();
+                        perms.add(PosixFilePermission.OWNER_WRITE);
+                        perms.add(PosixFilePermission.OWNER_READ);
+                        perms.add(PosixFilePermission.GROUP_READ);
+                        perms.add(PosixFilePermission.OTHERS_READ);
+                        try {
+                            Files.setPosixFilePermissions(path, perms);
+                        } catch (Exception e) {
+                            Slog.e(LOG_TAG, "failed to set permissions on migration marker", e);
+                        }
+                    } else {
+                        java.nio.file.Path path = Paths.get(STORAGE_MIGRATION_MARKER_FILE);
+                        if (Files.exists(path)) {
+                            Files.delete(path);
                         }
                     }
                 }

@@ -55,6 +55,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.server.EventLogTags;
 import com.android.server.display.brightness.BrightnessEvent;
 import com.android.server.display.brightness.clamper.BrightnessClamperController;
+import com.android.server.display.config.HysteresisLevels;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -673,14 +674,10 @@ public class AutomaticBrightnessController {
         }
 
         pw.println();
-        pw.println("  mAmbientBrightnessThresholds=");
-        mAmbientBrightnessThresholds.dump(pw);
-        pw.println("  mScreenBrightnessThresholds=");
-        mScreenBrightnessThresholds.dump(pw);
-        pw.println("  mScreenBrightnessThresholdsIdle=");
-        mScreenBrightnessThresholdsIdle.dump(pw);
-        pw.println("  mAmbientBrightnessThresholdsIdle=");
-        mAmbientBrightnessThresholdsIdle.dump(pw);
+        pw.println("  mAmbientBrightnessThresholds=" + mAmbientBrightnessThresholds);
+        pw.println("  mAmbientBrightnessThresholdsIdle=" + mAmbientBrightnessThresholdsIdle);
+        pw.println("  mScreenBrightnessThresholds=" + mScreenBrightnessThresholds);
+        pw.println("  mScreenBrightnessThresholdsIdle=" + mScreenBrightnessThresholdsIdle);
     }
 
     public float[] getLastSensorValues() {

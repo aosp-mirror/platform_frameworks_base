@@ -34,7 +34,7 @@ java_defaults {
 }
 
 android_test {
-    name: "SelinuxFrameworkTests",
+    name: "SelinuxFrameworksTests",
     srcs: [
         "src/**/*.java",
     ],

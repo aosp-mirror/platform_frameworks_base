@@ -425,7 +425,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     boolean shouldResizeListenerHandleEvent(MotionEvent e, Point offset) {
-        return mDragResizeListener.shouldHandleEvent(e, offset);
+        return mDragResizeListener != null && mDragResizeListener.shouldHandleEvent(e, offset);
     }
 
     boolean isHandlingDragResize() {
@@ -795,7 +795,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     private Region getGlobalExclusionRegion() {
         Region exclusionRegion;
-        if (mTaskInfo.isResizeable) {
+        if (mDragResizeListener != null && mTaskInfo.isResizeable) {
             exclusionRegion = mDragResizeListener.getCornersRegion();
         } else {
             exclusionRegion = new Region();

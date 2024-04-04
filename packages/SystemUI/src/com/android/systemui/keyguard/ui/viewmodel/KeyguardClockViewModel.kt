@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.content.Context
 import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.helper.widget.Layer
+import com.android.internal.policy.SystemBarUtils
 import com.android.keyguard.KeyguardClockSwitch.LARGE
 import com.android.keyguard.KeyguardClockSwitch.SMALL
 import com.android.systemui.customization.R as customizationR
@@ -165,7 +166,7 @@ constructor(
 
     companion object {
         fun getLargeClockTopMargin(context: Context): Int {
-            return context.resources.getDimensionPixelSize(R.dimen.status_bar_height) +
+            return SystemBarUtils.getStatusBarHeight(context) +
                 context.resources.getDimensionPixelSize(
                     customizationR.dimen.small_clock_padding_top
                 ) +

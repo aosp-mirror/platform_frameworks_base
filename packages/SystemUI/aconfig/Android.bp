@@ -36,6 +36,7 @@ package {
 aconfig_declarations {
     name: "com_android_systemui_flags",
     package: "com.android.systemui",
+    container: "system",
     srcs: [
         "*.aconfig",
     ],

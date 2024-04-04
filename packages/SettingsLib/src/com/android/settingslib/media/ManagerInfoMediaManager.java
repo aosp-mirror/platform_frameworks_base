@@ -62,19 +62,27 @@ public class ManagerInfoMediaManager extends InfoMediaManager {
     @Override
     protected void startScanOnRouter() {
         if (!mIsScanning) {
-            mRouterManager.registerCallback(mExecutor, mMediaRouterCallback);
             mRouterManager.registerScanRequest();
             mIsScanning = true;
         }
     }
 
     @Override
-    public void stopScan() {
+    protected void registerRouter() {
+        mRouterManager.registerCallback(mExecutor, mMediaRouterCallback);
+    }
+
+    @Override
+    protected void stopScanOnRouter() {
         if (mIsScanning) {
-            mRouterManager.unregisterCallback(mMediaRouterCallback);
             mRouterManager.unregisterScanRequest();
             mIsScanning = false;
         }
+    }
+
+    @Override
+    protected void unregisterRouter() {
+        mRouterManager.unregisterCallback(mMediaRouterCallback);
     }
 
     @Override

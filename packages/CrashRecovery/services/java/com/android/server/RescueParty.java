@@ -31,6 +31,7 @@ import android.content.pm.VersionedPackage;
 import android.crashrecovery.flags.Flags;
 import android.os.Build;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.PowerManager;
 import android.os.RecoverySystem;
 import android.os.SystemClock;
@@ -43,11 +44,10 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
-import android.utils.ArrayUtils;
-import android.utils.FileUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.PackageWatchdog.FailureReasons;
 import com.android.server.PackageWatchdog.PackageHealthObserver;
 import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
@@ -139,7 +139,7 @@ public class RescueParty {
     static final String NAMESPACE_TO_PACKAGE_MAPPING_FLAG =
             "namespace_to_package_mapping";
     @VisibleForTesting
-    static final long DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN = 10;
+    static final long DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN = 1440;
 
     private static final String NAME = "rescue-party-observer";
 

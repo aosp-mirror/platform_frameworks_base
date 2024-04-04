@@ -52,6 +52,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 
 import java.lang.annotation.Retention;
@@ -70,7 +71,8 @@ import javax.crypto.Mac;
 public class BiometricPrompt implements BiometricAuthenticator, BiometricConstants {
 
     private static final String TAG = "BiometricPrompt";
-    private static final int MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER = 30;
+    @VisibleForTesting
+    static final int MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER = 30;
 
     /**
      * Error/help message will show for this amount of time.
@@ -223,8 +225,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          *
          * @param logoDescription The logo description text that will be shown on the prompt.
          * @return This builder.
-         * @throws IllegalStateException If logo description is null or exceeds certain character
-         *                               limit.
+         * @throws IllegalArgumentException If logo description is null or exceeds certain character
+         *                                  limit.
          */
         @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
         @RequiresPermission(SET_BIOMETRIC_DIALOG_ADVANCED)
@@ -232,14 +234,13 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         public BiometricPrompt.Builder setLogoDescription(@NonNull String logoDescription) {
             if (logoDescription == null
                     || logoDescription.length() > MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER) {
-                throw new IllegalStateException(
+                throw new IllegalArgumentException(
                         "Logo description passed in can not be null or exceed "
                                 + MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER + " character number.");
             }
             mPromptInfo.setLogoDescription(logoDescription);
             return this;
         }
-
 
         /**
          * Required: Sets the title that will be shown on the prompt.

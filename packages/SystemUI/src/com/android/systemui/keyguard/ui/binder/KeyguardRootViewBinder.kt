@@ -36,7 +36,6 @@ import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launch
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
-import com.android.keyguard.KeyguardClockSwitch.MISSING_CLOCK_ID
 import com.android.systemui.Flags.newAodTransition
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
@@ -47,6 +46,7 @@ import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
+import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
@@ -55,7 +55,6 @@ import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessage
 import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
-import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.CrossFadeHelper
@@ -69,7 +68,6 @@ import com.android.systemui.util.ui.AnimatedValue
 import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
-import javax.inject.Provider
 import kotlin.math.min
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
@@ -93,7 +91,7 @@ object KeyguardRootViewBinder {
         chipbarCoordinator: ChipbarCoordinator,
         screenOffAnimationController: ScreenOffAnimationController,
         shadeInteractor: ShadeInteractor,
-        clockControllerProvider: Provider<ClockController>?,
+        clockInteractor: KeyguardClockInteractor,
         interactionJankMonitor: InteractionJankMonitor?,
         deviceEntryHapticsInteractor: DeviceEntryHapticsInteractor?,
         vibratorHelper: VibratorHelper?,
@@ -281,14 +279,11 @@ object KeyguardRootViewBinder {
                                 viewModel.goneToAodTransition.collect {
                                     when (it.transitionState) {
                                         TransitionState.STARTED -> {
-                                            val clockId =
-                                                clockControllerProvider?.get()?.config?.id
-                                                    ?: MISSING_CLOCK_ID
+                                            val clockId = clockInteractor.renderedClockId
                                             val builder =
                                                 InteractionJankMonitor.Configuration.Builder
                                                     .withView(CUJ_SCREEN_OFF_SHOW_AOD, view)
                                                     .setTag(clockId)
-
                                             jankMonitor.begin(builder)
                                         }
                                         TransitionState.CANCELED ->
@@ -344,12 +339,6 @@ object KeyguardRootViewBinder {
                     }
                 }
             }
-
-        if (!MigrateClocksToBlueprint.isEnabled) {
-            burnInParams.update { current ->
-                current.copy(clockControllerProvider = clockControllerProvider)
-            }
-        }
 
         if (MigrateClocksToBlueprint.isEnabled) {
             burnInParams.update { current ->

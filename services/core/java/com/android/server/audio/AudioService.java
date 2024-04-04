@@ -47,6 +47,7 @@ import static com.android.media.audio.Flags.alarmMinVolumeZero;
 import static com.android.media.audio.Flags.disablePrescaleAbsoluteVolume;
 import static com.android.media.audio.Flags.ringerModeAffectsAlarm;
 import static com.android.media.audio.Flags.setStreamVolumeOrder;
+import static com.android.media.audio.Flags.vgsVssSyncMuteOrder;
 import static com.android.server.audio.SoundDoseHelper.ACTION_CHECK_MUSIC_ACTIVE;
 import static com.android.server.utils.EventLogger.Event.ALOGE;
 import static com.android.server.utils.EventLogger.Event.ALOGI;
@@ -4544,6 +4545,8 @@ public class AudioService extends IAudioService.Stub
                 + setStreamVolumeOrder());
         pw.println("\tandroid.media.audio.roForegroundAudioControl:"
                 + roForegroundAudioControl());
+        pw.println("\tcom.android.media.audio.vgsVssSyncMuteOrder:"
+                + vgsVssSyncMuteOrder());
     }
 
     private void dumpAudioMode(PrintWriter pw) {
@@ -8317,13 +8320,23 @@ public class AudioService extends IAudioService.Stub
                                         synced = true;
                                         continue;
                                     }
+                                    if (vgsVssSyncMuteOrder()) {
+                                        if ((isMuted() != streamMuted) && isVssMuteBijective(
+                                                stream)) {
+                                            mStreamStates[stream].mute(isMuted(),
+                                                    "VGS.applyAllVolumes#1");
+                                        }
+                                    }
                                     if (indexForStream != index) {
                                         mStreamStates[stream].setIndex(index * 10, device, caller,
                                                 true /*hasModifyAudioSettings*/);
                                     }
-                                    if ((isMuted() != streamMuted) && isVssMuteBijective(stream)) {
-                                        mStreamStates[stream].mute(isMuted(),
-                                                "VGS.applyAllVolumes#1");
+                                    if (!vgsVssSyncMuteOrder()) {
+                                        if ((isMuted() != streamMuted) && isVssMuteBijective(
+                                                stream)) {
+                                            mStreamStates[stream].mute(isMuted(),
+                                                    "VGS.applyAllVolumes#1");
+                                        }
                                     }
                                 }
                             }

@@ -22,7 +22,7 @@ android_library {
         "guava",
 
         "WifiTrackerLibRes",
-        "iconloader",
+        "//frameworks/libs/systemui:iconloader",
         "setupdesign",
 
         "SettingsLibActionBarShadow",
@@ -88,6 +88,7 @@ java_defaults {
 aconfig_declarations {
     name: "settingslib_media_flags",
     package: "com.android.settingslib.media.flags",
+    container: "system",
     srcs: [
         "aconfig/settingslib_media_flag_declarations.aconfig",
     ],
@@ -101,6 +102,7 @@ java_aconfig_library {
 aconfig_declarations {
     name: "settingslib_flags",
     package: "com.android.settingslib.flags",
+    container: "system",
     srcs: [
         "aconfig/settingslib.aconfig",
     ],

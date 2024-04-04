@@ -403,6 +403,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             if (DeviceEntryUdfpsRefactor.isEnabled()) {
                 if (mOverlay != null && mOverlay.getRequestReason() == REASON_AUTH_KEYGUARD) {
                     mOverlay.updateOverlayParams(mOverlayParams);
+                } else {
+                    redrawOverlay();
                 }
             } else {
                 final boolean wasShowingAlternateBouncer =

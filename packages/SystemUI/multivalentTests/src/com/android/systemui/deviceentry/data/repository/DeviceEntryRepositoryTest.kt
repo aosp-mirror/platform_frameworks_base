@@ -5,15 +5,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.phone.KeyguardBypassController
-import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
-import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
@@ -25,7 +21,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -37,12 +32,10 @@ class DeviceEntryRepositoryTest : SysuiTestCase() {
 
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
     @Mock private lateinit var keyguardBypassController: KeyguardBypassController
-    @Mock private lateinit var keyguardStateController: KeyguardStateController
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val userRepository = FakeUserRepository()
-    private val keyguardRepository = FakeKeyguardRepository()
 
     private lateinit var underTest: DeviceEntryRepository
 
@@ -59,35 +52,9 @@ class DeviceEntryRepositoryTest : SysuiTestCase() {
                 userRepository = userRepository,
                 lockPatternUtils = lockPatternUtils,
                 keyguardBypassController = keyguardBypassController,
-                keyguardStateController = keyguardStateController,
-                keyguardRepository = keyguardRepository,
             )
         testScope.runCurrent()
     }
-
-    @Test
-    fun isUnlocked() =
-        testScope.runTest {
-            whenever(keyguardStateController.isUnlocked).thenReturn(false)
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
-
-            runCurrent()
-            assertThat(isUnlocked).isFalse()
-
-            val captor = argumentCaptor<KeyguardStateController.Callback>()
-            verify(keyguardStateController, Mockito.atLeastOnce()).addCallback(captor.capture())
-
-            whenever(keyguardStateController.isUnlocked).thenReturn(true)
-            captor.value.onUnlockedChanged()
-            runCurrent()
-            assertThat(isUnlocked).isTrue()
-
-            whenever(keyguardStateController.isUnlocked).thenReturn(false)
-            captor.value.onKeyguardShowingChanged()
-            runCurrent()
-            assertThat(isUnlocked).isFalse()
-        }
-
     @Test
     fun isLockscreenEnabled() =
         testScope.runTest {
@@ -99,17 +66,6 @@ class DeviceEntryRepositoryTest : SysuiTestCase() {
 
             userRepository.setSelectedUserInfo(USER_INFOS[1])
             assertThat(underTest.isLockscreenEnabled()).isFalse()
-        }
-
-    @Test
-    fun reportSuccessfulAuthentication_updatesIsUnlocked() =
-        testScope.runTest {
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
-            assertThat(isUnlocked).isFalse()
-
-            underTest.reportSuccessfulAuthentication()
-
-            assertThat(isUnlocked).isTrue()
         }
 
     @Test

@@ -34,6 +34,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.DisplayId
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.model.SceneContainerPlugin
 import com.android.systemui.model.SysUiState
@@ -51,6 +52,7 @@ import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNoti
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisioningInteractor
 import com.android.systemui.util.asIndenting
+import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.printSection
 import com.android.systemui.util.println
 import dagger.Lazy
@@ -83,6 +85,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     private val sceneInteractor: SceneInteractor,
     private val deviceEntryInteractor: DeviceEntryInteractor,
+    private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
     private val bouncerInteractor: BouncerInteractor,
     private val keyguardInteractor: KeyguardInteractor,
     private val flags: SceneContainerFlags,
@@ -194,39 +197,41 @@ constructor(
             }
         }
         applicationScope.launch {
-            simBouncerInteractor.get().isAnySimSecure.collect { isAnySimLocked ->
-                val canSwipeToEnter = deviceEntryInteractor.canSwipeToEnter.value
-                val isUnlocked = deviceEntryInteractor.isUnlocked.value
-
-                when {
-                    isAnySimLocked -> {
-                        switchToScene(
-                            targetSceneKey = Scenes.Bouncer,
-                            loggingReason = "Need to authenticate locked SIM card."
-                        )
-                    }
-                    isUnlocked && canSwipeToEnter == false -> {
-                        switchToScene(
-                            targetSceneKey = Scenes.Gone,
-                            loggingReason =
-                                "All SIM cards unlocked and device already" +
-                                    " unlocked and lockscreen doesn't require a swipe to dismiss."
-                        )
-                    }
-                    else -> {
-                        switchToScene(
-                            targetSceneKey = Scenes.Lockscreen,
-                            loggingReason =
-                                "All SIM cards unlocked and device still locked" +
-                                    " or lockscreen still requires a swipe to dismiss."
-                        )
+            simBouncerInteractor
+                .get()
+                .isAnySimSecure
+                .sample(deviceUnlockedInteractor.deviceUnlockStatus, ::Pair)
+                .collect { (isAnySimLocked, unlockStatus) ->
+                    when {
+                        isAnySimLocked -> {
+                            switchToScene(
+                                targetSceneKey = Scenes.Bouncer,
+                                loggingReason = "Need to authenticate locked SIM card."
+                            )
+                        }
+                        unlockStatus.isUnlocked &&
+                            deviceEntryInteractor.canSwipeToEnter.value == false -> {
+                            switchToScene(
+                                targetSceneKey = Scenes.Gone,
+                                loggingReason =
+                                    "All SIM cards unlocked and device already unlocked and " +
+                                        "lockscreen doesn't require a swipe to dismiss."
+                            )
+                        }
+                        else -> {
+                            switchToScene(
+                                targetSceneKey = Scenes.Lockscreen,
+                                loggingReason =
+                                    "All SIM cards unlocked and device still locked" +
+                                        " or lockscreen still requires a swipe to dismiss."
+                            )
+                        }
                     }
                 }
-            }
         }
         applicationScope.launch {
-            deviceEntryInteractor.isUnlocked
-                .mapNotNull { isUnlocked ->
+            deviceUnlockedInteractor.deviceUnlockStatus
+                .mapNotNull { deviceUnlockStatus ->
                     val renderedScenes =
                         when (val transitionState = sceneInteractor.transitionState.value) {
                             is ObservableTransitionState.Idle -> setOf(transitionState.scene)
@@ -238,7 +243,7 @@ constructor(
                         }
                     val isOnLockscreen = renderedScenes.contains(Scenes.Lockscreen)
                     val isOnBouncer = renderedScenes.contains(Scenes.Bouncer)
-                    if (!isUnlocked) {
+                    if (!deviceUnlockStatus.isUnlocked) {
                         return@mapNotNull if (isOnLockscreen || isOnBouncer) {
                             // Already on lockscreen or bouncer, no need to change scenes.
                             null
@@ -250,8 +255,6 @@ constructor(
                         }
                     }
 
-                    val isBypassEnabled = deviceEntryInteractor.isBypassEnabled.value
-                    val canSwipeToEnter = deviceEntryInteractor.canSwipeToEnter.value
                     when {
                         isOnBouncer ->
                             // When the device becomes unlocked in Bouncer, go to Gone.
@@ -266,14 +269,12 @@ constructor(
                             //    when the unlock state changes indicates this is an active
                             //    authentication attempt.
                             when {
-                                isBypassEnabled ->
+                                deviceUnlockStatus.deviceUnlockSource?.dismissesLockscreen ==
+                                    true ->
                                     Scenes.Gone to
-                                        "device has been unlocked on lockscreen with bypass" +
-                                            " enabled"
-                                canSwipeToEnter == false ->
-                                    Scenes.Gone to
-                                        "device has been unlocked on lockscreen using an active" +
-                                            " authentication mechanism"
+                                        "device has been unlocked on lockscreen with bypass " +
+                                            "enabled or using an active authentication " +
+                                            "mechanism: ${deviceUnlockStatus.deviceUnlockSource}"
                                 else -> null
                             }
                         // Not on lockscreen or bouncer, so remain in the current scene.
@@ -297,7 +298,7 @@ constructor(
                     )
                 } else {
                     val canSwipeToEnter = deviceEntryInteractor.canSwipeToEnter.value
-                    val isUnlocked = deviceEntryInteractor.isUnlocked.value
+                    val isUnlocked = deviceUnlockedInteractor.deviceUnlockStatus.value.isUnlocked
                     if (isUnlocked && canSwipeToEnter == false) {
                         val isTransitioningToLockscreen =
                             sceneInteractor.transitioningTo.value == Scenes.Lockscreen
@@ -429,8 +430,8 @@ constructor(
     /** Keeps the interaction state of [CentralSurfaces] up-to-date. */
     private fun hydrateInteractionState() {
         applicationScope.launch {
-            deviceEntryInteractor.isUnlocked
-                .map { !it }
+            deviceUnlockedInteractor.deviceUnlockStatus
+                .map { !it.isUnlocked }
                 .flatMapLatest { isDeviceLocked ->
                     if (isDeviceLocked) {
                         sceneInteractor.transitionState

@@ -28,7 +28,6 @@ import com.android.systemui.bouncer.data.repository.fakeSimBouncerRepository
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
@@ -387,7 +386,6 @@ class PinBouncerViewModelTest : SysuiTestCase() {
 
     private fun TestScope.lockDeviceAndOpenPinBouncer() {
         kosmos.fakeAuthenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-        kosmos.fakeDeviceEntryRepository.setUnlocked(false)
         switchToScene(Scenes.Bouncer)
     }
 

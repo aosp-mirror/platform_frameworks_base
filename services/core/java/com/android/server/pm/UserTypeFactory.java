@@ -327,7 +327,8 @@ public final class UserTypeFactory {
                                 UserProperties.CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT)
                         .setProfileApiVisibility(
                                 UserProperties.PROFILE_API_VISIBILITY_HIDDEN)
-                        .setItemsRestrictedOnHomeScreen(true));
+                        .setItemsRestrictedOnHomeScreen(true)
+                        .setUpdateCrossProfileIntentFiltersOnOTA(true));
     }
 
     /**

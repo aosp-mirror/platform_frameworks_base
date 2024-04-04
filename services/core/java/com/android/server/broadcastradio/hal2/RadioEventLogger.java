@@ -19,7 +19,8 @@ package com.android.server.broadcastradio.hal2;
 import android.util.IndentingPrintWriter;
 import android.util.LocalLog;
 import android.util.Log;
-import android.util.Slog;
+
+import com.android.server.utils.Slogf;
 
 final class RadioEventLogger {
     private final String mTag;
@@ -30,11 +31,12 @@ final class RadioEventLogger {
         mEventLogger = new LocalLog(loggerQueueSize);
     }
 
+    @SuppressWarnings("AnnotateFormatMethod")
     void logRadioEvent(String logFormat, Object... args) {
         String log = String.format(logFormat, args);
         mEventLogger.log(log);
         if (Log.isLoggable(mTag, Log.DEBUG)) {
-            Slog.d(mTag, log);
+            Slogf.d(mTag, log);
         }
     }
 

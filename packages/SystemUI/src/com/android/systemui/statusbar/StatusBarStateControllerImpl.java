@@ -46,9 +46,9 @@ import com.android.keyguard.KeyguardClockSwitch;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor;
+import com.android.systemui.deviceentry.shared.model.DeviceUnlockStatus;
 import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor;
-import com.android.systemui.plugins.clocks.ClockController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
@@ -199,7 +199,7 @@ public class StatusBarStateControllerImpl implements
         if (SceneContainerFlag.isEnabled()) {
             mJavaAdapter.alwaysCollectFlow(
                     combineFlows(
-                        mDeviceUnlockedInteractorLazy.get().isDeviceUnlocked(),
+                        mDeviceUnlockedInteractorLazy.get().getDeviceUnlockStatus(),
                         mSceneInteractorLazy.get().getCurrentScene(),
                         this::calculateStateFromSceneFramework),
                     this::onStatusBarStateChanged);
@@ -468,13 +468,7 @@ public class StatusBarStateControllerImpl implements
     /** Returns the id of the currently rendering clock */
     public String getClockId() {
         if (MigrateClocksToBlueprint.isEnabled()) {
-            ClockController clock = mKeyguardClockInteractorLazy.get()
-                    .getCurrentClock().getValue();
-            if (clock == null) {
-                Log.e(TAG, "No clock is available");
-                return KeyguardClockSwitch.MISSING_CLOCK_ID;
-            }
-            return clock.getConfig().getId();
+            return mKeyguardClockInteractorLazy.get().getRenderedClockId();
         }
 
         if (mClockSwitchView == null) {
@@ -653,11 +647,11 @@ public class StatusBarStateControllerImpl implements
     }
 
     private int calculateStateFromSceneFramework(
-            boolean isDeviceUnlocked,
+            DeviceUnlockStatus deviceUnlockStatus,
             SceneKey currentScene) {
         SceneContainerFlag.isUnexpectedlyInLegacyMode();
 
-        if (isDeviceUnlocked) {
+        if (deviceUnlockStatus.isUnlocked()) {
             return StatusBarState.SHADE;
         } else {
             return Preconditions.checkNotNull(sStatusBarStateByLockedSceneKey.get(currentScene));

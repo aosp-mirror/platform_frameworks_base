@@ -113,6 +113,9 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
 import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation;
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor;
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds;
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape;
+import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
@@ -135,6 +138,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
@@ -143,7 +147,9 @@ import java.util.function.Consumer;
 /**
  * A layout which handles a dynamic amount of notifications and presents them in a scrollable stack.
  */
-public class NotificationStackScrollLayout extends ViewGroup implements Dumpable {
+public class NotificationStackScrollLayout
+        extends ViewGroup
+        implements Dumpable, NotificationScrollView {
 
     public static final float BACKGROUND_ALPHA_DIMMED = 0.7f;
     private static final String TAG = "StackScroller";
@@ -218,6 +224,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     private final StackScrollAlgorithm mStackScrollAlgorithm;
     private final AmbientState mAmbientState;
+    private final ScrollViewFields mScrollViewFields = new ScrollViewFields();
 
     private final GroupMembershipManager mGroupMembershipManager;
     private final GroupExpansionManager mGroupExpansionManager;
@@ -230,7 +237,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private final ArrayList<View> mSwipedOutViews = new ArrayList<>();
     private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
     private final StackStateAnimator mStateAnimator;
-    private boolean mAnimationsEnabled;
+    // TODO(b/332732878): call setAnimationsEnabled with scene container enabled, then remove this
+    private boolean mAnimationsEnabled = SceneContainerFlag.isEnabled();
     private boolean mChangePositionInProgress;
     private boolean mChildTransferInProgress;
 
@@ -589,7 +597,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         @Override
         public boolean isScrolledToTop() {
             if (SceneContainerFlag.isEnabled()) {
-                return mController.isPlaceholderScrolledToTop();
+                return mScrollViewFields.isScrolledToTop();
             } else {
                 return mOwnScrollY == 0;
             }
@@ -854,7 +862,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         drawDebugInfo(canvas, y, Color.MAGENTA,
                 /* label= */ "mContentHeight = " + y);
 
-        drawDebugInfo(canvas, mRoundedRectClippingBottom, Color.DKGRAY,
+        y = mRoundedRectClippingBottom;
+        drawDebugInfo(canvas, y, Color.DKGRAY,
                 /* label= */ "mRoundedRectClippingBottom) = " + y);
     }
 
@@ -1130,6 +1139,48 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
+    @Override
+    public View asView() {
+        return this;
+    }
+
+    @Override
+    public void setScrolledToTop(boolean scrolledToTop) {
+        mScrollViewFields.setScrolledToTop(scrolledToTop);
+    }
+
+    @Override
+    public void setStackTop(float stackTop) {
+        mScrollViewFields.setStackTop(stackTop);
+        // TODO(b/332574413): replace the following with using stackTop
+        updateTopPadding(stackTop, isAddOrRemoveAnimationPending());
+    }
+
+    @Override
+    public void setStackBottom(float stackBottom) {
+        mScrollViewFields.setStackBottom(stackBottom);
+    }
+
+    @Override
+    public void setHeadsUpTop(float headsUpTop) {
+        mScrollViewFields.setHeadsUpTop(headsUpTop);
+    }
+
+    @Override
+    public void setSyntheticScrollConsumer(@Nullable Consumer<Float> consumer) {
+        mScrollViewFields.setSyntheticScrollConsumer(consumer);
+    }
+
+    @Override
+    public void setStackHeightConsumer(@Nullable Consumer<Float> consumer) {
+        mScrollViewFields.setStackHeightConsumer(consumer);
+    }
+
+    @Override
+    public void setHeadsUpHeightConsumer(@Nullable Consumer<Float> consumer) {
+        mScrollViewFields.setHeadsUpHeightConsumer(consumer);
+    }
+
     /**
      * @param listener to be notified after the location of Notification children might have
      *                 changed.
@@ -1378,6 +1429,31 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     void setOnStackYChanged(Consumer<Boolean> onStackYChanged) {
         mOnStackYChanged = onStackYChanged;
+    }
+
+    @Override
+    public void setExpandFraction(float expandFraction) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        final float oldFraction = mAmbientState.getExpansionFraction();
+        final boolean wasExpanding = oldFraction != 0f && oldFraction != 1f;
+        final boolean nowExpanding = expandFraction != 0f && expandFraction != 1f;
+
+        // need to enter 'expanding' state before handling the new expand fraction, and then
+        if (nowExpanding && !wasExpanding) {
+            onExpansionStarted();
+            mController.checkSnoozeLeavebehind();
+        }
+
+        // Update the expand progress between started/stopped events
+        mAmbientState.setExpansionFraction(expandFraction);
+        // TODO(b/332577544): don't convert to height which then converts to the fraction again
+        setExpandedHeight(expandFraction * getHeight());
+
+        // expansion stopped event requires that the expandFraction has already been updated
+        if (!nowExpanding && wasExpanding) {
+            setCheckForLeaveBehind(false);
+            onExpansionStopped();
+        }
     }
 
     /**
@@ -2314,7 +2390,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                         /* notificationStackScrollLayout= */ this, mMaxDisplayedNotifications,
                         shelfIntrinsicHeight);
         mIntrinsicContentHeight = height;
-        mController.setIntrinsicContentHeight(mIntrinsicContentHeight);
+        mScrollViewFields.sendStackHeight(height);
 
         // The topPadding can be bigger than the regular padding when qs is expanded, in that
         // state the maxPanelHeight and the contentHeight should be bigger
@@ -2904,6 +2980,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     public void setAnimationsEnabled(boolean animationsEnabled) {
+        // TODO(b/332732878): remove the initial value of this field once the setter is called
         mAnimationsEnabled = animationsEnabled;
         updateNotificationAnimationStates();
         if (!animationsEnabled) {
@@ -3553,7 +3630,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     protected boolean isInsideQsHeader(MotionEvent ev) {
         if (SceneContainerFlag.isEnabled()) {
-            return ev.getY() < mController.getPlaceholderTop();
+            return ev.getY() < mScrollViewFields.getScrimClippingShape().getBounds().getTop();
         }
 
         mQsHeader.getBoundsOnScreen(mQsHeaderBound);
@@ -4086,7 +4163,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                     // to it so that it can scroll the stack and scrim accordingly.
                     if (SceneContainerFlag.isEnabled()) {
                         float diff = endPosition - layoutEnd;
-                        mController.sendSyntheticScrollToSceneFramework(diff);
+                        mScrollViewFields.sendSyntheticScroll(diff);
                     }
                     setOwnScrollY((int) (mOwnScrollY + endPosition - layoutEnd));
                     mDisallowScrollingInThisMotion = true;
@@ -4969,6 +5046,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                     elapsedRealtime - mLastUpdateSidePaddingElapsedRealtime);
             println(pw, "isSmallLandscapeLockscreenEnabled", mIsSmallLandscapeLockscreenEnabled);
             mNotificationStackSizeCalculator.dump(pw, args);
+            mScrollViewFields.dump(pw);
         });
         pw.println();
         pw.println("Contents:");
@@ -5509,8 +5587,40 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /**
      * Set rounded rect clipping bounds on this view.
      */
+    @Override
+    public void setScrimClippingShape(@Nullable ShadeScrimShape shape) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        if (Objects.equals(mScrollViewFields.getScrimClippingShape(), shape)) return;
+        mScrollViewFields.setScrimClippingShape(shape);
+        mShouldUseRoundedRectClipping = shape != null;
+        mRoundedClipPath.reset();
+        if (shape != null) {
+            ShadeScrimBounds bounds = shape.getBounds();
+            mRoundedRectClippingLeft = (int) bounds.getLeft();
+            mRoundedRectClippingTop = (int) bounds.getTop();
+            mRoundedRectClippingRight = (int) bounds.getRight();
+            mRoundedRectClippingBottom = (int) bounds.getBottom();
+            mBgCornerRadii[0] = shape.getTopRadius();
+            mBgCornerRadii[1] = shape.getTopRadius();
+            mBgCornerRadii[2] = shape.getTopRadius();
+            mBgCornerRadii[3] = shape.getTopRadius();
+            mBgCornerRadii[4] = shape.getBottomRadius();
+            mBgCornerRadii[5] = shape.getBottomRadius();
+            mBgCornerRadii[6] = shape.getBottomRadius();
+            mBgCornerRadii[7] = shape.getBottomRadius();
+            mRoundedClipPath.addRoundRect(
+                    bounds.getLeft(), bounds.getTop(), bounds.getRight(), bounds.getBottom(),
+                    mBgCornerRadii, Path.Direction.CW);
+        }
+        invalidate();
+    }
+
+    /**
+     * Set rounded rect clipping bounds on this view.
+     */
     public void setRoundedClippingBounds(int left, int top, int right, int bottom, int topRadius,
                                          int bottomRadius) {
+        SceneContainerFlag.assertInLegacyMode();
         if (mRoundedRectClippingLeft == left && mRoundedRectClippingRight == right
                 && mRoundedRectClippingBottom == bottom && mRoundedRectClippingTop == top
                 && mBgCornerRadii[0] == topRadius && mBgCornerRadii[5] == bottomRadius) {
@@ -5588,6 +5698,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * Should we use rounded rect clipping
      */
     private void updateUseRoundedRectClipping() {
+        if (SceneContainerFlag.isEnabled()) return;
         // We don't want to clip notifications when QS is expanded, because incoming heads up on
         // the bottom would be clipped otherwise
         boolean qsAllowsClipping = mQsExpansionFraction < 0.5f || mShouldUseSplitNotificationShade;

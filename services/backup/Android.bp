@@ -30,5 +30,6 @@ java_library_static {
 aconfig_declarations {
     name: "backup_flags",
     package: "com.android.server.backup",
+    container: "system",
     srcs: ["flags.aconfig"],
 }

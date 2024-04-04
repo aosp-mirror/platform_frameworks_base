@@ -32,6 +32,7 @@ import android.graphics.Region;
 import android.testing.AndroidTestingRunner;
 import android.util.Pair;
 import android.view.GestureDetector;
+import android.view.IWindowManager;
 import android.view.InputEvent;
 import android.view.MotionEvent;
 
@@ -83,11 +84,14 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
         private final GestureDetector.OnGestureListener mGestureListener;
         private final DisplayHelper mDisplayHelper;
         private final FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
+        private final FakeExecutor mBackgroundExecutor = new FakeExecutor(new FakeSystemClock());
         private final Rect mDisplayBounds = Mockito.mock(Rect.class);
+        private final IWindowManager mIWindowManager;
 
         Environment(Set<DreamTouchHandler> handlers) {
             mLifecycle = Mockito.mock(Lifecycle.class);
             mLifecycleOwner = Mockito.mock(LifecycleOwner.class);
+            mIWindowManager = Mockito.mock(IWindowManager.class);
 
             mInputFactory = Mockito.mock(InputSessionComponent.Factory.class);
             final InputSessionComponent inputComponent = Mockito.mock(InputSessionComponent.class);
@@ -100,8 +104,8 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
             mDisplayHelper = Mockito.mock(DisplayHelper.class);
             when(mDisplayHelper.getMaxBounds(anyInt(), anyInt()))
                     .thenReturn(mDisplayBounds);
-            mMonitor = new DreamOverlayTouchMonitor(mExecutor, mLifecycle, mInputFactory,
-                    mDisplayHelper, handlers);
+            mMonitor = new DreamOverlayTouchMonitor(mExecutor, mBackgroundExecutor,
+                    mLifecycle, mInputFactory, mDisplayHelper, handlers, mIWindowManager, 0);
             mMonitor.init();
 
             final ArgumentCaptor<LifecycleObserver> lifecycleObserverCaptor =
@@ -163,7 +167,8 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
         environment.publishInputEvent(initialEvent);
 
         // Verify display bounds passed into TouchHandler#getTouchInitiationRegion
-        verify(touchHandler).getTouchInitiationRegion(eq(environment.getDisplayBounds()), any());
+        verify(touchHandler).getTouchInitiationRegion(
+                eq(environment.getDisplayBounds()), any(), any());
         final ArgumentCaptor<DreamTouchHandler.TouchSession> touchSessionArgumentCaptor =
                 ArgumentCaptor.forClass(DreamTouchHandler.TouchSession.class);
         verify(touchHandler).onSessionStart(touchSessionArgumentCaptor.capture());
@@ -182,7 +187,7 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
             final Region region = (Region) invocation.getArguments()[1];
             region.set(touchArea);
             return null;
-        }).when(touchHandler).getTouchInitiationRegion(any(), any());
+        }).when(touchHandler).getTouchInitiationRegion(any(), any(), any());
 
         final Environment environment = new Environment(Stream.of(touchHandler)
                 .collect(Collectors.toCollection(HashSet::new)));
@@ -211,7 +216,7 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
             final Region region = (Region) invocation.getArguments()[1];
             region.set(touchArea);
             return null;
-        }).when(touchHandler).getTouchInitiationRegion(any(), any());
+        }).when(touchHandler).getTouchInitiationRegion(any(), any(), any());
 
         final Environment environment = new Environment(Stream.of(touchHandler, unzonedTouchHandler)
                 .collect(Collectors.toCollection(HashSet::new)));
@@ -264,7 +269,7 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
 
         // Make sure there is no active session.
         verify(touchHandler, never()).onSessionStart(any());
-        verify(touchHandler, never()).getTouchInitiationRegion(any(), any());
+        verify(touchHandler, never()).getTouchInitiationRegion(any(), any(), any());
     }
 
     @Test

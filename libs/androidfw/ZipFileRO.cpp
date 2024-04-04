@@ -304,7 +304,7 @@ bool ZipFileRO::uncompressEntry(ZipEntryRO entry, int fd) const
     _ZipEntryRO *zipEntry = reinterpret_cast<_ZipEntryRO*>(entry);
     const int32_t error = ExtractEntryToFile(mHandle, &(zipEntry->entry), fd);
     if (error) {
-        ALOGW("ExtractToMemory failed with %s", ErrorCodeString(error));
+        ALOGW("ExtractToFile failed with %s", ErrorCodeString(error));
         return false;
     }
 

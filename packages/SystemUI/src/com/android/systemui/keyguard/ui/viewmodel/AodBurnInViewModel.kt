@@ -33,10 +33,8 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.ui.StateToValue
-import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.res.R
 import javax.inject.Inject
-import javax.inject.Provider
 import kotlin.math.max
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -128,12 +126,12 @@ constructor(
                 yDimenResourceId = R.dimen.burn_in_prevention_offset_y
             ),
         ) { interpolated, burnIn ->
+            val useAltAod =
+                keyguardClockViewModel.currentClock.value?.let { clock ->
+                    clock.config.useAlternateSmartspaceAODTransition
+                } == true
             val useScaleOnly =
-                (clockController(params.clockControllerProvider)
-                    ?.get()
-                    ?.config
-                    ?.useAlternateSmartspaceAODTransition
-                    ?: false) && keyguardClockViewModel.clockSize.value == KeyguardClockSwitch.LARGE
+                useAltAod && keyguardClockViewModel.clockSize.value == KeyguardClockSwitch.LARGE
 
             if (useScaleOnly) {
                 BurnInModel(
@@ -164,21 +162,10 @@ constructor(
             }
         }
     }
-
-    private fun clockController(
-        provider: Provider<ClockController>?,
-    ): Provider<ClockController>? {
-        return if (MigrateClocksToBlueprint.isEnabled) {
-            Provider { keyguardClockViewModel.currentClock.value }
-        } else {
-            provider
-        }
-    }
 }
 
 /** UI-sourced parameters to pass into the various methods of [AodBurnInViewModel]. */
 data class BurnInParameters(
-    val clockControllerProvider: Provider<ClockController>? = null,
     /** System insets that keyguard needs to stay out of */
     val topInset: Int = 0,
     /** The min y-value of the visible elements on lockscreen */

@@ -34,4 +34,8 @@ public class TinyFrameworkNative_host {
     public static int nativeNonStaticAddToValue(TinyFrameworkNative source, int arg) {
         return source.value + arg;
     }
+
+    public static byte nativeBytePlus(byte arg1, byte arg2) {
+        return (byte) (arg1 + arg2);
+    }
 }

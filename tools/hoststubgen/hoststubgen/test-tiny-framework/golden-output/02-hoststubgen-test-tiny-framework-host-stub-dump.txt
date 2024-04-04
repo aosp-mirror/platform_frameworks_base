@@ -1554,7 +1554,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkNative
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 1, methods: 9, attributes: 3
+  interfaces: 0, fields: 1, methods: 10, attributes: 3
   int value;
     descriptor: I
     flags: (0x0000)
@@ -1681,6 +1681,15 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
          x: ldc           #x                 // String Stub!
          x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
          x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public static native byte nativeBytePlus(byte, byte);
+    descriptor: (BB)B
+    flags: (0x0109) ACC_PUBLIC, ACC_STATIC, ACC_NATIVE
     RuntimeVisibleAnnotations:
       x: #x()
         com.android.hoststubgen.hosthelper.HostStubGenKeptInStub

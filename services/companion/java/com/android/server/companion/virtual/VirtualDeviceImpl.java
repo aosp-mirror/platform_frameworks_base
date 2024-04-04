@@ -1068,6 +1068,10 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @Override
     public boolean hasCustomAudioInputSupport() throws RemoteException {
+        return hasCustomAudioInputSupportInternal();
+    }
+
+    private boolean hasCustomAudioInputSupportInternal() {
         if (!Flags.vdmPublicApis()) {
             return false;
         }
@@ -1108,10 +1112,10 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mParams.dump(fout, indent + indent);
         fout.println(indent + "mVirtualDisplayIds: ");
         synchronized (mVirtualDeviceLock) {
-            fout.println("    mDevicePolicies: " + mDevicePolicies);
             for (int i = 0; i < mVirtualDisplays.size(); i++) {
                 fout.println(indent + "  " + mVirtualDisplays.keyAt(i));
             }
+            fout.println("    mDevicePolicies: " + mDevicePolicies);
             fout.println(indent + "mDefaultShowPointerIcon: " + mDefaultShowPointerIcon);
         }
         mInputController.dump(fout);
@@ -1119,6 +1123,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         if (mVirtualCameraController != null) {
             mVirtualCameraController.dump(fout, indent);
         }
+        fout.println(
+                indent + "hasCustomAudioInputSupport: " + hasCustomAudioInputSupportInternal());
     }
 
     // For display mirroring, we want to dispatch all key events to the source (default) display,

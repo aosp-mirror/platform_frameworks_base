@@ -9,6 +9,16 @@ flag {
 }
 
 flag {
+    name: "wait_for_transition_on_display_switch"
+    namespace: "windowing_frontend"
+    description: "Waits for Shell transition to start before unblocking the screen after display switch"
+    bug: "301420598"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
   name: "edge_to_edge_by_default"
   namespace: "windowing_frontend"
   description: "Make app go edge-to-edge by default when targeting SDK 35 or greater"

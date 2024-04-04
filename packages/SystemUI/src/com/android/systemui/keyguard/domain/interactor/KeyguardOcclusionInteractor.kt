@@ -107,7 +107,7 @@ constructor(
      */
     val occludingActivityWillDismissKeyguard: StateFlow<Boolean> =
         if (SceneContainerFlag.isEnabled) {
-                deviceUnlockedInteractor.get().isDeviceUnlocked
+                deviceUnlockedInteractor.get().deviceUnlockStatus.map { it.isUnlocked }
             } else {
                 keyguardInteractor.isKeyguardDismissible
             }

@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.Context
-import android.content.res.Resources
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.SettingsClockSize
@@ -87,16 +86,6 @@ constructor(
                     getDimensionPixelSize(R.dimen.status_bar_header_height_keyguard) +
                     getDimensionPixelSize(R.dimen.keyguard_smartspace_top_offset)
             }
-        }
-    }
-    companion object {
-        fun getStatusBarHeight(resource: Resources): Int {
-            var result = 0
-            val resourceId: Int = resource.getIdentifier("status_bar_height", "dimen", "android")
-            if (resourceId > 0) {
-                result = resource.getDimensionPixelSize(resourceId)
-            }
-            return result
         }
     }
 }

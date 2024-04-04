@@ -49,7 +49,7 @@ constructor(
     private val sceneContainerFlags: SceneContainerFlags,
     private val controller: NotificationStackScrollLayoutController,
     private val notificationStackSizeCalculator: NotificationStackSizeCalculator,
-    private val notificationStackViewBinder: NotificationStackViewBinder,
+    private val notificationScrollViewBinder: NotificationScrollViewBinder,
     @Main private val mainImmediateDispatcher: CoroutineDispatcher,
 ) {
 
@@ -162,7 +162,7 @@ constructor(
             }
 
         if (sceneContainerFlags.isEnabled()) {
-            disposables += notificationStackViewBinder.bindWhileAttached()
+            disposables += notificationScrollViewBinder.bindWhileAttached()
         }
 
         controller.setOnHeightChangedRunnable { viewModel.notificationStackChanged() }

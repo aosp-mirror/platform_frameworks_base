@@ -86,12 +86,11 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     @GuardedBy("mTransferLock")
     @Nullable private volatile SessionCreationRequest mPendingTransferRequest;
 
-    SystemMediaRoute2Provider(Context context, UserHandle user) {
+    SystemMediaRoute2Provider(Context context, UserHandle user, Looper looper) {
         super(COMPONENT_NAME);
         mIsSystemRouteProvider = true;
         mContext = context;
         mUser = user;
-        Looper looper = Looper.getMainLooper();
         mHandler = new Handler(looper);
 
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
@@ -654,9 +653,11 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 return;
             }
 
-            // TODO: b/310145678 - Post this to mHandler once mHandler does not run on the main
-            // thread.
-            updateVolume();
+            if (Flags.enableMr2ServiceNonMainBgThread()) {
+                mHandler.post(SystemMediaRoute2Provider.this::updateVolume);
+            } else {
+                updateVolume();
+            }
         }
     }
 }
