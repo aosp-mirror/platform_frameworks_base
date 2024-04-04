@@ -74,6 +74,7 @@ constructor(
             modifier =
                 modifier
                     .height(dimensionResource(R.dimen.small_clock_height))
+                    .padding(horizontal = dimensionResource(R.dimen.clock_padding_start))
                     .padding(top = { viewModel.getSmallClockTopMargin(context) })
                     .onTopPlacementChanged(onTopChanged)
                     .burnInAware(
