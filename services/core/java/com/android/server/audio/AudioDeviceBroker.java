@@ -1436,7 +1436,6 @@ public class AudioDeviceBroker {
         sendMsgNoDelay(MSG_BROADCAST_AUDIO_BECOMING_NOISY, SENDMSG_REPLACE);
     }
 
-    @GuardedBy("mDeviceStateLock")
     /*package*/ void postBluetoothActiveDevice(BtDeviceInfo info, int delay) {
         sendLMsg(MSG_L_SET_BT_ACTIVE_DEVICE, SENDMSG_QUEUE, info, delay);
     }

@@ -289,6 +289,7 @@ public class BtHelper {
                     Log.e(TAG, "Exception while getting status of " + device, e);
                 }
                 if (btCodecStatus == null) {
+                    Log.e(TAG, "getCodec, null A2DP codec status for device: " + device);
                     mA2dpCodecConfig = null;
                     return new Pair<>(AudioSystem.AUDIO_FORMAT_DEFAULT, changed);
                 }
@@ -316,6 +317,7 @@ public class BtHelper {
                     Log.e(TAG, "Exception while getting status of " + device, e);
                 }
                 if (btLeCodecStatus == null) {
+                    Log.e(TAG, "getCodec, null LE codec status for device: " + device);
                     mLeAudioCodecConfig = null;
                     return new Pair<>(AudioSystem.AUDIO_FORMAT_DEFAULT, changed);
                 }
@@ -363,6 +365,7 @@ public class BtHelper {
             return new Pair<>(profile == BluetoothProfile.A2DP
                     ? AudioSystem.AUDIO_FORMAT_SBC : AudioSystem.AUDIO_FORMAT_LC3, true);
         }
+
         return codecAndChanged;
     }
 
@@ -653,7 +656,7 @@ public class BtHelper {
                 // Not a valid profile to connect
                 Log.e(TAG, "onBtProfileConnected: Not a valid profile to connect "
                         + BluetoothProfile.getProfileName(profile));
-                break;
+                return;
         }
 
         // this part is only for A2DP, LE Audio unicast and Hearing aid
@@ -664,17 +667,65 @@ public class BtHelper {
             return;
         }
         List<BluetoothDevice> activeDevices = adapter.getActiveDevices(profile);
-        BluetoothProfileConnectionInfo bpci = new BluetoothProfileConnectionInfo(profile);
-        for (BluetoothDevice device : activeDevices) {
-            if (device == null) {
-                continue;
-            }
-            AudioDeviceBroker.BtDeviceChangedData data = new AudioDeviceBroker.BtDeviceChangedData(
-                    device, null, bpci, "mBluetoothProfileServiceListener");
-            AudioDeviceBroker.BtDeviceInfo info = mDeviceBroker.createBtDeviceInfo(
-                    data, device, BluetoothProfile.STATE_CONNECTED);
-            mDeviceBroker.postBluetoothActiveDevice(info, 0 /* delay */);
+        if (activeDevices.isEmpty() || activeDevices.get(0) == null) {
+            return;
         }
+        BluetoothDevice device = activeDevices.get(0);
+        switch (profile) {
+            case BluetoothProfile.A2DP: {
+                BluetoothProfileConnectionInfo bpci =
+                        BluetoothProfileConnectionInfo.createA2dpInfo(false, -1);
+                postBluetoothActiveDevice(device, bpci);
+            } break;
+            case BluetoothProfile.HEARING_AID: {
+                BluetoothProfileConnectionInfo bpci =
+                        BluetoothProfileConnectionInfo.createHearingAidInfo(false);
+                postBluetoothActiveDevice(device, bpci);
+            } break;
+            case BluetoothProfile.LE_AUDIO: {
+                int groupId = mLeAudio.getGroupId(device);
+                BluetoothLeAudioCodecStatus btLeCodecStatus = null;
+                try {
+                    btLeCodecStatus = mLeAudio.getCodecStatus(groupId);
+                } catch (Exception e) {
+                    Log.e(TAG, "Exception while getting status of " + device, e);
+                }
+                if (btLeCodecStatus == null) {
+                    Log.i(TAG, "onBtProfileConnected null LE codec status for groupId: "
+                            + groupId + ", device: " + device);
+                    break;
+                }
+                List<BluetoothLeAudioCodecConfig> outputCodecConfigs =
+                        btLeCodecStatus.getOutputCodecSelectableCapabilities();
+                if (!outputCodecConfigs.isEmpty()) {
+                    BluetoothProfileConnectionInfo bpci =
+                            BluetoothProfileConnectionInfo.createLeAudioInfo(
+                                    false /*suppressNoisyIntent*/, true /*isLeOutput*/);
+                    postBluetoothActiveDevice(device, bpci);
+                }
+                List<BluetoothLeAudioCodecConfig> inputCodecConfigs =
+                        btLeCodecStatus.getInputCodecSelectableCapabilities();
+                if (!inputCodecConfigs.isEmpty()) {
+                    BluetoothProfileConnectionInfo bpci =
+                            BluetoothProfileConnectionInfo.createLeAudioInfo(
+                                    false /*suppressNoisyIntent*/, false /*isLeOutput*/);
+                    postBluetoothActiveDevice(device, bpci);
+                }
+            } break;
+            default:
+                // Not a valid profile to connect
+                Log.wtf(TAG, "Invalid profile! onBtProfileConnected");
+                break;
+        }
+    }
+
+    private void postBluetoothActiveDevice(
+            BluetoothDevice device, BluetoothProfileConnectionInfo bpci) {
+        AudioDeviceBroker.BtDeviceChangedData data = new AudioDeviceBroker.BtDeviceChangedData(
+                device, null, bpci, "mBluetoothProfileServiceListener");
+        AudioDeviceBroker.BtDeviceInfo info = mDeviceBroker.createBtDeviceInfo(
+                data, device, BluetoothProfile.STATE_CONNECTED);
+        mDeviceBroker.postBluetoothActiveDevice(info, 0 /* delay */);
     }
 
     /*package*/ synchronized boolean isProfilePoxyConnected(int profile) {
