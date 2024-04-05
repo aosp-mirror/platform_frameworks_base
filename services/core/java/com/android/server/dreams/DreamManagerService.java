@@ -20,6 +20,7 @@ import static android.Manifest.permission.BIND_DREAM_SERVICE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.service.dreams.Flags.dreamTracksFocus;
 
 import static com.android.server.wm.ActivityInterceptorCallback.DREAM_MANAGER_ORDERED_ID;
 
@@ -406,8 +407,10 @@ public final class DreamManagerService extends SystemService {
     /** Whether dreaming can start given user settings and the current dock/charge state. */
     private boolean canStartDreamingInternal(boolean isScreenOn) {
         synchronized (mLock) {
-            // Can't start dreaming if we are already dreaming.
-            if (isScreenOn && isDreamingInternal()) {
+            // Can't start dreaming if we are already dreaming and the dream has focus. If we are
+            // dreaming but the dream does not have focus, then the dream can be brought to the
+            // front so it does have focus.
+            if (isScreenOn && isDreamingInternal() && dreamHasFocus()) {
                 return false;
             }
 
@@ -442,11 +445,20 @@ public final class DreamManagerService extends SystemService {
         }
     }
 
+    private boolean dreamHasFocus() {
+        // Dreams always had focus before they were able to track it.
+        return !dreamTracksFocus() || mController.dreamHasFocus();
+    }
+
     protected void requestStartDreamFromShell() {
         requestDreamInternal();
     }
 
     private void requestDreamInternal() {
+        if (isDreamingInternal() && !dreamHasFocus() && mController.bringDreamToFront()) {
+            return;
+        }
+
         // Ask the power manager to nap.  It will eventually call back into
         // startDream() if/when it is appropriate to start dreaming.
         // Because napping could cause the screen to turn off immediately if the dream
@@ -1126,6 +1138,16 @@ public final class DreamManagerService extends SystemService {
                 }
                 mController.setDreamAppTask(dreamToken, appTask);
             });
+        }
+
+        @Override
+        public void onDreamFocusChanged(boolean hasFocus) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mController.setDreamHasFocus(hasFocus);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
 
         boolean canLaunchDreamActivity(String dreamPackageName, String packageName,

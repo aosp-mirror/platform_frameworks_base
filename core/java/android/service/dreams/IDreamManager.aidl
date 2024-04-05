@@ -48,4 +48,5 @@ interface IDreamManager {
     void setSystemDreamComponent(in ComponentName componentName);
     void registerDreamOverlayService(in ComponentName componentName);
     void startDreamActivity(in Intent intent);
+    void onDreamFocusChanged(in boolean hasFocus);
 }

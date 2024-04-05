@@ -79,6 +79,11 @@ public abstract class DreamOverlayService extends Service {
             mService.endDream(this);
         }
 
+        @Override
+        public void comeToFront() {
+            mService.comeToFront(this);
+        }
+
         private void onExitRequested() {
             try {
                 mDreamOverlayCallback.onExitRequested();
@@ -127,6 +132,16 @@ public abstract class DreamOverlayService extends Service {
             }
 
             onWakeUp();
+        });
+    }
+
+    private void comeToFront(OverlayClient client) {
+        mExecutor.execute(() -> {
+            if (mCurrentClient != client) {
+                return;
+            }
+
+            onComeToFront();
         });
     }
 
@@ -188,6 +203,13 @@ public abstract class DreamOverlayService extends Service {
      * @hide
      */
     public void onWakeUp() {}
+
+    /**
+     * This method is overridden by implementations to handle when the dream is coming to the front
+     * (after having lost focus to something on top of it).
+     * @hide
+     */
+    public void onComeToFront() {}
 
     /**
      * This method is overridden by implementations to handle when the dream has ended. There may
