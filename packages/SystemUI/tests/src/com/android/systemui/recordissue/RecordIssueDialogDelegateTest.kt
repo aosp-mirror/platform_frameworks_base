@@ -88,6 +88,7 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
     private lateinit var dialog: SystemUIDialog
     private lateinit var factory: SystemUIDialog.Factory
     private lateinit var latch: CountDownLatch
+    private var issueRecordingState = IssueRecordingState()
 
     @Before
     fun setup() {
@@ -128,6 +129,7 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
                     mediaProjectionMetricsLogger,
                     userFileManager,
                     screenCaptureDisabledDialogDelegate,
+                    issueRecordingState,
                 ) {
                     latch.countDown()
                 }

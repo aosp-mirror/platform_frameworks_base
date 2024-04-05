@@ -54,6 +54,7 @@
             android:layout_weight="0"
             android:src="@drawable/ic_screenrecord"
             app:tint="?androidprv:attr/materialColorOnSurface"
+            android:importantForAccessibility="no"
             android:layout_gravity="center"
             android:layout_marginEnd="@dimen/screenrecord_option_padding" />
 
@@ -77,5 +78,45 @@
             android:layout_gravity="fill_vertical"
             android:layout_weight="0"
             android:contentDescription="@string/quick_settings_screen_record_label" />
+    </LinearLayout>
+
+    <!-- Bug Report Switch -->
+    <LinearLayout
+        android:id="@+id/bugreport_switch_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/qqs_layout_margin_top"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="@dimen/screenrecord_option_icon_size"
+            android:layout_height="@dimen/screenrecord_option_icon_size"
+            android:layout_weight="0"
+            android:src="@drawable/ic_bugreport"
+            app:tint="?androidprv:attr/materialColorOnSurface"
+            android:importantForAccessibility="no"
+            android:layout_gravity="center"
+            android:layout_marginEnd="@dimen/screenrecord_option_padding" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/screenrecord_option_icon_size"
+            android:layout_weight="1"
+            android:layout_gravity="fill_vertical"
+            android:gravity="center"
+            android:text="@string/qs_record_issue_bug_report"
+            android:textAppearance="@style/TextAppearance.Dialog.Body.Message"
+            android:importantForAccessibility="no"/>
+
+        <Switch
+            android:id="@+id/bugreport_switch"
+            android:layout_width="wrap_content"
+            android:minHeight="@dimen/screenrecord_option_icon_size"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_gravity="fill_vertical"
+            android:layout_weight="0"
+            android:contentDescription="@string/qs_record_issue_bug_report" />
     </LinearLayout>
 </LinearLayout>

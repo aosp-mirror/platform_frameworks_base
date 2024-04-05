@@ -206,7 +206,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                 break;
 
             case ACTION_SHARE:
-                Uri shareUri = Uri.parse(intent.getStringExtra(EXTRA_PATH));
+                Uri shareUri = intent.getParcelableExtra(EXTRA_PATH, Uri.class);
 
                 Intent shareIntent = new Intent(Intent.ACTION_SEND)
                         .setType("video/mp4")
@@ -356,7 +356,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                 PendingIntent.getService(
                         this,
                         REQUEST_CODE,
-                        getShareIntent(this, uri != null ? uri.toString() : null),
+                        getShareIntent(this, uri),
                         PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE))
                 .build();
 
@@ -512,7 +512,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
         return new Intent(context, this.getClass()).setAction(ACTION_STOP_NOTIF);
     }
 
-    private Intent getShareIntent(Context context, String path) {
+    private Intent getShareIntent(Context context, Uri path) {
         return new Intent(context, this.getClass()).setAction(ACTION_SHARE)
                 .putExtra(EXTRA_PATH, path);
     }
