@@ -52,6 +52,7 @@ import android.tracing.perfetto.DataSourceParams;
 import android.tracing.perfetto.InitArguments;
 import android.tracing.perfetto.Producer;
 import android.tracing.perfetto.TracingContext;
+import android.util.ArrayMap;
 import android.util.LongArray;
 import android.util.Slog;
 import android.util.proto.ProtoInputStream;
@@ -70,6 +71,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -83,18 +85,22 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     private final AtomicInteger mTracingInstances = new AtomicInteger();
 
     private final ProtoLogDataSource mDataSource = new ProtoLogDataSource(
-            this.mTracingInstances::incrementAndGet,
+            this::onTracingInstanceStart,
             this::dumpTransitionTraceConfig,
-            this.mTracingInstances::decrementAndGet
+            this::onTracingInstanceStop
     );
     private final ProtoLogViewerConfigReader mViewerConfigReader;
     private final ViewerConfigInputStreamProvider mViewerConfigInputStreamProvider;
     private final TreeMap<String, IProtoLogGroup> mLogGroups;
+    private final Runnable mCacheUpdater;
+
+    private final Map<LogLevel, Integer> mDefaultLogLevelCounts = new ArrayMap<>();
+    private final Map<IProtoLogGroup, Map<LogLevel, Integer>> mLogLevelCounts = new ArrayMap<>();
 
     private final ExecutorService mBackgroundLoggingService = Executors.newCachedThreadPool();
 
     public PerfettoProtoLogImpl(String viewerConfigFilePath,
-            TreeMap<String, IProtoLogGroup> logGroups) {
+            TreeMap<String, IProtoLogGroup> logGroups, Runnable cacheUpdater) {
         this(() -> {
             try {
                 return new ProtoInputStream(new FileInputStream(viewerConfigFilePath));
@@ -102,28 +108,32 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                 Slog.w(LOG_TAG, "Failed to load viewer config file " + viewerConfigFilePath, e);
                 return null;
             }
-        }, logGroups);
+        }, logGroups, cacheUpdater);
     }
 
     public PerfettoProtoLogImpl(
             ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
-            TreeMap<String, IProtoLogGroup> logGroups
+            TreeMap<String, IProtoLogGroup> logGroups,
+            Runnable cacheUpdater
     ) {
         this(viewerConfigInputStreamProvider,
-                new ProtoLogViewerConfigReader(viewerConfigInputStreamProvider), logGroups);
+                new ProtoLogViewerConfigReader(viewerConfigInputStreamProvider), logGroups,
+                cacheUpdater);
     }
 
     @VisibleForTesting
     public PerfettoProtoLogImpl(
             ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
             ProtoLogViewerConfigReader viewerConfigReader,
-            TreeMap<String, IProtoLogGroup> logGroups
+            TreeMap<String, IProtoLogGroup> logGroups,
+            Runnable cacheUpdater
     ) {
         Producer.init(InitArguments.DEFAULTS);
         mDataSource.register(DataSourceParams.DEFAULTS);
         this.mViewerConfigInputStreamProvider = viewerConfigInputStreamProvider;
         this.mViewerConfigReader = viewerConfigReader;
         this.mLogGroups = logGroups;
+        this.mCacheUpdater = cacheUpdater;
     }
 
     /**
@@ -494,6 +504,29 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         return setTextLogging(false, logger, groups);
     }
 
+    @Override
+    public boolean isEnabled(IProtoLogGroup group, LogLevel level) {
+        return group.isLogToLogcat() || getLogFromLevel(group).ordinal() <= level.ordinal();
+    }
+
+    private LogLevel getLogFromLevel(IProtoLogGroup group) {
+        if (mLogLevelCounts.containsKey(group)) {
+            for (LogLevel logLevel : LogLevel.values()) {
+                if (mLogLevelCounts.get(group).getOrDefault(logLevel, 0) > 0) {
+                    return logLevel;
+                }
+            }
+        } else {
+            for (LogLevel logLevel : LogLevel.values()) {
+                if (mDefaultLogLevelCounts.getOrDefault(logLevel, 0) > 0) {
+                    return logLevel;
+                }
+            }
+        }
+
+        return LogLevel.WTF;
+    }
+
     /**
      * Start logging the stack trace of the when the log message happened for target groups
      * @return status code
@@ -521,6 +554,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                 return -1;
             }
         }
+
+        mCacheUpdater.run();
         return 0;
     }
 
@@ -565,6 +600,61 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         pw.println("  enable-text [group...]: Enable logcat logging for given groups");
         pw.println("  disable-text [group...]: Disable logcat logging for given groups");
         return -1;
+    }
+
+    private synchronized void onTracingInstanceStart(ProtoLogDataSource.ProtoLogConfig config) {
+        this.mTracingInstances.incrementAndGet();
+
+        final LogLevel defaultLogFrom = config.getDefaultGroupConfig().logFrom;
+        mDefaultLogLevelCounts.put(defaultLogFrom,
+                mDefaultLogLevelCounts.getOrDefault(defaultLogFrom, 0) + 1);
+
+        final Set<String> overriddenGroupTags = config.getGroupTagsWithOverriddenConfigs();
+
+        for (String overriddenGroupTag : overriddenGroupTags) {
+            IProtoLogGroup group = mLogGroups.get(overriddenGroupTag);
+
+            mLogLevelCounts.putIfAbsent(group, new ArrayMap<>());
+            final Map<LogLevel, Integer> logLevelsCountsForGroup = mLogLevelCounts.get(group);
+
+            final LogLevel logFromLevel = config.getConfigFor(overriddenGroupTag).logFrom;
+            logLevelsCountsForGroup.put(logFromLevel,
+                    logLevelsCountsForGroup.getOrDefault(logFromLevel, 0) + 1);
+        }
+
+        mCacheUpdater.run();
+    }
+
+    private synchronized void onTracingInstanceStop(ProtoLogDataSource.ProtoLogConfig config) {
+        this.mTracingInstances.decrementAndGet();
+
+        final LogLevel defaultLogFrom = config.getDefaultGroupConfig().logFrom;
+        mDefaultLogLevelCounts.put(defaultLogFrom,
+                mDefaultLogLevelCounts.get(defaultLogFrom) - 1);
+        if (mDefaultLogLevelCounts.get(defaultLogFrom) <= 0) {
+            mDefaultLogLevelCounts.remove(defaultLogFrom);
+        }
+
+        final Set<String> overriddenGroupTags = config.getGroupTagsWithOverriddenConfigs();
+
+        for (String overriddenGroupTag : overriddenGroupTags) {
+            IProtoLogGroup group = mLogGroups.get(overriddenGroupTag);
+
+            mLogLevelCounts.putIfAbsent(group, new ArrayMap<>());
+            final Map<LogLevel, Integer> logLevelsCountsForGroup = mLogLevelCounts.get(group);
+
+            final LogLevel logFromLevel = config.getConfigFor(overriddenGroupTag).logFrom;
+            logLevelsCountsForGroup.put(logFromLevel,
+                    logLevelsCountsForGroup.get(logFromLevel) - 1);
+            if (logLevelsCountsForGroup.get(logFromLevel) <= 0) {
+                logLevelsCountsForGroup.remove(logFromLevel);
+            }
+            if (logLevelsCountsForGroup.isEmpty()) {
+                mLogLevelCounts.remove(group);
+            }
+        }
+
+        mCacheUpdater.run();
     }
 
     static void logAndPrintln(@Nullable PrintWriter pw, String msg) {

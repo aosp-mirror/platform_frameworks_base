@@ -52,4 +52,12 @@ public interface IProtoLog {
      * @return status code
      */
     int stopLoggingToLogcat(String[] groups, ILogger logger);
+
+    /**
+     * Should return true iff logging is enabled to ProtoLog or to Logcat for this group and level.
+     * @param group ProtoLog group to check for.
+     * @param level ProtoLog level to check for.
+     * @return If we need to log this group and level to either ProtoLog or Logcat.
+     */
+    boolean isEnabled(IProtoLogGroup group, LogLevel level);
 }

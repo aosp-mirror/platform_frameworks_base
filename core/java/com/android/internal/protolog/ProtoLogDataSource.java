@@ -39,16 +39,19 @@ import com.android.internal.protolog.common.LogLevel;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
 
 public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
         ProtoLogDataSource.TlsState,
         ProtoLogDataSource.IncrementalState> {
 
-    private final Runnable mOnStart;
+    private final Consumer<ProtoLogConfig> mOnStart;
     private final Runnable mOnFlush;
-    private final Runnable mOnStop;
+    private final Consumer<ProtoLogConfig> mOnStop;
 
-    public ProtoLogDataSource(Runnable onStart, Runnable onFlush, Runnable onStop) {
+    public ProtoLogDataSource(Consumer<ProtoLogConfig> onStart, Runnable onFlush,
+            Consumer<ProtoLogConfig> onStop) {
         super("android.protolog");
         this.mOnStart = onStart;
         this.mOnFlush = onFlush;
@@ -138,7 +141,7 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
         public boolean clearReported = false;
     }
 
-    private static class ProtoLogConfig {
+    public static class ProtoLogConfig {
         private final LogLevel mDefaultLogFromLevel;
         private final Map<String, GroupConfig> mGroupConfigs;
 
@@ -151,12 +154,16 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
             this.mGroupConfigs = groupConfigs;
         }
 
-        private GroupConfig getConfigFor(String groupTag) {
+        public GroupConfig getConfigFor(String groupTag) {
             return mGroupConfigs.getOrDefault(groupTag, getDefaultGroupConfig());
         }
 
-        private GroupConfig getDefaultGroupConfig() {
+        public GroupConfig getDefaultGroupConfig() {
             return new GroupConfig(mDefaultLogFromLevel, false);
+        }
+
+        public Set<String> getGroupTagsWithOverriddenConfigs() {
+            return mGroupConfigs.keySet();
         }
     }
 
@@ -255,18 +262,18 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
 
     public static class Instance extends DataSourceInstance {
 
-        private final Runnable mOnStart;
+        private final Consumer<ProtoLogConfig> mOnStart;
         private final Runnable mOnFlush;
-        private final Runnable mOnStop;
+        private final Consumer<ProtoLogConfig> mOnStop;
         private final ProtoLogConfig mConfig;
 
         public Instance(
                 DataSource<Instance, TlsState, IncrementalState> dataSource,
                 int instanceIdx,
                 ProtoLogConfig config,
-                Runnable onStart,
+                Consumer<ProtoLogConfig> onStart,
                 Runnable onFlush,
-                Runnable onStop
+                Consumer<ProtoLogConfig> onStop
         ) {
             super(dataSource, instanceIdx);
             this.mOnStart = onStart;
@@ -277,7 +284,7 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
 
         @Override
         public void onStart(StartCallbackArguments args) {
-            this.mOnStart.run();
+            this.mOnStart.accept(this.mConfig);
         }
 
         @Override
@@ -287,7 +294,7 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
 
         @Override
         public void onStop(StopCallbackArguments args) {
-            this.mOnStop.run();
+            this.mOnStop.accept(this.mConfig);
         }
     }
 }
