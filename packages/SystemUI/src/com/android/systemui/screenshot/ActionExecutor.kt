@@ -50,8 +50,15 @@ constructor(
 
     fun startSharedTransition(intent: Intent, user: UserHandle, overrideTransition: Boolean) {
         isPendingSharedTransition = true
+        val windowTransition = createWindowTransition()
         applicationScope.launch("$TAG#launchIntentAsync") {
-            intentExecutor.launchIntent(intent, createWindowTransition(), user, overrideTransition)
+            intentExecutor.launchIntent(
+                intent,
+                user,
+                overrideTransition,
+                windowTransition.first,
+                windowTransition.second
+            )
         }
     }
 
