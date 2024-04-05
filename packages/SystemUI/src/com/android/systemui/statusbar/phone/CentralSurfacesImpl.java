@@ -168,6 +168,7 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
+import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirrorShowingInteractor;
 import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
@@ -594,6 +595,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     private final SceneContainerFlags mSceneContainerFlags;
 
+    private final BrightnessMirrorShowingInteractor mBrightnessMirrorShowingInteractor;
+
     /**
      * Public constructor for CentralSurfaces.
      *
@@ -705,7 +708,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             UserTracker userTracker,
             Provider<FingerprintManager> fingerprintManager,
             ActivityStarter activityStarter,
-            SceneContainerFlags sceneContainerFlags
+            SceneContainerFlags sceneContainerFlags,
+            BrightnessMirrorShowingInteractor brightnessMirrorShowingInteractor
     ) {
         mContext = context;
         mNotificationsController = notificationsController;
@@ -801,6 +805,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mFingerprintManager = fingerprintManager;
         mActivityStarter = activityStarter;
         mSceneContainerFlags = sceneContainerFlags;
+        mBrightnessMirrorShowingInteractor = brightnessMirrorShowingInteractor;
 
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mStartingSurfaceOptional = startingSurfaceOptional;
@@ -1083,6 +1088,12 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mJavaAdapter.alwaysCollectFlow(
                 mCommunalInteractor.isIdleOnCommunal(),
                 mIdleOnCommunalConsumer);
+        if (mSceneContainerFlags.isEnabled()) {
+            mJavaAdapter.alwaysCollectFlow(
+                    mBrightnessMirrorShowingInteractor.isShowing(),
+                    this::setBrightnessMirrorShowing
+            );
+        }
     }
 
     /**
@@ -1284,10 +1295,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     mShadeSurface,
                     mNotificationShadeDepthControllerLazy.get(),
                     mBrightnessSliderFactory,
-                    (visible) -> {
-                        mBrightnessMirrorVisible = visible;
-                        updateScrimController();
-                    });
+                    this::setBrightnessMirrorShowing);
             fragmentHostManager.addTagListener(QS.TAG, (tag, f) -> {
                 QS qs = (QS) f;
                 if (qs instanceof QSFragmentLegacy) {
@@ -1346,6 +1354,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         ThreadedRenderer.overrideProperty("ambientRatio", String.valueOf(1.5f));
     }
 
+    private void setBrightnessMirrorShowing(boolean showing) {
+        mBrightnessMirrorVisible = showing;
+        updateScrimController();
+    }
 
     /**
      * When swiping up to dismiss the lock screen, the panel expansion fraction goes from 1f to 0f.

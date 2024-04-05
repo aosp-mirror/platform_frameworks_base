@@ -17,6 +17,7 @@
 package com.android.systemui.shade.ui.composable
 
 import android.view.ViewGroup
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.clipScrollableContainer
@@ -33,6 +34,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -45,6 +47,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
@@ -70,6 +73,7 @@ import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL
 import com.android.systemui.notifications.ui.composable.NotificationScrollingStack
 import com.android.systemui.qs.footer.ui.compose.FooterActionsWithAnimatedVisibility
+import com.android.systemui.qs.ui.composable.BrightnessMirror
 import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
@@ -302,12 +306,25 @@ private fun SceneScope.SplitShade(
         }
     }
 
+    val brightnessMirrorShowing by viewModel.brightnessMirrorViewModel.isShowing.collectAsState()
+    val contentAlpha by
+        animateFloatAsState(
+            targetValue = if (brightnessMirrorShowing) 0f else 1f,
+            label = "alphaAnimationBrightnessMirrorContentHiding",
+        )
+
+    val brightnessMirrorShowingModifier = Modifier.graphicsLayer { alpha = contentAlpha }
+
     Box(
         modifier =
             modifier
                 .fillMaxSize()
                 .element(Shade.Elements.BackgroundScrim)
-                .background(colorResource(R.color.shade_scrim_background_dark))
+                // Cannot set the alpha of the whole element to 0, because the mirror should be
+                // in the QS column.
+                .background(
+                    colorResource(R.color.shade_scrim_background_dark).copy(alpha = contentAlpha)
+                )
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -317,61 +334,80 @@ private fun SceneScope.SplitShade(
                 createTintedIconManager = createTintedIconManager,
                 createBatteryMeterViewController = createBatteryMeterViewController,
                 statusBarIconController = statusBarIconController,
-                modifier = Modifier.padding(horizontal = Shade.Dimensions.HorizontalPadding)
+                modifier =
+                    Modifier.padding(horizontal = Shade.Dimensions.HorizontalPadding)
+                        .then(brightnessMirrorShowingModifier)
             )
 
             Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
-                Column(
-                    verticalArrangement = Arrangement.Top,
-                    modifier =
-                        Modifier.weight(1f).fillMaxSize().thenIf(!isCustomizing) {
-                            Modifier.padding(bottom = navBarBottomHeight)
-                        },
-                ) {
+                Box(modifier = Modifier.weight(1f)) {
+                    BrightnessMirror(
+                        viewModel = viewModel.brightnessMirrorViewModel,
+                        qsSceneAdapter = viewModel.qsSceneAdapter,
+                        // Need to remove the offset of the header height, as the mirror uses
+                        // the position of the Brightness slider in the window
+                        modifier = Modifier.offset(y = -ShadeHeader.Dimensions.CollapsedHeight)
+                    )
                     Column(
+                        verticalArrangement = Arrangement.Top,
                         modifier =
-                            Modifier.fillMaxSize().weight(1f).thenIf(!isCustomizing) {
-                                Modifier.verticalNestedScrollToScene()
-                                    .verticalScroll(
-                                        quickSettingsScrollState,
-                                        enabled = isScrollable
-                                    )
-                                    .clipScrollableContainer(Orientation.Horizontal)
-                            }
+                            Modifier.fillMaxSize().thenIf(!isCustomizing) {
+                                Modifier.padding(bottom = navBarBottomHeight)
+                            },
                     ) {
-                        Box(
+                        Column(
                             modifier =
-                                Modifier.element(QuickSettings.Elements.SplitShadeQuickSettings)
+                                Modifier.fillMaxSize()
+                                    .weight(1f)
+                                    .thenIf(!isCustomizing) {
+                                        Modifier.verticalNestedScrollToScene()
+                                            .verticalScroll(
+                                                quickSettingsScrollState,
+                                                enabled = isScrollable
+                                            )
+                                            .clipScrollableContainer(Orientation.Horizontal)
+                                    }
+                                    .then(brightnessMirrorShowingModifier)
                         ) {
-                            QuickSettings(
-                                qsSceneAdapter = viewModel.qsSceneAdapter,
-                                heightProvider = { viewModel.qsSceneAdapter.qsHeight },
-                                isSplitShade = true,
+                            Box(
+                                modifier =
+                                    Modifier.element(QuickSettings.Elements.SplitShadeQuickSettings)
+                            ) {
+                                QuickSettings(
+                                    qsSceneAdapter = viewModel.qsSceneAdapter,
+                                    heightProvider = { viewModel.qsSceneAdapter.qsHeight },
+                                    isSplitShade = true,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    squishiness = tileSquishiness,
+                                )
+                            }
+
+                            MediaIfVisible(
+                                viewModel = viewModel,
+                                mediaCarouselController = mediaCarouselController,
+                                mediaHost = mediaHost,
                                 modifier = Modifier.fillMaxWidth(),
-                                squishiness = tileSquishiness,
                             )
                         }
-
-                        MediaIfVisible(
-                            viewModel = viewModel,
-                            mediaCarouselController = mediaCarouselController,
-                            mediaHost = mediaHost,
-                            modifier = Modifier.fillMaxWidth(),
+                        FooterActionsWithAnimatedVisibility(
+                            viewModel = footerActionsViewModel,
+                            isCustomizing = isCustomizing,
+                            lifecycleOwner = lifecycleOwner,
+                            modifier =
+                                Modifier.align(Alignment.CenterHorizontally)
+                                    .then(brightnessMirrorShowingModifier),
                         )
                     }
-                    FooterActionsWithAnimatedVisibility(
-                        viewModel = footerActionsViewModel,
-                        isCustomizing = isCustomizing,
-                        lifecycleOwner = lifecycleOwner,
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
-                    )
                 }
 
                 NotificationScrollingStack(
                     viewModel = viewModel.notifications,
                     maxScrimTop = { 0f },
                     modifier =
-                        Modifier.weight(1f).fillMaxHeight().padding(bottom = navBarBottomHeight),
+                        Modifier.weight(1f)
+                            .fillMaxHeight()
+                            .padding(bottom = navBarBottomHeight)
+                            .then(brightnessMirrorShowingModifier),
                 )
             }
         }

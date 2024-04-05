@@ -52,7 +52,6 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.util.settings.SecureSettings;
 
 import dagger.assisted.Assisted;
@@ -107,7 +106,7 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
     private ValueAnimator mSliderAnimator;
 
     @Override
-    public void setMirror(BrightnessMirrorController controller) {
+    public void setMirror(@Nullable MirrorController controller) {
         mControl.setMirrorControllerAndMirror(controller);
     }
 

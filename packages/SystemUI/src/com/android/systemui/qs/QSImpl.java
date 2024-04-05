@@ -61,6 +61,7 @@ import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlags;
+import com.android.systemui.settings.brightness.MirrorController;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
@@ -68,7 +69,6 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.util.Utils;
 
@@ -544,7 +544,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
     }
 
     public void setBrightnessMirrorController(
-            BrightnessMirrorController brightnessMirrorController) {
+            @Nullable MirrorController brightnessMirrorController) {
         mQSPanelController.setBrightnessMirror(brightnessMirrorController);
     }
 

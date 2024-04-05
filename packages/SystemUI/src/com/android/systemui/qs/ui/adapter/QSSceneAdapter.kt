@@ -34,6 +34,7 @@ import com.android.systemui.qs.QSContainerImpl
 import com.android.systemui.qs.QSImpl
 import com.android.systemui.qs.dagger.QSSceneComponent
 import com.android.systemui.res.R
+import com.android.systemui.settings.brightness.MirrorController
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.util.kotlin.sample
@@ -67,6 +68,9 @@ interface QSSceneAdapter {
      * the interactor.
      */
     val qsView: Flow<View>
+
+    /** Sets the [MirrorController] in [QSImpl]. Set to `null` to remove. */
+    fun setBrightnessMirrorController(mirrorController: MirrorController?)
 
     /**
      * Inflate an instance of [QSImpl] for this context. Once inflated, it will be available in
@@ -206,7 +210,7 @@ constructor(
         applicationScope.launch {
             launch {
                 state.sample(_isCustomizing, ::Pair).collect { (state, customizing) ->
-                    _qsImpl.value?.apply {
+                    qsImpl.value?.apply {
                         if (state != QSSceneAdapter.State.QS && customizing) {
                             this@apply.closeCustomizerImmediately()
                         }
@@ -282,6 +286,10 @@ constructor(
 
     override fun requestCloseCustomizer() {
         qsImpl.value?.closeCustomizer()
+    }
+
+    override fun setBrightnessMirrorController(mirrorController: MirrorController?) {
+        qsImpl.value?.setBrightnessMirrorController(mirrorController)
     }
 
     private fun QSImpl.applyState(state: QSSceneAdapter.State) {

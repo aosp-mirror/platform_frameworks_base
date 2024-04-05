@@ -18,6 +18,7 @@ package com.android.systemui.qs.ui.adapter
 
 import android.content.Context
 import android.view.View
+import com.android.systemui.settings.brightness.MirrorController
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -41,6 +42,9 @@ class FakeQSSceneAdapter(
     private val _navBarPadding = MutableStateFlow<Int>(0)
     val navBarPadding = _navBarPadding.asStateFlow()
 
+    var brightnessMirrorController: MirrorController? = null
+        private set
+
     override var isQsFullyCollapsed: Boolean = true
 
     override suspend fun inflate(context: Context) {
@@ -63,5 +67,9 @@ class FakeQSSceneAdapter(
 
     override fun requestCloseCustomizer() {
         _customizing.value = false
+    }
+
+    override fun setBrightnessMirrorController(mirrorController: MirrorController?) {
+        brightnessMirrorController = mirrorController
     }
 }

@@ -57,8 +57,10 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
         ToggleSlider {
 
     private Listener mListener;
+    @Nullable
     private ToggleSlider mMirror;
-    private BrightnessMirrorController mMirrorController;
+    @Nullable
+    private MirrorController mMirrorController;
     private boolean mTracking;
     private final FalsingManager mFalsingManager;
     private final UiEventLogger mUiEventLogger;
@@ -108,6 +110,9 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
     protected void onViewAttached() {
         mView.setOnSeekBarChangeListener(mSeekListener);
         mView.setOnInterceptListener(mOnInterceptListener);
+        if (mMirror != null) {
+            mView.setOnDispatchTouchEventListener(this::mirrorTouchEvent);
+        }
     }
 
     @Override
@@ -129,7 +134,10 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
 
     private boolean copyEventToMirror(MotionEvent ev) {
         MotionEvent copy = ev.copy();
-        boolean out = mMirror.mirrorTouchEvent(copy);
+        boolean out = false;
+        if (mMirror != null) {
+            out = mMirror.mirrorTouchEvent(copy);
+        }
         copy.recycle();
         return out;
     }
@@ -166,9 +174,13 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
      * @param c
      */
     @Override
-    public void setMirrorControllerAndMirror(BrightnessMirrorController c) {
+    public void setMirrorControllerAndMirror(@Nullable MirrorController c) {
         mMirrorController = c;
-        setMirror(c.getToggleSlider());
+        if (c != null) {
+            setMirror(c.getToggleSlider());
+        } else {
+            setMirror(null);
+        }
     }
 
     @Override
