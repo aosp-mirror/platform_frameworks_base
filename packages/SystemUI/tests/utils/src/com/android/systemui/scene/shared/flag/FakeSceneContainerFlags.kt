@@ -21,7 +21,7 @@ import dagger.Module
 import dagger.Provides
 
 class FakeSceneContainerFlags(
-    var enabled: Boolean = false,
+    var enabled: Boolean = SceneContainerFlag.isEnabled,
 ) : SceneContainerFlags {
 
     override fun isEnabled(): Boolean {
