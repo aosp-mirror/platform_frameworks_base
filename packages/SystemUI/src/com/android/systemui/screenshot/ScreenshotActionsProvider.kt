@@ -40,6 +40,7 @@ import dagger.assisted.AssistedInject
  * implementation.
  */
 interface ScreenshotActionsProvider {
+    fun onScrollChipReady(onClick: Runnable)
     fun setCompletedScreenshot(result: ScreenshotSavedResult)
 
     fun onAssistContentAvailable(assistContent: AssistContent) {}
@@ -143,6 +144,18 @@ constructor(
                 Log.w(TAG, "Received immutable quick share pending intent; ignoring")
             }
         }
+    }
+
+    override fun onScrollChipReady(onClick: Runnable) {
+        viewModel.addAction(
+            ActionButtonViewModel(
+                AppCompatResources.getDrawable(context, R.drawable.ic_screenshot_scroll),
+                context.resources.getString(R.string.screenshot_scroll_label),
+                context.resources.getString(R.string.screenshot_scroll_label),
+            ) {
+                onClick.run()
+            }
+        )
     }
 
     override fun setCompletedScreenshot(result: ScreenshotSavedResult) {
