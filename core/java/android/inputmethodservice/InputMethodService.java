@@ -3627,6 +3627,7 @@ public class InputMethodService extends AbstractInputMethodService {
             if (mDecorViewVisible && mWindowVisible) {
                 int direction = (event.getMetaState() & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
                 mPrivOps.switchKeyboardLayoutAsync(direction);
+                event.startTracking();
                 return true;
             }
         }
@@ -3679,7 +3680,12 @@ public class InputMethodService extends AbstractInputMethodService {
             if (event.isTracking() && !event.isCanceled()) {
                 return handleBack(true);
             }
+        } else if (event.getKeyCode() == KeyEvent.KEYCODE_SPACE) {
+            if (event.isTracking() && !event.isCanceled()) {
+                return true;
+            }
         }
+
         return doMovementKey(keyCode, event, MOVEMENT_UP);
     }
 
