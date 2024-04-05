@@ -621,14 +621,26 @@ public class ScreenshotController {
                 mDisplayId,
                 mWindow.getDecorView().getWindowToken(),
                 (response) -> {
-                    mViewProxy.showScrollChip(response.getPackageName(),
-                            () -> onScrollButtonClicked(owner, response));
+                    mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_IMPRESSION,
+                            0, response.getPackageName());
+                    if (screenshotShelfUi() && mActionsProvider != null) {
+                        mActionsProvider.onScrollChipReady(
+                                () -> onScrollButtonClicked(owner, response));
+                    } else {
+                        mViewProxy.showScrollChip(response.getPackageName(),
+                                () -> onScrollButtonClicked(owner, response));
+                    }
                     return Unit.INSTANCE;
                 }
         );
     }
 
     private void onScrollButtonClicked(UserHandle owner, ScrollCaptureResponse response) {
+        if (DEBUG_INPUT) {
+            Log.d(TAG, "scroll chip tapped");
+        }
+        mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_REQUESTED, 0,
+                response.getPackageName());
         Bitmap newScreenshot = mImageCapture.captureDisplay(mDisplayId, getFullScreenRect());
         if (newScreenshot == null) {
             Log.e(TAG, "Failed to capture current screenshot for scroll transition!");
