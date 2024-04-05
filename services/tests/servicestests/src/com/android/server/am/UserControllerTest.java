@@ -888,7 +888,7 @@ public class UserControllerTest {
         int userId = -1;
 
         assertThrows(IllegalArgumentException.class,
-                () -> mUserController.stopUser(userId, /* force= */ true,
+                () -> mUserController.stopUser(userId,
                         /* allowDelayedLocking= */ true, /* stopUserCallback= */ null,
                         /* keyEvictedCallback= */ null));
     }
@@ -897,7 +897,7 @@ public class UserControllerTest {
     public void testStopUser_systemUser() {
         int userId = UserHandle.USER_SYSTEM;
 
-        int r = mUserController.stopUser(userId, /* force= */ true,
+        int r = mUserController.stopUser(userId,
                 /* allowDelayedLocking= */ true, /* stopUserCallback= */ null,
                 /* keyEvictedCallback= */ null);
 
@@ -909,7 +909,7 @@ public class UserControllerTest {
         setUpUser(TEST_USER_ID1, /* flags= */ 0);
         mUserController.startUser(TEST_USER_ID1, USER_START_MODE_FOREGROUND);
 
-        int r = mUserController.stopUser(TEST_USER_ID1, /* force= */ true,
+        int r = mUserController.stopUser(TEST_USER_ID1,
                 /* allowDelayedLocking= */ true, /* stopUserCallback= */ null,
                 /* keyEvictedCallback= */ null);
 
@@ -1338,7 +1338,7 @@ public class UserControllerTest {
 
     private void assertUserLockedOrUnlockedAfterStopping(int userId, boolean allowDelayedLocking,
             KeyEvictedCallback keyEvictedCallback, boolean expectLocking) throws Exception {
-        int r = mUserController.stopUser(userId, /* force= */ true, /* allowDelayedLocking= */
+        int r = mUserController.stopUser(userId, /* allowDelayedLocking= */
                 allowDelayedLocking, null, keyEvictedCallback);
         assertThat(r).isEqualTo(ActivityManager.USER_OP_SUCCESS);
         assertUserLockedOrUnlockedState(userId, allowDelayedLocking, expectLocking);

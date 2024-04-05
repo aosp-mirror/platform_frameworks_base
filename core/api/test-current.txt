@@ -157,7 +157,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public void scheduleApplicationInfoChanged(java.util.List<java.lang.String>, int);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public void setStopUserOnSwitch(int);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public boolean startUserInBackgroundVisibleOnDisplay(int, int);
-    method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public boolean stopUser(int, boolean);
+    method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public boolean stopUser(int);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void unregisterUidFrozenStateChangedCallback(@NonNull android.app.ActivityManager.UidFrozenStateChangedCallback);
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public boolean updateMccMncConfiguration(@NonNull String, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.DUMP) public void waitForBroadcastIdle();

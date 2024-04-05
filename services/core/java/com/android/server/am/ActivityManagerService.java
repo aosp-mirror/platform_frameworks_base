@@ -17896,9 +17896,35 @@ public class ActivityManagerService extends IActivityManager.Stub
         mUserController.setStopUserOnSwitch(value);
     }
 
+    /** @deprecated use {@link #stopUserWithCallback(int, IStopUserCallback)} instead */
+    @Deprecated
     @Override
-    public int stopUser(final int userId, boolean force, final IStopUserCallback callback) {
-        return mUserController.stopUser(userId, force, /* allowDelayedLocking= */ false,
+    public int stopUser(final int userId,
+            boolean stopProfileRegardlessOfParent, final IStopUserCallback callback) {
+        return stopUserExceptCertainProfiles(userId, stopProfileRegardlessOfParent, callback);
+    }
+
+    /** Stops the given user. */
+    @Override
+    public int stopUserWithCallback(@UserIdInt int userId, @Nullable IStopUserCallback callback) {
+        return mUserController.stopUser(userId, /* allowDelayedLocking= */ false,
+                /* callback= */ callback, /* keyEvictedCallback= */ null);
+    }
+
+    /**
+     * Stops the given user.
+     *
+     * Usually, callers can just use @link{#stopUserWithCallback(int, IStopUserCallback)} instead.
+     *
+     * @param stopProfileRegardlessOfParent whether to stop the profile regardless of who its
+     *                                      parent is, e.g. even if the parent is the current user;
+     *                                      its value is irrelevant for non-profile users.
+     */
+    @Override
+    public int stopUserExceptCertainProfiles(@UserIdInt int userId,
+            boolean stopProfileRegardlessOfParent, @Nullable IStopUserCallback callback) {
+        return mUserController.stopUser(userId,
+                stopProfileRegardlessOfParent, /* allowDelayedLocking= */ false,
                 /* callback= */ callback, /* keyEvictedCallback= */ null);
     }
 
@@ -17907,11 +17933,9 @@ public class ActivityManagerService extends IActivityManager.Stub
      * stopping only if {@code config_multiuserDelayUserDataLocking} overlay is set true.
      *
      * <p>When delayed locking is not enabled through the overlay, this call becomes the same
-     * with {@link #stopUser(int, boolean, IStopUserCallback)} call.
+     * with {@link #stopUserWithCallback(int, IStopUserCallback)} call.
      *
      * @param userId User id to stop.
-     * @param force Force stop the user even if the user is related with system user or current
-     *              user.
      * @param callback Callback called when user has stopped.
      *
      * @return {@link ActivityManager#USER_OP_SUCCESS} when user is stopped successfully. Returns
@@ -17921,9 +17945,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     // TODO(b/302662311): Add javadoc changes corresponding to the user property that allows
     // delayed locking behavior once the private space flag is finalized.
     @Override
-    public int stopUserWithDelayedLocking(final int userId, boolean force,
-            final IStopUserCallback callback) {
-        return mUserController.stopUser(userId, force, /* allowDelayedLocking= */ true,
+    public int stopUserWithDelayedLocking(@UserIdInt int userId, IStopUserCallback callback) {
+        return mUserController.stopUser(userId, /* allowDelayedLocking= */ true,
                 /* callback= */ callback, /* keyEvictedCallback= */ null);
     }
 

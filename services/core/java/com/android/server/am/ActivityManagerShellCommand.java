@@ -2560,7 +2560,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                 "shell_runStopUser-" + userId + "-[stopUser]");
         try {
-            int res = mInterface.stopUser(userId, force, callback);
+            int res = mInterface.stopUserExceptCertainProfiles(
+                    userId, /* stopProfileRegardlessOfParent= */ force, callback);
             if (res != ActivityManager.USER_OP_SUCCESS) {
                 String txt = "";
                 switch (res) {
@@ -4394,7 +4395,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Stop execution of USER_ID, not allowing it to run any");
             pw.println("      code until a later explicit start or switch to it.");
             pw.println("      -w: wait for stop-user to complete.");
-            pw.println("      -f: force stop even if there are related users that cannot be stopped.");
+            pw.println("      -f: force stop, even if user has an unstoppable parent.");
             pw.println("  is-user-stopped <USER_ID>");
             pw.println("      Returns whether <USER_ID> has been stopped or not.");
             pw.println("  get-started-user-state <USER_ID>");

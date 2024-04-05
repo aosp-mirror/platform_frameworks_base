@@ -1882,11 +1882,10 @@ public class UserManagerService extends IUserManager.Stub {
                 && android.multiuser.Flags.enablePrivateSpaceFeatures()) {
             // Allow delayed locking since some profile types want to be able to unlock again via
             // biometrics.
-            ActivityManager.getService()
-                    .stopUserWithDelayedLocking(userId, /* force= */ true, null);
+            ActivityManager.getService().stopUserWithDelayedLocking(userId, null);
             return;
         }
-        ActivityManager.getService().stopUser(userId, /* force= */ true, null);
+        ActivityManager.getService().stopUserWithCallback(userId, null);
     }
 
     private void logQuietModeEnabled(@UserIdInt int userId, boolean enableQuietMode,
@@ -6132,7 +6131,7 @@ public class UserManagerService extends IUserManager.Stub {
             if (DBG) Slog.i(LOG_TAG, "Stopping user " + userId);
             int res;
             try {
-                res = ActivityManager.getService().stopUser(userId, /* force= */ true,
+                res = ActivityManager.getService().stopUserWithCallback(userId,
                 new IStopUserCallback.Stub() {
                             @Override
                             public void userStopped(int userIdParam) {
