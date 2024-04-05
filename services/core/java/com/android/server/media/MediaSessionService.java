@@ -215,12 +215,6 @@ public class MediaSessionService extends SystemService implements Monitor {
     private final MediaCommunicationManager.SessionCallback mSession2TokenCallback =
             new MediaCommunicationManager.SessionCallback() {
                 @Override
-                // TODO (b/324266224): Deprecate this method once other overload is published.
-                public void onSession2TokenCreated(Session2Token token) {
-                    addSession(token, Process.INVALID_PID);
-                }
-
-                @Override
                 public void onSession2TokenCreated(Session2Token token, int pid) {
                     addSession(token, pid);
                 }
