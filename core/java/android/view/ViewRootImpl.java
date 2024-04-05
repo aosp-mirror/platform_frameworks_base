@@ -9587,6 +9587,8 @@ public final class ViewRootImpl implements ViewParent,
             }
             mRemoved = true;
             mOnBackInvokedDispatcher.detachFromWindow();
+            removeVrrMessages();
+
             if (mAdded) {
                 dispatchDetachedFromWindow();
             }
@@ -12551,8 +12553,8 @@ public final class ViewRootImpl implements ViewParent,
                 if (sToolkitFrameRateFunctionEnablingReadOnlyFlagValue) {
                     mFrameRateTransaction.setFrameRateCategory(mSurfaceControl,
                         frameRateCategory, false).applyAsyncUnsafe();
-                    mLastPreferredFrameRateCategory = frameRateCategory;
                 }
+                mLastPreferredFrameRateCategory = frameRateCategory;
             }
         } catch (Exception e) {
             Log.e(mTag, "Unable to set frame rate category", e);
@@ -12612,8 +12614,8 @@ public final class ViewRootImpl implements ViewParent,
                 if (sToolkitFrameRateFunctionEnablingReadOnlyFlagValue) {
                     mFrameRateTransaction.setFrameRate(mSurfaceControl, preferredFrameRate,
                     mFrameRateCompatibility).applyAsyncUnsafe();
-                    mLastPreferredFrameRate = preferredFrameRate;
                 }
+                mLastPreferredFrameRate = preferredFrameRate;
             }
         } catch (Exception e) {
             Log.e(mTag, "Unable to set frame rate", e);
@@ -12854,5 +12856,11 @@ public final class ViewRootImpl implements ViewParent,
                     FRAME_RATE_IDLENESS_CHECK_TIME_MILLIS);
             mHasIdledMessage = true;
         }
+    }
+
+    private void removeVrrMessages() {
+        mHandler.removeMessages(MSG_TOUCH_BOOST_TIMEOUT);
+        mHandler.removeMessages(MSG_CHECK_INVALIDATION_IDLE);
+        mHandler.removeMessages(MSG_FRAME_RATE_SETTING);
     }
 }
