@@ -13,34 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.ravenwood.mockito;
+package com.android.ravenwoodtest.mockito;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import android.app.ActivityManager;
 import android.platform.test.ravenwood.RavenwoodRule;
 
-import com.android.dx.mockito.inline.extended.ExtendedMockito;
-
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.quality.Strictness;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
-public class RavenwoodMockitoDeviceOnlyTest {
+public class RavenwoodMockitoRavenwoodOnlyTest {
     @Rule public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     @Test
-    public void testStaticMockOnDevice() {
-        var mockingSession = ExtendedMockito.mockitoSession()
-                .strictness(Strictness.LENIENT)
-                .mockStatic(ActivityManager.class)
-                .startMocking();
-        try {
-            ExtendedMockito.doReturn(true).when(ActivityManager::isUserAMonkey);
-
+    public void testStaticMockOnRavenwood() {
+        try (MockedStatic<ActivityManager> am = Mockito.mockStatic(ActivityManager.class)) {
+            am.when(ActivityManager::isUserAMonkey).thenReturn(true);
             assertThat(ActivityManager.isUserAMonkey()).isEqualTo(true);
-        } finally {
-            mockingSession.finishMocking();
         }
     }
 }

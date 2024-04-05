@@ -13,26 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.ravenwood.mockito;
+package com.android.ravenwoodtest.bivalenttest;
 
-import static com.google.common.truth.Truth.assertThat;
-
-import android.app.ActivityManager;
+import android.platform.test.annotations.DisabledOnRavenwood;
+import android.platform.test.ravenwood.RavenwoodClassRule;
 import android.platform.test.ravenwood.RavenwoodRule;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-public class RavenwoodMockitoRavenwoodOnlyTest {
-    @Rule public final RavenwoodRule mRavenwood = new RavenwoodRule();
+import org.junit.Assert;
+import org.junit.ClassRule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+@RunWith(AndroidJUnit4.class)
+@DisabledOnRavenwood
+public class RavenwoodClassRuleDeviceOnlyTest {
+    @ClassRule
+    public static final RavenwoodClassRule sRavenwood = new RavenwoodClassRule();
 
     @Test
-    public void testStaticMockOnRavenwood() {
-        try (MockedStatic<ActivityManager> am = Mockito.mockStatic(ActivityManager.class)) {
-            am.when(ActivityManager::isUserAMonkey).thenReturn(true);
-            assertThat(ActivityManager.isUserAMonkey()).isEqualTo(true);
-        }
+    public void testDeviceOnly() {
+        Assert.assertFalse(RavenwoodRule.isOnRavenwood());
     }
 }

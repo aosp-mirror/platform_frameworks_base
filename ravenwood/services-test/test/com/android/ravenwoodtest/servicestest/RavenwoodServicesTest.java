@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.ravenwood;
+package com.android.ravenwoodtest.servicestest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

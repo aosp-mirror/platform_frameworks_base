@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.ravenwood.mockito;
+package com.android.ravenwoodtest.mockito;
 
 import static com.google.common.truth.Truth.assertThat;
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.platform.test.ravenwood.coretest;
+package com.android.ravenwoodtest.coretest;
 
 import android.platform.test.ravenwood.RavenwoodRule;
 
