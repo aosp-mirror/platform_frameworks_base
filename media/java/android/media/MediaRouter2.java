@@ -3141,11 +3141,6 @@ public final class MediaRouter2 {
                 return;
             }
 
-            // For successful in-session transfer, onControllerUpdated() handles it.
-            if (TextUtils.equals(oldSession.getId(), newSession.getId())) {
-                return;
-            }
-
             RoutingController oldController;
             if (oldSession.isSystemSession()) {
                 mSystemController.setRoutingSessionInfo(
@@ -3237,19 +3232,19 @@ public final class MediaRouter2 {
             }
         }
 
-        private void onSessionUpdatedOnHandler(@NonNull RoutingSessionInfo sessionInfo) {
+        private void onSessionUpdatedOnHandler(@NonNull RoutingSessionInfo updatedSession) {
             for (MediaRouter2Manager.TransferRequest request : mTransferRequests) {
                 String sessionId = request.mOldSessionInfo.getId();
-                if (!TextUtils.equals(sessionId, sessionInfo.getId())) {
+                if (!TextUtils.equals(sessionId, updatedSession.getId())) {
                     continue;
                 }
-                if (sessionInfo.getSelectedRoutes().contains(request.mTargetRoute.getId())) {
+
+                if (updatedSession.getSelectedRoutes().contains(request.mTargetRoute.getId())) {
                     mTransferRequests.remove(request);
-                    this.onTransferred(request.mOldSessionInfo, sessionInfo);
                     break;
                 }
             }
-            this.onSessionUpdated(sessionInfo);
+            this.onSessionUpdated(updatedSession);
         }
 
         private void onSessionReleasedOnHandler(@NonNull RoutingSessionInfo session) {
