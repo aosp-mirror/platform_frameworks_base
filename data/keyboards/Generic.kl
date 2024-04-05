@@ -424,12 +424,14 @@ key 580   APP_SWITCH
 key 582   VOICE_ASSIST
 # Linux KEY_ASSISTANT
 key 583   ASSIST
+key 585   EMOJI_PICKER
 key 656   MACRO_1
 key 657   MACRO_2
 key 658   MACRO_3
 key 659   MACRO_4
 
 # Keys defined by HID usages
+key usage 0x0c0065 SCREENSHOT                FALLBACK_USAGE_MAPPING
 key usage 0x0c0067 WINDOW                    FALLBACK_USAGE_MAPPING
 key usage 0x0c006F BRIGHTNESS_UP             FALLBACK_USAGE_MAPPING
 key usage 0x0c0070 BRIGHTNESS_DOWN           FALLBACK_USAGE_MAPPING
