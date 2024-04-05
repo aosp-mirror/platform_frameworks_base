@@ -10163,10 +10163,12 @@ public class WindowManagerService extends IWindowManager.Stub
         // TODO(b/323580163): Check if already shown and update shown state.
         if (mSensitiveContentPackages.shouldBlockScreenCaptureForApp(w.getOwningPackage(),
                 w.getOwningUid(), w.getWindowToken())) {
-            Toast.makeText(mContext, Looper.getMainLooper(),
-                            mContext.getString(R.string.screen_not_shared_sensitive_content),
-                            Toast.LENGTH_SHORT)
-                    .show();
+            mH.post(() -> {
+                Toast.makeText(mContext, Looper.getMainLooper(),
+                                mContext.getString(R.string.screen_not_shared_sensitive_content),
+                                Toast.LENGTH_SHORT)
+                        .show();
+            });
         }
     }
 }
