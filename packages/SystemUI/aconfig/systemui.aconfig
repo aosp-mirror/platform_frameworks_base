@@ -328,6 +328,16 @@ flag {
 }
 
 flag {
+    name: "status_bar_monochrome_icons_fix"
+    namespace: "systemui"
+    description: "Fixes the status bar icon size when drawing InsetDrawables (ie. monochrome icons)"
+    bug: "329091967"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "compose_bouncer"
     namespace: "systemui"
     description: "Use the new compose bouncer in SystemUI"
