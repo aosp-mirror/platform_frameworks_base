@@ -60,9 +60,12 @@ public class NoFilteringResolver extends CrossProfileResolver {
     public static boolean isIntentRedirectionAllowed(Context context,
             AppCloningDeviceConfigHelper appCloningDeviceConfigHelper, boolean resolveForStart,
             long flags) {
+        boolean canMatchCloneProfile = (flags & PackageManager.MATCH_CLONE_PROFILE) != 0
+                || (flags & PackageManager.MATCH_CLONE_PROFILE_LONG) != 0;
         return isAppCloningBuildingBlocksEnabled(context, appCloningDeviceConfigHelper)
-                    && (resolveForStart || (((flags & PackageManager.MATCH_CLONE_PROFILE) != 0)
-                    && hasPermission(context, Manifest.permission.QUERY_CLONED_APPS)));
+                && (resolveForStart
+                    || (canMatchCloneProfile
+                        && hasPermission(context, Manifest.permission.QUERY_CLONED_APPS)));
     }
 
     public NoFilteringResolver(ComponentResolverApi componentResolver,
