@@ -104,8 +104,8 @@ public class CameraDeviceSetupImpl extends CameraDevice.CameraDeviceSetup {
             }
 
             try {
-                return cameraService.isSessionConfigurationWithParametersSupported(
-                        mCameraId, config, mContext.getDeviceId(),
+                return cameraService.isSessionConfigurationWithParametersSupported(mCameraId,
+                        mTargetSdkVersion, config, mContext.getDeviceId(),
                         mCameraManager.getDevicePolicyFromContext(mContext));
             } catch (ServiceSpecificException e) {
                 throw ExceptionUtils.throwAsPublicException(e);
