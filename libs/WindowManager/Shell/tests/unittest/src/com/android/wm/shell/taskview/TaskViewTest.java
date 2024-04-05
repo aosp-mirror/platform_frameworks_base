@@ -44,7 +44,6 @@ import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.os.Handler;
 import android.os.Looper;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -495,6 +494,31 @@ public class TaskViewTest extends ShellTestCase {
         assertThat(insetsInfo.touchableRegion.contains(10, 10)).isFalse();
         assertThat(insetsInfo.touchableRegion.contains(20, 20)).isFalse();
         assertThat(insetsInfo.touchableRegion.contains(30, 30)).isFalse();
+    }
+
+    @Test
+    public void testStartRootTask_setsBoundsAndVisibility() {
+        assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
+
+        TaskViewBase taskViewBase = mock(TaskViewBase.class);
+        Rect bounds = new Rect(0, 0, 100, 100);
+        when(taskViewBase.getCurrentBoundsOnScreen()).thenReturn(bounds);
+        mTaskViewTaskController.setTaskViewBase(taskViewBase);
+
+        // Surface created, but task not available so bounds / visibility isn't set
+        mTaskView.surfaceCreated(mock(SurfaceHolder.class));
+        verify(mTaskViewTransitions, never()).updateVisibilityState(
+                eq(mTaskViewTaskController), eq(true));
+
+        // Make the task available
+        WindowContainerTransaction wct = mock(WindowContainerTransaction.class);
+        mTaskViewTaskController.startRootTask(mTaskInfo, mLeash, wct);
+
+        // Bounds got set
+        verify(wct).setBounds(any(WindowContainerToken.class), eq(bounds));
+        // Visibility & bounds state got set
+        verify(mTaskViewTransitions).updateVisibilityState(eq(mTaskViewTaskController), eq(true));
+        verify(mTaskViewTransitions).updateBoundsState(eq(mTaskViewTaskController), eq(bounds));
     }
 
     @Test
