@@ -68,6 +68,7 @@
                 android:layout_height="@dimen/biometric_prompt_logo_size"
                 android:layout_gravity="center"
                 android:scaleType="fitXY"
+                android:importantForAccessibility="no"
                 app:layout_constraintBottom_toTopOf="@+id/logo_description"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
