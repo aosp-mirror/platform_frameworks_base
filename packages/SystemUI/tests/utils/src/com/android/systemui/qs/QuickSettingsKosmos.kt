@@ -35,7 +35,6 @@ import com.android.systemui.plugins.qs.QSFactory
 import com.android.systemui.qs.footer.domain.interactor.FooterActionsInteractorImpl
 import com.android.systemui.qs.footer.foregroundServicesRepository
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
-import com.android.systemui.qs.tiles.di.NewQSTileFactory
 import com.android.systemui.security.data.repository.securityRepository
 import com.android.systemui.settings.userTracker
 import com.android.systemui.statusbar.policy.deviceProvisionedController
@@ -49,7 +48,6 @@ val Kosmos.qsEventLogger: QsEventLoggerFake by Fixture {
     QsEventLoggerFake(uiEventLoggerFake, instanceIdSequenceFake)
 }
 
-var Kosmos.newQSTileFactory by Fixture<NewQSTileFactory>()
 var Kosmos.qsTileFactory by Fixture<QSFactory>()
 
 val Kosmos.fgsManagerController by Fixture { FakeFgsManagerController() }
