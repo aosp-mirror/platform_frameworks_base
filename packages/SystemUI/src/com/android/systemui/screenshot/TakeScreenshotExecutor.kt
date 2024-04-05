@@ -92,14 +92,14 @@ constructor(
         // Let's wait before logging "screenshot requested", as we should log the processed
         // ScreenshotData.
         val screenshotData =
-            try {
-                screenshotRequestProcessor.process(rawScreenshotData)
-            } catch (e: RequestProcessorException) {
-                Log.e(TAG, "Failed to process screenshot request!", e)
-                logScreenshotRequested(rawScreenshotData)
-                onFailedScreenshotRequest(rawScreenshotData, callback)
-                return
-            }
+            runCatching { screenshotRequestProcessor.process(rawScreenshotData) }
+                .onFailure {
+                    Log.e(TAG, "Failed to process screenshot request!", it)
+                    logScreenshotRequested(rawScreenshotData)
+                    onFailedScreenshotRequest(rawScreenshotData, callback)
+                }
+                .getOrNull()
+                ?: return
 
         logScreenshotRequested(screenshotData)
         Log.d(TAG, "Screenshot request: $screenshotData")

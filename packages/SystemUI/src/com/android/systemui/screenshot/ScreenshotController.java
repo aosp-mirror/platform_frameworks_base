@@ -395,10 +395,10 @@ public class ScreenshotController {
         Assert.isMainThread();
 
         mCurrentRequestCallback = requestCallback;
-        if (screenshot.getType() == WindowManager.TAKE_SCREENSHOT_FULLSCREEN) {
+        if (screenshot.getType() == WindowManager.TAKE_SCREENSHOT_FULLSCREEN
+                && screenshot.getBitmap() == null) {
             Rect bounds = getFullScreenRect();
-            screenshot.setBitmap(
-                    mImageCapture.captureDisplay(mDisplayId, bounds));
+            screenshot.setBitmap(mImageCapture.captureDisplay(mDisplayId, bounds));
             screenshot.setScreenBounds(bounds);
         }
 

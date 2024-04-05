@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.screenshot.data.model
+package com.android.systemui.screenshot.policy
 
-import android.app.ActivityTaskManager.RootTaskInfo
+import android.graphics.Rect
 
-/** Information about the tasks on a display. */
-data class DisplayContentModel(
-    /** The id of the display. */
-    val displayId: Int,
-    /** Information about the current System UI state which can affect capture. */
-    val systemUiState: SystemUiState,
-    /** A list of root tasks on the display, ordered from top to bottom along the z-axis */
-    val rootTasks: List<RootTaskInfo>,
-)
+/** What to capture */
+sealed interface CaptureType {
+    /** Capture the entire screen contents. */
+    class FullScreen(val displayId: Int) : CaptureType
+
+    /** Capture the contents of the task only. */
+    class IsolatedTask(
+        val taskId: Int,
+        val taskBounds: Rect?,
+    ) : CaptureType
+}

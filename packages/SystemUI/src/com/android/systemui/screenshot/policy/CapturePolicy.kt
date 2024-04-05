@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.screenshot.data.model
+package com.android.systemui.screenshot.policy
 
-import android.app.ActivityTaskManager.RootTaskInfo
+import com.android.systemui.screenshot.data.model.DisplayContentModel
 
-/** Information about the tasks on a display. */
-data class DisplayContentModel(
-    /** The id of the display. */
-    val displayId: Int,
-    /** Information about the current System UI state which can affect capture. */
-    val systemUiState: SystemUiState,
-    /** A list of root tasks on the display, ordered from top to bottom along the z-axis */
-    val rootTasks: List<RootTaskInfo>,
-)
+/** Contains logic to determine when and how an adjust to screenshot behavior applies. */
+fun interface CapturePolicy {
+    /**
+     * Test the policy against the current display task state. If the policy applies, Returns a
+     * non-null [CaptureParameters] describing how the screenshot request should be augmented.
+     */
+    suspend fun apply(content: DisplayContentModel): CaptureParameters?
+}

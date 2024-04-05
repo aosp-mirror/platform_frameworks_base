@@ -18,7 +18,7 @@ package com.android.systemui.screenshot.data.repository
 import com.android.systemui.screenshot.data.model.DisplayContentModel
 
 /** Provides information about tasks related to a display. */
-interface DisplayContentRepository {
+fun interface DisplayContentRepository {
     /** Provides information about the tasks and content presented on a given display. */
     suspend fun getDisplayContent(displayId: Int): DisplayContentModel
 }
