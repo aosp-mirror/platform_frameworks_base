@@ -455,8 +455,7 @@ public class BubbleController implements ConfigurationChangeListener,
                         ProtoLog.d(WM_SHELL_BUBBLES,
                                 "onActivityRestartAttempt - taskId=%d selecting matching bubble=%s",
                                 task.taskId, b.getKey());
-                        mBubbleData.setSelectedBubble(b);
-                        mBubbleData.setExpanded(true);
+                        mBubbleData.setSelectedBubbleAndExpandStack(b);
                         return;
                     }
                 }
@@ -591,13 +590,6 @@ public class BubbleController implements ConfigurationChangeListener,
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-    }
-
-    private void openBubbleOverflow() {
-        ensureBubbleViewsAndWindowCreated();
-        mBubbleData.setShowingOverflow(true);
-        mBubbleData.setSelectedBubble(mBubbleData.getOverflow());
-        mBubbleData.setExpanded(true);
     }
 
     /**
@@ -1247,8 +1239,7 @@ public class BubbleController implements ConfigurationChangeListener,
         }
         if (mBubbleData.hasBubbleInStackWithKey(b.getKey())) {
             // already in the stack
-            mBubbleData.setSelectedBubble(b);
-            mBubbleData.setExpanded(true);
+            mBubbleData.setSelectedBubbleAndExpandStack(b);
         } else if (mBubbleData.hasOverflowBubbleWithKey(b.getKey())) {
             // promote it out of the overflow
             promoteBubbleFromOverflow(b);
@@ -1273,8 +1264,7 @@ public class BubbleController implements ConfigurationChangeListener,
             String key = entry.getKey();
             Bubble bubble = mBubbleData.getBubbleInStackWithKey(key);
             if (bubble != null) {
-                mBubbleData.setSelectedBubble(bubble);
-                mBubbleData.setExpanded(true);
+                mBubbleData.setSelectedBubbleAndExpandStack(bubble);
             } else {
                 bubble = mBubbleData.getOverflowBubbleWithKey(key);
                 if (bubble != null) {
@@ -1367,8 +1357,7 @@ public class BubbleController implements ConfigurationChangeListener,
             } else {
                 // App bubble is not selected, select it & expand
                 Log.i(TAG, "  showOrHideAppBubble, expand and select existing app bubble");
-                mBubbleData.setSelectedBubble(existingAppBubble);
-                mBubbleData.setExpanded(true);
+                mBubbleData.setSelectedBubbleAndExpandStack(existingAppBubble);
             }
         } else {
             // Check if it exists in the overflow
