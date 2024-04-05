@@ -3137,7 +3137,7 @@ public class SubscriptionManager {
             if (useRootLocale) {
                 configurationKey.setLocale(Locale.ROOT);
             }
-            cacheKey = Pair.create(context.getPackageName(), configurationKey);
+            cacheKey = Pair.create(context.getPackageName() + ", subid=" + subId, configurationKey);
             synchronized (sResourcesCache) {
                 Resources cached = sResourcesCache.get(cacheKey);
                 if (cached != null) {
