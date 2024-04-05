@@ -172,11 +172,6 @@ class WallpaperData {
     SparseArray<Rect> mCropHints = new SparseArray<>();
 
     /**
-     * cropHints will be ignored if this flag is false
-     */
-    boolean mSupportsMultiCrop;
-
-    /**
      * The phone orientation when the wallpaper was set. Only relevant for image wallpapers
      */
     int mOrientationWhenSet = ORIENTATION_UNKNOWN;
@@ -204,7 +199,6 @@ class WallpaperData {
         if (source.mCropHints != null) {
             this.mCropHints = source.mCropHints.clone();
         }
-        this.mSupportsMultiCrop = source.mSupportsMultiCrop;
         this.allowBackup = source.allowBackup;
         this.primaryColors = source.primaryColors;
         this.mWallpaperDimAmount = source.mWallpaperDimAmount;

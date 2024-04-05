@@ -16,6 +16,7 @@
 
 package com.android.server.wallpaper;
 
+import static android.app.WallpaperManager.ORIENTATION_UNKNOWN;
 import static android.app.WallpaperManager.getOrientation;
 import static android.app.WallpaperManager.getRotatedOrientation;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -86,7 +87,7 @@ public class WallpaperCropper {
     public interface WallpaperCropUtils {
 
         /**
-         * Equivalent to {@link #getCrop(Point, Point, SparseArray, boolean)}
+         * Equivalent to {@link WallpaperCropper#getCrop(Point, Point, SparseArray, boolean)}
          */
         Rect getCrop(Point displaySize, Point bitmapSize,
                 SparseArray<Rect> suggestedCrops, boolean rtl);
@@ -120,16 +121,23 @@ public class WallpaperCropper {
     public Rect getCrop(Point displaySize, Point bitmapSize,
             SparseArray<Rect> suggestedCrops, boolean rtl) {
 
-        // Case 1: if no crops are provided, center align the full image
+        int orientation = getOrientation(displaySize);
+
+        // Case 1: if no crops are provided, show the full image (from the left, or right if RTL).
         if (suggestedCrops == null || suggestedCrops.size() == 0) {
-            Rect crop = new Rect(0, 0, displaySize.x, displaySize.y);
-            float scale = Math.min(
-                    ((float) bitmapSize.x) / displaySize.x,
-                    ((float) bitmapSize.y) / displaySize.y);
-            crop.scale(scale);
-            crop.offset((bitmapSize.x - crop.width()) / 2,
-                    (bitmapSize.y - crop.height()) / 2);
-            return crop;
+            Rect crop = new Rect(0, 0, bitmapSize.x, bitmapSize.y);
+
+            // The first exception is if the device is a foldable and we're on the folded screen.
+            // In that case, show the center of what's on the unfolded screen.
+            int unfoldedOrientation = mWallpaperDisplayHelper.getUnfoldedOrientation(orientation);
+            if (unfoldedOrientation != ORIENTATION_UNKNOWN) {
+                // Let the system know that we're showing the full image on the unfolded screen
+                SparseArray<Rect> newSuggestedCrops = new SparseArray<>();
+                newSuggestedCrops.put(unfoldedOrientation, crop);
+                // This will fall into "Case 4" of this function and center the folded screen
+                return getCrop(displaySize, bitmapSize, newSuggestedCrops, rtl);
+            }
+            return getAdjustedCrop(crop, bitmapSize, displaySize, true, rtl, ADD);
         }
 
         // If any suggested crop is invalid, fallback to case 1
@@ -141,8 +149,6 @@ public class WallpaperCropper {
                 return getCrop(displaySize, bitmapSize, new SparseArray<>(), rtl);
             }
         }
-
-        int orientation = getOrientation(displaySize);
 
         // Case 2: if the orientation exists in the suggested crops, adjust the suggested crop
         Rect suggestedCrop = suggestedCrops.get(orientation);
@@ -168,10 +174,20 @@ public class WallpaperCropper {
         suggestedCrop = suggestedCrops.get(unfoldedOrientation);
         suggestedDisplaySize = defaultDisplaySizes.get(unfoldedOrientation);
         if (suggestedCrop != null) {
-            // only keep the visible part (without parallax)
+            // compute the visible part (without parallax) of the unfolded screen
             Rect adjustedCrop = noParallax(suggestedCrop, suggestedDisplaySize, bitmapSize, rtl);
-            return getAdjustedCrop(adjustedCrop, bitmapSize, displaySize, false, rtl, REMOVE);
+            // compute the folded crop, at the center of the crop of the unfolded screen
+            Rect res = getAdjustedCrop(adjustedCrop, bitmapSize, displaySize, false, rtl, REMOVE);
+            // if we removed some width, add it back to add a parallax effect
+            if (res.width() < adjustedCrop.width()) {
+                if (rtl) res.left = Math.min(res.left, adjustedCrop.left);
+                else res.right = Math.max(res.right, adjustedCrop.right);
+                // use getAdjustedCrop(parallax=true) to make sure we don't exceed MAX_PARALLAX
+                res = getAdjustedCrop(res, bitmapSize, displaySize, true, rtl, ADD);
+            }
+            return res;
         }
+
 
         // Case 5: if the device is a foldable, if we're looking for an unfolded orientation and
         // have the suggested crop of the relative folded orientation, reuse it by adding content.
@@ -274,11 +290,8 @@ public class WallpaperCropper {
             if (additionalWidthForParallax > MAX_PARALLAX) {
                 int widthToRemove = (int) Math.ceil(
                         (additionalWidthForParallax - MAX_PARALLAX) * screenRatio * crop.height());
-                if (rtl) {
-                    adjustedCrop.left += widthToRemove;
-                } else {
-                    adjustedCrop.right -= widthToRemove;
-                }
+                adjustedCrop.left += widthToRemove / 2;
+                adjustedCrop.right -= widthToRemove / 2 + widthToRemove % 2;
             }
         } else {
             // TODO (b/281648899) the third case is not always correct, fix that.
@@ -366,6 +379,24 @@ public class WallpaperCropper {
      */
     SparseArray<Rect> getDefaultCrops(SparseArray<Rect> suggestedCrops, Point bitmapSize) {
 
+        // If the suggested crops is single-element map with (ORIENTATION_UNKNOWN, cropHint),
+        // Crop the bitmap using the cropHint and compute the crops for cropped bitmap.
+        Rect cropHint = suggestedCrops.get(ORIENTATION_UNKNOWN);
+        if (cropHint != null) {
+            Rect bitmapRect = new Rect(0, 0, bitmapSize.x, bitmapSize.y);
+            if (suggestedCrops.size() != 1 || !bitmapRect.contains(cropHint)) {
+                Slog.w(TAG, "Couldn't get default crops from suggested crops " + suggestedCrops
+                        + " for bitmap of size " + bitmapSize + "; ignoring suggested crops");
+                return getDefaultCrops(new SparseArray<>(), bitmapSize);
+            }
+            Point cropSize = new Point(cropHint.width(), cropHint.height());
+            SparseArray<Rect> relativeDefaultCrops = getDefaultCrops(new SparseArray<>(), cropSize);
+            for (int i = 0; i < relativeDefaultCrops.size(); i++) {
+                relativeDefaultCrops.valueAt(i).offset(cropHint.left, cropHint.top);
+            }
+            return relativeDefaultCrops;
+        }
+
         SparseArray<Point> defaultDisplaySizes = mWallpaperDisplayHelper.getDefaultDisplaySizes();
         boolean rtl = TextUtils.getLayoutDirectionFromLocale(Locale.getDefault())
                 == View.LAYOUT_DIRECTION_RTL;
@@ -422,26 +453,74 @@ public class WallpaperCropper {
         } else {
             boolean needCrop = false;
             boolean needScale;
-            boolean multiCrop = multiCrop() && wallpaper.mSupportsMultiCrop;
 
             Point bitmapSize = new Point(options.outWidth, options.outHeight);
+            Rect bitmapRect = new Rect(0, 0, bitmapSize.x, bitmapSize.y);
 
+            if (multiCrop()) {
+                // Check that the suggested crops per screen orientation are all within the bitmap.
+                for (int i = 0; i < wallpaper.mCropHints.size(); i++) {
+                    int orientation = wallpaper.mCropHints.keyAt(i);
+                    Rect crop = wallpaper.mCropHints.valueAt(i);
+                    if (crop.isEmpty() || !bitmapRect.contains(crop)) {
+                        Slog.w(TAG, "Invalid crop " + crop + " for orientation " + orientation
+                                + " and bitmap size " + bitmapSize + "; clearing suggested crops.");
+                        wallpaper.mCropHints.clear();
+                        wallpaper.cropHint.set(bitmapRect);
+                        break;
+                    }
+                }
+            }
             final Rect cropHint;
-            if (multiCrop) {
-                SparseArray<Rect> defaultDisplayCrops =
-                        getDefaultCrops(wallpaper.mCropHints, bitmapSize);
-                // adapt the entries in wallpaper.mCropHints for the actual display
+
+            // A wallpaper with cropHints = Map.of(ORIENTATION_UNKNOWN, rect) is treated like
+            // a wallpaper with cropHints = null and  cropHint = rect.
+            Rect tempCropHint = wallpaper.mCropHints.get(ORIENTATION_UNKNOWN);
+            if (multiCrop() && tempCropHint != null) {
+                wallpaper.cropHint.set(tempCropHint);
+                wallpaper.mCropHints.clear();
+            }
+            if (multiCrop() && wallpaper.mCropHints.size() > 0) {
+                // Some suggested crops per screen orientation were provided,
+                // use them to compute the default crops for this device
+                SparseArray<Rect> defaultCrops = getDefaultCrops(wallpaper.mCropHints, bitmapSize);
+                // Adapt the provided crops to match the actual crops for the default display
                 SparseArray<Rect> updatedCropHints = new SparseArray<>();
                 for (int i = 0; i < wallpaper.mCropHints.size(); i++) {
                     int orientation = wallpaper.mCropHints.keyAt(i);
-                    Rect defaultCrop = defaultDisplayCrops.get(orientation);
+                    Rect defaultCrop = defaultCrops.get(orientation);
                     if (defaultCrop != null) {
                         updatedCropHints.put(orientation, defaultCrop);
                     }
                 }
                 wallpaper.mCropHints = updatedCropHints;
-                cropHint = getTotalCrop(defaultDisplayCrops);
+
+                // Finally, compute the cropHint based on the default crops
+                cropHint = getTotalCrop(defaultCrops);
                 wallpaper.cropHint.set(cropHint);
+                if (DEBUG) {
+                    Slog.d(TAG, "Generated default crops for wallpaper: " + defaultCrops
+                            + " based on suggested crops: " + wallpaper.mCropHints);
+                }
+            } else if (multiCrop()) {
+                // No crops per screen orientation were provided, but an overall cropHint may be
+                // defined in wallpaper.cropHint. Compute the default crops for the sub-image
+                // defined by the cropHint, then recompute the cropHint based on the default crops.
+                // If the cropHint is empty or invalid, ignore it and use the full image.
+                if (wallpaper.cropHint.isEmpty()) wallpaper.cropHint.set(bitmapRect);
+                if (!bitmapRect.contains(wallpaper.cropHint)) {
+                    Slog.w(TAG, "Ignoring wallpaper.cropHint = " + wallpaper.cropHint
+                            + "; not within the bitmap of size " + bitmapSize);
+                    wallpaper.cropHint.set(bitmapRect);
+                }
+                Point cropSize = new Point(wallpaper.cropHint.width(), wallpaper.cropHint.height());
+                SparseArray<Rect> defaultCrops = getDefaultCrops(new SparseArray<>(), cropSize);
+                cropHint = getTotalCrop(defaultCrops);
+                cropHint.offset(wallpaper.cropHint.left, wallpaper.cropHint.top);
+                wallpaper.cropHint.set(cropHint);
+                if (DEBUG) {
+                    Slog.d(TAG, "Generated default crops for wallpaper: " + defaultCrops);
+                }
             } else {
                 cropHint = new Rect(wallpaper.cropHint);
             }
@@ -455,11 +534,11 @@ public class WallpaperCropper {
             }
 
             // Empty crop means use the full image
-            if (cropHint.isEmpty()) {
+            if (!multiCrop() && cropHint.isEmpty()) {
                 cropHint.left = cropHint.top = 0;
                 cropHint.right = options.outWidth;
                 cropHint.bottom = options.outHeight;
-            } else {
+            } else if (!multiCrop()) {
                 // force the crop rect to lie within the measured bounds
                 int dx = cropHint.right > options.outWidth ? options.outWidth - cropHint.right : 0;
                 int dy = cropHint.bottom > options.outHeight
@@ -473,11 +552,11 @@ public class WallpaperCropper {
                 if (cropHint.top < 0) {
                     cropHint.top = 0;
                 }
-
-                // Don't bother cropping if what we're left with is identity
-                needCrop = (options.outHeight > cropHint.height()
-                        || options.outWidth > cropHint.width());
             }
+
+            // Don't bother cropping if what we're left with is identity
+            needCrop = (options.outHeight > cropHint.height()
+                    || options.outWidth > cropHint.width());
 
             // scale if the crop height winds up not matching the recommended metrics
             needScale = cropHint.height() > wpData.mHeight
@@ -485,7 +564,7 @@ public class WallpaperCropper {
                     || cropHint.width() > GLHelper.getMaxTextureSize();
 
             //make sure screen aspect ratio is preserved if width is scaled under screen size
-            if (needScale && !multiCrop) {
+            if (needScale && !multiCrop()) {
                 final float scaleByHeight = (float) wpData.mHeight / (float) cropHint.height();
                 final int newWidth = (int) (cropHint.width() * scaleByHeight);
                 if (newWidth < displayInfo.logicalWidth) {
@@ -543,7 +622,7 @@ public class WallpaperCropper {
                     final Rect estimateCrop = new Rect(cropHint);
                     estimateCrop.scale(1f / options.inSampleSize);
                     float hRatio = (float) wpData.mHeight / estimateCrop.height();
-                    if (multiCrop) {
+                    if (multiCrop()) {
                         // make sure the crop height is at most the display largest dimension
                         hRatio = (float) mWallpaperDisplayHelper.getDefaultDisplayLargestDimension()
                                 / estimateCrop.height();
@@ -557,7 +636,7 @@ public class WallpaperCropper {
                         if (DEBUG) {
                             Slog.w(TAG, "Invalid crop dimensions, trying to adjust.");
                         }
-                        if (multiCrop) {
+                        if (multiCrop()) {
                             // clear custom crop guidelines, fallback to system default
                             wallpaper.mCropHints.clear();
                             generateCropInternal(wallpaper);
@@ -618,7 +697,7 @@ public class WallpaperCropper {
                         final Bitmap finalCrop = Bitmap.createScaledBitmap(cropped,
                                 safeWidth, safeHeight, true);
 
-                        if (multiCrop) {
+                        if (multiCrop()) {
                             wallpaper.mSampleSize =
                                     ((float) cropHint.height()) / finalCrop.getHeight();
                         }
