@@ -28,4 +28,12 @@ data class RecentTask(
     val baseIntentComponent: ComponentName?,
     @ColorInt val colorBackground: Int?,
     val isForegroundTask: Boolean,
-)
+    val userType: UserType,
+) {
+    enum class UserType {
+        STANDARD,
+        WORK,
+        PRIVATE,
+        CLONED
+    }
+}

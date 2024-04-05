@@ -20,15 +20,10 @@ import android.content.ComponentName
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import androidx.test.filters.SmallTest
-import com.android.launcher3.icons.BitmapInfo
 import com.android.launcher3.icons.FastBitmapDrawable
-import com.android.launcher3.icons.IconFactory
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.shared.system.PackageManagerWrapper
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -40,20 +35,17 @@ import org.junit.runners.JUnit4
 
 @SmallTest
 @RunWith(JUnit4::class)
-class IconLoaderLibAppIconLoaderTest : SysuiTestCase() {
+class BasicPackageManagerAppIconLoaderTest : SysuiTestCase() {
 
-    private val iconFactory: IconFactory = mock()
     private val packageManagerWrapper: PackageManagerWrapper = mock()
     private val packageManager: PackageManager = mock()
     private val dispatcher = Dispatchers.Unconfined
 
     private val appIconLoader =
-        IconLoaderLibAppIconLoader(
+        BasicPackageManagerAppIconLoader(
             backgroundDispatcher = dispatcher,
-            context = context,
             packageManagerWrapper = packageManagerWrapper,
             packageManager = packageManager,
-            iconFactoryProvider = { iconFactory }
         )
 
     @Test
@@ -70,12 +62,7 @@ class IconLoaderLibAppIconLoaderTest : SysuiTestCase() {
     private fun givenIcon(component: ComponentName, userId: Int, icon: FastBitmapDrawable) {
         val activityInfo = mock<ActivityInfo>()
         whenever(packageManagerWrapper.getActivityInfo(component, userId)).thenReturn(activityInfo)
-        val rawIcon = mock<Drawable>()
-        whenever(activityInfo.loadIcon(packageManager)).thenReturn(rawIcon)
-
-        val bitmapInfo = mock<BitmapInfo>()
-        whenever(iconFactory.createBadgedIconBitmap(eq(rawIcon), any())).thenReturn(bitmapInfo)
-        whenever(bitmapInfo.newIcon(context)).thenReturn(icon)
+        whenever(activityInfo.loadIcon(packageManager)).thenReturn(icon)
     }
 
     private fun createIcon(): FastBitmapDrawable =
