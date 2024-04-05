@@ -64,7 +64,7 @@ class ActionExecutorTest : SysuiTestCase() {
 
         val intentCaptor = argumentCaptor<Intent>()
         verifyBlocking(intentExecutor) {
-            launchIntent(capture(intentCaptor), any(), eq(UserHandle.CURRENT), eq(true))
+            launchIntent(capture(intentCaptor), eq(UserHandle.CURRENT), eq(true), any(), any())
         }
         assertThat(intentCaptor.value.action).isEqualTo(Intent.ACTION_EDIT)
     }
