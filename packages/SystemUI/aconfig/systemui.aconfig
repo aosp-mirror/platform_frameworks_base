@@ -26,6 +26,14 @@ flag {
 }
 
 flag {
+   name: "refactor_keyguard_dismiss_intent"
+   namespace: "systemui"
+   description: "Update how keyguard dismiss intents are stored."
+   bug: "275069969"
+}
+
+flag {
+
     name: "notification_heads_up_cycling"
     namespace: "systemui"
     description: "Heads-up notification cycling animation for the Notification Avalanche feature."
