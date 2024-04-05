@@ -108,29 +108,41 @@ import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockSettingsInternal;
+import com.android.server.accounts.AccountManagerService;
 import com.android.server.adaptiveauth.AdaptiveAuthService;
+import com.android.server.adb.AdbService;
+import com.android.server.alarm.AlarmManagerService;
 import com.android.server.am.ActivityManagerService;
+import com.android.server.app.GameManagerService;
 import com.android.server.appbinding.AppBindingService;
+import com.android.server.apphibernation.AppHibernationService;
 import com.android.server.appop.AppOpMigrationHelper;
 import com.android.server.appop.AppOpMigrationHelperImpl;
 import com.android.server.art.ArtModuleServiceInitializer;
 import com.android.server.art.DexUseManagerLocal;
 import com.android.server.attention.AttentionManagerService;
 import com.android.server.audio.AudioService;
+import com.android.server.backup.BackupManagerService;
 import com.android.server.biometrics.AuthService;
 import com.android.server.biometrics.BiometricService;
 import com.android.server.biometrics.sensors.face.FaceService;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintService;
 import com.android.server.biometrics.sensors.iris.IrisService;
+import com.android.server.blob.BlobStoreManagerService;
 import com.android.server.broadcastradio.BroadcastRadioService;
 import com.android.server.camera.CameraServiceProxy;
 import com.android.server.clipboard.ClipboardService;
+import com.android.server.companion.CompanionDeviceManagerService;
+import com.android.server.companion.virtual.VirtualDeviceManagerService;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.compat.PlatformCompatNative;
+import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.connectivity.PacProxyService;
+import com.android.server.content.ContentService;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.coverage.CoverageService;
 import com.android.server.cpu.CpuMonitorService;
+import com.android.server.credentials.CredentialManagerService;
 import com.android.server.criticalevents.CriticalEventLog;
 import com.android.server.devicepolicy.DevicePolicyManagerService;
 import com.android.server.devicestate.DeviceStateManagerService;
@@ -147,14 +159,19 @@ import com.android.server.incident.IncidentCompanionService;
 import com.android.server.input.InputManagerService;
 import com.android.server.inputmethod.InputMethodManagerService;
 import com.android.server.integrity.AppIntegrityManagerService;
+import com.android.server.job.JobSchedulerService;
 import com.android.server.lights.LightsService;
 import com.android.server.locales.LocaleManagerService;
 import com.android.server.location.LocationManagerService;
 import com.android.server.location.altitude.AltitudeService;
+import com.android.server.locksettings.LockSettingsService;
 import com.android.server.logcat.LogcatManagerService;
+import com.android.server.media.MediaResourceMonitorService;
 import com.android.server.media.MediaRouterService;
+import com.android.server.media.MediaSessionService;
 import com.android.server.media.metrics.MediaMetricsManagerService;
 import com.android.server.media.projection.MediaProjectionManagerService;
+import com.android.server.midi.MidiService;
 import com.android.server.net.NetworkManagementService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.watchlist.NetworkWatchlistService;
@@ -200,6 +217,7 @@ import com.android.server.recoverysystem.RecoverySystemService;
 import com.android.server.resources.ResourcesManagerService;
 import com.android.server.restrictions.RestrictionsManagerService;
 import com.android.server.role.RoleServicePlatformHelper;
+import com.android.server.rollback.RollbackManagerService;
 import com.android.server.rotationresolver.RotationResolverManagerService;
 import com.android.server.security.AttestationVerificationManagerService;
 import com.android.server.security.FileIntegrityService;
@@ -212,13 +230,22 @@ import com.android.server.sensors.SensorService;
 import com.android.server.signedconfig.SignedConfigService;
 import com.android.server.soundtrigger.SoundTriggerService;
 import com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareService;
+import com.android.server.speech.SpeechRecognitionManagerService;
+import com.android.server.stats.bootstrap.StatsBootstrapAtomService;
+import com.android.server.stats.pull.StatsPullAtomService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
+import com.android.server.systemcaptions.SystemCaptionsManagerService;
 import com.android.server.telecom.TelecomLoaderService;
 import com.android.server.testharness.TestHarnessModeService;
 import com.android.server.textclassifier.TextClassificationManagerService;
 import com.android.server.textservices.TextServicesManagerService;
+import com.android.server.texttospeech.TextToSpeechManagerService;
+import com.android.server.timedetector.GnssTimeUpdateService;
 import com.android.server.timedetector.NetworkTimeUpdateService;
+import com.android.server.timedetector.TimeDetectorService;
+import com.android.server.timezonedetector.TimeZoneDetectorService;
+import com.android.server.timezonedetector.location.LocationTimeZoneManagerService;
 import com.android.server.tracing.TracingServiceProxy;
 import com.android.server.trust.TrustManagerService;
 import com.android.server.tv.TvInputManagerService;
@@ -228,9 +255,12 @@ import com.android.server.tv.tunerresourcemanager.TunerResourceManagerService;
 import com.android.server.twilight.TwilightService;
 import com.android.server.uri.UriGrantsManagerService;
 import com.android.server.usage.UsageStatsService;
+import com.android.server.usb.UsbService;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.vibrator.VibratorManagerService;
+import com.android.server.voiceinteraction.VoiceInteractionManagerService;
 import com.android.server.vr.VrManagerService;
+import com.android.server.wallpaper.WallpaperManagerService;
 import com.android.server.wearable.WearableSensingManagerService;
 import com.android.server.webkit.WebViewUpdateService;
 import com.android.server.wm.ActivityTaskManagerService;
@@ -268,8 +298,6 @@ public final class SystemServer implements Dumpable {
      * Implementation class names. TODO: Move them to a codegen class or load
      * them from the build system somehow.
      */
-    private static final String BACKUP_MANAGER_SERVICE_CLASS =
-            "com.android.server.backup.BackupManagerService$Lifecycle";
     private static final String APPWIDGET_SERVICE_CLASS =
             "com.android.server.appwidget.AppWidgetService";
     private static final String ARC_NETWORK_SERVICE_CLASS =
@@ -280,14 +308,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.arc.health.ArcSystemHealthService";
     private static final String VOICE_RECOGNITION_MANAGER_SERVICE_CLASS =
             "com.android.server.voiceinteraction.VoiceInteractionManagerService";
-    private static final String APP_HIBERNATION_SERVICE_CLASS =
-            "com.android.server.apphibernation.AppHibernationService";
     private static final String PRINT_MANAGER_SERVICE_CLASS =
             "com.android.server.print.PrintManagerService";
-    private static final String COMPANION_DEVICE_MANAGER_SERVICE_CLASS =
-            "com.android.server.companion.CompanionDeviceManagerService";
-    private static final String VIRTUAL_DEVICE_MANAGER_SERVICE_CLASS =
-            "com.android.server.companion.virtual.VirtualDeviceManagerService";
     private static final String STATS_COMPANION_APEX_PATH =
             "/apex/com.android.os.statsd/javalib/service-statsd.jar";
     private static final String SCHEDULING_APEX_PATH =
@@ -298,14 +320,6 @@ public final class SystemServer implements Dumpable {
             "/apex/com.android.tethering/javalib/service-connectivity.jar";
     private static final String STATS_COMPANION_LIFECYCLE_CLASS =
             "com.android.server.stats.StatsCompanion$Lifecycle";
-    private static final String STATS_PULL_ATOM_SERVICE_CLASS =
-            "com.android.server.stats.pull.StatsPullAtomService";
-    private static final String STATS_BOOTSTRAP_ATOM_SERVICE_LIFECYCLE_CLASS =
-            "com.android.server.stats.bootstrap.StatsBootstrapAtomService$Lifecycle";
-    private static final String USB_SERVICE_CLASS =
-            "com.android.server.usb.UsbService$Lifecycle";
-    private static final String MIDI_SERVICE_CLASS =
-            "com.android.server.midi.MidiService$Lifecycle";
     private static final String WIFI_APEX_SERVICE_JAR_PATH =
             "/apex/com.android.wifi/javalib/service-wifi.jar";
     private static final String WIFI_SERVICE_CLASS =
@@ -320,10 +334,6 @@ public final class SystemServer implements Dumpable {
             "com.android.server.wifi.p2p.WifiP2pService";
     private static final String LOWPAN_SERVICE_CLASS =
             "com.android.server.lowpan.LowpanService";
-    private static final String JOB_SCHEDULER_SERVICE_CLASS =
-            "com.android.server.job.JobSchedulerService";
-    private static final String LOCK_SETTINGS_SERVICE_CLASS =
-            "com.android.server.locksettings.LockSettingsService$Lifecycle";
     private static final String STORAGE_MANAGER_SERVICE_CLASS =
             "com.android.server.StorageManagerService$Lifecycle";
     private static final String STORAGE_STATS_SERVICE_CLASS =
@@ -354,16 +364,8 @@ public final class SystemServer implements Dumpable {
             "com.android.clockwork.settings.WearSettingsService";
     private static final String WRIST_ORIENTATION_SERVICE_CLASS =
             "com.android.clockwork.wristorientation.WristOrientationService";
-    private static final String ACCOUNT_SERVICE_CLASS =
-            "com.android.server.accounts.AccountManagerService$Lifecycle";
-    private static final String CONTENT_SERVICE_CLASS =
-            "com.android.server.content.ContentService$Lifecycle";
-    private static final String WALLPAPER_SERVICE_CLASS =
-            "com.android.server.wallpaper.WallpaperManagerService$Lifecycle";
     private static final String AUTO_FILL_MANAGER_SERVICE_CLASS =
             "com.android.server.autofill.AutofillManagerService";
-    private static final String CREDENTIAL_MANAGER_SERVICE_CLASS =
-            "com.android.server.credentials.CredentialManagerService";
     private static final String CONTENT_CAPTURE_MANAGER_SERVICE_CLASS =
             "com.android.server.contentcapture.ContentCaptureManagerService";
     private static final String TRANSLATION_MANAGER_SERVICE_CLASS =
@@ -372,30 +374,14 @@ public final class SystemServer implements Dumpable {
             "com.android.server.musicrecognition.MusicRecognitionManagerService";
     private static final String AMBIENT_CONTEXT_MANAGER_SERVICE_CLASS =
             "com.android.server.ambientcontext.AmbientContextManagerService";
-    private static final String SYSTEM_CAPTIONS_MANAGER_SERVICE_CLASS =
-            "com.android.server.systemcaptions.SystemCaptionsManagerService";
-    private static final String TEXT_TO_SPEECH_MANAGER_SERVICE_CLASS =
-            "com.android.server.texttospeech.TextToSpeechManagerService";
     private static final String IOT_SERVICE_CLASS =
             "com.android.things.server.IoTSystemService";
     private static final String SLICE_MANAGER_SERVICE_CLASS =
             "com.android.server.slice.SliceManagerService$Lifecycle";
     private static final String CAR_SERVICE_HELPER_SERVICE_CLASS =
             "com.android.internal.car.CarServiceHelperService";
-    private static final String TIME_DETECTOR_SERVICE_CLASS =
-            "com.android.server.timedetector.TimeDetectorService$Lifecycle";
-    private static final String TIME_ZONE_DETECTOR_SERVICE_CLASS =
-            "com.android.server.timezonedetector.TimeZoneDetectorService$Lifecycle";
-    private static final String LOCATION_TIME_ZONE_MANAGER_SERVICE_CLASS =
-            "com.android.server.timezonedetector.location.LocationTimeZoneManagerService$Lifecycle";
-    private static final String GNSS_TIME_UPDATE_SERVICE_CLASS =
-            "com.android.server.timedetector.GnssTimeUpdateService$Lifecycle";
     private static final String ACCESSIBILITY_MANAGER_SERVICE_CLASS =
             "com.android.server.accessibility.AccessibilityManagerService$Lifecycle";
-    private static final String ADB_SERVICE_CLASS =
-            "com.android.server.adb.AdbService$Lifecycle";
-    private static final String SPEECH_RECOGNITION_MANAGER_SERVICE_CLASS =
-            "com.android.server.speech.SpeechRecognitionManagerService";
     private static final String WALLPAPER_EFFECTS_GENERATION_MANAGER_SERVICE_CLASS =
             "com.android.server.wallpapereffectsgeneration.WallpaperEffectsGenerationManagerService";
     private static final String APP_PREDICTION_MANAGER_SERVICE_CLASS =
@@ -408,28 +394,14 @@ public final class SystemServer implements Dumpable {
             "com.android.server.smartspace.SmartspaceManagerService";
     private static final String CONTEXTUAL_SEARCH_MANAGER_SERVICE_CLASS =
             "com.android.server.contextualsearch.ContextualSearchManagerService";
-    private static final String DEVICE_IDLE_CONTROLLER_CLASS =
-            "com.android.server.DeviceIdleController";
-    private static final String BLOB_STORE_MANAGER_SERVICE_CLASS =
-            "com.android.server.blob.BlobStoreManagerService";
     private static final String APPSEARCH_MODULE_LIFECYCLE_CLASS =
             "com.android.server.appsearch.AppSearchModule$Lifecycle";
     private static final String ISOLATED_COMPILATION_SERVICE_CLASS =
             "com.android.server.compos.IsolatedCompilationService";
-    private static final String ROLLBACK_MANAGER_SERVICE_CLASS =
-            "com.android.server.rollback.RollbackManagerService";
-    private static final String ALARM_MANAGER_SERVICE_CLASS =
-            "com.android.server.alarm.AlarmManagerService";
-    private static final String MEDIA_SESSION_SERVICE_CLASS =
-            "com.android.server.media.MediaSessionService";
-    private static final String MEDIA_RESOURCE_MONITOR_SERVICE_CLASS =
-            "com.android.server.media.MediaResourceMonitorService";
     private static final String CONNECTIVITY_SERVICE_INITIALIZER_CLASS =
             "com.android.server.ConnectivityServiceInitializer";
     private static final String NETWORK_STATS_SERVICE_INITIALIZER_CLASS =
             "com.android.server.NetworkStatsServiceInitializer";
-    private static final String IP_CONNECTIVITY_METRICS_CLASS =
-            "com.android.server.connectivity.IpConnectivityMetrics";
     private static final String MEDIA_COMMUNICATION_SERVICE_CLASS =
             "com.android.server.media.MediaCommunicationService";
     private static final String APP_COMPAT_OVERRIDES_SERVICE_CLASS =
@@ -437,8 +409,6 @@ public final class SystemServer implements Dumpable {
     private static final String HEALTHCONNECT_MANAGER_SERVICE_CLASS =
             "com.android.server.healthconnect.HealthConnectManagerService";
     private static final String ROLE_SERVICE_CLASS = "com.android.role.RoleService";
-    private static final String GAME_MANAGER_SERVICE_CLASS =
-            "com.android.server.app.GameManagerService$Lifecycle";
     private static final String ENHANCED_CONFIRMATION_SERVICE_CLASS =
             "com.android.ecm.EnhancedConfirmationService";
 
@@ -1435,7 +1405,7 @@ public final class SystemServer implements Dumpable {
 
         // Manages apk rollbacks.
         t.traceBegin("StartRollbackManagerService");
-        mSystemServiceManager.startService(ROLLBACK_MANAGER_SERVICE_CLASS);
+        mSystemServiceManager.startService(RollbackManagerService.class);
         t.traceEnd();
 
         // Tracks native tombstones.
@@ -1580,11 +1550,11 @@ public final class SystemServer implements Dumpable {
 
             // The AccountManager must come before the ContentService
             t.traceBegin("StartAccountManagerService");
-            mSystemServiceManager.startService(ACCOUNT_SERVICE_CLASS);
+            mSystemServiceManager.startService(AccountManagerService.Lifecycle.class);
             t.traceEnd();
 
             t.traceBegin("StartContentService");
-            mSystemServiceManager.startService(CONTENT_SERVICE_CLASS);
+            mSystemServiceManager.startService(ContentService.Lifecycle.class);
             t.traceEnd();
 
             t.traceBegin("InstallSystemProviders");
@@ -1639,7 +1609,7 @@ public final class SystemServer implements Dumpable {
 
             // TODO(aml-jobscheduler): Think about how to do it properly.
             t.traceBegin("StartAlarmManagerService");
-            mSystemServiceManager.startService(ALARM_MANAGER_SERVICE_CLASS);
+            mSystemServiceManager.startService(AlarmManagerService.class);
             t.traceEnd();
 
             t.traceBegin("StartInputManagerService");
@@ -1721,7 +1691,7 @@ public final class SystemServer implements Dumpable {
             }
 
             t.traceBegin("IpConnectivityMetrics");
-            mSystemServiceManager.startService(IP_CONNECTIVITY_METRICS_CLASS);
+            mSystemServiceManager.startService(IpConnectivityMetrics.class);
             t.traceEnd();
 
             t.traceBegin("NetworkWatchlistService");
@@ -1860,7 +1830,7 @@ public final class SystemServer implements Dumpable {
         t.traceEnd();
 
         t.traceBegin("StartAppHibernationService");
-        mSystemServiceManager.startService(APP_HIBERNATION_SERVICE_CLASS);
+        mSystemServiceManager.startService(AppHibernationService.class);
         t.traceEnd();
 
         t.traceBegin("ArtManagerLocal");
@@ -1892,7 +1862,7 @@ public final class SystemServer implements Dumpable {
         } else {
             t.traceBegin("StartLockSettingsService");
             try {
-                mSystemServiceManager.startService(LOCK_SETTINGS_SERVICE_CLASS);
+                mSystemServiceManager.startService(LockSettingsService.Lifecycle.class);
                 lockSettings = ILockSettings.Stub.asInterface(
                         ServiceManager.getService("lock_settings"));
             } catch (Throwable e) {
@@ -1925,7 +1895,7 @@ public final class SystemServer implements Dumpable {
             }
 
             t.traceBegin("StartDeviceIdleController");
-            mSystemServiceManager.startService(DEVICE_IDLE_CONTROLLER_CLASS);
+            mSystemServiceManager.startService(DeviceIdleController.class);
             t.traceEnd();
 
             // Always start the Device Policy Manager, so that the API is compatible with
@@ -1974,7 +1944,7 @@ public final class SystemServer implements Dumpable {
 
             // System Speech Recognition Service
             t.traceBegin("StartSpeechRecognitionManagerService");
-            mSystemServiceManager.startService(SPEECH_RECOGNITION_MANAGER_SERVICE_CLASS);
+            mSystemServiceManager.startService(SpeechRecognitionManagerService.class);
             t.traceEnd();
 
             // App prediction manager service
@@ -2214,7 +2184,7 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("StartTimeDetectorService");
             try {
-                mSystemServiceManager.startService(TIME_DETECTOR_SERVICE_CLASS);
+                mSystemServiceManager.startService(TimeDetectorService.Lifecycle.class);
             } catch (Throwable e) {
                 reportWtf("starting TimeDetectorService service", e);
             }
@@ -2235,7 +2205,7 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("StartTimeZoneDetectorService");
             try {
-                mSystemServiceManager.startService(TIME_ZONE_DETECTOR_SERVICE_CLASS);
+                mSystemServiceManager.startService(TimeZoneDetectorService.Lifecycle.class);
             } catch (Throwable e) {
                 reportWtf("starting TimeZoneDetectorService service", e);
             }
@@ -2251,7 +2221,7 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("StartLocationTimeZoneManagerService");
             try {
-                mSystemServiceManager.startService(LOCATION_TIME_ZONE_MANAGER_SERVICE_CLASS);
+                mSystemServiceManager.startService(LocationTimeZoneManagerService.Lifecycle.class);
             } catch (Throwable e) {
                 reportWtf("starting LocationTimeZoneManagerService service", e);
             }
@@ -2260,7 +2230,7 @@ public final class SystemServer implements Dumpable {
             if (context.getResources().getBoolean(R.bool.config_enableGnssTimeUpdateService)) {
                 t.traceBegin("StartGnssTimeUpdateService");
                 try {
-                    mSystemServiceManager.startService(GNSS_TIME_UPDATE_SERVICE_CLASS);
+                    mSystemServiceManager.startService(GnssTimeUpdateService.Lifecycle.class);
                 } catch (Throwable e) {
                     reportWtf("starting GnssTimeUpdateService service", e);
                 }
@@ -2279,7 +2249,7 @@ public final class SystemServer implements Dumpable {
 
             if (context.getResources().getBoolean(R.bool.config_enableWallpaperService)) {
                 t.traceBegin("StartWallpaperManagerService");
-                mSystemServiceManager.startService(WALLPAPER_SERVICE_CLASS);
+                mSystemServiceManager.startService(WallpaperManagerService.Lifecycle.class);
                 t.traceEnd();
             } else {
                 Slog.i(TAG, "Wallpaper service disabled by config");
@@ -2345,14 +2315,14 @@ public final class SystemServer implements Dumpable {
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_MIDI)) {
                 // Start MIDI Manager service
                 t.traceBegin("StartMidiManager");
-                mSystemServiceManager.startService(MIDI_SERVICE_CLASS);
+                mSystemServiceManager.startService(MidiService.Lifecycle.class);
                 t.traceEnd();
             }
 
             // Start ADB Debugging Service
             t.traceBegin("StartAdbService");
             try {
-                mSystemServiceManager.startService(ADB_SERVICE_CLASS);
+                mSystemServiceManager.startService(AdbService.Lifecycle.class);
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting AdbService");
             }
@@ -2364,7 +2334,7 @@ public final class SystemServer implements Dumpable {
                     || Build.IS_EMULATOR) {
                 // Manage USB host and device support
                 t.traceBegin("StartUsbService");
-                mSystemServiceManager.startService(USB_SERVICE_CLASS);
+                mSystemServiceManager.startService(UsbService.Lifecycle.class);
                 t.traceEnd();
             }
 
@@ -2396,7 +2366,7 @@ public final class SystemServer implements Dumpable {
 
             // TODO(aml-jobscheduler): Think about how to do it properly.
             t.traceBegin("StartJobScheduler");
-            mSystemServiceManager.startService(JOB_SCHEDULER_SERVICE_CLASS);
+            mSystemServiceManager.startService(JobSchedulerService.class);
             t.traceEnd();
 
             t.traceBegin("StartSoundTrigger");
@@ -2409,7 +2379,7 @@ public final class SystemServer implements Dumpable {
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_BACKUP)) {
                 t.traceBegin("StartBackupManager");
-                mSystemServiceManager.startService(BACKUP_MANAGER_SERVICE_CLASS);
+                mSystemServiceManager.startService(BackupManagerService.Lifecycle.class);
                 t.traceEnd();
             }
 
@@ -2425,7 +2395,7 @@ public final class SystemServer implements Dumpable {
             // of initializing various settings.  It will internally modify its behavior
             // based on that feature.
             t.traceBegin("StartVoiceRecognitionManager");
-            mSystemServiceManager.startService(VOICE_RECOGNITION_MANAGER_SERVICE_CLASS);
+            mSystemServiceManager.startService(VoiceInteractionManagerService.class);
             t.traceEnd();
 
             if (GestureLauncherService.isGestureLauncherEnabled(context.getResources())) {
@@ -2486,7 +2456,7 @@ public final class SystemServer implements Dumpable {
             }
 
             t.traceBegin(START_BLOB_STORE_SERVICE);
-            mSystemServiceManager.startService(BLOB_STORE_MANAGER_SERVICE_CLASS);
+            mSystemServiceManager.startService(BlobStoreManagerService.class);
             t.traceEnd();
 
             // Dreams (interactive idle-time views, a/k/a screen savers, and doze mode)
@@ -2517,13 +2487,13 @@ public final class SystemServer implements Dumpable {
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_COMPANION_DEVICE_SETUP)) {
                 t.traceBegin("StartCompanionDeviceManager");
-                mSystemServiceManager.startService(COMPANION_DEVICE_MANAGER_SERVICE_CLASS);
+                mSystemServiceManager.startService(CompanionDeviceManagerService.class);
                 t.traceEnd();
             }
 
             if (context.getResources().getBoolean(R.bool.config_enableVirtualDeviceManager)) {
                 t.traceBegin("StartVirtualDeviceManager");
-                mSystemServiceManager.startService(VIRTUAL_DEVICE_MANAGER_SERVICE_CLASS);
+                mSystemServiceManager.startService(VirtualDeviceManagerService.class);
                 t.traceEnd();
             }
 
@@ -2532,7 +2502,7 @@ public final class SystemServer implements Dumpable {
             t.traceEnd();
 
             t.traceBegin("StartMediaSessionService");
-            mSystemServiceManager.startService(MEDIA_SESSION_SERVICE_CLASS);
+            mSystemServiceManager.startService(MediaSessionService.class);
             t.traceEnd();
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_HDMI_CEC)) {
@@ -2563,7 +2533,7 @@ public final class SystemServer implements Dumpable {
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
                 t.traceBegin("StartMediaResourceMonitor");
-                mSystemServiceManager.startService(MEDIA_RESOURCE_MONITOR_SERVICE_CLASS);
+                mSystemServiceManager.startService(MediaResourceMonitorService.class);
                 t.traceEnd();
             }
 
@@ -2759,12 +2729,12 @@ public final class SystemServer implements Dumpable {
 
         // Statsd pulled atoms
         t.traceBegin("StartStatsPullAtomService");
-        mSystemServiceManager.startService(STATS_PULL_ATOM_SERVICE_CLASS);
+        mSystemServiceManager.startService(StatsPullAtomService.class);
         t.traceEnd();
 
         // Log atoms to statsd from bootstrap processes.
         t.traceBegin("StatsBootstrapAtomService");
-        mSystemServiceManager.startService(STATS_BOOTSTRAP_ATOM_SERVICE_LIFECYCLE_CLASS);
+        mSystemServiceManager.startService(StatsBootstrapAtomService.Lifecycle.class);
         t.traceEnd();
 
         // Incidentd and dumpstated helper
@@ -2820,13 +2790,12 @@ public final class SystemServer implements Dumpable {
                     DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_CREDENTIAL,
                     CredentialManager.DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER, true);
             if (credentialManagerEnabled) {
-                if(isWatch &&
-                  !android.credentials.flags.Flags.wearCredentialManagerEnabled()) {
-                  Slog.d(TAG, "CredentialManager disabled on wear.");
+                if (isWatch && !android.credentials.flags.Flags.wearCredentialManagerEnabled()) {
+                    Slog.d(TAG, "CredentialManager disabled on wear.");
                 } else {
-                  t.traceBegin("StartCredentialManagerService");
-                  mSystemServiceManager.startService(CREDENTIAL_MANAGER_SERVICE_CLASS);
-                  t.traceEnd();
+                    t.traceBegin("StartCredentialManagerService");
+                    mSystemServiceManager.startService(CredentialManagerService.class);
+                    t.traceEnd();
                 }
             } else {
                 Slog.d(TAG, "CredentialManager disabled.");
@@ -2980,7 +2949,7 @@ public final class SystemServer implements Dumpable {
         t.traceEnd();
 
         t.traceBegin("GameManagerService");
-        mSystemServiceManager.startService(GAME_MANAGER_SERVICE_CLASS);
+        mSystemServiceManager.startService(GameManagerService.Lifecycle.class);
         t.traceEnd();
 
         if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_UWB)) {
@@ -3397,14 +3366,14 @@ public final class SystemServer implements Dumpable {
         }
 
         t.traceBegin("StartSystemCaptionsManagerService");
-        mSystemServiceManager.startService(SYSTEM_CAPTIONS_MANAGER_SERVICE_CLASS);
+        mSystemServiceManager.startService(SystemCaptionsManagerService.class);
         t.traceEnd();
     }
 
     private void startTextToSpeechManagerService(@NonNull Context context,
             @NonNull TimingsTraceAndSlog t) {
         t.traceBegin("StartTextToSpeechManagerService");
-        mSystemServiceManager.startService(TEXT_TO_SPEECH_MANAGER_SERVICE_CLASS);
+        mSystemServiceManager.startService(TextToSpeechManagerService.class);
         t.traceEnd();
     }
 
