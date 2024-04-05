@@ -51,6 +51,8 @@ import com.android.credentialmanager.TAG
 import com.android.credentialmanager.model.BiometricRequestInfo
 import com.android.credentialmanager.model.EntryInfo
 
+const val CREDENTIAL_ENTRY_PREFIX = "androidx.credentials.provider.credentialEntry."
+
 fun EntryInfo.getIntentSenderRequest(
     isAutoSelected: Boolean = false
 ): IntentSenderRequest? {
@@ -140,7 +142,8 @@ private fun getCredentialOptionInfoList(
                     isDefaultIconPreferredAsSingleProvider =
                             credentialEntry.isDefaultIconPreferredAsSingleProvider,
                     affiliatedDomain = credentialEntry.affiliatedDomain?.toString(),
-                    biometricRequest = predetermineAndValidateBiometricFlow(it),
+                    biometricRequest = predetermineAndValidateBiometricFlow(it,
+                        CREDENTIAL_ENTRY_PREFIX),
                 )
                 )
             }
@@ -169,7 +172,8 @@ private fun getCredentialOptionInfoList(
                     isDefaultIconPreferredAsSingleProvider =
                             credentialEntry.isDefaultIconPreferredAsSingleProvider,
                     affiliatedDomain = credentialEntry.affiliatedDomain?.toString(),
-                    biometricRequest = predetermineAndValidateBiometricFlow(it),
+                    biometricRequest = predetermineAndValidateBiometricFlow(it,
+                        CREDENTIAL_ENTRY_PREFIX),
                 )
                 )
             }
@@ -197,7 +201,8 @@ private fun getCredentialOptionInfoList(
                     isDefaultIconPreferredAsSingleProvider =
                             credentialEntry.isDefaultIconPreferredAsSingleProvider,
                     affiliatedDomain = credentialEntry.affiliatedDomain?.toString(),
-                    biometricRequest = predetermineAndValidateBiometricFlow(it),
+                    biometricRequest = predetermineAndValidateBiometricFlow(it,
+                        CREDENTIAL_ENTRY_PREFIX),
                 )
                 )
             }
@@ -217,21 +222,26 @@ private fun getCredentialOptionInfoList(
  * Note that the required values, such as the provider info's icon or display name, or the entries
  * credential type or userName, and finally the display info's app name, are non-null and must
  * exist to run through the flow.
+ *
+ * @param hintPrefix a string prefix indicating the type of entry being utilized, since both create
+ * and get flows utilize slice params; includes the final '.' before the name of the type (e.g.
+ * androidx.credentials.provider.credentialEntry.SLICE_HINT_ALLOWED_AUTHENTICATORS must have
+ * 'hintPrefix' up to "androidx.credentials.provider.credentialEntry.")
  * // TODO(b/326243754) : Presently, due to dependencies, the opId bit is parsed but is never
  * // expected to be used. When it is added, it should be lightly validated.
  */
-private fun predetermineAndValidateBiometricFlow(
-    it: Entry
+fun predetermineAndValidateBiometricFlow(
+    entry: Entry,
+    hintPrefix: String,
 ): BiometricRequestInfo? {
     // TODO(b/326243754) : When available, use the official jetpack structured type
-    val allowedAuthenticators: Int? = it.slice.items.firstOrNull {
-        it.hasHint("androidx.credentials." +
-                "provider.credentialEntry.SLICE_HINT_ALLOWED_AUTHENTICATORS")
+    val allowedAuthenticators: Int? = entry.slice.items.firstOrNull {
+        it.hasHint(hintPrefix + "SLICE_HINT_ALLOWED_AUTHENTICATORS")
     }?.int
 
     // This is optional and does not affect validating the biometric flow in any case
-    val opId: Int? = it.slice.items.firstOrNull {
-        it.hasHint("androidx.credentials.provider.credentialEntry.SLICE_HINT_CRYPTO_OP_ID")
+    val opId: Int? = entry.slice.items.firstOrNull {
+        it.hasHint(hintPrefix + "SLICE_HINT_CRYPTO_OP_ID")
     }?.int
     if (allowedAuthenticators != null) {
         return BiometricRequestInfo(opId = opId, allowedAuthenticators = allowedAuthenticators)

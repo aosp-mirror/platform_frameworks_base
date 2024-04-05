@@ -144,8 +144,6 @@ fun GetCredentialScreen(
                         } else if (credmanBiometricApiEnabled() && getCredentialUiState
                                 .currentScreenState == GetScreenState.BIOMETRIC_SELECTION) {
                             BiometricSelectionPage(
-                                // TODO(b/326243754) : Utilize expected entry for this flow, confirm
-                                // activeEntry will always be what represents the single tap flow
                                 biometricEntry = getCredentialUiState.activeEntry,
                                 onMoreOptionSelected = viewModel::getFlowOnMoreOptionSelected,
                                 onCancelFlowAndFinish = viewModel::onUserCancel,

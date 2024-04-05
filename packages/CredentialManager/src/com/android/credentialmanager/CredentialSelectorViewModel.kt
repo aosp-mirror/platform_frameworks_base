@@ -18,6 +18,7 @@ package com.android.credentialmanager
 
 import android.app.Activity
 import android.hardware.biometrics.BiometricPrompt
+import android.hardware.biometrics.BiometricPrompt.AuthenticationResult
 import android.os.IBinder
 import android.text.TextUtils
 import android.util.Log
@@ -39,6 +40,7 @@ import com.android.credentialmanager.common.ProviderActivityState
 import com.android.credentialmanager.createflow.ActiveEntry
 import com.android.credentialmanager.createflow.CreateCredentialUiState
 import com.android.credentialmanager.createflow.CreateScreenState
+import com.android.credentialmanager.createflow.findBiometricFlowEntry
 import com.android.credentialmanager.getflow.GetCredentialUiState
 import com.android.credentialmanager.getflow.GetScreenState
 import com.android.credentialmanager.logging.LifecycleEvent
@@ -304,7 +306,11 @@ class CredentialSelectorViewModel(
         uiState = uiState.copy(
             createCredentialUiState = uiState.createCredentialUiState?.copy(
                 currentScreenState =
-                if (uiState.createCredentialUiState?.requestDisplayInfo?.userSetDefaultProviderIds
+                // An autoselect flow never makes it to the more options screen
+                if (findBiometricFlowEntry(activeEntry = activeEntry,
+                        isAutoSelectFlow = false) != null) CreateScreenState.BIOMETRIC_SELECTION
+                else if (
+                    uiState.createCredentialUiState?.requestDisplayInfo?.userSetDefaultProviderIds
                         ?.contains(activeEntry.activeProvider.id) ?: true ||
                     !(uiState.createCredentialUiState?.foundCandidateFromUserDefaultProvider
                     ?: false) ||
@@ -330,7 +336,10 @@ class CredentialSelectorViewModel(
         )
     }
 
-    fun createFlowOnEntrySelected(selectedEntry: EntryInfo) {
+    fun createFlowOnEntrySelected(
+        selectedEntry: EntryInfo,
+        authResult: AuthenticationResult? = null
+    ) {
         val providerId = selectedEntry.providerId
         val entryKey = selectedEntry.entryKey
         val entrySubkey = selectedEntry.entrySubkey
@@ -341,6 +350,9 @@ class CredentialSelectorViewModel(
             uiState = uiState.copy(
                 selectedEntry = selectedEntry,
                 providerActivityState = ProviderActivityState.READY_TO_LAUNCH,
+                biometricState = if (authResult == null) uiState.biometricState else uiState
+                    .biometricState.copy(biometricResult = BiometricResult(
+                        biometricAuthenticationResult = authResult))
             )
         } else {
             credManRepo.onOptionSelected(
@@ -366,10 +378,5 @@ class CredentialSelectorViewModel(
     @Composable
     fun logUiEvent(uiEventEnum: UiEventEnum) {
         this.uiMetrics.log(uiEventEnum, credManRepo.requestInfo?.packageName)
-    }
-
-    companion object {
-        // TODO(b/326243754) : Replace/remove once all failure flows added in
-        const val TEMPORARY_FAILURE_CODE = Integer.MIN_VALUE
     }
 }
