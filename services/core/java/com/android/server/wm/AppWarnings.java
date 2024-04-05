@@ -160,7 +160,11 @@ class AppWarnings {
      * @param r activity record for which the warning may be displayed
      */
     public void showDeprecatedTargetDialogIfNeeded(ActivityRecord r) {
-        if (r.info.applicationInfo.targetSdkVersion < Build.VERSION.MIN_SUPPORTED_TARGET_SDK_INT) {
+        // The warning dialog can be disabled for debugging or testing purposes
+        final boolean disableDeprecatedTargetSdkDialog = SystemProperties.getBoolean(
+                "debug.wm.disable_deprecated_target_sdk_dialog", false);
+        if (r.info.applicationInfo.targetSdkVersion < Build.VERSION.MIN_SUPPORTED_TARGET_SDK_INT
+                && !disableDeprecatedTargetSdkDialog) {
             mUiHandler.showDeprecatedTargetDialog(r);
         }
     }
