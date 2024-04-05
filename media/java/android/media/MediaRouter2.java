@@ -3129,15 +3129,8 @@ public final class MediaRouter2 {
 
         private void onTransferred(
                 @NonNull RoutingSessionInfo oldSession, @NonNull RoutingSessionInfo newSession) {
-            if (!oldSession.isSystemSession()
-                    && !TextUtils.equals(
-                            getClientPackageName(), oldSession.getClientPackageName())) {
-                return;
-            }
-
-            if (!newSession.isSystemSession()
-                    && !TextUtils.equals(
-                            getClientPackageName(), newSession.getClientPackageName())) {
+            if (!isSessionRelatedToTargetPackageName(oldSession)
+                    || !isSessionRelatedToTargetPackageName(newSession)) {
                 return;
             }
 
@@ -3164,16 +3157,14 @@ public final class MediaRouter2 {
 
         private void onTransferFailed(
                 @NonNull RoutingSessionInfo session, @NonNull MediaRoute2Info route) {
-            if (!session.isSystemSession()
-                    && !TextUtils.equals(getClientPackageName(), session.getClientPackageName())) {
+            if (!isSessionRelatedToTargetPackageName(session)) {
                 return;
             }
             notifyTransferFailure(route);
         }
 
         private void onSessionUpdated(@NonNull RoutingSessionInfo session) {
-            if (!session.isSystemSession()
-                    && !TextUtils.equals(getClientPackageName(), session.getClientPackageName())) {
+            if (!isSessionRelatedToTargetPackageName(session)) {
                 return;
             }
 
@@ -3186,6 +3177,15 @@ public final class MediaRouter2 {
                 controller = new RoutingController(session);
             }
             notifyControllerUpdated(controller);
+        }
+
+        /**
+         * Returns {@code true} if the session is a system session or if its client package name
+         * matches the proxy router's target package name.
+         */
+        private boolean isSessionRelatedToTargetPackageName(@NonNull RoutingSessionInfo session) {
+            return session.isSystemSession()
+                    || TextUtils.equals(getClientPackageName(), session.getClientPackageName());
         }
 
         private void onSessionCreatedOnHandler(
