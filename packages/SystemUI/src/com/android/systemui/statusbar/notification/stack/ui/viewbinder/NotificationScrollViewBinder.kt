@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 
-import android.view.View
+import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.common.ui.ConfigurationState
@@ -26,7 +26,6 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
-import com.android.systemui.statusbar.notification.stack.shared.model.ViewPosition
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationScrollViewModel
 import com.android.systemui.util.kotlin.FlowDumperImpl
@@ -37,9 +36,6 @@ import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 /** Binds the [NotificationScrollView]. */
@@ -54,8 +50,15 @@ constructor(
     private val configuration: ConfigurationState,
 ) : FlowDumperImpl(dumpManager) {
 
-    private val viewPosition = MutableStateFlow(ViewPosition()).dumpValue("viewPosition")
-    private val viewTopOffset = viewPosition.map { it.top }.distinctUntilChanged()
+    private val viewLeftOffset = MutableStateFlow(0).dumpValue("viewLeftOffset")
+
+    private fun updateViewPosition() {
+        val trueView = view.asView()
+        if (trueView.top != 0) {
+            Log.w("NSSL", "Expected $trueView to have top==0")
+        }
+        viewLeftOffset.value = trueView.left
+    }
 
     fun bindWhileAttached(): DisposableHandle {
         return view.asView().repeatWhenAttached(mainImmediateDispatcher) {
@@ -65,20 +68,20 @@ constructor(
 
     suspend fun bind() = coroutineScope {
         launchAndDispose {
-            viewPosition.value = view.asView().position
-            view.asView().onLayoutChanged { viewPosition.value = it.position }
+            updateViewPosition()
+            view.asView().onLayoutChanged { updateViewPosition() }
         }
 
         launch {
-            viewModel.shadeScrimShape(scrimRadius, viewPosition).collect {
-                view.setScrimClippingShape(it)
-            }
+            viewModel
+                .shadeScrimShape(cornerRadius = scrimRadius, viewLeftOffset = viewLeftOffset)
+                .collect { view.setScrimClippingShape(it) }
         }
 
-        launch { viewModel.stackTop.minusTopOffset().collect { view.setStackTop(it) } }
-        launch { viewModel.stackBottom.minusTopOffset().collect { view.setStackBottom(it) } }
+        launch { viewModel.stackTop.collect { view.setStackTop(it) } }
+        launch { viewModel.stackBottom.collect { view.setStackBottom(it) } }
         launch { viewModel.scrolledToTop.collect { view.setScrolledToTop(it) } }
-        launch { viewModel.headsUpTop.minusTopOffset().collect { view.setHeadsUpTop(it) } }
+        launch { viewModel.headsUpTop.collect { view.setHeadsUpTop(it) } }
         launch { viewModel.expandFraction.collect { view.setExpandFraction(it) } }
         launch { viewModel.isScrollable.collect { view.setScrollingEnabled(it) } }
 
@@ -94,15 +97,7 @@ constructor(
         }
     }
 
-    /** Combine with the topOffset flow and subtract that value from this flow's value */
-    private fun Flow<Float>.minusTopOffset() =
-        combine(viewTopOffset) { y, topOffset -> y - topOffset }
-
     /** flow of the scrim clipping radius */
     private val scrimRadius: Flow<Int>
         get() = configuration.getDimensionPixelOffset(R.dimen.notification_scrim_corner_radius)
-
-    /** Construct a [ViewPosition] from this view using [View.getLeft] and [View.getTop] */
-    private val View.position
-        get() = ViewPosition(left = left, top = top)
 }

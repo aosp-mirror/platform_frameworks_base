@@ -19,6 +19,7 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -166,23 +167,35 @@ constructor(
             )
             .dumpWhileCollecting("isShadeLocked")
 
+    @VisibleForTesting
+    val paddingTopDimen: Flow<Int> =
+        interactor.configurationBasedDimensions
+            .map {
+                when {
+                    !it.useSplitShade -> 0
+                    it.useLargeScreenHeader -> it.marginTopLargeScreen
+                    else -> it.marginTop
+                }
+            }
+            .distinctUntilChanged()
+            .dumpWhileCollecting("paddingTopDimen")
+
     val configurationBasedDimensions: Flow<ConfigurationBasedDimensions> =
         interactor.configurationBasedDimensions
             .map {
                 val marginTop =
-                    if (it.useLargeScreenHeader) it.marginTopLargeScreen else it.marginTop
+                    when {
+                        // y position of the NSSL in the window needs to be 0 under scene container
+                        SceneContainerFlag.isEnabled -> 0
+                        it.useLargeScreenHeader -> it.marginTopLargeScreen
+                        else -> it.marginTop
+                    }
                 ConfigurationBasedDimensions(
                     marginStart = if (it.useSplitShade) 0 else it.marginHorizontal,
                     marginEnd = it.marginHorizontal,
                     marginBottom = it.marginBottom,
                     marginTop = marginTop,
                     useSplitShade = it.useSplitShade,
-                    paddingTop =
-                        if (it.useSplitShade) {
-                            marginTop
-                        } else {
-                            0
-                        },
                 )
             }
             .distinctUntilChanged()
@@ -341,16 +354,16 @@ constructor(
         combine(
                 isOnLockscreenWithoutShade,
                 keyguardInteractor.notificationContainerBounds,
-                configurationBasedDimensions,
+                paddingTopDimen,
                 interactor.topPosition
                     .sampleCombine(
                         keyguardTransitionInteractor.isInTransitionToAnyState,
                         shadeInteractor.qsExpansion,
                     )
                     .onStart { emit(Triple(0f, false, 0f)) }
-            ) { onLockscreen, bounds, config, (top, isInTransitionToAnyState, qsExpansion) ->
+            ) { onLockscreen, bounds, paddingTop, (top, isInTransitionToAnyState, qsExpansion) ->
                 if (onLockscreen) {
-                    bounds.copy(top = bounds.top - config.paddingTop)
+                    bounds.copy(top = bounds.top - paddingTop)
                 } else {
                     // When QS expansion > 0, it should directly set the top padding so do not
                     // animate it
@@ -546,6 +559,8 @@ constructor(
      * translated as the keyguard fades out.
      */
     fun translationY(params: BurnInParameters): Flow<Float> {
+        // with SceneContainer, x translation is handled by views, y is handled by compose
+        SceneContainerFlag.assertInLegacyMode()
         return combine(
                 aodBurnInViewModel
                     .movement(params)
@@ -644,6 +659,5 @@ constructor(
         val marginEnd: Int,
         val marginBottom: Int,
         val useSplitShade: Boolean,
-        val paddingTop: Int,
     )
 }

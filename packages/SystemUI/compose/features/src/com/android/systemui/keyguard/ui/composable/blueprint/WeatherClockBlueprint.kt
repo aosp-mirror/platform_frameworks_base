@@ -149,6 +149,7 @@ constructor(
                         if (areNotificationsVisible) {
                             with(notificationSection) {
                                 Notifications(
+                                    burnInParams = burnIn.parameters,
                                     modifier = Modifier.fillMaxWidth().weight(weight = 1f)
                                 )
                             }
@@ -375,6 +376,7 @@ constructor(
                                         )
                                     }
                                 Notifications(
+                                    burnInParams = burnIn.parameters,
                                     modifier =
                                         Modifier.fillMaxHeight()
                                             .weight(weight = 1f)
