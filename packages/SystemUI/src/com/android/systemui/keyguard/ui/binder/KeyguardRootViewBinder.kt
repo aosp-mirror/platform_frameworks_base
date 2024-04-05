@@ -41,6 +41,9 @@ import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.shared.model.TintedIcon
 import com.android.systemui.common.ui.ConfigurationState
+import com.android.systemui.common.ui.view.onApplyWindowInsets
+import com.android.systemui.common.ui.view.onLayoutChanged
+import com.android.systemui.common.ui.view.onTouchListener
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
@@ -64,6 +67,7 @@ import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.temporarydisplay.ViewPriority
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo
+import com.android.systemui.util.kotlin.DisposableHandles
 import com.android.systemui.util.ui.AnimatedValue
 import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.stopAnimating
@@ -99,16 +103,19 @@ object KeyguardRootViewBinder {
         keyguardViewMediator: KeyguardViewMediator?,
         mainImmediateDispatcher: CoroutineDispatcher,
     ): DisposableHandle {
-        var onLayoutChangeListener: OnLayoutChange? = null
+        val disposables = DisposableHandles()
         val childViews = mutableMapOf<Int, View>()
 
         if (KeyguardBottomAreaRefactor.isEnabled) {
-            view.setOnTouchListener { _, event ->
-                if (falsingManager?.isFalseTap(FalsingManager.LOW_PENALTY) == false) {
-                    viewModel.setRootViewLastTapPosition(Point(event.x.toInt(), event.y.toInt()))
+            disposables +=
+                view.onTouchListener { _, event ->
+                    if (falsingManager?.isFalseTap(FalsingManager.LOW_PENALTY) == false) {
+                        viewModel.setRootViewLastTapPosition(
+                            Point(event.x.toInt(), event.y.toInt())
+                        )
+                    }
+                    false
                 }
-                false
-            }
         }
 
         val burnInParams = MutableStateFlow(BurnInParameters())
@@ -117,7 +124,7 @@ object KeyguardRootViewBinder {
                 alpha = { view.alpha },
             )
 
-        val disposableHandle =
+        disposables +=
             view.repeatWhenAttached(mainImmediateDispatcher) {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
                     launch("$TAG#occludingAppDeviceEntryMessageViewModel.message") {
@@ -346,8 +353,7 @@ object KeyguardRootViewBinder {
             }
         }
 
-        onLayoutChangeListener = OnLayoutChange(viewModel, childViews, burnInParams)
-        view.addOnLayoutChangeListener(onLayoutChangeListener)
+        disposables += view.onLayoutChanged(OnLayoutChange(viewModel, childViews, burnInParams))
 
         // Views will be added or removed after the call to bind(). This is needed to avoid many
         // calls to findViewById
@@ -362,24 +368,21 @@ object KeyguardRootViewBinder {
                 }
             }
         )
-
-        view.setOnApplyWindowInsetsListener { v: View, insets: WindowInsets ->
-            val insetTypes = WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
-            burnInParams.update { current ->
-                current.copy(topInset = insets.getInsetsIgnoringVisibility(insetTypes).top)
-            }
-            insets
+        disposables += DisposableHandle {
+            view.setOnHierarchyChangeListener(null)
+            childViews.clear()
         }
 
-        return object : DisposableHandle {
-            override fun dispose() {
-                disposableHandle.dispose()
-                view.removeOnLayoutChangeListener(onLayoutChangeListener)
-                view.setOnHierarchyChangeListener(null)
-                view.setOnApplyWindowInsetsListener(null)
-                childViews.clear()
+        disposables +=
+            view.onApplyWindowInsets { _: View, insets: WindowInsets ->
+                val insetTypes = WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
+                burnInParams.update { current ->
+                    current.copy(topInset = insets.getInsetsIgnoringVisibility(insetTypes).top)
+                }
+                insets
             }
-        }
+
+        return disposables
     }
 
     /**

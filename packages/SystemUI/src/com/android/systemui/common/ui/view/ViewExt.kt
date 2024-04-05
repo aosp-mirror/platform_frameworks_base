@@ -46,8 +46,25 @@ inline fun <reified T : View> View.getNearestParent(): T? {
 }
 
 /** Adds a [View.OnLayoutChangeListener] and provides a [DisposableHandle] for teardown. */
-fun View.onLayoutChanged(onLayoutChanged: (v: View) -> Unit): DisposableHandle {
-    val listener = View.OnLayoutChangeListener { v, _, _, _, _, _, _, _, _ -> onLayoutChanged(v) }
+fun View.onLayoutChanged(onLayoutChanged: (v: View) -> Unit): DisposableHandle =
+    onLayoutChanged { v, _, _, _, _, _, _, _, _ ->
+        onLayoutChanged(v)
+    }
+
+/** Adds the [View.OnLayoutChangeListener] and provides a [DisposableHandle] for teardown. */
+fun View.onLayoutChanged(listener: View.OnLayoutChangeListener): DisposableHandle {
     addOnLayoutChangeListener(listener)
     return DisposableHandle { removeOnLayoutChangeListener(listener) }
+}
+
+/** Adds a [View.OnApplyWindowInsetsListener] and provides a [DisposableHandle] for teardown. */
+fun View.onApplyWindowInsets(listener: View.OnApplyWindowInsetsListener): DisposableHandle {
+    setOnApplyWindowInsetsListener(listener)
+    return DisposableHandle { setOnApplyWindowInsetsListener(null) }
+}
+
+/** Adds a [View.OnTouchListener] and provides a [DisposableHandle] for teardown. */
+fun View.onTouchListener(listener: View.OnTouchListener): DisposableHandle {
+    setOnTouchListener(listener)
+    return DisposableHandle { setOnTouchListener(null) }
 }
