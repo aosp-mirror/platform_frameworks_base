@@ -9900,6 +9900,21 @@ public class CarrierConfigManager {
             "satellite_information_redirect_url_string";
 
     /**
+     * An int array that contains default capabilities for carrier enabled satellite roaming.
+     * If any PLMN is provided from the entitlement server, and it is not listed in
+     * {@link #KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE}, default capabilities
+     * will be used instead.
+     * <p>
+     * The default capabilities are
+     * {@link NetworkRegistrationInfo#SERVICE_TYPE_SMS}, and
+     * {@link NetworkRegistrationInfo#SERVICE_TYPE_MMS}
+     *
+     * @hide
+     */
+    public static final String KEY_CARRIER_ROAMING_SATELLITE_DEFAULT_SERVICES_INT_ARRAY =
+            "carrier_roaming_satellite_default_services_int_array";
+
+    /**
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
      * the default APN (i.e. internet) will be used for tethering.
      *
@@ -11045,6 +11060,11 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL, false);
         sDefaults.putString(KEY_SATELLITE_ENTITLEMENT_APP_NAME_STRING, "androidSatmode");
         sDefaults.putString(KEY_SATELLITE_INFORMATION_REDIRECT_URL_STRING, "");
+        sDefaults.putIntArray(KEY_CARRIER_ROAMING_SATELLITE_DEFAULT_SERVICES_INT_ARRAY,
+                new int[] {
+                        NetworkRegistrationInfo.SERVICE_TYPE_SMS,
+                        NetworkRegistrationInfo.SERVICE_TYPE_MMS
+                });
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
