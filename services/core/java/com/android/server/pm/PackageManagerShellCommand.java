@@ -3387,6 +3387,18 @@ class PackageManagerShellCommand extends ShellCommand {
                     }
                     sessionParams.setEnableRollback(true, rollbackStrategy);
                     break;
+                case "--rollback-impact-level":
+                    if (!Flags.recoverabilityDetection()) {
+                        throw new IllegalArgumentException("Unknown option " + opt);
+                    }
+                    int rollbackImpactLevel = Integer.parseInt(peekNextArg());
+                    if (rollbackImpactLevel < PackageManager.ROLLBACK_USER_IMPACT_LOW
+                            || rollbackImpactLevel
+                                    > PackageManager.ROLLBACK_USER_IMPACT_ONLY_MANUAL) {
+                        throw new IllegalArgumentException(
+                            rollbackImpactLevel + " is not a valid rollback impact level.");
+                    }
+                    sessionParams.setRollbackImpactLevel(rollbackImpactLevel);
                 case "--staged-ready-timeout":
                     params.stagedReadyTimeoutMs = Long.parseLong(getNextArgRequired());
                     break;
@@ -4571,6 +4583,11 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      --full: cause the app to be installed as a non-ephemeral full app");
         pw.println("      --enable-rollback: enable rollbacks for the upgrade.");
         pw.println("          0=restore (default), 1=wipe, 2=retain");
+        if (Flags.recoverabilityDetection()) {
+            pw.println(
+                    "      --rollback-impact-level: set device impact required for rollback.");
+            pw.println("          0=low (default), 1=high, 2=manual only");
+        }
         pw.println("      --install-location: force the install location:");
         pw.println("          0=auto, 1=internal only, 2=prefer external");
         pw.println("      --install-reason: indicates why the app is being installed:");
