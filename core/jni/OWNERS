@@ -110,3 +110,6 @@ per-file android_database_SQLite* = file:/SQLITE_OWNERS
 
 # PerformanceHintManager
 per-file android_os_PerformanceHintManager.cpp = file:/ADPF_OWNERS
+
+# IF Tools
+per-file android_tracing_Perfetto* = file:platform/development:/tools/winscope/OWNERS
