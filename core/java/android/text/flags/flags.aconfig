@@ -160,3 +160,14 @@ flag {
   description: "Feature flag for showing error message when user tries stylus handwriting on a text field which doesn't support it"
   bug: "297962571"
 }
+
+flag {
+  name: "fix_font_update_failure"
+  namespace: "text"
+  description: "There was a bug of updating system font from Android 13 to 14. This flag for fixing the migration failure."
+  is_fixed_read_only: true
+  bug: "331717791"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
