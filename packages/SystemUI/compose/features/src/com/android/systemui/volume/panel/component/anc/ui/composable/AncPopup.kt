@@ -19,6 +19,7 @@ package com.android.systemui.volume.panel.component.anc.ui.composable
 import android.content.Context
 import android.view.ContextThemeWrapper
 import android.view.View
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -55,6 +56,7 @@ constructor(
     @Composable
     private fun Title() {
         Text(
+            modifier = Modifier.basicMarquee(),
             text = stringResource(R.string.volume_panel_noise_control_title),
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center,
