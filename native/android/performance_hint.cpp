@@ -41,16 +41,15 @@ using namespace aidl::android::os;
 
 using namespace std::chrono_literals;
 
-using HalSessionHint = aidl::android::hardware::power::SessionHint;
-using HalSessionMode = aidl::android::hardware::power::SessionMode;
-using HalWorkDuration = aidl::android::hardware::power::WorkDuration;
+// Namespace for AIDL types coming from the PowerHAL
+namespace hal = aidl::android::hardware::power;
 
 using android::base::StringPrintf;
 
 struct APerformanceHintSession;
 
 constexpr int64_t SEND_HINT_TIMEOUT = std::chrono::nanoseconds(100ms).count();
-struct AWorkDuration : public HalWorkDuration {};
+struct AWorkDuration : public hal::WorkDuration {};
 
 struct APerformanceHintManager {
 public:
@@ -115,7 +114,7 @@ private:
     // Last hint reported from sendHint indexed by hint value
     std::vector<int64_t> mLastHintSentTimestamp;
     // Cached samples
-    std::vector<HalWorkDuration> mActualWorkDurations;
+    std::vector<hal::WorkDuration> mActualWorkDurations;
     std::string mSessionName;
     static int32_t sIDCounter;
     // The most recent set of thread IDs
@@ -207,8 +206,9 @@ APerformanceHintSession::APerformanceHintSession(std::shared_ptr<IHintManager> h
         mTargetDurationNanos(targetDurationNanos),
         mFirstTargetMetTimestamp(0),
         mLastTargetMetTimestamp(0) {
-    const std::vector<HalSessionHint> sessionHintRange{ndk::enum_range<HalSessionHint>().begin(),
-                                                       ndk::enum_range<HalSessionHint>().end()};
+    const std::vector<hal::SessionHint> sessionHintRange{ndk::enum_range<hal::SessionHint>()
+                                                                 .begin(),
+                                                         ndk::enum_range<hal::SessionHint>().end()};
 
     mLastHintSentTimestamp = std::vector<int64_t>(sessionHintRange.size(), 0);
     mSessionName = android::base::StringPrintf("ADPF Session %" PRId32, ++sIDCounter);
@@ -246,10 +246,10 @@ int APerformanceHintSession::updateTargetWorkDuration(int64_t targetDurationNano
 }
 
 int APerformanceHintSession::reportActualWorkDuration(int64_t actualDurationNanos) {
-    HalWorkDuration workDuration{.durationNanos = actualDurationNanos,
-                                 .workPeriodStartTimestampNanos = 0,
-                                 .cpuDurationNanos = actualDurationNanos,
-                                 .gpuDurationNanos = 0};
+    hal::WorkDuration workDuration{.durationNanos = actualDurationNanos,
+                                   .workPeriodStartTimestampNanos = 0,
+                                   .cpuDurationNanos = actualDurationNanos,
+                                   .gpuDurationNanos = 0};
 
     return reportActualWorkDurationInternal(static_cast<AWorkDuration*>(&workDuration));
 }
@@ -323,7 +323,8 @@ int APerformanceHintSession::getThreadIds(int32_t* const threadIds, size_t* size
 
 int APerformanceHintSession::setPreferPowerEfficiency(bool enabled) {
     ndk::ScopedAStatus ret =
-            mHintSession->setMode(static_cast<int32_t>(HalSessionMode::POWER_EFFICIENCY), enabled);
+            mHintSession->setMode(static_cast<int32_t>(hal::SessionMode::POWER_EFFICIENCY),
+                                  enabled);
 
     if (!ret.isOk()) {
         ALOGE("%s: HintSession setPreferPowerEfficiency failed: %s", __FUNCTION__,
