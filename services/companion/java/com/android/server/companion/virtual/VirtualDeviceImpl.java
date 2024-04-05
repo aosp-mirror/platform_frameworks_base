@@ -28,8 +28,6 @@ import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CAMERA;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CLIPBOARD;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
 import static android.content.pm.PackageManager.ACTION_REQUEST_PERMISSIONS;
-import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
-import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.companion.virtualdevice.flags.Flags.virtualCameraServiceDiscovery;
 
 import android.annotation.EnforcePermission;
@@ -1150,8 +1148,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 Flags.vdmCustomHome() ? mParams.getHomeComponent() : null;
 
         final GenericWindowPolicyController gwpc = new GenericWindowPolicyController(
-                FLAG_SECURE,
-                SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
+                WindowManager.LayoutParams.FLAG_SECURE,
+                WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
                 mAttributionSource,
                 getAllowedUserHandles(),
                 activityLaunchAllowedByDefault,
@@ -1265,7 +1263,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         // if the secure window is shown on a non-secure virtual display.
         DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
         Display display = displayManager.getDisplay(displayId);
-        if ((display.getFlags() & FLAG_SECURE) == 0) {
+        if ((display.getFlags() & Display.FLAG_SECURE) == 0) {
             showToastWhereUidIsRunning(uid, com.android.internal.R.string.vdm_secure_window,
                     Toast.LENGTH_LONG, mContext.getMainLooper());
 
