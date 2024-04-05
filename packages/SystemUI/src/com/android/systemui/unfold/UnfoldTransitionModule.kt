@@ -19,6 +19,7 @@ package com.android.systemui.unfold
 import android.content.Context
 import android.hardware.devicestate.DeviceStateManager
 import android.os.SystemProperties
+import com.android.internal.foldables.FoldLockSettingAvailabilityProvider
 import com.android.systemui.CoreStartable
 import com.android.systemui.Flags
 import com.android.systemui.dagger.qualifiers.Application
@@ -174,6 +175,12 @@ class UnfoldTransitionModule {
     @Singleton
     fun provideDisplaySwitchLatencyLogger(): DisplaySwitchLatencyLogger =
         DisplaySwitchLatencyLogger()
+
+    @Provides
+    @Singleton
+    fun provideFoldLockSettingAvailabilityProvider(
+        context: Context
+    ): FoldLockSettingAvailabilityProvider = FoldLockSettingAvailabilityProvider(context.resources)
 
     @Module
     interface Bindings {
