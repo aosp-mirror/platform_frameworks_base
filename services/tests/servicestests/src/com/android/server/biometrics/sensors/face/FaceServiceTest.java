@@ -176,6 +176,21 @@ public class FaceServiceTest {
     }
 
     @Test
+    @RequiresFlagsEnabled({Flags.FLAG_DE_HIDL, Flags.FLAG_FACE_VHAL_FEATURE})
+    public void registerAuthenticatorsLegacy_virtualFaceOnly() throws Exception {
+        initService();
+        Settings.Secure.putInt(mSettingsRule.mockContentResolver(mContext),
+                Settings.Secure.BIOMETRIC_FACE_VIRTUAL_ENABLED, 1);
+
+        mFaceService.mServiceWrapper.registerAuthenticatorsLegacy(mFaceSensorConfigurations);
+        waitForRegistration();
+
+        verify(mIBiometricService).registerAuthenticator(eq(ID_VIRTUAL),
+                eq(BiometricAuthenticator.TYPE_FACE),
+                eq(Utils.propertyStrengthToAuthenticatorStrength(STRENGTH_STRONG)), any());
+    }
+
+    @Test
     @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
     public void registerAuthenticatorsLegacy_virtualAlwaysWhenNoOther() throws Exception {
         mFaceSensorConfigurations = new FaceSensorConfigurations(false);
