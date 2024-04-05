@@ -17,7 +17,7 @@
 #pragma once
 
 #include "SkRefCnt.h"
-#include "SkiaPipeline.h"
+#include "pipeline/skia/SkiaGpuPipeline.h"
 #include "renderstate/RenderState.h"
 #include "renderthread/HardwareBufferRenderParams.h"
 #include "renderthread/VulkanManager.h"
@@ -30,7 +30,7 @@ namespace android {
 namespace uirenderer {
 namespace skiapipeline {
 
-class SkiaVulkanPipeline : public SkiaPipeline, public IGpuContextCallback {
+class SkiaVulkanPipeline : public SkiaGpuPipeline, public IGpuContextCallback {
 public:
     explicit SkiaVulkanPipeline(renderthread::RenderThread& thread);
     virtual ~SkiaVulkanPipeline();
