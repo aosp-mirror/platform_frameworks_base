@@ -196,7 +196,12 @@ final class UpdatableFontDir {
                 File signatureFile = new File(dir, FONT_SIGNATURE_FILE);
                 if (!signatureFile.exists()) {
                     Slog.i(TAG, "The signature file is missing.");
-                    return;
+                    if (com.android.text.flags.Flags.fixFontUpdateFailure()) {
+                        return;
+                    } else {
+                        FileUtils.deleteContentsAndDir(dir);
+                        continue;
+                    }
                 }
                 byte[] signature;
                 try {
@@ -221,33 +226,39 @@ final class UpdatableFontDir {
 
                 FontFileInfo fontFileInfo = validateFontFile(fontFile, signature);
                 if (fontConfig == null) {
-                    // Use preinstalled font config for checking revision number.
-                    fontConfig = mConfigSupplier.apply(Collections.emptyMap());
+                    if (com.android.text.flags.Flags.fixFontUpdateFailure()) {
+                        // Use preinstalled font config for checking revision number.
+                        fontConfig = mConfigSupplier.apply(Collections.emptyMap());
+                    } else {
+                        fontConfig = getSystemFontConfig();
+                    }
                 }
                 addFileToMapIfSameOrNewer(fontFileInfo, fontConfig, true /* deleteOldFile */);
             }
 
-            // Treat as error if post script name of font family was not installed.
-            for (int i = 0; i < config.fontFamilies.size(); ++i) {
-                FontUpdateRequest.Family family = config.fontFamilies.get(i);
-                for (int j = 0; j < family.getFonts().size(); ++j) {
-                    FontUpdateRequest.Font font = family.getFonts().get(j);
-                    if (mFontFileInfoMap.containsKey(font.getPostScriptName())) {
-                        continue;
-                    }
+            if (com.android.text.flags.Flags.fixFontUpdateFailure()) {
+                // Treat as error if post script name of font family was not installed.
+                for (int i = 0; i < config.fontFamilies.size(); ++i) {
+                    FontUpdateRequest.Family family = config.fontFamilies.get(i);
+                    for (int j = 0; j < family.getFonts().size(); ++j) {
+                        FontUpdateRequest.Font font = family.getFonts().get(j);
+                        if (mFontFileInfoMap.containsKey(font.getPostScriptName())) {
+                            continue;
+                        }
 
-                    if (fontConfig == null) {
-                        fontConfig = mConfigSupplier.apply(Collections.emptyMap());
-                    }
+                        if (fontConfig == null) {
+                            fontConfig = mConfigSupplier.apply(Collections.emptyMap());
+                        }
 
-                    if (getFontByPostScriptName(font.getPostScriptName(), fontConfig) != null) {
-                        continue;
-                    }
+                        if (getFontByPostScriptName(font.getPostScriptName(), fontConfig) != null) {
+                            continue;
+                        }
 
-                    Slog.e(TAG, "Unknown font that has PostScript name "
-                            + font.getPostScriptName() + " is requested in FontFamily "
-                            + family.getName());
-                    return;
+                        Slog.e(TAG, "Unknown font that has PostScript name "
+                                + font.getPostScriptName() + " is requested in FontFamily "
+                                + family.getName());
+                        return;
+                    }
                 }
             }
 
@@ -262,7 +273,9 @@ final class UpdatableFontDir {
                 mFontFileInfoMap.clear();
                 mLastModifiedMillis = 0;
                 FileUtils.deleteContents(mFilesDir);
-                mConfigFile.delete();
+                if (com.android.text.flags.Flags.fixFontUpdateFailure()) {
+                    mConfigFile.delete();
+                }
             }
         }
     }
