@@ -30,7 +30,7 @@ import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricRequestConstants;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.security.KeyStore;
+import android.security.KeyStoreAuthorization;
 import android.util.EventLog;
 import android.util.Slog;
 
@@ -255,7 +255,7 @@ public abstract class AuthenticationClient<T, O extends AuthenticateOptions>
 
             // For BP, BiometricService will add the authToken to Keystore.
             if (!isBiometricPrompt() && mIsStrongBiometric) {
-                final int result = KeyStore.getInstance().addAuthToken(byteToken);
+                final int result = KeyStoreAuthorization.getInstance().addAuthToken(byteToken);
                 if (result != 0) {
                     Slog.d(TAG, "Error adding auth token : " + result);
                 } else {
