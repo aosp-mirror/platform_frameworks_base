@@ -17,6 +17,7 @@
 #pragma once
 
 #include <android/performance_hint.h>
+#include <private/performance_hint_private.h>
 
 #include <future>
 #include <optional>
@@ -80,9 +81,10 @@ private:
         virtual ~HintSessionBinding() = default;
         virtual void init();
         APerformanceHintManager* (*getManager)();
-        APerformanceHintSession* (*createSession)(APerformanceHintManager* manager,
-                                                  const int32_t* tids, size_t tidCount,
-                                                  int64_t defaultTarget) = nullptr;
+        APerformanceHintSession* (*createSessionInternal)(APerformanceHintManager* manager,
+                                                          const int32_t* tids, size_t tidCount,
+                                                          int64_t defaultTarget,
+                                                          SessionTag tag) = nullptr;
         void (*closeSession)(APerformanceHintSession* session) = nullptr;
         void (*updateTargetWorkDuration)(APerformanceHintSession* session,
                                          int64_t targetDuration) = nullptr;

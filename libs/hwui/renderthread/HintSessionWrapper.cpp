@@ -45,7 +45,7 @@ void HintSessionWrapper::HintSessionBinding::init() {
     LOG_ALWAYS_FATAL_IF(handle_ == nullptr, "Failed to dlopen libandroid.so!");
 
     BIND_APH_METHOD(getManager);
-    BIND_APH_METHOD(createSession);
+    BIND_APH_METHOD(createSessionInternal);
     BIND_APH_METHOD(closeSession);
     BIND_APH_METHOD(updateTargetWorkDuration);
     BIND_APH_METHOD(reportActualWorkDuration);
@@ -122,7 +122,8 @@ bool HintSessionWrapper::init() {
     int64_t targetDurationNanos =
             mLastTargetWorkDuration == 0 ? kDefaultTargetDuration : mLastTargetWorkDuration;
     mHintSessionFuture = CommonPool::async([=, this, tids = mPermanentSessionTids] {
-        return mBinding->createSession(manager, tids.data(), tids.size(), targetDurationNanos);
+        return mBinding->createSessionInternal(manager, tids.data(), tids.size(),
+                                               targetDurationNanos, SessionTag::HWUI);
     });
     return false;
 }
