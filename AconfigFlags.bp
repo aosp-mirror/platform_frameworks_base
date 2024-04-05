@@ -618,6 +618,19 @@ java_aconfig_library {
     ],
 }
 
+java_aconfig_library {
+    name: "android.permission.flags-aconfig-java-host",
+    aconfig_declarations: "android.permission.flags-aconfig",
+    host_supported: true,
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+    min_sdk_version: "30",
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.permission",
+        "com.android.nfcservices",
+    ],
+}
+
 // SQLite
 aconfig_declarations {
     name: "android.database.sqlite-aconfig",
