@@ -6384,6 +6384,12 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_KEEP_CLEAR_RECTS_CHANGED";
                 case MSG_REFRESH_POINTER_ICON:
                     return "MSG_REFRESH_POINTER_ICON";
+                case MSG_TOUCH_BOOST_TIMEOUT:
+                    return "MSG_TOUCH_BOOST_TIMEOUT";
+                case MSG_CHECK_INVALIDATION_IDLE:
+                    return "MSG_CHECK_INVALIDATION_IDLE";
+                case MSG_FRAME_RATE_SETTING:
+                    return "MSG_FRAME_RATE_SETTING";
             }
             return super.getMessageName(message);
         }
