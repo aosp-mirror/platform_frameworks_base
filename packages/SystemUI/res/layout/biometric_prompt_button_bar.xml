@@ -17,12 +17,13 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:theme="@style/Theme.SystemUI.Dialog"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <!-- Negative Button, reserved for app -->
     <Button
         android:id="@+id/button_negative"
-        style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
+        style="@style/Widget.Dialog.Button.BorderButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
@@ -36,7 +37,7 @@
     <!-- Cancel Button, replaces negative button when biometric is accepted -->
     <Button
         android:id="@+id/button_cancel"
-        style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
+        style="@style/Widget.Dialog.Button.BorderButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
@@ -49,7 +50,7 @@
     <!-- "Use Credential" Button, replaces if device credential is allowed -->
     <Button
         android:id="@+id/button_use_credential"
-        style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
+        style="@style/Widget.Dialog.Button.BorderButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
@@ -61,7 +62,7 @@
     <!-- Positive Button -->
     <Button
         android:id="@+id/button_confirm"
-        style="@*android:style/Widget.DeviceDefault.Button.Colored"
+        style="@style/Widget.Dialog.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
@@ -76,7 +77,7 @@
     <!-- Try Again Button -->
     <Button
         android:id="@+id/button_try_again"
-        style="@*android:style/Widget.DeviceDefault.Button.Colored"
+        style="@style/Widget.Dialog.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
