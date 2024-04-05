@@ -130,7 +130,7 @@ constructor(
                         ActionButtonViewModel(
                             quickShare.getIcon().loadDrawable(context),
                             quickShare.title,
-                            quickShare.title
+                            quickShare.title,
                         ) {
                             debugLog(LogConfig.DEBUG_ACTIONS) { "Quickshare tapped" }
                             onDeferrableActionTapped { result ->
@@ -180,7 +180,7 @@ constructor(
                         ActionButtonViewModel(
                             it.getIcon().loadDrawable(context),
                             it.title,
-                            it.title
+                            it.title,
                         ) {
                             sendPendingIntent(it.actionIntent)
                         }
