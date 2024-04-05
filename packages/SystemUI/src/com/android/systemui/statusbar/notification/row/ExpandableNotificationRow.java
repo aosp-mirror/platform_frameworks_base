@@ -1767,7 +1767,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      */
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
         this(context, attrs, context);
-        Log.wtf(TAG, "This constructor shouldn't be called");
+        Log.e(TAG, "This constructor shouldn't be called");
     }
 
     /**
