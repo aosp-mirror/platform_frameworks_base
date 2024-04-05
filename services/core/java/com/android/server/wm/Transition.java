@@ -112,6 +112,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 
 /**
@@ -232,6 +233,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
      * task, and [B, C] are the transient-hide tasks.
      */
     private ArrayList<Task> mTransientHideTasks;
+
+    @VisibleForTesting
+    ArrayList<Runnable> mTransactionCompletedListeners = null;
 
     /** Custom activity-level animation options and callbacks. */
     private TransitionInfo.AnimationOptions mOverrideOptions;
@@ -1624,6 +1628,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         commitVisibleActivities(transaction);
         commitVisibleWallpapers();
 
+        if (mTransactionCompletedListeners != null) {
+            for (int i = 0; i < mTransactionCompletedListeners.size(); i++) {
+                final Runnable listener = mTransactionCompletedListeners.get(i);
+                transaction.addTransactionCompletedListener(Runnable::run,
+                        (stats) -> listener.run());
+            }
+        }
+
         // Fall-back to the default display if there isn't one participating.
         final DisplayContent primaryDisplay = !mTargetDisplays.isEmpty() ? mTargetDisplays.get(0)
                 : mController.mAtm.mRootWindowContainer.getDefaultDisplay();
@@ -1843,6 +1855,17 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 asyncRotationController.onTransactionCommitTimeout(mCleanupTransaction);
             }
         }
+    }
+
+    /**
+     * Adds a listener that will be executed after the start transaction of this transition
+     * is presented on the screen, the listener will be executed on a binder thread
+     */
+    void addTransactionCompletedListener(Runnable listener) {
+        if (mTransactionCompletedListeners == null) {
+            mTransactionCompletedListeners = new ArrayList<>();
+        }
+        mTransactionCompletedListeners.add(listener);
     }
 
     /**

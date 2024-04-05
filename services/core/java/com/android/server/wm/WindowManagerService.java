@@ -8007,6 +8007,10 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             boolean allWindowsDrawn = false;
             synchronized (mGlobalLock) {
+                if (mRoot.getDefaultDisplay().mDisplayUpdater.waitForTransition(message)) {
+                    // Use the ready-to-play of transition as the signal.
+                    return;
+                }
                 container.waitForAllWindowsDrawn();
                 mWindowPlacerLocked.requestTraversal();
                 mH.removeMessages(H.WAITING_FOR_DRAWN_TIMEOUT, container);

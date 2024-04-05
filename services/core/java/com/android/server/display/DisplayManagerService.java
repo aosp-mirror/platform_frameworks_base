@@ -730,6 +730,7 @@ public final class DisplayManagerService extends SystemService {
             mContext.getSystemService(DeviceStateManager.class).registerCallback(
                     new HandlerExecutor(mHandler), new DeviceStateListener());
 
+            mLogicalDisplayMapper.onWindowManagerReady();
             scheduleTraversalLocked(false);
         }
     }
