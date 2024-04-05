@@ -83,6 +83,7 @@ import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
 import android.window.IWindowContainerToken;
 import android.window.RemoteTransition;
+import android.window.RemoteTransitionStub;
 import android.window.TransitionFilter;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
@@ -280,23 +281,13 @@ public class ShellTransitionTests extends ShellTestCase {
 
         final boolean[] remoteCalled = new boolean[]{false};
         final WindowContainerTransaction remoteFinishWCT = new WindowContainerTransaction();
-        IRemoteTransition testRemote = new IRemoteTransition.Stub() {
+        IRemoteTransition testRemote = new RemoteTransitionStub() {
             @Override
             public void startAnimation(IBinder token, TransitionInfo info,
                     SurfaceControl.Transaction t,
                     IRemoteTransitionFinishedCallback finishCallback) throws RemoteException {
                 remoteCalled[0] = true;
                 finishCallback.onTransitionFinished(remoteFinishWCT, null /* sct */);
-            }
-
-            @Override
-            public void mergeAnimation(IBinder token, TransitionInfo info,
-                    SurfaceControl.Transaction t, IBinder mergeTarget,
-                    IRemoteTransitionFinishedCallback finishCallback) throws RemoteException {
-            }
-
-            @Override
-            public void onTransitionConsumed(IBinder iBinder, boolean b) throws RemoteException {
             }
         };
         IBinder transitToken = new Binder();
@@ -450,23 +441,13 @@ public class ShellTransitionTests extends ShellTestCase {
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
 
         final boolean[] remoteCalled = new boolean[]{false};
-        IRemoteTransition testRemote = new IRemoteTransition.Stub() {
+        IRemoteTransition testRemote = new RemoteTransitionStub() {
             @Override
             public void startAnimation(IBinder token, TransitionInfo info,
                     SurfaceControl.Transaction t,
                     IRemoteTransitionFinishedCallback finishCallback) throws RemoteException {
                 remoteCalled[0] = true;
                 finishCallback.onTransitionFinished(null /* wct */, null /* sct */);
-            }
-
-            @Override
-            public void mergeAnimation(IBinder token, TransitionInfo info,
-                    SurfaceControl.Transaction t, IBinder mergeTarget,
-                    IRemoteTransitionFinishedCallback finishCallback) throws RemoteException {
-            }
-
-            @Override
-            public void onTransitionConsumed(IBinder iBinder, boolean b) throws RemoteException {
             }
         };
 
@@ -500,23 +481,13 @@ public class ShellTransitionTests extends ShellTestCase {
 
         final boolean[] remoteCalled = new boolean[]{false};
         final WindowContainerTransaction remoteFinishWCT = new WindowContainerTransaction();
-        IRemoteTransition testRemote = new IRemoteTransition.Stub() {
+        IRemoteTransition testRemote = new RemoteTransitionStub() {
             @Override
             public void startAnimation(IBinder token, TransitionInfo info,
                     SurfaceControl.Transaction t,
                     IRemoteTransitionFinishedCallback finishCallback) throws RemoteException {
                 remoteCalled[0] = true;
                 finishCallback.onTransitionFinished(remoteFinishWCT, null /* sct */);
-            }
-
-            @Override
-            public void mergeAnimation(IBinder token, TransitionInfo info,
-                    SurfaceControl.Transaction t, IBinder mergeTarget,
-                    IRemoteTransitionFinishedCallback finishCallback) throws RemoteException {
-            }
-
-            @Override
-            public void onTransitionConsumed(IBinder iBinder, boolean b) throws RemoteException {
             }
         };
 
