@@ -28,6 +28,7 @@ import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.android.internal.app.ResolverActivity.EXTRA_CALLING_USER;
+import static com.android.internal.app.ResolverActivity.EXTRA_RESTRICT_TO_SINGLE_USER;
 import static com.android.internal.app.ResolverActivity.EXTRA_SELECTED_PROFILE;
 
 import android.annotation.Nullable;
@@ -190,7 +191,7 @@ public class IntentForwarderActivity extends Activity  {
                 .thenApplyAsync(targetResolveInfo -> {
                     if (isResolverActivityResolveInfo(targetResolveInfo)) {
                         launchResolverActivityWithCorrectTab(intentReceived, className, newIntent,
-                                callingUserId, targetUserId);
+                                callingUserId, targetUserId, false);
                     // When switching to the personal profile, automatically start the activity
                     } else if (className.equals(FORWARD_INTENT_TO_PARENT)) {
                         startActivityAsCaller(newIntent, targetUserId);
@@ -218,7 +219,7 @@ public class IntentForwarderActivity extends Activity  {
                 .thenAcceptAsync(targetResolveInfo -> {
                     if (isResolverActivityResolveInfo(targetResolveInfo)) {
                         launchResolverActivityWithCorrectTab(intentReceived, className, newIntent,
-                                callingUserId, targetUserId);
+                                callingUserId, targetUserId, true);
                     } else {
                         maybeShowUserConsentMiniResolverPrivate(targetResolveInfo, newIntent,
                                 targetUserId);
@@ -490,7 +491,7 @@ public class IntentForwarderActivity extends Activity  {
     }
 
     private void launchResolverActivityWithCorrectTab(Intent intentReceived, String className,
-            Intent newIntent, int callingUserId, int targetUserId) {
+            Intent newIntent, int callingUserId, int targetUserId, boolean singleTabOnly) {
         // When showing the intent resolver, instead of forwarding to the other profile,
         // we launch it in the current user and select the other tab. This fixes b/155874820.
         //
@@ -505,6 +506,9 @@ public class IntentForwarderActivity extends Activity  {
         sanitizeIntent(intentReceived);
         intentReceived.putExtra(EXTRA_SELECTED_PROFILE, selectedProfile);
         intentReceived.putExtra(EXTRA_CALLING_USER, UserHandle.of(callingUserId));
+        if (singleTabOnly) {
+            intentReceived.putExtra(EXTRA_RESTRICT_TO_SINGLE_USER, true);
+        }
         startActivityAsCaller(intentReceived, null, false, userId);
         finish();
     }
