@@ -3889,6 +3889,13 @@
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL"
                 android:protectionLevel="internal|role" />
 
+    <!-- Allows the holder to manage and retrieve max storage limit for admin policies. This
+        permission is only grantable on rooted devices.
+        @TestAPI
+        @hide -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_STORAGE_LIMIT"
+                android:protectionLevel="internal" />
+
     <!-- Allows an application to access EnhancedConfirmationManager.
         @SystemApi
         @FlaggedApi("android.permission.flags.enhanced_confirmation_mode_apis_enabled")

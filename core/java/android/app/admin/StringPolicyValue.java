@@ -30,7 +30,7 @@ public final class StringPolicyValue extends PolicyValue<String> {
 
     public StringPolicyValue(@NonNull String value) {
         super(value);
-        if (Flags.devicePolicySizeTrackingInternalEnabled()) {
+        if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
             PolicySizeVerifier.enforceMaxStringLength(value, "policyValue");
         }
     }

@@ -54,6 +54,7 @@ import static android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY;
 import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
 import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
+import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_INTERNAL_BUG_FIX_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_THEFT_API_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED;
@@ -17552,6 +17553,48 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 return mService.getMaxPolicyStorageLimit(mContext.getPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Force sets the maximum storage size allowed for policies associated with an admin regardless
+     * of the default value set in the system, unlike {@link #setMaxPolicyStorageLimit} which can
+     * only set it to a value higher than the default value set by the system.Setting a limit of -1
+     * effectively removes any storage restrictions.
+     *
+     * @param storageLimit Maximum storage allowed in bytes. Use -1 to disable limits.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(permission.MANAGE_DEVICE_POLICY_STORAGE_LIMIT)
+    @FlaggedApi(FLAG_DEVICE_POLICY_SIZE_TRACKING_INTERNAL_BUG_FIX_ENABLED)
+    public void forceSetMaxPolicyStorageLimit(int storageLimit) {
+        if (mService != null) {
+            try {
+                mService.forceSetMaxPolicyStorageLimit(mContext.getPackageName(), storageLimit);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Retrieves the size of the current policies set by the {@code admin}.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(permission.MANAGE_DEVICE_POLICY_STORAGE_LIMIT)
+    @FlaggedApi(FLAG_DEVICE_POLICY_SIZE_TRACKING_INTERNAL_BUG_FIX_ENABLED)
+    public int getPolicySizeForAdmin(@NonNull EnforcingAdmin admin) {
+        if (mService != null) {
+            try {
+                return mService.getPolicySizeForAdmin(mContext.getPackageName(), admin);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

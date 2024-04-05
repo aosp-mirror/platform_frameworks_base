@@ -45,7 +45,7 @@ public final class UserRestrictionPolicyKey extends PolicyKey {
     @TestApi
     public UserRestrictionPolicyKey(@NonNull String identifier, @NonNull String restriction) {
         super(identifier);
-        if (Flags.devicePolicySizeTrackingInternalEnabled()) {
+        if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
             PolicySizeVerifier.enforceMaxStringLength(restriction, "restriction");
         }
         mRestriction = Objects.requireNonNull(restriction);

@@ -32,7 +32,7 @@ public final class StringSetPolicyValue extends PolicyValue<Set<String>> {
 
     public StringSetPolicyValue(@NonNull Set<String> value) {
         super(value);
-        if (Flags.devicePolicySizeTrackingInternalEnabled()) {
+        if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
             for (String str : value) {
                 PolicySizeVerifier.enforceMaxStringLength(str, "policyValue");
             }

@@ -28,6 +28,17 @@ flag {
 }
 
 flag {
+  name: "device_policy_size_tracking_internal_bug_fix_enabled"
+  namespace: "enterprise"
+  description: "Bug fix for tracking the total policy size and have a max threshold"
+  bug: "281543351"
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
+}
+
+
+flag {
   name: "onboarding_bugreport_v2_enabled"
   is_exported: true
   namespace: "enterprise"
