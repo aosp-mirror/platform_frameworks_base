@@ -631,7 +631,7 @@ constructor(
             // color will need to use wallpaper's extracted color and consider if the
             // wallpaper's color is dark or light.
             val style = themeStyle ?: fetchThemeStyleFromSetting().also { themeStyle = it }
-            val wallpaperColorScheme = ColorScheme(colors, darkTheme = false, style)
+            val wallpaperColorScheme = ColorScheme(colors, false, style)
             val lightClockColor = wallpaperColorScheme.accent1.s100
             val darkClockColor = wallpaperColorScheme.accent2.s600
 
