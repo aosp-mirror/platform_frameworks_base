@@ -32,7 +32,6 @@ import android.hardware.face.FaceManager
 import android.hardware.face.FaceSensorProperties
 import android.hardware.face.FaceSensorPropertiesInternal
 import android.os.CancellationSignal
-import android.view.Display
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId.fakeInstanceId
@@ -54,7 +53,6 @@ import com.android.systemui.deviceentry.shared.model.FaceAuthenticationStatus
 import com.android.systemui.deviceentry.shared.model.FaceDetectionStatus
 import com.android.systemui.deviceentry.shared.model.HelpFaceAuthenticationStatus
 import com.android.systemui.deviceentry.shared.model.SuccessFaceAuthenticationStatus
-import com.android.systemui.display.data.repository.display
 import com.android.systemui.display.data.repository.displayRepository
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FakeFeatureFlags
@@ -697,9 +695,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             )
             runCurrent()
 
-            displayRepository.emit(setOf(display(0, 0, Display.DEFAULT_DISPLAY, Display.STATE_OFF)))
-            displayRepository.emitDisplayChangeEvent(Display.DEFAULT_DISPLAY)
-
+            displayRepository.setDefaultDisplayOff(true)
             runCurrent()
 
             assertThat(canFaceAuthRun()).isTrue()
@@ -717,10 +713,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
                 )
                 runCurrent()
 
-                displayRepository.emit(
-                    setOf(display(0, 0, Display.DEFAULT_DISPLAY, Display.STATE_OFF))
-                )
-                displayRepository.emitDisplayChangeEvent(Display.DEFAULT_DISPLAY)
+                displayRepository.setDefaultDisplayOff(true)
             }
         }
 
@@ -1161,8 +1154,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         faceLockoutResetCallback.value.onLockoutReset(0)
         bouncerRepository.setAlternateVisible(true)
         keyguardRepository.setKeyguardShowing(true)
-        displayRepository.emit(setOf(display(0, 0, Display.DEFAULT_DISPLAY, Display.STATE_ON)))
-        displayRepository.emitDisplayChangeEvent(Display.DEFAULT_DISPLAY)
+        displayRepository.setDefaultDisplayOff(false)
         keyguardTransitionRepository.sendTransitionSteps(
             from = KeyguardState.AOD,
             to = KeyguardState.LOCKSCREEN,
