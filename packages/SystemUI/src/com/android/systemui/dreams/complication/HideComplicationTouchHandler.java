@@ -16,6 +16,7 @@
 
 package com.android.systemui.dreams.complication;
 
+import static com.android.systemui.Flags.removeDreamOverlayHideOnTouch;
 import static com.android.systemui.dreams.complication.dagger.ComplicationModule.COMPLICATIONS_FADE_OUT_DELAY;
 import static com.android.systemui.dreams.complication.dagger.ComplicationModule.COMPLICATIONS_RESTORE_TIMEOUT;
 
@@ -120,7 +121,7 @@ public class HideComplicationTouchHandler implements DreamTouchHandler {
         final boolean bouncerShowing = mStatusBarKeyguardViewManager.isBouncerShowing();
 
         // If other sessions are interested in this touch, do not fade out elements.
-        if (session.getActiveSessionCount() > 1 || bouncerShowing
+        if (removeDreamOverlayHideOnTouch() || session.getActiveSessionCount() > 1 || bouncerShowing
                 || mOverlayStateController.areExitAnimationsRunning()) {
             if (DEBUG) {
                 Log.d(TAG, "not fading. Active session count: " + session.getActiveSessionCount()
