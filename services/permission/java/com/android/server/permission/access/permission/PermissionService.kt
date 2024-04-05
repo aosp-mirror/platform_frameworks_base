@@ -1601,7 +1601,7 @@ class PermissionService(private val service: AccessCheckingService) :
         ) {
             with(policy) { getPermissionFlags(appId, userId, permissionName) }
         } else {
-            if (permissionName !in DEVICE_AWARE_PERMISSIONS) {
+            if (permissionName !in PermissionManager.DEVICE_AWARE_PERMISSIONS) {
                 Slog.i(
                     LOG_TAG,
                     "$permissionName is not device aware permission, " +
@@ -1626,7 +1626,7 @@ class PermissionService(private val service: AccessCheckingService) :
         ) {
             with(policy) { setPermissionFlags(appId, userId, permissionName, flags) }
         } else {
-            if (permissionName !in DEVICE_AWARE_PERMISSIONS) {
+            if (permissionName !in PermissionManager.DEVICE_AWARE_PERMISSIONS) {
                 Slog.i(
                     LOG_TAG,
                     "$permissionName is not device aware permission, " +
@@ -2846,15 +2846,6 @@ class PermissionService(private val service: AccessCheckingService) :
             PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE or
                 PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM or
                 PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER
-
-        /** These permissions are supported for virtual devices. */
-        // TODO: b/298661870 - Use new API to get the list of device aware permissions.
-        val DEVICE_AWARE_PERMISSIONS =
-            if (Flags.deviceAwarePermissionsEnabled()) {
-                setOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
-            } else {
-                emptySet<String>()
-            }
 
         fun getFullerPermission(permissionName: String): String? =
             FULLER_PERMISSIONS[permissionName]
