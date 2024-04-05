@@ -1085,11 +1085,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isUpdateOwnershipEnforcementEnabled =
                 mPm.isUpdateOwnershipEnforcementAvailable()
                         && existingUpdateOwnerPackageName != null;
+        // For an installation that un-archives an app, if the installer doesn't have the
+        // INSTALL_PACKAGES permission, the user should have already been prompted to confirm the
+        // un-archive request. There's no need for another confirmation during the installation.
+        final boolean isInstallUnarchive =
+                (params.installFlags & PackageManager.INSTALL_UNARCHIVE) != 0;
 
         // Device owners and affiliated profile owners are allowed to silently install packages, so
         // the permission check is waived if the installer is the device owner.
         final boolean noUserActionNecessary = isInstallerRoot || isInstallerSystem
-                || isInstallerDeviceOwnerOrAffiliatedProfileOwner() || isEmergencyInstall;
+                || isInstallerDeviceOwnerOrAffiliatedProfileOwner() || isEmergencyInstall
+                || isInstallUnarchive;
 
         if (noUserActionNecessary) {
             return userActionNotTypicallyNeededResponse;
