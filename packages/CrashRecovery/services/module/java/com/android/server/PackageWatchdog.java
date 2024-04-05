@@ -51,11 +51,11 @@ import android.util.IndentingPrintWriter;
 import android.util.LongArrayQueue;
 import android.util.Slog;
 import android.util.Xml;
+import android.util.XmlUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.os.BackgroundThread;
-import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.BackgroundThread;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 
