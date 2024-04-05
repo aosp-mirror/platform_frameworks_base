@@ -1256,6 +1256,30 @@ public final class UserManagerTest {
 
     @MediumTest
     @Test
+    public void testDefaultUserRestrictionsForPrivateProfile() {
+        assumeTrue(mUserManager.canAddPrivateProfile());
+        final int currentUserId = ActivityManager.getCurrentUser();
+        UserInfo privateProfileInfo = null;
+        try {
+            privateProfileInfo = createProfileForUser("Private",
+                    UserManager.USER_TYPE_PROFILE_PRIVATE, currentUserId);
+            assertThat(privateProfileInfo).isNotNull();
+        } catch (Exception e) {
+            fail("Creation of private profile failed due to " + e.getMessage());
+        }
+        assertDefaultPrivateProfileRestrictions(privateProfileInfo.getUserHandle());
+    }
+
+    private void assertDefaultPrivateProfileRestrictions(UserHandle userHandle) {
+        Bundle defaultPrivateProfileRestrictions =
+                UserTypeFactory.getDefaultPrivateProfileRestrictions();
+        for (String restriction : defaultPrivateProfileRestrictions.keySet()) {
+            assertThat(mUserManager.hasUserRestrictionForUser(restriction, userHandle)).isTrue();
+        }
+    }
+
+    @MediumTest
+    @Test
     public void testAddRestrictedProfile() throws Exception {
         if (isAutomotive() || UserManager.isHeadlessSystemUserMode()) return;
         assertWithMessage("There should be no associated restricted profiles before the test")
