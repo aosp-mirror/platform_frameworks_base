@@ -13,27 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.platform.test.ravenwood.bivalenttest;
+package com.android.ravenwoodtest.bivalenttest;
 
-import android.platform.test.annotations.DisabledOnRavenwood;
-import android.platform.test.ravenwood.RavenwoodClassRule;
-import android.platform.test.ravenwood.RavenwoodRule;
+import static org.junit.Assert.assertEquals;
+
+import android.util.ArrayMap;
+import android.util.Size;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import org.junit.Assert;
-import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Map;
+
+// Tests for calling simple Android APIs.
 @RunWith(AndroidJUnit4.class)
-@DisabledOnRavenwood
-public class RavenwoodClassRuleDeviceOnlyTest {
-    @ClassRule
-    public static final RavenwoodClassRule sRavenwood = new RavenwoodClassRule();
+public class RavenwoodAndroidApiTest {
+    @Test
+    public void testArrayMapSimple() {
+        final Map<String, String> map = new ArrayMap<>();
+
+        map.put("key1", "value1");
+        assertEquals("value1", map.get("key1"));
+    }
 
     @Test
-    public void testDeviceOnly() {
-        Assert.assertFalse(RavenwoodRule.isOnRavenwood());
+    public void testSizeSimple() {
+        final var size = new Size(1, 2);
+
+        assertEquals(2, size.getHeight());
     }
 }
