@@ -238,6 +238,7 @@ public class ParsingPackageUtils {
      */
     public static final int PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY = 1 << 7;
     public static final int PARSE_APK_IN_APEX = 1 << 9;
+    public static final int PARSE_APEX = 1 << 10;
 
     public static final int PARSE_CHATTY = 1 << 31;
 
@@ -338,6 +339,9 @@ public class ParsingPackageUtils {
         int liteParseFlags = 0;
         if ((flags & PARSE_APK_IN_APEX) != 0) {
             liteParseFlags |= PARSE_APK_IN_APEX;
+        }
+        if ((flags & PARSE_APEX) != 0) {
+            liteParseFlags |= PARSE_APEX;
         }
         final ParseResult<PackageLite> liteResult =
                 ApkLiteParseUtils.parseClusterPackageLite(input, packageDir, liteParseFlags);
@@ -530,7 +534,7 @@ public class ParsingPackageUtils {
 
         afterParseBaseApplication(pkg);
 
-        final ParseResult<ParsingPackage> result = validateBaseApkTags(input, pkg);
+        final ParseResult<ParsingPackage> result = validateBaseApkTags(input, pkg, flags);
         if (result.isError()) {
             return result;
         }
@@ -1012,10 +1016,11 @@ public class ParsingPackageUtils {
             }
         }
 
-        return validateBaseApkTags(input, pkg);
+        return validateBaseApkTags(input, pkg, flags);
     }
 
-    private ParseResult<ParsingPackage> validateBaseApkTags(ParseInput input, ParsingPackage pkg) {
+    private ParseResult<ParsingPackage> validateBaseApkTags(ParseInput input, ParsingPackage pkg,
+            int flags) {
         if (!ParsedAttributionUtils.isCombinationValid(pkg.getAttributions())) {
             return input.error(
                     INSTALL_PARSE_FAILED_BAD_MANIFEST,
@@ -1045,6 +1050,17 @@ public class ParsingPackageUtils {
                 && !pkg.isResizeable()
                 && !pkg.isAnyDensity())) {
             adjustPackageToBeUnresizeableAndUnpipable(pkg);
+        }
+
+        // An Apex package shouldn't have permission declarations
+        final boolean isApex = (flags & PARSE_APEX) != 0;
+        if (android.permission.flags.Flags.ignoreApexPermissions()
+                && isApex && !pkg.getPermissions().isEmpty()) {
+            return input.error(
+                    INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                    pkg.getPackageName()
+                            + " is an APEX package and shouldn't declare permissions."
+            );
         }
 
         return input.success(pkg);
