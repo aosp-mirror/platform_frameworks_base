@@ -69,7 +69,6 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
@@ -87,6 +86,8 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import kotlin.test.assertEquals
+import java.util.Optional
 import org.mockito.Mockito.`when` as whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -138,6 +139,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     private val notificationLaunchAnimationInteractor =
         NotificationLaunchAnimationInteractor(notificationLaunchAnimationRepository)
 
+    private lateinit var falsingCollector: FalsingCollectorFake
     private lateinit var fakeClock: FakeSystemClock
     private lateinit var interactionEventHandlerCaptor: ArgumentCaptor<InteractionEventHandler>
     private lateinit var interactionEventHandler: InteractionEventHandler
@@ -170,11 +172,12 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         mSetFlagsRule.enableFlags(Flags.FLAG_REVAMPED_BOUNCER_MESSAGES)
 
         testScope = TestScope()
+        falsingCollector = FalsingCollectorFake()
         fakeClock = FakeSystemClock()
         underTest =
             NotificationShadeWindowViewController(
                 lockscreenShadeTransitionController,
-                FalsingCollectorFake(),
+                falsingCollector,
                 sysuiStatusBarStateController,
                 dockManager,
                 notificationShadeDepthController,
@@ -564,6 +567,13 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         val keyEvent = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_VOLUME_UP)
         interactionEventHandler.interceptMediaKey(keyEvent)
         verify(sysUIKeyEventHandler).interceptMediaKey(keyEvent)
+    }
+
+    @Test
+    fun forwardsCollectKeyEvent() {
+        val keyEvent = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_A)
+        interactionEventHandler.collectKeyEvent(keyEvent)
+        assertEquals(keyEvent, falsingCollector.lastKeyEvent)
     }
 
     companion object {
