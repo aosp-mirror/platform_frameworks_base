@@ -26,5 +26,12 @@
         }
       ]
     }
+  ],
+  "postsubmit": [
+    {
+      // TODO(b/332974906): Promote in presubmit presubmit-devicepolicy.
+      "name": "CtsDevicePolicyManagerTestCases_NoFlakes_NoLarge",
+      "name": "CtsDevicePolicyManagerTestCases_ParentProfileApiDisabled"
+    }
   ]
 }
