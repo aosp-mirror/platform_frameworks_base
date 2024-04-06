@@ -86,16 +86,21 @@ constructor(
                             if (shouldUseSplitNotificationShade) {
                                 with(notificationSection) {
                                     Notifications(
-                                        Modifier.fillMaxWidth(0.5f)
-                                            .fillMaxHeight()
-                                            .align(alignment = Alignment.TopEnd)
+                                        burnInParams = null,
+                                        modifier =
+                                            Modifier.fillMaxWidth(0.5f)
+                                                .fillMaxHeight()
+                                                .align(alignment = Alignment.TopEnd)
                                     )
                                 }
                             }
                         }
                         if (!shouldUseSplitNotificationShade) {
                             with(notificationSection) {
-                                Notifications(Modifier.weight(weight = 1f))
+                                Notifications(
+                                    burnInParams = null,
+                                    modifier = Modifier.weight(weight = 1f)
+                                )
                             }
                         }
                         if (!isUdfpsVisible && ambientIndicationSectionOptional.isPresent) {

@@ -32,7 +32,6 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape
-import com.android.systemui.statusbar.notification.stack.shared.model.ViewPosition
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationScrollViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.testKosmos
@@ -67,8 +66,8 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
     fun updateBounds() =
         testScope.runTest {
             val radius = MutableStateFlow(32)
-            val viewPosition = MutableStateFlow(ViewPosition(0, 0))
-            val shape by collectLastValue(appearanceViewModel.shadeScrimShape(radius, viewPosition))
+            val leftOffset = MutableStateFlow(0)
+            val shape by collectLastValue(appearanceViewModel.shadeScrimShape(radius, leftOffset))
 
             placeholderViewModel.onScrimBoundsChanged(
                 ShadeScrimBounds(left = 0f, top = 200f, right = 100f, bottom = 550f)
@@ -83,7 +82,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
                     )
                 )
 
-            viewPosition.value = ViewPosition(200, 15)
+            leftOffset.value = 200
             radius.value = 24
             placeholderViewModel.onScrimBoundsChanged(
                 ShadeScrimBounds(left = 210f, top = 200f, right = 300f, bottom = 550f)
@@ -92,7 +91,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
                 .isEqualTo(
                     ShadeScrimShape(
                         bounds =
-                            ShadeScrimBounds(left = 10f, top = 185f, right = 100f, bottom = 535f),
+                            ShadeScrimBounds(left = 10f, top = 200f, right = 100f, bottom = 550f),
                         topRadius = 24,
                         bottomRadius = 0
                     )

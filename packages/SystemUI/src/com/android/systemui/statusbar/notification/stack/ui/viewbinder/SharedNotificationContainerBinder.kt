@@ -28,6 +28,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
@@ -139,10 +140,12 @@ constructor(
                         }
                     }
 
-                    launch {
-                        burnInParams
-                            .flatMapLatest { params -> viewModel.translationY(params) }
-                            .collect { y -> controller.setTranslationY(y) }
+                    if (!SceneContainerFlag.isEnabled) {
+                        launch {
+                            burnInParams
+                                .flatMapLatest { params -> viewModel.translationY(params) }
+                                .collect { y -> controller.setTranslationY(y) }
+                        }
                     }
 
                     launch { viewModel.translationX.collect { x -> controller.translationX = x } }
