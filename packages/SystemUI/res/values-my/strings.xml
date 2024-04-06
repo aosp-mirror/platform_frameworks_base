@@ -501,7 +501,7 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"အက်ပ်ကို ပင်ဖြုတ်လိုက်သည်"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"ဖုန်းခေါ်ရန်"</string>
     <string name="stream_system" msgid="7663148785370565134">"စနစ်"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"အသံမြည်စေသည်"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"ဖုန်းမြည်သံ"</string>
     <string name="stream_music" msgid="2188224742361847580">"မီဒီယာ"</string>
     <string name="stream_alarm" msgid="16058075093011694">"နှိုးစက်"</string>
     <string name="stream_notification" msgid="7930294049046243939">"အကြောင်းကြားချက်"</string>

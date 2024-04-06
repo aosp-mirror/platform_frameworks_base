@@ -308,7 +308,7 @@
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"الوصول إلى جهات اتصالك"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"الموقع الجغرافي"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"الوصول إلى موقع هذا الجهاز"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"التقويم"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"‏تقويم Google"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"الوصول إلى تقويمك"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"‏إرسال رسائل قصيرة SMS وعرضها"</string>
