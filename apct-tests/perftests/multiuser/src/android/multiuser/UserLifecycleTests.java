@@ -366,7 +366,7 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
 
-            stopUser(userId, /* force */true);
+            stopUser(userId);
             mRunner.resumeTimingForNextIteration();
         }
 
@@ -429,7 +429,7 @@ public class UserLifecycleTests {
 
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
-            stopUser(userId, /* force */true);
+            stopUser(userId);
             mRunner.resumeTimingForNextIteration();
         }
 
@@ -545,7 +545,7 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             Log.d(TAG, "Stopping timer");
             switchUserNoCheck(currentUserId);
-            stopUserAfterWaitingForBroadcastIdle(userId, /* force */true);
+            stopUserAfterWaitingForBroadcastIdle(userId);
             attestFalse("Failed to stop user " + userId, mAm.isUserRunning(userId));
             mRunner.resumeTimingForNextIteration();
         }
@@ -571,7 +571,7 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             Log.d(TAG, "Stopping timer");
             switchUserNoCheck(startUser);
-            stopUserAfterWaitingForBroadcastIdle(testUser, true);
+            stopUserAfterWaitingForBroadcastIdle(testUser);
             attestFalse("Failed to stop user " + testUser, mAm.isUserRunning(testUser));
             mRunner.resumeTimingForNextIteration();
         }
@@ -660,7 +660,7 @@ public class UserLifecycleTests {
             mRunner.resumeTiming();
             Log.i(TAG, "Starting timer");
 
-            stopUser(userId, false);
+            stopUser(userId);
 
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
@@ -685,7 +685,7 @@ public class UserLifecycleTests {
             Log.d(TAG, "Starting timer");
             mRunner.resumeTiming();
 
-            stopUser(userId, false);
+            stopUser(userId);
 
             mRunner.pauseTiming();
             Log.d(TAG, "Stopping timer");
@@ -883,7 +883,7 @@ public class UserLifecycleTests {
             final int userId = createManagedProfile();
             // Start the profile initially, then stop it. Similar to setQuietModeEnabled.
             startUserInBackgroundAndWaitForUnlock(userId);
-            stopUserAfterWaitingForBroadcastIdle(userId, true);
+            stopUserAfterWaitingForBroadcastIdle(userId);
             mRunner.resumeTiming();
             Log.i(TAG, "Starting timer");
 
@@ -905,7 +905,7 @@ public class UserLifecycleTests {
         startUserInBackgroundAndWaitForUnlock(userId);
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
-            stopUserAfterWaitingForBroadcastIdle(userId, true);
+            stopUserAfterWaitingForBroadcastIdle(userId);
             mRunner.resumeTiming();
             Log.d(TAG, "Starting timer");
 
@@ -987,7 +987,7 @@ public class UserLifecycleTests {
             installPreexistingApp(userId, DUMMY_PACKAGE_NAME);
             startUserInBackgroundAndWaitForUnlock(userId);
             startApp(userId, DUMMY_PACKAGE_NAME);
-            stopUserAfterWaitingForBroadcastIdle(userId, true);
+            stopUserAfterWaitingForBroadcastIdle(userId);
             SystemClock.sleep(1_000); // 1 second cool-down before re-starting profile.
             mRunner.resumeTiming();
             Log.i(TAG, "Starting timer");
@@ -1019,7 +1019,7 @@ public class UserLifecycleTests {
             installPreexistingApp(userId, DUMMY_PACKAGE_NAME);
             startUserInBackgroundAndWaitForUnlock(userId);
             startApp(userId, DUMMY_PACKAGE_NAME);
-            stopUserAfterWaitingForBroadcastIdle(userId, true);
+            stopUserAfterWaitingForBroadcastIdle(userId);
             SystemClock.sleep(1_000); // 1 second cool-down before re-starting profile.
             mRunner.resumeTiming();
             Log.d(TAG, "Starting timer");
@@ -1144,7 +1144,7 @@ public class UserLifecycleTests {
             mRunner.resumeTiming();
             Log.i(TAG, "Starting timer");
 
-            stopUser(userId, true);
+            stopUser(userId);
 
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
@@ -1168,7 +1168,7 @@ public class UserLifecycleTests {
             mRunner.resumeTiming();
             Log.d(TAG, "Starting timer");
 
-            stopUser(userId, true);
+            stopUser(userId);
 
             mRunner.pauseTiming();
             Log.d(TAG, "Stopping timer");
@@ -1294,15 +1294,15 @@ public class UserLifecycleTests {
      * Do not call this method while timing is on. i.e. between mRunner.resumeTiming() and
      * mRunner.pauseTiming(). Otherwise it would cause the test results to be spiky.
      */
-    private void stopUserAfterWaitingForBroadcastIdle(int userId, boolean force)
+    private void stopUserAfterWaitingForBroadcastIdle(int userId)
             throws RemoteException {
         waitForBroadcastIdle();
-        stopUser(userId, force);
+        stopUser(userId);
     }
 
-    private void stopUser(int userId, boolean force) throws RemoteException {
+    private void stopUser(int userId) throws RemoteException {
         final CountDownLatch latch = new CountDownLatch(1);
-        mIam.stopUser(userId, force /* force */, new IStopUserCallback.Stub() {
+        mIam.stopUserWithCallback(userId, new IStopUserCallback.Stub() {
             @Override
             public void userStopped(int userId) throws RemoteException {
                 latch.countDown();
@@ -1352,7 +1352,7 @@ public class UserLifecycleTests {
         attestTrue("Didn't switch back to user, " + origUser, origUser == mAm.getCurrentUser());
 
         if (stopNewUser) {
-            stopUserAfterWaitingForBroadcastIdle(testUser, true);
+            stopUserAfterWaitingForBroadcastIdle(testUser);
             attestFalse("Failed to stop user " + testUser, mAm.isUserRunning(testUser));
         }
 
@@ -1471,7 +1471,7 @@ public class UserLifecycleTests {
     }
 
     private void removeUser(int userId) throws RemoteException {
-        stopUserAfterWaitingForBroadcastIdle(userId, true);
+        stopUserAfterWaitingForBroadcastIdle(userId);
         try {
             ShellHelper.runShellCommandWithTimeout("pm remove-user -w " + userId,
                     TIMEOUT_IN_SECOND);
@@ -1512,7 +1512,7 @@ public class UserLifecycleTests {
 
             final boolean preStartComplete = mIam.startUserInBackgroundWithListener(userId,
                     preWaiter) && preWaiter.waitForFinish(TIMEOUT_IN_SECOND * 1000);
-            stopUserAfterWaitingForBroadcastIdle(userId, /* force */true);
+            stopUserAfterWaitingForBroadcastIdle(userId);
 
             assertTrue("Pre start was not performed for user" + userId, preStartComplete);
         }

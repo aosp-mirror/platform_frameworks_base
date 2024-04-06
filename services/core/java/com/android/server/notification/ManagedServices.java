@@ -1617,7 +1617,8 @@ abstract public class ManagedServices {
         intent.putExtra(Intent.EXTRA_CLIENT_LABEL, mConfig.clientLabel);
 
         final ActivityOptions activityOptions = ActivityOptions.makeBasic();
-        activityOptions.setIgnorePendingIntentCreatorForegroundState(true);
+        activityOptions.setPendingIntentCreatorBackgroundActivityStartMode(
+                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED);
         final PendingIntent pendingIntent = PendingIntent.getActivity(
                 mContext, 0, new Intent(mConfig.settingsAction), PendingIntent.FLAG_IMMUTABLE,
                 activityOptions.toBundle());

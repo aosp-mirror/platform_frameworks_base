@@ -452,12 +452,14 @@ interface IActivityManager {
             in IBinder resultTo, in String resultWho, int requestCode, int flags,
             in ProfilerInfo profilerInfo, in Bundle options, int userId);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
-    int stopUser(int userid, boolean force, in IStopUserCallback callback);
+    int stopUser(int userid, boolean stopProfileRegardlessOfParent, in IStopUserCallback callback);
+    int stopUserWithCallback(int userid, in IStopUserCallback callback);
+    int stopUserExceptCertainProfiles(int userid, boolean stopProfileRegardlessOfParent, in IStopUserCallback callback);
     /**
-     * Check {@link com.android.server.am.ActivityManagerService#stopUserWithDelayedLocking(int, boolean, IStopUserCallback)}
+     * Check {@link com.android.server.am.ActivityManagerService#stopUserWithDelayedLocking(int, IStopUserCallback)}
      * for details.
      */
-    int stopUserWithDelayedLocking(int userid, boolean force, in IStopUserCallback callback);
+    int stopUserWithDelayedLocking(int userid, in IStopUserCallback callback);
 
     @UnsupportedAppUsage
     void registerUserSwitchObserver(in IUserSwitchObserver observer, in String name);
@@ -499,6 +501,7 @@ interface IActivityManager {
             in String shareDescription);
 
     void requestInteractiveBugReport();
+    void requestBugReportWithExtraAttachment(in Uri extraAttachment);
     void requestFullBugReport();
     void requestRemoteBugReport(long nonce);
     boolean launchBugReportHandlerApp();

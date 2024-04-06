@@ -635,7 +635,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final String EXTRA_DESCRIPTION = "android.intent.extra.DESCRIPTION";
     static final String EXTRA_BUGREPORT_TYPE = "android.intent.extra.BUGREPORT_TYPE";
     static final String EXTRA_BUGREPORT_NONCE = "android.intent.extra.BUGREPORT_NONCE";
-
+    static final String EXTRA_EXTRA_ATTACHMENT_URI =
+            "android.intent.extra.EXTRA_ATTACHMENT_URI";
     /**
      * It is now required for apps to explicitly set either
      * {@link android.content.Context#RECEIVER_EXPORTED} or
@@ -7656,6 +7657,16 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     public void requestBugReportWithDescription(@Nullable String shareTitle,
             @Nullable String shareDescription, int bugreportType, long nonce) {
+        requestBugReportWithDescription(shareTitle, shareDescription, bugreportType, nonce, null);
+    }
+
+    /**
+     * Takes a bugreport using bug report API ({@code BugreportManager}) which gets
+     * triggered by sending a broadcast to Shell. Optionally adds an extra attachment.
+     */
+    public void requestBugReportWithDescription(@Nullable String shareTitle,
+            @Nullable String shareDescription, int bugreportType, long nonce,
+            @Nullable Uri extraAttachment) {
         String type = null;
         switch (bugreportType) {
             case BugreportParams.BUGREPORT_MODE_FULL:
@@ -7710,6 +7721,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         triggerShellBugreport.setPackage(SHELL_APP_PACKAGE);
         triggerShellBugreport.putExtra(EXTRA_BUGREPORT_TYPE, bugreportType);
         triggerShellBugreport.putExtra(EXTRA_BUGREPORT_NONCE, nonce);
+        if (extraAttachment != null) {
+            triggerShellBugreport.putExtra(EXTRA_EXTRA_ATTACHMENT_URI, extraAttachment);
+            triggerShellBugreport.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        }
         triggerShellBugreport.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         triggerShellBugreport.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         if (shareTitle != null) {
@@ -7760,6 +7775,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void requestInteractiveBugReport() {
         requestBugReportWithDescription(null, null, BugreportParams.BUGREPORT_MODE_INTERACTIVE);
+    }
+
+    /**
+     * Takes an interactive bugreport with a progress notification. Also attaches given file uri.
+     */
+    @Override
+    public void requestBugReportWithExtraAttachment(@NonNull Uri extraAttachment) {
+        requestBugReportWithDescription(null, null, BugreportParams.BUGREPORT_MODE_INTERACTIVE, 0L,
+                extraAttachment);
     }
 
     /**
@@ -17872,9 +17896,35 @@ public class ActivityManagerService extends IActivityManager.Stub
         mUserController.setStopUserOnSwitch(value);
     }
 
+    /** @deprecated use {@link #stopUserWithCallback(int, IStopUserCallback)} instead */
+    @Deprecated
     @Override
-    public int stopUser(final int userId, boolean force, final IStopUserCallback callback) {
-        return mUserController.stopUser(userId, force, /* allowDelayedLocking= */ false,
+    public int stopUser(final int userId,
+            boolean stopProfileRegardlessOfParent, final IStopUserCallback callback) {
+        return stopUserExceptCertainProfiles(userId, stopProfileRegardlessOfParent, callback);
+    }
+
+    /** Stops the given user. */
+    @Override
+    public int stopUserWithCallback(@UserIdInt int userId, @Nullable IStopUserCallback callback) {
+        return mUserController.stopUser(userId, /* allowDelayedLocking= */ false,
+                /* callback= */ callback, /* keyEvictedCallback= */ null);
+    }
+
+    /**
+     * Stops the given user.
+     *
+     * Usually, callers can just use @link{#stopUserWithCallback(int, IStopUserCallback)} instead.
+     *
+     * @param stopProfileRegardlessOfParent whether to stop the profile regardless of who its
+     *                                      parent is, e.g. even if the parent is the current user;
+     *                                      its value is irrelevant for non-profile users.
+     */
+    @Override
+    public int stopUserExceptCertainProfiles(@UserIdInt int userId,
+            boolean stopProfileRegardlessOfParent, @Nullable IStopUserCallback callback) {
+        return mUserController.stopUser(userId,
+                stopProfileRegardlessOfParent, /* allowDelayedLocking= */ false,
                 /* callback= */ callback, /* keyEvictedCallback= */ null);
     }
 
@@ -17883,11 +17933,9 @@ public class ActivityManagerService extends IActivityManager.Stub
      * stopping only if {@code config_multiuserDelayUserDataLocking} overlay is set true.
      *
      * <p>When delayed locking is not enabled through the overlay, this call becomes the same
-     * with {@link #stopUser(int, boolean, IStopUserCallback)} call.
+     * with {@link #stopUserWithCallback(int, IStopUserCallback)} call.
      *
      * @param userId User id to stop.
-     * @param force Force stop the user even if the user is related with system user or current
-     *              user.
      * @param callback Callback called when user has stopped.
      *
      * @return {@link ActivityManager#USER_OP_SUCCESS} when user is stopped successfully. Returns
@@ -17897,9 +17945,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     // TODO(b/302662311): Add javadoc changes corresponding to the user property that allows
     // delayed locking behavior once the private space flag is finalized.
     @Override
-    public int stopUserWithDelayedLocking(final int userId, boolean force,
-            final IStopUserCallback callback) {
-        return mUserController.stopUser(userId, force, /* allowDelayedLocking= */ true,
+    public int stopUserWithDelayedLocking(@UserIdInt int userId, IStopUserCallback callback) {
+        return mUserController.stopUser(userId, /* allowDelayedLocking= */ true,
                 /* callback= */ callback, /* keyEvictedCallback= */ null);
     }
 

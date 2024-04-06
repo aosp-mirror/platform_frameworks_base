@@ -242,7 +242,7 @@ public class UserLifecycleStressTest {
     private void stopUser(int userId) throws RemoteException, InterruptedException {
         runWithLatch("stop user", countDownLatch -> {
             ActivityManager.getService()
-                    .stopUser(userId, /* force= */ true, new IStopUserCallback.Stub() {
+                    .stopUserWithCallback(userId, new IStopUserCallback.Stub() {
                         @Override
                         public void userStopped(int userId) {
                             countDownLatch.countDown();

@@ -3783,6 +3783,13 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             throw new IllegalArgumentException(
                     "idBits must contain at least one pointer from this motion event");
         }
+        final int currentBits = getPointerIdBits();
+        if ((currentBits & idBits) != idBits) {
+            throw new IllegalArgumentException(
+                    "idBits must be a non-empty subset of the pointer IDs from this MotionEvent, "
+                            + "got idBits: "
+                            + String.format("0x%x", idBits) + " for " + this);
+        }
         MotionEvent event = obtain();
         event.mNativePtr = nativeSplit(event.mNativePtr, this.mNativePtr, idBits);
         return event;

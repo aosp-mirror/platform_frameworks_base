@@ -230,6 +230,8 @@
     <style name="TextAppearance.AuthCredential.Indicator" parent="TextAppearance.Material3.BodyMedium">
         <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
         <item name="android:marqueeRepeatLimit">marquee_forever</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">marquee</item>
     </style>
 
     <style name="TextAppearance.AuthCredential.Error">

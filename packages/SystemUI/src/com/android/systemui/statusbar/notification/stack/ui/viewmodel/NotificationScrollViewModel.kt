@@ -27,7 +27,6 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimClipping
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape
-import com.android.systemui.statusbar.notification.stack.shared.model.ViewPosition
 import com.android.systemui.util.kotlin.FlowDumperImpl
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -92,12 +91,12 @@ constructor(
 
     fun shadeScrimShape(
         cornerRadius: Flow<Int>,
-        viewPosition: Flow<ViewPosition>
+        viewLeftOffset: Flow<Int>
     ): Flow<ShadeScrimShape?> =
-        combine(shadeScrimClipping, cornerRadius, viewPosition) { clipping, radius, position ->
+        combine(shadeScrimClipping, cornerRadius, viewLeftOffset) { clipping, radius, leftOffset ->
                 if (clipping == null) return@combine null
                 ShadeScrimShape(
-                    bounds = clipping.bounds - position,
+                    bounds = clipping.bounds.minus(leftOffset = leftOffset),
                     topRadius = radius.takeIf { clipping.rounding.isTopRounded } ?: 0,
                     bottomRadius = radius.takeIf { clipping.rounding.isBottomRounded } ?: 0
                 )

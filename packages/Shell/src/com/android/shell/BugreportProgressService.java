@@ -50,7 +50,6 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.BugreportManager;
 import android.os.BugreportManager.BugreportCallback;
-import android.os.BugreportManager.BugreportCallback.BugreportErrorCode;
 import android.os.BugreportParams;
 import android.os.Bundle;
 import android.os.FileUtils;
@@ -169,6 +168,8 @@ public class BugreportProgressService extends Service {
     static final String EXTRA_DESCRIPTION = "android.intent.extra.DESCRIPTION";
     static final String EXTRA_ORIGINAL_INTENT = "android.intent.extra.ORIGINAL_INTENT";
     static final String EXTRA_INFO = "android.intent.extra.INFO";
+    static final String EXTRA_EXTRA_ATTACHMENT_URI =
+            "android.intent.extra.EXTRA_ATTACHMENT_URI";
 
     private static final int MSG_SERVICE_COMMAND = 1;
     private static final int MSG_DELAYED_SCREENSHOT = 2;
@@ -634,9 +635,10 @@ public class BugreportProgressService extends Service {
         long nonce = intent.getLongExtra(EXTRA_BUGREPORT_NONCE, 0);
         String baseName = getBugreportBaseName(bugreportType);
         String name = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date());
+        Uri extraAttachment = intent.getParcelableExtra(EXTRA_EXTRA_ATTACHMENT_URI, Uri.class);
 
-        BugreportInfo info = new BugreportInfo(mContext, baseName, name,
-                shareTitle, shareDescription, bugreportType, mBugreportsDir, nonce);
+        BugreportInfo info = new BugreportInfo(mContext, baseName, name, shareTitle,
+                shareDescription, bugreportType, mBugreportsDir, nonce, extraAttachment);
         synchronized (mLock) {
             if (info.bugreportFile.exists()) {
                 Log.e(TAG, "Failed to start bugreport generation, the requested bugreport file "
@@ -1183,6 +1185,10 @@ public class BugreportProgressService extends Service {
             Log.d(TAG, "share intent: screenshotUri=" + screenshotUri);
             clipData.addItem(new ClipData.Item(null, null, null, screenshotUri));
             attachments.add(screenshotUri);
+        }
+        if (info.extraAttachment != null) {
+            clipData.addItem(new ClipData.Item(null, null, null, info.extraAttachment));
+            attachments.add(info.extraAttachment);
         }
         intent.setClipData(clipData);
         intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, attachments);
@@ -2042,6 +2048,9 @@ public class BugreportProgressService extends Service {
          */
         final long nonce;
 
+        @Nullable
+        public Uri extraAttachment = null;
+
         private final Object mLock = new Object();
 
         /**
@@ -2049,7 +2058,8 @@ public class BugreportProgressService extends Service {
          */
         BugreportInfo(Context context, String baseName, String name,
                 @Nullable String shareTitle, @Nullable String shareDescription,
-                @BugreportParams.BugreportMode int type, File bugreportsDir, long nonce) {
+                @BugreportParams.BugreportMode int type, File bugreportsDir, long nonce,
+                @Nullable Uri extraAttachment) {
             this.context = context;
             this.name = this.initialName = name;
             this.shareTitle = shareTitle == null ? "" : shareTitle;
@@ -2058,6 +2068,7 @@ public class BugreportProgressService extends Service {
             this.nonce = nonce;
             this.baseName = baseName;
             this.bugreportFile = new File(bugreportsDir, getFileName(this, ".zip"));
+            this.extraAttachment = extraAttachment;
         }
 
         void createBugreportFile() {
