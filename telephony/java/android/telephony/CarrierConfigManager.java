@@ -9898,6 +9898,35 @@ public class CarrierConfigManager {
      */
     public static final String KEY_SATELLITE_INFORMATION_REDIRECT_URL_STRING =
             "satellite_information_redirect_url_string";
+    /**
+     * Indicate whether a carrier supports emergency messaging. When this config is {@code  false},
+     * emergency call to satellite T911 handover will be disabled.
+     *
+     * This will need agreement with carriers before enabling this flag.
+     *
+     * The default value is false.
+     *
+     * @hide
+     */
+    public static final String KEY_EMERGENCY_MESSAGING_SUPPORTED_BOOL =
+            "emergency_messaging_supported_bool";
+
+    /**
+     * An integer key holds the timeout duration in milliseconds used to determine whether to hand
+     * over an emergency call to satellite T911.
+     *
+     * The timer is started when there is an ongoing emergency call, and the IMS is not registered,
+     * and cellular service is not available. When the timer expires,
+     * {@link com.android.internal.telephony.satellite.SatelliteSOSMessageRecommender} will send the
+     * event {@link TelephonyManager#EVENT_DISPLAY_EMERGENCY_MESSAGE} to Dialer, which will then
+     * prompt user to switch to using satellite emergency messaging.
+     *
+     * The default value is 30 seconds.
+     *
+     * @hide
+     */
+    public static final String KEY_EMERGENCY_CALL_TO_SATELLITE_T911_HANDOVER_TIMEOUT_MILLIS_INT =
+            "emergency_call_to_satellite_t911_handover_timeout_millis_int";
 
     /**
      * An int array that contains default capabilities for carrier enabled satellite roaming.
@@ -11066,6 +11095,9 @@ public class CarrierConfigManager {
                         NetworkRegistrationInfo.SERVICE_TYPE_MMS
                 });
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
+        sDefaults.putBoolean(KEY_EMERGENCY_MESSAGING_SUPPORTED_BOOL, false);
+        sDefaults.putInt(KEY_EMERGENCY_CALL_TO_SATELLITE_T911_HANDOVER_TIMEOUT_MILLIS_INT,
+                (int) TimeUnit.SECONDS.toMillis(30));
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORTS_BUSINESS_CALL_COMPOSER_BOOL, false);
