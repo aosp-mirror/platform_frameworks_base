@@ -380,10 +380,6 @@ constructor(
                 initialValue = NotificationContainerBounds(),
             )
             .dumpValue("bounds")
-        get() {
-            /* check if */ SceneContainerFlag.isUnexpectedlyInLegacyMode()
-            return field
-        }
 
     /**
      * Ensure view is visible when the shade/qs are expanded. Also, as QS is expanding, fade out
