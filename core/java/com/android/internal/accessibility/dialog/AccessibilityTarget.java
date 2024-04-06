@@ -23,17 +23,22 @@ import static com.android.internal.accessibility.util.ShortcutUtils.optOutValueF
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.UserHandle;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.Flags;
 
 import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
 import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 import com.android.internal.accessibility.dialog.TargetAdapter.ViewHolder;
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.Set;
 
 /**
  * Abstract base class for creating various target related to accessibility service, accessibility
@@ -108,13 +113,21 @@ public abstract class AccessibilityTarget implements TargetOperations, OnTargetS
         }
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onCheckedChanged(boolean isChecked) {
         setShortcutEnabled(isChecked);
-        if (isChecked) {
-            optInValueToSettings(getContext(), getShortcutType(), getId());
+        if (Flags.a11yQsShortcut()) {
+            final AccessibilityManager am =
+                    getContext().getSystemService(AccessibilityManager.class);
+            am.enableShortcutsForTargets(
+                    isChecked, getShortcutType(), Set.of(mId), UserHandle.myUserId());
         } else {
-            optOutValueFromSettings(getContext(), getShortcutType(), getId());
+            if (isChecked) {
+                optInValueToSettings(getContext(), getShortcutType(), getId());
+            } else {
+                optOutValueFromSettings(getContext(), getShortcutType(), getId());
+            }
         }
     }
 

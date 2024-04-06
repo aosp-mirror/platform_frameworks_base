@@ -17,17 +17,11 @@
 package com.android.internal.accessibility.dialog;
 
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
-import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
-import static com.android.internal.accessibility.util.AccessibilityUtils.setAccessibilityServiceState;
-import static com.android.internal.accessibility.util.ShortcutUtils.optOutValueFromSettings;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
-import android.content.ComponentName;
 import android.content.Context;
-import android.widget.Toast;
 
-import com.android.internal.R;
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
 import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 
@@ -47,30 +41,10 @@ class VolumeShortcutToggleAccessibilityServiceTarget extends AccessibilityServic
 
     @Override
     public void onCheckedChanged(boolean isChecked) {
-        switch (getShortcutType()) {
-            case SOFTWARE:
-                onCheckedFromAccessibilityButton(isChecked);
-                return;
-            case HARDWARE:
-                super.onCheckedChanged(isChecked);
-                return;
-            default:
-                throw new IllegalStateException("Unexpected shortcut type");
-        }
-    }
-
-    private void onCheckedFromAccessibilityButton(boolean isChecked) {
-        setShortcutEnabled(isChecked);
-        final ComponentName componentName = ComponentName.unflattenFromString(getId());
-        setAccessibilityServiceState(getContext(), componentName, isChecked);
-
-        if (!isChecked) {
-            optOutValueFromSettings(getContext(), UserShortcutType.HARDWARE, getId());
-
-            final String warningText =
-                    getContext().getString(R.string.accessibility_uncheck_legacy_item_warning,
-                            getLabel());
-            Toast.makeText(getContext(), warningText, Toast.LENGTH_SHORT).show();
+        if (getShortcutType() == HARDWARE) {
+            super.onCheckedChanged(isChecked);
+        } else {
+            throw new IllegalStateException("Unexpected shortcut type");
         }
     }
 }
