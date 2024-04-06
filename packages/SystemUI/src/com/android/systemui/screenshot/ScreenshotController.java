@@ -942,7 +942,7 @@ public class ScreenshotController {
     private void saveScreenshotInBackground(
             ScreenshotData screenshot, UUID requestId, Consumer<Uri> finisher) {
         ListenableFuture<ImageExporter.Result> future = mImageExporter.export(mBgExecutor,
-                requestId, screenshot.getBitmap(), screenshot.getUserHandle(), mDisplayId);
+                requestId, screenshot.getBitmap(), screenshot.getUserOrDefault(), mDisplayId);
         future.addListener(() -> {
             try {
                 ImageExporter.Result result = future.get();
@@ -950,12 +950,8 @@ public class ScreenshotController {
                 logScreenshotResultStatus(result.uri, screenshot.getUserHandle());
                 mScreenshotHandler.resetTimeout();
                 if (result.uri != null) {
-                    final SavedImageData savedImageData = new SavedImageData();
-                    savedImageData.uri = result.uri;
-                    savedImageData.owner = screenshot.getUserHandle();
-                    savedImageData.imageTime = result.timestamp;
-                    mActionsProvider.setCompletedScreenshot(savedImageData);
-                    mViewProxy.setChipIntents(savedImageData);
+                    mActionsProvider.setCompletedScreenshot(new ScreenshotSavedResult(
+                            result.uri, screenshot.getUserOrDefault(), result.timestamp));
                 }
                 if (DEBUG_CALLBACK) {
                     Log.d(TAG, "finished background processing, Calling (Consumer<Uri>) "

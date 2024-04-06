@@ -67,14 +67,7 @@ class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
     private val requestDismissal = mock<() -> Unit>()
 
     private val request = ScreenshotData.forTesting()
-    private val invalidResult = ScreenshotController.SavedImageData()
-    private val validResult =
-        ScreenshotController.SavedImageData().apply {
-            uri = Uri.EMPTY
-            owner = UserHandle.OWNER
-            subject = "Test"
-            imageTime = 0
-        }
+    private val validResult = ScreenshotSavedResult(Uri.EMPTY, android.os.Process.myUserHandle(), 0)
 
     private lateinit var viewModel: ScreenshotViewModel
     private lateinit var actionsProvider: ScreenshotActionsProvider
@@ -105,17 +98,6 @@ class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
         assertThat(secondAction.onClicked).isNotNull()
         firstAction.onClicked!!.invoke()
         secondAction.onClicked!!.invoke()
-        verifyNoMoreInteractions(actionIntentExecutor)
-    }
-
-    @Test
-    fun actionAccessed_withInvalidResult_doesNothing() {
-        actionsProvider = createActionsProvider()
-
-        actionsProvider.setCompletedScreenshot(invalidResult)
-        viewModel.previewAction.value!!.invoke()
-        viewModel.actions.value[1].onClicked!!.invoke()
-
         verifyNoMoreInteractions(actionIntentExecutor)
     }
 
