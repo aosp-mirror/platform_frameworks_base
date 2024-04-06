@@ -20,6 +20,7 @@ import android.app.ActivityOptions
 import android.app.BroadcastOptions
 import android.app.ExitTransitionCoordinator
 import android.app.PendingIntent
+import android.app.assist.AssistContent
 import android.content.Context
 import android.content.Intent
 import android.os.Process
@@ -57,6 +58,8 @@ import kotlinx.coroutines.CoroutineScope
 interface ScreenshotActionsProvider {
     fun setCompletedScreenshot(result: SavedImageData)
     fun isPendingSharedTransition(): Boolean
+
+    fun onAssistContentAvailable(assistContent: AssistContent) {}
 
     interface Factory {
         fun create(
@@ -127,7 +130,7 @@ constructor(
                         ActionButtonViewModel(
                             quickShare.getIcon().loadDrawable(context),
                             quickShare.title,
-                            quickShare.title
+                            quickShare.title,
                         ) {
                             debugLog(LogConfig.DEBUG_ACTIONS) { "Quickshare tapped" }
                             onDeferrableActionTapped { result ->
@@ -177,7 +180,7 @@ constructor(
                         ActionButtonViewModel(
                             it.getIcon().loadDrawable(context),
                             it.title,
-                            it.title
+                            it.title,
                         ) {
                             sendPendingIntent(it.actionIntent)
                         }

@@ -417,6 +417,12 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         } else {
             mLpChanged.flags &= ~LayoutParams.FLAG_SECURE;
         }
+
+        if (state.bouncerShowing) {
+            mLpChanged.inputFeatures |= LayoutParams.INPUT_FEATURE_SENSITIVE_FOR_TRACING;
+        } else {
+            mLpChanged.inputFeatures &= ~LayoutParams.INPUT_FEATURE_SENSITIVE_FOR_TRACING;
+        }
     }
 
     protected boolean isDebuggable() {

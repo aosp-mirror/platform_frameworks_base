@@ -179,10 +179,14 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                 setAutoConfirmFeatureEnabled(true)
             }
             assertThat(isAutoConfirmEnabled).isTrue()
-            val shorterPin =
-                FakeAuthenticationRepository.DEFAULT_PIN.toMutableList().apply { removeLast() }
+            val defaultPin = FakeAuthenticationRepository.DEFAULT_PIN.toMutableList()
 
-            assertSkipped(underTest.authenticate(shorterPin, tryAutoConfirm = true))
+            assertSkipped(
+                underTest.authenticate(
+                    defaultPin.subList(0, defaultPin.size - 1),
+                    tryAutoConfirm = true
+                )
+            )
             assertThat(underTest.lockoutEndTimestamp).isNull()
             assertThat(kosmos.fakeAuthenticationRepository.lockoutStartedReportCount).isEqualTo(0)
         }
@@ -201,7 +205,6 @@ class AuthenticationInteractorTest : SysuiTestCase() {
 
             assertFailed(
                 underTest.authenticate(wrongPin, tryAutoConfirm = true),
-                assertNoResultEvents = true,
             )
         }
 
@@ -219,7 +222,6 @@ class AuthenticationInteractorTest : SysuiTestCase() {
 
             assertFailed(
                 underTest.authenticate(longerPin, tryAutoConfirm = true),
-                assertNoResultEvents = true,
             )
         }
 
@@ -547,14 +549,9 @@ class AuthenticationInteractorTest : SysuiTestCase() {
 
     private fun assertFailed(
         authenticationResult: AuthenticationResult,
-        assertNoResultEvents: Boolean = false,
     ) {
         assertThat(authenticationResult).isEqualTo(AuthenticationResult.FAILED)
-        if (assertNoResultEvents) {
-            assertThat(onAuthenticationResult).isNull()
-        } else {
-            assertThat(onAuthenticationResult).isFalse()
-        }
+        assertThat(onAuthenticationResult).isFalse()
     }
 
     private fun assertSkipped(

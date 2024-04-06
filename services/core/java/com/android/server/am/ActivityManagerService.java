@@ -4418,7 +4418,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         packageName, null, userId);
         }
 
-        if (packageName == null || uninstalling || packageStateStopped) {
+        final boolean clearPendingIntentsForStoppedApp = (android.content.pm.Flags.stayStopped()
+                && packageStateStopped);
+        if (packageName == null || uninstalling || clearPendingIntentsForStoppedApp) {
             didSomething |= mPendingIntentController.removePendingIntentsForPackage(
                     packageName, userId, appId, doit);
         }
@@ -17622,7 +17624,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public boolean dumpHeap(String process, int userId, boolean managed, boolean mallocInfo,
-            boolean runGc, String path, ParcelFileDescriptor fd, RemoteCallback finishCallback) {
+            boolean runGc, String dumpBitmaps,
+            String path, ParcelFileDescriptor fd, RemoteCallback finishCallback) {
         try {
             // note: hijacking SET_ACTIVITY_WATCHER, but should be changed to
             // its own permission (same as profileControl).
@@ -17656,7 +17659,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
                     }, null);
 
-                thread.dumpHeap(managed, mallocInfo, runGc, path, fd, intermediateCallback);
+                thread.dumpHeap(managed, mallocInfo, runGc, dumpBitmaps,
+                                path, fd, intermediateCallback);
                 fd = null;
                 return true;
             }

@@ -45,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.intermediateLayout
 import androidx.compose.ui.platform.LocalViewConfiguration
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertTopPositionInRootIsEqualTo
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -171,6 +172,60 @@ class ElementTest {
                 // static (shared or transformed) elements.
                 at(32L + i * 16) { assertNumberOfLayoutsAndPlacements() }
             }
+        }
+    }
+
+    @Test
+    fun elementsNotInTransition_shouldNotBeDrawn() {
+        val nFrames = 20
+        val frameDuration = 16L
+        val tween = tween<Float>(nFrames * frameDuration.toInt())
+        val layoutSize = 100.dp
+        val elementSize = 50.dp
+        val elementOffset = 20.dp
+
+        lateinit var changeScene: (SceneKey) -> Unit
+
+        rule.testTransition(
+            from = TestScenes.SceneA,
+            to = TestScenes.SceneB,
+            transitionLayout = { currentScene, onChangeScene ->
+                changeScene = onChangeScene
+
+                SceneTransitionLayout(
+                    currentScene,
+                    onChangeScene,
+                    transitions {
+                        from(TestScenes.SceneA, to = TestScenes.SceneB) { spec = tween }
+                        from(TestScenes.SceneB, to = TestScenes.SceneC) { spec = tween }
+                    },
+                ) {
+                    scene(TestScenes.SceneA) {
+                        Box(Modifier.size(layoutSize)) {
+                            // Transformed element
+                            Element(
+                                TestElements.Bar,
+                                elementSize,
+                                elementOffset,
+                            )
+                        }
+                    }
+                    scene(TestScenes.SceneB) { Box(Modifier.size(layoutSize)) }
+                    scene(TestScenes.SceneC) { Box(Modifier.size(layoutSize)) }
+                }
+            },
+        ) {
+            // Start transition from SceneA to SceneB
+            at(1 * frameDuration) {
+                onElement(TestElements.Bar).assertExists()
+
+                // Start transition from SceneB to SceneC
+                changeScene(TestScenes.SceneC)
+            }
+
+            at(2 * frameDuration) { onElement(TestElements.Bar).assertIsNotDisplayed() }
+
+            at(3 * frameDuration) { onElement(TestElements.Bar).assertDoesNotExist() }
         }
     }
 

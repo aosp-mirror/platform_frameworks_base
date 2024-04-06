@@ -1971,7 +1971,7 @@
     <!-- Content description for the clear search button in shortcut search list. [CHAR LIMIT=NONE] -->
     <string name="keyboard_shortcut_clear_text">Clear search query</string>
     <!-- The title for keyboard shortcut search list [CHAR LIMIT=25] -->
-    <string name="keyboard_shortcut_search_list_title">Shortcuts</string>
+    <string name="keyboard_shortcut_search_list_title">Keyboard Shortcuts</string>
     <!-- The hint for keyboard shortcut search list [CHAR LIMIT=25] -->
     <string name="keyboard_shortcut_search_list_hint">Search shortcuts</string>
     <!-- The description for no shortcuts results [CHAR LIMIT=25] -->

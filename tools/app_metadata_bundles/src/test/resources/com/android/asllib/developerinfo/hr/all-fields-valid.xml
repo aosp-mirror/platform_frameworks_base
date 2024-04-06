@@ -1,0 +1,8 @@
+<developer-info
+    name="max"
+    email="max@example.com"
+    address="111 blah lane"
+    countryRegion="US"
+    relationship="aosp"
+    website="example.com"
+    registryId="registry_id" />

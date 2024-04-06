@@ -3156,6 +3156,39 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     @SmallTest
+    public void testAccountRemovedBroadcastMarkedAccountAsVisibleTwice() throws Exception {
+        unlockSystemUser();
+
+        HashMap<String, Integer> visibility = new HashMap<>();
+        visibility.put("testpackage1", AccountManager.VISIBILITY_USER_MANAGED_VISIBLE);
+
+        addAccountRemovedReceiver("testpackage1");
+        mAms.registerAccountListener(
+                new String [] {AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1},
+                "testpackage1");
+        mAms.addAccountExplicitlyWithVisibility(
+                AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS,
+                /* password= */ "p11",
+                /* extras= */ null,
+                visibility,
+                /* callerPackage= */ null);
+
+        updateBroadcastCounters(2);
+        assertEquals(mVisibleAccountsChangedBroadcasts, 1);
+        assertEquals(mLoginAccountsChangedBroadcasts, 1);
+        assertEquals(mAccountRemovedBroadcasts, 0);
+
+        mAms.setAccountVisibility(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS,
+                "testpackage1",
+                AccountManager.VISIBILITY_VISIBLE);
+
+        updateBroadcastCounters(3);
+        assertEquals(mVisibleAccountsChangedBroadcasts, 1); // visibility was not changed
+        assertEquals(mLoginAccountsChangedBroadcasts, 2);
+        assertEquals(mAccountRemovedBroadcasts, 0);
+    }
+
+    @SmallTest
     public void testRegisterAccountListenerCredentialsUpdate() throws Exception {
         unlockSystemUser();
         mAms.registerAccountListener(
@@ -3489,6 +3522,12 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         @Override
         public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
                 UserHandle user) {
+            return mTestContext.bindServiceAsUser(service, conn, flags, user);
+        }
+
+        @Override
+        public boolean bindServiceAsUser(Intent service, ServiceConnection conn,
+                Context.BindServiceFlags flags, UserHandle user) {
             return mTestContext.bindServiceAsUser(service, conn, flags, user);
         }
 

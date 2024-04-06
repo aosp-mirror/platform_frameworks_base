@@ -103,8 +103,8 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     /**
      * Returns an ActivityOptions bundle created using the given parameters.
      *
-     * @param displayId The ID of the display to launch the activity in. Typically this would
-     *                  be the display the status bar is on.
+     * @param displayId        The ID of the display to launch the activity in. Typically this would
+     *                         be the display the status bar is on.
      * @param animationAdapter The animation adapter used to start this activity, or {@code null}
      *                         for the default animation.
      */
@@ -197,7 +197,7 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     void onKeyguardViewManagerStatesUpdated();
 
-    /** */
+    /**  */
     boolean getCommandQueuePanelsEnabled();
 
     void showWirelessChargingAnimation(int batteryLevel);

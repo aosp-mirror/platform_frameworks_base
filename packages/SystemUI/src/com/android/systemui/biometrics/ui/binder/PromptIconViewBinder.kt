@@ -37,7 +37,6 @@ import com.android.systemui.util.kotlin.Utils.Companion.toQuint
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /** Sub-binder for [BiometricPromptLayout.iconView]. */
@@ -127,13 +126,21 @@ object PromptIconViewBinder {
                         if (constraintBp() && position != Rect()) {
                             val iconParams = iconView.layoutParams as ConstraintLayout.LayoutParams
 
-                            if (position.left != -1) {
+                            if (position.left != 0) {
                                 iconParams.endToEnd = ConstraintSet.UNSET
                                 iconParams.leftMargin = position.left
                             }
-                            if (position.top != -1) {
+                            if (position.top != 0) {
                                 iconParams.bottomToBottom = ConstraintSet.UNSET
                                 iconParams.topMargin = position.top
+                            }
+                            if (position.right != 0) {
+                                iconParams.startToStart = ConstraintSet.UNSET
+                                iconParams.rightMargin = position.right
+                            }
+                            if (position.bottom != 0) {
+                                iconParams.topToTop = ConstraintSet.UNSET
+                                iconParams.bottomMargin = position.bottom
                             }
                             iconView.layoutParams = iconParams
                         }

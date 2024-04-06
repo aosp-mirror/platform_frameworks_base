@@ -281,5 +281,10 @@ constructor(
                 powerButtonLaunchGestureTriggeredDuringSleep = false,
             )
         }
+
+        /** Helper method for tests to simulate the device screen state change event. */
+        fun PowerInteractor.setScreenPowerState(screenPowerState: ScreenPowerState) {
+            this.onScreenPowerStateUpdated(screenPowerState)
+        }
     }
 }

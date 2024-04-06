@@ -1,6 +1,7 @@
 aconfig_declarations {
     name: "net_flags",
     package: "com.android.server.net",
+    container: "system",
     srcs: ["*.aconfig"],
 }
 

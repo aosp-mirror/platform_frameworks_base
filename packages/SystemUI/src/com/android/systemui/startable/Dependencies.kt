@@ -27,4 +27,4 @@ import kotlin.reflect.KClass
 @MustBeDocumented
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class Dependencies(vararg val value: KClass<out CoreStartable> = [])
+annotation class Dependencies(vararg val value: KClass<*> = [])

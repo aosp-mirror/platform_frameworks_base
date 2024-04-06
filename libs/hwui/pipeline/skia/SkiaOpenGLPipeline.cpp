@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-#include "SkiaOpenGLPipeline.h"
+#include "pipeline/skia/SkiaOpenGLPipeline.h"
 
-#include <include/gpu/ganesh/SkSurfaceGanesh.h>
-#include <include/gpu/ganesh/gl/GrGLBackendSurface.h>
-#include <include/gpu/gl/GrGLTypes.h>
 #include <GrBackendSurface.h>
 #include <SkBlendMode.h>
 #include <SkImageInfo.h>
 #include <cutils/properties.h>
 #include <gui/TraceUtils.h>
+#include <include/gpu/ganesh/SkSurfaceGanesh.h>
+#include <include/gpu/ganesh/gl/GrGLBackendSurface.h>
+#include <include/gpu/gl/GrGLTypes.h>
 #include <strings.h>
 
 #include "DeferredLayerUpdater.h"
 #include "FrameInfo.h"
-#include "LayerDrawable.h"
 #include "LightingInfo.h"
-#include "SkiaPipeline.h"
-#include "SkiaProfileRenderer.h"
 #include "hwui/Bitmap.h"
+#include "pipeline/skia/LayerDrawable.h"
+#include "pipeline/skia/SkiaGpuPipeline.h"
+#include "pipeline/skia/SkiaProfileRenderer.h"
 #include "private/hwui/DrawGlInfo.h"
 #include "renderstate/RenderState.h"
 #include "renderthread/EglManager.h"
@@ -47,7 +47,7 @@ namespace uirenderer {
 namespace skiapipeline {
 
 SkiaOpenGLPipeline::SkiaOpenGLPipeline(RenderThread& thread)
-        : SkiaPipeline(thread), mEglManager(thread.eglManager()) {
+        : SkiaGpuPipeline(thread), mEglManager(thread.eglManager()) {
     thread.renderState().registerContextCallback(this);
 }
 

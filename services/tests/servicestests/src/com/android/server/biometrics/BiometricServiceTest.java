@@ -82,8 +82,7 @@ import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.security.GateKeeper;
-import android.security.KeyStore;
-import android.security.authorization.IKeystoreAuthorization;
+import android.security.KeyStoreAuthorization;
 import android.service.gatekeeper.IGateKeeperService;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -182,7 +181,7 @@ public class BiometricServiceTest {
     private BiometricHandlerProvider mBiometricHandlerProvider;
 
     @Mock
-    private IKeystoreAuthorization mKeystoreAuthService;
+    private KeyStoreAuthorization mKeyStoreAuthorization;
 
     @Mock
     private IGateKeeperService mGateKeeperService;
@@ -207,7 +206,7 @@ public class BiometricServiceTest {
         when(mInjector.getStatusBarService()).thenReturn(mock(IStatusBarService.class));
         when(mInjector.getSettingObserver(any(), any(), any()))
                 .thenReturn(mock(BiometricService.SettingObserver.class));
-        when(mInjector.getKeyStore()).thenReturn(mock(KeyStore.class));
+        when(mInjector.getKeyStoreAuthorization()).thenReturn(mock(KeyStoreAuthorization.class));
         when(mInjector.isDebugEnabled(any(), anyInt())).thenReturn(false);
         when(mInjector.getBiometricStrengthController(any()))
                 .thenReturn(mock(BiometricStrengthController.class));
@@ -243,7 +242,7 @@ public class BiometricServiceTest {
                 mStatusBarService, null /* handler */,
                 mAuthSessionCoordinator);
         when(mInjector.getBiometricContext(any())).thenReturn(mBiometricContextProvider);
-        when(mInjector.getKeystoreAuthorizationService()).thenReturn(mKeystoreAuthService);
+        when(mInjector.getKeyStoreAuthorization()).thenReturn(mKeyStoreAuthorization);
         when(mInjector.getGateKeeperService()).thenReturn(mGateKeeperService);
         when(mInjector.getNotificationLogger()).thenReturn(mNotificationLogger);
         when(mGateKeeperService.getSecureUserId(anyInt())).thenReturn(42L);
@@ -682,9 +681,9 @@ public class BiometricServiceTest {
         waitForIdle();
         // HAT sent to keystore
         if (isStrongBiometric) {
-            verify(mBiometricService.mKeyStore).addAuthToken(AdditionalMatchers.aryEq(HAT));
+            verify(mKeyStoreAuthorization).addAuthToken(AdditionalMatchers.aryEq(HAT));
         } else {
-            verify(mBiometricService.mKeyStore, never()).addAuthToken(any(byte[].class));
+            verify(mKeyStoreAuthorization, never()).addAuthToken(any(byte[].class));
         }
         // Send onAuthenticated to client
         verify(mReceiver1).onAuthenticationSucceeded(
@@ -747,7 +746,7 @@ public class BiometricServiceTest {
         waitForIdle();
         // Waiting for SystemUI to send confirmation callback
         assertEquals(STATE_AUTH_PENDING_CONFIRM, mBiometricService.mAuthSession.getState());
-        verify(mBiometricService.mKeyStore, never()).addAuthToken(any(byte[].class));
+        verify(mKeyStoreAuthorization, never()).addAuthToken(any(byte[].class));
 
         // SystemUI sends confirm, HAT is sent to keystore and client is notified.
         mBiometricService.mAuthSession.mSysuiReceiver.onDialogDismissed(
@@ -755,9 +754,9 @@ public class BiometricServiceTest {
                 null /* credentialAttestation */);
         waitForIdle();
         if (isStrongBiometric) {
-            verify(mBiometricService.mKeyStore).addAuthToken(AdditionalMatchers.aryEq(HAT));
+            verify(mKeyStoreAuthorization).addAuthToken(AdditionalMatchers.aryEq(HAT));
         } else {
-            verify(mBiometricService.mKeyStore, never()).addAuthToken(any(byte[].class));
+            verify(mKeyStoreAuthorization, never()).addAuthToken(any(byte[].class));
         }
         verify(mReceiver1).onAuthenticationSucceeded(
                 BiometricPrompt.AUTHENTICATION_RESULT_TYPE_BIOMETRIC);
@@ -1313,7 +1312,7 @@ public class BiometricServiceTest {
                 eq(TYPE_FACE),
                 eq(BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED),
                 eq(0 /* vendorCode */));
-        verify(mBiometricService.mKeyStore, never()).addAuthToken(any(byte[].class));
+        verify(mKeyStoreAuthorization, never()).addAuthToken(any(byte[].class));
         assertNull(mBiometricService.mAuthSession);
     }
 
@@ -1839,7 +1838,7 @@ public class BiometricServiceTest {
 
         final long expectedResult = 31337L;
 
-        when(mKeystoreAuthService.getLastAuthTime(eq(secureUserId), eq(hardwareAuthenticators)))
+        when(mKeyStoreAuthorization.getLastAuthTime(eq(secureUserId), eq(hardwareAuthenticators)))
                 .thenReturn(expectedResult);
 
         mBiometricService = new BiometricService(mContext, mInjector, mBiometricHandlerProvider);
@@ -1848,7 +1847,8 @@ public class BiometricServiceTest {
                 Authenticators.BIOMETRIC_STRONG | Authenticators.DEVICE_CREDENTIAL);
 
         assertEquals(expectedResult, result);
-        verify(mKeystoreAuthService).getLastAuthTime(eq(secureUserId), eq(hardwareAuthenticators));
+        verify(mKeyStoreAuthorization).getLastAuthTime(eq(secureUserId),
+                eq(hardwareAuthenticators));
     }
 
     // Helper methods

@@ -1,4 +1,5 @@
 package: "com.android.server.notification"
+container: "system"
 
 flag {
   name: "expire_bitmaps"

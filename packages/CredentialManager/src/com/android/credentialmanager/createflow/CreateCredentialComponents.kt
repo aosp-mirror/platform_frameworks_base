@@ -17,6 +17,7 @@
 package com.android.credentialmanager.createflow
 
 import android.credentials.flags.Flags.selectorUiImprovementsEnabled
+import android.hardware.biometrics.BiometricPrompt
 import android.text.TextUtils
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
@@ -26,7 +27,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Divider
 import androidx.compose.material.icons.Icons
@@ -38,6 +38,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -49,6 +50,7 @@ import com.android.credentialmanager.model.EntryInfo
 import com.android.credentialmanager.model.CredentialType
 import com.android.credentialmanager.common.ProviderActivityState
 import com.android.credentialmanager.common.material.ModalBottomSheetDefaults
+import com.android.credentialmanager.common.runBiometricFlow
 import com.android.credentialmanager.common.ui.ActionButton
 import com.android.credentialmanager.common.ui.BodyMediumText
 import com.android.credentialmanager.common.ui.BodySmallText
@@ -95,6 +97,22 @@ fun CreateCredentialScreen(
                                 viewModel::createFlowOnMoreOptionsSelectedOnCreationSelection,
                                 onLog = { viewModel.logUiEvent(it) },
                         )
+                        CreateScreenState.BIOMETRIC_SELECTION ->
+                            BiometricSelectionPage(
+                                biometricEntry = createCredentialUiState
+                                    .activeEntry?.activeEntryInfo,
+                                onCancelFlowAndFinish = viewModel::onUserCancel,
+                                onIllegalScreenStateAndFinish = viewModel::onIllegalUiState,
+                                onMoreOptionSelected =
+                                viewModel::createFlowOnMoreOptionsSelectedOnCreationSelection,
+                                requestDisplayInfo = createCredentialUiState.requestDisplayInfo,
+                                enabledProviderInfo = createCredentialUiState
+                                        .activeEntry?.activeProvider!!,
+                                onBiometricEntrySelected =
+                                viewModel::createFlowOnEntrySelected,
+                                fallbackToOriginalFlow =
+                                viewModel::getFlowOnBackToPrimarySelectionScreen,
+                            )
                         CreateScreenState.MORE_OPTIONS_SELECTION -> MoreOptionsSelectionCard(
                                 requestDisplayInfo = createCredentialUiState.requestDisplayInfo,
                                 enabledProviderList = createCredentialUiState.enabledProviders,
@@ -313,20 +331,9 @@ fun CreationSelectionCard(
         item { Divider(thickness = 16.dp, color = Color.Transparent) }
         item {
             HeadlineText(
-                text = when (requestDisplayInfo.type) {
-                    CredentialType.PASSKEY -> stringResource(
-                        R.string.choose_create_option_passkey_title,
-                        requestDisplayInfo.appName
-                    )
-                    CredentialType.PASSWORD -> stringResource(
-                        R.string.choose_create_option_password_title,
-                        requestDisplayInfo.appName
-                    )
-                    CredentialType.UNKNOWN -> stringResource(
-                        R.string.choose_create_option_sign_in_title,
-                        requestDisplayInfo.appName
-                    )
-                }
+                text = stringResource(
+                    getCreateTitleResCode(requestDisplayInfo),
+                    requestDisplayInfo.appName)
             )
         }
         item { Divider(thickness = 24.dp, color = Color.Transparent) }
@@ -559,5 +566,33 @@ fun RemoteEntryRow(
         onClick = { onRemoteEntrySelected(remoteInfo) },
         iconImageVector = Icons.Outlined.QrCodeScanner,
         entryHeadlineText = stringResource(R.string.another_device),
+    )
+}
+
+@Composable
+internal fun BiometricSelectionPage(
+    biometricEntry: EntryInfo?,
+    onMoreOptionSelected: () -> Unit,
+    requestDisplayInfo: RequestDisplayInfo,
+    enabledProviderInfo: EnabledProviderInfo,
+    onBiometricEntrySelected: (EntryInfo, BiometricPrompt.AuthenticationResult) -> Unit,
+    onCancelFlowAndFinish: () -> Unit,
+    onIllegalScreenStateAndFinish: (String) -> Unit,
+    fallbackToOriginalFlow: () -> Unit,
+) {
+    if (biometricEntry == null) {
+        fallbackToOriginalFlow()
+        return
+    }
+    runBiometricFlow(
+        biometricEntry = biometricEntry,
+        context = LocalContext.current,
+        openMoreOptionsPage = onMoreOptionSelected,
+        sendDataToProvider = onBiometricEntrySelected,
+        onCancelFlowAndFinish = onCancelFlowAndFinish,
+        createRequestDisplayInfo = requestDisplayInfo,
+        createProviderInfo = enabledProviderInfo,
+        onBiometricFailureFallback = fallbackToOriginalFlow,
+        onIllegalStateAndFinish = onIllegalScreenStateAndFinish,
     )
 }

@@ -26,6 +26,14 @@ flag {
 }
 
 flag {
+   name: "refactor_keyguard_dismiss_intent"
+   namespace: "systemui"
+   description: "Update how keyguard dismiss intents are stored."
+   bug: "275069969"
+}
+
+flag {
+
     name: "notification_heads_up_cycling"
     namespace: "systemui"
     description: "Heads-up notification cycling animation for the Notification Avalanche feature."
@@ -715,4 +723,11 @@ flag {
     description: "Enables the new QS UI pipeline that follows recommended architecture and uses"
       " Compose for the UI."
     bug: "325099249"
+}
+
+flag {
+    name: "keyboard_docking_indicator"
+    namespace: "systemui"
+    description: "Glow bar indicator reveals upon keyboard docking."
+    bug: "324600132"
 }

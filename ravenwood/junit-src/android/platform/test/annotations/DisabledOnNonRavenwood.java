@@ -32,7 +32,7 @@ import java.lang.annotation.Target;
  * on a per-method basis.
  *
  * THIS ANNOTATION CANNOT BE ADDED TO CLASSES AT THIS PONINT.
- * See {@link com.android.platform.test.ravenwood.bivalenttest.RavenwoodClassRuleRavenwoodOnlyTest}
+ * See {@link com.android.ravenwoodtest.bivalenttest.RavenwoodClassRuleRavenwoodOnlyTest}
  * for the reason.
  *
  * The {@code RAVENWOOD_RUN_DISABLED_TESTS} environmental variable won't work because it won't be

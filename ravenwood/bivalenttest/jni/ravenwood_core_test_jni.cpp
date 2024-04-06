@@ -42,7 +42,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     ALOGI("%s: JNI_OnLoad", __FILE__);
 
     int res = jniRegisterNativeMethods(env,
-            "com/android/platform/test/ravenwood/bivalenttest/RavenwoodJniTest",
+            "com/android/ravenwoodtest/bivalenttest/RavenwoodJniTest",
             sMethods, NELEM(sMethods));
     if (res < 0) {
         return res;

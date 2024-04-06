@@ -803,7 +803,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     null /* options */);
             mWindowManagerInternal.setWallpaperShowWhenLocked(
                     mToken, (wallpaper.mWhich & FLAG_LOCK) != 0);
-            if (multiCrop() && wallpaper.mSupportsMultiCrop) {
+            if (multiCrop() && mImageWallpaper.equals(wallpaper.wallpaperComponent)) {
                 mWindowManagerInternal.setWallpaperCropHints(mToken,
                         mWallpaperCropper.getRelativeCropHints(wallpaper));
             } else {
@@ -1917,11 +1917,17 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             final ComponentName component;
             final int finalWhich;
 
-            if ((which & FLAG_LOCK) > 0 && lockWallpaper != null) {
-                clearWallpaperBitmaps(lockWallpaper);
-            }
-            if ((which & FLAG_SYSTEM) > 0) {
-                clearWallpaperBitmaps(wallpaper);
+            // Clear any previous ImageWallpaper related fields
+            List<WallpaperData> toClear = new ArrayList<>();
+            if ((which & FLAG_LOCK) > 0 && lockWallpaper != null) toClear.add(lockWallpaper);
+            if ((which & FLAG_SYSTEM) > 0) toClear.add(wallpaper);
+            for (WallpaperData wallpaperToClear : toClear) {
+                clearWallpaperBitmaps(wallpaperToClear);
+                if (multiCrop()) {
+                    wallpaperToClear.mCropHints.clear();
+                    wallpaperToClear.cropHint.set(0, 0, 0, 0);
+                    wallpaperToClear.mSampleSize = 1;
+                }
             }
 
             // lock only case: set the system wallpaper component to both screens
@@ -2225,7 +2231,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             checkPermission(READ_WALLPAPER_INTERNAL);
             WallpaperData wallpaper = (which == FLAG_LOCK) ? mLockWallpaperMap.get(userId)
                     : mWallpaperMap.get(userId);
-            if (wallpaper == null || !wallpaper.mSupportsMultiCrop) return null;
+            if (wallpaper == null || !mImageWallpaper.equals(wallpaper.wallpaperComponent)) {
+                return null;
+            }
             SparseArray<Rect> relativeSuggestedCrops =
                     mWallpaperCropper.getRelativeCropHints(wallpaper);
             Point croppedBitmapSize = new Point(
@@ -2255,7 +2263,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     @Override
     public List<Rect> getFutureBitmapCrops(Point bitmapSize, List<Point> displaySizes,
             int[] screenOrientations, List<Rect> crops) {
-        SparseArray<Rect> cropMap = getCropMap(screenOrientations, crops, ORIENTATION_UNKNOWN);
+        SparseArray<Rect> cropMap = getCropMap(screenOrientations, crops);
         SparseArray<Rect> defaultCrops = mWallpaperCropper.getDefaultCrops(cropMap, bitmapSize);
         List<Rect> result = new ArrayList<>();
         boolean rtl = TextUtils.getLayoutDirectionFromLocale(Locale.getDefault())
@@ -2272,7 +2280,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             throw new UnsupportedOperationException(
                     "This method should only be called with the multi crop flag enabled");
         }
-        SparseArray<Rect> cropMap = getCropMap(screenOrientations, crops, ORIENTATION_UNKNOWN);
+        SparseArray<Rect> cropMap = getCropMap(screenOrientations, crops);
         SparseArray<Rect> defaultCrops = mWallpaperCropper.getDefaultCrops(cropMap, bitmapSize);
         return WallpaperCropper.getTotalCrop(defaultCrops);
     }
@@ -2860,10 +2868,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             return null;
         }
 
-        int currentOrientation = mWallpaperDisplayHelper.getDefaultDisplayCurrentOrientation();
-        SparseArray<Rect> cropMap = !multiCrop() ? null
-                : getCropMap(screenOrientations, crops, currentOrientation);
-        Rect cropHint = multiCrop() || crops == null ? null : crops.get(0);
+        SparseArray<Rect> cropMap = !multiCrop() ? null : getCropMap(screenOrientations, crops);
+        Rect cropHint = multiCrop() || crops == null || crops.isEmpty() ? new Rect() : crops.get(0);
         final boolean fromForegroundApp = !multiCrop() ? false
                 : isFromForegroundApp(callingPackage);
 
@@ -2912,12 +2918,15 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     wallpaper.setComplete = completion;
                     wallpaper.fromForegroundApp = multiCrop() ? fromForegroundApp
                             : isFromForegroundApp(callingPackage);
-                    if (!multiCrop()) wallpaper.cropHint.set(cropHint);
-                    if (multiCrop()) wallpaper.mSupportsMultiCrop = true;
-                    if (multiCrop()) wallpaper.mCropHints = cropMap;
+                    wallpaper.cropHint.set(cropHint);
+                    if (multiCrop()) {
+                        wallpaper.mCropHints = cropMap;
+                        wallpaper.mSampleSize = 1f;
+                        wallpaper.mOrientationWhenSet =
+                                mWallpaperDisplayHelper.getDefaultDisplayCurrentOrientation();
+                    }
                     wallpaper.allowBackup = allowBackup;
                     wallpaper.mWallpaperDimAmount = getWallpaperDimAmount();
-                    wallpaper.mOrientationWhenSet = currentOrientation;
                 }
                 return pfd;
             } finally {
@@ -2926,16 +2935,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    private SparseArray<Rect> getCropMap(int[] screenOrientations, List<Rect> crops,
-            int currentOrientation) {
+    private SparseArray<Rect> getCropMap(int[] screenOrientations, List<Rect> crops) {
         if ((crops == null ^ screenOrientations == null)
                 || (crops != null && crops.size() != screenOrientations.length)) {
             throw new IllegalArgumentException(
                     "Illegal crops/orientations lists: must both be null, or both the same size");
         }
         SparseArray<Rect> cropMap = new SparseArray<>();
-        boolean unknown = false;
-        if (crops != null && crops.size() != 0) {
+        if (crops != null && !crops.isEmpty()) {
             for (int i = 0; i < crops.size(); i++) {
                 Rect crop = crops.get(i);
                 int width = crop.width(), height = crop.height();
@@ -2943,21 +2950,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     throw new IllegalArgumentException("Invalid crop rect supplied: " + crop);
                 }
                 int orientation = screenOrientations[i];
-                if (orientation == ORIENTATION_UNKNOWN) {
-                    if (currentOrientation == ORIENTATION_UNKNOWN) {
-                        throw new IllegalArgumentException(
-                                "Invalid orientation: " + ORIENTATION_UNKNOWN);
-                    }
-                    unknown = true;
-                    orientation = currentOrientation;
+                if (orientation == ORIENTATION_UNKNOWN && cropMap.size() > 1) {
+                    throw new IllegalArgumentException("Invalid crops supplied: the UNKNOWN"
+                            + "screen orientation should only be used in a singleton map");
                 }
                 cropMap.put(orientation, crop);
             }
-        }
-        if (unknown && cropMap.size() > 1) {
-            throw new IllegalArgumentException("Invalid crops supplied: the UNKNOWN screen "
-                    + "orientation should only be used in a singleton map (in which case it"
-                    + "represents the current orientation of the default display)");
         }
         return cropMap;
     }
@@ -2975,7 +2973,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         WallpaperData lockWP = new WallpaperData(userId, FLAG_LOCK);
         lockWP.wallpaperId = sysWP.wallpaperId;
         lockWP.cropHint.set(sysWP.cropHint);
-        lockWP.mSupportsMultiCrop = sysWP.mSupportsMultiCrop;
         if (sysWP.mCropHints != null) {
             lockWP.mCropHints = sysWP.mCropHints.clone();
         }
@@ -3096,7 +3093,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             final long ident = Binder.clearCallingIdentity();
 
             try {
-                newWallpaper.mSupportsMultiCrop = mImageWallpaper.equals(name);
                 newWallpaper.imageWallpaperPending = false;
                 newWallpaper.mWhich = which;
                 newWallpaper.mSystemWasBoth = systemIsBoth;

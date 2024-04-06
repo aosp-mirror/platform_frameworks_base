@@ -40,7 +40,6 @@ import com.android.systemui.deviceentry.shared.model.FailedFaceAuthenticationSta
 import com.android.systemui.deviceentry.shared.model.HelpFaceAuthenticationStatus
 import com.android.systemui.deviceentry.shared.model.SuccessFaceAuthenticationStatus
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.BiometricType
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
@@ -313,11 +312,7 @@ constructor(
         // or device starts going to sleep.
         merge(
                 powerInteractor.isAsleep,
-                if (KeyguardWmStateRefactor.isEnabled) {
-                    keyguardTransitionInteractor.isInTransitionToState(KeyguardState.GONE)
-                } else {
-                    keyguardRepository.keyguardDoneAnimationsFinished.map { true }
-                },
+                keyguardTransitionInteractor.isInTransitionToState(KeyguardState.GONE),
                 userRepository.selectedUser.map {
                     it.selectionStatus == SelectionStatus.SELECTION_IN_PROGRESS
                 },

@@ -1,4 +1,5 @@
 package: "com.android.server.utils"
+container: "system"
 
 flag {
      name: "anr_timer_service"

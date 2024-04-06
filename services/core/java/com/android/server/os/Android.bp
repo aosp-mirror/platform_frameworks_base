@@ -1,6 +1,7 @@
 aconfig_declarations {
     name: "core_os_flags",
     package: "com.android.server.os",
+    container: "system",
     srcs: [
         "*.aconfig",
     ],

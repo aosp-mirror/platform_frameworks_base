@@ -1,4 +1,5 @@
 package: "com.android.server.stats"
+container: "system"
 
 flag {
     name: "add_mobile_bytes_transfer_by_proc_state_puller"

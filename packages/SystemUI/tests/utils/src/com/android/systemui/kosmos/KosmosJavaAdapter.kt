@@ -49,6 +49,7 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.sceneDataSource
+import com.android.systemui.settings.brightness.domain.interactor.brightnessMirrorShowingInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 import com.android.systemui.statusbar.phone.screenOffAnimationController
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
@@ -106,6 +107,7 @@ class KosmosJavaAdapter(
     val sharedNotificationContainerInteractor by lazy {
         kosmos.sharedNotificationContainerInteractor
     }
+    val brightnessMirrorShowingInteractor by lazy { kosmos.brightnessMirrorShowingInteractor }
 
     init {
         kosmos.applicationContext = testCase.context

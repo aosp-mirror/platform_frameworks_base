@@ -30,8 +30,6 @@
 #include "SwapBehavior.h"
 #include "hwui/Bitmap.h"
 
-class GrDirectContext;
-
 struct ANativeWindow;
 
 namespace android {
@@ -94,7 +92,6 @@ public:
     virtual void setSurfaceColorProperties(ColorMode colorMode) = 0;
     virtual SkColorType getSurfaceColorType() const = 0;
     virtual sk_sp<SkColorSpace> getSurfaceColorSpace() = 0;
-    virtual GrSurfaceOrigin getSurfaceOrigin() = 0;
     virtual void setPictureCapturedCallback(
             const std::function<void(sk_sp<SkPicture>&&)>& callback) = 0;
 

@@ -21,6 +21,8 @@ import android.view.WindowInsets
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.Flags.communalHub
+import com.android.systemui.common.ui.view.onApplyWindowInsets
+import com.android.systemui.common.ui.view.onLayoutChanged
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
@@ -168,22 +170,16 @@ constructor(
         controller.setOnHeightChangedRunnable { viewModel.notificationStackChanged() }
         disposables += DisposableHandle { controller.setOnHeightChangedRunnable(null) }
 
-        view.setOnApplyWindowInsetsListener { v: View, insets: WindowInsets ->
-            val insetTypes = WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
-            burnInParams.update { current ->
-                current.copy(topInset = insets.getInsetsIgnoringVisibility(insetTypes).top)
+        disposables +=
+            view.onApplyWindowInsets { _: View, insets: WindowInsets ->
+                val insetTypes = WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
+                burnInParams.update { current ->
+                    current.copy(topInset = insets.getInsetsIgnoringVisibility(insetTypes).top)
+                }
+                insets
             }
-            insets
-        }
-        disposables += DisposableHandle { view.setOnApplyWindowInsetsListener(null) }
 
-        // Required to capture keyguard media changes and ensure the notification count is correct
-        val layoutChangeListener =
-            View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-                viewModel.notificationStackChanged()
-            }
-        view.addOnLayoutChangeListener(layoutChangeListener)
-        disposables += DisposableHandle { view.removeOnLayoutChangeListener(layoutChangeListener) }
+        disposables += view.onLayoutChanged { viewModel.notificationStackChanged() }
 
         return disposables
     }

@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
@@ -199,6 +200,36 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
         reset(mProximitySensor);
         stateListenerArgumentCaptor.getValue().onStateChanged(StatusBarState.SHADE);
         verify(mProximitySensor).register(any(ThresholdSensor.Listener.class));
+    }
+
+    @Test
+    public void testPassThroughEnterKeyEvent() {
+        KeyEvent enterDown = KeyEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER,
+                0, 0, 0, 0, 0, 0, 0, "");
+        KeyEvent enterUp = KeyEvent.obtain(0, 0, MotionEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER, 0,
+                0, 0, 0, 0, 0, 0, "");
+
+        mFalsingCollector.onKeyEvent(enterDown);
+        verify(mFalsingDataProvider, never()).onKeyEvent(any(KeyEvent.class));
+
+        mFalsingCollector.onKeyEvent(enterUp);
+        verify(mFalsingDataProvider, times(1)).onKeyEvent(enterUp);
+    }
+
+    @Test
+    public void testAvoidAKeyEvent() {
+        // Arbitrarily chose the "A" key, as it is not currently allowlisted. If this key is
+        // allowlisted in the future, please choose another key that will not be collected.
+        KeyEvent aKeyDown = KeyEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, KeyEvent.KEYCODE_A,
+                0, 0, 0, 0, 0, 0, 0, "");
+        KeyEvent aKeyUp = KeyEvent.obtain(0, 0, MotionEvent.ACTION_UP, KeyEvent.KEYCODE_A, 0,
+                0, 0, 0, 0, 0, 0, "");
+
+        mFalsingCollector.onKeyEvent(aKeyDown);
+        verify(mFalsingDataProvider, never()).onKeyEvent(any(KeyEvent.class));
+
+        mFalsingCollector.onKeyEvent(aKeyUp);
+        verify(mFalsingDataProvider, never()).onKeyEvent(any(KeyEvent.class));
     }
 
     @Test

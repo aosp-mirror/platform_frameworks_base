@@ -45,6 +45,7 @@ import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 import com.android.systemui.statusbar.notification.row.FooterViewButton;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
+import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.ViewState;
 import com.android.systemui.util.DrawableDumpKt;
@@ -100,6 +101,11 @@ public class FooterView extends StackScrollerDecorView {
     /** See {@link this#setClearAllButtonVisible(boolean, boolean, Consumer)}. */
     public void setClearAllButtonVisible(boolean visible, boolean animate) {
         setClearAllButtonVisible(visible, animate, /* onAnimationEnded = */ null);
+    }
+
+    /** Set the visibility of the "Manage"/"History" button to {@code visible}. */
+    public void setManageOrHistoryButtonVisible(boolean visible) {
+        mManageOrHistoryButton.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     /**
@@ -274,14 +280,23 @@ public class FooterView extends StackScrollerDecorView {
 
     /** Show a message instead of the footer buttons. */
     public void setFooterLabelVisible(boolean isVisible) {
-        if (isVisible) {
-            mManageOrHistoryButton.setVisibility(View.GONE);
-            mClearAllButton.setVisibility(View.GONE);
-            mSeenNotifsFooterTextView.setVisibility(View.VISIBLE);
+        // In the refactored code, hiding the buttons is handled in the FooterViewModel
+        if (FooterViewRefactor.isEnabled()) {
+            if (isVisible) {
+                mSeenNotifsFooterTextView.setVisibility(View.VISIBLE);
+            } else {
+                mSeenNotifsFooterTextView.setVisibility(View.GONE);
+            }
         } else {
-            mManageOrHistoryButton.setVisibility(View.VISIBLE);
-            mClearAllButton.setVisibility(View.VISIBLE);
-            mSeenNotifsFooterTextView.setVisibility(View.GONE);
+            if (isVisible) {
+                mManageOrHistoryButton.setVisibility(View.GONE);
+                mClearAllButton.setVisibility(View.GONE);
+                mSeenNotifsFooterTextView.setVisibility(View.VISIBLE);
+            } else {
+                mManageOrHistoryButton.setVisibility(View.VISIBLE);
+                mClearAllButton.setVisibility(View.VISIBLE);
+                mSeenNotifsFooterTextView.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -443,6 +458,12 @@ public class FooterView extends StackScrollerDecorView {
          */
         public boolean hideContent;
 
+        /**
+         * When true, skip animating Y on the next #animateTo.
+         * Once true, remains true until reset in #animateTo.
+         */
+        public boolean resetY = false;
+
         @Override
         public void copyFrom(ViewState viewState) {
             super.copyFrom(viewState);
@@ -458,6 +479,18 @@ public class FooterView extends StackScrollerDecorView {
                 FooterView footerView = (FooterView) view;
                 footerView.setContentVisibleAnimated(!hideContent);
             }
+        }
+
+        @Override
+        public void animateTo(View child, AnimationProperties properties) {
+            if (child instanceof FooterView) {
+                // Must set animateY=false before super.animateTo, which checks for animateY
+                if (resetY) {
+                    properties.getAnimationFilter().animateY = false;
+                    resetY = false;
+                }
+            }
+            super.animateTo(child, properties);
         }
     }
 }

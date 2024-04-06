@@ -70,6 +70,8 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
     NotificationListener mNotificationListener;
     @Nullable
     private MediaProjectionManager mProjectionManager;
+
+    @GuardedBy("mSensitiveContentProtectionLock")
     @Nullable
     private MediaProjectionSession mMediaProjectionSession;
 
@@ -98,6 +100,48 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
             mIsExempted = isExempted;
             mSessionId = sessionId;
         }
+
+        public void logProjectionSessionStart() {
+            FrameworkStatsLog.write(
+                    SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION,
+                    mSessionId,
+                    mUid,
+                    mIsExempted,
+                    SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__START,
+                    SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__SOURCE__FRAMEWORKS
+            );
+        }
+
+        public void logProjectionSessionStop() {
+            FrameworkStatsLog.write(
+                    SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION,
+                    mSessionId,
+                    mUid,
+                    mIsExempted,
+                    SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__STOP,
+                    SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__SOURCE__FRAMEWORKS
+            );
+        }
+
+        public void logAppBlocked(int uid) {
+            FrameworkStatsLog.write(
+                    FrameworkStatsLog.SENSITIVE_CONTENT_APP_PROTECTION,
+                    mSessionId,
+                    uid,
+                    mUid,
+                    FrameworkStatsLog.SENSITIVE_CONTENT_APP_PROTECTION__STATE__BLOCKED
+            );
+        }
+
+        public void logAppUnblocked(int uid) {
+            FrameworkStatsLog.write(
+                    FrameworkStatsLog.SENSITIVE_CONTENT_APP_PROTECTION,
+                    mSessionId,
+                    uid,
+                    mUid,
+                    FrameworkStatsLog.SENSITIVE_CONTENT_APP_PROTECTION__STATE__UNBLOCKED
+            );
+        }
     }
 
     private final MediaProjectionManager.Callback mProjectionCallback =
@@ -112,28 +156,11 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
                     } finally {
                         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
                     }
-                    FrameworkStatsLog.write(
-                            SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION,
-                            mMediaProjectionSession.mSessionId,
-                            mMediaProjectionSession.mUid,
-                            mMediaProjectionSession.mIsExempted,
-                            SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__START,
-                            SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__SOURCE__FRAMEWORKS
-                    );
                 }
 
                 @Override
                 public void onStop(MediaProjectionInfo info) {
                     if (DEBUG) Log.d(TAG, "onStop projection: " + info);
-                    FrameworkStatsLog.write(
-                            SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION,
-                            mMediaProjectionSession.mSessionId,
-                            mMediaProjectionSession.mUid,
-                            mMediaProjectionSession.mIsExempted,
-                            SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__STOP,
-                            SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__SOURCE__FRAMEWORKS
-                    );
-
                     Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
                             "SensitiveContentProtectionManagerService.onProjectionStop");
                     try {
@@ -242,16 +269,18 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
                 DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS, 0) != 0;
         int uid = mPackageManagerInternal.getPackageUid(projectionInfo.getPackageName(), 0,
                 projectionInfo.getUserHandle().getIdentifier());
-        mMediaProjectionSession = new MediaProjectionSession(
-                uid, isPackageExempted || isFeatureDisabled, new Random().nextLong());
-
-        if (isPackageExempted || isFeatureDisabled) {
-            Log.w(TAG, "projection session is exempted, package ="
-                    + projectionInfo.getPackageName() + ", isFeatureDisabled=" + isFeatureDisabled);
-            return;
-        }
-
         synchronized (mSensitiveContentProtectionLock) {
+            mMediaProjectionSession = new MediaProjectionSession(
+                    uid, isPackageExempted || isFeatureDisabled, new Random().nextLong());
+            mMediaProjectionSession.logProjectionSessionStart();
+
+            if (isPackageExempted || isFeatureDisabled) {
+                Log.w(TAG, "projection session is exempted, package ="
+                        + projectionInfo.getPackageName() + ", isFeatureDisabled="
+                        + isFeatureDisabled);
+                return;
+            }
+
             mProjectionActive = true;
             if (sensitiveNotificationAppProtection()) {
                 updateAppsThatShouldBlockScreenCapture();
@@ -266,7 +295,10 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
     private void onProjectionEnd() {
         synchronized (mSensitiveContentProtectionLock) {
             mProjectionActive = false;
-            mMediaProjectionSession = null;
+            if (mMediaProjectionSession != null) {
+                mMediaProjectionSession.logProjectionSessionStop();
+                mMediaProjectionSession = null;
+            }
 
             // notify windowmanager to clear any sensitive notifications observed during projection
             // session
@@ -437,22 +469,14 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
             packageInfos.add(packageInfo);
             if (isShowingSensitiveContent) {
                 mWindowManager.addBlockScreenCaptureForApps(packageInfos);
-                FrameworkStatsLog.write(
-                        FrameworkStatsLog.SENSITIVE_CONTENT_APP_PROTECTION,
-                        mMediaProjectionSession.mSessionId,
-                        uid,
-                        mMediaProjectionSession.mUid,
-                        FrameworkStatsLog.SENSITIVE_CONTENT_APP_PROTECTION__STATE__BLOCKED
-                );
+                if (mMediaProjectionSession != null) {
+                    mMediaProjectionSession.logAppBlocked(uid);
+                }
             } else {
                 mWindowManager.removeBlockScreenCaptureForApps(packageInfos);
-                FrameworkStatsLog.write(
-                        FrameworkStatsLog.SENSITIVE_CONTENT_APP_PROTECTION,
-                        mMediaProjectionSession.mSessionId,
-                        uid,
-                        mMediaProjectionSession.mUid,
-                        FrameworkStatsLog.SENSITIVE_CONTENT_APP_PROTECTION__STATE__UNBLOCKED
-                );
+                if (mMediaProjectionSession != null) {
+                    mMediaProjectionSession.logAppUnblocked(uid);
+                }
             }
         }
     }

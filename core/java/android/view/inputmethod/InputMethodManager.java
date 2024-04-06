@@ -1153,6 +1153,9 @@ public final class InputMethodManager {
                     }
                     final boolean startInput;
                     synchronized (mH) {
+                        if (reason == UnbindReason.DISCONNECT_IME) {
+                            mImeDispatcher.clear();
+                        }
                         if (getBindSequenceLocked() != sequence) {
                             return;
                         }

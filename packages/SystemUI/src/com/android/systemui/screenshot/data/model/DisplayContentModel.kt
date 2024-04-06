@@ -24,6 +24,6 @@ data class DisplayContentModel(
     val displayId: Int,
     /** Information about the current System UI state which can affect capture. */
     val systemUiState: SystemUiState,
-    /** A list of root tasks on the display, ordered from bottom to top along the z-axis */
+    /** A list of root tasks on the display, ordered from top to bottom along the z-axis */
     val rootTasks: List<RootTaskInfo>,
 )

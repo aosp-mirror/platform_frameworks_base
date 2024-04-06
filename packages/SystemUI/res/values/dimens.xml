@@ -1091,7 +1091,7 @@
     <dimen name="remote_input_history_extra_height">60dp</dimen>
 
     <!-- Biometric Dialog values -->
-    <dimen name="biometric_dialog_face_icon_size">64dp</dimen>
+    <dimen name="biometric_dialog_face_icon_size">54dp</dimen>
     <dimen name="biometric_dialog_fingerprint_icon_width">80dp</dimen>
     <dimen name="biometric_dialog_fingerprint_icon_height">80dp</dimen>
     <dimen name="biometric_dialog_button_negative_max_width">160dp</dimen>
@@ -1108,6 +1108,22 @@
     <dimen name="biometric_dialog_credential_translation_offset">60dp</dimen>
     <dimen name="biometric_dialog_width">240dp</dimen>
     <dimen name="biometric_dialog_height">240dp</dimen>
+
+    <!-- Dimensions for biometric prompt panel padding -->
+    <dimen name="biometric_prompt_small_horizontal_guideline_padding">344dp</dimen>
+    <dimen name="biometric_prompt_udfps_horizontal_guideline_padding">114dp</dimen>
+    <dimen name="biometric_prompt_udfps_mid_guideline_padding">409dp</dimen>
+    <dimen name="biometric_prompt_medium_horizontal_guideline_padding">640dp</dimen>
+    <dimen name="biometric_prompt_medium_mid_guideline_padding">330dp</dimen>
+
+    <!-- Dimensions for biometric prompt icon padding -->
+    <dimen name="biometric_prompt_portrait_small_bottom_padding">60dp</dimen>
+    <dimen name="biometric_prompt_portrait_medium_bottom_padding">160dp</dimen>
+    <dimen name="biometric_prompt_portrait_large_screen_bottom_padding">176dp</dimen>
+    <dimen name="biometric_prompt_landscape_small_bottom_padding">192dp</dimen>
+    <dimen name="biometric_prompt_landscape_small_horizontal_padding">145dp</dimen>
+    <dimen name="biometric_prompt_landscape_medium_bottom_padding">148dp</dimen>
+    <dimen name="biometric_prompt_landscape_medium_horizontal_padding">125dp</dimen>
 
     <!-- Dimensions for biometric prompt custom content view. -->
     <dimen name="biometric_prompt_logo_size">32dp</dimen>

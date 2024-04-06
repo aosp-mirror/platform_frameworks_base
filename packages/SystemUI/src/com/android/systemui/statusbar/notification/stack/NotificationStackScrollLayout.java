@@ -1868,6 +1868,13 @@ public class NotificationStackScrollLayout
     private void updateImeInset(WindowInsets windowInsets) {
         mImeInset = windowInsets.getInsets(WindowInsets.Type.ime()).bottom;
 
+        if (mFooterView != null && mFooterView.getViewState() != null) {
+            // Do not animate footer Y when showing IME so that after IME hides, the footer
+            // appears at the correct Y. Once resetY is true, it remains true (even when IME
+            // hides, where mImeInset=0) until reset in FooterViewState#animateTo.
+            ((FooterView.FooterViewState) mFooterView.getViewState()).resetY |= mImeInset > 0;
+        }
+
         if (mForcedScroll != null) {
             updateForcedScroll();
         }

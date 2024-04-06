@@ -203,6 +203,15 @@ a different `RollbackDataPolicy`, like `ROLLBACK_DATA_POLICY_RETAIN` (1) or
 $ adb install --enable-rollback 1 FooV2.apk
 ```
 
+### Setting Rollback Impact Level
+
+The `adb install` command accepts the `--rollback-impact-level [0/1/2]` flag to control
+when a rollback can be performed by `PackageWatchdog`.
+
+The default rollback impact level is `ROLLBACK_USER_IMPACT_LOW` (0). To use a
+different impact level, use `ROLLBACK_USER_IMPACT_HIGH` (1) or `ROLLBACK_USER_IMPACT_ONLY_MANUAL`
+(2).
+
 ### Triggering Rollback Manually
 
 If rollback is available for an application, the pm command can be used to
@@ -225,6 +234,8 @@ $ adb shell dumpsys rollback
 469808841:
   -state: committed
   -timestamp: 2019-04-23T14:57:35.944Z
+  -rollbackLifetimeMillis: 0
+  -rollbackUserImpact: 1
   -packages:
     com.android.tests.rollback.testapp.B 2 -> 1 [0]
   -causePackages:
@@ -232,6 +243,8 @@ $ adb shell dumpsys rollback
 649899517:
   -state: committed
   -timestamp: 2019-04-23T12:55:21.342Z
+  -rollbackLifetimeMillis: 0
+  -rollbackUserImpact: 0
   -stagedSessionId: 343374391
   -packages:
     com.android.tests.rollback.testapex 2 -> 1 [0]

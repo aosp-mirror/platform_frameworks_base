@@ -395,10 +395,10 @@ public class ScreenshotController {
         Assert.isMainThread();
 
         mCurrentRequestCallback = requestCallback;
-        if (screenshot.getType() == WindowManager.TAKE_SCREENSHOT_FULLSCREEN) {
+        if (screenshot.getType() == WindowManager.TAKE_SCREENSHOT_FULLSCREEN
+                && screenshot.getBitmap() == null) {
             Rect bounds = getFullScreenRect();
-            screenshot.setBitmap(
-                    mImageCapture.captureDisplay(mDisplayId, bounds));
+            screenshot.setBitmap(mImageCapture.captureDisplay(mDisplayId, bounds));
             screenshot.setScreenBounds(bounds);
         }
 
@@ -453,6 +453,13 @@ public class ScreenshotController {
                         return Unit.INSTANCE;
                     });
             saveScreenshotInBackground(screenshot, requestId, finisher);
+
+            if (screenshot.getTaskId() >= 0) {
+                mAssistContentRequester.requestAssistContent(screenshot.getTaskId(),
+                        assistContent -> {
+                            mActionsProvider.onAssistContentAvailable(assistContent);
+                        });
+            }
         } else {
             saveScreenshotInWorkerThread(screenshot.getUserHandle(), finisher,
                     this::showUiOnActionsReady, this::showUiOnQuickShareActionReady);

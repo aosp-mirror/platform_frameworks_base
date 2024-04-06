@@ -22,5 +22,5 @@ import com.android.systemui.statusbar.policy.BrightnessMirrorController
  * Indicates controller that has brightness slider and uses [BrightnessMirrorController]
  */
 interface MirroredBrightnessController {
-    fun setMirror(controller: BrightnessMirrorController)
+    fun setMirror(controller: MirrorController?)
 }

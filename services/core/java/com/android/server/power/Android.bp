@@ -1,6 +1,7 @@
 aconfig_declarations {
     name: "backstage_power_flags",
     package: "com.android.server.power.optimization",
+    container: "system",
     srcs: [
         "stats/*.aconfig",
     ],

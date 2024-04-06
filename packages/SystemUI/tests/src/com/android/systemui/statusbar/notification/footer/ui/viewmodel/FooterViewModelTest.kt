@@ -66,7 +66,7 @@ class FooterViewModelTest : SysuiTestCase() {
     val underTest = kosmos.footerViewModel
 
     @Test
-    fun testMessageVisible_whenFilteredNotifications() =
+    fun messageVisible_whenFilteredNotifications() =
         testScope.runTest {
             val visible by collectLastValue(underTest.message.isVisible)
 
@@ -76,7 +76,7 @@ class FooterViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testMessageVisible_whenNoFilteredNotifications() =
+    fun messageVisible_whenNoFilteredNotifications() =
         testScope.runTest {
             val visible by collectLastValue(underTest.message.isVisible)
 
@@ -86,7 +86,7 @@ class FooterViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testClearAllButtonVisible_whenHasClearableNotifs() =
+    fun clearAllButtonVisible_whenHasClearableNotifs() =
         testScope.runTest {
             val visible by collectLastValue(underTest.clearAllButton.isVisible)
 
@@ -104,7 +104,7 @@ class FooterViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testClearAllButtonVisible_whenHasNoClearableNotifs() =
+    fun clearAllButtonVisible_whenHasNoClearableNotifs() =
         testScope.runTest {
             val visible by collectLastValue(underTest.clearAllButton.isVisible)
 
@@ -122,7 +122,26 @@ class FooterViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testClearAllButtonAnimating_whenShadeExpandedAndTouchable() =
+    fun clearAllButtonVisible_whenMessageVisible() =
+        testScope.runTest {
+            val visible by collectLastValue(underTest.clearAllButton.isVisible)
+
+            activeNotificationListRepository.notifStats.value =
+                NotifStats(
+                    numActiveNotifs = 2,
+                    hasNonClearableAlertingNotifs = false,
+                    hasClearableAlertingNotifs = true,
+                    hasNonClearableSilentNotifs = false,
+                    hasClearableSilentNotifs = true,
+                )
+            activeNotificationListRepository.hasFilteredOutSeenNotifications.value = true
+            runCurrent()
+
+            assertThat(visible?.value).isFalse()
+        }
+
+    @Test
+    fun clearAllButtonAnimating_whenShadeExpandedAndTouchable() =
         testScope.runTest {
             val visible by collectLastValue(underTest.clearAllButton.isVisible)
             runCurrent()
@@ -156,7 +175,7 @@ class FooterViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testClearAllButtonAnimating_whenShadeNotExpanded() =
+    fun clearAllButtonAnimating_whenShadeNotExpanded() =
         testScope.runTest {
             val visible by collectLastValue(underTest.clearAllButton.isVisible)
             runCurrent()
@@ -190,7 +209,7 @@ class FooterViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testManageButton_whenHistoryDisabled() =
+    fun manageButton_whenHistoryDisabled() =
         testScope.runTest {
             val buttonLabel by collectLastValue(underTest.manageOrHistoryButton.labelId)
             runCurrent()
@@ -203,7 +222,7 @@ class FooterViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testHistoryButton_whenHistoryEnabled() =
+    fun historyButton_whenHistoryEnabled() =
         testScope.runTest {
             val buttonLabel by collectLastValue(underTest.manageOrHistoryButton.labelId)
             runCurrent()
@@ -213,5 +232,25 @@ class FooterViewModelTest : SysuiTestCase() {
 
             // THEN label is "History"
             assertThat(buttonLabel).isEqualTo(R.string.manage_notifications_history_text)
+        }
+
+    @Test
+    fun manageButtonVisible_whenMessageVisible() =
+        testScope.runTest {
+            val visible by collectLastValue(underTest.manageOrHistoryButton.isVisible)
+
+            activeNotificationListRepository.hasFilteredOutSeenNotifications.value = true
+
+            assertThat(visible?.value).isFalse()
+        }
+
+    @Test
+    fun manageButtonVisible_whenMessageNotVisible() =
+        testScope.runTest {
+            val visible by collectLastValue(underTest.manageOrHistoryButton.isVisible)
+
+            activeNotificationListRepository.hasFilteredOutSeenNotifications.value = false
+
+            assertThat(visible?.value).isTrue()
         }
 }

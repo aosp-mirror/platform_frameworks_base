@@ -16,12 +16,15 @@
 
 package com.android.systemui.classifier;
 
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 import javax.inject.Inject;
 
 /** */
 public class FalsingCollectorFake implements FalsingCollector {
+
+    public KeyEvent lastKeyEvent = null;
 
     @Override
     public void init() {
@@ -67,6 +70,11 @@ public class FalsingCollectorFake implements FalsingCollector {
 
     @Override
     public void onBouncerHidden() {
+    }
+
+    @Override
+    public void onKeyEvent(KeyEvent ev) {
+        lastKeyEvent = ev;
     }
 
     @Override

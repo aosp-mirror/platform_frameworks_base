@@ -1,0 +1,8 @@
+<holder_of_flattened_for_testing>
+    <data-shared dataCategory="location"
+        dataType="approx_location"
+        purposes="analytics" />
+    <data-shared dataCategory="location"
+        dataType="precise_location"
+        purposes="analytics" />
+</holder_of_flattened_for_testing>

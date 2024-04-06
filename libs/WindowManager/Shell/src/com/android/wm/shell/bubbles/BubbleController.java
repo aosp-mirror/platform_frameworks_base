@@ -2335,6 +2335,11 @@ public class BubbleController implements ConfigurationChangeListener,
             mMainExecutor.execute(() ->
                     mController.setBubbleBarLocation(location));
         }
+
+        @Override
+        public void setBubbleBarBounds(Rect bubbleBarBounds) {
+            mMainExecutor.execute(() -> mBubblePositioner.setBubbleBarBounds(bubbleBarBounds));
+        }
     }
 
     private class BubblesImpl implements Bubbles {
