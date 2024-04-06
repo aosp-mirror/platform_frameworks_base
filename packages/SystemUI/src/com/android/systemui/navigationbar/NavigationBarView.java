@@ -584,7 +584,6 @@ public class NavigationBarView extends FrameLayout {
         if (!visible) {
             mTransitionListener.onBackAltCleared();
         }
-        mRotationButtonController.getRotationButton().setCanShowRotationButton(!visible);
     }
 
     void setDisabledFlags(int disabledFlags, SysUiState sysUiState) {

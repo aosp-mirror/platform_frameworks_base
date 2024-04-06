@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
+import android.telephony.CellSignalStrength
 import android.telephony.SubscriptionInfo
 import android.telephony.TelephonyManager
 import com.android.systemui.log.table.TableLogBuffer
@@ -133,6 +134,6 @@ interface MobileConnectionRepository {
 
     companion object {
         /** The default number of levels to use for [numberOfLevels]. */
-        const val DEFAULT_NUM_LEVELS = 4
+        val DEFAULT_NUM_LEVELS = CellSignalStrength.getNumSignalStrengthLevels()
     }
 }

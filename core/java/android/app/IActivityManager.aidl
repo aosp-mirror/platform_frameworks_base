@@ -550,6 +550,17 @@ interface IActivityManager {
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean isTopOfTask(in IBinder token);
     void bootAnimationComplete();
+
+    /**
+     * Used by {@link com.android.systemui.theme.ThemeOverlayController} to notify when color
+     * palette is ready.
+     *
+     * @param userId The ID of the user where ThemeOverlayController is ready.
+     *
+     * @throws RemoteException
+     */
+    void setThemeOverlayReady(int userId);
+
     @UnsupportedAppUsage
     void registerTaskStackListener(in ITaskStackListener listener);
     void unregisterTaskStackListener(in ITaskStackListener listener);

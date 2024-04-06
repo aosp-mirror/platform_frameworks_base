@@ -5717,6 +5717,25 @@ public class ActivityManager {
     }
 
     /**
+     * Used by ThemeOverlayController to notify when color
+     * palette is ready.
+     *
+     * @param userId The ID of the user where ThemeOverlayController is ready.
+     *
+     * @throws RemoteException
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SET_THEME_OVERLAY_CONTROLLER_READY)
+    public void setThemeOverlayReady(@UserIdInt int userId) {
+        try {
+            getService().setThemeOverlayReady(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Resets the state of the {@link com.android.server.am.AppErrors} instance.
      * This is intended for use with CTS only.
      * @hide

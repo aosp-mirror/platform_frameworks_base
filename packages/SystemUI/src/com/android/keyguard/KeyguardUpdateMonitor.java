@@ -3810,6 +3810,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
         becameAbsent |= ABSENT_SIM_STATE_LIST.contains(state);
 
+        // TODO(b/327476182): Preserve SIM_STATE_CARD_IO_ERROR sims in a separate data source.
         SimData data = mSimDatas.get(subId);
         final boolean changed;
         if (data == null) {
