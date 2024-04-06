@@ -992,12 +992,19 @@ public final class SatelliteManager {
      */
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int DATAGRAM_TYPE_LOCATION_SHARING = 2;
+    /**
+     * This type of datagram is used to keep the device in satellite connected state or check if
+     * there is any incoming message.
+     * @hide
+     */
+    public static final int DATAGRAM_TYPE_KEEP_ALIVE = 3;
 
     /** @hide */
     @IntDef(prefix = "DATAGRAM_TYPE_", value = {
             DATAGRAM_TYPE_UNKNOWN,
             DATAGRAM_TYPE_SOS_MESSAGE,
-            DATAGRAM_TYPE_LOCATION_SHARING
+            DATAGRAM_TYPE_LOCATION_SHARING,
+            DATAGRAM_TYPE_KEEP_ALIVE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DatagramType {}
@@ -1077,8 +1084,13 @@ public final class SatelliteManager {
                             }
 
                             @Override
-                            public void onSendDatagramStateChanged(int state, int sendPendingCount,
-                                    int errorCode) {
+                            public void onSendDatagramStateChanged(int datagramType, int state,
+                                    int sendPendingCount, int errorCode) {
+                                executor.execute(() -> Binder.withCleanCallingIdentity(
+                                        () -> callback.onSendDatagramStateChanged(datagramType,
+                                                state, sendPendingCount, errorCode)));
+
+                                // For backward compatibility
                                 executor.execute(() -> Binder.withCleanCallingIdentity(
                                         () -> callback.onSendDatagramStateChanged(
                                                 state, sendPendingCount, errorCode)));
