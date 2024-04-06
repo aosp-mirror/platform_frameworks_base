@@ -526,14 +526,6 @@ public class NotificationTestHelper {
             @InflationFlag int extraInflationFlags,
             int importance)
             throws Exception {
-        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
-                mContext.LAYOUT_INFLATER_SERVICE);
-        mRow = (ExpandableNotificationRow) inflater.inflate(
-                R.layout.status_bar_notification_row,
-                null /* root */,
-                false /* attachToRoot */);
-        ExpandableNotificationRow row = mRow;
-
         final NotificationChannel channel =
                 new NotificationChannel(
                         notification.getChannelId(),
@@ -552,6 +544,15 @@ public class NotificationTestHelper {
                 .setPostTime(System.currentTimeMillis())
                 .setChannel(channel)
                 .build();
+
+        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE);
+        inflater.setFactory2(new RowInflaterTask.RowAsyncLayoutInflater(entry));
+        mRow = (ExpandableNotificationRow) inflater.inflate(
+                R.layout.status_bar_notification_row,
+                null /* root */,
+                false /* attachToRoot */);
+        ExpandableNotificationRow row = mRow;
 
         entry.setRow(row);
         mIconManager.createIcons(entry);
