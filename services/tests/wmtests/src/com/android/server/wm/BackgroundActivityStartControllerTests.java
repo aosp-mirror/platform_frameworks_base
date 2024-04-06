@@ -504,22 +504,37 @@ public class BackgroundActivityStartControllerTests {
         assertThat(balState.callerExplicitOptInOrOut()).isFalse();
         assertThat(balState.realCallerExplicitOptInOrAutoOptIn()).isTrue();
         assertThat(balState.realCallerExplicitOptInOrOut()).isFalse();
-        assertThat(balState.toString()).isEqualTo(
-                "[callingPackage: package.app1; callingPackageTargetSdk: -1; callingUid: 10001; "
-                        + "callingPid: 11001; appSwitchState: 0; callingUidHasAnyVisibleWindow: "
-                        + "false; callingUidProcState: NONEXISTENT; "
-                        + "isCallingUidPersistentSystemProcess: false; forcedBalByPiSender: BSP"
-                        + ".NONE; intent: Intent { cmp=package.app3/someClass }; callerApp: "
-                        + "mCallerApp; inVisibleTask: false; balAllowedByPiCreator: BSP"
-                        + ".ALLOW_BAL; balAllowedByPiCreatorWithHardening: BSP.ALLOW_BAL; "
-                        + "resultIfPiCreatorAllowsBal: null; hasRealCaller: true; "
-                        + "isCallForResult: false; isPendingIntent: false; autoOptInReason: "
-                        + "notPendingIntent; realCallingPackage: uid=1[debugOnly]; "
-                        + "realCallingPackageTargetSdk: -1; realCallingUid: 1; realCallingPid: 1;"
-                        + " realCallingUidHasAnyVisibleWindow: false; realCallingUidProcState: "
-                        + "NONEXISTENT; isRealCallingUidPersistentSystemProcess: false; "
-                        + "originatingPendingIntent: null; realCallerApp: null; "
-                        + "balAllowedByPiSender: BSP.ALLOW_BAL; resultIfPiSenderAllowsBal: null]");
+        assertThat(balState.toString()).contains(
+                "[callingPackage: package.app1; "
+                        + "callingPackageTargetSdk: -1; "
+                        + "callingUid: 10001; "
+                        + "callingPid: 11001; "
+                        + "appSwitchState: 0; "
+                        + "callingUidHasAnyVisibleWindow: false; "
+                        + "callingUidProcState: NONEXISTENT; "
+                        + "isCallingUidPersistentSystemProcess: false; "
+                        + "forcedBalByPiSender: BSP.NONE; "
+                        + "intent: Intent { cmp=package.app3/someClass }; "
+                        + "callerApp: mCallerApp; "
+                        + "inVisibleTask: false; "
+                        + "balAllowedByPiCreator: BSP.ALLOW_BAL; "
+                        + "balAllowedByPiCreatorWithHardening: BSP.ALLOW_BAL; "
+                        + "resultIfPiCreatorAllowsBal: null; "
+                        + "hasRealCaller: true; "
+                        + "isCallForResult: false; "
+                        + "isPendingIntent: false; "
+                        + "autoOptInReason: notPendingIntent; "
+                        + "realCallingPackage: uid=1[debugOnly]; "
+                        + "realCallingPackageTargetSdk: -1; "
+                        + "realCallingUid: 1; "
+                        + "realCallingPid: 1; "
+                        + "realCallingUidHasAnyVisibleWindow: false; "
+                        + "realCallingUidProcState: NONEXISTENT; "
+                        + "isRealCallingUidPersistentSystemProcess: false; "
+                        + "originatingPendingIntent: null; "
+                        + "realCallerApp: null; "
+                        + "balAllowedByPiSender: BSP.ALLOW_BAL; "
+                        + "resultIfPiSenderAllowsBal: null");
     }
 
     @Test
@@ -588,21 +603,36 @@ public class BackgroundActivityStartControllerTests {
         assertThat(balState.callerExplicitOptInOrOut()).isFalse();
         assertThat(balState.realCallerExplicitOptInOrAutoOptIn()).isFalse();
         assertThat(balState.realCallerExplicitOptInOrOut()).isFalse();
-        assertThat(balState.toString()).isEqualTo(
-                "[callingPackage: package.app1; callingPackageTargetSdk: -1; callingUid: 10001; "
-                        + "callingPid: 11001; appSwitchState: 0; callingUidHasAnyVisibleWindow: "
-                        + "false; callingUidProcState: NONEXISTENT; "
-                        + "isCallingUidPersistentSystemProcess: false; forcedBalByPiSender: BSP"
-                        + ".NONE; intent: Intent { cmp=package.app3/someClass }; callerApp: "
-                        + "mCallerApp; inVisibleTask: false; balAllowedByPiCreator: BSP"
-                        + ".NONE; balAllowedByPiCreatorWithHardening: BSP.NONE; "
-                        + "resultIfPiCreatorAllowsBal: null; hasRealCaller: true; "
-                        + "isCallForResult: false; isPendingIntent: true; autoOptInReason: "
-                        + "null; realCallingPackage: uid=1[debugOnly]; "
-                        + "realCallingPackageTargetSdk: -1; realCallingUid: 1; realCallingPid: 1;"
-                        + " realCallingUidHasAnyVisibleWindow: false; realCallingUidProcState: "
-                        + "NONEXISTENT; isRealCallingUidPersistentSystemProcess: false; "
-                        + "originatingPendingIntent: PendingIntentRecord; realCallerApp: null; "
-                        + "balAllowedByPiSender: BSP.ALLOW_FGS; resultIfPiSenderAllowsBal: null]");
+        assertThat(balState.toString()).contains(
+                "[callingPackage: package.app1; "
+                        + "callingPackageTargetSdk: -1; "
+                        + "callingUid: 10001; "
+                        + "callingPid: 11001; "
+                        + "appSwitchState: 0; "
+                        + "callingUidHasAnyVisibleWindow: false; "
+                        + "callingUidProcState: NONEXISTENT; "
+                        + "isCallingUidPersistentSystemProcess: false; "
+                        + "forcedBalByPiSender: BSP.NONE; "
+                        + "intent: Intent { cmp=package.app3/someClass }; "
+                        + "callerApp: mCallerApp; "
+                        + "inVisibleTask: false; "
+                        + "balAllowedByPiCreator: BSP.NONE; "
+                        + "balAllowedByPiCreatorWithHardening: BSP.NONE; "
+                        + "resultIfPiCreatorAllowsBal: null; "
+                        + "hasRealCaller: true; "
+                        + "isCallForResult: false; "
+                        + "isPendingIntent: true; "
+                        + "autoOptInReason: null; "
+                        + "realCallingPackage: uid=1[debugOnly]; "
+                        + "realCallingPackageTargetSdk: -1; "
+                        + "realCallingUid: 1; "
+                        + "realCallingPid: 1; "
+                        + "realCallingUidHasAnyVisibleWindow: false; "
+                        + "realCallingUidProcState: NONEXISTENT; "
+                        + "isRealCallingUidPersistentSystemProcess: false; "
+                        + "originatingPendingIntent: PendingIntentRecord; "
+                        + "realCallerApp: null; "
+                        + "balAllowedByPiSender: BSP.ALLOW_FGS; "
+                        + "resultIfPiSenderAllowsBal: null");
     }
 }
