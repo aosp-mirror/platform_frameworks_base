@@ -58,6 +58,16 @@ public class FontScaleConverterFactory {
         synchronized (LOOKUP_TABLES_WRITE_LOCK) {
             putInto(
                     sLookupTables,
+                    /* scaleKey= */ 1.05f,
+                    new FontScaleConverterImpl(
+                            /* fromSp= */
+                            new float[] {   8f,   10f,   12f,   14f,   18f,   20f,   24f,   30f,  100},
+                            /* toDp=   */
+                            new float[] { 8.4f, 10.5f, 12.6f, 14.8f, 18.6f, 20.6f, 24.4f,   30f,  100})
+            );
+
+            putInto(
+                    sLookupTables,
                     /* scaleKey= */ 1.1f,
                     new FontScaleConverterImpl(
                             /* fromSp= */
@@ -74,6 +84,16 @@ public class FontScaleConverterFactory {
                             new float[] {   8f,   10f,   12f,   14f,   18f,   20f,   24f,   30f,  100},
                             /* toDp=   */
                             new float[] { 9.2f, 11.5f, 13.8f, 16.4f, 19.8f, 21.8f, 25.2f,   30f,  100})
+            );
+
+            putInto(
+                    sLookupTables,
+                    /* scaleKey= */ 1.2f,
+                    new FontScaleConverterImpl(
+                            /* fromSp= */
+                            new float[] {   8f,   10f,   12f,   14f,   18f,   20f,   24f,   30f,  100},
+                            /* toDp=   */
+                            new float[] { 9.6f,   12f, 14.4f, 17.2f, 20.4f, 22.4f, 25.6f,   30f,  100})
             );
 
             putInto(
@@ -117,7 +137,7 @@ public class FontScaleConverterFactory {
             );
         }
 
-        sMinScaleBeforeCurvesApplied = getScaleFromKey(sLookupTables.keyAt(0)) - 0.02f;
+        sMinScaleBeforeCurvesApplied = getScaleFromKey(sLookupTables.keyAt(0)) - 0.01f;
         if (sMinScaleBeforeCurvesApplied <= 1.0f) {
             throw new IllegalStateException(
                     "You should only apply non-linear scaling to font scales > 1"
