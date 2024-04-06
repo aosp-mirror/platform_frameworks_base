@@ -43,6 +43,7 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardPreviewClockViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.res.R
+import com.android.systemui.shared.clocks.ClockRegistry
 import com.android.systemui.util.Utils
 import kotlin.reflect.KSuspendFunction1
 
@@ -76,37 +77,42 @@ object KeyguardPreviewClockViewBinder {
         context: Context,
         rootView: ConstraintLayout,
         viewModel: KeyguardPreviewClockViewModel,
+        clockRegistry: ClockRegistry,
         updateClockAppearance: KSuspendFunction1<ClockController, Unit>,
     ) {
         rootView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
+                var lastClock: ClockController? = null
                 launch("$TAG#viewModel.previewClock") {
-                    var lastClock: ClockController? = null
-                    viewModel.previewClock.collect { currentClock ->
-                        lastClock?.let { clock ->
-                            (clock.largeClock.layout.views + clock.smallClock.layout.views)
-                                .forEach { rootView.removeView(it) }
-                        }
-                        lastClock = currentClock
-                        updateClockAppearance(currentClock)
+                        viewModel.previewClock.collect { currentClock ->
+                            lastClock?.let { clock ->
+                                (clock.largeClock.layout.views + clock.smallClock.layout.views)
+                                    .forEach { rootView.removeView(it) }
+                            }
+                            lastClock = currentClock
+                            updateClockAppearance(currentClock)
 
-                        if (viewModel.shouldHighlightSelectedAffordance) {
-                            (currentClock.largeClock.layout.views +
-                                    currentClock.smallClock.layout.views)
-                                .forEach { it.alpha = KeyguardPreviewRenderer.DIM_ALPHA }
-                        }
-                        currentClock.largeClock.layout.views.forEach {
-                            (it.parent as? ViewGroup)?.removeView(it)
-                            rootView.addView(it)
-                        }
+                            if (viewModel.shouldHighlightSelectedAffordance) {
+                                (currentClock.largeClock.layout.views +
+                                        currentClock.smallClock.layout.views)
+                                    .forEach { it.alpha = KeyguardPreviewRenderer.DIM_ALPHA }
+                            }
+                            currentClock.largeClock.layout.views.forEach {
+                                (it.parent as? ViewGroup)?.removeView(it)
+                                rootView.addView(it)
+                            }
 
-                        currentClock.smallClock.layout.views.forEach {
-                            (it.parent as? ViewGroup)?.removeView(it)
-                            rootView.addView(it)
+                            currentClock.smallClock.layout.views.forEach {
+                                (it.parent as? ViewGroup)?.removeView(it)
+                                rootView.addView(it)
+                            }
+                            applyPreviewConstraints(context, rootView, currentClock, viewModel)
                         }
-                        applyPreviewConstraints(context, rootView, currentClock, viewModel)
                     }
-                }
+                    .invokeOnCompletion {
+                        // recover seed color especially for Transit clock
+                        lastClock?.events?.onSeedColorChanged(clockRegistry.seedColor)
+                    }
             }
         }
     }

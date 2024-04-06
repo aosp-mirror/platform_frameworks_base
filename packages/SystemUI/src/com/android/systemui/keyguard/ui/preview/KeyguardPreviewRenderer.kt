@@ -410,7 +410,8 @@ constructor(
                     context,
                     keyguardRootView,
                     clockViewModel,
-                    ::updateClockAppearance
+                    clockRegistry,
+                    ::updateClockAppearance,
                 )
             } else {
                 KeyguardPreviewClockViewBinder.bind(
