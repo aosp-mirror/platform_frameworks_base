@@ -23,6 +23,11 @@ import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
 import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 import static android.content.pm.PackageManager.MATCH_FACTORY_ONLY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
+
+import static com.android.server.contextualsearch.flags.Flags.enableExcludePersistentUi;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -66,6 +71,7 @@ import java.io.FileDescriptor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public class ContextualSearchManagerService extends SystemService {
 
@@ -192,7 +198,13 @@ public class ContextualSearchManagerService extends SystemService {
         }
         final ScreenCapture.ScreenshotHardwareBuffer shb;
         if (mWmInternal != null) {
-            shb = mWmInternal.takeAssistScreenshot();
+            if (enableExcludePersistentUi()) {
+                shb = mWmInternal.takeAssistScreenshot(
+                        Set.of(TYPE_STATUS_BAR, TYPE_NAVIGATION_BAR, TYPE_NAVIGATION_BAR_PANEL));
+            } else {
+                shb = mWmInternal.takeAssistScreenshot(/* windowTypesToExclude= */ Set.of());
+            }
+
         } else {
             shb = null;
         }

@@ -50,6 +50,7 @@ import android.view.WindowInfo;
 import android.view.WindowManager.DisplayImePolicy;
 import android.view.inputmethod.ImeTracker;
 import android.window.ScreenCapture;
+import android.window.ScreenCapture.ScreenshotHardwareBuffer;
 
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.server.input.InputManagerService;
@@ -1073,8 +1074,9 @@ public abstract class WindowManagerInternal {
     public abstract boolean moveFocusToAdjacentEmbeddedActivityIfNeeded();
 
     /**
-     * Returns an instance of {@link ScreenCapture.ScreenshotHardwareBuffer} containing the current
+     * Returns an instance of {@link ScreenshotHardwareBuffer} containing the current
      * screenshot.
      */
-    public abstract ScreenCapture.ScreenshotHardwareBuffer takeAssistScreenshot();
+    public abstract ScreenshotHardwareBuffer takeAssistScreenshot(
+            Set<Integer> windowTypesToExclude);
 }
