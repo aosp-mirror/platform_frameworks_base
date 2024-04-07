@@ -545,7 +545,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Recién"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Este teléfono"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Esta tablet"</string>
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Bocina del conector"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Bocina de la estación de carga"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositivo externo"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispositivo conectado"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este teléfono"</string>
