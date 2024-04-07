@@ -1645,6 +1645,8 @@
     <string name="accessibility_phone_two_bars">Phone two bars.</string>
     <!-- Content description of the phone signal when it is three bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_phone_three_bars">Phone three bars.</string>
+    <!-- Content description of the phone signal when it is four bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_phone_four_bars">Phone four bars.</string>
     <!-- Content description of the phone signal when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_phone_signal_full">Phone signal full.</string>
 
