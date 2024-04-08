@@ -786,7 +786,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             }
         }
         if (deadCallbackHolders != null) {
-            mControllerCallbackHolders.removeAll(deadCallbackHolders);
+            removeControllerHoldersSafely(deadCallbackHolders);
         }
     }
 
@@ -813,7 +813,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             }
         }
         if (deadCallbackHolders != null) {
-            mControllerCallbackHolders.removeAll(deadCallbackHolders);
+            removeControllerHoldersSafely(deadCallbackHolders);
         }
     }
 
@@ -848,7 +848,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             }
         }
         if (deadCallbackHolders != null) {
-            mControllerCallbackHolders.removeAll(deadCallbackHolders);
+            removeControllerHoldersSafely(deadCallbackHolders);
         }
     }
 
@@ -875,7 +875,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             }
         }
         if (deadCallbackHolders != null) {
-            mControllerCallbackHolders.removeAll(deadCallbackHolders);
+            removeControllerHoldersSafely(deadCallbackHolders);
         }
     }
 
@@ -902,7 +902,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             }
         }
         if (deadCallbackHolders != null) {
-            mControllerCallbackHolders.removeAll(deadCallbackHolders);
+            removeControllerHoldersSafely(deadCallbackHolders);
         }
     }
 
@@ -929,7 +929,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             }
         }
         if (deadCallbackHolders != null) {
-            mControllerCallbackHolders.removeAll(deadCallbackHolders);
+            removeControllerHoldersSafely(deadCallbackHolders);
         }
     }
 
@@ -954,7 +954,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             }
         }
         if (deadCallbackHolders != null) {
-            mControllerCallbackHolders.removeAll(deadCallbackHolders);
+            removeControllerHoldersSafely(deadCallbackHolders);
         }
     }
 
@@ -979,7 +979,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             }
         }
         // After notifying clear all listeners
-        mControllerCallbackHolders.clear();
+        removeControllerHoldersSafely(null);
     }
 
     private PlaybackState getStateWithUpdatedPosition() {
@@ -1025,6 +1025,17 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             }
         }
         return -1;
+    }
+
+    private void removeControllerHoldersSafely(
+            Collection<ISessionControllerCallbackHolder> holders) {
+        synchronized (mLock) {
+            if (holders == null) {
+                mControllerCallbackHolders.clear();
+            } else {
+                mControllerCallbackHolders.removeAll(holders);
+            }
+        }
     }
 
     private PlaybackInfo getVolumeAttributes() {
