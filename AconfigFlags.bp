@@ -585,6 +585,7 @@ java_aconfig_library {
 aconfig_declarations {
     name: "com.android.media.flags.performance-aconfig",
     package: "com.android.media.performance.flags",
+    container: "system",
     srcs: [
         "media/java/android/media/flags/performance.aconfig",
     ],

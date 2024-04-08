@@ -1,4 +1,5 @@
 package: "com.android.media.performance.flags"
+container: "system"
 
 flag {
     name: "media_description_ashmem_bitmap"
