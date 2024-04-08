@@ -21,6 +21,11 @@
     <item name="android:colorControlNormal">@color/colorControlNormal</item>
   </style>
 
+  <style name="SettingsTheme" parent="Theme.SettingsBase">
+    <!-- Quick fix so that the preference page doesn't render under its parent header. -->
+    <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+  </style>
+
   <!--The basic theme for service and test case only-->
   <style name="A11yMenuBaseTheme" parent="android:Theme.DeviceDefault.Light">
     <item name="android:windowActionBar">false</item>
