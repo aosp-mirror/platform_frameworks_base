@@ -72,7 +72,6 @@ import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYB
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL;
 import static android.media.audio.Flags.roForegroundAudioControl;
-import static android.os.Process.SCHED_OTHER;
 import static android.os.Process.THREAD_GROUP_BACKGROUND;
 import static android.os.Process.THREAD_GROUP_DEFAULT;
 import static android.os.Process.THREAD_GROUP_RESTRICTED;
@@ -81,7 +80,6 @@ import static android.os.Process.THREAD_PRIORITY_DISPLAY;
 import static android.os.Process.THREAD_PRIORITY_TOP_APP_BOOST;
 import static android.os.Process.setProcessGroup;
 import static android.os.Process.setThreadPriority;
-import static android.os.Process.setThreadScheduler;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKUP;
@@ -3315,22 +3313,10 @@ public class OomAdjuster {
                         // do nothing if we already switched to RT
                         if (oldSchedGroup != SCHED_GROUP_TOP_APP) {
                             app.getWindowProcessController().onTopProcChanged();
-                            if (mService.mUseFifoUiScheduling) {
+                            if (app.useFifoUiScheduling()) {
                                 // Switch UI pipeline for app to SCHED_FIFO
                                 state.setSavedPriority(Process.getThreadPriority(app.getPid()));
-                                mService.scheduleAsFifoPriority(app.getPid(), true);
-                                if (renderThreadTid != 0) {
-                                    mService.scheduleAsFifoPriority(renderThreadTid,
-                                            /* suppressLogs */true);
-                                    if (DEBUG_OOM_ADJ) {
-                                        Slog.d("UI_FIFO", "Set RenderThread (TID " +
-                                                renderThreadTid + ") to FIFO");
-                                    }
-                                } else {
-                                    if (DEBUG_OOM_ADJ) {
-                                        Slog.d("UI_FIFO", "Not setting RenderThread TID");
-                                    }
-                                }
+                                ActivityManagerService.setFifoPriority(app, true /* enable */);
                             } else {
                                 // Boost priority for top app UI and render threads
                                 setThreadPriority(app.getPid(), THREAD_PRIORITY_TOP_APP_BOOST);
@@ -3347,22 +3333,10 @@ public class OomAdjuster {
                     } else if (oldSchedGroup == SCHED_GROUP_TOP_APP
                             && curSchedGroup != SCHED_GROUP_TOP_APP) {
                         app.getWindowProcessController().onTopProcChanged();
-                        if (mService.mUseFifoUiScheduling) {
-                            try {
-                                // Reset UI pipeline to SCHED_OTHER
-                                setThreadScheduler(app.getPid(), SCHED_OTHER, 0);
-                                setThreadPriority(app.getPid(), state.getSavedPriority());
-                                if (renderThreadTid != 0) {
-                                    setThreadScheduler(renderThreadTid,
-                                            SCHED_OTHER, 0);
-                                }
-                            } catch (IllegalArgumentException e) {
-                                Slog.w(TAG,
-                                        "Failed to set scheduling policy, thread does not exist:\n"
-                                                + e);
-                            } catch (SecurityException e) {
-                                Slog.w(TAG, "Failed to set scheduling policy, not allowed:\n" + e);
-                            }
+                        if (app.useFifoUiScheduling()) {
+                            // Reset UI pipeline to SCHED_OTHER
+                            ActivityManagerService.setFifoPriority(app, false /* enable */);
+                            setThreadPriority(app.getPid(), state.getSavedPriority());
                         } else {
                             // Reset priority for top app UI and render threads
                             setThreadPriority(app.getPid(), 0);
@@ -3557,7 +3531,7 @@ public class OomAdjuster {
                 // {@link SCHED_GROUP_TOP_APP}. We don't check render thread because it
                 // is not ready when attaching.
                 app.getWindowProcessController().onTopProcChanged();
-                if (mService.mUseFifoUiScheduling) {
+                if (app.useFifoUiScheduling()) {
                     mService.scheduleAsFifoPriority(app.getPid(), true);
                 } else {
                     setThreadPriority(app.getPid(), THREAD_PRIORITY_TOP_APP_BOOST);

@@ -38,6 +38,7 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.am.ActivityManagerInternalTest.CustomThread;
 import static com.android.server.am.ActivityManagerService.Injector;
@@ -690,6 +691,31 @@ public class ActivityManagerServiceTest {
         // Ensure the next one fails
         uid = range.allocateIsolatedUidLocked(0);
         assertEquals(uid, -1);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testFifoSwitch() {
+        addUidRecord(TEST_UID, TEST_PACKAGE);
+        final ProcessRecord fifoProc = mAms.getProcessRecordLocked(TEST_PACKAGE, TEST_UID);
+        final var wpc = fifoProc.getWindowProcessController();
+        spyOn(wpc);
+        doReturn(true).when(wpc).useFifoUiScheduling();
+        fifoProc.makeActive(fifoProc.getThread(), mAms.mProcessStats);
+        assertTrue(fifoProc.useFifoUiScheduling());
+        assertTrue(mAms.mSpecifiedFifoProcesses.contains(fifoProc));
+
+        // If there is a request to use more CPU resource (e.g. camera), the current fifo process
+        // should switch the capability of using fifo.
+        final UidRecord uidRecord = addUidRecord(TEST_UID + 1, TEST_PACKAGE + 1);
+        uidRecord.setCurProcState(PROCESS_STATE_TOP);
+        mAms.adjustFifoProcessesIfNeeded(uidRecord.getUid(), false /* allowSpecifiedFifo */);
+        assertFalse(fifoProc.useFifoUiScheduling());
+        mAms.adjustFifoProcessesIfNeeded(uidRecord.getUid(), true /* allowSpecifiedFifo */);
+        assertTrue(fifoProc.useFifoUiScheduling());
+
+        fifoProc.makeInactive(mAms.mProcessStats);
+        assertFalse(mAms.mSpecifiedFifoProcesses.contains(fifoProc));
     }
 
     @Test
