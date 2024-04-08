@@ -56,7 +56,8 @@ class MediaProjectionRecentsViewControllerTest : SysuiTestCase() {
             topActivityComponent = null,
             baseIntentComponent = null,
             colorBackground = null,
-            isForegroundTask = false
+            isForegroundTask = false,
+            userType = RecentTask.UserType.STANDARD,
         )
 
     private val taskView =
