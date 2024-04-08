@@ -55,6 +55,7 @@ android_test {
         "platform-test-annotations",
         "servicestests-utils",
         "com_android_wm_shell_flags_lib",
+        "guava-android-testlib",
     ],
 
     libs: [

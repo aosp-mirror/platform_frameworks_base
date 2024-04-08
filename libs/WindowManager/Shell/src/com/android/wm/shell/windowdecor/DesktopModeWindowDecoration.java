@@ -42,6 +42,7 @@ import android.graphics.Region;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.Log;
+import android.util.Size;
 import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
@@ -276,7 +277,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     mHandler,
                     mChoreographer,
                     mDisplay.getDisplayId(),
-                    mRelayoutParams.mCornerRadius,
                     mDecorationContainerSurface,
                     mDragPositioningCallback,
                     mSurfaceControlBuilderSupplier,
@@ -288,16 +288,17 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 .getScaledTouchSlop();
         mDragDetector.setTouchSlop(touchSlop);
 
-        final int resize_handle = mResult.mRootView.getResources()
+        final int resizeHandle = mResult.mRootView.getResources()
                 .getDimensionPixelSize(R.dimen.freeform_resize_handle);
-        final int resize_corner = mResult.mRootView.getResources()
+        final int resizeCorner = mResult.mRootView.getResources()
                 .getDimensionPixelSize(R.dimen.freeform_resize_corner);
 
         // If either task geometry or position have changed, update this task's
         // exclusion region listener
         if (mDragResizeListener.setGeometry(
-                mResult.mWidth, mResult.mHeight, resize_handle, resize_corner, touchSlop)
-                || !mTaskInfo.positionInParent.equals(mPositionInParent)) {
+                new DragResizeWindowGeometry(mRelayoutParams.mCornerRadius,
+                        new Size(mResult.mWidth, mResult.mHeight), resizeHandle, resizeCorner),
+                touchSlop) || !mTaskInfo.positionInParent.equals(mPositionInParent)) {
             updateExclusionRegion();
         }
 
@@ -427,7 +428,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         return mHandleMenu != null;
     }
 
-    boolean shouldResizeListenerHandleEvent(MotionEvent e, Point offset) {
+    boolean shouldResizeListenerHandleEvent(@NonNull MotionEvent e, @NonNull Point offset) {
         return mDragResizeListener != null && mDragResizeListener.shouldHandleEvent(e, offset);
     }
 

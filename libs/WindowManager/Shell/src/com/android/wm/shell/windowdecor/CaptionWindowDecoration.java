@@ -27,6 +27,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.VectorDrawable;
 import android.os.Handler;
+import android.util.Size;
 import android.view.Choreographer;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -222,7 +223,6 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
                     mHandler,
                     mChoreographer,
                     mDisplay.getDisplayId(),
-                    0 /* taskCornerRadius */,
                     mDecorationContainerSurface,
                     mDragPositioningCallback,
                     mSurfaceControlBuilderSupplier,
@@ -234,12 +234,13 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
                 .getScaledTouchSlop();
         mDragDetector.setTouchSlop(touchSlop);
 
-        final int resize_handle = mResult.mRootView.getResources()
+        final int resizeHandle = mResult.mRootView.getResources()
                 .getDimensionPixelSize(R.dimen.freeform_resize_handle);
-        final int resize_corner = mResult.mRootView.getResources()
+        final int resizeCorner = mResult.mRootView.getResources()
                 .getDimensionPixelSize(R.dimen.freeform_resize_corner);
-        mDragResizeListener.setGeometry(
-                mResult.mWidth, mResult.mHeight, resize_handle, resize_corner, touchSlop);
+        mDragResizeListener.setGeometry(new DragResizeWindowGeometry(0 /* taskCornerRadius */,
+                        new Size(mResult.mWidth, mResult.mHeight), resizeHandle, resizeCorner),
+                touchSlop);
     }
 
     /**
