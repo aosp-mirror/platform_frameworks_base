@@ -26,6 +26,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.nullable;
 import static org.mockito.Mockito.times;
@@ -45,6 +46,7 @@ import android.app.PropertyInvalidatedCache;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -57,6 +59,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
@@ -155,6 +158,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         mPackageInfo.applicationInfo = new ApplicationInfo();
         mPackageInfo.applicationInfo.privateFlags = ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
         when(mMockPackageManager.getPackageInfo(anyString(), anyInt())).thenReturn(mPackageInfo);
+        when(mMockPackageManager.getPackageInfoAsUser(
+                        anyString(), anyInt(), anyInt())).thenReturn(mPackageInfo);
         when(mMockContext.getSystemService(Context.APP_OPS_SERVICE)).thenReturn(mMockAppOpsManager);
         when(mMockContext.getSystemService(Context.USER_SERVICE)).thenReturn(mMockUserManager);
         when(mMockContext.getSystemServiceName(AppOpsManager.class)).thenReturn(
@@ -3583,6 +3588,19 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         @Override
         public File getDatabasePath(String name) {
             return mTestContext.getDatabasePath(name);
+        }
+
+        @Override
+        public Resources getResources() {
+            Resources mockResources = mock(Resources.class);
+            // config_canRemoveFirstAccount = true
+            when(mockResources.getBoolean(anyInt())).thenReturn(true);
+            return mockResources;
+        }
+
+        @Override
+        public ContentResolver getContentResolver() {
+            return mock(ContentResolver.class);
         }
 
         @Override
