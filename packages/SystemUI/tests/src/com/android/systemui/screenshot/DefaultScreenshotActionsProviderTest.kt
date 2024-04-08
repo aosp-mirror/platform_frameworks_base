@@ -16,12 +16,11 @@
 
 package com.android.systemui.screenshot
 
-import android.app.ActivityOptions
-import android.app.ExitTransitionCoordinator
 import android.app.Notification
 import android.app.PendingIntent
 import android.content.Intent
 import android.net.Uri
+import android.os.Process
 import android.os.UserHandle
 import android.testing.AndroidTestingRunner
 import android.view.accessibility.AccessibilityManager
@@ -36,11 +35,7 @@ import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
-import kotlin.test.Ignore
 import kotlin.test.Test
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestCoroutineScheduler
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNotNull
 import org.junit.Before
@@ -49,25 +44,18 @@ import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyBlocking
 import org.mockito.kotlin.whenever
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
-    private val scheduler = TestCoroutineScheduler()
-    private val mainDispatcher = StandardTestDispatcher(scheduler)
-    private val testScope = TestScope(mainDispatcher)
-
-    private val actionIntentExecutor = mock<ActionIntentExecutor>()
+    private val actionExecutor = mock<ActionExecutor>()
     private val accessibilityManager = mock<AccessibilityManager>()
     private val uiEventLogger = mock<UiEventLogger>()
     private val smartActionsProvider = mock<SmartActionsProvider>()
-    private val transition = mock<android.util.Pair<ActivityOptions, ExitTransitionCoordinator>>()
-    private val requestDismissal = mock<() -> Unit>()
 
     private val request = ScreenshotData.forTesting()
-    private val validResult = ScreenshotSavedResult(Uri.EMPTY, android.os.Process.myUserHandle(), 0)
+    private val validResult = ScreenshotSavedResult(Uri.EMPTY, Process.myUserHandle(), 0)
 
     private lateinit var viewModel: ScreenshotViewModel
     private lateinit var actionsProvider: ScreenshotActionsProvider
@@ -84,7 +72,7 @@ class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
 
         assertNotNull(viewModel.previewAction.value)
         viewModel.previewAction.value!!.invoke()
-        verifyNoMoreInteractions(actionIntentExecutor)
+        verifyNoMoreInteractions(actionExecutor)
     }
 
     @Test
@@ -98,28 +86,24 @@ class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
         assertThat(secondAction.onClicked).isNotNull()
         firstAction.onClicked!!.invoke()
         secondAction.onClicked!!.invoke()
-        verifyNoMoreInteractions(actionIntentExecutor)
+        verifyNoMoreInteractions(actionExecutor)
     }
 
     @Test
-    @Ignore("b/332526567")
     fun actionAccessed_withResult_launchesIntent() = runTest {
         actionsProvider = createActionsProvider()
 
         actionsProvider.setCompletedScreenshot(validResult)
         viewModel.actions.value[0].onClicked!!.invoke()
-        scheduler.advanceUntilIdle()
 
         verify(uiEventLogger).log(eq(ScreenshotEvent.SCREENSHOT_EDIT_TAPPED), eq(0), eq(""))
         val intentCaptor = argumentCaptor<Intent>()
-        verifyBlocking(actionIntentExecutor) {
-            launchIntent(capture(intentCaptor), eq(transition), eq(UserHandle.CURRENT), eq(true))
-        }
+        verify(actionExecutor)
+            .startSharedTransition(capture(intentCaptor), eq(Process.myUserHandle()), eq(true))
         assertThat(intentCaptor.value.action).isEqualTo(Intent.ACTION_EDIT)
     }
 
     @Test
-    @Ignore("b/332526567")
     fun actionAccessed_whilePending_launchesMostRecentAction() = runTest {
         actionsProvider = createActionsProvider()
 
@@ -127,13 +111,11 @@ class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
         viewModel.previewAction.value!!.invoke()
         viewModel.actions.value[1].onClicked!!.invoke()
         actionsProvider.setCompletedScreenshot(validResult)
-        scheduler.advanceUntilIdle()
 
         verify(uiEventLogger).log(eq(ScreenshotEvent.SCREENSHOT_SHARE_TAPPED), eq(0), eq(""))
         val intentCaptor = argumentCaptor<Intent>()
-        verifyBlocking(actionIntentExecutor) {
-            launchIntent(capture(intentCaptor), eq(transition), eq(UserHandle.CURRENT), eq(false))
-        }
+        verify(actionExecutor)
+            .startSharedTransition(capture(intentCaptor), eq(Process.myUserHandle()), eq(false))
         assertThat(intentCaptor.value.action).isEqualTo(Intent.ACTION_CHOOSER)
     }
 
@@ -154,7 +136,7 @@ class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
             (it.getArgument(2) as ((Notification.Action) -> Unit)).invoke(quickShare)
         }
         whenever(smartActionsProvider.wrapIntent(any(), any(), any(), any())).thenAnswer {
-            it.getArgument(0)
+            (it.getArgument(0) as Notification.Action).actionIntent
         }
         actionsProvider = createActionsProvider()
 
@@ -172,14 +154,11 @@ class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
         return DefaultScreenshotActionsProvider(
             context,
             viewModel,
-            actionIntentExecutor,
             smartActionsProvider,
             uiEventLogger,
-            testScope,
             request,
             "testid",
-            { transition },
-            requestDismissal,
+            actionExecutor
         )
     }
 }

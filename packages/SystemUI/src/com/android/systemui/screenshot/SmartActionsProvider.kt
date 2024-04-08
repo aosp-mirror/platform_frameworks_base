@@ -106,14 +106,14 @@ constructor(
      * @param uri the URI of the saved screenshot
      * @param subject the subject/title for the screenshot
      * @param id the request ID of the screenshot
-     * @return the wrapped action
+     * @return the pending intent with correct URI
      */
     fun wrapIntent(
         quickShare: Notification.Action,
         uri: Uri,
         subject: String,
         id: String
-    ): Notification.Action {
+    ): PendingIntent {
         val wrappedIntent: Intent =
             Intent(context, SmartActionsReceiver::class.java)
                 .putExtra(ScreenshotController.EXTRA_ACTION_INTENT, quickShare.actionIntent)
@@ -134,17 +134,12 @@ constructor(
             .putExtra(ScreenshotController.EXTRA_ACTION_TYPE, actionType)
             .putExtra(ScreenshotController.EXTRA_ID, id)
             .putExtra(ScreenshotController.EXTRA_SMART_ACTIONS_ENABLED, true)
-        val broadcastIntent =
-            PendingIntent.getBroadcast(
-                context,
-                Random.nextInt(),
-                wrappedIntent,
-                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        return Notification.Action.Builder(quickShare.getIcon(), quickShare.title, broadcastIntent)
-            .setContextual(true)
-            .addExtras(extras)
-            .build()
+        return PendingIntent.getBroadcast(
+            context,
+            Random.nextInt(),
+            wrappedIntent,
+            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
     }
 
     private fun createFillInIntent(uri: Uri, subject: String): Intent {

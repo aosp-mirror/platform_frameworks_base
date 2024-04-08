@@ -335,8 +335,8 @@ public class LongScreenshotActivity extends Activity {
             // TODO: Fix transition for work profile. Omitting it in the meantime.
             mActionExecutor.launchIntentAsync(
                     ActionIntentCreator.INSTANCE.createEdit(uri, this),
-                    null,
-                    mScreenshotUserHandle, false);
+                    mScreenshotUserHandle, false,
+                    /* activityOptions */ null, /* transitionCoordinator */ null);
         } else {
             String editorPackage = getString(R.string.config_screenshotEditor);
             Intent intent = new Intent(Intent.ACTION_EDIT);
@@ -363,7 +363,8 @@ public class LongScreenshotActivity extends Activity {
 
     private void doShare(Uri uri) {
         Intent shareIntent = ActionIntentCreator.INSTANCE.createShare(uri);
-        mActionExecutor.launchIntentAsync(shareIntent, null, mScreenshotUserHandle, false);
+        mActionExecutor.launchIntentAsync(shareIntent, mScreenshotUserHandle, false,
+                /* activityOptions */ null, /* transitionCoordinator */ null);
     }
 
     private void onClicked(View v) {
