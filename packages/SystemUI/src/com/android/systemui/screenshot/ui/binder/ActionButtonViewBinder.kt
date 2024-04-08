@@ -28,16 +28,16 @@ object ActionButtonViewBinder {
     fun bind(view: View, viewModel: ActionButtonViewModel) {
         val iconView = view.requireViewById<ImageView>(R.id.overlay_action_chip_icon)
         val textView = view.requireViewById<TextView>(R.id.overlay_action_chip_text)
-        iconView.setImageDrawable(viewModel.icon)
-        textView.text = viewModel.name
-        setMargins(iconView, textView, viewModel.name?.isNotEmpty() ?: false)
+        iconView.setImageDrawable(viewModel.appearance.icon)
+        textView.text = viewModel.appearance.label
+        setMargins(iconView, textView, viewModel.appearance.label?.isNotEmpty() ?: false)
         if (viewModel.onClicked != null) {
             view.setOnClickListener { viewModel.onClicked.invoke() }
         } else {
             view.setOnClickListener(null)
         }
         view.tag = viewModel.id
-        view.contentDescription = viewModel.description
+        view.contentDescription = viewModel.appearance.description
         view.visibility = View.VISIBLE
         view.alpha = 1f
     }
