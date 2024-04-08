@@ -36,3 +36,10 @@ flag {
     description: "Enables a limit on the number of Tasks shown in Desktop Mode"
     bug: "332502912"
 }
+
+flag {
+    name: "enable_windowing_edge_drag_resize"
+    namespace: "lse_desktop_experience"
+    description: "Enables edge drag resizing for all input sources"
+    bug: "323383067"
+}
