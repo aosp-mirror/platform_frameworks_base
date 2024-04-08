@@ -94,7 +94,6 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_REFACTOR_KEYGUARD_DISMISS_INTENT)
         overrideResource(R.bool.config_use_split_notification_shade, false)
         movementFlow = MutableStateFlow(BurnInModel())
         whenever(aodBurnInViewModel.movement(any())).thenReturn(movementFlow)
@@ -691,6 +690,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     fun translationYUpdatesOnKeyguardForBurnIn() =
         testScope.runTest {
             val translationY by collectLastValue(underTest.translationY(BurnInParameters()))
@@ -724,6 +724,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     fun translationYDoesNotUpdateWhenShadeIsExpanded() =
         testScope.runTest {
             val translationY by collectLastValue(underTest.translationY(BurnInParameters()))
