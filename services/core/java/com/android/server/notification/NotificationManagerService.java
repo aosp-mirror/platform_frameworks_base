@@ -22,6 +22,7 @@ import static android.Manifest.permission.STATUS_BAR_SERVICE;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.app.ActivityManagerInternal.ServiceNotificationPolicy.NOT_FOREGROUND_SERVICE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR;
 import static android.app.Flags.lifetimeExtensionRefactor;
 import static android.app.Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
@@ -3597,8 +3598,8 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_TOAST_RATE_LIMITING)
         @Override
+        @EnforcePermission(android.Manifest.permission.MANAGE_TOAST_RATE_LIMITING)
         public void setToastRateLimitingEnabled(boolean enable) {
 
             super.setToastRateLimitingEnabled_enforcePermission();
@@ -4523,7 +4524,6 @@ public class NotificationManagerService extends SystemService {
             return getActiveNotificationsWithAttribution(callingPkg, null);
         }
 
-        @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_NOTIFICATIONS)
         /**
          * System-only API for getting a list of current (i.e. not cleared) notifications.
          *
@@ -4531,6 +4531,7 @@ public class NotificationManagerService extends SystemService {
          * @returns A list of all the notifications, in natural order.
          */
         @Override
+        @EnforcePermission(android.Manifest.permission.ACCESS_NOTIFICATIONS)
         public StatusBarNotification[] getActiveNotificationsWithAttribution(String callingPkg,
                 String callingAttributionTag) {
             // enforce() will ensure the calling uid has the correct permission
@@ -4548,9 +4549,9 @@ public class NotificationManagerService extends SystemService {
             });
 
             // noteOp will check to make sure the callingPkg matches the uid
-            if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ACCESS_NOTIFICATIONS, uid, callingPkg,
-                    callingAttributionTag, null)
-                    == MODE_ALLOWED) {
+            int mode = mAppOps.noteOpNoThrow(AppOpsManager.OP_ACCESS_NOTIFICATIONS, uid, callingPkg,
+                        callingAttributionTag, null);
+            if (mode == MODE_ALLOWED || mode == MODE_DEFAULT) {
                 synchronized (mNotificationLock) {
                     final int N = mNotificationList.size();
                     for (int i = 0; i < N; i++) {
@@ -4650,12 +4651,12 @@ public class NotificationManagerService extends SystemService {
                     includeSnoozed);
         }
 
-        @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_NOTIFICATIONS)
         /**
          * System-only API for getting a list of recent (cleared, no longer shown) notifications.
          */
         @Override
         @RequiresPermission(android.Manifest.permission.ACCESS_NOTIFICATIONS)
+        @EnforcePermission(android.Manifest.permission.ACCESS_NOTIFICATIONS)
         public StatusBarNotification[] getHistoricalNotificationsWithAttribution(String callingPkg,
                 String callingAttributionTag, int count, boolean includeSnoozed) {
             // enforce() will ensure the calling uid has the correct permission
@@ -4665,9 +4666,9 @@ public class NotificationManagerService extends SystemService {
             int uid = Binder.getCallingUid();
 
             // noteOp will check to make sure the callingPkg matches the uid
-            if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ACCESS_NOTIFICATIONS, uid, callingPkg,
-                    callingAttributionTag, null)
-                    == MODE_ALLOWED) {
+            int mode = mAppOps.noteOpNoThrow(AppOpsManager.OP_ACCESS_NOTIFICATIONS, uid, callingPkg,
+                        callingAttributionTag, null);
+            if (mode == MODE_ALLOWED || mode == MODE_DEFAULT) {
                 synchronized (mArchive) {
                     tmp = mArchive.getArray(mUm, count, includeSnoozed);
                 }
@@ -4675,7 +4676,6 @@ public class NotificationManagerService extends SystemService {
             return tmp;
         }
 
-        @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_NOTIFICATIONS)
         /**
          * System-only API for getting a list of historical notifications. May contain multiple days
          * of notifications.
@@ -4683,6 +4683,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         @WorkerThread
         @RequiresPermission(android.Manifest.permission.ACCESS_NOTIFICATIONS)
+        @EnforcePermission(android.Manifest.permission.ACCESS_NOTIFICATIONS)
         public NotificationHistory getNotificationHistory(String callingPkg,
                 String callingAttributionTag) {
             // enforce() will ensure the calling uid has the correct permission
@@ -4690,9 +4691,9 @@ public class NotificationManagerService extends SystemService {
             int uid = Binder.getCallingUid();
 
             // noteOp will check to make sure the callingPkg matches the uid
-            if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ACCESS_NOTIFICATIONS, uid, callingPkg,
-                    callingAttributionTag, null)
-                    == MODE_ALLOWED) {
+            int mode = mAppOps.noteOpNoThrow(AppOpsManager.OP_ACCESS_NOTIFICATIONS, uid, callingPkg,
+                        callingAttributionTag, null);
+            if (mode == MODE_ALLOWED || mode == MODE_DEFAULT) {
                 IntArray currentUserIds = mUserProfiles.getCurrentProfileIds();
                 Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "notifHistoryReadHistory");
                 try {
