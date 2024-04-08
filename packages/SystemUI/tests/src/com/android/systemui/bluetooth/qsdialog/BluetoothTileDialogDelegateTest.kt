@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.tiles.dialog.bluetooth
+package com.android.systemui.bluetooth.qsdialog
 
-import android.content.Context
 import android.graphics.drawable.Drawable
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -121,23 +120,18 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                 sysuiDialogFactory
             )
 
-        whenever(
-                sysuiDialogFactory.create(
-                    any(SystemUIDialog.Delegate::class.java)
-                )
+        whenever(sysuiDialogFactory.create(any(SystemUIDialog.Delegate::class.java))).thenAnswer {
+            SystemUIDialog(
+                mContext,
+                0,
+                SystemUIDialog.DEFAULT_DISMISS_ON_DEVICE_LOCK,
+                dialogManager,
+                sysuiState,
+                fakeBroadcastDispatcher,
+                dialogTransitionAnimator,
+                it.getArgument(0)
             )
-            .thenAnswer {
-                SystemUIDialog(
-                    mContext,
-                    0,
-                    SystemUIDialog.DEFAULT_DISMISS_ON_DEVICE_LOCK,
-                    dialogManager,
-                    sysuiState,
-                    fakeBroadcastDispatcher,
-                    dialogTransitionAnimator,
-                    it.getArgument(0)
-                )
-            }
+        }
 
         icon = Pair(drawable, DEVICE_NAME)
         deviceItem =
@@ -163,6 +157,7 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
         assertThat(recyclerView.visibility).isEqualTo(VISIBLE)
         assertThat(recyclerView.adapter).isNotNull()
         assertThat(recyclerView.layoutManager is LinearLayoutManager).isTrue()
+        dialog.dismiss()
     }
 
     @Test
@@ -184,6 +179,7 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
             assertThat(adapter.getItem(0).deviceName).isEqualTo(DEVICE_NAME)
             assertThat(adapter.getItem(0).connectionSummary).isEqualTo(DEVICE_CONNECTION_SUMMARY)
             assertThat(adapter.getItem(0).iconWithDescription).isEqualTo(icon)
+            dialog.dismiss()
         }
     }
 
@@ -259,6 +255,7 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
             assertThat(pairNewButton.visibility).isEqualTo(VISIBLE)
             assertThat(adapter.itemCount).isEqualTo(1)
             assertThat(scrollViewContent.layoutParams.height).isEqualTo(WRAP_CONTENT)
+            dialog.dismiss()
         }
     }
 
@@ -283,6 +280,7 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
             dialog.show()
             assertThat(dialog.requireViewById<View>(R.id.scroll_view).layoutParams.height)
                 .isEqualTo(cachedHeight)
+            dialog.dismiss()
         }
     }
 
@@ -306,6 +304,7 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
             dialog.show()
             assertThat(dialog.requireViewById<View>(R.id.scroll_view).layoutParams.height)
                 .isGreaterThan(MATCH_PARENT)
+            dialog.dismiss()
         }
     }
 
@@ -331,6 +330,7 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                     dialog.requireViewById<View>(R.id.bluetooth_auto_on_toggle_layout).visibility
                 )
                 .isEqualTo(GONE)
+            dialog.dismiss()
         }
     }
 }

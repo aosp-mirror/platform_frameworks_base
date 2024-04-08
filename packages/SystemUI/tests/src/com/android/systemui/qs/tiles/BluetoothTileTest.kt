@@ -23,7 +23,7 @@ import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
-import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialogViewModel
+import com.android.systemui.bluetooth.qsdialog.BluetoothTileDialogViewModel
 import com.android.systemui.statusbar.policy.BluetoothController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq

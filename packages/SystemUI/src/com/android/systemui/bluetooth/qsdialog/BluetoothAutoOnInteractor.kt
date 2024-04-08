@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.tiles.dialog.bluetooth
+package com.android.systemui.bluetooth.qsdialog
 
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton

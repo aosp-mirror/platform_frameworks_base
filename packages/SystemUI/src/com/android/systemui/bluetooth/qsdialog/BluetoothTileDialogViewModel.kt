@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.tiles.dialog.bluetooth
+package com.android.systemui.bluetooth.qsdialog
 
 import android.content.Intent
 import android.content.SharedPreferences
@@ -31,15 +31,15 @@ import com.android.internal.logging.UiEventLogger
 import com.android.systemui.Prefs
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
+import com.android.systemui.bluetooth.qsdialog.BluetoothTileDialogDelegate.Companion.ACTION_BLUETOOTH_DEVICE_DETAILS
+import com.android.systemui.bluetooth.qsdialog.BluetoothTileDialogDelegate.Companion.ACTION_PAIR_NEW_DEVICE
+import com.android.systemui.bluetooth.qsdialog.BluetoothTileDialogDelegate.Companion.ACTION_PREVIOUSLY_CONNECTED_DEVICE
+import com.android.systemui.bluetooth.qsdialog.BluetoothTileDialogDelegate.Companion.MAX_DEVICE_ITEM_ENTRY
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialogDelegate.Companion.ACTION_BLUETOOTH_DEVICE_DETAILS
-import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialogDelegate.Companion.ACTION_PAIR_NEW_DEVICE
-import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialogDelegate.Companion.ACTION_PREVIOUSLY_CONNECTED_DEVICE
-import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialogDelegate.Companion.MAX_DEVICE_ITEM_ENTRY
 import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
