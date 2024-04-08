@@ -16,6 +16,8 @@
 
 package com.android.os.bugreports.tests;
 
+import static android.content.Context.RECEIVER_EXPORTED;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertNotNull;
@@ -358,7 +360,10 @@ public class BugreportManagerTest {
         // shell UID rather than our own.
         BugreportBroadcastReceiver br = new BugreportBroadcastReceiver();
         InstrumentationRegistry.getContext()
-                .registerReceiver(br, new IntentFilter(INTENT_BUGREPORT_FINISHED));
+                .registerReceiver(
+                        br,
+                        new IntentFilter(INTENT_BUGREPORT_FINISHED),
+                        RECEIVER_EXPORTED);
         UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
                 .executeShellCommand("am bug-report");
 
