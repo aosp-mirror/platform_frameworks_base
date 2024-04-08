@@ -124,7 +124,6 @@ constructor(
             // release focus immediately to kick off focus change transition
             notificationShadeWindowController.setNotificationShadeFocusable(false)
             notificationStackScrollLayout.cancelExpandHelper()
-            sceneInteractor.changeScene(Scenes.Shade, "ShadeController.animateExpandShade")
             if (delayed) {
                 scope.launch {
                     delay(125)
