@@ -29,14 +29,12 @@ import com.android.settingslib.spaprivileged.template.preference.RestrictedSwitc
 @Composable
 fun RestrictedTwoTargetSwitchPreference(
     model: SwitchPreferenceModel,
-    icon: @Composable (() -> Unit)? = null,
     restrictions: Restrictions,
     primaryEnabled: () -> Boolean = { true },
     primaryOnClick: (() -> Unit)?,
 ) {
     RestrictedTwoTargetSwitchPreference(
         model = model,
-        icon = icon,
         primaryEnabled = primaryEnabled,
         primaryOnClick = primaryOnClick,
         restrictions = restrictions,
@@ -48,21 +46,19 @@ fun RestrictedTwoTargetSwitchPreference(
 @Composable
 internal fun RestrictedTwoTargetSwitchPreference(
     model: SwitchPreferenceModel,
-    icon: @Composable (() -> Unit)? = null,
     primaryEnabled: () -> Boolean = { true },
     primaryOnClick: (() -> Unit)?,
     restrictions: Restrictions,
     restrictionsProviderFactory: RestrictionsProviderFactory,
 ) {
     if (restrictions.isEmpty()) {
-        TwoTargetSwitchPreference(model, icon, primaryEnabled, primaryOnClick)
+        TwoTargetSwitchPreference(model, primaryEnabled, primaryOnClick)
         return
     }
     val restrictedMode = restrictionsProviderFactory.rememberRestrictedMode(restrictions).value
     RestrictedSwitchWrapper(model, restrictedMode) { restrictedModel ->
         TwoTargetSwitchPreference(
             model = restrictedModel,
-            icon = icon,
             primaryEnabled = restrictedMode.restrictEnabled(primaryEnabled),
             primaryOnClick = restrictedMode.restrictOnClick(primaryOnClick),
         )
