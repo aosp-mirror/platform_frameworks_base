@@ -34,7 +34,8 @@ import java.util.List;
 @RunWith(JUnit4.class)
 public class AslgenTests {
     private static final String VALID_MAPPINGS_PATH = "com/android/asllib/validmappings";
-    private static final List<String> VALID_MAPPINGS_SUBDIRS = List.of("location", "contacts");
+    private static final List<String> VALID_MAPPINGS_SUBDIRS =
+            List.of("location", "contacts", "general");
     private static final String HR_XML_FILENAME = "hr.xml";
     private static final String OD_XML_FILENAME = "od.xml";
 
