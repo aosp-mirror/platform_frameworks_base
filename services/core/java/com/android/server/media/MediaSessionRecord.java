@@ -849,7 +849,7 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
         }
         if (deadCallbackHolders != null) {
-            mControllerCallbackHolders.removeAll(deadCallbackHolders);
+            removeControllerHoldersSafely(deadCallbackHolders);
         }
     }
 
@@ -876,7 +876,7 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
         }
         if (deadCallbackHolders != null) {
-            mControllerCallbackHolders.removeAll(deadCallbackHolders);
+            removeControllerHoldersSafely(deadCallbackHolders);
         }
     }
 
@@ -911,7 +911,7 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
         }
         if (deadCallbackHolders != null) {
-            mControllerCallbackHolders.removeAll(deadCallbackHolders);
+            removeControllerHoldersSafely(deadCallbackHolders);
         }
     }
 
@@ -938,7 +938,7 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
         }
         if (deadCallbackHolders != null) {
-            mControllerCallbackHolders.removeAll(deadCallbackHolders);
+            removeControllerHoldersSafely(deadCallbackHolders);
         }
     }
 
@@ -965,7 +965,7 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
         }
         if (deadCallbackHolders != null) {
-            mControllerCallbackHolders.removeAll(deadCallbackHolders);
+            removeControllerHoldersSafely(deadCallbackHolders);
         }
     }
 
@@ -992,7 +992,7 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
         }
         if (deadCallbackHolders != null) {
-            mControllerCallbackHolders.removeAll(deadCallbackHolders);
+            removeControllerHoldersSafely(deadCallbackHolders);
         }
     }
 
@@ -1017,7 +1017,7 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
         }
         if (deadCallbackHolders != null) {
-            mControllerCallbackHolders.removeAll(deadCallbackHolders);
+            removeControllerHoldersSafely(deadCallbackHolders);
         }
     }
 
@@ -1042,7 +1042,7 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
         }
         // After notifying clear all listeners
-        mControllerCallbackHolders.clear();
+        removeControllerHoldersSafely(null);
     }
 
     private PlaybackState getStateWithUpdatedPosition() {
@@ -1088,6 +1088,17 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
         }
         return -1;
+    }
+
+    private void removeControllerHoldersSafely(
+            Collection<ISessionControllerCallbackHolder> holders) {
+        synchronized (mLock) {
+            if (holders == null) {
+                mControllerCallbackHolders.clear();
+            } else {
+                mControllerCallbackHolders.removeAll(holders);
+            }
+        }
     }
 
     private PlaybackInfo getVolumeAttributes() {
