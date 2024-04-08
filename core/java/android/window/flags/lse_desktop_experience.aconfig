@@ -43,3 +43,10 @@ flag {
     description: "Enables edge drag resizing for all input sources"
     bug: "323383067"
 }
+
+flag {
+    name: "enable_desktop_windowing_taskbar_running_apps"
+    namespace: "lse_desktop_experience"
+    description: "Shows running apps in Desktop Mode Taskbar"
+    bug: "332504528"
+}
