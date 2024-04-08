@@ -856,11 +856,6 @@ class WallpaperController {
         result.setWallpaperTarget(wallpaperTarget);
     }
 
-    public void updateWallpaperTokens(boolean keyguardLocked) {
-        updateWallpaperTokens(mWallpaperTarget != null || mPrevWallpaperTarget != null,
-                keyguardLocked);
-    }
-
     /**
      * Change the visibility of the top wallpaper to {@param visibility} and hide all the others.
      */

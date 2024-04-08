@@ -1007,8 +1007,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     private final Consumer<WindowState> mApplySurfaceChangesTransaction = w -> {
         final WindowSurfacePlacer surfacePlacer = mWmService.mWindowPlacerLocked;
-        final boolean obscuredChanged = w.mObscured !=
-                mTmpApplySurfaceChangesTransactionState.obscured;
         final RootWindowContainer root = mWmService.mRoot;
 
         if (w.mHasSurface) {
@@ -1105,12 +1103,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                             preferredMaxRefreshRate;
                 }
             }
-        }
-
-        if (obscuredChanged && w.isVisible() && mWallpaperController.isWallpaperTarget(w)) {
-            // This is the wallpaper target and its obscured state changed... make sure the
-            // current wallpaper's visibility has been updated accordingly.
-            mWallpaperController.updateWallpaperTokens(mDisplayContent.isKeyguardLocked());
         }
 
         w.handleWindowMovedIfNeeded();
