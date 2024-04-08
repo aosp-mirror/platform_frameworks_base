@@ -313,7 +313,7 @@
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Si este modo está habilitado, es posible que la dirección MAC del dispositivo cambie cada vez que se conecte a una red que tenga habilitada la aleatorización de MAC."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"De uso medido"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Sin tarifa plana"</string>
-    <string name="select_logd_size_title" msgid="1604578195914595173">"Tamaños de búfer de Logger"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"Tamaños de los búferes de registro"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Selecciona el tamaño del Logger por búfer"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"¿Borrar el almacenamiento persistente del registrador?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Cuando ya no usamos el registrador persistente para monitorear, debemos borrar los datos que almacena el registrador en tu dispositivo."</string>
@@ -389,7 +389,7 @@
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Depurar operaciones de recorte no rectangulares"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Perfil procesamiento HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Habilitar depuración GPU"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permite capas de GPU para apps de depuración"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permite cargar capas de depuración de GPU para apps de depuración"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Habilitar registro detallado"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Incluye otros registros de proveedor específicos del dispositivo en los informes de errores, que podrían contener información privada, consumir más batería o usar más espacio de almacenamiento."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Escala de animación de ventana"</string>
@@ -437,7 +437,7 @@
     <string name="transcode_default" msgid="3784803084573509491">"Suponer que las apps admiten formatos modernos"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Mostrar notificaciones de transcodificación"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Inhabilitar caché de transcodificación"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Parámetros de configuración de Widevine"</string>
+    <string name="widevine_settings_title" msgid="4023329801172572917">"Configuración de Widevine"</string>
     <string name="force_l3_fallback_title" msgid="4987972688770202547">"Forzar resguardo de nivel 3"</string>
     <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Seleccionar para forzar un resguardo de nivel 3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"En ejecución"</string>
@@ -452,7 +452,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteronomalía (rojo-verde)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalía (rojo-verde)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalía (azul-amarillo)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Corrección de color"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Corrección de colores"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"La corrección de colores puede ser útil cuando quieres hacer lo siguiente:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Ver los colores con mayor precisión&lt;/li&gt; &lt;li&gt;&amp;nbsp;Quitar colores para concentrarte&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Reemplazado por <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
@@ -491,7 +491,7 @@
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Carga completa"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Se detuvo la carga"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlada por el administrador"</string>
-    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Controlada por la configuración restringida"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Función controlada por configuración restringida"</string>
     <string name="disabled" msgid="8017887509554714950">"Inhabilitada"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Con permiso"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"No permitida"</string>
@@ -555,7 +555,7 @@
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Esta tablet"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Conector de la bocina"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Bocina de la estación de carga"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositivo externo"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispositivo conectado"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este teléfono"</string>

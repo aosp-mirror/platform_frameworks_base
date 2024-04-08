@@ -106,7 +106,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktív, csak bal"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktív, csak jobb"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktív, bal és jobb"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Média audió"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Médiahang"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonhívások"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Fájlátvitel"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Beviteli eszköz"</string>
@@ -263,9 +263,9 @@
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Hibabejelentési gomb"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Gomb megjelenítése a bekapcsolási menüben hibajelentés készítéséhez"</string>
-    <string name="keep_screen_on" msgid="1187161672348797558">"Nem kapcsolódik ki"</string>
+    <string name="keep_screen_on" msgid="1187161672348797558">"Ne kapcsoljon ki"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"A képernyő soha nem kapcsol ki töltés során"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI snoop napló engedélyezése"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI kémlelésnapló engedélyezése"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth-csomagok rögzítése. (Bluetooth be-, illetve kikapcsolása a beállítás módosítása után)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM-feloldás"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"A rendszerbetöltő feloldásának engedélyezése"</string>
@@ -341,7 +341,7 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Bekapcsolja az Enhanced Connectivity funkciót."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Helyi végpont"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Végalkalmazás engedélyezése a helyi rendszerhéj eléréséhez"</string>
-    <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP ellenőrzés"</string>
+    <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP-ellenőrzés"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP-ellenőrzés beállítása"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Hibakeresés"</string>
     <string name="debug_app" msgid="8903350241392391766">"Hibakereső alkalmazás kiválasztása"</string>

@@ -311,7 +311,7 @@
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi ಲಾಗಿಂಗ್ ಮಟ್ಟನ್ನು ಹೆಚ್ಚಿಸಿ, Wi‑Fi ಆಯ್ಕೆಯಲ್ಲಿ ಪ್ರತಿಯೊಂದು SSID RSSI ತೋರಿಸಿ"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ಬ್ಯಾಟರಿ ಹೆಚ್ಚು ಬಾಳಿಕೆ ಬರುವಂತೆ ಮಾಡುತ್ತದೆ ಮತ್ತು ನೆಟ್‌ವರ್ಕ್‌ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ಸುಧಾರಿಸುತ್ತದೆ"</string>
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"ಈ ಮೋಡ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ, MAC ಯಾದೃಚ್ಛಿಕರಣವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಕನೆಕ್ಟ್ ಮಾಡಿದಾಗ ಈ ಸಾಧನದ MAC ವಿಳಾಸವು ಪ್ರತಿ ಬಾರಿಯೂ ಬದಲಾಗಬಹುದು."</string>
-    <string name="wifi_metered_label" msgid="8737187690304098638">"ಮೀಟರ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="wifi_metered_label" msgid="8737187690304098638">"ಮೀಟರ್ಡ್ ನೆಟ್‌ವರ್ಕ್"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"ಮೀಟರ್ ಮಾಡಲಾಗಿಲ್ಲ"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ಲಾಗರ್ ಬಫರ್ ಗಾತ್ರಗಳು"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"ಪ್ರತಿ ಲಾಗ್ ಬಫರ್‌ಗೆ ಲಾಗರ್ ಗಾತ್ರಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
@@ -468,7 +468,7 @@
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"ನಿಮ್ಮ ಬಳಕೆ ಆಧರಿಸಿ <xliff:g id="TIME">%1$s</xliff:g> ವರೆಗೆ ರನ್ ಆಗಲಿದೆ"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"<xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>) ಸಮಯದವರೆಗೆ ರನ್ ಆಗಲಿದೆ"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"<xliff:g id="TIME">%1$s</xliff:g> ಸಮಯದವರೆಗೆ ರನ್ ಆಗಲಿದೆ"</string>
-    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> ರವರೆಗೆ"</string>
+    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> ವರೆಗೆ ಇರುತ್ತದೆ"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"<xliff:g id="TIME">%1$s</xliff:g> ಗಳಲ್ಲಿ ಬ್ಯಾಟರಿ ಮುಕ್ತಾಯವಾಗಬಹುದು"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ಕ್ಕಿಂತ ಕಡಿಮೆ ಸಮಯ ಉಳಿದಿದೆ"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ಕ್ಕಿಂತ ಕಡಿಮೆ ಸಮಯ ಉಳಿದಿದೆ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -518,7 +518,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"ಸಿಸ್ಟಂ ಭಾಷೆಗಳನ್ನು ಬಳಸಿ"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> ಗಾಗಿ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಲು ವಿಫಲವಾಗಿದೆ"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"ವೈಯಕ್ತಿಕ ಡೇಟಾಗಳಾದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಮತ್ತು ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಸಂಖ್ಯೆಗಳನ್ನು ಒಳಗೊಂಡಂತೆ ನೀವು ಟೈಪ್ ಮಾಡುವ ಎಲ್ಲ ಪಠ್ಯವನ್ನು ಸಂಗ್ರಹಿಸಲು ಈ ಇನ್‌ಪುಟ್ ವಿಧಾನಕ್ಕೆ ಸಾಧ್ಯವಾಗಬಹುದು. ಇದು <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ ಬರುತ್ತದೆ. ಈ ಇನ್‌ಪುಟ್ ವಿಧಾನವನ್ನು ಬಳಸುವುದೇ?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"ಗಮನಿಸಿ: ರೀಬೂಟ್ ನಂತರ, ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನೀವು ಅನ್‌ಲಾಕ್ ಮಾಡುವ ತನಕ ಈ ಆಪ್ ಪ್ರಾರಂಭಗೊಳ್ಳುವುದಿಲ್ಲ"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"ಗಮನಿಸಿ: ರೀಬೂಟ್ ನಂತರ, ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನೀವು ಅನ್‌ಲಾಕ್ ಮಾಡುವ ತನಕ ಈ ಆ್ಯಪ್ ಪ್ರಾರಂಭಗೊಳ್ಳುವುದಿಲ್ಲ"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS ನೋಂದಣಿ ಸ್ಥಿತಿ"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"ನೋಂದಾಯಿಸಲಾಗಿದೆ"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"ನೋಂದಾಯಿಸಲಾಗಿಲ್ಲ"</string>

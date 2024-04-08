@@ -264,7 +264,7 @@
     <string name="bugreport_in_power" msgid="8664089072534638709">"ବଗ୍ ରିପୋର୍ଟ ସର୍ଟକଟ୍‌"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"ବଗ୍ ରିପୋର୍ଟ ଦେବା ପାଇଁ ପାୱାର୍‌ ମେନୁରେ ଏକ ବଟନ୍‌ ଦେଖାନ୍ତୁ"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"ସତର୍କ ରୁହନ୍ତୁ"</string>
-    <string name="keep_screen_on_summary" msgid="1510731514101925829">"ଚାର୍ଜ ହେବାବେଳେ ସ୍କ୍ରୀନ୍‌ ଆଦୌ ବନ୍ଦ ହେବନାହିଁ"</string>
+    <string name="keep_screen_on_summary" msgid="1510731514101925829">"ଚାର୍ଜ ହେବାବେଳେ ସ୍କ୍ରିନ କେବେ ବି ବନ୍ଦ ହେବନାହିଁ"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"ବ୍ଲୁଟୂଥ୍‍‌ HCI ସ୍ନୁପ୍‌ ଲଗ୍‌ ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"ବ୍ଲୁଟୁଥ୍‌ ପ୍ୟାକେଟ୍ କ୍ୟାପଚର୍ କରନ୍ତୁ (ଏହି ସେଟିଂ ବଦଳାଇବା ପରେ ବ୍ଲୁଟୁଥ୍‍‌କୁ ଟୋଗଲ୍ କରନ୍ତୁ)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM ଅନଲକ୍‌ କରିବା"</string>
@@ -300,10 +300,10 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"ବ୍ଲୁଟୂଥ୍‍‌ ଅଡିଓ LDAC କୋଡେକ୍‌: ପ୍ଲେବ୍ୟାକ୍‌ ଗୁଣବତ୍ତା"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"ବ୍ଲୁ-ଟୁଥ୍‌ ଅଡିଓ LDAC\nକୋଡେକ୍‌ ଚୟନକୁ ଗତିଶୀଳ କରନ୍ତୁ: ପ୍ଲେବ୍ୟାକ୍‌ କ୍ୱାଲିଟୀ"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"ଷ୍ଟ୍ରିମ୍ କରୁଛି: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
-    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"ବ୍ୟକ୍ତିଗତ DNS"</string>
+    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"ପ୍ରାଇଭେଟ DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"ବ୍ୟକ୍ତିଗତ DNS ମୋଡ୍‌ ବାଛନ୍ତୁ"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"ବନ୍ଦ"</string>
-    <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"ଅଟୋମେଟିକ"</string>
+    <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"ସ୍ୱତଃ"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"ବ୍ୟକ୍ତିଗତ DNS ପ୍ରଦାତା ହୋଷ୍ଟନାମ"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"DNS ପ୍ରଦାନକାରୀଙ୍କ ହୋଷ୍ଟନାମ ଲେଖନ୍ତୁ"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"କନେକ୍ଟ କରିହେଲା ନାହିଁ"</string>
@@ -341,7 +341,7 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"ଏନହାନ୍ସଡ୍ କନେକ୍ଟିଭିଟି ଫିଚର୍ ସକ୍ଷମ କରିଥାଏ।"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"ସ୍ଥାନୀୟ ଟର୍ମିନାଲ୍‌"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"ସ୍ଥାନୀୟ ଶେଲ୍‌କୁ ଆକ‌ସେସ୍‌ ଦେଉଥିବା ଟର୍ମିନଲ୍‌ ଆପ୍‌କୁ ସକ୍ଷମ କରନ୍ତୁ"</string>
-    <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP ଯାଞ୍ଚ କରୁଛି"</string>
+    <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP ଯାଞ୍ଚ"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCPର ଯାଞ୍ଚ ଗତିବିଧି ସେଟ୍‍ କରନ୍ତୁ"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ଡିବଗ୍‌ କରୁଛି"</string>
     <string name="debug_app" msgid="8903350241392391766">"ଡିବଗ୍‌ ଆପ୍‌ ବାଛନ୍ତୁ"</string>
