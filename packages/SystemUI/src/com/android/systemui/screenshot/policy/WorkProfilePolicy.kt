@@ -16,6 +16,7 @@
 
 package com.android.systemui.screenshot.policy
 
+import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_PINNED
 import android.os.UserHandle
 import com.android.systemui.screenshot.data.model.DisplayContentModel
@@ -24,6 +25,7 @@ import com.android.systemui.screenshot.data.repository.ProfileTypeRepository
 import com.android.systemui.screenshot.policy.CapturePolicy.PolicyResult
 import com.android.systemui.screenshot.policy.CapturePolicy.PolicyResult.NotMatched
 import com.android.systemui.screenshot.policy.CaptureType.IsolatedTask
+import com.android.window.flags.Flags
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 
@@ -42,6 +44,14 @@ constructor(
         // The systemUI notification shade isn't a work app, skip.
         if (content.systemUiState.shadeExpanded) {
             return NotMatched(policy = NAME, reason = SHADE_EXPANDED)
+        }
+
+        if (Flags.enableDesktopWindowingMode()) {
+            content.rootTasks.firstOrNull()?.also {
+                if (it.windowingMode == WINDOWING_MODE_FREEFORM) {
+                    return NotMatched(policy = NAME, reason = DESKTOP_MODE_ENABLED)
+                }
+            }
         }
 
         // Find the first non PiP rootTask with a top child task owned by a work user
@@ -75,5 +85,8 @@ constructor(
         const val WORK_TASK_NOT_TOP =
             "The top-most non-PINNED task does not belong to a work profile user"
         const val WORK_TASK_IS_TOP = "The top-most non-PINNED task belongs to a work profile user"
+        const val DESKTOP_MODE_ENABLED =
+            "enable_desktop_windowing_mode is enabled and top " +
+                "RootTask has WINDOWING_MODE_FREEFORM"
     }
 }

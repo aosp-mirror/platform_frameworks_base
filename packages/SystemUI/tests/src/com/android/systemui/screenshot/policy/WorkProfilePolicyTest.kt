@@ -18,6 +18,9 @@ package com.android.systemui.screenshot.policy
 
 import android.content.ComponentName
 import android.os.UserHandle
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.ActivityNames.FILES
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.ActivityNames.YOUTUBE
@@ -35,14 +38,19 @@ import com.android.systemui.screenshot.policy.CapturePolicy.PolicyResult.NotMatc
 import com.android.systemui.screenshot.policy.CaptureType.IsolatedTask
 import com.android.systemui.screenshot.policy.TestUserIds.PERSONAL
 import com.android.systemui.screenshot.policy.TestUserIds.WORK
+import com.android.systemui.screenshot.policy.WorkProfilePolicy.Companion.DESKTOP_MODE_ENABLED
 import com.android.systemui.screenshot.policy.WorkProfilePolicy.Companion.SHADE_EXPANDED
 import com.android.systemui.screenshot.policy.WorkProfilePolicy.Companion.WORK_TASK_IS_TOP
 import com.android.systemui.screenshot.policy.WorkProfilePolicy.Companion.WORK_TASK_NOT_TOP
+import com.android.window.flags.Flags
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 
 class WorkProfilePolicyTest {
+    @JvmField @Rule val setFlagsRule = SetFlagsRule()
+
     private val kosmos = Kosmos()
     private val policy = WorkProfilePolicy(kosmos.profileTypeRepository)
 
@@ -170,6 +178,7 @@ class WorkProfilePolicyTest {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
     fun withWorkFocusedInFreeForm_matched() = runTest {
         val result =
             policy.check(
@@ -190,6 +199,27 @@ class WorkProfilePolicyTest {
                         component = ComponentName.unflattenFromString(FILES),
                         owner = UserHandle.of(WORK),
                     )
+                )
+            )
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    fun withWorkFocusedInFreeForm_desktopModeEnabled_notMatched() = runTest {
+        val result =
+            policy.check(
+                freeFormApps(
+                    TaskSpec(taskId = 1002, name = YOUTUBE, userId = PERSONAL),
+                    TaskSpec(taskId = 1003, name = FILES, userId = WORK),
+                    focusedTaskId = 1003
+                )
+            )
+
+        assertThat(result)
+            .isEqualTo(
+                NotMatched(
+                    WorkProfilePolicy.NAME,
+                    DESKTOP_MODE_ENABLED,
                 )
             )
     }
