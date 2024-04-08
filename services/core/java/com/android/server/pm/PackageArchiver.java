@@ -187,7 +187,7 @@ public class PackageArchiver {
     }
 
     public static boolean isArchivingEnabled() {
-        return Flags.archiving() || SystemProperties.getBoolean("pm.archiving.enabled", false);
+        return Flags.archiving();
     }
 
     @VisibleForTesting
