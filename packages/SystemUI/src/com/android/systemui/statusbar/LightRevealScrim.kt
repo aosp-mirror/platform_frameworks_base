@@ -419,15 +419,14 @@ constructor(
         revealGradientCenter.y = top + (revealGradientHeight / 2f)
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         if (
-            canvas == null ||
-                revealGradientWidth <= 0 ||
-                revealGradientHeight <= 0 ||
-                revealAmount == 0f
+            revealGradientWidth <= 0 ||
+            revealGradientHeight <= 0 ||
+            revealAmount == 0f
         ) {
             if (revealAmount < 1f) {
-                canvas?.drawColor(revealGradientEndColor)
+                canvas.drawColor(revealGradientEndColor)
             }
             return
         }

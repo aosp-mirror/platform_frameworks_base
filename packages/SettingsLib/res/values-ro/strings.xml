@@ -608,7 +608,7 @@
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Resetezi invitatul?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Excluzi invitatul?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Resetează"</string>
-    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Elimină"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Exclude"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Se resetează invitatul…"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Resetezi sesiunea pentru invitați?"</string>
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Astfel, va începe o nouă sesiune pentru invitați și se vor șterge toate aplicațiile și datele din sesiunea actuală"</string>

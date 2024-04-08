@@ -501,7 +501,7 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"ஆப்ஸ் பின்னிலிருந்து அகற்றப்பட்டது"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"அழைப்பு"</string>
     <string name="stream_system" msgid="7663148785370565134">"சிஸ்டம்"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"ரிங் செய்"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"அழைப்பு ஒலி"</string>
     <string name="stream_music" msgid="2188224742361847580">"மீடியா"</string>
     <string name="stream_alarm" msgid="16058075093011694">"அலாரம்"</string>
     <string name="stream_notification" msgid="7930294049046243939">"அறிவிப்பு"</string>
@@ -974,7 +974,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> சாதனங்கள் தேர்ந்தெடுக்கப்பட்டுள்ளன"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(துண்டிக்கப்பட்டது)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"இணைக்க முடியவில்லை. மீண்டும் முயல தட்டவும்."</string>
-    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"சாதனத்தை இணைத்தல்"</string>
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"சாதனத்தை இணை"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"இந்த அமர்வை அலைபரப்ப ஆப்ஸைத் திறங்கள்."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"அறியப்படாத ஆப்ஸ்"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"அலைபரப்புவதை நிறுத்து"</string>
