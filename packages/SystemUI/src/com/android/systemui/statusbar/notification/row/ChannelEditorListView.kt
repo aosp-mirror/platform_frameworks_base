@@ -60,7 +60,7 @@ class ChannelEditorListView(c: Context, attrs: AttributeSet) : LinearLayout(c, a
     override fun onFinishInflate() {
         super.onFinishInflate()
 
-        appControlRow = findViewById(R.id.app_control)
+        appControlRow = requireViewById(R.id.app_control)
     }
 
     /**
@@ -143,9 +143,9 @@ class AppControlView(c: Context, attrs: AttributeSet) : LinearLayout(c, attrs) {
     lateinit var switch: Switch
 
     override fun onFinishInflate() {
-        iconView = findViewById(R.id.icon)
-        channelName = findViewById(R.id.app_name)
-        switch = findViewById(R.id.toggle)
+        iconView = requireViewById(R.id.icon)
+        channelName = requireViewById(R.id.app_name)
+        switch = requireViewById(R.id.toggle)
 
         setOnClickListener { switch.toggle() }
     }
@@ -174,9 +174,9 @@ class ChannelRow(c: Context, attrs: AttributeSet) : LinearLayout(c, attrs) {
 
     override fun onFinishInflate() {
         super.onFinishInflate()
-        channelName = findViewById(R.id.channel_name)
-        channelDescription = findViewById(R.id.channel_description)
-        switch = findViewById(R.id.toggle)
+        channelName = requireViewById(R.id.channel_name)
+        channelDescription = requireViewById(R.id.channel_description)
+        switch = requireViewById(R.id.toggle)
         switch.setOnCheckedChangeListener { _, b ->
             channel?.let {
                 controller.proposeEditForChannel(it, if (b) it.importance else IMPORTANCE_NONE)
