@@ -367,13 +367,11 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
             boolean isUserEngaged = isUserEngaged(record, playbackState);
 
-            Log.d(
-                    TAG,
-                    "onSessionActiveStateChanged:"
-                            + " record="
-                            + record
-                            + " playbackState="
-                            + playbackState);
+            Log.d(TAG, "onSessionActiveStateChanged: "
+                    + "record=" + record
+                    + "playbackState=" + playbackState
+                    + "allowRunningInForeground=" + isUserEngaged);
+            setForegroundServiceAllowance(record, /* allowRunningInForeground= */ isUserEngaged);
             reportMediaInteractionEvent(record, isUserEngaged);
             mHandler.postSessionsChanged(record);
         }
@@ -481,13 +479,11 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
             user.mPriorityStack.onPlaybackStateChanged(record, shouldUpdatePriority);
             boolean isUserEngaged = isUserEngaged(record, playbackState);
-            Log.d(
-                    TAG,
-                    "onSessionPlaybackStateChanged:"
-                            + " record="
-                            + record
-                            + " playbackState="
-                            + playbackState);
+            Log.d(TAG, "onSessionPlaybackStateChanged: "
+                    + "record=" + record
+                    + "playbackState=" + playbackState
+                    + "allowRunningInForeground=" + isUserEngaged);
+            setForegroundServiceAllowance(record, /* allowRunningInForeground= */ isUserEngaged);
             reportMediaInteractionEvent(record, isUserEngaged);
         }
     }
@@ -654,54 +650,33 @@ public class MediaSessionService extends SystemService implements Monitor {
         session.close();
 
         Log.d(TAG, "destroySessionLocked: record=" + session);
-
+        setForegroundServiceAllowance(session, /* allowRunningInForeground= */ false);
         reportMediaInteractionEvent(session, /* userEngaged= */ false);
         mHandler.postSessionsChanged(session);
     }
 
-    void onSessionUserEngagementStateChange(
-            MediaSessionRecordImpl mediaSessionRecord, boolean isUserEngaged) {
-        if (isUserEngaged) {
-            addUserEngagedSession(mediaSessionRecord);
-            startFgsIfSessionIsLinkedToNotification(mediaSessionRecord);
+    private void setForegroundServiceAllowance(
+            MediaSessionRecordImpl record, boolean allowRunningInForeground) {
+        if (!Flags.enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
+            return;
+        }
+        ForegroundServiceDelegationOptions foregroundServiceDelegationOptions =
+                record.getForegroundServiceDelegationOptions();
+        if (foregroundServiceDelegationOptions == null) {
+            return;
+        }
+        if (allowRunningInForeground) {
+            onUserSessionEngaged(record);
         } else {
-            removeUserEngagedSession(mediaSessionRecord);
-            stopFgsIfNoSessionIsLinkedToNotification(mediaSessionRecord);
+            onUserDisengaged(record);
         }
     }
 
-    private void addUserEngagedSession(MediaSessionRecordImpl mediaSessionRecord) {
+    private void onUserSessionEngaged(MediaSessionRecordImpl mediaSessionRecord) {
         synchronized (mLock) {
             int uid = mediaSessionRecord.getUid();
             mUserEngagedSessionsForFgs.putIfAbsent(uid, new HashSet<>());
             mUserEngagedSessionsForFgs.get(uid).add(mediaSessionRecord);
-        }
-    }
-
-    private void removeUserEngagedSession(MediaSessionRecordImpl mediaSessionRecord) {
-        synchronized (mLock) {
-            int uid = mediaSessionRecord.getUid();
-            Set<MediaSessionRecordImpl> mUidUserEngagedSessionsForFgs =
-                    mUserEngagedSessionsForFgs.get(uid);
-            if (mUidUserEngagedSessionsForFgs == null) {
-                return;
-            }
-
-            mUidUserEngagedSessionsForFgs.remove(mediaSessionRecord);
-            if (mUidUserEngagedSessionsForFgs.isEmpty()) {
-                mUserEngagedSessionsForFgs.remove(uid);
-            }
-        }
-    }
-
-    private void startFgsIfSessionIsLinkedToNotification(
-            MediaSessionRecordImpl mediaSessionRecord) {
-        Log.d(TAG, "startFgsIfSessionIsLinkedToNotification: record=" + mediaSessionRecord);
-        if (!Flags.enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
-            return;
-        }
-        synchronized (mLock) {
-            int uid = mediaSessionRecord.getUid();
             for (Notification mediaNotification : mMediaNotifications.getOrDefault(uid, Set.of())) {
                 if (mediaSessionRecord.isLinkedToNotification(mediaNotification)) {
                     mActivityManagerInternal.startForegroundServiceDelegate(
@@ -713,34 +688,30 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
     }
 
-    private void stopFgsIfNoSessionIsLinkedToNotification(
-            MediaSessionRecordImpl mediaSessionRecord) {
-        Log.d(TAG, "stopFgsIfNoSessionIsLinkedToNotification: record=" + mediaSessionRecord);
-        if (!Flags.enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
-            return;
-        }
+    private void onUserDisengaged(MediaSessionRecordImpl mediaSessionRecord) {
         synchronized (mLock) {
             int uid = mediaSessionRecord.getUid();
-            ForegroundServiceDelegationOptions foregroundServiceDelegationOptions =
-                    mediaSessionRecord.getForegroundServiceDelegationOptions();
-            if (foregroundServiceDelegationOptions == null) {
-                return;
-            }
-
-            for (MediaSessionRecordImpl record :
-                    mUserEngagedSessionsForFgs.getOrDefault(uid, Set.of())) {
-                for (Notification mediaNotification :
-                        mMediaNotifications.getOrDefault(uid, Set.of())) {
-                    if (record.isLinkedToNotification(mediaNotification)) {
-                        // A user engaged session linked with a media notification is found.
-                        // We shouldn't call stop FGS in this case.
-                        return;
-                    }
+            if (mUserEngagedSessionsForFgs.containsKey(uid)) {
+                mUserEngagedSessionsForFgs.get(uid).remove(mediaSessionRecord);
+                if (mUserEngagedSessionsForFgs.get(uid).isEmpty()) {
+                    mUserEngagedSessionsForFgs.remove(uid);
                 }
             }
 
-            mActivityManagerInternal.stopForegroundServiceDelegate(
-                    foregroundServiceDelegationOptions);
+            boolean shouldStopFgs = true;
+            for (MediaSessionRecordImpl sessionRecord :
+                    mUserEngagedSessionsForFgs.getOrDefault(uid, Set.of())) {
+                for (Notification mediaNotification : mMediaNotifications.getOrDefault(uid,
+                        Set.of())) {
+                    if (sessionRecord.isLinkedToNotification(mediaNotification)) {
+                        shouldStopFgs = false;
+                    }
+                }
+            }
+            if (shouldStopFgs) {
+                mActivityManagerInternal.stopForegroundServiceDelegate(
+                        mediaSessionRecord.getForegroundServiceDelegationOptions());
+            }
         }
     }
 
@@ -2531,6 +2502,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
             MediaSessionRecord session = null;
             MediaButtonReceiverHolder mediaButtonReceiverHolder = null;
+
             if (mCustomMediaKeyDispatcher != null) {
                 MediaSession.Token token = mCustomMediaKeyDispatcher.getMediaSession(
                         keyEvent, uid, asSystemService);
@@ -2656,18 +2628,6 @@ public class MediaSessionService extends SystemService implements Monitor {
         private boolean isValidLocalStreamType(int streamType) {
             return streamType >= AudioManager.STREAM_VOICE_CALL
                     && streamType <= AudioManager.STREAM_NOTIFICATION;
-        }
-
-        @Override
-        public void expireTempEngagedSessions() {
-            synchronized (mLock) {
-                for (Set<MediaSessionRecordImpl> uidSessions :
-                        mUserEngagedSessionsForFgs.values()) {
-                    for (MediaSessionRecordImpl sessionRecord : uidSessions) {
-                        sessionRecord.expireTempEngaged();
-                    }
-                }
-            }
         }
 
         private class MediaKeyListenerResultReceiver extends ResultReceiver implements Runnable {
@@ -3167,6 +3127,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             super.onNotificationPosted(sbn);
             Notification postedNotification = sbn.getNotification();
             int uid = sbn.getUid();
+
             if (!postedNotification.isMediaNotification()) {
                 return;
             }
@@ -3177,8 +3138,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                         mUserEngagedSessionsForFgs.getOrDefault(uid, Set.of())) {
                     ForegroundServiceDelegationOptions foregroundServiceDelegationOptions =
                             mediaSessionRecord.getForegroundServiceDelegationOptions();
-                    if (foregroundServiceDelegationOptions != null
-                            && mediaSessionRecord.isLinkedToNotification(postedNotification)) {
+                    if (mediaSessionRecord.isLinkedToNotification(postedNotification)
+                            && foregroundServiceDelegationOptions != null) {
                         mActivityManagerInternal.startForegroundServiceDelegate(
                                 foregroundServiceDelegationOptions,
                                 /* connection= */ null);
@@ -3212,7 +3173,21 @@ public class MediaSessionService extends SystemService implements Monitor {
                     return;
                 }
 
-                stopFgsIfNoSessionIsLinkedToNotification(notificationRecord);
+                boolean shouldStopFgs = true;
+                for (MediaSessionRecordImpl mediaSessionRecord :
+                        mUserEngagedSessionsForFgs.getOrDefault(uid, Set.of())) {
+                    for (Notification mediaNotification :
+                            mMediaNotifications.getOrDefault(uid, Set.of())) {
+                        if (mediaSessionRecord.isLinkedToNotification(mediaNotification)) {
+                            shouldStopFgs = false;
+                        }
+                    }
+                }
+                if (shouldStopFgs
+                        && notificationRecord.getForegroundServiceDelegationOptions() != null) {
+                    mActivityManagerInternal.stopForegroundServiceDelegate(
+                            notificationRecord.getForegroundServiceDelegationOptions());
+                }
             }
         }
 
