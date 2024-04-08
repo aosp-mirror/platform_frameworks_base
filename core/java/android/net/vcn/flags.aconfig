@@ -1,5 +1,4 @@
 package: "android.net.vcn"
-container: "system"
 
 flag {
     name: "safe_mode_config"

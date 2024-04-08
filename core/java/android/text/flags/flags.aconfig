@@ -1,5 +1,4 @@
 package: "com.android.text.flags"
-container: "system"
 
 flag {
   name: "vendor_custom_locale_fallback"

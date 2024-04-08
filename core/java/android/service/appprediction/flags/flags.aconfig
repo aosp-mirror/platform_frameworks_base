@@ -1,5 +1,4 @@
 package: "android.service.appprediction.flags"
-container: "system"
 
 flag {
   name: "service_features_api"

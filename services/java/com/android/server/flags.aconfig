@@ -1,5 +1,4 @@
 package: "android.server"
-container: "system"
 
 flag {
      namespace: "system_performance"

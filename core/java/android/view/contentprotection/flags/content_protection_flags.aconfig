@@ -1,5 +1,4 @@
 package: "android.view.contentprotection.flags"
-container: "system"
 
 flag {
     name: "blocklist_update_enabled"

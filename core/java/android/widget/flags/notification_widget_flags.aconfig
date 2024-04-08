@@ -1,5 +1,4 @@
 package: "android.widget.flags"
-container: "system"
 
 flag {
    name: "notif_linearlayout_optimized"

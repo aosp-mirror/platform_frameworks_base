@@ -1,5 +1,4 @@
 package: "android.service.autofill"
-container: "system"
 
 flag {
   name: "autofill_credman_integration"

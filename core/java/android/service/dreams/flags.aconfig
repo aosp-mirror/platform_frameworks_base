@@ -1,5 +1,4 @@
 package: "android.service.dreams"
-container: "system"
 
 flag {
   name: "dream_overlay_host"

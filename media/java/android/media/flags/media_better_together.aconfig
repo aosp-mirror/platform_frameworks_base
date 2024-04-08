@@ -1,5 +1,4 @@
 package: "com.android.media.flags"
-container: "system"
 
 flag {
     name: "enable_rlp_callbacks_in_media_router2"

@@ -14,7 +14,6 @@
 # limitations under the License.
 
 package: "android.companion.virtualdevice.flags"
-container: "system"
 
 flag {
      namespace: "virtual_devices"
