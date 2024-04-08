@@ -638,7 +638,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Slått av"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Slått på"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Enheten din må startes på nytt for at denne endringen skal tre i kraft. Start på nytt nå eller avbryt."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Hodetelefoner med kabel"</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"hodetelefoner med kabel"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"På"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Av"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Bytting av operatørnettverk"</string>

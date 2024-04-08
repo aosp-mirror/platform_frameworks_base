@@ -74,7 +74,7 @@ class ViewGroupFadeHelper {
                     root.setTag(R.id.view_group_fade_helper_previous_value_tag, newAlpha)
                 }
                 addListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) {
+                    override fun onAnimationEnd(animation: Animator) {
                         endRunnable?.run()
                     }
                 })
