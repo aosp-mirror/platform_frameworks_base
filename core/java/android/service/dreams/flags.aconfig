@@ -11,7 +11,7 @@ flag {
 
 flag {
   name: "dream_handles_confirm_keys"
-  namespace: "dreams"
+  namespace: "communal"
   description: "This flag enables dreams processing confirm keys to show the bouncer or dismiss "
        "the keyguard"
   bug: "326975875"
