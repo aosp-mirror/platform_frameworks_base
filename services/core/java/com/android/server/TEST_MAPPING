@@ -74,6 +74,15 @@
             "file_patterns": ["SensitiveContentProtectionManagerService\\.java"]
         },
         {
+            "name": "FrameworksMockingServicesTests",
+            "options": [
+                {
+                    "include-filter": "com.android.server.StorageManagerServiceTest"
+                }
+            ],
+            "file_patterns": ["StorageManagerService\\.java"]
+        },
+        {
             "name": "FrameworksServicesTests",
             "options": [
                 {
