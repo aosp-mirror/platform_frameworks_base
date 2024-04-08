@@ -16,14 +16,12 @@
 
 package com.android.systemui.volume.panel.component.button.ui.composable
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -64,20 +62,21 @@ class ButtonComponent(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Expandable(
-                modifier =
-                    Modifier.height(64.dp).fillMaxWidth().semantics {
-                        role = Role.Button
-                        contentDescription = label
-                    },
-                color = MaterialTheme.colorScheme.primaryContainer,
-                shape = RoundedCornerShape(28.dp),
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                borderStroke = BorderStroke(8.dp, MaterialTheme.colorScheme.surface),
-                onClick = onClick,
-            ) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Icon(modifier = Modifier.size(24.dp), icon = viewModel.icon)
+            BottomComponentButtonSurface {
+                Expandable(
+                    modifier =
+                        Modifier.fillMaxSize().padding(8.dp).semantics {
+                            role = Role.Button
+                            contentDescription = label
+                        },
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = RoundedCornerShape(28.dp),
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    onClick = onClick,
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Icon(modifier = Modifier.size(24.dp), icon = viewModel.icon)
+                    }
                 }
             }
             Text(

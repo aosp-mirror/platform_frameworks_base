@@ -74,9 +74,11 @@ constructor(
         }
         VolumePanelRadioButtonBar {
             for (buttonViewModel in enabledModelStates) {
+                val label = buttonViewModel.button.label.toString()
                 item(
                     isSelected = buttonViewModel.button.isChecked,
                     onItemSelected = { viewModel.setEnabled(buttonViewModel.model) },
+                    contentDescription = label,
                     icon = {
                         Icon(
                             icon = buttonViewModel.button.icon,
@@ -86,7 +88,7 @@ constructor(
                     label = {
                         Text(
                             modifier = Modifier.basicMarquee(),
-                            text = buttonViewModel.button.label.toString(),
+                            text = label,
                             style = MaterialTheme.typography.labelMedium,
                             color = buttonViewModel.labelColor.toColor(),
                             textAlign = TextAlign.Center,

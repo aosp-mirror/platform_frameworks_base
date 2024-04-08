@@ -709,18 +709,6 @@
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
-    "2959074735946674755": {
-      "message": "Trying to update display configuration for system\/invalid process.",
-      "level": "WARN",
-      "group": "WM_DEBUG_CONFIGURATION",
-      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
-    },
-    "5668810920995272206": {
-      "message": "Trying to update display configuration for invalid process, pid=%d",
-      "level": "WARN",
-      "group": "WM_DEBUG_CONFIGURATION",
-      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
-    },
     "-1123414663662718691": {
       "message": "setVr2dDisplayId called for: %d",
       "level": "DEBUG",
@@ -3465,6 +3453,12 @@
     },
     "-4345077332231178044": {
       "message": "Old wallpaper still the target.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WALLPAPER",
+      "at": "com\/android\/server\/wm\/WallpaperController.java"
+    },
+    "257349083882992098": {
+      "message": "updateWallpaperTokens requestedVisibility=%b on keyguardLocked=%b",
       "level": "VERBOSE",
       "group": "WM_DEBUG_WALLPAPER",
       "at": "com\/android\/server\/wm\/WallpaperController.java"

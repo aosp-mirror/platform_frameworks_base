@@ -53,6 +53,16 @@ package com.android.server.display.config {
     method public final void setType(@NonNull com.android.server.display.config.PredefinedBrightnessLimitNames);
   }
 
+  public class BrightnessPoint {
+    ctor public BrightnessPoint();
+    method @NonNull public final java.math.BigDecimal getBacklight();
+    method @NonNull public final java.math.BigDecimal getBrightness();
+    method @NonNull public final java.math.BigDecimal getNits();
+    method public final void setBacklight(@NonNull java.math.BigDecimal);
+    method public final void setBrightness(@NonNull java.math.BigDecimal);
+    method public final void setNits(@NonNull java.math.BigDecimal);
+  }
+
   public class BrightnessThresholds {
     ctor public BrightnessThresholds();
     method public final com.android.server.display.config.ThresholdPoints getBrightnessThresholdPoints();
@@ -74,6 +84,13 @@ package com.android.server.display.config {
     method @NonNull public final com.android.server.display.config.ThermalStatus getThermalStatus();
     method public final void setBrightness(@NonNull java.math.BigDecimal);
     method public final void setThermalStatus(@NonNull com.android.server.display.config.ThermalStatus);
+  }
+
+  public class ComprehensiveBrightnessMap {
+    ctor public ComprehensiveBrightnessMap();
+    method @NonNull public final java.util.List<com.android.server.display.config.BrightnessPoint> getBrightnessPoint();
+    method public String getInterpolation();
+    method public void setInterpolation(String);
   }
 
   public class Density {
@@ -183,12 +200,11 @@ package com.android.server.display.config {
 
   public class EvenDimmerMode {
     ctor public EvenDimmerMode();
-    method public java.util.List<java.lang.Float> getBacklight();
-    method public java.util.List<java.lang.Float> getBrightness();
+    method public com.android.server.display.config.ComprehensiveBrightnessMap getBrightnessMapping();
     method public boolean getEnabled();
     method public com.android.server.display.config.NitsMap getLuxToMinimumNitsMap();
-    method public java.util.List<java.lang.Float> getNits();
     method public java.math.BigDecimal getTransitionPoint();
+    method public void setBrightnessMapping(com.android.server.display.config.ComprehensiveBrightnessMap);
     method public void setEnabled(boolean);
     method public void setLuxToMinimumNitsMap(com.android.server.display.config.NitsMap);
     method public void setTransitionPoint(java.math.BigDecimal);

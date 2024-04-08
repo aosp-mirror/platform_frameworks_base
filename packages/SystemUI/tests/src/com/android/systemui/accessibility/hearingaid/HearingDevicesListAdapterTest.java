@@ -27,7 +27,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.qs.tiles.dialog.bluetooth.DeviceItem;
+import com.android.systemui.bluetooth.qsdialog.DeviceItem;
 
 import org.junit.Before;
 import org.junit.Rule;

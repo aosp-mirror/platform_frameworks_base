@@ -32,6 +32,9 @@ public class SafetyLabelsTest {
     private static final String MISSING_VERSION_FILE_NAME = "missing-version.xml";
     private static final String VALID_EMPTY_FILE_NAME = "valid-empty.xml";
     private static final String WITH_DATA_LABELS_FILE_NAME = "with-data-labels.xml";
+    private static final String WITH_SECURITY_LABELS_FILE_NAME = "with-security-labels.xml";
+    private static final String WITH_THIRD_PARTY_VERIFICATION_FILE_NAME =
+            "with-third-party-verification.xml";
 
     private Document mDoc = null;
 
@@ -60,6 +63,20 @@ public class SafetyLabelsTest {
     public void testSafetyLabelsWithDataLabels() throws Exception {
         System.out.println("starting testSafetyLabelsWithDataLabels.");
         testHrToOdSafetyLabels(WITH_DATA_LABELS_FILE_NAME);
+    }
+
+    /** Test for safety labels with security labels. */
+    @Test
+    public void testSafetyLabelsWithSecurityLabels() throws Exception {
+        System.out.println("starting testSafetyLabelsWithSecurityLabels.");
+        testHrToOdSafetyLabels(WITH_SECURITY_LABELS_FILE_NAME);
+    }
+
+    /** Test for safety labels with third party verification. */
+    @Test
+    public void testSafetyLabelsWithThirdPartyVerification() throws Exception {
+        System.out.println("starting testSafetyLabelsWithThirdPartyVerification.");
+        testHrToOdSafetyLabels(WITH_THIRD_PARTY_VERIFICATION_FILE_NAME);
     }
 
     private void hrToOdExpectException(String fileName) {

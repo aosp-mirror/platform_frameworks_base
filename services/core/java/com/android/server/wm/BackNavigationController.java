@@ -20,6 +20,7 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
@@ -779,6 +780,10 @@ class BackNavigationController {
                     && wc.asTaskFragment() == null) {
                 continue;
             }
+            // Only care if visibility changed.
+            if (targets.get(i).getTransitMode(wc) == TRANSIT_CHANGE) {
+                continue;
+            }
             // WC can be visible due to setLaunchBehind
             if (wc.isVisibleRequested()) {
                 mTmpOpenApps.add(wc);
@@ -843,14 +848,14 @@ class BackNavigationController {
      * @param targets The final animation targets derived in transition.
      * @param finishedTransition The finished transition target.
     */
-    boolean onTransitionFinish(ArrayList<Transition.ChangeInfo> targets,
+    void onTransitionFinish(ArrayList<Transition.ChangeInfo> targets,
             @NonNull Transition finishedTransition) {
         if (finishedTransition == mWaitTransitionFinish) {
             clearBackAnimations();
         }
 
         if (!mBackAnimationInProgress || mPendingAnimationBuilder == null) {
-            return false;
+            return;
         }
         ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
                 "Handling the deferred animation after transition finished");
@@ -878,7 +883,7 @@ class BackNavigationController {
                     + " open: " + Arrays.toString(mPendingAnimationBuilder.mOpenTargets)
                     + " close: " + mPendingAnimationBuilder.mCloseTarget);
             cancelPendingAnimation();
-            return false;
+            return;
         }
 
         // Ensure the final animation targets which hidden by transition could be visible.
@@ -887,9 +892,14 @@ class BackNavigationController {
             wc.prepareSurfaces();
         }
 
-        scheduleAnimation(mPendingAnimationBuilder);
-        mPendingAnimationBuilder = null;
-        return true;
+        // The pending builder could be cleared due to prepareSurfaces
+        // => updateNonSystemOverlayWindowsVisibilityIfNeeded
+        // => setForceHideNonSystemOverlayWindowIfNeeded
+        // => updateFocusedWindowLocked => onFocusWindowChanged.
+        if (mPendingAnimationBuilder != null) {
+            scheduleAnimation(mPendingAnimationBuilder);
+            mPendingAnimationBuilder = null;
+        }
     }
 
     private void cancelPendingAnimation() {
@@ -1552,15 +1562,17 @@ class BackNavigationController {
                 return this;
             }
 
+            // WC must be Activity/TaskFragment/Task
             boolean containTarget(@NonNull WindowContainer wc) {
                 if (mOpenTargets != null) {
                     for (int i = mOpenTargets.length - 1; i >= 0; --i) {
-                        if (wc == mOpenTargets[i] || mOpenTargets[i].hasChild(wc)) {
+                        if (wc == mOpenTargets[i] || mOpenTargets[i].hasChild(wc)
+                                || wc.hasChild(mOpenTargets[i])) {
                             return true;
                         }
                     }
                 }
-                return wc == mCloseTarget || mCloseTarget.hasChild(wc);
+                return wc == mCloseTarget || mCloseTarget.hasChild(wc) || wc.hasChild(mCloseTarget);
             }
 
             /**

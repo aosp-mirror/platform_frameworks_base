@@ -32,6 +32,8 @@ public class XmlUtils {
     public static final String HR_TAG_DEVELOPER_INFO = "developer-info";
     public static final String HR_TAG_APP_INFO = "app-info";
     public static final String HR_TAG_DATA_LABELS = "data-labels";
+    public static final String HR_TAG_SECURITY_LABELS = "security-labels";
+    public static final String HR_TAG_THIRD_PARTY_VERIFICATION = "third-party-verification";
     public static final String HR_TAG_DATA_ACCESSED = "data-accessed";
     public static final String HR_TAG_DATA_COLLECTED = "data-collected";
     public static final String HR_TAG_DATA_SHARED = "data-shared";
@@ -46,6 +48,8 @@ public class XmlUtils {
     public static final String HR_ATTR_DATA_TYPE = "dataType";
     public static final String HR_ATTR_IS_COLLECTION_OPTIONAL = "isCollectionOptional";
     public static final String HR_ATTR_IS_SHARING_OPTIONAL = "isSharingOptional";
+    public static final String HR_ATTR_IS_DATA_DELETABLE = "isDataDeletable";
+    public static final String HR_ATTR_IS_DATA_ENCRYPTED = "isDataEncrypted";
     public static final String HR_ATTR_EPHEMERAL = "ephemeral";
     public static final String HR_ATTR_PURPOSES = "purposes";
     public static final String HR_ATTR_VERSION = "version";
@@ -98,6 +102,8 @@ public class XmlUtils {
     public static final String OD_NAME_VERSION = "version";
     public static final String OD_NAME_URL = "url";
     public static final String OD_NAME_SYSTEM_APP_SAFETY_LABEL = "system_app_safety_label";
+    public static final String OD_NAME_SECURITY_LABELS = "security_labels";
+    public static final String OD_NAME_THIRD_PARTY_VERIFICATION = "third_party_verification";
     public static final String OD_NAME_DATA_LABELS = "data_labels";
     public static final String OD_NAME_DATA_ACCESSED = "data_accessed";
     public static final String OD_NAME_DATA_COLLECTED = "data_collected";
@@ -105,6 +111,8 @@ public class XmlUtils {
     public static final String OD_NAME_PURPOSES = "purposes";
     public static final String OD_NAME_IS_COLLECTION_OPTIONAL = "is_collection_optional";
     public static final String OD_NAME_IS_SHARING_OPTIONAL = "is_sharing_optional";
+    public static final String OD_NAME_IS_DATA_DELETABLE = "is_data_deletable";
+    public static final String OD_NAME_IS_DATA_ENCRYPTED = "is_data_encrypted";
     public static final String OD_NAME_EPHEMERAL = "ephemeral";
 
     public static final String TRUE_STR = "true";

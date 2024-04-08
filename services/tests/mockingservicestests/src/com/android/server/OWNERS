@@ -3,3 +3,5 @@ per-file *AppStateTracker* = file:/apex/jobscheduler/OWNERS
 per-file *DeviceIdleController* = file:/apex/jobscheduler/OWNERS
 per-file SensitiveContentProtectionManagerService* = file:/core/java/android/permission/OWNERS
 per-file RescuePartyTest.java = file:/packages/CrashRecovery/OWNERS
+per-file *Storage* = file:/core/java/android/os/storage/OWNERS
+

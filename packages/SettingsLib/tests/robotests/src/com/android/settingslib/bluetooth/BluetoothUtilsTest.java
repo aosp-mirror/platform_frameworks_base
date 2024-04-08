@@ -17,6 +17,7 @@ package com.android.settingslib.bluetooth;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothLeBroadcastReceiveState;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -44,6 +46,9 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RunWith(RobolectricTestRunner.class)
 public class BluetoothUtilsTest {
 
@@ -55,6 +60,16 @@ public class BluetoothUtilsTest {
     private AudioManager mAudioManager;
     @Mock
     private PackageManager mPackageManager;
+    @Mock
+    private LocalBluetoothLeBroadcast mBroadcast;
+    @Mock
+    private LocalBluetoothProfileManager mProfileManager;
+    @Mock
+    private LocalBluetoothManager mLocalBluetoothManager;
+    @Mock
+    private LocalBluetoothLeBroadcastAssistant mAssistant;
+    @Mock
+    private BluetoothLeBroadcastReceiveState mLeBroadcastReceiveState;
 
     private Context mContext;
     private static final String STRING_METADATA = "string_metadata";
@@ -72,6 +87,9 @@ public class BluetoothUtilsTest {
         MockitoAnnotations.initMocks(this);
 
         mContext = spy(RuntimeEnvironment.application);
+        when(mLocalBluetoothManager.getProfileManager()).thenReturn(mProfileManager);
+        when(mProfileManager.getLeAudioBroadcastProfile()).thenReturn(mBroadcast);
+        when(mProfileManager.getLeAudioBroadcastAssistantProfile()).thenReturn(mAssistant);
     }
 
     @Test
@@ -429,6 +447,30 @@ public class BluetoothUtilsTest {
 
         assertThat(BluetoothUtils.isExclusivelyManagedBluetoothDevice(mContext,
                 mBluetoothDevice)).isEqualTo(true);
+    }
+
+    @Test
+    public void testIsBroadcasting_broadcastEnabled_returnTrue() {
+        when(mBroadcast.isEnabled(any())).thenReturn(true);
+        assertThat(BluetoothUtils.isBroadcasting(mLocalBluetoothManager)).isEqualTo(true);
+    }
+
+    @Test
+    public void testHasConnectedBroadcastSource_deviceConnectedToBroadcastSource() {
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(mBluetoothDevice);
+
+        List<Long> bisSyncState = new ArrayList<>();
+        bisSyncState.add(1L);
+        when(mLeBroadcastReceiveState.getBisSyncState()).thenReturn(bisSyncState);
+
+        List<BluetoothLeBroadcastReceiveState> sourceList = new ArrayList<>();
+        sourceList.add(mLeBroadcastReceiveState);
+        when(mAssistant.getAllSources(any())).thenReturn(sourceList);
+
+        assertThat(
+                BluetoothUtils.hasConnectedBroadcastSource(
+                        mCachedBluetoothDevice, mLocalBluetoothManager))
+                .isEqualTo(true);
     }
 
     @Test

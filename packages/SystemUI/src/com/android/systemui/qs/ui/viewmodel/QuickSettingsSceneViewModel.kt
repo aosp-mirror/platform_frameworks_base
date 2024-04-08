@@ -25,12 +25,15 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
+import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.brightness.ui.viewModel.BrightnessMirrorViewModel
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 /** Models UI state and handles user input for the quick settings scene. */
@@ -44,20 +47,23 @@ constructor(
     val notifications: NotificationsPlaceholderViewModel,
     private val footerActionsViewModelFactory: FooterActionsViewModel.Factory,
     private val footerActionsController: FooterActionsController,
+    private val sceneInteractor: SceneInteractor,
 ) {
     val destinationScenes =
-        qsSceneAdapter.isCustomizing.map { customizing ->
+        qsSceneAdapter.isCustomizing.flatMapLatest { customizing ->
             if (customizing) {
                 // TODO(b/332749288) Empty map so there are no back handlers and back can close
                 // customizer
-                emptyMap()
+                flowOf(emptyMap())
                 // TODO(b/330200163) Add an Up from Bottom to be able to collapse the shade
                 // while customizing
             } else {
-                mapOf(
-                    Back to UserActionResult(Scenes.Shade),
-                    Swipe(SwipeDirection.Up) to UserActionResult(Scenes.Shade),
-                )
+                sceneInteractor.previousScene.map { previousScene ->
+                    mapOf(
+                        Back to UserActionResult(previousScene ?: Scenes.Shade),
+                        Swipe(SwipeDirection.Up) to UserActionResult(previousScene ?: Scenes.Shade),
+                    )
+                }
             }
         }
 

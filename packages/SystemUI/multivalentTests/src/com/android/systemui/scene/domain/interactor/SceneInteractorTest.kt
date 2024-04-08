@@ -291,4 +291,19 @@ class SceneInteractorTest : SysuiTestCase() {
 
             assertThat(isVisible).isFalse()
         }
+
+    @Test
+    fun previousScene() =
+        testScope.runTest {
+            val currentScene by collectLastValue(underTest.currentScene)
+            val previousScene by collectLastValue(underTest.previousScene)
+            assertThat(previousScene).isNull()
+
+            val firstScene = currentScene
+            underTest.changeScene(toScene = Scenes.Shade, "reason")
+            assertThat(previousScene).isEqualTo(firstScene)
+
+            underTest.changeScene(toScene = Scenes.QuickSettings, "reason")
+            assertThat(previousScene).isEqualTo(Scenes.Shade)
+        }
 }

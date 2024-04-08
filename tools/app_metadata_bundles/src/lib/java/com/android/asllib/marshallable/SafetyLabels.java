@@ -28,10 +28,18 @@ public class SafetyLabels implements AslMarshallable {
 
     private final Long mVersion;
     private final DataLabels mDataLabels;
+    private final SecurityLabels mSecurityLabels;
+    private final ThirdPartyVerification mThirdPartyVerification;
 
-    public SafetyLabels(Long version, DataLabels dataLabels) {
+    public SafetyLabels(
+            Long version,
+            DataLabels dataLabels,
+            SecurityLabels securityLabels,
+            ThirdPartyVerification thirdPartyVerification) {
         this.mVersion = version;
         this.mDataLabels = dataLabels;
+        this.mSecurityLabels = securityLabels;
+        this.mThirdPartyVerification = thirdPartyVerification;
     }
 
     /** Returns the data label for the safety label */
@@ -53,6 +61,12 @@ public class SafetyLabels implements AslMarshallable {
                 XmlUtils.createOdLongEle(doc, XmlUtils.OD_NAME_VERSION, mVersion));
         if (mDataLabels != null) {
             XmlUtils.appendChildren(safetyLabelsEle, mDataLabels.toOdDomElements(doc));
+        }
+        if (mSecurityLabels != null) {
+            XmlUtils.appendChildren(safetyLabelsEle, mSecurityLabels.toOdDomElements(doc));
+        }
+        if (mThirdPartyVerification != null) {
+            XmlUtils.appendChildren(safetyLabelsEle, mThirdPartyVerification.toOdDomElements(doc));
         }
         return XmlUtils.listOf(safetyLabelsEle);
     }

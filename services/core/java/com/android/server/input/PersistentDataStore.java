@@ -27,7 +27,6 @@ import android.util.Xml;
 import android.view.Surface;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
@@ -42,7 +41,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -74,7 +72,7 @@ final class PersistentDataStore {
             new HashMap<String, InputDeviceState>();
 
     // The interface for methods which should be replaced by the test harness.
-    private Injector mInjector;
+    private final Injector mInjector;
 
     // True if the data has been loaded.
     private boolean mLoaded;
@@ -83,7 +81,7 @@ final class PersistentDataStore {
     private boolean mDirty;
 
     // Storing key remapping
-    private Map<Integer, Integer> mKeyRemapping = new HashMap<>();
+    private final Map<Integer, Integer> mKeyRemapping = new HashMap<>();
 
     public PersistentDataStore() {
         this(new Injector());
@@ -130,22 +128,6 @@ final class PersistentDataStore {
     }
 
     @Nullable
-    public String getCurrentKeyboardLayout(String inputDeviceDescriptor) {
-        InputDeviceState state = getInputDeviceState(inputDeviceDescriptor);
-        return state != null ? state.getCurrentKeyboardLayout() : null;
-    }
-
-    public boolean setCurrentKeyboardLayout(String inputDeviceDescriptor,
-            String keyboardLayoutDescriptor) {
-        InputDeviceState state = getOrCreateInputDeviceState(inputDeviceDescriptor);
-        if (state.setCurrentKeyboardLayout(keyboardLayoutDescriptor)) {
-            setDirty();
-            return true;
-        }
-        return false;
-    }
-
-    @Nullable
     public String getKeyboardLayout(String inputDeviceDescriptor, String key) {
         InputDeviceState state = getInputDeviceState(inputDeviceDescriptor);
         return state != null ? state.getKeyboardLayout(key) : null;
@@ -165,43 +147,6 @@ final class PersistentDataStore {
             @NonNull Set<String> selectedLayouts) {
         InputDeviceState state = getOrCreateInputDeviceState(inputDeviceDescriptor);
         if (state.setSelectedKeyboardLayouts(selectedLayouts)) {
-            setDirty();
-            return true;
-        }
-        return false;
-    }
-
-    public String[] getKeyboardLayouts(String inputDeviceDescriptor) {
-        InputDeviceState state = getInputDeviceState(inputDeviceDescriptor);
-        if (state == null) {
-            return (String[])ArrayUtils.emptyArray(String.class);
-        }
-        return state.getKeyboardLayouts();
-    }
-
-    public boolean addKeyboardLayout(String inputDeviceDescriptor,
-            String keyboardLayoutDescriptor) {
-        InputDeviceState state = getOrCreateInputDeviceState(inputDeviceDescriptor);
-        if (state.addKeyboardLayout(keyboardLayoutDescriptor)) {
-            setDirty();
-            return true;
-        }
-        return false;
-    }
-
-    public boolean removeKeyboardLayout(String inputDeviceDescriptor,
-            String keyboardLayoutDescriptor) {
-        InputDeviceState state = getOrCreateInputDeviceState(inputDeviceDescriptor);
-        if (state.removeKeyboardLayout(keyboardLayoutDescriptor)) {
-            setDirty();
-            return true;
-        }
-        return false;
-    }
-
-    public boolean switchKeyboardLayout(String inputDeviceDescriptor, int direction) {
-        InputDeviceState state = getInputDeviceState(inputDeviceDescriptor);
-        if (state != null && state.switchKeyboardLayout(direction)) {
             setDirty();
             return true;
         }
@@ -417,9 +362,6 @@ final class PersistentDataStore {
                 "x_ymix", "x_offset", "y_xmix", "y_scale", "y_offset" };
 
         private final TouchCalibration[] mTouchCalibration = new TouchCalibration[4];
-        @Nullable
-        private String mCurrentKeyboardLayout;
-        private final ArrayList<String> mKeyboardLayouts = new ArrayList<String>();
         private final SparseIntArray mKeyboardBacklightBrightnessMap = new SparseIntArray();
 
         private final Map<String, String> mKeyboardLayoutMap = new ArrayMap<>();
@@ -465,49 +407,6 @@ final class PersistentDataStore {
             return true;
         }
 
-        @Nullable
-        public String getCurrentKeyboardLayout() {
-            return mCurrentKeyboardLayout;
-        }
-
-        public boolean setCurrentKeyboardLayout(String keyboardLayout) {
-            if (Objects.equals(mCurrentKeyboardLayout, keyboardLayout)) {
-                return false;
-            }
-            addKeyboardLayout(keyboardLayout);
-            mCurrentKeyboardLayout = keyboardLayout;
-            return true;
-        }
-
-        public String[] getKeyboardLayouts() {
-            if (mKeyboardLayouts.isEmpty()) {
-                return (String[])ArrayUtils.emptyArray(String.class);
-            }
-            return mKeyboardLayouts.toArray(new String[mKeyboardLayouts.size()]);
-        }
-
-        public boolean addKeyboardLayout(String keyboardLayout) {
-            int index = Collections.binarySearch(mKeyboardLayouts, keyboardLayout);
-            if (index >= 0) {
-                return false;
-            }
-            mKeyboardLayouts.add(-index - 1, keyboardLayout);
-            if (mCurrentKeyboardLayout == null) {
-                mCurrentKeyboardLayout = keyboardLayout;
-            }
-            return true;
-        }
-
-        public boolean removeKeyboardLayout(String keyboardLayout) {
-            int index = Collections.binarySearch(mKeyboardLayouts, keyboardLayout);
-            if (index < 0) {
-                return false;
-            }
-            mKeyboardLayouts.remove(index);
-            updateCurrentKeyboardLayoutIfRemoved(keyboardLayout, index);
-            return true;
-        }
-
         public boolean setKeyboardBacklightBrightness(int lightId, int brightness) {
             if (mKeyboardBacklightBrightnessMap.get(lightId, INVALID_VALUE) == brightness) {
                 return false;
@@ -521,48 +420,8 @@ final class PersistentDataStore {
             return brightness == INVALID_VALUE ? OptionalInt.empty() : OptionalInt.of(brightness);
         }
 
-        private void updateCurrentKeyboardLayoutIfRemoved(
-                String removedKeyboardLayout, int removedIndex) {
-            if (Objects.equals(mCurrentKeyboardLayout, removedKeyboardLayout)) {
-                if (!mKeyboardLayouts.isEmpty()) {
-                    int index = removedIndex;
-                    if (index == mKeyboardLayouts.size()) {
-                        index = 0;
-                    }
-                    mCurrentKeyboardLayout = mKeyboardLayouts.get(index);
-                } else {
-                    mCurrentKeyboardLayout = null;
-                }
-            }
-        }
-
-        public boolean switchKeyboardLayout(int direction) {
-            final int size = mKeyboardLayouts.size();
-            if (size < 2) {
-                return false;
-            }
-            int index = Collections.binarySearch(mKeyboardLayouts, mCurrentKeyboardLayout);
-            assert index >= 0;
-            if (direction > 0) {
-                index = (index + 1) % size;
-            } else {
-                index = (index + size - 1) % size;
-            }
-            mCurrentKeyboardLayout = mKeyboardLayouts.get(index);
-            return true;
-        }
-
         public boolean removeUninstalledKeyboardLayouts(Set<String> availableKeyboardLayouts) {
             boolean changed = false;
-            for (int i = mKeyboardLayouts.size(); i-- > 0; ) {
-                String keyboardLayout = mKeyboardLayouts.get(i);
-                if (!availableKeyboardLayouts.contains(keyboardLayout)) {
-                    Slog.i(TAG, "Removing uninstalled keyboard layout " + keyboardLayout);
-                    mKeyboardLayouts.remove(i);
-                    updateCurrentKeyboardLayoutIfRemoved(keyboardLayout, i);
-                    changed = true;
-                }
-            }
             List<String> removedEntries = new ArrayList<>();
             for (String key : mKeyboardLayoutMap.keySet()) {
                 if (!availableKeyboardLayouts.contains(mKeyboardLayoutMap.get(key))) {
@@ -582,27 +441,7 @@ final class PersistentDataStore {
                 throws IOException, XmlPullParserException {
             final int outerDepth = parser.getDepth();
             while (XmlUtils.nextElementWithin(parser, outerDepth)) {
-                if (parser.getName().equals("keyboard-layout")) {
-                    String descriptor = parser.getAttributeValue(null, "descriptor");
-                    if (descriptor == null) {
-                        throw new XmlPullParserException(
-                                "Missing descriptor attribute on keyboard-layout.");
-                    }
-                    String current = parser.getAttributeValue(null, "current");
-                    if (mKeyboardLayouts.contains(descriptor)) {
-                        throw new XmlPullParserException(
-                                "Found duplicate keyboard layout.");
-                    }
-
-                    mKeyboardLayouts.add(descriptor);
-                    if (current != null && current.equals("true")) {
-                        if (mCurrentKeyboardLayout != null) {
-                            throw new XmlPullParserException(
-                                    "Found multiple current keyboard layouts.");
-                        }
-                        mCurrentKeyboardLayout = descriptor;
-                    }
-                } else if (parser.getName().equals("keyed-keyboard-layout")) {
+                if (parser.getName().equals("keyed-keyboard-layout")) {
                     String key = parser.getAttributeValue(null, "key");
                     if (key == null) {
                         throw new XmlPullParserException(
@@ -676,27 +515,9 @@ final class PersistentDataStore {
                     }
                 }
             }
-
-            // Maintain invariant that layouts are sorted.
-            Collections.sort(mKeyboardLayouts);
-
-            // Maintain invariant that there is always a current keyboard layout unless
-            // there are none installed.
-            if (mCurrentKeyboardLayout == null && !mKeyboardLayouts.isEmpty()) {
-                mCurrentKeyboardLayout = mKeyboardLayouts.get(0);
-            }
         }
 
         public void saveToXml(TypedXmlSerializer serializer) throws IOException {
-            for (String layout : mKeyboardLayouts) {
-                serializer.startTag(null, "keyboard-layout");
-                serializer.attribute(null, "descriptor", layout);
-                if (layout.equals(mCurrentKeyboardLayout)) {
-                    serializer.attributeBoolean(null, "current", true);
-                }
-                serializer.endTag(null, "keyboard-layout");
-            }
-
             for (String key : mKeyboardLayoutMap.keySet()) {
                 serializer.startTag(null, "keyed-keyboard-layout");
                 serializer.attribute(null, "key", key);

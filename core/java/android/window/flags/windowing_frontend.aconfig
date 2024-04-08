@@ -128,9 +128,28 @@ flag {
 }
 
 flag {
+  name: "fifo_priority_for_major_ui_processes"
+  namespace: "windowing_frontend"
+  description: "Use realtime priority for SystemUI and launcher"
+  bug: "288140556"
+  is_fixed_read_only: true
+}
+
+flag {
   name: "insets_decoupled_configuration"
   namespace: "windowing_frontend"
   description: "Configuration decoupled from insets"
   bug: "151861875"
   is_fixed_read_only: true
+}
+
+flag {
+  name: "keyguard_appear_transition"
+  namespace: "windowing_frontend"
+  description: "Add transition when keyguard appears"
+  bug: "327970608"
+  is_fixed_read_only: true
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
 }

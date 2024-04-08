@@ -745,6 +745,9 @@ class ProcessRecord implements WindowProcessListener {
             mOnewayThread = thread;
         }
         mWindowProcessController.setThread(thread);
+        if (mWindowProcessController.useFifoUiScheduling()) {
+            mService.mSpecifiedFifoProcesses.add(this);
+        }
     }
 
     @GuardedBy({"mService", "mProcLock"})
@@ -752,7 +755,17 @@ class ProcessRecord implements WindowProcessListener {
         mThread = null;
         mOnewayThread = null;
         mWindowProcessController.setThread(null);
+        if (mWindowProcessController.useFifoUiScheduling()) {
+            mService.mSpecifiedFifoProcesses.remove(this);
+        }
         mProfile.onProcessInactive(tracker);
+    }
+
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    boolean useFifoUiScheduling() {
+        return mService.mUseFifoUiScheduling
+                || (mService.mAllowSpecifiedFifoScheduling
+                        && mWindowProcessController.useFifoUiScheduling());
     }
 
     @GuardedBy("mService")

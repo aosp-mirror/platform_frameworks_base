@@ -840,6 +840,8 @@ public class SettingsBackupTest {
                         Settings.Secure.BIOMETRIC_APP_ENABLED,
                         Settings.Secure.BIOMETRIC_KEYGUARD_ENABLED,
                         Settings.Secure.BIOMETRIC_VIRTUAL_ENABLED,
+                        Settings.Secure.BIOMETRIC_FINGERPRINT_VIRTUAL_ENABLED,
+                        Settings.Secure.BIOMETRIC_FACE_VIRTUAL_ENABLED,
                         Settings.Secure.BLUETOOTH_ADDR_VALID,
                         Settings.Secure.BLUETOOTH_ADDRESS,
                         Settings.Secure.BLUETOOTH_NAME,

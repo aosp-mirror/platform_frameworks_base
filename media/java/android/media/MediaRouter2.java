@@ -1309,18 +1309,24 @@ public final class MediaRouter2 {
             return;
         }
 
-        RoutingController newController;
-        if (sessionInfo.isSystemSession()) {
-            newController = getSystemController();
-            newController.setRoutingSessionInfo(sessionInfo);
+        RoutingController newController = addRoutingController(sessionInfo);
+        notifyTransfer(oldController, newController);
+    }
+
+    @NonNull
+    private RoutingController addRoutingController(@NonNull RoutingSessionInfo session) {
+        RoutingController controller;
+        if (session.isSystemSession()) {
+            // mSystemController is never released, so we only need to update its status.
+            mSystemController.setRoutingSessionInfo(session);
+            controller = mSystemController;
         } else {
-            newController = new RoutingController(sessionInfo);
+            controller = new RoutingController(session);
             synchronized (mLock) {
-                mNonSystemRoutingControllers.put(newController.getId(), newController);
+                mNonSystemRoutingControllers.put(controller.getId(), controller);
             }
         }
-
-        notifyTransfer(oldController, newController);
+        return controller;
     }
 
     void updateControllerOnHandler(RoutingSessionInfo sessionInfo) {
@@ -1329,40 +1335,12 @@ public final class MediaRouter2 {
             return;
         }
 
-        if (sessionInfo.isSystemSession()) {
-            // The session info is sent from SystemMediaRoute2Provider.
-            RoutingController systemController = getSystemController();
-            systemController.setRoutingSessionInfo(sessionInfo);
-            notifyControllerUpdated(systemController);
-            return;
+        RoutingController controller =
+                getMatchingController(sessionInfo, /* logPrefix */ "updateControllerOnHandler");
+        if (controller != null) {
+            controller.setRoutingSessionInfo(sessionInfo);
+            notifyControllerUpdated(controller);
         }
-
-        RoutingController matchingController;
-        synchronized (mLock) {
-            matchingController = mNonSystemRoutingControllers.get(sessionInfo.getId());
-        }
-
-        if (matchingController == null) {
-            Log.w(
-                    TAG,
-                    "updateControllerOnHandler: Matching controller not found. uniqueSessionId="
-                            + sessionInfo.getId());
-            return;
-        }
-
-        RoutingSessionInfo oldInfo = matchingController.getRoutingSessionInfo();
-        if (!TextUtils.equals(oldInfo.getProviderId(), sessionInfo.getProviderId())) {
-            Log.w(
-                    TAG,
-                    "updateControllerOnHandler: Provider IDs are not matched. old="
-                            + oldInfo.getProviderId()
-                            + ", new="
-                            + sessionInfo.getProviderId());
-            return;
-        }
-
-        matchingController.setRoutingSessionInfo(sessionInfo);
-        notifyControllerUpdated(matchingController);
     }
 
     void releaseControllerOnHandler(RoutingSessionInfo sessionInfo) {
@@ -1371,34 +1349,47 @@ public final class MediaRouter2 {
             return;
         }
 
-        RoutingController matchingController;
-        synchronized (mLock) {
-            matchingController = mNonSystemRoutingControllers.get(sessionInfo.getId());
-        }
+        RoutingController matchingController =
+                getMatchingController(sessionInfo, /* logPrefix */ "releaseControllerOnHandler");
 
-        if (matchingController == null) {
-            if (DEBUG) {
-                Log.d(
-                        TAG,
-                        "releaseControllerOnHandler: Matching controller not found. "
-                                + "uniqueSessionId="
-                                + sessionInfo.getId());
+        if (matchingController != null) {
+            matchingController.releaseInternal(/* shouldReleaseSession= */ false);
+        }
+    }
+
+    @Nullable
+    private RoutingController getMatchingController(
+            RoutingSessionInfo sessionInfo, String logPrefix) {
+        if (sessionInfo.isSystemSession()) {
+            return getSystemController();
+        } else {
+            RoutingController controller;
+            synchronized (mLock) {
+                controller = mNonSystemRoutingControllers.get(sessionInfo.getId());
             }
-            return;
-        }
 
-        RoutingSessionInfo oldInfo = matchingController.getRoutingSessionInfo();
-        if (!TextUtils.equals(oldInfo.getProviderId(), sessionInfo.getProviderId())) {
-            Log.w(
-                    TAG,
-                    "releaseControllerOnHandler: Provider IDs are not matched. old="
-                            + oldInfo.getProviderId()
-                            + ", new="
-                            + sessionInfo.getProviderId());
-            return;
-        }
+            if (controller == null) {
+                Log.w(
+                        TAG,
+                        logPrefix
+                                + ": Matching controller not found. uniqueSessionId="
+                                + sessionInfo.getId());
+                return null;
+            }
 
-        matchingController.releaseInternal(/* shouldReleaseSession= */ false);
+            RoutingSessionInfo oldInfo = controller.getRoutingSessionInfo();
+            if (!TextUtils.equals(oldInfo.getProviderId(), sessionInfo.getProviderId())) {
+                Log.w(
+                        TAG,
+                        logPrefix
+                                + ": Provider IDs are not matched. old="
+                                + oldInfo.getProviderId()
+                                + ", new="
+                                + sessionInfo.getProviderId());
+                return null;
+            }
+            return controller;
+        }
     }
 
     void onRequestCreateControllerByManagerOnHandler(

@@ -1222,6 +1222,19 @@ public class BubbleDataTest extends ShellTestCase {
         assertThat(update.bubbleBarLocation).isEqualTo(BubbleBarLocation.LEFT);
     }
 
+    @Test
+    public void setSelectedBubbleAndExpandStack() {
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        mBubbleData.setListener(mListener);
+
+        mBubbleData.setSelectedBubbleAndExpandStack(mBubbleA1);
+
+        verifyUpdateReceived();
+        assertSelectionChangedTo(mBubbleA1);
+        assertExpandedChangedTo(true);
+    }
+
     private void verifyUpdateReceived() {
         verify(mListener).applyUpdate(mUpdateCaptor.capture());
         reset(mListener);

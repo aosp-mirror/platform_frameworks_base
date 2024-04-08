@@ -21,10 +21,9 @@ import static android.hardware.usb.UsbOperationInternal.USB_OPERATION_ERROR_INTE
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -34,9 +33,7 @@ import android.hardware.usb.IUsbOperationInternal;
 import android.hardware.usb.flags.Flags;
 import android.os.RemoteException;
 import android.os.UserManager;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -64,7 +61,7 @@ public class UsbServiceTest {
     @Mock
     private UsbSettingsManager mUsbSettingsManager;
     @Mock
-    private IUsbOperationInternal mIUsbOperationInternal;
+    private IUsbOperationInternal mCallback;
 
     private static final String TEST_PORT_ID = "123";
 
@@ -77,98 +74,105 @@ public class UsbServiceTest {
     private UsbService mUsbService;
 
     @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Before
     public void setUp() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_USB_DATA_SIGNAL_STAKING);
         MockitoAnnotations.initMocks(this);
-        mUsbService = new UsbService(mContext, mUsbPortManager, mUsbAlsaManager, mUserManager,
-                mUsbSettingsManager);
+
+        when(mUsbPortManager.enableUsbData(eq(TEST_PORT_ID), anyBoolean(), eq(TEST_TRANSACTION_ID),
+                eq(mCallback), any())).thenReturn(true);
+
+        mUsbService = new UsbService(mContext, mUsbPortManager, mUsbAlsaManager,
+                mUserManager, mUsbSettingsManager);
+    }
+
+    private void assertToggleUsbSuccessfully(int uid, boolean enable) {
+        assertTrue(mUsbService.enableUsbDataInternal(TEST_PORT_ID, enable,
+                TEST_TRANSACTION_ID, mCallback, uid));
+
+        verify(mUsbPortManager).enableUsbData(TEST_PORT_ID,
+                enable, TEST_TRANSACTION_ID, mCallback, null);
+        verifyZeroInteractions(mCallback);
+
+        clearInvocations(mUsbPortManager);
+        clearInvocations(mCallback);
+    }
+
+    private void assertToggleUsbFailed(int uid, boolean enable) throws Exception {
+        assertFalse(mUsbService.enableUsbDataInternal(TEST_PORT_ID, enable,
+                TEST_TRANSACTION_ID, mCallback, uid));
+
+        verifyZeroInteractions(mUsbPortManager);
+        verify(mCallback).onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+
+        clearInvocations(mUsbPortManager);
+        clearInvocations(mCallback);
     }
 
     /**
      * Verify enableUsbData successfully disables USB port without error
      */
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_USB_DATA_SIGNAL_STAKING)
-    public void usbPort_SuccessfullyDisabled() {
-        boolean enableState = false;
-        when(mUsbPortManager.enableUsbData(TEST_PORT_ID, enableState, TEST_TRANSACTION_ID,
-                mIUsbOperationInternal, null)).thenReturn(true);
-
-        assertTrue(mUsbService.enableUsbDataInternal(TEST_PORT_ID, enableState,
-                TEST_TRANSACTION_ID, mIUsbOperationInternal, TEST_FIRST_CALLER_ID));
-
-        verify(mUsbPortManager, times(1)).enableUsbData(TEST_PORT_ID,
-                enableState, TEST_TRANSACTION_ID, mIUsbOperationInternal, null);
-        verifyZeroInteractions(mIUsbOperationInternal);
+    public void disableUsb_successfullyDisable() {
+        assertToggleUsbSuccessfully(TEST_FIRST_CALLER_ID, false);
     }
 
     /**
      * Verify enableUsbData successfully enables USB port without error given no other stakers
      */
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_USB_DATA_SIGNAL_STAKING)
-    public void usbPortWhenNoOtherStakers_SuccessfullyEnabledUsb() {
-        boolean enableState = true;
-        when(mUsbPortManager.enableUsbData(TEST_PORT_ID, enableState, TEST_TRANSACTION_ID,
-                mIUsbOperationInternal, null))
-                .thenReturn(true);
-
-        assertTrue(mUsbService.enableUsbDataInternal(TEST_PORT_ID, enableState,
-                TEST_TRANSACTION_ID, mIUsbOperationInternal, TEST_FIRST_CALLER_ID));
-        verifyZeroInteractions(mIUsbOperationInternal);
+    public void enableUsbWhenNoOtherStakers_successfullyEnable() {
+        assertToggleUsbSuccessfully(TEST_FIRST_CALLER_ID, true);
     }
 
     /**
      * Verify enableUsbData does not enable USB port if other stakers are present
      */
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_USB_DATA_SIGNAL_STAKING)
-    public void usbPortWithOtherStakers_DoesNotToEnableUsb() throws RemoteException {
-        mUsbService.enableUsbDataInternal(TEST_PORT_ID, false, TEST_TRANSACTION_ID,
-                mIUsbOperationInternal, TEST_FIRST_CALLER_ID);
-        clearInvocations(mUsbPortManager);
+    public void enableUsbPortWithOtherStakers_failsToEnable() throws Exception {
+        assertToggleUsbSuccessfully(TEST_FIRST_CALLER_ID, false);
 
-        assertFalse(mUsbService.enableUsbDataInternal(TEST_PORT_ID, true,
-                TEST_TRANSACTION_ID, mIUsbOperationInternal, TEST_SECOND_CALLER_ID));
+        assertToggleUsbFailed(TEST_SECOND_CALLER_ID, true);
+    }
 
-        verifyZeroInteractions(mUsbPortManager);
-        verify(mIUsbOperationInternal).onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+    /**
+     * Verify enableUsbData successfully enables USB port when the last staker is removed
+     */
+    @Test
+    public void enableUsbByTheOnlyStaker_successfullyEnable() {
+        assertToggleUsbSuccessfully(TEST_FIRST_CALLER_ID, false);
+
+        assertToggleUsbSuccessfully(TEST_FIRST_CALLER_ID, true);
     }
 
     /**
      * Verify enableUsbDataWhileDockedInternal does not enable USB port if other stakers are present
      */
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_USB_DATA_SIGNAL_STAKING)
-    public void enableUsbWhileDockedWhenThereAreOtherStakers_DoesNotEnableUsb()
+    public void enableUsbWhileDockedWhenThereAreOtherStakers_failsToEnable()
             throws RemoteException {
-        mUsbService.enableUsbDataInternal(TEST_PORT_ID, false, TEST_TRANSACTION_ID,
-                mIUsbOperationInternal, TEST_FIRST_CALLER_ID);
+        assertToggleUsbSuccessfully(TEST_FIRST_CALLER_ID, false);
 
-        mUsbService.enableUsbDataWhileDockedInternal(TEST_PORT_ID, 0,
-                mIUsbOperationInternal, TEST_SECOND_CALLER_ID);
+        mUsbService.enableUsbDataWhileDockedInternal(TEST_PORT_ID, TEST_TRANSACTION_ID,
+                mCallback, TEST_SECOND_CALLER_ID);
 
-        verify(mUsbPortManager, never()).enableUsbDataWhileDocked(any(),
-                anyLong(), any(), any());
-        verify(mIUsbOperationInternal).onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+        verifyZeroInteractions(mUsbPortManager);
+        verify(mCallback).onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
     }
 
     /**
-     * Verify enableUsbDataWhileDockedInternal does  enable USB port if other stakers are
+     * Verify enableUsbDataWhileDockedInternal does enable USB port if other stakers are
      * not present
      */
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_USB_DATA_SIGNAL_STAKING)
-    public void enableUsbWhileDockedWhenThereAreNoStakers_SuccessfullyEnableUsb()
-            throws RemoteException {
+    public void enableUsbWhileDockedWhenThereAreNoStakers_SuccessfullyEnable() {
         mUsbService.enableUsbDataWhileDockedInternal(TEST_PORT_ID, TEST_TRANSACTION_ID,
-                mIUsbOperationInternal, TEST_SECOND_CALLER_ID);
+                mCallback, TEST_SECOND_CALLER_ID);
 
-        verify(mUsbPortManager, times(1))
-                .enableUsbDataWhileDocked(TEST_PORT_ID, TEST_TRANSACTION_ID,
-                        mIUsbOperationInternal, null);
-        verifyZeroInteractions(mIUsbOperationInternal);
+        verify(mUsbPortManager).enableUsbDataWhileDocked(TEST_PORT_ID, TEST_TRANSACTION_ID,
+                        mCallback, null);
+        verifyZeroInteractions(mCallback);
     }
 }

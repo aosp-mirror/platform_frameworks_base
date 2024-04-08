@@ -3685,12 +3685,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     // Called by window manager policy.  Not exposed externally.
     @Override
-    public void switchKeyboardLayout(int deviceId, int direction) {
-        mInputManager.switchKeyboardLayout(deviceId, direction);
-    }
-
-    // Called by window manager policy.  Not exposed externally.
-    @Override
     public void shutdown(boolean confirm) {
         // Pass in the UI context, since ShutdownThread requires it (to show UI).
         ShutdownThread.shutdown(ActivityThread.currentActivityThread().getSystemUiContext(),

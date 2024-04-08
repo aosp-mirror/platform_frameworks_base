@@ -46,6 +46,12 @@ import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -112,10 +118,16 @@ fun VolumePanelRadioButtonBar(
                 horizontalArrangement = Arrangement.spacedBy(spacing)
             ) {
                 for (itemIndex in items.indices) {
+                    val item = items[itemIndex]
                     Row(
                         modifier =
                             Modifier.height(48.dp)
                                 .weight(1f)
+                                .semantics {
+                                    item.contentDescription?.let { contentDescription = it }
+                                    role = Role.Switch
+                                    selected = itemIndex == scope.selectedIndex
+                                }
                                 .clickable(
                                     interactionSource = null,
                                     indication = null,
@@ -124,7 +136,6 @@ fun VolumePanelRadioButtonBar(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        val item = items[itemIndex]
                         if (item.icon !== Empty) {
                             with(items[itemIndex]) { icon() }
                         }
@@ -138,7 +149,8 @@ fun VolumePanelRadioButtonBar(
                             start = indicatorBackgroundPadding,
                             top = labelIndicatorBackgroundSpacing,
                             end = indicatorBackgroundPadding
-                        ),
+                        )
+                        .clearAndSetSemantics {},
                 horizontalArrangement = Arrangement.spacedBy(spacing),
             ) {
                 for (itemIndex in items.indices) {
@@ -296,6 +308,7 @@ interface VolumePanelRadioButtonBarScope {
         onItemSelected: () -> Unit,
         icon: @Composable RowScope.() -> Unit = Empty,
         label: @Composable RowScope.() -> Unit = Empty,
+        contentDescription: String? = null,
     )
 }
 
@@ -317,6 +330,7 @@ private class VolumePanelRadioButtonBarScopeImpl : VolumePanelRadioButtonBarScop
         onItemSelected: () -> Unit,
         icon: @Composable RowScope.() -> Unit,
         label: @Composable RowScope.() -> Unit,
+        contentDescription: String?,
     ) {
         require(!isSelected || !hasSelectedItem) { "Only one item should be selected at a time" }
         if (isSelected) {
@@ -327,6 +341,7 @@ private class VolumePanelRadioButtonBarScopeImpl : VolumePanelRadioButtonBarScop
                 onItemSelected = onItemSelected,
                 icon = icon,
                 label = label,
+                contentDescription = contentDescription,
             )
         )
     }
@@ -340,6 +355,7 @@ private class Item(
     val onItemSelected: () -> Unit,
     val icon: @Composable RowScope.() -> Unit,
     val label: @Composable RowScope.() -> Unit,
+    val contentDescription: String?,
 )
 
 private const val UNSET_OFFSET = -1

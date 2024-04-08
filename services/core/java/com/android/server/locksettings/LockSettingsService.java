@@ -102,8 +102,10 @@ import android.os.ShellCallback;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.ICeStorageLockEventListener;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
+import android.os.storage.StorageManagerInternal;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.security.AndroidKeyStoreMaintenance;
@@ -337,6 +339,8 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private final CopyOnWriteArrayList<LockSettingsStateListener> mLockSettingsStateListeners =
             new CopyOnWriteArrayList<>();
+
+    private final StorageManagerInternal mStorageManagerInternal;
 
     // This class manages life cycle events for encrypted users on File Based Encryption (FBE)
     // devices. The most basic of these is to show/hide notifications about missing features until
@@ -577,6 +581,10 @@ public class LockSettingsService extends ILockSettings.Stub {
             return null;
         }
 
+        public StorageManagerInternal getStorageManagerInternal() {
+            return LocalServices.getService(StorageManagerInternal.class);
+        }
+
         public SyntheticPasswordManager getSyntheticPasswordManager(LockSettingsStorage storage) {
             return new SyntheticPasswordManager(getContext(), storage, getUserManager(),
                     new PasswordSlotManager());
@@ -672,6 +680,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mNotificationManager = injector.getNotificationManager();
         mUserManager = injector.getUserManager();
         mStorageManager = injector.getStorageManager();
+        mStorageManagerInternal = injector.getStorageManagerInternal();
         mStrongAuthTracker = injector.getStrongAuthTracker();
         mStrongAuthTracker.register(mStrongAuth);
         mGatekeeperPasswords = new LongSparseArray<>();
@@ -925,7 +934,33 @@ public class LockSettingsService extends ILockSettings.Stub {
         mStorage.prefetchUser(UserHandle.USER_SYSTEM);
         mBiometricDeferredQueue.systemReady(mInjector.getFingerprintManager(),
                 mInjector.getFaceManager(), mInjector.getBiometricManager());
+        if (android.os.Flags.allowPrivateProfile()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures()
+                && android.multiuser.Flags.enableBiometricsToUnlockPrivateSpace()) {
+            mStorageManagerInternal.registerStorageLockEventListener(mCeStorageLockEventListener);
+        }
     }
+
+    private final ICeStorageLockEventListener mCeStorageLockEventListener =
+            new ICeStorageLockEventListener() {
+                @Override
+                public void onStorageLocked(int userId) {
+                    Slog.i(TAG, "Storage lock event received for " + userId);
+                    if (android.os.Flags.allowPrivateProfile()
+                            && android.multiuser.Flags.enablePrivateSpaceFeatures()
+                            && android.multiuser.Flags.enableBiometricsToUnlockPrivateSpace()) {
+                        mHandler.post(() -> {
+                            UserProperties userProperties =
+                                    mUserManager.getUserProperties(UserHandle.of(userId));
+                            if (userProperties != null
+                                    && userProperties.getAllowStoppingUserWithDelayedLocking()) {
+                                int strongAuthRequired = LockPatternUtils.StrongAuthTracker
+                                        .getDefaultFlags(mContext);
+                                requireStrongAuth(strongAuthRequired, userId);
+                            }
+                        });
+                    }
+                }};
 
     private void loadEscrowData() {
         mRebootEscrowManager.loadRebootEscrowDataIfAvailable(mHandler);

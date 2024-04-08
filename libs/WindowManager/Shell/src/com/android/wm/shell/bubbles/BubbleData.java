@@ -365,6 +365,19 @@ public class BubbleData {
         mSelectedBubble = bubble;
     }
 
+    /**
+     * Sets the selected bubble and expands it.
+     *
+     * <p>This dispatches a single state update for both changes and should be used instead of
+     * calling {@link #setSelectedBubble(BubbleViewProvider)} followed by
+     * {@link #setExpanded(boolean)} immediately after, which will generate 2 separate updates.
+     */
+    public void setSelectedBubbleAndExpandStack(BubbleViewProvider bubble) {
+        setSelectedBubbleInternal(bubble);
+        setExpandedInternal(true);
+        dispatchPendingChanges();
+    }
+
     public void setSelectedBubble(BubbleViewProvider bubble) {
         setSelectedBubbleInternal(bubble);
         dispatchPendingChanges();

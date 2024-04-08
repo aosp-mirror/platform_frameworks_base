@@ -42,6 +42,7 @@ import static com.android.server.wallpaper.WallpaperUtils.WALLPAPER_LOCK_ORIG;
 import static com.android.server.wallpaper.WallpaperUtils.getWallpaperDir;
 import static com.android.server.wallpaper.WallpaperUtils.makeWallpaperIdLocked;
 import static com.android.window.flags.Flags.multiCrop;
+import static com.android.window.flags.Flags.offloadColorExtraction;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -380,7 +381,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             }
 
             // Outside of the lock since it will synchronize itself
-            notifyWallpaperColorsChanged(wallpaper);
+            if (!offloadColorExtraction()) notifyWallpaperColorsChanged(wallpaper);
         }
 
         @Override
@@ -403,12 +404,16 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     void notifyWallpaperColorsChanged(@NonNull WallpaperData wallpaper) {
+        notifyWallpaperColorsChanged(wallpaper, wallpaper.mWhich);
+    }
+
+    private void notifyWallpaperColorsChanged(@NonNull WallpaperData wallpaper, int which) {
         if (DEBUG) {
             Slog.i(TAG, "Notifying wallpaper colors changed");
         }
         if (wallpaper.connection != null) {
             wallpaper.connection.forEachDisplayConnector(connector ->
-                    notifyWallpaperColorsChangedOnDisplay(wallpaper, connector.mDisplayId));
+                    notifyWallpaperColorsChangedOnDisplay(wallpaper, connector.mDisplayId, which));
         }
     }
 
@@ -425,6 +430,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
     private void notifyWallpaperColorsChangedOnDisplay(@NonNull WallpaperData wallpaper,
             int displayId) {
+        notifyWallpaperColorsChangedOnDisplay(wallpaper, displayId, wallpaper.mWhich);
+    }
+
+    private void notifyWallpaperColorsChangedOnDisplay(@NonNull WallpaperData wallpaper,
+            int displayId, int which) {
         boolean needsExtraction;
         synchronized (mLock) {
             final RemoteCallbackList<IWallpaperManagerCallback> currentUserColorListeners =
@@ -449,8 +459,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             notify = extractColors(wallpaper);
         }
         if (notify) {
-            notifyColorListeners(getAdjustedWallpaperColorsOnDimming(wallpaper),
-                    wallpaper.mWhich, wallpaper.userId, displayId);
+            notifyColorListeners(getAdjustedWallpaperColorsOnDimming(wallpaper), which,
+                    wallpaper.userId, displayId);
         }
     }
 
@@ -504,6 +514,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
      * @return true unless the wallpaper changed during the color computation
      */
     private boolean extractColors(WallpaperData wallpaper) {
+        if (offloadColorExtraction()) return !mImageWallpaper.equals(wallpaper.wallpaperComponent);
         String cropFile = null;
         boolean defaultImageWallpaper = false;
         int wallpaperId;
@@ -1148,10 +1159,16 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             synchronized (mLock) {
                 // Do not broadcast changes on ImageWallpaper since it's handled
                 // internally by this class.
-                if (mImageWallpaper.equals(mWallpaper.wallpaperComponent)) {
+                boolean isImageWallpaper = mImageWallpaper.equals(mWallpaper.wallpaperComponent);
+                if (isImageWallpaper && (!offloadColorExtraction() || primaryColors == null)) {
                     return;
                 }
                 mWallpaper.primaryColors = primaryColors;
+                // only save the colors for ImageWallpaper - for live wallpapers, the colors
+                // are always recomputed after a reboot.
+                if (offloadColorExtraction() && isImageWallpaper) {
+                    saveSettingsLocked(mWallpaper.userId);
+                }
             }
             notifyWallpaperColorsChangedOnDisplay(mWallpaper, displayId);
         }
@@ -1177,7 +1194,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 try {
                     // This will trigger onComputeColors in the wallpaper engine.
                     // It's fine to be locked in here since the binder is oneway.
-                    connector.mEngine.requestWallpaperColors();
+                    if (!offloadColorExtraction() || mWallpaper.primaryColors == null) {
+                        connector.mEngine.requestWallpaperColors();
+                    }
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed to request wallpaper colors", e);
                 }
@@ -1811,6 +1830,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             // Offload color extraction to another thread since switchUser will be called
             // from the main thread.
             FgThread.getHandler().post(() -> {
+                if (offloadColorExtraction()) return;
                 notifyWallpaperColorsChanged(systemWallpaper);
                 if (lockWallpaper != systemWallpaper) notifyWallpaperColorsChanged(lockWallpaper);
                 notifyWallpaperColorsChanged(mFallbackWallpaper);
@@ -2722,8 +2742,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         });
                         // Need to extract colors again to re-calculate dark hints after
                         // applying dimming.
-                        wp.mIsColorExtractedFromDim = true;
-                        pendingColorExtraction.add(wp);
+                        if (!offloadColorExtraction()) {
+                            wp.mIsColorExtractedFromDim = true;
+                            pendingColorExtraction.add(wp);
+                        }
                         changed = true;
                     }
                 }
@@ -2732,7 +2754,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
             }
             for (WallpaperData wp: pendingColorExtraction) {
-                notifyWallpaperColorsChanged(wp);
+                if (!offloadColorExtraction()) notifyWallpaperColorsChanged(wp);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -2927,6 +2949,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     }
                     wallpaper.allowBackup = allowBackup;
                     wallpaper.mWallpaperDimAmount = getWallpaperDimAmount();
+                    if (offloadColorExtraction()) wallpaper.primaryColors = null;
                 }
                 return pfd;
             } finally {
@@ -3069,6 +3092,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         checkPermission(android.Manifest.permission.SET_WALLPAPER_COMPONENT);
 
         boolean shouldNotifyColors = false;
+
+        // If the lockscreen wallpaper is set to the same as the home screen, notify that the
+        // lockscreen wallpaper colors changed, even if we don't bind a new wallpaper engine.
+        boolean shouldNotifyLockscreenColors = false;
         boolean bindSuccess;
         final WallpaperData newWallpaper;
 
@@ -3114,7 +3141,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 bindSuccess = bindWallpaperComponentLocked(name, /* force */
                         forceRebind, /* fromUser */ true, newWallpaper, reply);
                 if (bindSuccess) {
-                    if (!same) {
+                    if (!same || (offloadColorExtraction() && forceRebind)) {
                         newWallpaper.primaryColors = null;
                     } else {
                         if (newWallpaper.connection != null) {
@@ -3138,6 +3165,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     newWallpaper.wallpaperId = makeWallpaperIdLocked();
                     notifyCallbacksLocked(newWallpaper);
                     shouldNotifyColors = true;
+                    if (offloadColorExtraction()) {
+                        shouldNotifyColors = false;
+                        shouldNotifyLockscreenColors = !force && same && !systemIsBoth
+                                && which == (FLAG_SYSTEM | FLAG_LOCK);
+                    }
 
                     if (which == (FLAG_SYSTEM | FLAG_LOCK)) {
                         if (DEBUG) {
@@ -3166,6 +3198,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         if (shouldNotifyColors) {
             notifyWallpaperColorsChanged(newWallpaper);
         }
+        if (shouldNotifyLockscreenColors) {
+            notifyWallpaperColorsChanged(newWallpaper, FLAG_LOCK);
+        }
+
         return bindSuccess;
     }
 

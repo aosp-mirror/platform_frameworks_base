@@ -17,6 +17,8 @@
 package com.android.systemui.mediaprojection.appselector.data
 
 import android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE
+import android.content.pm.UserInfo
+import android.os.UserManager
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.kotlin.getOrNull
@@ -41,7 +43,8 @@ constructor(
     @Background private val coroutineDispatcher: CoroutineDispatcher,
     @Background private val backgroundExecutor: Executor,
     private val recentTasks: Optional<RecentTasks>,
-    private val userTracker: UserTracker
+    private val userTracker: UserTracker,
+    private val userManager: UserManager,
 ) : RecentTaskListProvider {
 
     private val recents by lazy { recentTasks.getOrNull() }
@@ -65,7 +68,8 @@ constructor(
                         it.topActivity,
                         it.baseIntent?.component,
                         it.taskDescription?.backgroundColor,
-                        isForegroundTask = it.taskId in foregroundTaskIds && it.isVisible
+                        isForegroundTask = it.taskId in foregroundTaskIds && it.isVisible,
+                        userType = userManager.getUserInfo(it.userId).toUserType(),
                     )
                 }
         }
@@ -80,5 +84,16 @@ constructor(
             ) { tasks ->
                 continuation.resume(tasks)
             }
+        }
+
+    private fun UserInfo.toUserType(): RecentTask.UserType =
+        if (isCloneProfile) {
+            RecentTask.UserType.CLONED
+        } else if (isManagedProfile) {
+            RecentTask.UserType.WORK
+        } else if (isPrivateProfile) {
+            RecentTask.UserType.PRIVATE
+        } else {
+            RecentTask.UserType.STANDARD
         }
 }

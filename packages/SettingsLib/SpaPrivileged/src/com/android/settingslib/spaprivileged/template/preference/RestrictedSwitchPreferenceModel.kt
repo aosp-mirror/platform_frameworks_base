@@ -52,6 +52,8 @@ internal class RestrictedSwitchPreferenceModel(
         checked = model.checked,
     )
 
+    override val icon = model.icon
+
     override val checked = when (restrictedMode) {
         null -> ({ null })
         is NoRestricted -> model.checked
