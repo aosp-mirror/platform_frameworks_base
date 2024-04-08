@@ -948,6 +948,9 @@ public class DisplayManagerServiceTest {
         final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
                 VIRTUAL_DISPLAY_NAME, width, height, dpi);
         builder.setUniqueId(uniqueId);
+        builder.setFlags(VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR);
+        when(mContext.checkCallingPermission(CAPTURE_VIDEO_OUTPUT))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
         final int firstDisplayId = binderService.createVirtualDisplay(builder.build(),
                 mMockAppToken /* callback */, null /* projection */, PACKAGE_NAME);
         verify(mMockProjectionService, never()).setContentRecordingSession(any(),
@@ -960,6 +963,7 @@ public class DisplayManagerServiceTest {
                 VIRTUAL_DISPLAY_NAME, width, height, dpi).setUniqueId(uniqueId2);
         builder2.setUniqueId(uniqueId2);
         builder2.setDisplayIdToMirror(firstDisplayId);
+        builder2.setFlags(VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR);
         final int secondDisplayId = binderService.createVirtualDisplay(builder2.build(),
                 mMockAppToken2 /* callback */, null /* projection */,
                 PACKAGE_NAME);
