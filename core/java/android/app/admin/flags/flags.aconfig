@@ -195,6 +195,15 @@ flag {
   }
 }
 
+flag {
+  name: "power_exemption_bg_usage_fix"
+  namespace: "enterprise"
+  description: "Ensure aps with EXEMPT_FROM_POWER_RESTRICTIONS can execute in the background"
+  bug: "333379020"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
 
 flag {
   name: "esim_management_ux_enabled"
