@@ -49,6 +49,13 @@ flag {
 }
 
 flag {
+    name: "enable_a11y_checker_logging"
+    namespace: "accessibility"
+    description: "Whether to identify and log app a11y issues."
+    bug: "325420273"
+}
+
+flag {
     name: "enable_magnification_joystick"
     namespace: "accessibility"
     description: "Whether to enable joystick controls for magnification"
