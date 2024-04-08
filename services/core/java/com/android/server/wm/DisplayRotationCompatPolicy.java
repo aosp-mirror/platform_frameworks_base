@@ -71,7 +71,7 @@ import java.util.Set;
  * R.bool.config_isWindowManagerCameraCompatTreatmentEnabled} is {@code true}.
  */
  // TODO(b/261444714): Consider moving Camera-specific logic outside of the WM Core path
-final class DisplayRotationCompatPolicy {
+class DisplayRotationCompatPolicy {
 
     // Delay for updating display rotation after Camera connection is closed. Needed to avoid
     // rotation flickering when an app is flipping between front and rear cameras or when size
@@ -342,7 +342,8 @@ final class DisplayRotationCompatPolicy {
 
     boolean isActivityEligibleForOrientationOverride(@NonNull ActivityRecord activity) {
         return isTreatmentEnabledForDisplay()
-                && isCameraActive(activity, /* mustBeFullscreen */ true);
+                && isCameraActive(activity, /* mustBeFullscreen */ true)
+                && activity.mLetterboxUiController.shouldForceRotateForCameraCompat();
     }
 
 
@@ -360,6 +361,13 @@ final class DisplayRotationCompatPolicy {
         return isTreatmentEnabledForActivity(activity, /* mustBeFullscreen */ true);
     }
 
+    boolean isCameraActive(@NonNull ActivityRecord activity, boolean mustBeFullscreen) {
+        // Checking windowing mode on activity level because we don't want to
+        // apply treatment in case of activity embedding.
+        return (!mustBeFullscreen || !activity.inMultiWindowMode())
+                && mCameraIdPackageBiMap.containsPackageName(activity.packageName);
+    }
+
     private boolean isTreatmentEnabledForActivity(@Nullable ActivityRecord activity,
             boolean mustBeFullscreen) {
         return activity != null && isCameraActive(activity, mustBeFullscreen)
@@ -367,14 +375,7 @@ final class DisplayRotationCompatPolicy {
                 // "locked" and "nosensor" values are often used by camera apps that can't
                 // handle dynamic changes so we shouldn't force rotate them.
                 && activity.getOverrideOrientation() != SCREEN_ORIENTATION_NOSENSOR
-                && activity.getOverrideOrientation() != SCREEN_ORIENTATION_LOCKED;
-    }
-
-    private boolean isCameraActive(@NonNull ActivityRecord activity, boolean mustBeFullscreen) {
-        // Checking windowing mode on activity level because we don't want to
-        // apply treatment in case of activity embedding.
-        return (!mustBeFullscreen || !activity.inMultiWindowMode())
-                && mCameraIdPackageBiMap.containsPackageName(activity.packageName)
+                && activity.getOverrideOrientation() != SCREEN_ORIENTATION_LOCKED
                 && activity.mLetterboxUiController.shouldForceRotateForCameraCompat();
     }
 
