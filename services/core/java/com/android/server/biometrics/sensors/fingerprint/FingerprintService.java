@@ -1136,7 +1136,7 @@ public class FingerprintService extends SystemService {
         final String virtualInstance = "virtual";
         final boolean isVirtualHalPresent =
                 fingerprintSensorConfigurations.doesInstanceExist(virtualInstance);
-        if (Utils.isVirtualEnabled(getContext())) {
+        if (Utils.isFingerprintVirtualEnabled(getContext())) {
             if (isVirtualHalPresent) {
                 return new Pair<>(virtualInstance,
                         fingerprintSensorConfigurations.getSensorPropForInstance(virtualInstance));
@@ -1169,7 +1169,7 @@ public class FingerprintService extends SystemService {
         }
 
         final int virtualAt = aidlInstances.indexOf("virtual");
-        if (Utils.isVirtualEnabled(getContext())) {
+        if (Utils.isFingerprintVirtualEnabled(getContext())) {
             if (virtualAt != -1) {
                 //only virtual instance should be returned
                 Slog.i(TAG, "virtual hal is used");
@@ -1295,7 +1295,7 @@ public class FingerprintService extends SystemService {
 
     void syncEnrollmentsNow() {
         Utils.checkPermissionOrShell(getContext(), MANAGE_FINGERPRINT);
-        if (Utils.isVirtualEnabled(getContext())) {
+        if (Utils.isFingerprintVirtualEnabled(getContext())) {
             Slog.i(TAG, "Sync virtual enrollments");
             final int userId = ActivityManager.getCurrentUser();
             final CountDownLatch latch = new CountDownLatch(mRegistry.getProviders().size());
@@ -1324,7 +1324,7 @@ public class FingerprintService extends SystemService {
     }
 
     void simulateVhalFingerDown() {
-        if (Utils.isVirtualEnabled(getContext())) {
+        if (Utils.isFingerprintVirtualEnabled(getContext())) {
             Slog.i(TAG, "Simulate virtual HAL finger down event");
             final Pair<Integer, ServiceProvider> provider = mRegistry.getSingleProvider();
             if (provider != null) {
