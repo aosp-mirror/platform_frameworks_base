@@ -116,6 +116,8 @@ android_test {
         ":BinderDeathRecipientHelperApp1",
         ":BinderDeathRecipientHelperApp2",
         ":com.android.cts.helpers.aosp",
+        ":BinderProxyCountingTestApp",
+        ":BinderProxyCountingTestService",
     ],
 }
 
