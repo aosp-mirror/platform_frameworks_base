@@ -54,9 +54,9 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexScenePicker
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.TransitionState
 import com.android.compose.animation.scene.ValueKey
 import com.android.compose.animation.scene.animateElementFloatAsState
-import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.settingslib.Utils
 import com.android.systemui.battery.BatteryMeterView
@@ -87,10 +87,6 @@ object ShadeHeader {
         val ShadeCarrierGroup = ElementKey("ShadeCarrierGroup")
     }
 
-    object Keys {
-        val transitionProgress = ValueKey("ShadeHeaderTransitionProgress")
-    }
-
     object Values {
         val ClockScale = ValueKey("ShadeHeaderClockScale")
     }
@@ -119,19 +115,17 @@ fun SceneScope.CollapsedShadeHeader(
         return
     }
 
-    val formatProgress =
-        animateSceneFloatAsState(0f, ShadeHeader.Keys.transitionProgress)
-            .unsafeCompositionState(initialValue = 0f)
-
     val cutoutWidth = LocalDisplayCutout.current.width()
     val cutoutLocation = LocalDisplayCutout.current.location
 
     val useExpandedFormat by
-        remember(formatProgress) {
+        remember(cutoutLocation) {
             derivedStateOf {
-                cutoutLocation != CutoutLocation.CENTER || formatProgress.value > 0.5f
+                cutoutLocation != CutoutLocation.CENTER ||
+                    shouldUseExpandedFormat(layoutState.transitionState)
             }
         }
+
     val isPrivacyChipVisible by viewModel.isPrivacyChipVisible.collectAsState()
 
     // This layout assumes it is globally positioned at (0, 0) and is the
@@ -207,7 +201,7 @@ fun SceneScope.CollapsedShadeHeader(
 
         val screenWidth = constraints.maxWidth
         val cutoutWidthPx = cutoutWidth.roundToPx()
-        val height = ShadeHeader.Dimensions.CollapsedHeight.roundToPx()
+        val height = CollapsedHeight.roundToPx()
         val childConstraints = Constraints.fixed((screenWidth - cutoutWidthPx) / 2, height)
 
         val startMeasurable = measurables[0][0]
@@ -261,11 +255,10 @@ fun SceneScope.ExpandedShadeHeader(
         return
     }
 
-    val formatProgress =
-        animateSceneFloatAsState(1f, ShadeHeader.Keys.transitionProgress)
-            .unsafeCompositionState(initialValue = 1f)
-    val useExpandedFormat by
-        remember(formatProgress) { derivedStateOf { formatProgress.value > 0.5f } }
+    val useExpandedFormat by remember {
+        derivedStateOf { shouldUseExpandedFormat(layoutState.transitionState) }
+    }
+
     val isPrivacyChipVisible by viewModel.isPrivacyChipVisible.collectAsState()
 
     Box(modifier = modifier) {
@@ -529,4 +522,16 @@ private fun SceneScope.PrivacyChip(
         update = { it.privacyList = privacyList },
         modifier = modifier.element(ShadeHeader.Elements.PrivacyChip),
     )
+}
+
+private fun shouldUseExpandedFormat(state: TransitionState): Boolean {
+    return when (state) {
+        is TransitionState.Idle -> {
+            state.currentScene == Scenes.QuickSettings
+        }
+        is TransitionState.Transition -> {
+            (state.isTransitioning(Scenes.Shade, Scenes.QuickSettings) && state.progress >= 0.5) ||
+                (state.isTransitioning(Scenes.QuickSettings, Scenes.Shade) && state.progress < 0.5)
+        }
+    }
 }
