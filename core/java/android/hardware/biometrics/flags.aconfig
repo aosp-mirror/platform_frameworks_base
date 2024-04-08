@@ -1,5 +1,4 @@
 package: "android.hardware.biometrics"
-container: "system"
 
 flag {
     name: "last_authentication_time"

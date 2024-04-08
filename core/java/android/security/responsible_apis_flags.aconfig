@@ -1,5 +1,4 @@
 package: "android.security"
-container: "system"
 
 flag {
     name: "extend_ecm_to_all_settings"

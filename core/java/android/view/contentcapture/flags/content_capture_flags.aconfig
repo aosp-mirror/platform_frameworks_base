@@ -1,5 +1,4 @@
 package: "android.view.contentcapture.flags"
-container: "system"
 
 flag {
     name: "run_on_background_thread_enabled"

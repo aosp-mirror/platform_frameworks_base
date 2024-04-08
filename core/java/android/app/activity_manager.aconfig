@@ -1,5 +1,4 @@
 package: "android.app"
-container: "system"
 
 flag {
      namespace: "system_performance"

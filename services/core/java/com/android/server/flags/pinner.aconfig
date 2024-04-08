@@ -1,5 +1,4 @@
 package: "com.android.server.flags"
-container: "system"
 
 flag {
     name: "pin_webview"

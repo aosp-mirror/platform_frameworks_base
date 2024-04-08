@@ -1,5 +1,4 @@
 package: "android.os.vibrator"
-container: "system"
 
 flag {
     namespace: "haptics"

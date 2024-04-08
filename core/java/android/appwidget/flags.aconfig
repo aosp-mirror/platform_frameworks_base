@@ -1,5 +1,4 @@
 package: "android.appwidget.flags"
-container: "system"
 
 flag {
   name: "generated_previews"

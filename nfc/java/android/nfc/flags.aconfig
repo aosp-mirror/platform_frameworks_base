@@ -1,5 +1,4 @@
 package: "android.nfc"
-container: "system"
 
 flag {
     name: "enable_nfc_mainline"

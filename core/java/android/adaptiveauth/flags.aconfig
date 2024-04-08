@@ -1,5 +1,4 @@
 package: "android.adaptiveauth"
-container: "system"
 
 flag {
   name: "enable_adaptive_auth"
