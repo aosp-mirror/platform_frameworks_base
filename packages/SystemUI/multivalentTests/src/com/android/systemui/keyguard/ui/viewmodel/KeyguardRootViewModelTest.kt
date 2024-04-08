@@ -426,4 +426,23 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
             shadeRepository.setQsExpansion(0.5f)
             assertThat(alpha).isEqualTo(0f)
         }
+
+    @Test
+    fun alpha_idleOnDream_isZero() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.alpha(viewState))
+            assertThat(alpha).isEqualTo(1f)
+
+            // Go to GONE state
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.DREAMING,
+                testScope = testScope,
+            )
+            assertThat(alpha).isEqualTo(0f)
+
+            // Try pulling down shade and ensure the value doesn't change
+            shadeRepository.setQsExpansion(0.5f)
+            assertThat(alpha).isEqualTo(0f)
+        }
 }

@@ -185,8 +185,12 @@ constructor(
                     .transitionValue(OCCLUDED)
                     .map { it == 1f }
                     .onStart { emit(false) },
-            ) { isIdleOnCommunal, isGone, isOccluded ->
-                isIdleOnCommunal || isGone || isOccluded
+                keyguardTransitionInteractor
+                    .transitionValue(KeyguardState.DREAMING)
+                    .map { it == 1f }
+                    .onStart { emit(false) },
+            ) { isIdleOnCommunal, isGone, isOccluded, isDreaming ->
+                isIdleOnCommunal || isGone || isOccluded || isDreaming
             }
             .distinctUntilChanged()
 
