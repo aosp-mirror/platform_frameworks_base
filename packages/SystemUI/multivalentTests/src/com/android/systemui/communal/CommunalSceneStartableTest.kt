@@ -32,7 +32,9 @@ import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.statusbar.notificationShadeWindowController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
@@ -68,8 +70,10 @@ class CommunalSceneStartableTest : SysuiTestCase() {
                         keyguardTransitionInteractor = keyguardTransitionInteractor,
                         keyguardInteractor = keyguardInteractor,
                         systemSettings = fakeSettings,
+                        notificationShadeWindowController = notificationShadeWindowController,
                         applicationScope = applicationCoroutineScope,
                         bgScope = applicationCoroutineScope,
+                        mainDispatcher = testDispatcher,
                     )
                     .apply { start() }
 

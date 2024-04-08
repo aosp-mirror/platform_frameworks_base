@@ -16,6 +16,8 @@
 
 package com.android.systemui.dreams;
 
+import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
@@ -28,6 +30,7 @@ import static org.mockito.Mockito.when;
 import android.content.res.Resources;
 import android.graphics.Region;
 import android.os.Handler;
+import android.testing.TestableLooper.RunWithLooper;
 import android.view.AttachedSurfaceControl;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
@@ -43,6 +46,7 @@ import com.android.systemui.ambient.touch.scrim.BouncerlessScrimController;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
 import com.android.systemui.complication.ComplicationHostViewController;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.statusbar.BlurUtils;
 
 import org.junit.Before;
@@ -52,8 +56,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import kotlinx.coroutines.CoroutineDispatcher;
+
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@RunWithLooper(setAsMainLooper = true)
 public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     private static final int MAX_BURN_IN_OFFSET = 20;
     private static final long BURN_IN_PROTECTION_UPDATE_INTERVAL = 10;
@@ -87,6 +94,9 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     Handler mHandler;
 
     @Mock
+    CoroutineDispatcher mDispatcher;
+
+    @Mock
     BlurUtils mBlurUtils;
 
     @Mock
@@ -103,6 +113,8 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
 
     @Mock
     DreamOverlayStateController mStateController;
+    @Mock
+    KeyguardTransitionInteractor mKeyguardTransitionInteractor;
 
     DreamOverlayContainerViewController mController;
 
@@ -115,6 +127,7 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
         when(mDreamOverlayContainerView.getViewRootImpl()).thenReturn(mViewRoot);
         when(mDreamOverlayContainerView.getRootSurfaceControl())
                 .thenReturn(mAttachedSurfaceControl);
+        when(mKeyguardTransitionInteractor.isFinishedInStateWhere(any())).thenReturn(emptyFlow());
 
         mController = new DreamOverlayContainerViewController(
                 mDreamOverlayContainerView,
@@ -124,6 +137,7 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
                 mLowLightTransitionCoordinator,
                 mBlurUtils,
                 mHandler,
+                mDispatcher,
                 mResources,
                 MAX_BURN_IN_OFFSET,
                 BURN_IN_PROTECTION_UPDATE_INTERVAL,
@@ -131,7 +145,8 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
                 mPrimaryBouncerCallbackInteractor,
                 mAnimationsController,
                 mStateController,
-                mBouncerlessScrimController);
+                mBouncerlessScrimController,
+                mKeyguardTransitionInteractor);
     }
 
     @Test

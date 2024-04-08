@@ -17,6 +17,7 @@
 package com.android.systemui.communal
 
 import android.provider.Settings
+import android.service.dreams.Flags.dreamTracksFocus
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.CoreStartable
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
@@ -25,11 +26,13 @@ import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dock.DockManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.util.kotlin.emitOnStart
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
@@ -37,15 +40,18 @@ import com.android.systemui.util.settings.SystemSettings
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * A [CoreStartable] responsible for automatically navigating between communal scenes when certain
@@ -61,8 +67,10 @@ constructor(
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val keyguardInteractor: KeyguardInteractor,
     private val systemSettings: SystemSettings,
+    private val notificationShadeWindowController: NotificationShadeWindowController,
     @Application private val applicationScope: CoroutineScope,
     @Background private val bgScope: CoroutineScope,
+    @Main private val mainDispatcher: CoroutineDispatcher,
 ) : CoreStartable {
     private var screenTimeout: Int = DEFAULT_SCREEN_TIMEOUT
 
@@ -133,6 +141,16 @@ constructor(
                         communalInteractor.changeScene(CommunalScenes.Blank)
                     }
                 }
+        }
+
+        if (dreamTracksFocus()) {
+            bgScope.launch {
+                communalInteractor.isIdleOnCommunal.collectLatest {
+                    withContext(mainDispatcher) {
+                        notificationShadeWindowController.setGlanceableHubShowing(it)
+                    }
+                }
+            }
         }
     }
 
