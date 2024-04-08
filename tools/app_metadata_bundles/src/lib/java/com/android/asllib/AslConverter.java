@@ -59,7 +59,8 @@ public class AslConverter {
         switch (format) {
             case HUMAN_READABLE:
                 Element appMetadataBundles =
-                        XmlUtils.getSingleElement(document, XmlUtils.HR_TAG_APP_METADATA_BUNDLES);
+                        XmlUtils.getSingleChildElement(
+                                document, XmlUtils.HR_TAG_APP_METADATA_BUNDLES, true);
 
                 return new AndroidSafetyLabelFactory()
                         .createFromHrElements(XmlUtils.listOf(appMetadataBundles));

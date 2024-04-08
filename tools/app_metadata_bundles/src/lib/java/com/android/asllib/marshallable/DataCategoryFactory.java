@@ -50,4 +50,31 @@ public class DataCategoryFactory implements AslMarshallableFactory<DataCategory>
 
         return new DataCategory(categoryName, dataTypeMap);
     }
+
+    /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
+    @Override
+    public DataCategory createFromOdElements(List<Element> elements) throws MalformedXmlException {
+        Element dataCategoryEle = XmlUtils.getSingleElement(elements);
+        Map<String, DataType> dataTypeMap = new LinkedHashMap<String, DataType>();
+        String categoryName = dataCategoryEle.getAttribute(XmlUtils.OD_ATTR_NAME);
+        var odDataTypes = XmlUtils.asElementList(dataCategoryEle.getChildNodes());
+        for (Element odDataTypeEle : odDataTypes) {
+            String dataTypeName = odDataTypeEle.getAttribute(XmlUtils.OD_ATTR_NAME);
+            if (!DataTypeConstants.getValidDataTypes().containsKey(categoryName)) {
+                throw new MalformedXmlException(
+                        String.format("Unrecognized data category %s", categoryName));
+            }
+            if (!DataTypeConstants.getValidDataTypes().get(categoryName).contains(dataTypeName)) {
+                throw new MalformedXmlException(
+                        String.format(
+                                "Unrecognized data type name %s for category %s",
+                                dataTypeName, categoryName));
+            }
+            dataTypeMap.put(
+                    dataTypeName,
+                    new DataTypeFactory().createFromOdElements(XmlUtils.listOf(odDataTypeEle)));
+        }
+
+        return new DataCategory(categoryName, dataTypeMap);
+    }
 }

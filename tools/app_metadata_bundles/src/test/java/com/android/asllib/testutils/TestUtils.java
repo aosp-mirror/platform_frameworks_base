@@ -26,6 +26,8 @@ import com.android.asllib.util.XmlUtils;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
@@ -72,7 +74,7 @@ public class TestUtils {
                             .findFirst()
                             .get()
                             .getTagName();
-            return XmlUtils.asElementList(root.getElementsByTagName(tagName));
+            return XmlUtils.getChildrenByTagName(root, tagName);
         } else {
             return List.of(root);
         }
@@ -105,7 +107,7 @@ public class TestUtils {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         Document document = factory.newDocumentBuilder().parse(stream);
-
+        stripEmptyElements(document);
         return docToStr(document, omitXmlDeclaration);
     }
 
@@ -125,6 +127,17 @@ public class TestUtils {
                 });
     }
 
+    /** Helper for testing on-device to human-readable conversion expecting exception */
+    public static <T extends AslMarshallable> void odToHrExpectException(
+            AslMarshallableFactory<T> factory, String odFolderPath, String fileName) {
+        assertThrows(
+                MalformedXmlException.class,
+                () -> {
+                    factory.createFromOdElements(
+                            TestUtils.getElementsFromResource(Paths.get(odFolderPath, fileName)));
+                });
+    }
+
     /** Helper for testing human-readable to on-device conversion */
     public static <T extends AslMarshallable> void testHrToOd(
             Document doc,
@@ -133,20 +146,71 @@ public class TestUtils {
             String odFolderPath,
             String fileName)
             throws Exception {
+        testFormatToFormat(doc, factory, hrFolderPath, odFolderPath, fileName, true);
+    }
+
+    /** Helper for testing on-device to human-readable conversion */
+    public static <T extends AslMarshallable> void testOdToHr(
+            Document doc,
+            AslMarshallableFactory<T> factory,
+            String odFolderPath,
+            String hrFolderPath,
+            String fileName)
+            throws Exception {
+        testFormatToFormat(doc, factory, odFolderPath, hrFolderPath, fileName, false);
+    }
+
+    /** Helper for testing format to format conversion */
+    private static <T extends AslMarshallable> void testFormatToFormat(
+            Document doc,
+            AslMarshallableFactory<T> factory,
+            String inFolderPath,
+            String outFolderPath,
+            String fileName,
+            boolean hrToOd)
+            throws Exception {
         AslMarshallable marshallable =
-                factory.createFromHrElements(
-                        TestUtils.getElementsFromResource(Paths.get(hrFolderPath, fileName)));
+                hrToOd
+                        ? factory.createFromHrElements(
+                                TestUtils.getElementsFromResource(
+                                        Paths.get(inFolderPath, fileName)))
+                        : factory.createFromOdElements(
+                                TestUtils.getElementsFromResource(
+                                        Paths.get(inFolderPath, fileName)));
 
-        for (var child : marshallable.toOdDomElements(doc)) {
-            doc.appendChild(child);
+        List<Element> elements =
+                hrToOd ? marshallable.toOdDomElements(doc) : marshallable.toHrDomElements(doc);
+        if (elements.isEmpty()) {
+            throw new IllegalStateException("elements was empty.");
+        } else if (elements.size() == 1) {
+            doc.appendChild(elements.get(0));
+        } else {
+            Element root = doc.createElement(TestUtils.HOLDER_TAG_NAME);
+            for (var child : elements) {
+                root.appendChild(child);
+            }
+            doc.appendChild(root);
         }
-        String converted = TestUtils.docToStr(doc, true);
-        System.out.println("converted: " + converted);
+        String converted = TestUtils.getFormattedXml(TestUtils.docToStr(doc, true), true);
+        System.out.println("Converted: " + converted);
+        String expectedOutContents =
+                TestUtils.getFormattedXml(
+                        TestUtils.readStrFromResource(Paths.get(outFolderPath, fileName)), true);
+        System.out.println("Expected: " + expectedOutContents);
+        assertEquals(expectedOutContents, converted);
+    }
 
-        String expectedOdContents =
-                TestUtils.readStrFromResource(Paths.get(odFolderPath, fileName));
-        assertEquals(
-                TestUtils.getFormattedXml(expectedOdContents, true),
-                TestUtils.getFormattedXml(converted, true));
+    private static void stripEmptyElements(Node node) {
+        NodeList children = node.getChildNodes();
+        for (int i = 0; i < children.getLength(); ++i) {
+            Node child = children.item(i);
+            if (child.getNodeType() == Node.TEXT_NODE) {
+                if (child.getTextContent().trim().length() == 0) {
+                    child.getParentNode().removeChild(child);
+                    i--;
+                }
+            }
+            stripEmptyElements(child);
+        }
     }
 }

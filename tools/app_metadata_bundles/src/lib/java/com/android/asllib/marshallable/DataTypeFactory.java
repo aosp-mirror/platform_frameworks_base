@@ -51,4 +51,31 @@ public class DataTypeFactory implements AslMarshallableFactory<DataType> {
         return new DataType(
                 dataTypeName, purposes, isCollectionOptional, isSharingOptional, ephemeral);
     }
+
+    /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
+    @Override
+    public DataType createFromOdElements(List<Element> elements) throws MalformedXmlException {
+        Element odDataTypeEle = XmlUtils.getSingleElement(elements);
+        String dataTypeName = odDataTypeEle.getAttribute(XmlUtils.OD_ATTR_NAME);
+        List<Integer> purposeInts =
+                XmlUtils.getOdIntArray(odDataTypeEle, XmlUtils.OD_NAME_PURPOSES, true);
+        List<DataType.Purpose> purposes =
+                purposeInts.stream().map(DataType.Purpose::forValue).collect(Collectors.toList());
+        if (purposes.isEmpty()) {
+            throw new MalformedXmlException(String.format("Found no purpose in: %s", dataTypeName));
+        }
+        if (new HashSet<>(purposes).size() != purposes.size()) {
+            throw new MalformedXmlException(
+                    String.format("Found non-unique purposes in: %s", dataTypeName));
+        }
+        Boolean isCollectionOptional =
+                XmlUtils.getOdBoolEle(
+                        odDataTypeEle, XmlUtils.OD_NAME_IS_COLLECTION_OPTIONAL, false);
+        Boolean isSharingOptional =
+                XmlUtils.getOdBoolEle(odDataTypeEle, XmlUtils.OD_NAME_IS_SHARING_OPTIONAL, false);
+        Boolean ephemeral = XmlUtils.getOdBoolEle(odDataTypeEle, XmlUtils.OD_NAME_EPHEMERAL, false);
+
+        return new DataType(
+                dataTypeName, purposes, isCollectionOptional, isSharingOptional, ephemeral);
+    }
 }

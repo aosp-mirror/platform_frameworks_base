@@ -1,0 +1,11 @@
+<data-labels>
+    <data-shared dataCategory="app_performance"
+        dataType="crash_logs"
+        purposes="analytics" />
+    <data-shared dataCategory="app_performance"
+        dataType="performance_diagnostics"
+        purposes="analytics" />
+    <data-shared dataCategory="app_performance"
+        dataType="other"
+        purposes="analytics" />
+</data-labels>
