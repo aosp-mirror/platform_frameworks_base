@@ -34,6 +34,8 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.power.data.repository.fakePowerRepository
+import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.shadeRepository
@@ -43,6 +45,7 @@ import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificati
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
+import kotlin.math.pow
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.BeforeClass
@@ -57,22 +60,26 @@ import platform.test.runner.parameterized.Parameters
 class LockscreenSceneViewModelTest : SysuiTestCase() {
 
     companion object {
+        private const val parameterCount = 6
+
         @Parameters(
             name =
                 "canSwipeToEnter={0}, downWithTwoPointers={1}, downFromEdge={2}," +
-                    " isSingleShade={3}, isCommunalAvailable={4}"
+                    " isSingleShade={3}, isCommunalAvailable={4}, isShadeTouchable={5}"
         )
         @JvmStatic
         fun combinations() = buildList {
-            repeat(32) { combination ->
+            repeat(2f.pow(parameterCount).toInt()) { combination ->
                 add(
                     arrayOf(
-                        /* canSwipeToEnter= */ combination and 1 != 0,
-                        /* downWithTwoPointers= */ combination and 2 != 0,
-                        /* downFromEdge= */ combination and 4 != 0,
-                        /* isSingleShade= */ combination and 8 != 0,
-                        /* isCommunalAvailable= */ combination and 16 != 0,
-                    )
+                            /* canSwipeToEnter= */ combination and 1 != 0,
+                            /* downWithTwoPointers= */ combination and 2 != 0,
+                            /* downFromEdge= */ combination and 4 != 0,
+                            /* isSingleShade= */ combination and 8 != 0,
+                            /* isCommunalAvailable= */ combination and 16 != 0,
+                            /* isShadeTouchable= */ combination and 32 != 0,
+                        )
+                        .also { check(it.size == parameterCount) }
                 )
             }
         }
@@ -82,8 +89,15 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
         fun setUp() {
             val combinationStrings =
                 combinations().map { array ->
-                    check(array.size == 5)
-                    "${array[4]},${array[3]},${array[2]},${array[1]},${array[0]}"
+                    check(array.size == parameterCount)
+                    buildString {
+                        ((parameterCount - 1) downTo 0).forEach { index ->
+                            append("${array[index]}")
+                            if (index > 0) {
+                                append(",")
+                            }
+                        }
+                    }
                 }
             val uniqueCombinations = combinationStrings.toSet()
             assertThat(combinationStrings).hasSize(uniqueCombinations.size)
@@ -92,8 +106,35 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
         private fun expectedDownDestination(
             downFromEdge: Boolean,
             isSingleShade: Boolean,
-        ): SceneKey {
-            return if (downFromEdge && isSingleShade) Scenes.QuickSettings else Scenes.Shade
+            isShadeTouchable: Boolean,
+        ): SceneKey? {
+            return when {
+                !isShadeTouchable -> null
+                downFromEdge && isSingleShade -> Scenes.QuickSettings
+                else -> Scenes.Shade
+            }
+        }
+
+        private fun expectedUpDestination(
+            canSwipeToEnter: Boolean,
+            isShadeTouchable: Boolean,
+        ): SceneKey? {
+            return when {
+                !isShadeTouchable -> null
+                canSwipeToEnter -> Scenes.Gone
+                else -> Scenes.Bouncer
+            }
+        }
+
+        private fun expectedLeftDestination(
+            isCommunalAvailable: Boolean,
+            isShadeTouchable: Boolean,
+        ): SceneKey? {
+            return when {
+                !isShadeTouchable -> null
+                isCommunalAvailable -> Scenes.Communal
+                else -> null
+            }
         }
     }
 
@@ -106,6 +147,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     @JvmField @Parameter(2) var downFromEdge: Boolean = false
     @JvmField @Parameter(3) var isSingleShade: Boolean = true
     @JvmField @Parameter(4) var isCommunalAvailable: Boolean = false
+    @JvmField @Parameter(5) var isShadeTouchable: Boolean = false
 
     private val underTest by lazy { createLockscreenSceneViewModel() }
 
@@ -130,6 +172,14 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
                 }
             )
             kosmos.setCommunalAvailable(isCommunalAvailable)
+            kosmos.fakePowerRepository.updateWakefulness(
+                rawState =
+                    if (isShadeTouchable) {
+                        WakefulnessState.AWAKE
+                    } else {
+                        WakefulnessState.ASLEEP
+                    },
+            )
 
             val destinationScenes by collectLastValue(underTest.destinationScenes)
 
@@ -148,14 +198,25 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
                     expectedDownDestination(
                         downFromEdge = downFromEdge,
                         isSingleShade = isSingleShade,
+                        isShadeTouchable = isShadeTouchable,
                     )
                 )
 
             assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.toScene)
-                .isEqualTo(if (canSwipeToEnter) Scenes.Gone else Scenes.Bouncer)
+                .isEqualTo(
+                    expectedUpDestination(
+                        canSwipeToEnter = canSwipeToEnter,
+                        isShadeTouchable = isShadeTouchable,
+                    )
+                )
 
             assertThat(destinationScenes?.get(Swipe(SwipeDirection.Left))?.toScene)
-                .isEqualTo(Scenes.Communal.takeIf { isCommunalAvailable })
+                .isEqualTo(
+                    expectedLeftDestination(
+                        isCommunalAvailable = isCommunalAvailable,
+                        isShadeTouchable = isShadeTouchable,
+                    )
+                )
         }
 
     private fun createLockscreenSceneViewModel(): LockscreenSceneViewModel {
