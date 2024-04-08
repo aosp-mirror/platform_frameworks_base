@@ -184,6 +184,16 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
                         throwInvalidBugreportFileForCallerException(
                                 bugreportFile, callingInfo.second);
                     }
+
+                    boolean keepBugreportOnRetrieval = false;
+                    if (onboardingBugreportV2Enabled()) {
+                        keepBugreportOnRetrieval = mBugreportFilesToPersist.contains(
+                                bugreportFile);
+                    }
+
+                    if (!keepBugreportOnRetrieval) {
+                        bugreportFilesForUid.remove(bugreportFile);
+                    }
                 } else {
                     ArraySet<String> bugreportFilesForCaller = mBugreportFiles.get(callingInfo);
                     if (bugreportFilesForCaller != null
