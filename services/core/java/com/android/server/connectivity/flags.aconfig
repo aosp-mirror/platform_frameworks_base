@@ -1,0 +1,8 @@
+package: "com.android.server.connectivity"
+
+flag {
+    name: "replace_vpn_profile_store"
+    namespace: "android_core_networking"
+    description: "This flag controls the usage of VpnBlobStore to replace LegacyVpnProfileStore."
+    bug: "307903113"
+}
