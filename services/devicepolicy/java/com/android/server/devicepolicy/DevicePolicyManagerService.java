@@ -885,10 +885,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             "enable_permission_based_access";
     private static final boolean DEFAULT_VALUE_PERMISSION_BASED_ACCESS_FLAG = false;
 
-    // TODO(b/266831522) remove the flag after rollout.
-    private static final String APPLICATION_EXEMPTIONS_FLAG = "application_exemptions";
-    private static final boolean DEFAULT_APPLICATION_EXEMPTIONS_FLAG = true;
-
     private static final int RETRY_COPY_ACCOUNT_ATTEMPTS = 3;
 
     /**
@@ -3686,26 +3682,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         startOwnerService(userId, "start-user");
         mDevicePolicyEngine.handleStartUser(userId);
-    }
-
-    void pushUserControlDisabledPackagesLocked(int userId) {
-        final int targetUserId;
-        final ActiveAdmin owner;
-        if (getDeviceOwnerUserIdUncheckedLocked() == userId) {
-            owner = getDeviceOwnerAdminLocked();
-            targetUserId = UserHandle.USER_ALL;
-        } else {
-            owner = getProfileOwnerAdminLocked(userId);
-            targetUserId = userId;
-        }
-
-        List<String> protectedPackages = (owner == null || owner.protectedPackages == null)
-                ? null : owner.protectedPackages;
-        mInjector.binderWithCleanCallingIdentity(() ->
-                mInjector.getPackageManagerInternal().setOwnerProtectedPackages(
-                        targetUserId, protectedPackages));
-        mUsageStatsManagerInternal.setAdminProtectedPackages(new ArraySet(protectedPackages),
-                targetUserId);
     }
 
     void handleUnlockUser(int userId) {
@@ -15909,14 +15885,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         @Override
         public boolean isUserOrganizationManaged(@UserIdInt int userHandle) {
             return getDeviceStateCache().isUserOrganizationManaged(userHandle);
-        }
-
-        @Override
-        public boolean isApplicationExemptionsFlagEnabled() {
-            return DeviceConfig.getBoolean(
-                    NAMESPACE_DEVICE_POLICY_MANAGER,
-                    APPLICATION_EXEMPTIONS_FLAG,
-                    DEFAULT_APPLICATION_EXEMPTIONS_FLAG);
         }
 
         @Override
