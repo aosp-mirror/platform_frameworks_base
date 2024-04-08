@@ -206,6 +206,7 @@ java_library_static {
         "service-jobscheduler-deviceidle.flags-aconfig-java",
         "net_flags_lib",
         "core_os_flags_lib",
+        "connectivity_flags_lib",
     ],
     javac_shard_size: 50,
     javacflags: [
