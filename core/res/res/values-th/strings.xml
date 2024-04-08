@@ -1295,12 +1295,12 @@
     <string name="new_app_action" msgid="547772182913269801">"เปิด <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1958903080400806644">"<xliff:g id="OLD_APP">%1$s</xliff:g> จะปิดโดยไม่บันทึก"</string>
     <string name="dump_heap_notification" msgid="5316644945404825032">"<xliff:g id="PROC">%1$s</xliff:g> เกินขีดจำกัดของหน่วยความจำ"</string>
-    <string name="dump_heap_ready_notification" msgid="2302452262927390268">"ฮีพดัมพ์ <xliff:g id="PROC">%1$s</xliff:g> พร้อมแล้ว"</string>
-    <string name="dump_heap_notification_detail" msgid="8431586843001054050">"รวบรวมฮีพดัมพ์แล้ว แตะเพื่อแชร์"</string>
-    <string name="dump_heap_title" msgid="4367128917229233901">"แชร์ฮีพดัมพ์ไหม"</string>
-    <string name="dump_heap_text" msgid="1692649033835719336">"กระบวนการ <xliff:g id="PROC">%1$s</xliff:g> ใช้หน่วยความจำเกินขีดจำกัดขนาด <xliff:g id="SIZE">%2$s</xliff:g> มีฮีพดัมพ์พร้อมให้แชร์กับนักพัฒนาซอฟต์แวร์ โปรดระวัง: ฮีพดัมพ์นี้อาจมีข้อมูลส่วนบุคคลที่มีความละเอียดอ่อนซึ่งแอปพลิเคชันเข้าถึงได้"</string>
-    <string name="dump_heap_system_text" msgid="6805155514925350849">"กระบวนการ <xliff:g id="PROC">%1$s</xliff:g> ใช้หน่วยความจำเกินขีดจำกัดขนาด <xliff:g id="SIZE">%2$s</xliff:g> มีฮีพดัมพ์พร้อมให้แชร์ โปรดระวัง: ฮีพดัมพ์นี้อาจมีข้อมูลส่วนบุคคลที่มีความละเอียดอ่อนซึ่งกระบวนการดังกล่าวเข้าถึงได้ ซึ่งอาจรวมถึงข้อมูลต่างๆ ที่คุณพิมพ์ไว้"</string>
-    <string name="dump_heap_ready_text" msgid="5849618132123045516">"มีฮีพดัมพ์ของกระบวนการ <xliff:g id="PROC">%1$s</xliff:g> พร้อมให้แชร์ โปรดระวัง: ฮีพดัมพ์นี้อาจมีข้อมูลส่วนบุคคลที่มีความละเอียดอ่อนซึ่งกระบวนการดังกล่าวเข้าถึงได้ ซึ่งอาจรวมถึงข้อมูลต่างๆ ที่คุณพิมพ์ไว้"</string>
+    <string name="dump_heap_ready_notification" msgid="2302452262927390268">"ฮีปดัมป์ <xliff:g id="PROC">%1$s</xliff:g> พร้อมแล้ว"</string>
+    <string name="dump_heap_notification_detail" msgid="8431586843001054050">"รวบรวมฮีปดัมป์แล้ว แตะเพื่อแชร์"</string>
+    <string name="dump_heap_title" msgid="4367128917229233901">"แชร์ฮีปดัมป์ไหม"</string>
+    <string name="dump_heap_text" msgid="1692649033835719336">"กระบวนการ <xliff:g id="PROC">%1$s</xliff:g> ใช้หน่วยความจำเกินขีดจำกัดขนาด <xliff:g id="SIZE">%2$s</xliff:g> มีฮีปดัมป์พร้อมให้แชร์กับนักพัฒนาซอฟต์แวร์ โปรดระวัง: ฮีปดัมป์นี้อาจมีข้อมูลส่วนบุคคลที่มีความละเอียดอ่อนซึ่งแอปพลิเคชันเข้าถึงได้"</string>
+    <string name="dump_heap_system_text" msgid="6805155514925350849">"กระบวนการ <xliff:g id="PROC">%1$s</xliff:g> ใช้หน่วยความจำเกินขีดจำกัดขนาด <xliff:g id="SIZE">%2$s</xliff:g> มีฮีปดัมป์พร้อมให้แชร์ โปรดระวัง: ฮีปดัมป์นี้อาจมีข้อมูลส่วนบุคคลที่มีความละเอียดอ่อนซึ่งกระบวนการดังกล่าวเข้าถึงได้ ซึ่งอาจรวมถึงข้อมูลต่างๆ ที่คุณพิมพ์ไว้"</string>
+    <string name="dump_heap_ready_text" msgid="5849618132123045516">"มีฮีปดัมป์ของกระบวนการ <xliff:g id="PROC">%1$s</xliff:g> พร้อมให้แชร์ โปรดระวัง: ฮีปดัมป์นี้อาจมีข้อมูลส่วนบุคคลที่มีความละเอียดอ่อนซึ่งกระบวนการดังกล่าวเข้าถึงได้ ซึ่งอาจรวมถึงข้อมูลต่างๆ ที่คุณพิมพ์ไว้"</string>
     <string name="sendText" msgid="493003724401350724">"เลือกการทำงานกับข้อความ"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"ระดับความดังเสียงเรียกเข้า"</string>
     <string name="volume_music" msgid="7727274216734955095">"ระดับเสียงของสื่อ"</string>

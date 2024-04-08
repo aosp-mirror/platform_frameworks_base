@@ -1281,7 +1281,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Колдонмолорду иштетип баштоо"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Жүктөлүүдө"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Кубат баскычын бастыңыз — адатта, бул экранды өчүрөт.\n\nМанжаңыздын изин жөндөп жатканда аны акырын басып көрүңүз."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Кошуп бүтүрүү үчүн экранды өчүрүңүз"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Бүтүрүү үчүн экранды өчүрүңүз"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Өчүрүү"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Манжаңыздын изин ырастоону улантасызбы?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Кубат баскычын бастыңыз — адатта, бул экранды өчүрөт.\n\nМанжаңыздын изин ырастоо үчүн аны акырын басып көрүңүз."</string>

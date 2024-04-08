@@ -258,7 +258,7 @@
     <string name="global_action_power_options" msgid="1185286119330160073">"הפעלה"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"הפעלה מחדש"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"חירום"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"דיווח על באג"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"דוח איתור באגים"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"סיום הפעלה"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"צילום מסך"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"דיווח על באג"</string>
