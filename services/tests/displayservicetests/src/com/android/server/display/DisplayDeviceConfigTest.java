@@ -924,7 +924,7 @@ public final class DisplayDeviceConfigTest {
                 getValidProxSensor(), /* includeIdleMode= */ false, /* enableEvenDimmer */ true));
 
         assertTrue(mDisplayDeviceConfig.isEvenDimmerAvailable());
-        assertEquals(0.0001f, mDisplayDeviceConfig.getBacklightFromBrightness(0.1f), ZERO_DELTA);
+        assertEquals(0.01f, mDisplayDeviceConfig.getBacklightFromBrightness(0.002f), ZERO_DELTA);
         assertEquals(0.2f, mDisplayDeviceConfig.getNitsFromBacklight(0.0f), ZERO_DELTA);
     }
 
@@ -1649,18 +1649,28 @@ public final class DisplayDeviceConfigTest {
     private String evenDimmerConfig(boolean enabled) {
         return (enabled ? "<evenDimmer enabled=\"true\">" : "<evenDimmer enabled=\"false\">")
                 + "  <transitionPoint>0.1</transitionPoint>\n"
-                + "  <nits>0.2</nits>\n"
-                + "  <nits>2.0</nits>\n"
-                + "  <nits>500.0</nits>\n"
-                + "  <nits>1000.0</nits>\n"
-                + "  <backlight>0</backlight>\n"
-                + "  <backlight>0.0001</backlight>\n"
-                + "  <backlight>0.5</backlight>\n"
-                + "  <backlight>1.0</backlight>\n"
-                + "  <brightness>0</brightness>\n"
-                + "  <brightness>0.1</brightness>\n"
-                + "  <brightness>0.5</brightness>\n"
-                + "  <brightness>1.0</brightness>\n"
+                + "  <brightnessMapping>\n"
+                + "      <brightnessPoint>\n"
+                + "        <nits>0.2</nits>\n"
+                + "        <backlight>0</backlight>\n"
+                + "        <brightness>0</brightness>\n"
+                + "      </brightnessPoint>\n"
+                + "      <brightnessPoint>\n"
+                + "        <nits>2.0</nits>\n"
+                + "        <backlight>0.01</backlight>\n"
+                + "        <brightness>0.002</brightness>\n"
+                + "      </brightnessPoint>\n"
+                + "      <brightnessPoint>\n"
+                + "        <nits>500.0</nits>\n"
+                + "        <backlight>0.5</backlight>\n"
+                + "        <brightness>0.5</brightness>\n"
+                + "      </brightnessPoint>\n"
+                + "      <brightnessPoint>\n"
+                + "        <nits>1000</nits>\n"
+                + "        <backlight>1.0</backlight>\n"
+                + "        <brightness>1.0</brightness>\n"
+                + "      </brightnessPoint>\n"
+                + "  </brightnessMapping>\n"
                 + " <luxToMinimumNitsMap>\n"
                 + "     <point>\n"
                 + "         <value>10</value> <nits>0.3</nits>\n"

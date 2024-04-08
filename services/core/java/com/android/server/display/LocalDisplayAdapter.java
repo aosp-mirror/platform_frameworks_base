@@ -82,11 +82,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
     private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.boot.emulator.circular";
     // Min and max strengths for even dimmer feature.
     private static final float EVEN_DIMMER_MIN_STRENGTH = 0.0f;
-    private static final float EVEN_DIMMER_MAX_STRENGTH = 70.0f; // not too dim yet.
+    private static final float EVEN_DIMMER_MAX_STRENGTH = 90.0f;
     private static final float BRIGHTNESS_MIN = 0.0f;
-    // The brightness at which we start using color matrices rather than backlight,
-    // to dim the display
-    private static final float BACKLIGHT_COLOR_TRANSITION_POINT = 0.1f;
 
     private final LongSparseArray<LocalDisplayDevice> mDevices = new LongSparseArray<>();
 
@@ -995,9 +992,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
                     private void applyColorMatrixBasedDimming(float brightnessState) {
                         int strength = (int) (MathUtils.constrainedMap(
-                                EVEN_DIMMER_MAX_STRENGTH, EVEN_DIMMER_MIN_STRENGTH, // to this range
-                                BRIGHTNESS_MIN, BACKLIGHT_COLOR_TRANSITION_POINT, // from this range
-                                brightnessState) + 0.5); // map this (+ rounded up)
+                                // to this range:
+                                EVEN_DIMMER_MAX_STRENGTH, EVEN_DIMMER_MIN_STRENGTH,
+                                // from this range:
+                                BRIGHTNESS_MIN, mDisplayDeviceConfig.getEvenDimmerTransitionPoint(),
+                                // map this (+ rounded up):
+                                brightnessState) + 0.5);
 
                         if (mEvenDimmerStrength < 0 // uninitialised
                                 || MathUtils.abs(mEvenDimmerStrength - strength) > 1

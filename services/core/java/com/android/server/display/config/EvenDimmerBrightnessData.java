@@ -66,6 +66,10 @@ public class EvenDimmerBrightnessData {
      * Spline, mapping between backlight and brightness
      */
     public final Spline mBacklightToBrightness;
+
+    /**
+     * Spline, mapping the minimum nits for each lux condition.
+     */
     public final Spline mMinLuxToNits;
 
     @VisibleForTesting
@@ -114,34 +118,35 @@ public class EvenDimmerBrightnessData {
             return null;
         }
 
-        List<Float> nitsList = lbm.getNits();
-        List<Float> backlightList = lbm.getBacklight();
-        List<Float> brightnessList = lbm.getBrightness();
-        float transitionPoints = lbm.getTransitionPoint().floatValue();
+        ComprehensiveBrightnessMap map = lbm.getBrightnessMapping();
+        if (map == null) {
+            return null;
+        }
+        String interpolation = map.getInterpolation();
 
-        if (nitsList.isEmpty()
-                || backlightList.size() != brightnessList.size()
-                || backlightList.size() != nitsList.size()) {
-            Slog.e(TAG, "Invalid even dimmer array lengths");
+        List<BrightnessPoint> brightnessPoints = map.getBrightnessPoint();
+        if (brightnessPoints.isEmpty()) {
             return null;
         }
 
-        float[] nits = new float[nitsList.size()];
-        float[] backlight = new float[nitsList.size()];
-        float[] brightness = new float[nitsList.size()];
+        float[] nits = new float[brightnessPoints.size()];
+        float[] backlight = new float[brightnessPoints.size()];
+        float[] brightness = new float[brightnessPoints.size()];
 
-        for (int i = 0; i < nitsList.size(); i++) {
-            nits[i] = nitsList.get(i);
-            backlight[i] = backlightList.get(i);
-            brightness[i] = brightnessList.get(i);
+        for (int i = 0; i < brightnessPoints.size(); i++) {
+            BrightnessPoint val = brightnessPoints.get(i);
+            nits[i] = val.getNits().floatValue();
+            backlight[i] = val.getBacklight().floatValue();
+            brightness[i] = val.getBrightness().floatValue();
         }
 
-        final NitsMap map = lbm.getLuxToMinimumNitsMap();
-        if (map == null) {
+        float transitionPoint = lbm.getTransitionPoint().floatValue();
+        final NitsMap minimumNitsMap = lbm.getLuxToMinimumNitsMap();
+        if (minimumNitsMap == null) {
             Slog.e(TAG, "Invalid min lux to nits mapping");
             return null;
         }
-        final List<Point> points = map.getPoint();
+        final List<Point> points = minimumNitsMap.getPoint();
         final int size = points.size();
 
         float[] minLux = new float[size];
@@ -164,7 +169,18 @@ public class EvenDimmerBrightnessData {
             ++i;
         }
 
-        return new EvenDimmerBrightnessData(transitionPoints, nits, backlight, brightness,
+        // Explicitly choose linear interpolation.
+        if ("linear".equals(interpolation)) {
+            return new EvenDimmerBrightnessData(transitionPoint, nits, backlight, brightness,
+                    new Spline.LinearSpline(backlight, nits),
+                    new Spline.LinearSpline(nits, backlight),
+                    new Spline.LinearSpline(brightness, backlight),
+                    new Spline.LinearSpline(backlight, brightness),
+                    new Spline.LinearSpline(minLux, minNits)
+            );
+        }
+
+        return new EvenDimmerBrightnessData(transitionPoint, nits, backlight, brightness,
                 Spline.createSpline(backlight, nits),
                 Spline.createSpline(nits, backlight),
                 Spline.createSpline(brightness, backlight),
