@@ -108,9 +108,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Kuvio tarvitaan uudelleenkäynnistyksen jälkeen"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"PIN-koodi tarvitaan uudelleenkäynnistyksen jälkeen"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Salasana tarvitaan uudelleenkäynnistyksen jälkeen"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Lisäsuojaa saat, kun käytät sen sijaan kuviota"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Lisäsuojaa saat, kun käytät sen sijaan PIN-koodia"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Lisäsuojaa saat, kun käytät sen sijaan salasanaa"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Käytä kuviota, niin saat lisäsuojaa"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Käytä PIN-koodia, niin saat lisäsuojaa"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Käytä salasanaa, niin saat lisäsuojaa"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Järjestelmänvalvoja lukitsi laitteen."</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Laite lukittiin manuaalisesti"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Ei tunnistettu"</string>

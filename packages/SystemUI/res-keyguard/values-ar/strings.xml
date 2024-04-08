@@ -21,13 +21,13 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"‏أدخل رقم التعريف الشخصي (PIN)"</string>
-    <string name="keyguard_enter_pin" msgid="8114529922480276834">"أدخِل رقم التعريف الشخصي."</string>
+    <string name="keyguard_enter_pin" msgid="8114529922480276834">"أدخِل رقم التعريف الشخصي"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"أدخل النقش"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"ارسم النقش."</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"أدخل كلمة المرور"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"أدخِل كلمة المرور."</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"بطاقة غير صالحة."</string>
-    <string name="keyguard_charged" msgid="5478247181205188995">"تم الشحن"</string>
+    <string name="keyguard_charged" msgid="5478247181205188995">"اكتمل الشحن"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن لاسلكيًا"</string>
     <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن"</string>
@@ -108,9 +108,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"يجب رسم النقش بعد إعادة تشغيل الجهاز."</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"يجب إدخال رقم التعريف الشخصي بعد إعادة تشغيل الجهاز."</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"يجب إدخال كلمة المرور بعد إعادة تشغيل الجهاز."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"لمزيد من الأمان، استخدِم النقش بدلاً من ذلك."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"لمزيد من الأمان، أدخِل رقم التعريف الشخصي بدلاً من ذلك."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"لمزيد من الأمان، أدخِل كلمة المرور بدلاً من ذلك."</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"لمزيد من الأمان، يجب استخدام النقش"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"لمزيد من الأمان، يجب إدخال رقم التعريف الشخصي"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"لمزيد من الأمان، يجب إدخال كلمة المرور"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"اختار المشرف قفل الجهاز"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"تم حظر الجهاز يدويًا"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"لم يتم التعرّف عليه."</string>

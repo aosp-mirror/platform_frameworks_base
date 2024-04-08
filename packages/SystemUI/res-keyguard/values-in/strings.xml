@@ -108,9 +108,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Pola diperlukan setelah perangkat dimulai ulang"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"PIN diperlukan setelah perangkat dimulai ulang"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Sandi diperlukan setelah perangkat dimulai ulang"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Untuk keamanan tambahan, gunakan pola"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Untuk keamanan tambahan, gunakan PIN"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Untuk keamanan tambahan, gunakan sandi"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Agar lebih aman, gunakan pola"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Agar lebih aman, gunakan PIN"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Agar lebih aman, gunakan sandi"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Perangkat dikunci oleh admin"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Perangkat dikunci secara manual"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Tidak dikenali"</string>
