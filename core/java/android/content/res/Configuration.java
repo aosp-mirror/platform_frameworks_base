@@ -806,7 +806,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      *
      * <aside class="note"><b>Note:</b> If the app targets
      * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}
-     * or after, The width measurement reflects the window size without excluding insets.
+     * or after, the width measurement reflects the window size without excluding insets.
      * Otherwise, the measurement excludes window insets even when the app is displayed edge to edge
      * using {@link android.view.Window#setDecorFitsSystemWindows(boolean)
      * Window#setDecorFitsSystemWindows(boolean)}.</aside>
