@@ -2,6 +2,7 @@ package com.android.systemui.shade.ui.viewmodel
 
 import android.content.Intent
 import android.provider.AlarmClock
+import android.provider.Settings
 import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -59,6 +60,19 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
             verify(activityStarter)
                 .postStartActivityDismissingKeyguard(
                     argThat(IntentMatcherAction(AlarmClock.ACTION_SHOW_ALARMS)),
+                    anyInt(),
+                )
+        }
+
+    @Test
+    fun onShadeCarrierGroupClicked_launchesNetworkSettings() =
+        testScope.runTest {
+            val activityStarter = kosmos.activityStarter
+            underTest.onShadeCarrierGroupClicked()
+
+            verify(activityStarter)
+                .postStartActivityDismissingKeyguard(
+                    argThat(IntentMatcherAction(Settings.ACTION_WIRELESS_SETTINGS)),
                     anyInt(),
                 )
         }

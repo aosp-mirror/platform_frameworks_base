@@ -22,9 +22,11 @@ import android.content.IntentFilter
 import android.icu.text.DateFormat
 import android.icu.text.DisplayContext
 import android.os.UserHandle
+import android.provider.Settings
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.privacy.PrivacyItem
 import com.android.systemui.res.R
@@ -54,6 +56,7 @@ class ShadeHeaderViewModel
 constructor(
     @Application private val applicationScope: CoroutineScope,
     context: Context,
+    private val activityStarter: ActivityStarter,
     shadeInteractor: ShadeInteractor,
     mobileIconsInteractor: MobileIconsInteractor,
     val mobileIconsViewModel: MobileIconsViewModel,
@@ -134,6 +137,14 @@ constructor(
     /** Notifies that the clock was clicked. */
     fun onClockClicked() {
         clockInteractor.launchClockActivity()
+    }
+
+    /** Notifies that the shadeCarrierGroup was clicked. */
+    fun onShadeCarrierGroupClicked() {
+        activityStarter.postStartActivityDismissingKeyguard(
+            Intent(Settings.ACTION_WIRELESS_SETTINGS),
+            0
+        )
     }
 
     private fun updateDateTexts(invalidateFormats: Boolean) {
