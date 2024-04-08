@@ -621,7 +621,9 @@ constructor(
     }
 
     private suspend fun updateClockAppearance(clock: ClockController) {
-        clockController.clock = clock
+        if (!MigrateClocksToBlueprint.isEnabled) {
+            clockController.clock = clock
+        }
         val colors = wallpaperColors
         if (clockRegistry.seedColor == null && colors != null) {
             // Seed color null means users do not override any color on the clock. The default
@@ -638,6 +640,11 @@ constructor(
             clock.events.onSeedColorChanged(
                 if (isWallpaperDark) lightClockColor else darkClockColor
             )
+        }
+        // In clock preview, we should have a seed color for clock
+        // before setting clock to clockEventController to avoid updateColor with seedColor == null
+        if (MigrateClocksToBlueprint.isEnabled) {
+            clockController.clock = clock
         }
     }
     private fun onClockChanged() {
