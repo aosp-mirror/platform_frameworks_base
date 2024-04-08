@@ -16,8 +16,6 @@
 
 package android.tracing.perfetto;
 
-import java.io.IOException;
-
 /**
  * The interface for the trace function called from native on a trace call with a context.
  *
@@ -36,6 +34,5 @@ public interface TraceFunction<TlsStateType, IncrementalStateType> {
      *
      * @param ctx the tracing context to trace for in the trace function.
      */
-    void trace(TracingContext<TlsStateType, IncrementalStateType> ctx)
-            throws IOException;
+    void trace(TracingContext<TlsStateType, IncrementalStateType> ctx);
 }
