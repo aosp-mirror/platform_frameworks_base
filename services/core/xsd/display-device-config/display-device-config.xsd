@@ -226,11 +226,8 @@
             <xs:element name="transitionPoint" type="nonNegativeDecimal" minOccurs="1"
                 maxOccurs="1">
             </xs:element>
-            <xs:element name="nits" type="xs:float" maxOccurs="unbounded">
-            </xs:element>
-            <xs:element name="backlight" type="xs:float" maxOccurs="unbounded">
-            </xs:element>
-            <xs:element name="brightness" type="xs:float" maxOccurs="unbounded">
+            <!-- Mapping of nits -> backlight -> brightness -->
+            <xs:element name="brightnessMapping" type="comprehensiveBrightnessMap" maxOccurs="1">
             </xs:element>
             <!-- Mapping of current lux to minimum allowed nits values. -->
             <xs:element name="luxToMinimumNitsMap" type="nitsMap" maxOccurs="1">
@@ -448,6 +445,35 @@
             </xs:element>
         </xs:sequence>
     </xs:complexType>
+
+    <xs:complexType name="comprehensiveBrightnessMap">
+        <xs:sequence>
+            <xs:element name="brightnessPoint" type="brightnessPoint" maxOccurs="unbounded" minOccurs="2">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+        <!-- valid value of interpolation if specified: linear -->
+        <xs:attribute name="interpolation" type="xs:string" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="brightnessPoint">
+        <xs:sequence>
+            <xs:element type="nonNegativeDecimal" name="nits">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="nonNegativeDecimal" name="backlight">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="nonNegativeDecimal" name="brightness">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
 
     <xs:complexType name="sdrHdrRatioMap">
         <xs:sequence>
