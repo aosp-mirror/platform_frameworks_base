@@ -519,8 +519,17 @@ class InsetsSourceProvider {
         final SurfaceControl leash = mAdapter.mCapturedLeash;
         mControlTarget = target;
         updateVisibility();
+        boolean initiallyVisible = mClientVisible;
+        if (mSource.getType() == WindowInsets.Type.ime()) {
+            // The IME cannot be initially visible, see ControlAdapter#startAnimation below.
+            // Also, the ImeInsetsSourceConsumer clears the client visibility upon losing control,
+            // but this won't have reached here yet by the time the new control is created.
+            // Note: The DisplayImeController needs the correct previous client's visibility, so we
+            // only override the initiallyVisible here.
+            initiallyVisible = false;
+        }
         mControl = new InsetsSourceControl(mSource.getId(), mSource.getType(), leash,
-                mClientVisible, surfacePosition, getInsetsHint());
+                initiallyVisible, surfacePosition, getInsetsHint());
 
         ProtoLog.d(WM_DEBUG_WINDOW_INSETS,
                 "InsetsSource Control %s for target %s", mControl, mControlTarget);
