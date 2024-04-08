@@ -17,6 +17,7 @@
 package com.android.systemui.media.controls.ui.viewmodel
 
 import android.content.applicationContext
+import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.media.controls.domain.pipeline.interactor.mediaControlInteractor
@@ -27,6 +28,7 @@ val Kosmos.mediaControlViewModel by
         MediaControlViewModel(
             applicationContext = applicationContext,
             backgroundDispatcher = testDispatcher,
+            backgroundExecutor = fakeExecutor,
             interactor = mediaControlInteractor,
             logger = mediaUiEventLogger,
         )
