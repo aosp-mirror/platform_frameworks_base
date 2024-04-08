@@ -261,7 +261,7 @@
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"No hay dispositivos vinculados disponibles"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Toca para conectar o desconectar un dispositivo"</string>
-    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Emparejar un nuevo dispositivo"</string>
+    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Emparejar nuevo dispositivo"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Ver todos"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Usar Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Conectado"</string>
@@ -682,8 +682,8 @@
     <string name="keyboard_key_back" msgid="4185420465469481999">"Atrás"</string>
     <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"Flecha hacia arriba"</string>
     <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"Flecha hacia abajo"</string>
-    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"Flecha hacia la izquierda"</string>
-    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"Flecha hacia la derecha"</string>
+    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"Flecha izquierda"</string>
+    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"Flecha derecha"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Centro"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tabulador"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Espacio"</string>
@@ -737,10 +737,10 @@
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Abrir ajustes"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Abrir el Asistente"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Pantalla de bloqueo"</string>
-    <string name="group_system_quick_memo" msgid="3764560265935722903">"Escribe una nota"</string>
+    <string name="group_system_quick_memo" msgid="3764560265935722903">"Escribir una nota"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Función multitarea del sistema"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Iniciar pantalla dividida con esta aplicación en el lado derecho"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Iniciar pantalla dividida con esta aplicación en el lado izquierdo"</string>
+    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Iniciar pantalla dividida con la aplicación actual en el lado derecho"</string>
+    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Iniciar pantalla dividida con la aplicación actual en el lado izquierdo"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Cambiar de pantalla dividida a pantalla completa"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Con pantalla dividida: reemplazar una aplicación por otra"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Entrada"</string>
