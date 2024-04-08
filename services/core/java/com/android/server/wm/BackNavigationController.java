@@ -20,6 +20,7 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
@@ -777,6 +778,10 @@ class BackNavigationController {
             final WindowContainer wc = targets.get(i).mContainer;
             if (wc.asActivityRecord() == null && wc.asTask() == null
                     && wc.asTaskFragment() == null) {
+                continue;
+            }
+            // Only care if visibility changed.
+            if (targets.get(i).getTransitMode(wc) == TRANSIT_CHANGE) {
                 continue;
             }
             // WC can be visible due to setLaunchBehind
@@ -1557,15 +1562,17 @@ class BackNavigationController {
                 return this;
             }
 
+            // WC must be Activity/TaskFragment/Task
             boolean containTarget(@NonNull WindowContainer wc) {
                 if (mOpenTargets != null) {
                     for (int i = mOpenTargets.length - 1; i >= 0; --i) {
-                        if (wc == mOpenTargets[i] || mOpenTargets[i].hasChild(wc)) {
+                        if (wc == mOpenTargets[i] || mOpenTargets[i].hasChild(wc)
+                                || wc.hasChild(mOpenTargets[i])) {
                             return true;
                         }
                     }
                 }
-                return wc == mCloseTarget || mCloseTarget.hasChild(wc);
+                return wc == mCloseTarget || mCloseTarget.hasChild(wc) || wc.hasChild(mCloseTarget);
             }
 
             /**
