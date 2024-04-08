@@ -14,21 +14,26 @@
  * limitations under the License.
  */
 
-package com.android.systemui.screenshot.ui.viewmodel
+package com.android.systemui.screenshot
 
-import android.graphics.drawable.Drawable
+import android.net.Uri
+import android.os.UserHandle
+import java.text.DateFormat
+import java.util.Date
 
-data class ActionButtonViewModel(
-    val icon: Drawable?,
-    val name: CharSequence?,
-    val description: CharSequence,
-    val onClicked: (() -> Unit)?,
-) {
-    val id: Int = getId()
+/**
+ * Represents a saved screenshot, with the uri and user it was saved to as well as the time it was
+ * saved.
+ */
+data class ScreenshotSavedResult(val uri: Uri, val user: UserHandle, val imageTime: Long) {
+    val subject: String
+
+    init {
+        val subjectDate = DateFormat.getDateTimeInstance().format(Date(imageTime))
+        subject = String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate)
+    }
 
     companion object {
-        private var nextId = 0
-
-        private fun getId() = nextId.also { nextId += 1 }
+        private const val SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)"
     }
 }

@@ -326,6 +326,7 @@ android_library {
         "androidx.test.uiautomator_uiautomator",
         "androidx.core_core-animation-testing",
         "mockito-target-extended-minus-junit4",
+        "mockito-kotlin2",
         "androidx.test.ext.junit",
         "androidx.test.ext.truth",
         "kotlin-test",

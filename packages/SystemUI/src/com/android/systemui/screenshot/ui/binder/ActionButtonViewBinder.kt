@@ -36,6 +36,7 @@ object ActionButtonViewBinder {
         } else {
             view.setOnClickListener(null)
         }
+        view.tag = viewModel.id
         view.contentDescription = viewModel.description
         view.visibility = View.VISIBLE
         view.alpha = 1f
