@@ -9035,8 +9035,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // vertically centered within parent bounds with insets, so position vertical bounds
             // within parent bounds with insets to prevent insets from unnecessarily trimming
             // vertical bounds.
-            final int bottom = Math.min(parentBoundsWithInsets.top + parentBounds.width() - 1,
-                    parentBoundsWithInsets.bottom);
+            final int bottom = Math.min(parentBoundsWithInsets.top
+                            + parentBoundsWithInsets.width() - 1, parentBoundsWithInsets.bottom);
             containingBounds.set(parentBounds.left, parentBoundsWithInsets.top, parentBounds.right,
                     bottom);
             containingBoundsWithInsets.set(parentBoundsWithInsets.left, parentBoundsWithInsets.top,
@@ -9047,8 +9047,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // horizontally centered within parent bounds with insets, so position horizontal bounds
             // within parent bounds with insets to prevent insets from unnecessarily trimming
             // horizontal bounds.
-            final int right = Math.min(parentBoundsWithInsets.left + parentBounds.height(),
-                    parentBoundsWithInsets.right);
+            final int right = Math.min(parentBoundsWithInsets.left
+                            + parentBoundsWithInsets.height(), parentBoundsWithInsets.right);
             containingBounds.set(parentBoundsWithInsets.left, parentBounds.top, right,
                     parentBounds.bottom);
             containingBoundsWithInsets.set(parentBoundsWithInsets.left, parentBoundsWithInsets.top,
