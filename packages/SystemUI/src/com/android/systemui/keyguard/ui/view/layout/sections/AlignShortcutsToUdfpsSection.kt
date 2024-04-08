@@ -36,7 +36,6 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.statusbar.VibratorHelper
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineDispatcher
 
 class AlignShortcutsToUdfpsSection
 @Inject
@@ -48,7 +47,6 @@ constructor(
     private val falsingManager: FalsingManager,
     private val indicationController: KeyguardIndicationController,
     private val vibratorHelper: VibratorHelper,
-    @Main private val mainImmediateDispatcher: CoroutineDispatcher,
 ) : BaseShortcutSection() {
     override fun addViews(constraintLayout: ConstraintLayout) {
         if (KeyguardBottomAreaRefactor.isEnabled) {
@@ -66,7 +64,6 @@ constructor(
                     keyguardQuickAffordancesCombinedViewModel.transitionAlpha,
                     falsingManager,
                     vibratorHelper,
-                    mainImmediateDispatcher,
                 ) {
                     indicationController.showTransientIndication(it)
                 }
@@ -77,7 +74,6 @@ constructor(
                     keyguardQuickAffordancesCombinedViewModel.transitionAlpha,
                     falsingManager,
                     vibratorHelper,
-                    mainImmediateDispatcher,
                 ) {
                     indicationController.showTransientIndication(it)
                 }

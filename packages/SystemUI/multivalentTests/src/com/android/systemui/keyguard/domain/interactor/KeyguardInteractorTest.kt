@@ -214,16 +214,14 @@ class KeyguardInteractorTest : SysuiTestCase() {
             )
 
             repository.setStatusBarState(StatusBarState.KEYGUARD)
-            // User begins to swipe up
-            shadeRepository.setLegacyShadeExpansion(0.99f)
+            shadeRepository.setLegacyShadeExpansion(1f)
 
             // When not dismissable, no alpha value (null) should emit
             repository.setKeyguardDismissible(false)
             assertThat(dismissAlpha).isNull()
 
             repository.setKeyguardDismissible(true)
-            shadeRepository.setLegacyShadeExpansion(0.98f)
-            assertThat(dismissAlpha).isGreaterThan(0.5f)
+            assertThat(dismissAlpha).isGreaterThan(0.95f)
         }
 
     @Test

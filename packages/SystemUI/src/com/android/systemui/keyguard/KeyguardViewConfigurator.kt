@@ -41,7 +41,6 @@ import com.android.keyguard.dagger.KeyguardStatusViewComponent
 import com.android.systemui.CoreStartable
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
@@ -73,7 +72,6 @@ import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import dagger.Lazy
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -110,7 +108,6 @@ constructor(
     private val keyguardBlueprintViewBinder: KeyguardBlueprintViewBinder,
     private val clockInteractor: KeyguardClockInteractor,
     private val keyguardViewMediator: KeyguardViewMediator,
-    @Main private val mainImmediateDispatcher: CoroutineDispatcher,
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
@@ -214,7 +211,6 @@ constructor(
                 vibratorHelper,
                 falsingManager,
                 keyguardViewMediator,
-                mainImmediateDispatcher,
             )
     }
 

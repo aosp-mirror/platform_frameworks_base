@@ -387,7 +387,6 @@ constructor(
                     null, // device entry haptics not required for preview mode
                     null, // falsing manager not required for preview mode
                     null, // keyguard view mediator is not required for preview mode
-                    mainDispatcher,
                 )
         }
         rootView.addView(
@@ -454,7 +453,6 @@ constructor(
                     alpha = flowOf(1f),
                     falsingManager = falsingManager,
                     vibratorHelper = vibratorHelper,
-                    mainImmediateDispatcher = mainDispatcher,
                 ) { message ->
                     indicationController.showTransientIndication(message)
                 }
@@ -469,7 +467,6 @@ constructor(
                     alpha = flowOf(1f),
                     falsingManager = falsingManager,
                     vibratorHelper = vibratorHelper,
-                    mainImmediateDispatcher = mainDispatcher,
                 ) { message ->
                     indicationController.showTransientIndication(message)
                 }
