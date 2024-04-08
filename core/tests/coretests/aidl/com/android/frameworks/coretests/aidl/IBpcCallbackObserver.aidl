@@ -17,5 +17,6 @@
 package com.android.frameworks.coretests.aidl;
 
 interface IBpcCallbackObserver {
-    void onCallback(int uid);
+    void onLimitReached(int uid);
+    void onWarningThresholdReached(int uid);
 }
