@@ -2302,7 +2302,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         computeSizeRanges(mDisplayInfo, rotated, dw, dh, mDisplayMetrics.density, outConfig,
-                false /* legacyConfig */);
+                false /* overrideConfig */);
 
         setDisplayInfoOverride();
 
@@ -2439,7 +2439,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final DisplayCutout displayCutout = calculateDisplayCutoutForRotation(rotation);
         displayInfo.displayCutout = displayCutout.isEmpty() ? null : displayCutout;
         computeSizeRanges(displayInfo, rotated, dw, dh, mDisplayMetrics.density, outConfig,
-                false /* legacyConfig */);
+                false /* overrideConfig */);
         return displayInfo;
     }
 
@@ -2613,11 +2613,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * @param dh Display Height in current rotation.
      * @param density Display density.
      * @param outConfig The output configuration to
-     * @param legacyConfig Whether we need to report the legacy result, which is excluding system
-     *                     decorations.
+     * @param overrideConfig Whether we need to report the override config result
      */
     void computeSizeRanges(DisplayInfo displayInfo, boolean rotated,
-            int dw, int dh, float density, Configuration outConfig, boolean legacyConfig) {
+            int dw, int dh, float density, Configuration outConfig, boolean overrideConfig) {
 
         // We need to determine the smallest width that will occur under normal
         // operation.  To this, start with the base screen size and compute the
@@ -2635,10 +2634,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         displayInfo.smallestNominalAppHeight = 1<<30;
         displayInfo.largestNominalAppWidth = 0;
         displayInfo.largestNominalAppHeight = 0;
-        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_0, unrotDw, unrotDh, legacyConfig);
-        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_90, unrotDh, unrotDw, legacyConfig);
-        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_180, unrotDw, unrotDh, legacyConfig);
-        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_270, unrotDh, unrotDw, legacyConfig);
+        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_0, unrotDw, unrotDh, overrideConfig);
+        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_90, unrotDh, unrotDw, overrideConfig);
+        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_180, unrotDw, unrotDh,
+                overrideConfig);
+        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_270, unrotDh, unrotDw,
+                overrideConfig);
 
         if (outConfig == null) {
             return;
@@ -2648,17 +2649,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     private void adjustDisplaySizeRanges(DisplayInfo displayInfo, int rotation, int dw, int dh,
-            boolean legacyConfig) {
+            boolean overrideConfig) {
         final DisplayPolicy.DecorInsets.Info info = mDisplayPolicy.getDecorInsetsInfo(
                 rotation, dw, dh);
         final int w;
         final int h;
-        if (!legacyConfig) {
+        if (!overrideConfig) {
             w = info.mConfigFrame.width();
             h = info.mConfigFrame.height();
         } else {
-            w = info.mLegacyConfigFrame.width();
-            h = info.mLegacyConfigFrame.height();
+            w = info.mOverrideConfigFrame.width();
+            h = info.mOverrideConfigFrame.height();
         }
         if (w < displayInfo.smallestNominalAppWidth) {
             displayInfo.smallestNominalAppWidth = w;
