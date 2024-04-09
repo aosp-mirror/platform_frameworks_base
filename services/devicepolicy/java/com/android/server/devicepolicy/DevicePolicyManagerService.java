@@ -2222,32 +2222,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return packageNameAndSignature;
     }
 
-    private void unsuspendAppsForQuietProfiles() {
-        PackageManagerInternal pmi = mInjector.getPackageManagerInternal();
-        List<UserInfo> users = mUserManagerInternal.getUsers(true /* excludeDying */);
-
-        for (UserInfo user : users) {
-            if (!user.isManagedProfile() || !user.isQuietModeEnabled()) {
-                continue;
-            }
-            int userId = user.id;
-            var suspendedByAdmin = getPackagesSuspendedByAdmin(userId);
-            var packagesToUnsuspend = mInjector.getPackageManager(userId)
-                    .getInstalledPackages(PackageManager.PackageInfoFlags.of(
-                            MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE))
-                    .stream()
-                    .map(packageInfo -> packageInfo.packageName)
-                    .filter(pkg -> !suspendedByAdmin.contains(pkg))
-                    .toArray(String[]::new);
-
-            Slogf.i(LOG_TAG, "Unsuspending work apps for user %d", userId);
-            // When app suspension was used for quiet mode, the apps were suspended by platform
-            // package, just like when admin suspends them. So although it wasn't admin who
-            // suspended, this method will remove the right suspension record.
-            pmi.setPackagesSuspendedByAdmin(userId, packagesToUnsuspend, false /* suspended */);
-        }
-    }
-
     private Owners makeOwners(Injector injector, PolicyPathProvider pathProvider) {
         return new Owners(
                 injector.getUserManager(), injector.getUserManagerInternal(),
@@ -3510,6 +3484,39 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mOwners.markRequiredPasswordComplexityMigrated();
         return true;
     }
+
+    @GuardedBy("getLockObject()")
+    private boolean maybeMigrateSuspendedPackagesLocked(String backupId) {
+        Slog.i(LOG_TAG, "Migrating suspended packages to policy engine");
+        if (!Flags.unmanagedModeMigration()) {
+            return false;
+        }
+        if (mOwners.isSuspendedPackagesMigrated()) {
+            return false;
+        }
+        // Create backup if none exists
+        mDevicePolicyEngine.createBackup(backupId);
+        try {
+            iterateThroughDpcAdminsLocked((admin, enforcingAdmin) -> {
+                if (admin.suspendedPackages == null || admin.suspendedPackages.size() == 0) {
+                    return;
+                }
+                int userId = enforcingAdmin.getUserId();
+                mDevicePolicyEngine.setLocalPolicy(
+                        PolicyDefinition.PACKAGES_SUSPENDED,
+                        enforcingAdmin,
+                        new PackageSetPolicyValue(new ArraySet<>(admin.suspendedPackages)),
+                        userId);
+            });
+        } catch (Exception e) {
+            Slog.wtf(LOG_TAG, "Failed to migrate suspended packages to policy engine", e);
+        }
+
+        Slog.i(LOG_TAG, "Marking suspended packages migration complete");
+        mOwners.markSuspendedPackagesMigrated();
+        return true;
+    }
+
 
     private void applyManagedSubscriptionsPolicyIfRequired() {
         int copeProfileUserId = getOrganizationOwnedProfileUserId();
@@ -13211,8 +13218,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return result;
     }
 
-    @Override
-    public String[] setPackagesSuspended(ComponentName who, String callerPackage,
+    private String[] setPackagesSuspendedPreCoexistence(ComponentName who, String callerPackage,
             String[] packageNames, boolean suspended) {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
         ActiveAdmin admin;
@@ -13293,6 +13299,78 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return result;
     }
 
+    @Override
+    public String[] setPackagesSuspended(ComponentName who, String callerPackage,
+            String[] packageNames, boolean suspended) {
+        if (!Flags.unmanagedModeMigration()) {
+            return setPackagesSuspendedPreCoexistence(who, callerPackage, packageNames, suspended);
+        }
+
+        final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+
+        EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
+                who,
+                MANAGE_DEVICE_POLICY_PACKAGE_STATE,
+                caller.getPackageName(),
+                caller.getUserId());
+        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_PACKAGES_SUSPENDED);
+
+        Set<String> packages = new ArraySet<>(packageNames);
+        Set<String> suspendedPackagesBefore = mDevicePolicyEngine.getResolvedPolicy(
+                PolicyDefinition.PACKAGES_SUSPENDED, caller.getUserId());
+
+        Set<String> currentPackages = mDevicePolicyEngine.getLocalPolicySetByAdmin(
+                PolicyDefinition.PACKAGES_SUSPENDED,
+                enforcingAdmin,
+                caller.getUserId());
+        if (currentPackages == null) currentPackages = new ArraySet<>();
+        if (suspended) {
+            currentPackages.addAll(packages);
+        } else {
+            currentPackages.removeAll(packages);
+        }
+        if (currentPackages.isEmpty()) {
+            mDevicePolicyEngine.removeLocalPolicy(
+                    PolicyDefinition.PACKAGES_SUSPENDED,
+                    enforcingAdmin,
+                    caller.getUserId());
+        } else {
+            mDevicePolicyEngine.setLocalPolicy(
+                    PolicyDefinition.PACKAGES_SUSPENDED,
+                    enforcingAdmin,
+                    new PackageSetPolicyValue(currentPackages),
+                    caller.getUserId());
+        }
+
+        Set<String> suspendedPackagesAfter = mDevicePolicyEngine.getResolvedPolicy(
+                PolicyDefinition.PACKAGES_SUSPENDED, caller.getUserId());
+
+        PackageSuspender suspender = new PackageSuspender(
+                suspendedPackagesBefore, suspendedPackagesAfter,
+                listPolicyExemptAppsUnchecked(mContext),
+                mInjector.getPackageManagerInternal(), caller.getUserId());
+
+        String[] result;
+        synchronized (getLockObject()) {
+            long id = mInjector.binderClearCallingIdentity();
+            try {
+                result = suspended ? suspender.suspend(packages) : suspender.unsuspend(packages);
+            } finally {
+                mInjector.binderRestoreCallingIdentity(id);
+            }
+        }
+
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_PACKAGES_SUSPENDED)
+                .setAdmin(caller.getPackageName())
+                .setBoolean(/* isDelegate */ who == null)
+                .setStrings(packageNames)
+                .write();
+
+        if (VERBOSE_LOG) Slogf.v(LOG_TAG, "Returning %s", Arrays.toString(result));
+        return result;
+    }
+
     /**
      * Returns an array containing the union of the given non-suspended packages and
      * exempt apps. Assumes both parameters are non-null and non-empty.
@@ -13314,7 +13392,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public boolean isPackageSuspended(ComponentName who, String callerPackage, String packageName) {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
 
-        if (isUnicornFlagEnabled()) {
+        if (Flags.unmanagedModeMigration()) {
             enforcePermission(
                     MANAGE_DEVICE_POLICY_PACKAGE_STATE,
                     caller.getPackageName(),
@@ -15482,17 +15560,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             DevicePolicyData policy = getUserData(userId);
             return policy.mStatusBarDisabled;
-        }
-    }
-
-    private Set<String> getPackagesSuspendedByAdmin(@UserIdInt int userId) {
-        synchronized (getLockObject()) {
-            ActiveAdmin admin = getDeviceOrProfileOwnerAdminLocked(userId);
-            if (admin == null || admin.suspendedPackages == null) {
-                return Collections.emptySet();
-            } else {
-                return new ArraySet<>(admin.suspendedPackages);
-            }
         }
     }
 
@@ -23751,7 +23818,39 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         Slog.w(LOG_TAG, "Work apps may have been paused via suspension previously.");
-        unsuspendAppsForQuietProfiles();
+        PackageManagerInternal pmi = mInjector.getPackageManagerInternal();
+        List<UserInfo> users = mUserManagerInternal.getUsers(true /* excludeDying */);
+
+        for (UserInfo user : users) {
+            if (!user.isManagedProfile() || !user.isQuietModeEnabled()) {
+                continue;
+            }
+            int userId = user.id;
+            Set<String> suspendedByAdmin;
+            synchronized (getLockObject()) {
+                ActiveAdmin admin = getDeviceOrProfileOwnerAdminLocked(userId);
+                // This is legacy code from Turn off Work 2.0 which is before setPackagesSuspended
+                // is migrated to PolicyEngine, so we only need to query the legacy ActiveAdmin here
+                if (admin == null || admin.suspendedPackages == null) {
+                    suspendedByAdmin = Collections.emptySet();
+                } else {
+                    suspendedByAdmin = new ArraySet<>(admin.suspendedPackages);
+                }
+            }
+            var packagesToUnsuspend = mInjector.getPackageManager(userId)
+                    .getInstalledPackages(PackageManager.PackageInfoFlags.of(
+                            MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE))
+                    .stream()
+                    .map(packageInfo -> packageInfo.packageName)
+                    .filter(pkg -> !suspendedByAdmin.contains(pkg))
+                    .toArray(String[]::new);
+
+            Slogf.i(LOG_TAG, "Unsuspending work apps for user %d", userId);
+            // When app suspension was used for quiet mode, the apps were suspended by platform
+            // package, just like when admin suspends them. So although it wasn't admin who
+            // suspended, this method will remove the right suspension record.
+            pmi.setPackagesSuspendedByAdmin(userId, packagesToUnsuspend, false /* suspended */);
+        }
     }
 
     public void setMtePolicy(int flags, String callerPackageName) {
@@ -24179,6 +24278,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         String unmanagedBackupId = "35.1.unmanaged-mode";
         boolean migrated = false;
         migrated = migrated | maybeMigrateRequiredPasswordComplexityLocked(unmanagedBackupId);
+        migrated = migrated | maybeMigrateSuspendedPackagesLocked(unmanagedBackupId);
         if (migrated) {
             Slogf.i(LOG_TAG, "Backup made: " + unmanagedBackupId);
         }

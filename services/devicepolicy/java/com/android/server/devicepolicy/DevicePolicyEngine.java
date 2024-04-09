@@ -16,6 +16,7 @@
 
 package com.android.server.devicepolicy;
 
+import static android.app.admin.DevicePolicyIdentifiers.PACKAGES_SUSPENDED_POLICY;
 import static android.app.admin.DevicePolicyIdentifiers.USER_CONTROL_DISABLED_PACKAGES_POLICY;
 import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_TARGET_USER_ID;
 import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_UPDATE_RESULT_KEY;
@@ -264,9 +265,7 @@ final class DevicePolicyEngine {
                 boolean policyEnforced = Objects.equals(
                         localPolicyState.getCurrentResolvedPolicy(), value);
                 // TODO(b/285532044): remove hack and handle properly
-                if (!policyEnforced
-                        && policyDefinition.getPolicyKey().getIdentifier().equals(
-                        USER_CONTROL_DISABLED_PACKAGES_POLICY)) {
+                if (!policyEnforced && shouldApplyPackageSetUnionPolicyHack(policyDefinition)) {
                     PolicyValue<Set<String>> parsedValue = (PolicyValue<Set<String>>) value;
                     PolicyValue<Set<String>> parsedResolvedValue =
                             (PolicyValue<Set<String>>) localPolicyState.getCurrentResolvedPolicy();
@@ -532,8 +531,7 @@ final class DevicePolicyEngine {
                         globalPolicyState.getCurrentResolvedPolicy(), value);
                 // TODO(b/285532044): remove hack and handle properly
                 if (!policyAppliedGlobally
-                        && policyDefinition.getPolicyKey().getIdentifier().equals(
-                        USER_CONTROL_DISABLED_PACKAGES_POLICY)) {
+                        && shouldApplyPackageSetUnionPolicyHack(policyDefinition)) {
                     PolicyValue<Set<String>> parsedValue = (PolicyValue<Set<String>>) value;
                     PolicyValue<Set<String>> parsedResolvedValue =
                             (PolicyValue<Set<String>>) globalPolicyState.getCurrentResolvedPolicy();
@@ -670,8 +668,7 @@ final class DevicePolicyEngine {
 
             }
             // TODO(b/285532044): remove hack and handle properly
-            if (policyDefinition.getPolicyKey().getIdentifier().equals(
-                    USER_CONTROL_DISABLED_PACKAGES_POLICY)) {
+            if (shouldApplyPackageSetUnionPolicyHack(policyDefinition)) {
                 if (!Objects.equals(value, localPolicyState.getCurrentResolvedPolicy())) {
                     PolicyValue<Set<String>> parsedValue = (PolicyValue<Set<String>>) value;
                     PolicyValue<Set<String>> parsedResolvedValue =
@@ -1868,6 +1865,18 @@ final class DevicePolicyEngine {
         }
 
         return false;
+    }
+
+    /**
+     * For PackageSetUnion policies, we can't simply compare the resolved policy against the admin's
+     * policy for equality to determine if the admin has applied the policy successfully, instead
+     * the admin's policy should be considered applied successfully as long as its policy is subset
+     * of the resolved policy. This method controls which policies should use this special logic.
+     */
+    private <V> boolean shouldApplyPackageSetUnionPolicyHack(PolicyDefinition<V> policy) {
+        String policyKey =  policy.getPolicyKey().getIdentifier();
+        return policyKey.equals(USER_CONTROL_DISABLED_PACKAGES_POLICY)
+                || policyKey.equals(PACKAGES_SUSPENDED_POLICY);
     }
 
     private class DevicePoliciesReaderWriter {

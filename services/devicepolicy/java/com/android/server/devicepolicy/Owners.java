@@ -650,6 +650,19 @@ class Owners {
 
     }
 
+    boolean isSuspendedPackagesMigrated() {
+        synchronized (mData) {
+            return mData.mSuspendedPackagesMigrated;
+        }
+    }
+
+    void markSuspendedPackagesMigrated() {
+        synchronized (mData) {
+            mData.mSuspendedPackagesMigrated = true;
+            mData.writeDeviceOwner();
+        }
+    }
+
     boolean isMigratedPostUpdate() {
         synchronized (mData) {
             return mData.mPoliciesMigratedPostUpdate;
