@@ -21,6 +21,7 @@ import com.android.systemui.communal.ui.view.layout.sections.CommunalTutorialInd
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.keyguard.ui.view.layout.sections.AccessibilityActionsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AlignShortcutsToUdfpsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodBurnInSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
@@ -47,6 +48,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 class ShortcutsBesideUdfpsKeyguardBlueprint
 @Inject
 constructor(
+    accessibilityActionsSection: AccessibilityActionsSection,
     alignShortcutsToUdfpsSection: AlignShortcutsToUdfpsSection,
     defaultIndicationAreaSection: DefaultIndicationAreaSection,
     defaultDeviceEntrySection: DefaultDeviceEntrySection,
@@ -68,6 +70,7 @@ constructor(
 
     override val sections =
         listOfNotNull(
+            accessibilityActionsSection,
             defaultIndicationAreaSection,
             alignShortcutsToUdfpsSection,
             defaultAmbientIndicationAreaSection.getOrNull(),

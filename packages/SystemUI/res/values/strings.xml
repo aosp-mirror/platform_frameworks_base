@@ -568,7 +568,7 @@
     <!-- Content description for the split notification shade that also includes QS (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_qs_notification_shade">Quick settings and Notification shade.</string>
     <!-- Content description for the lock screen (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_desc_lock_screen">Lock screen.</string>
+    <string name="accessibility_desc_lock_screen">Lock screen</string>
     <!-- Content description for the work profile lock screen. This prevents work profile apps from being used, but personal apps can be used as normal (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_work_lock">Work lock screen</string>
     <!-- Content description for the close button in the zen mode panel introduction message. [CHAR LIMIT=NONE] -->
@@ -1127,6 +1127,9 @@
 
     <!-- Indication on the keyguard that is shown when the device is dock charging. [CHAR LIMIT=80]-->
     <string name="keyguard_indication_charging_time_dock"><xliff:g id="percentage" example="20%">%2$s</xliff:g> • Charging • Full in <xliff:g id="charging_time_left" example="4 hr, 2 min">%1$s</xliff:g></string>
+
+    <!-- Label for accessibility action that shows widgets on lock screen on click. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_open_communal_hub">Widgets on lock screen</string>
 
     <!-- Indicator on keyguard to start the communal tutorial. [CHAR LIMIT=100] -->
     <string name="communal_tutorial_indicator_text">Swipe left to start the communal tutorial</string>
