@@ -96,10 +96,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : 
 
     val kosmos =
         testKosmos().apply {
-            fakeFeatureFlagsClassic.apply {
-                set(Flags.FULL_SCREEN_USER_SWITCHER, false)
-                set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false)
-            }
+            fakeFeatureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
         }
 
     init {

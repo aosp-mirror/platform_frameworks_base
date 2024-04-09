@@ -153,11 +153,6 @@ object Flags {
     // TODO(b/267722622): Tracking Bug
     @JvmField val WALLPAPER_PICKER_UI_FOR_AIWP = releasedFlag("wallpaper_picker_ui_for_aiwp")
 
-    /** Whether to use a new data source for intents to run on keyguard dismissal. */
-    // TODO(b/275069969): Tracking bug.
-    @JvmField
-    val REFACTOR_KEYGUARD_DISMISS_INTENT = unreleasedFlag("refactor_keyguard_dismiss_intent")
-
     /** Whether to allow long-press on the lock screen to directly open wallpaper picker. */
     // TODO(b/277220285): Tracking bug.
     @JvmField

@@ -209,7 +209,6 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
 
         val keyguardKeyboardInteractor = KeyguardKeyboardInteractor(FakeKeyboardRepository())
         featureFlags = FakeFeatureFlags()
-        featureFlags.set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false)
         featureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false)
 
         mSetFlagsRule.enableFlags(
@@ -217,7 +216,8 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         )
         mSetFlagsRule.disableFlags(
             FLAG_SIDEFPS_CONTROLLER_REFACTOR,
-            AConfigFlags.FLAG_KEYGUARD_WM_STATE_REFACTOR
+            AConfigFlags.FLAG_KEYGUARD_WM_STATE_REFACTOR,
+            AConfigFlags.FLAG_REFACTOR_KEYGUARD_DISMISS_INTENT,
         )
 
         keyguardPasswordViewController =
