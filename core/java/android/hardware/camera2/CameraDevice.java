@@ -1768,9 +1768,12 @@ public abstract class CameraDevice implements AutoCloseable {
          * @param sessionConfig The session configuration for which characteristics are fetched.
          * @return CameraCharacteristics specific to a given session configuration.
          *
-         * @throws IllegalArgumentException      if the session configuration is invalid
-         * @throws CameraAccessException         if the camera device is no longer connected or has
-         *                                       encountered a fatal error
+         * @throws IllegalArgumentException if the session configuration is invalid or if
+         *                                  {@link #isSessionConfigurationSupported} returns
+         *                                  {@code false} for the provided
+         *                                  {@link SessionConfiguration}
+         * @throws CameraAccessException    if the camera device is no longer connected or has
+         *                                  encountered a fatal error
          *
          * @see CameraCharacteristics#getAvailableSessionCharacteristicsKeys
          */
