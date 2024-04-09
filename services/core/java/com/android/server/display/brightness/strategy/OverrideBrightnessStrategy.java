@@ -16,11 +16,10 @@
 
 package com.android.server.display.brightness.strategy;
 
-import android.hardware.display.DisplayManagerInternal;
-
 import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.brightness.BrightnessUtils;
+import com.android.server.display.brightness.StrategyExecutionRequest;
 import com.android.server.display.brightness.StrategySelectionNotifyRequest;
 
 import java.io.PrintWriter;
@@ -31,12 +30,13 @@ import java.io.PrintWriter;
 public class OverrideBrightnessStrategy implements DisplayBrightnessStrategy {
     @Override
     public DisplayBrightnessState updateBrightness(
-            DisplayManagerInternal.DisplayPowerRequest displayPowerRequest) {
+            StrategyExecutionRequest strategyExecutionRequest) {
         // Todo(b/241308599): Introduce a validator class and add validations before setting
         // the brightness
         return BrightnessUtils.constructDisplayBrightnessState(BrightnessReason.REASON_OVERRIDE,
-                displayPowerRequest.screenBrightnessOverride,
-                displayPowerRequest.screenBrightnessOverride, getName());
+                strategyExecutionRequest.getDisplayPowerRequest().screenBrightnessOverride,
+                strategyExecutionRequest.getDisplayPowerRequest()
+                        .screenBrightnessOverride, getName());
     }
 
     @Override

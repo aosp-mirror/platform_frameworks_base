@@ -41,8 +41,10 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
 import com.android.server.display.AutomaticBrightnessController;
+import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessEvent;
 import com.android.server.display.brightness.BrightnessReason;
+import com.android.server.display.brightness.StrategyExecutionRequest;
 
 import org.junit.After;
 import org.junit.Before;
@@ -295,15 +297,11 @@ public class AutomaticBrightnessStrategyTest {
                 mContext.getContentResolver(),
                 Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
                 UserHandle.USER_CURRENT), 0.0f);
-        assertEquals(BrightnessReason.ADJUSTMENT_AUTO,
-                mAutomaticBrightnessStrategy.getAutoBrightnessAdjustmentReasonsFlags());
         float invalidBrightness = -0.5f;
         mAutomaticBrightnessStrategy
                 .adjustAutomaticBrightnessStateIfValid(invalidBrightness);
         assertEquals(autoBrightnessAdjustment,
                 mAutomaticBrightnessStrategy.getAutoBrightnessAdjustment(), 0.0f);
-        assertEquals(0,
-                mAutomaticBrightnessStrategy.getAutoBrightnessAdjustmentReasonsFlags());
     }
 
     @Test
@@ -424,6 +422,80 @@ public class AutomaticBrightnessStrategyTest {
         when(mAutomaticBrightnessController.getAutomaticScreenBrightness(null))
                 .thenReturn(0.2f);
         assertTrue(mAutomaticBrightnessStrategy.isAutoBrightnessValid());
+    }
+
+    @Test
+    public void
+            updateBrightness_constructsDisplayBrightnessState_withAdjustmentAutoAdjustmentFlag() {
+        BrightnessEvent brightnessEvent = new BrightnessEvent(DISPLAY_ID);
+        mAutomaticBrightnessStrategy = new AutomaticBrightnessStrategy(
+                mContext, DISPLAY_ID, displayId -> brightnessEvent);
+        new AutomaticBrightnessStrategy(mContext, DISPLAY_ID);
+        mAutomaticBrightnessStrategy.setAutomaticBrightnessController(
+                mAutomaticBrightnessController);
+        float brightness = 0.4f;
+        BrightnessReason brightnessReason = new BrightnessReason();
+        brightnessReason.setReason(BrightnessReason.REASON_AUTOMATIC);
+        when(mAutomaticBrightnessController.getAutomaticScreenBrightness(brightnessEvent))
+                .thenReturn(brightness);
+
+        DisplayManagerInternal.DisplayPowerRequest displayPowerRequest =
+                mock(DisplayManagerInternal.DisplayPowerRequest.class);
+        DisplayBrightnessState expectedDisplayBrightnessState = new DisplayBrightnessState.Builder()
+                .setBrightness(brightness)
+                .setSdrBrightness(brightness)
+                .setBrightnessReason(brightnessReason)
+                .setDisplayBrightnessStrategyName(mAutomaticBrightnessStrategy.getName())
+                .setIsSlowChange(false)
+                .setBrightnessEvent(brightnessEvent)
+                .setBrightnessAdjustmentFlag(BrightnessReason.ADJUSTMENT_AUTO)
+                .setShouldUpdateScreenBrightnessSetting(true)
+                .build();
+        DisplayBrightnessState actualDisplayBrightnessState = mAutomaticBrightnessStrategy
+                .updateBrightness(new StrategyExecutionRequest(displayPowerRequest, 0.6f));
+        assertEquals(expectedDisplayBrightnessState, actualDisplayBrightnessState);
+    }
+
+    @Test
+    public void
+            updateBrightness_constructsDisplayBrightnessState_withAdjustmentTempAdjustmentFlag() {
+        BrightnessEvent brightnessEvent = new BrightnessEvent(DISPLAY_ID);
+        mAutomaticBrightnessStrategy = new AutomaticBrightnessStrategy(
+                mContext, DISPLAY_ID, displayId -> brightnessEvent);
+        new AutomaticBrightnessStrategy(mContext, DISPLAY_ID);
+        mAutomaticBrightnessStrategy.setAutomaticBrightnessController(
+                mAutomaticBrightnessController);
+        float brightness = 0.4f;
+        BrightnessReason brightnessReason = new BrightnessReason();
+        brightnessReason.setReason(BrightnessReason.REASON_AUTOMATIC);
+        when(mAutomaticBrightnessController.getAutomaticScreenBrightness(brightnessEvent))
+                .thenReturn(brightness);
+
+        DisplayManagerInternal.DisplayPowerRequest displayPowerRequest =
+                mock(DisplayManagerInternal.DisplayPowerRequest.class);
+        float temporaryBrightness = 0.3f;
+        float autoBrightnessAdjustment = 0.1f;
+        mAutomaticBrightnessStrategy.setTemporaryAutoBrightnessAdjustment(temporaryBrightness);
+        mAutomaticBrightnessStrategy.accommodateUserBrightnessChanges(true,
+                brightness, DisplayManagerInternal.DisplayPowerRequest.POLICY_BRIGHT,
+                Display.STATE_ON, mock(BrightnessConfiguration.class),
+                AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED);
+        when(mAutomaticBrightnessController.getAutomaticScreenBrightnessAdjustment()).thenReturn(
+                autoBrightnessAdjustment);
+
+        DisplayBrightnessState expectedDisplayBrightnessState = new DisplayBrightnessState.Builder()
+                .setBrightness(brightness)
+                .setSdrBrightness(brightness)
+                .setBrightnessReason(brightnessReason)
+                .setDisplayBrightnessStrategyName(mAutomaticBrightnessStrategy.getName())
+                .setIsSlowChange(false)
+                .setBrightnessEvent(brightnessEvent)
+                .setBrightnessAdjustmentFlag(BrightnessReason.ADJUSTMENT_AUTO_TEMP)
+                .setShouldUpdateScreenBrightnessSetting(true)
+                .build();
+        DisplayBrightnessState actualDisplayBrightnessState = mAutomaticBrightnessStrategy
+                .updateBrightness(new StrategyExecutionRequest(displayPowerRequest, 0.6f));
+        assertEquals(expectedDisplayBrightnessState, actualDisplayBrightnessState);
     }
 
     private void setPendingAutoBrightnessAdjustment(float pendingAutoBrightnessAdjustment) {
