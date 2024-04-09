@@ -2300,7 +2300,7 @@
              ensure that the status bar has enough contrast with the contents of this app, and set
              an appropriate effective bar background accordingly.
              See: {@link android.R.attr#enforceStatusBarContrast}
-             <p>If the app targets
+             <p>If the window belongs to an app targeting
              {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM VANILLA_ICE_CREAM} or above,
              this attribute is ignored.
              @deprecated Draw proper background behind
@@ -2320,7 +2320,7 @@
              ensure that the navigation bar has enough contrast with the contents of this app, and
              set an appropriate effective bar background accordingly.
              See: {@link android.R.attr#enforceNavigationBarContrast}
-             <p>If the app targets
+             <p>If the window belongs to an app targeting
              {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM VANILLA_ICE_CREAM} or above,
              this attribute is ignored.
              @deprecated Draw proper background behind
@@ -2335,7 +2335,7 @@
              have been requested to be translucent with
              {@link android.R.attr#windowTranslucentNavigation}.
              Corresponds to {@link android.view.Window#setNavigationBarDividerColor(int)}.
-             <p>If the app targets
+             <p>If the window belongs to an app targeting
              {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM VANILLA_ICE_CREAM} or above,
              this attribute is ignored.
              @deprecated Draw proper background behind
@@ -2427,7 +2427,9 @@
 
         <!-- Controls how the window is laid out if there is a {@code DisplayCutout}.
         <p>
-        Defaults to {@code default}.
+        Defaults to {@code default}. But if the window fills the screen, and it belongs to an app
+        targeting {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM VANILLA_ICE_CREAM} or
+        above, the behavior will be the same as specifying {@code always} regardless.
         <p>
         See also
         {@link android.view.WindowManager.LayoutParams#layoutInDisplayCutoutMode
@@ -2524,8 +2526,8 @@
 
         <!-- Flag indicating whether this window would opt-out the edge-to-edge enforcement.
 
-             <p>If this is false, the edge-to-edge enforcement will be applied to the window if its
-             app targets
+             <p>If this is false, the edge-to-edge enforcement will be applied to the window if it
+             belongs to an app targeting
              {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM VANILLA_ICE_CREAM} or above.
              The affected behaviors are:
              <ul>
@@ -2533,9 +2535,8 @@
                  through the {@link android.view.WindowInsets} to the content view, as if calling
                  {@link android.view.Window#setDecorFitsSystemWindows(boolean)} with false.
                  <li>{@link android.view.WindowManager.LayoutParams#layoutInDisplayCutoutMode} of
-                 the non-floating windows will be set to {@link
+                 the fill-screen windows will behave as specifying {@link
                  android.view.WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS}.
-                 Changing it to other values will cause {@link lang.IllegalArgumentException}.
                  <li>The framework will set {@link android.R.attr#statusBarColor},
                  {@link android.R.attr#navigationBarColor}, and
                  {@link android.R.attr#navigationBarDividerColor} to transparent.
