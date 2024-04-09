@@ -47,6 +47,7 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.phone.CentralSurfaces
@@ -103,6 +104,7 @@ constructor(
     private val headsUpInteractor: HeadsUpNotificationInteractor,
     private val occlusionInteractor: SceneContainerOcclusionInteractor,
     private val faceUnlockInteractor: DeviceEntryFaceAuthInteractor,
+    private val shadeInteractor: ShadeInteractor,
 ) : CoreStartable {
 
     override fun start() {
@@ -185,6 +187,14 @@ constructor(
 
     /** Switches between scenes based on ever-changing application state. */
     private fun automaticallySwitchScenes() {
+        handleBouncerImeVisibility()
+        handleSimUnlock()
+        handleDeviceUnlockStatus()
+        handlePowerState()
+        handleShadeTouchability()
+    }
+
+    private fun handleBouncerImeVisibility() {
         applicationScope.launch {
             // TODO (b/308001302): Move this to a bouncer specific interactor.
             bouncerInteractor.onImeHiddenByUser.collectLatest {
@@ -196,6 +206,9 @@ constructor(
                 }
             }
         }
+    }
+
+    private fun handleSimUnlock() {
         applicationScope.launch {
             simBouncerInteractor
                 .get()
@@ -229,6 +242,9 @@ constructor(
                     }
                 }
         }
+    }
+
+    private fun handleDeviceUnlockStatus() {
         applicationScope.launch {
             deviceUnlockedInteractor.deviceUnlockStatus
                 .mapNotNull { deviceUnlockStatus ->
@@ -288,7 +304,9 @@ constructor(
                     )
                 }
         }
+    }
 
+    private fun handlePowerState() {
         applicationScope.launch {
             powerInteractor.isAsleep.collect { isAsleep ->
                 if (isAsleep) {
@@ -317,11 +335,25 @@ constructor(
                     ) {
                         switchToScene(
                             targetSceneKey = Scenes.Bouncer,
-                            loggingReason = "device is starting to wake up with a locked sim"
+                            loggingReason = "device is starting to wake up with a locked sim",
                         )
                     }
                 }
             }
+        }
+    }
+
+    private fun handleShadeTouchability() {
+        applicationScope.launch {
+            shadeInteractor.isShadeTouchable
+                .distinctUntilChanged()
+                .filter { !it }
+                .collect {
+                    switchToScene(
+                        targetSceneKey = Scenes.Lockscreen,
+                        loggingReason = "device became non-interactive",
+                    )
+                }
         }
     }
 
