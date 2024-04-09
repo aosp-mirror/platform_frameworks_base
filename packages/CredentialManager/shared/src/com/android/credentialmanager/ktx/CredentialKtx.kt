@@ -142,7 +142,7 @@ private fun getCredentialOptionInfoList(
                     isDefaultIconPreferredAsSingleProvider =
                             credentialEntry.isDefaultIconPreferredAsSingleProvider,
                     affiliatedDomain = credentialEntry.affiliatedDomain?.toString(),
-                    biometricRequest = predetermineAndValidateBiometricFlow(it,
+                    biometricRequest = retrieveEntryBiometricRequest(it,
                         CREDENTIAL_ENTRY_PREFIX),
                 )
                 )
@@ -172,7 +172,7 @@ private fun getCredentialOptionInfoList(
                     isDefaultIconPreferredAsSingleProvider =
                             credentialEntry.isDefaultIconPreferredAsSingleProvider,
                     affiliatedDomain = credentialEntry.affiliatedDomain?.toString(),
-                    biometricRequest = predetermineAndValidateBiometricFlow(it,
+                    biometricRequest = retrieveEntryBiometricRequest(it,
                         CREDENTIAL_ENTRY_PREFIX),
                 )
                 )
@@ -201,7 +201,7 @@ private fun getCredentialOptionInfoList(
                     isDefaultIconPreferredAsSingleProvider =
                             credentialEntry.isDefaultIconPreferredAsSingleProvider,
                     affiliatedDomain = credentialEntry.affiliatedDomain?.toString(),
-                    biometricRequest = predetermineAndValidateBiometricFlow(it,
+                    biometricRequest = retrieveEntryBiometricRequest(it,
                         CREDENTIAL_ENTRY_PREFIX),
                 )
                 )
@@ -216,7 +216,7 @@ private fun getCredentialOptionInfoList(
 }
 
 /**
- * This validates if this is a biometric flow or not, and if it is, this returns the expected
+ * This validates if the entry calling this method contains biometric info, and if so, returns a
  * [BiometricRequestInfo]. Namely, the biometric flow must have at least the
  * ALLOWED_AUTHENTICATORS bit passed from Jetpack.
  * Note that the required values, such as the provider info's icon or display name, or the entries
@@ -230,7 +230,7 @@ private fun getCredentialOptionInfoList(
  * // TODO(b/326243754) : Presently, due to dependencies, the opId bit is parsed but is never
  * // expected to be used. When it is added, it should be lightly validated.
  */
-fun predetermineAndValidateBiometricFlow(
+fun retrieveEntryBiometricRequest(
     entry: Entry,
     hintPrefix: String,
 ): BiometricRequestInfo? {

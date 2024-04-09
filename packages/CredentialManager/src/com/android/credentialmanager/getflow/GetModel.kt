@@ -286,7 +286,7 @@ private fun toGetScreenState(
         GetScreenState.REMOTE_ONLY
     else if (isRequestForAllOptions)
         GetScreenState.ALL_SIGN_IN_OPTIONS
-    else if (isBiometricFlow(providerDisplayInfo))
+    else if (isBiometricFlow(providerDisplayInfo, isFlowAutoSelectable(providerDisplayInfo)))
         GetScreenState.BIOMETRIC_SELECTION
     else GetScreenState.PRIMARY_SELECTION
 }
@@ -294,9 +294,14 @@ private fun toGetScreenState(
 /**
  * Determines if the flow is a biometric flow by taking into account autoselect criteria.
  */
-internal fun isBiometricFlow(providerDisplayInfo: ProviderDisplayInfo) =
-    findBiometricFlowEntry(providerDisplayInfo,
-        findAutoSelectEntry(providerDisplayInfo) != null) != null
+internal fun isBiometricFlow(providerDisplayInfo: ProviderDisplayInfo, isAutoSelectFlow: Boolean) =
+    findBiometricFlowEntry(providerDisplayInfo, isAutoSelectFlow) != null
+
+/**
+ * Determines if the flow is an autoselect flow.
+ */
+internal fun isFlowAutoSelectable(providerDisplayInfo: ProviderDisplayInfo) =
+    findAutoSelectEntry(providerDisplayInfo) != null
 
 internal class CredentialEntryInfoComparatorByTypeThenTimestamp(
         val typePriorityMap: Map<String, Int>,
