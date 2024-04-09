@@ -17,7 +17,6 @@
 package android.security;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.StrictMode;
 
 /**
  * This class provides some constants and helper methods related to Android's Keystore service.
@@ -37,18 +36,5 @@ public class KeyStore {
     @UnsupportedAppUsage
     public static KeyStore getInstance() {
         return KEY_STORE;
-    }
-
-    /**
-     * Add an authentication record to the keystore authorization table.
-     *
-     * @param authToken The packed bytes of a hw_auth_token_t to be provided to keymaster.
-     * @return 0 on success, otherwise an error value corresponding to a
-     * {@code KeymasterDefs.KM_ERROR_} value or {@code KeyStore} ResponseCode.
-     */
-    public int addAuthToken(byte[] authToken) {
-        StrictMode.noteDiskWrite();
-
-        return Authorization.addAuthToken(authToken);
     }
 }

@@ -16,6 +16,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.frameworks.coretests.binderproxycountingtestapp">
 
+    <queries>
+        <package android:name="com.android.frameworks.coretests.binderproxycountingtestservice" />
+    </queries>
     <application>
         <service android:name=".BpcTestAppCmdService"
                  android:exported="true"/>
