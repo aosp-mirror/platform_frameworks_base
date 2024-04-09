@@ -497,6 +497,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -9841,6 +9843,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 long runtimeMillis = SystemClock.uptimeMillis() - process.getStartUptime();
                 sb.append("Process-Runtime: ").append(runtimeMillis).append("\n");
             }
+        }
+        if (eventType.equals("crash")) {
+            String formattedTime = DROPBOX_TIME_FORMATTER.format(
+                    Instant.now().atZone(ZoneId.systemDefault()));
+            sb.append("Timestamp: ").append(formattedTime).append("\n");
         }
         if (activityShortComponentName != null) {
             sb.append("Activity: ").append(activityShortComponentName).append("\n");
