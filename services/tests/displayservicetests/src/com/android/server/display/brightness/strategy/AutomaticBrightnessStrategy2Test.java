@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class AutomaticBrightnessStrategyTest {
+public class AutomaticBrightnessStrategy2Test {
     private static final int DISPLAY_ID = 0;
     @Rule
     public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
@@ -65,7 +65,7 @@ public class AutomaticBrightnessStrategyTest {
     private BrightnessConfiguration mBrightnessConfiguration;
     private float mDefaultScreenAutoBrightnessAdjustment;
     private Context mContext;
-    private AutomaticBrightnessStrategy mAutomaticBrightnessStrategy;
+    private AutomaticBrightnessStrategy2 mAutomaticBrightnessStrategy;
 
     @Before
     public void before() {
@@ -78,7 +78,7 @@ public class AutomaticBrightnessStrategyTest {
                 Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, Float.NaN);
         Settings.System.putFloat(mContext.getContentResolver(),
                 Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, 0.5f);
-        mAutomaticBrightnessStrategy = new AutomaticBrightnessStrategy(mContext, DISPLAY_ID);
+        mAutomaticBrightnessStrategy = new AutomaticBrightnessStrategy2(mContext, DISPLAY_ID);
 
         mBrightnessConfiguration = new BrightnessConfiguration.Builder(
                 new float[]{0f, 1f}, new float[]{0, PowerManager.BRIGHTNESS_ON}).build();
@@ -392,38 +392,10 @@ public class AutomaticBrightnessStrategyTest {
     @Test
     public void testVerifyNoAutoBrightnessAdjustmentsArePopulatedForNonDefaultDisplay() {
         int newDisplayId = 1;
-        mAutomaticBrightnessStrategy = new AutomaticBrightnessStrategy(mContext, newDisplayId);
+        mAutomaticBrightnessStrategy = new AutomaticBrightnessStrategy2(mContext, newDisplayId);
         mAutomaticBrightnessStrategy.putAutoBrightnessAdjustmentSetting(0.3f);
         assertEquals(0.5f, mAutomaticBrightnessStrategy.getAutoBrightnessAdjustment(),
                 0.0f);
-    }
-
-    @Test
-    public void isAutoBrightnessValid_returnsFalseWhenAutoBrightnessIsDisabled() {
-        assertFalse(mAutomaticBrightnessStrategy.isAutoBrightnessValid());
-    }
-
-    @Test
-    public void isAutoBrightnessValid_returnsFalseWhenBrightnessIsInvalid() {
-        mAutomaticBrightnessStrategy.setAutoBrightnessState(Display.STATE_ON, true,
-                BrightnessReason.REASON_UNKNOWN,
-                DisplayManagerInternal.DisplayPowerRequest.POLICY_BRIGHT, 0.1f,
-                false);
-        when(mAutomaticBrightnessController.getAutomaticScreenBrightness(null))
-                .thenReturn(Float.NaN);
-        assertFalse(mAutomaticBrightnessStrategy.isAutoBrightnessValid());
-    }
-
-    @Test
-    public void isAutoBrightnessValid_returnsTrueWhenBrightnessIsValid() {
-        mAutomaticBrightnessStrategy.setUseAutoBrightness(true);
-        mAutomaticBrightnessStrategy.setAutoBrightnessState(Display.STATE_ON, true,
-                BrightnessReason.REASON_UNKNOWN,
-                DisplayManagerInternal.DisplayPowerRequest.POLICY_BRIGHT, 0.1f,
-                false);
-        when(mAutomaticBrightnessController.getAutomaticScreenBrightness(null))
-                .thenReturn(0.2f);
-        assertTrue(mAutomaticBrightnessStrategy.isAutoBrightnessValid());
     }
 
     private void setPendingAutoBrightnessAdjustment(float pendingAutoBrightnessAdjustment) {
