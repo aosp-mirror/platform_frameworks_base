@@ -1986,11 +1986,9 @@ final class UiModeManagerService extends SystemService {
         // the status bar should be totally disabled, the calls below will
         // have no effect until the device is unlocked.
         if (mStatusBarManager != null) {
-            StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo();
-            if (mCarModeEnabled) {
-                info.setNotificationTickerDisabled(true);
-            }
-            mStatusBarManager.requestDisabledComponent(info, "adjustStatusBarCarModeLocked");
+            mStatusBarManager.disable(mCarModeEnabled
+                    ? StatusBarManager.DISABLE_NOTIFICATION_TICKER
+                    : StatusBarManager.DISABLE_NONE);
         }
 
         if (mNotificationManager == null) {
