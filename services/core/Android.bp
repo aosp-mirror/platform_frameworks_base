@@ -182,6 +182,7 @@ java_library_static {
         "android.hardware.vibrator-V2-java",
         "app-compat-annotations",
         "framework-tethering.stubs.module_lib",
+        "keepanno-annotations",
         "service-art.stubs.system_server",
         "service-permission.stubs.system_server",
         "service-rkp.stubs.system_server",
