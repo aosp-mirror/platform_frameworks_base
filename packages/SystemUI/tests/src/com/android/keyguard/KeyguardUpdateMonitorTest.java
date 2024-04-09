@@ -52,6 +52,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -157,7 +158,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.MockitoSession;
 import org.mockito.internal.util.reflection.FieldSetter;
@@ -806,6 +806,31 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         verifyFingerprintAuthenticateNeverCalled();
         verifyFingerprintDetectCall();
+    }
+
+    @Test
+    public void whenFaceAuthenticated_biometricAuthenticatedCallback_beforeUpdatingFpState() {
+        // GIVEN listening for UDFPS fingerprint
+        when(mAuthController.isUdfpsSupported()).thenReturn(true);
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
+        mTestableLooper.processAllMessages();
+        keyguardIsVisible();
+        final CancellationSignal fpCancel = spy(mKeyguardUpdateMonitor.mFingerprintCancelSignal);
+        mKeyguardUpdateMonitor.mFingerprintCancelSignal = fpCancel;
+
+        // WHEN face is authenticated
+        when(mFaceAuthInteractor.isAuthenticated()).thenReturn(true);
+        when(mFaceAuthInteractor.isFaceAuthStrong()).thenReturn(true);
+        when(mFaceAuthInteractor.isLockedOut()).thenReturn(false);
+        mKeyguardUpdateMonitor.onFaceAuthenticated(0, true);
+        mTestableLooper.processAllMessages();
+
+        // THEN verify keyguardUpdateMonitorCallback receives an onAuthenticated callback
+        // before cancelling the fingerprint request
+        InOrder inOrder = inOrder(mTestCallback, fpCancel);
+        inOrder.verify(mTestCallback).onBiometricAuthenticated(
+                eq(0), eq(BiometricSourceType.FACE), eq(true));
+        inOrder.verify(fpCancel).cancel();
     }
 
     @Test
@@ -2133,7 +2158,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 null /* trustGrantedMessages */);
 
         // THEN onTrustChanged is called FIRST
-        final InOrder inOrder = Mockito.inOrder(callback);
+        final InOrder inOrder = inOrder(callback);
         inOrder.verify(callback).onTrustChanged(eq(mSelectedUserInteractor.getSelectedUserId()));
 
         // AND THEN onTrustGrantedForCurrentUser callback called
