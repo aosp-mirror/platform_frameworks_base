@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.Context
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.SettingsClockSize
 import com.android.systemui.res.R
@@ -31,7 +30,6 @@ import kotlinx.coroutines.flow.map
 class KeyguardPreviewSmartspaceViewModel
 @Inject
 constructor(
-    @Application private val context: Context,
     interactor: KeyguardClockInteractor,
     val smartspaceViewModel: KeyguardSmartspaceViewModel,
     val clockViewModel: KeyguardClockViewModel,
@@ -55,29 +53,29 @@ constructor(
                 }
             }
 
-    fun getSmartspaceStartPadding(): Int {
+    fun getSmartspaceStartPadding(context: Context): Int {
         return KeyguardSmartspaceViewModel.getSmartspaceStartMargin(context)
     }
 
-    fun getSmartspaceEndPadding(): Int {
+    fun getSmartspaceEndPadding(context: Context): Int {
         return KeyguardSmartspaceViewModel.getSmartspaceEndMargin(context)
     }
 
-    fun getSmallClockSmartspaceTopPadding(splitShadePreview: Boolean): Int {
-        return getSmallClockTopPadding(splitShadePreview) +
+    fun getSmallClockSmartspaceTopPadding(splitShadePreview: Boolean, context: Context): Int {
+        return getSmallClockTopPadding(splitShadePreview, context) +
             context.resources.getDimensionPixelSize(
                 com.android.systemui.customization.R.dimen.small_clock_height
             )
     }
 
-    fun getLargeClockSmartspaceTopPadding(splitShadePreview: Boolean): Int {
-        return getSmallClockTopPadding(splitShadePreview)
+    fun getLargeClockSmartspaceTopPadding(splitShadePreview: Boolean, context: Context): Int {
+        return getSmallClockTopPadding(splitShadePreview, context)
     }
 
     /*
      * SmallClockTopPadding decides the top position of smartspace
      */
-    private fun getSmallClockTopPadding(splitShadePreview: Boolean): Int {
+    private fun getSmallClockTopPadding(splitShadePreview: Boolean, context: Context): Int {
         return with(context.resources) {
             if (splitShadePreview) {
                 getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin)
