@@ -269,7 +269,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Luminozitate"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inversarea culorilor"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Corecția culorii"</string>
-    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Dimensiunea fontului"</string>
+    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Mărimea fontului"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Gestionează"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Terminat"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Închide"</string>
@@ -386,13 +386,13 @@
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Începe din nou"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Da, continuă"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"Modul pentru invitați"</string>
-    <string name="guest_notification_session_active" msgid="5567273684713471450">"Folosește modul pentru invitați"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"Folosești modul pentru invitați"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Dacă adaugi un utilizator nou, vei ieși din modul pentru invitați și se vor șterge toate aplicațiile și datele din sesiunea actuală pentru invitați."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Ai atins limita de utilizatori"</string>
     <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{Se poate crea doar un utilizator.}few{Poți adăuga până la # utilizatori.}other{Poți adăuga până la # de utilizatori.}}"</string>
     <string name="user_remove_user_title" msgid="9124124694835811874">"Excluzi utilizatorul?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Toate aplicațiile și datele acestui utilizator vor fi șterse."</string>
-    <string name="user_remove_user_remove" msgid="8387386066949061256">"Elimină"</string>
+    <string name="user_remove_user_remove" msgid="8387386066949061256">"Exclude"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Începi să înregistrezi sau să proiectezi cu <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> va avea acces la toate informațiile vizibile pe ecran sau redate pe dispozitiv în timp ce înregistrezi sau proiectezi. Între aceste informații se numără parole, detalii de plată, fotografii, mesaje și conținutul audio pe care îl redai."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Începi să înregistrezi sau să proiectezi?"</string>
@@ -838,7 +838,7 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"înregistrare de ecran"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Fără titlu"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Standby"</string>
-    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Dimensiunea fontului"</string>
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Mărimea fontului"</string>
     <string name="font_scaling_smaller" msgid="1012032217622008232">"Micșorează"</string>
     <string name="font_scaling_larger" msgid="5476242157436806760">"Mărește"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Fereastra de mărire"</string>

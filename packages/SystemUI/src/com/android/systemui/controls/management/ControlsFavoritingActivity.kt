@@ -216,7 +216,7 @@ open class ControlsFavoritingActivity @Inject constructor(
 
                         ControlsAnimations.enterAnimation(pageIndicator).apply {
                             addListener(object : AnimatorListenerAdapter() {
-                                override fun onAnimationEnd(animation: Animator?) {
+                                override fun onAnimationEnd(animation: Animator) {
                                     // Position the tooltip if necessary after animations are complete
                                     // so we can get the position on screen. The tooltip is not
                                     // rooted in the layout root.
@@ -268,7 +268,7 @@ open class ControlsFavoritingActivity @Inject constructor(
     private fun bindViews() {
         setContentView(R.layout.controls_management)
 
-        getLifecycle().addObserver(
+        lifecycle.addObserver(
             ControlsAnimations.observerForAnimations(
                 requireViewById<ViewGroup>(R.id.controls_management_root),
                 window,

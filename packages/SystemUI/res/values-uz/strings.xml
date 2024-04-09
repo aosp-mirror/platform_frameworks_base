@@ -532,7 +532,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Telefonda tezroq va xavfsizroq xarid qilish uchun sozlang"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Hammasi"</string>
-    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Ochish uchun ustiga bosing"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Ochish uchun bosing"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Yangilanmoqda"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Foydalanish uchun qulfdan chiqarish"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Bildirgilarni yuklashda xatolik yuz berdi, keyinroq qaytadan urining"</string>
@@ -1047,7 +1047,7 @@
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Joriy telefon chaqiruvi"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobil internet"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
-    <string name="mobile_data_connection_active" msgid="944490013299018227">"Ulandi"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"Ulangan"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Vaqtincha ulangan"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Aloqa beqaror"</string>
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"Mobil internetga avtomatik ulanmaydi"</string>
@@ -1124,7 +1124,7 @@
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Kamida bitta qurilma mavjud"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Qayd yozish yorligʻidan foydalanish uchun birlamchi qayd ilovasini tanlang"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Ilovani tanlang"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Bosib turish yorligʻi"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Yorliqni bosib turing"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Bekor qilish"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Ekranlarni hozir almashtirish"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Telefonni yoying"</string>

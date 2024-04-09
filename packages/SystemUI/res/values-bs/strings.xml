@@ -103,9 +103,9 @@
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Dok snimate, Android ima pristup svemu što je vidljivo na ekranu ili što se reproducira na uređaju. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, zvukovi i videozapisi."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Dok snimate aplikaciju, Android ima pristup svemu što se prikazuje ili reproducira u toj aplikaciji. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, zvukovi i videozapisi."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Pokreni snimanje"</string>
-    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Snimi zvučni zapis"</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Snimanje zvuka"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvuk na uređaju"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvuk s vašeg uređaja, naprimjer muzika, pozivi i melodije zvona"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvuk s vašeg uređaja, npr. muzika, pozivi i melodije zvona"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Zvuk na uređaju i mikrofon"</string>
     <string name="screenrecord_continue" msgid="4055347133700593164">"Pokreni"</string>

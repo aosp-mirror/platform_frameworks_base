@@ -1256,7 +1256,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Қолданбалар іске қосылуда."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Қосуды аяқтауда."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Қуат түймесін бастыңыз. Бұл әдетте экранды өшіреді.\n\nСаусақ ізін реттеу үшін, оны жайлап түртіп көріңіз."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Реттеуді аяқтау үшін экранды өшіріңіз"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Реттеуді аяқтау үшін экранды өшіріңіз."</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Өшіру"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Саусақ ізін растауды жалғастырасыз ба?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Қуат түймесін бастыңыз. Бұл әдетте экранды өшіреді.\n\nСаусақ ізін растау үшін, оны жайлап түртіп көріңіз."</string>
@@ -1534,7 +1534,7 @@
     <string name="sync_really_delete" msgid="5657871730315579051">"Бұл нәрселер жойылсын"</string>
     <string name="sync_undo_deletes" msgid="5786033331266418896">"Жойылғандарды кері орындау"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"Қазір ешқандай әрекет жасамаңыз"</string>
-    <string name="choose_account_label" msgid="5557833752759831548">"Аккаунт таңдау"</string>
+    <string name="choose_account_label" msgid="5557833752759831548">"Аккаунт таңдаңыз"</string>
     <string name="add_account_label" msgid="4067610644298737417">"Аккаунт қосу"</string>
     <string name="add_account_button_label" msgid="322390749416414097">"Аккаунт қосу."</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Арттыру"</string>
@@ -2065,7 +2065,7 @@
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Зиянды қолданба анықталды"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> қолданбасы <xliff:g id="APP_2">%2$s</xliff:g> қолданбасының үзінділерін көрсеткісі келеді"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Өзгерту"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Қоңыраулар мен хабарландырулардың вибрациясы болады"</string>
+    <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Қоңыраулар мен хабарландырулардың дірілі болады."</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Қоңыраулар мен хабарландырулардың дыбыстық сигналы өшіріледі"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Жүйе өзгерістері"</string>
     <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Мазаламау режимі"</string>

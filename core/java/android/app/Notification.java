@@ -7368,6 +7368,7 @@ public class Notification implements Parcelable
         /**
          * @hide
          */
+        @SuppressWarnings("HiddenAbstractMethod")
         public abstract boolean areNotificationsVisiblyDifferent(Style other);
 
         /**

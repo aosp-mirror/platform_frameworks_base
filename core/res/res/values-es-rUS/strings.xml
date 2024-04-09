@@ -109,7 +109,7 @@
     <string name="serviceClassPAD" msgid="6850244583416306321">"PAD"</string>
     <string name="roamingText0" msgid="7793257871609854208">"Indicador de roaming activado"</string>
     <string name="roamingText1" msgid="5073028598334616445">"Indicador de roaming desactivado"</string>
-    <string name="roamingText2" msgid="2834048284153110598">"Indicador de roaming titilando"</string>
+    <string name="roamingText2" msgid="2834048284153110598">"Indicador de roaming parpadeando"</string>
     <string name="roamingText3" msgid="831690234035748988">"Fuera del vecindario"</string>
     <string name="roamingText4" msgid="2171252529065590728">"Fuera de construcción"</string>
     <string name="roamingText5" msgid="4294671587635796641">"Roaming: sistema preferido"</string>
@@ -2093,7 +2093,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Aceptar"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desactivar"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Más información"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Las notificaciones mejoradas reemplazaron a las notificaciones adaptables en Android 12. Esta función muestra respuestas y acciones sugeridas, y organiza tus notificaciones.\n\nLas notificaciones mejoradas pueden acceder a todo el contenido de notificaciones, lo que incluye información personal, como nombres de contactos y mensajes. También pueden descartar o responder notificaciones (como contestar llamadas) y controlar la función No interrumpir."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Las notificaciones mejoradas reemplazaron a las notificaciones adaptables en Android 12. Esta función muestra respuestas y acciones sugeridas, y organiza tus notificaciones.\n\nLas notificaciones mejoradas pueden acceder a todo el contenido de notificaciones, incluida información personal, como nombres de contactos y mensajes. También pueden descartar o responder notificaciones (como contestar llamadas) y controlar la función No interrumpir."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificación de información del modo de Rutinas"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Ahorro de batería activado"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Reduciendo el uso de la batería para extender su duración"</string>

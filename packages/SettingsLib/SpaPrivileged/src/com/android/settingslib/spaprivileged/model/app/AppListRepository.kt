@@ -75,6 +75,7 @@ internal class AppListRepositoryImpl(private val context: Context) : AppListRepo
             packageManager.getInstalledModules(0)
                 .filter { it.isHidden }
                 .map { it.packageName }
+                .filterNotNull()
                 .toSet()
         }
         val hideWhenDisabledPackagesDeferred = async {

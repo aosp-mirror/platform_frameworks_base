@@ -164,7 +164,7 @@ class SideFpsControllerTest : SysuiTestCase() {
         context.addMockSystemService(WindowManager::class.java, windowManager)
 
         whenEver(layoutInflater.inflate(R.layout.sidefps_view, null, false)).thenReturn(sideFpsView)
-        whenEver(sideFpsView.findViewById<LottieAnimationView>(eq(R.id.sidefps_animation)))
+        whenEver(sideFpsView.requireViewById<LottieAnimationView>(eq(R.id.sidefps_animation)))
             .thenReturn(mock(LottieAnimationView::class.java))
         with(mock(ViewPropertyAnimator::class.java)) {
             whenEver(sideFpsView.animate()).thenReturn(this)

@@ -110,20 +110,20 @@ constructor(
                 }
                 value.smallClock.view.addOnAttachStateChangeListener(
                     object : OnAttachStateChangeListener {
-                        override fun onViewAttachedToWindow(p0: View?) {
+                        override fun onViewAttachedToWindow(p0: View) {
                             value.events.onTimeFormatChanged(DateFormat.is24HourFormat(context))
                         }
 
-                        override fun onViewDetachedFromWindow(p0: View?) {
+                        override fun onViewDetachedFromWindow(p0: View) {
                         }
                 })
                 value.largeClock.view.addOnAttachStateChangeListener(
                     object : OnAttachStateChangeListener {
-                        override fun onViewAttachedToWindow(p0: View?) {
+                        override fun onViewAttachedToWindow(p0: View) {
                             value.events.onTimeFormatChanged(DateFormat.is24HourFormat(context))
                         }
 
-                        override fun onViewDetachedFromWindow(p0: View?) {
+                        override fun onViewDetachedFromWindow(p0: View) {
                         }
                 })
             }
