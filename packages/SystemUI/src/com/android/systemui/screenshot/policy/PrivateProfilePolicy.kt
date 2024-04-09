@@ -20,10 +20,13 @@ import android.os.UserHandle
 import com.android.systemui.screenshot.data.model.DisplayContentModel
 import com.android.systemui.screenshot.data.model.ProfileType
 import com.android.systemui.screenshot.data.repository.ProfileTypeRepository
+import com.android.systemui.screenshot.policy.CapturePolicy.PolicyResult
+import com.android.systemui.screenshot.policy.CapturePolicy.PolicyResult.Matched
+import com.android.systemui.screenshot.policy.CapturePolicy.PolicyResult.NotMatched
 import com.android.systemui.screenshot.policy.CaptureType.FullScreen
 import javax.inject.Inject
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.firstOrNull
+
+private const val POLICY_NAME = "PrivateProfile"
 
 /**
  * Condition: When any visible task belongs to a private user.
@@ -35,7 +38,12 @@ class PrivateProfilePolicy
 constructor(
     private val profileTypes: ProfileTypeRepository,
 ) : CapturePolicy {
-    override suspend fun apply(content: DisplayContentModel): CaptureParameters? {
+    override suspend fun check(content: DisplayContentModel): PolicyResult {
+        // The systemUI notification shade isn't a private profile app, skip.
+        if (content.systemUiState.shadeExpanded) {
+            return NotMatched(policy = POLICY_NAME, reason = "Notification shade is expanded")
+        }
+
         // Find the first visible rootTaskInfo with a child task owned by a private user
         val (rootTask, childTask) =
             content.rootTasks
@@ -48,13 +56,20 @@ constructor(
                         }
                         ?.let { root to it }
                 }
-                ?: return null
+                ?: return NotMatched(
+                    policy = POLICY_NAME,
+                    reason = "No private profile tasks are visible"
+                )
 
         // If matched, return parameters needed to modify the request.
-        return CaptureParameters(
-            type = FullScreen(content.displayId),
-            component = childTask.componentName ?: rootTask.topActivity,
-            owner = UserHandle.of(childTask.userId),
+        return Matched(
+            policy = POLICY_NAME,
+            reason = "At least one private profile task is visible",
+            CaptureParameters(
+                type = FullScreen(content.displayId),
+                component = childTask.componentName ?: rootTask.topActivity,
+                owner = UserHandle.of(childTask.userId),
+            )
         )
     }
 }
