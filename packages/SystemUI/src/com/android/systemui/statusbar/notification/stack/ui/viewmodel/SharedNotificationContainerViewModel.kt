@@ -350,7 +350,8 @@ constructor(
      *
      * When the shade is expanding, the position is controlled by... the shade.
      */
-    val bounds: StateFlow<NotificationContainerBounds> =
+    val bounds: StateFlow<NotificationContainerBounds> by lazy {
+        SceneContainerFlag.assertInLegacyMode()
         combine(
                 isOnLockscreenWithoutShade,
                 keyguardInteractor.notificationContainerBounds,
@@ -380,6 +381,7 @@ constructor(
                 initialValue = NotificationContainerBounds(),
             )
             .dumpValue("bounds")
+    }
 
     /**
      * Ensure view is visible when the shade/qs are expanded. Also, as QS is expanding, fade out
