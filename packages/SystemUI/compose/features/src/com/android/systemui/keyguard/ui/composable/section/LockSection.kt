@@ -34,6 +34,7 @@ import com.android.keyguard.LockIconView
 import com.android.keyguard.LockIconViewController
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
@@ -50,12 +51,14 @@ import com.android.systemui.shade.NotificationPanelView
 import com.android.systemui.statusbar.VibratorHelper
 import dagger.Lazy
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 
 class LockSection
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
+    @Main private val mainImmediateDispatcher: CoroutineDispatcher,
     private val windowManager: WindowManager,
     private val authController: AuthController,
     private val featureFlags: FeatureFlagsClassic,
@@ -93,6 +96,7 @@ constructor(
                                 deviceEntryBackgroundViewModel.get(),
                                 falsingManager.get(),
                                 vibratorHelper.get(),
+                                mainImmediateDispatcher,
                             )
                         }
                     } else {

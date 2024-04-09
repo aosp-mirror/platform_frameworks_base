@@ -142,6 +142,7 @@ class ClockEventControllerTest : SysuiTestCase() {
                 context.resources,
                 context,
                 mainExecutor,
+                IMMEDIATE,
                 bgExecutor,
                 clockBuffers,
                 withDeps.featureFlags,
