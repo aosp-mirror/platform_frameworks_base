@@ -64,6 +64,12 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
 
     private static final int PACKET_LOSS_PERCENT_UNAVAILABLE = -1;
 
+    // Ignore the packet loss detection result if the expected packet number is smaller than 10.
+    // Solarwinds NPM uses 10 ICMP echos to calculate packet loss rate (as per
+    // https://thwack.solarwinds.com/products/network-performance-monitor-npm/f/forum/63829/how-is-packet-loss-calculated)
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    static final int MIN_VALID_EXPECTED_RX_PACKET_NUM = 10;
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(
             prefix = {"PACKET_LOSS_"},
@@ -85,6 +91,8 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
      * <ul>
      *   <li>The replay window did not proceed and thus all packets might have been delivered out of
      *       order
+     *   <li>The expected received packet number is too small and thus the detection result is not
+     *       reliable
      *   <li>There are unexpected errors
      * </ul>
      */
@@ -113,7 +121,7 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
     private static final int MAX_SEQ_NUM_INCREASE_DEFAULT_DISABLED = -1;
 
     private long mPollIpSecStateIntervalMs;
-    private final int mPacketLossRatePercentThreshold;
+    private int mPacketLossRatePercentThreshold;
     private int mMaxSeqNumIncreasePerSecond;
 
     @NonNull private final Handler mHandler;
@@ -273,6 +281,7 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
         mPollIpSecStateIntervalMs = getPollIpSecStateIntervalMs(carrierConfig);
 
         if (Flags.handleSeqNumLeap()) {
+            mPacketLossRatePercentThreshold = getPacketLossRatePercentThreshold(carrierConfig);
             mMaxSeqNumIncreasePerSecond = getMaxSeqNumIncreasePerSecond(carrierConfig);
         }
     }
@@ -475,6 +484,11 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
                             + expectedPktCntDiff
                             + " actualPktCntDiff: "
                             + actualPktCntDiff);
+
+            if (Flags.handleSeqNumLeap() && expectedPktCntDiff < MIN_VALID_EXPECTED_RX_PACKET_NUM) {
+                // The sample size is too small to ensure a reliable detection result
+                return PacketLossCalculationResult.invalid();
+            }
 
             if (expectedPktCntDiff < 0
                     || expectedPktCntDiff == 0
