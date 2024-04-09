@@ -66,6 +66,7 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
+import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.scene.shared.model.FakeSceneDataSource
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
@@ -267,7 +268,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 falsingManager,
                 userSwitcherController,
                 featureFlags,
-                kosmos.fakeSceneContainerFlags,
+                kosmos.sceneContainerFlags,
                 globalSettings,
                 sessionTracker,
                 Optional.of(sideFpsController),
