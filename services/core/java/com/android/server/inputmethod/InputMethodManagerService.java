@@ -1336,77 +1336,78 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             Context context,
             @Nullable ServiceThread serviceThreadForTesting,
             @Nullable InputMethodBindingController bindingControllerForTesting) {
-        mContext = context;
-        mRes = context.getResources();
-        SecureSettingsWrapper.onStart(mContext);
-        // TODO(b/196206770): Disallow I/O on this thread. Currently it's needed for loading
-        // additional subtypes in switchUserOnHandlerLocked().
-        final ServiceThread thread =
-                serviceThreadForTesting != null
-                        ? serviceThreadForTesting
-                        : new ServiceThread(
-                                HANDLER_THREAD_NAME,
-                                Process.THREAD_PRIORITY_FOREGROUND,
-                                true /* allowIo */);
-        thread.start();
-        mHandler = Handler.createAsync(thread.getLooper(), this);
-        SystemLocaleWrapper.onStart(context, this::onActionLocaleChanged, mHandler);
-        mImeTrackerService = new ImeTrackerService(serviceThreadForTesting != null
-                ? serviceThreadForTesting.getLooper() : Looper.getMainLooper());
-        // Note: SettingsObserver doesn't register observers in its constructor.
-        mSettingsObserver = new SettingsObserver(mHandler);
-        mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
-        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
-        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
-        mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
-        mImePlatformCompatUtils = new ImePlatformCompatUtils();
-        mInputMethodDeviceConfigs = new InputMethodDeviceConfigs();
-        mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
-
-        mSlotIme = mContext.getString(com.android.internal.R.string.status_bar_ime);
-
-        mShowOngoingImeSwitcherForPhones = false;
-
-        AdditionalSubtypeMapRepository.initialize(mHandler);
-
-        final int userId = mActivityManagerInternal.getCurrentUserId();
-
-        // mSettings should be created before buildInputMethodListLocked
-        mSettings = InputMethodSettings.createEmptyMap(userId);
-
-        mSwitchingController =
-                InputMethodSubtypeSwitchingController.createInstanceLocked(context,
-                        mSettings.getMethodMap(), userId);
-        mHardwareKeyboardShortcutController =
-                new HardwareKeyboardShortcutController(mSettings.getMethodMap(),
-                        mSettings.getUserId());
-        mMenuController = new InputMethodMenuController(this);
-        mBindingController =
-                bindingControllerForTesting != null
-                        ? bindingControllerForTesting
-                        : new InputMethodBindingController(this);
-        mAutofillController = new AutofillSuggestionsController(this);
-
-        mVisibilityStateComputer = new ImeVisibilityStateComputer(this);
-        mVisibilityApplier = new DefaultImeVisibilityApplier(this);
-
-        mClientController = new ClientController(mPackageManagerInternal);
         synchronized (ImfLock.class) {
+            mContext = context;
+            mRes = context.getResources();
+            SecureSettingsWrapper.onStart(mContext);
+
+            // TODO(b/196206770): Disallow I/O on this thread. Currently it's needed for loading
+            // additional subtypes in switchUserOnHandlerLocked().
+            final ServiceThread thread =
+                    serviceThreadForTesting != null
+                            ? serviceThreadForTesting
+                            : new ServiceThread(
+                                    HANDLER_THREAD_NAME,
+                                    Process.THREAD_PRIORITY_FOREGROUND,
+                                    true /* allowIo */);
+            thread.start();
+            mHandler = Handler.createAsync(thread.getLooper(), this);
+            SystemLocaleWrapper.onStart(context, this::onActionLocaleChanged, mHandler);
+            mImeTrackerService = new ImeTrackerService(serviceThreadForTesting != null
+                    ? serviceThreadForTesting.getLooper() : Looper.getMainLooper());
+            // Note: SettingsObserver doesn't register observers in its constructor.
+            mSettingsObserver = new SettingsObserver(mHandler);
+            mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
+            mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+            mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
+            mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
+            mImePlatformCompatUtils = new ImePlatformCompatUtils();
+            mInputMethodDeviceConfigs = new InputMethodDeviceConfigs();
+            mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
+
+            mSlotIme = mContext.getString(com.android.internal.R.string.status_bar_ime);
+
+            mShowOngoingImeSwitcherForPhones = false;
+
+            AdditionalSubtypeMapRepository.initialize(mHandler);
+
+            final int userId = mActivityManagerInternal.getCurrentUserId();
+
+            // mSettings should be created before buildInputMethodListLocked
+            mSettings = InputMethodSettings.createEmptyMap(userId);
+
+            mSwitchingController =
+                    InputMethodSubtypeSwitchingController.createInstanceLocked(context,
+                            mSettings.getMethodMap(), userId);
+            mHardwareKeyboardShortcutController =
+                    new HardwareKeyboardShortcutController(mSettings.getMethodMap(),
+                            mSettings.getUserId());
+            mMenuController = new InputMethodMenuController(this);
+            mBindingController =
+                    bindingControllerForTesting != null
+                            ? bindingControllerForTesting
+                            : new InputMethodBindingController(this);
+            mAutofillController = new AutofillSuggestionsController(this);
+
+            mVisibilityStateComputer = new ImeVisibilityStateComputer(this);
+            mVisibilityApplier = new DefaultImeVisibilityApplier(this);
+
+            mClientController = new ClientController(mPackageManagerInternal);
             mClientController.addClientControllerCallback(c -> onClientRemoved(c));
             mImeBindingState = ImeBindingState.newEmptyState();
-        }
 
-        mPreventImeStartupUnlessTextEditor = mRes.getBoolean(
-                com.android.internal.R.bool.config_preventImeStartupUnlessTextEditor);
-        mNonPreemptibleInputMethods = mRes.getStringArray(
-                com.android.internal.R.array.config_nonPreemptibleInputMethods);
-        IntConsumer toolTypeConsumer =
-                Flags.useHandwritingListenerForTooltype()
-                        ? toolType -> onUpdateEditorToolType(toolType) : null;
-        Runnable discardDelegationTextRunnable = () -> discardHandwritingDelegationText();
-        mHwController = new HandwritingModeController(mContext, thread.getLooper(),
-                new InkWindowInitializer(), toolTypeConsumer, discardDelegationTextRunnable);
-        registerDeviceListenerAndCheckStylusSupport();
+            mPreventImeStartupUnlessTextEditor = mRes.getBoolean(
+                    com.android.internal.R.bool.config_preventImeStartupUnlessTextEditor);
+            mNonPreemptibleInputMethods = mRes.getStringArray(
+                    com.android.internal.R.array.config_nonPreemptibleInputMethods);
+            IntConsumer toolTypeConsumer =
+                    Flags.useHandwritingListenerForTooltype()
+                            ? toolType -> onUpdateEditorToolType(toolType) : null;
+            Runnable discardDelegationTextRunnable = () -> discardHandwritingDelegationText();
+            mHwController = new HandwritingModeController(mContext, thread.getLooper(),
+                    new InkWindowInitializer(), toolTypeConsumer, discardDelegationTextRunnable);
+            registerDeviceListenerAndCheckStylusSupport();
+        }
     }
 
     @GuardedBy("ImfLock.class")
