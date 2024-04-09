@@ -16,7 +16,6 @@
 
 package com.android.systemui.dreams.touch;
 
-import static com.android.systemui.dreams.touch.dagger.DreamTouchModule.INPUT_SESSION_NAME;
 import static com.android.systemui.dreams.touch.dagger.DreamTouchModule.PILFER_ON_GESTURE_CONSUME;
 
 import android.os.Looper;
@@ -24,7 +23,7 @@ import android.view.Choreographer;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 
-import com.android.systemui.settings.DisplayTracker;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.shared.system.InputMonitorCompat;
 
@@ -44,24 +43,26 @@ public class InputSession {
 
     /**
      * Default session constructor.
-     * @param sessionName The session name that will be applied to the underlying
-     * {@link InputMonitorCompat}.
+     * @param inputMonitor Input monitor to track input events.
+     * @param gestureDetector Gesture detector for detecting gestures.
      * @param inputEventListener A listener to receive input events.
-     * @param gestureListener A listener to receive gesture events.
+     * @param choreographer Choreographer to use with the input receiver.
+     * @param looper Looper to use with the input receiver
      * @param pilferOnGestureConsume Whether touch events should be pilfered after a gesture has
      *                               been consumed.
      */
     @Inject
-    public InputSession(@Named(INPUT_SESSION_NAME) String sessionName,
+    public InputSession(
+            InputMonitorCompat inputMonitor,
+            GestureDetector gestureDetector,
             InputChannelCompat.InputEventListener inputEventListener,
-            GestureDetector.OnGestureListener gestureListener,
-            DisplayTracker displayTracker,
+            Choreographer choreographer,
+            @Main Looper looper,
             @Named(PILFER_ON_GESTURE_CONSUME) boolean pilferOnGestureConsume) {
-        mInputMonitor = new InputMonitorCompat(sessionName, displayTracker.getDefaultDisplayId());
-        mGestureDetector = new GestureDetector(gestureListener);
+        mInputMonitor = inputMonitor;
+        mGestureDetector = gestureDetector;
 
-        mInputEventReceiver = mInputMonitor.getInputReceiver(Looper.getMainLooper(),
-                Choreographer.getInstance(),
+        mInputEventReceiver = mInputMonitor.getInputReceiver(looper, choreographer,
                 ev -> {
                     // Process event. Since sometimes input may be a prerequisite for some
                     // gesture logic, process input first.
