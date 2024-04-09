@@ -81,6 +81,16 @@ flag {
 }
 
 flag {
+    name: "migrate_enable_shortcuts"
+    namespace: "accessibility"
+    description: "Refactors deprecated code to use AccessibilityManager#enableShortcutsForTargets."
+    bug: "332006721"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "motion_event_observing"
     is_exported: true
     namespace: "accessibility"

@@ -366,7 +366,7 @@ public class AccessibilityShortcutController {
                                 // to the Settings.
                                 final ComponentName configDefaultService =
                                         ComponentName.unflattenFromString(defaultService);
-                                if (Flags.a11yQsShortcut()) {
+                                if (Flags.migrateEnableShortcuts()) {
                                     am.enableShortcutsForTargets(true, HARDWARE,
                                             Set.of(configDefaultService.flattenToString()), userId);
                                 } else {
@@ -384,7 +384,7 @@ public class AccessibilityShortcutController {
                                             mContext,
                                             HARDWARE,
                                             userId);
-                            if (Flags.a11yQsShortcut()) {
+                            if (Flags.migrateEnableShortcuts()) {
                                 am.enableShortcutsForTargets(
                                         false, HARDWARE, targetServices, userId);
                             } else {

@@ -117,7 +117,7 @@ public class InvisibleToggleAccessibilityServiceTargetTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
+    @EnableFlags(Flags.FLAG_MIGRATE_ENABLE_SHORTCUTS)
     public void onCheckedChanged_true_callA11yManagerToUpdateShortcuts() throws Exception {
         mSut.onCheckedChanged(true);
 
@@ -130,7 +130,7 @@ public class InvisibleToggleAccessibilityServiceTargetTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
+    @EnableFlags(Flags.FLAG_MIGRATE_ENABLE_SHORTCUTS)
     public void onCheckedChanged_false_callA11yManagerToUpdateShortcuts() throws Exception {
         mSut.onCheckedChanged(false);
         verify(mAccessibilityManagerService).enableShortcutsForTargets(
@@ -142,7 +142,7 @@ public class InvisibleToggleAccessibilityServiceTargetTest {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
+    @DisableFlags(Flags.FLAG_MIGRATE_ENABLE_SHORTCUTS)
     public void onCheckedChanged_turnOnShortcut_hasOtherShortcut_serviceKeepsOn() {
         enableA11yService(/* enable= */ true);
         addShortcutForA11yService(
@@ -155,7 +155,7 @@ public class InvisibleToggleAccessibilityServiceTargetTest {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
+    @DisableFlags(Flags.FLAG_MIGRATE_ENABLE_SHORTCUTS)
     public void onCheckedChanged_turnOnShortcut_noOtherShortcut_shouldTurnOnService() {
         enableA11yService(/* enable= */ false);
         addShortcutForA11yService(
@@ -168,7 +168,7 @@ public class InvisibleToggleAccessibilityServiceTargetTest {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
+    @DisableFlags(Flags.FLAG_MIGRATE_ENABLE_SHORTCUTS)
     public void onCheckedChanged_turnOffShortcut_hasOtherShortcut_serviceKeepsOn() {
         enableA11yService(/* enable= */ true);
         addShortcutForA11yService(
@@ -181,7 +181,7 @@ public class InvisibleToggleAccessibilityServiceTargetTest {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
+    @DisableFlags(Flags.FLAG_MIGRATE_ENABLE_SHORTCUTS)
     public void onCheckedChanged_turnOffShortcut_noOtherShortcut_shouldTurnOffService() {
         enableA11yService(/* enable= */ true);
         addShortcutForA11yService(
