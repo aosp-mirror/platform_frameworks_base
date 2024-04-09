@@ -395,7 +395,7 @@ void nativeRegisterDataSource(JNIEnv* env, jclass clazz, jlong datasource_ptr,
     PerfettoDsRegister(&datasource->dataSource, datasource->dataSourceName.c_str(), params);
 }
 
-jobject nativeGetPerfettoInstanceLocked(JNIEnv* env, jclass clazz, jlong dataSourcePtr,
+jobject nativeGetPerfettoInstanceLocked(JNIEnv* /* env */, jclass /* clazz */, jlong dataSourcePtr,
                                         PerfettoDsInstanceIndex instance_idx) {
     ALOG(LOG_DEBUG, LOG_TAG, "nativeGetPerfettoInstanceLocked ds=%p, idx=%d", (void*)dataSourcePtr,
          instance_idx);
@@ -415,7 +415,7 @@ jobject nativeGetPerfettoInstanceLocked(JNIEnv* env, jclass clazz, jlong dataSou
     return datasource_instance->GetJavaDataSourceInstance();
 }
 
-void nativeReleasePerfettoInstanceLocked(JNIEnv* env, jclass clazz, jlong dataSourcePtr,
+void nativeReleasePerfettoInstanceLocked(JNIEnv* /* env */, jclass /* clazz */, jlong dataSourcePtr,
                                          PerfettoDsInstanceIndex instance_idx) {
     ALOG(LOG_DEBUG, LOG_TAG, "nativeReleasePerfettoInstanceLocked got lock ds=%p, idx=%d",
          (void*)dataSourcePtr, instance_idx);
@@ -423,27 +423,27 @@ void nativeReleasePerfettoInstanceLocked(JNIEnv* env, jclass clazz, jlong dataSo
     PerfettoDsImplReleaseInstanceLocked(datasource->dataSource.impl, instance_idx);
 }
 
-bool nativePerfettoDsTraceIterateBegin(JNIEnv* env, jclass clazz, jlong dataSourcePtr) {
+bool nativePerfettoDsTraceIterateBegin(jlong dataSourcePtr) {
     sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
     return datasource->TraceIterateBegin();
 }
 
-bool nativePerfettoDsTraceIterateNext(JNIEnv* env, jclass clazz, jlong dataSourcePtr) {
+bool nativePerfettoDsTraceIterateNext(jlong dataSourcePtr) {
     sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
     return datasource->TraceIterateNext();
 }
 
-void nativePerfettoDsTraceIterateBreak(JNIEnv* env, jclass clazz, jlong dataSourcePtr) {
+void nativePerfettoDsTraceIterateBreak(jlong dataSourcePtr) {
     sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
     return datasource->TraceIterateBreak();
 }
 
-jobject nativeGetCustomTls(JNIEnv* env, jclass clazz, jlong dataSourcePtr) {
+jobject nativeGetCustomTls(JNIEnv* /* env */, jclass /* clazz */, jlong dataSourcePtr) {
     sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
     return datasource->GetCustomTls();
 }
 
-jobject nativeGetIncrementalState(JNIEnv* env, jclass clazz, jlong dataSourcePtr) {
+jobject nativeGetIncrementalState(JNIEnv* /* env */, jclass /* clazz */, jlong dataSourcePtr) {
     sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
     return datasource->GetIncrementalState();
 }

@@ -20,6 +20,8 @@ import android.util.proto.ProtoInputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import dalvik.annotation.optimization.CriticalNative;
+
 /**
  * Templated base class meant to be derived by embedders to create a custom data
  * source.
@@ -177,7 +179,10 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
     private static native void nativeReleasePerfettoInstanceLocked(
             long dataSourcePtr, int dsInstanceIdx);
 
+    @CriticalNative
     private static native boolean nativePerfettoDsTraceIterateBegin(long dataSourcePtr);
+    @CriticalNative
     private static native boolean nativePerfettoDsTraceIterateNext(long dataSourcePtr);
+    @CriticalNative
     private static native void nativePerfettoDsTraceIterateBreak(long dataSourcePtr);
 }
