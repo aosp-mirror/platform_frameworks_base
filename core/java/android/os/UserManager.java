@@ -705,7 +705,7 @@ public class UserManager {
      * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_BLUETOOTH}
      * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
-     * <p>Default is <code>true</code> for managed profiles and false otherwise.
+     * <p>Default is <code>true</code> for managed and private profiles, false otherwise.
      *
      * <p>When a device upgrades to {@link android.os.Build.VERSION_CODES#O}, the system sets it
      * for all existing managed profiles.
