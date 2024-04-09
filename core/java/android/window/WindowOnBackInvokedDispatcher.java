@@ -36,6 +36,8 @@ import android.view.ImeBackAnimationController;
 import androidx.annotation.VisibleForTesting;
 
 
+import com.android.internal.annotations.GuardedBy;
+
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -75,14 +77,17 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     @Nullable
     private ImeBackAnimationController mImeBackAnimationController;
 
+    @GuardedBy("mLock")
     /** Convenience hashmap to quickly decide if a callback has been added. */
     private final HashMap<OnBackInvokedCallback, Integer> mAllCallbacks = new HashMap<>();
     /** Holds all callbacks by priorities. */
 
     @VisibleForTesting
+    @GuardedBy("mLock")
     public final TreeMap<Integer, ArrayList<OnBackInvokedCallback>>
             mOnBackInvokedCallbacks = new TreeMap<>();
     private Checker mChecker;
+    private final Object mLock = new Object();
 
     public WindowOnBackInvokedDispatcher(@NonNull Context context) {
         mChecker = new Checker(context);
@@ -94,20 +99,24 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
      */
     public void attachToWindow(@NonNull IWindowSession windowSession, @NonNull IWindow window,
             @Nullable ImeBackAnimationController imeBackAnimationController) {
-        mWindowSession = windowSession;
-        mWindow = window;
-        mImeBackAnimationController = imeBackAnimationController;
-        if (!mAllCallbacks.isEmpty()) {
-            setTopOnBackInvokedCallback(getTopCallback());
+        synchronized (mLock) {
+            mWindowSession = windowSession;
+            mWindow = window;
+            mImeBackAnimationController = imeBackAnimationController;
+            if (!mAllCallbacks.isEmpty()) {
+                setTopOnBackInvokedCallback(getTopCallback());
+            }
         }
     }
 
     /** Detaches the dispatcher instance from its window. */
     public void detachFromWindow() {
-        clear();
-        mWindow = null;
-        mWindowSession = null;
-        mImeBackAnimationController = null;
+        synchronized (mLock) {
+            clear();
+            mWindow = null;
+            mWindowSession = null;
+            mImeBackAnimationController = null;
+        }
     }
 
     // TODO: Take an Executor for the callback to run on.
@@ -125,65 +134,71 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
      */
     public void registerOnBackInvokedCallbackUnchecked(
             @NonNull OnBackInvokedCallback callback, @Priority int priority) {
-        if (mImeDispatcher != null) {
-            mImeDispatcher.registerOnBackInvokedCallback(priority, callback);
-            return;
-        }
-        if (!mOnBackInvokedCallbacks.containsKey(priority)) {
-            mOnBackInvokedCallbacks.put(priority, new ArrayList<>());
-        }
-        if (callback instanceof ImeOnBackInvokedDispatcher.DefaultImeOnBackAnimationCallback) {
-            callback = mImeBackAnimationController;
-        }
-        ArrayList<OnBackInvokedCallback> callbacks = mOnBackInvokedCallbacks.get(priority);
-
-        // If callback has already been added, remove it and re-add it.
-        if (mAllCallbacks.containsKey(callback)) {
-            if (DEBUG) {
-                Log.i(TAG, "Callback already added. Removing and re-adding it.");
+        synchronized (mLock) {
+            if (mImeDispatcher != null) {
+                mImeDispatcher.registerOnBackInvokedCallback(priority, callback);
+                return;
             }
-            Integer prevPriority = mAllCallbacks.get(callback);
-            mOnBackInvokedCallbacks.get(prevPriority).remove(callback);
-        }
+            if (!mOnBackInvokedCallbacks.containsKey(priority)) {
+                mOnBackInvokedCallbacks.put(priority, new ArrayList<>());
+            }
+            if (callback instanceof ImeOnBackInvokedDispatcher.DefaultImeOnBackAnimationCallback) {
+                callback = mImeBackAnimationController;
+            }
+            ArrayList<OnBackInvokedCallback> callbacks = mOnBackInvokedCallbacks.get(priority);
 
-        OnBackInvokedCallback previousTopCallback = getTopCallback();
-        callbacks.add(callback);
-        mAllCallbacks.put(callback, priority);
-        if (previousTopCallback == null
-                || (previousTopCallback != callback
-                        && mAllCallbacks.get(previousTopCallback) <= priority)) {
-            setTopOnBackInvokedCallback(callback);
+            // If callback has already been added, remove it and re-add it.
+            if (mAllCallbacks.containsKey(callback)) {
+                if (DEBUG) {
+                    Log.i(TAG, "Callback already added. Removing and re-adding it.");
+                }
+                Integer prevPriority = mAllCallbacks.get(callback);
+                mOnBackInvokedCallbacks.get(prevPriority).remove(callback);
+            }
+
+            OnBackInvokedCallback previousTopCallback = getTopCallback();
+            callbacks.add(callback);
+            mAllCallbacks.put(callback, priority);
+            if (previousTopCallback == null
+                    || (previousTopCallback != callback
+                    && mAllCallbacks.get(previousTopCallback) <= priority)) {
+                setTopOnBackInvokedCallback(callback);
+            }
         }
     }
 
     @Override
     public void unregisterOnBackInvokedCallback(@NonNull OnBackInvokedCallback callback) {
-        if (mImeDispatcher != null) {
-            mImeDispatcher.unregisterOnBackInvokedCallback(callback);
-            return;
-        }
-        if (callback instanceof ImeOnBackInvokedDispatcher.DefaultImeOnBackAnimationCallback) {
-            callback = mImeBackAnimationController;
-        }
-        if (!mAllCallbacks.containsKey(callback)) {
-            if (DEBUG) {
-                Log.i(TAG, "Callback not found. returning...");
+        synchronized (mLock) {
+            if (mImeDispatcher != null) {
+                mImeDispatcher.unregisterOnBackInvokedCallback(callback);
+                return;
             }
-            return;
-        }
-        OnBackInvokedCallback previousTopCallback = getTopCallback();
-        Integer priority = mAllCallbacks.get(callback);
-        ArrayList<OnBackInvokedCallback> callbacks = mOnBackInvokedCallbacks.get(priority);
-        callbacks.remove(callback);
-        if (callbacks.isEmpty()) {
-            mOnBackInvokedCallbacks.remove(priority);
-        }
-        mAllCallbacks.remove(callback);
-        // Re-populate the top callback to WM if the removed callback was previously the top one.
-        if (previousTopCallback == callback) {
-            // We should call onBackCancelled() when an active callback is removed from dispatcher.
-            sendCancelledIfInProgress(callback);
-            setTopOnBackInvokedCallback(getTopCallback());
+            if (callback instanceof ImeOnBackInvokedDispatcher.DefaultImeOnBackAnimationCallback) {
+                callback = mImeBackAnimationController;
+            }
+            if (!mAllCallbacks.containsKey(callback)) {
+                if (DEBUG) {
+                    Log.i(TAG, "Callback not found. returning...");
+                }
+                return;
+            }
+            OnBackInvokedCallback previousTopCallback = getTopCallback();
+            Integer priority = mAllCallbacks.get(callback);
+            ArrayList<OnBackInvokedCallback> callbacks = mOnBackInvokedCallbacks.get(priority);
+            callbacks.remove(callback);
+            if (callbacks.isEmpty()) {
+                mOnBackInvokedCallbacks.remove(priority);
+            }
+            mAllCallbacks.remove(callback);
+            // Re-populate the top callback to WM if the removed callback was previously the top
+            // one.
+            if (previousTopCallback == callback) {
+                // We should call onBackCancelled() when an active callback is removed from
+                // dispatcher.
+                sendCancelledIfInProgress(callback);
+                setTopOnBackInvokedCallback(getTopCallback());
+            }
         }
     }
 
@@ -191,15 +206,21 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
      * Indicates if the dispatcher is actively dispatching to a callback.
      */
     public boolean isDispatching() {
-        return mIsDispatching;
+        synchronized (mLock) {
+            return mIsDispatching;
+        }
     }
 
     private void onStartDispatching() {
-        mIsDispatching = true;
+        synchronized (mLock) {
+            mIsDispatching = true;
+        }
     }
 
     private void onStopDispatching() {
-        mIsDispatching = false;
+        synchronized (mLock) {
+            mIsDispatching = false;
+        }
     }
 
     private void sendCancelledIfInProgress(@NonNull OnBackInvokedCallback callback) {
@@ -223,27 +244,29 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
 
     /** Clears all registered callbacks on the instance. */
     public void clear() {
-        if (mImeDispatcher != null) {
-            mImeDispatcher.clear();
-            mImeDispatcher = null;
-        }
-        if (!mAllCallbacks.isEmpty()) {
-            OnBackInvokedCallback topCallback = getTopCallback();
-            if (topCallback != null) {
-                sendCancelledIfInProgress(topCallback);
-            } else {
-                // Should not be possible
-                Log.e(TAG, "There is no topCallback, even if mAllCallbacks is not empty");
+        synchronized (mLock) {
+            if (mImeDispatcher != null) {
+                mImeDispatcher.clear();
+                mImeDispatcher = null;
             }
-            // Clear binder references in WM.
-            setTopOnBackInvokedCallback(null);
-        }
+            if (!mAllCallbacks.isEmpty()) {
+                OnBackInvokedCallback topCallback = getTopCallback();
+                if (topCallback != null) {
+                    sendCancelledIfInProgress(topCallback);
+                } else {
+                    // Should not be possible
+                    Log.e(TAG, "There is no topCallback, even if mAllCallbacks is not empty");
+                }
+                // Clear binder references in WM.
+                setTopOnBackInvokedCallback(null);
+            }
 
-        // We should also stop running animations since all callbacks have been removed.
-        // note: mSpring.skipToEnd(), in ProgressAnimator.reset(), requires the main handler.
-        Handler.getMain().post(mProgressAnimator::reset);
-        mAllCallbacks.clear();
-        mOnBackInvokedCallbacks.clear();
+            // We should also stop running animations since all callbacks have been removed.
+            // note: mSpring.skipToEnd(), in ProgressAnimator.reset(), requires the main handler.
+            Handler.getMain().post(mProgressAnimator::reset);
+            mAllCallbacks.clear();
+            mOnBackInvokedCallbacks.clear();
+        }
     }
 
     private void setTopOnBackInvokedCallback(@Nullable OnBackInvokedCallback callback) {
@@ -275,13 +298,15 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     }
 
     public OnBackInvokedCallback getTopCallback() {
-        if (mAllCallbacks.isEmpty()) {
-            return null;
-        }
-        for (Integer priority : mOnBackInvokedCallbacks.descendingKeySet()) {
-            ArrayList<OnBackInvokedCallback> callbacks = mOnBackInvokedCallbacks.get(priority);
-            if (!callbacks.isEmpty()) {
-                return callbacks.get(callbacks.size() - 1);
+        synchronized (mLock) {
+            if (mAllCallbacks.isEmpty()) {
+                return null;
+            }
+            for (Integer priority : mOnBackInvokedCallbacks.descendingKeySet()) {
+                ArrayList<OnBackInvokedCallback> callbacks = mOnBackInvokedCallbacks.get(priority);
+                if (!callbacks.isEmpty()) {
+                    return callbacks.get(callbacks.size() - 1);
+                }
             }
         }
         return null;
@@ -315,16 +340,18 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     public void dump(String prefix, PrintWriter writer) {
         String innerPrefix = prefix + "    ";
         writer.println(prefix + "WindowOnBackDispatcher:");
-        if (mAllCallbacks.isEmpty()) {
-            writer.println(prefix + "<None>");
-            return;
-        }
+        synchronized (mLock) {
+            if (mAllCallbacks.isEmpty()) {
+                writer.println(prefix + "<None>");
+                return;
+            }
 
-        writer.println(innerPrefix + "Top Callback: " + getTopCallback());
-        writer.println(innerPrefix + "Callbacks: ");
-        mAllCallbacks.forEach((callback, priority) -> {
-            writer.println(innerPrefix + "  Callback: " + callback + " Priority=" + priority);
-        });
+            writer.println(innerPrefix + "Top Callback: " + getTopCallback());
+            writer.println(innerPrefix + "Callbacks: ");
+            mAllCallbacks.forEach((callback, priority) -> {
+                writer.println(innerPrefix + "  Callback: " + callback + " Priority=" + priority);
+            });
+        }
     }
 
     static class OnBackInvokedCallbackWrapper extends IOnBackInvokedCallback.Stub {
