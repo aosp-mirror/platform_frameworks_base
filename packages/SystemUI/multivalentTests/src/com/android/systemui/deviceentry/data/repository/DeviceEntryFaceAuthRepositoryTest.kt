@@ -827,7 +827,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun isAuthenticatedIsResetToFalseWhenTransitioningToGone() =
+    fun isAuthenticatedIsResetToFalseWhenKeyguardDoneAnimationsFinished() =
         testScope.runTest {
             initCollectors()
             allPreconditionsToRunFaceAuthAreTrue()
@@ -840,13 +840,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
 
             assertThat(authenticated()).isTrue()
 
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.GONE,
-                )
-            )
+            keyguardRepository.keyguardDoneAnimationsFinished()
 
             assertThat(authenticated()).isFalse()
         }
