@@ -2448,8 +2448,9 @@ public class DisplayManagerServiceTest {
         LogicalDisplay display =
                 logicalDisplayMapper.getDisplayLocked(displayDevice, /* includeDisabled= */ true);
         assertThat(display.isEnabledLocked()).isFalse();
+        // TODO(b/332711269) make sure only one DISPLAY_GROUP_EVENT_ADDED sent.
         assertThat(callback.receivedEvents()).containsExactly(DISPLAY_GROUP_EVENT_ADDED,
-                EVENT_DISPLAY_CONNECTED).inOrder();
+                DISPLAY_GROUP_EVENT_ADDED, EVENT_DISPLAY_CONNECTED).inOrder();
     }
 
     @Test
