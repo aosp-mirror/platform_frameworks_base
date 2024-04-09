@@ -2449,7 +2449,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (!useLegacyInsetsForStableBounds) {
             intersectWithInsetsIfFits(outStableBounds, mTmpBounds, info.mConfigInsets);
         } else {
-            intersectWithInsetsIfFits(outStableBounds, mTmpBounds, info.mLegacyConfigInsets);
+            intersectWithInsetsIfFits(outStableBounds, mTmpBounds, info.mOverrideConfigInsets);
         }
     }
 
