@@ -8645,7 +8645,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // Override starts here.
         final Rect stableInsets = mDisplayContent.getDisplayPolicy().getDecorInsetsInfo(
-                rotation, fullBounds.width(), fullBounds.height()).mLegacyConfigInsets;
+                rotation, fullBounds.width(), fullBounds.height()).mOverrideConfigInsets;
         // This should be the only place override the configuration for ActivityRecord. Override
         // the value if not calculated yet.
         Rect outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
@@ -8681,7 +8681,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mDisplayContent.getDisplay().getDisplayInfo(info);
             mDisplayContent.computeSizeRanges(info, rotated, info.logicalWidth,
                     info.logicalHeight, mDisplayContent.getDisplayMetrics().density,
-                    inOutConfig, true /* legacyConfig */);
+                    inOutConfig, true /* overrideConfig */);
         }
 
         // It's possible that screen size will be considered in different orientation with or

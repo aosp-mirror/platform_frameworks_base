@@ -8,7 +8,6 @@
 # instead.
 
 package: "android.companion.virtual.flags"
-container: "system"
 
 flag {
   name: "enable_native_vdm"
@@ -116,4 +115,15 @@ flag {
   namespace: "virtual_devices"
   description: "Enable virtual stylus input"
   bug: "304829446"
+}
+
+flag {
+  name: "intercept_intents_before_applying_policy"
+  is_exported: true
+  namespace: "virtual_devices"
+  description: "Apply intent interception before applying activity policy"
+  bug: "333444131"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

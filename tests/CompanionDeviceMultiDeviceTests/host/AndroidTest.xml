@@ -24,12 +24,12 @@
 
     <device name="device1">
         <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
-            <option name="test-file-name" value="cdm_snippet.apk" />
+            <option name="test-file-name" value="cdm_snippet_legacy.apk" />
         </target_preparer>
     </device>
     <device name="device2">
         <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
-            <option name="test-file-name" value="cdm_snippet.apk" />
+            <option name="test-file-name" value="cdm_snippet_legacy.apk" />
         </target_preparer>
     </device>
 

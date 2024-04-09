@@ -568,23 +568,25 @@ public class PowerStatsService extends SystemService {
             int index = 0;
 
             Channel[] channels = getEnergyMeterInfo();
-            for (Channel channel : channels) {
-                PowerMonitor monitor = new PowerMonitor(index++,
-                        PowerMonitor.POWER_MONITOR_TYPE_MEASUREMENT,
-                        getChannelName(channel));
-                monitors.add(monitor);
-                states.add(new PowerMonitorState(monitor, channel.id));
+            if (channels != null) {
+                for (Channel channel : channels) {
+                    PowerMonitor monitor = new PowerMonitor(index++,
+                            PowerMonitor.POWER_MONITOR_TYPE_MEASUREMENT,
+                            getChannelName(channel));
+                    monitors.add(monitor);
+                    states.add(new PowerMonitorState(monitor, channel.id));
+                }
             }
-
             EnergyConsumer[] energyConsumers = getEnergyConsumerInfo();
-            for (EnergyConsumer consumer : energyConsumers) {
-                PowerMonitor monitor = new PowerMonitor(index++,
-                        PowerMonitor.POWER_MONITOR_TYPE_CONSUMER,
-                        getEnergyConsumerName(consumer, energyConsumers));
-                monitors.add(monitor);
-                states.add(new PowerMonitorState(monitor, consumer.id));
+            if (energyConsumers != null) {
+                for (EnergyConsumer consumer : energyConsumers) {
+                    PowerMonitor monitor = new PowerMonitor(index++,
+                            PowerMonitor.POWER_MONITOR_TYPE_CONSUMER,
+                            getEnergyConsumerName(consumer, energyConsumers));
+                    monitors.add(monitor);
+                    states.add(new PowerMonitorState(monitor, consumer.id));
+                }
             }
-
             mPowerMonitors = monitors.toArray(new PowerMonitor[monitors.size()]);
             mPowerMonitorStates = states.toArray(new PowerMonitorState[monitors.size()]);
         }

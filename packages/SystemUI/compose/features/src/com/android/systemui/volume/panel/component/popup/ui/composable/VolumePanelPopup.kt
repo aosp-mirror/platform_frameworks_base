@@ -59,7 +59,7 @@ constructor(
      * @param content is the popup body
      */
     fun show(
-        expandable: Expandable,
+        expandable: Expandable?,
         title: @Composable (SystemUIDialog) -> Unit,
         content: @Composable (SystemUIDialog) -> Unit,
     ) {
@@ -70,7 +70,7 @@ constructor(
             ) {
                 PopupComposable(it, title, content)
             }
-        val controller = expandable.dialogTransitionController()
+        val controller = expandable?.dialogTransitionController()
         if (controller == null) {
             dialog.show()
         } else {

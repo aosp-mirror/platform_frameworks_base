@@ -120,6 +120,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
     private TestableContentResolver mContentResolver;
     private TestableLooper mTestableLooper;
 
+    private CrossActivityBackAnimation mCrossActivityBackAnimation;
+    private CrossTaskBackAnimation mCrossTaskBackAnimation;
     private ShellBackAnimationRegistry mShellBackAnimationRegistry;
 
     @Before
@@ -133,11 +135,11 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 ANIMATION_ENABLED);
         mTestableLooper = TestableLooper.get(this);
         mShellInit = spy(new ShellInit(mShellExecutor));
+        mCrossActivityBackAnimation = new CrossActivityBackAnimation(mContext, mAnimationBackground,
+                mRootTaskDisplayAreaOrganizer);
+        mCrossTaskBackAnimation = new CrossTaskBackAnimation(mContext, mAnimationBackground);
         mShellBackAnimationRegistry =
-                new ShellBackAnimationRegistry(
-                        new CrossActivityBackAnimation(
-                                mContext, mAnimationBackground, mRootTaskDisplayAreaOrganizer),
-                        new CrossTaskBackAnimation(mContext, mAnimationBackground),
+                new ShellBackAnimationRegistry(mCrossActivityBackAnimation, mCrossTaskBackAnimation,
                         /* dialogCloseAnimation= */ null,
                         new CustomizeActivityAnimation(mContext, mAnimationBackground),
                         /* defaultBackToHomeAnimation= */ null);
@@ -576,16 +578,14 @@ public class BackAnimationControllerTest extends ShellTestCase {
 
     @Test
     public void testBackToActivity() throws RemoteException {
-        final CrossActivityBackAnimation animation = new CrossActivityBackAnimation(
-                mContext, mAnimationBackground, mRootTaskDisplayAreaOrganizer);
-        verifySystemBackBehavior(BackNavigationInfo.TYPE_CROSS_ACTIVITY, animation.getRunner());
+        verifySystemBackBehavior(BackNavigationInfo.TYPE_CROSS_ACTIVITY,
+                mCrossActivityBackAnimation.getRunner());
     }
 
     @Test
     public void testBackToTask() throws RemoteException {
-        final CrossTaskBackAnimation animation = new CrossTaskBackAnimation(mContext,
-                mAnimationBackground);
-        verifySystemBackBehavior(BackNavigationInfo.TYPE_CROSS_TASK, animation.getRunner());
+        verifySystemBackBehavior(BackNavigationInfo.TYPE_CROSS_TASK,
+                mCrossTaskBackAnimation.getRunner());
     }
 
     private void verifySystemBackBehavior(int type, BackAnimationRunner animation)

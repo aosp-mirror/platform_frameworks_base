@@ -24,8 +24,9 @@ class FakeAncSliceRepository : AncSliceRepository {
 
     private val sliceByWidth = mutableMapOf<Int, MutableStateFlow<Slice?>>()
 
-    override fun ancSlice(width: Int): Flow<Slice?> =
-        sliceByWidth.getOrPut(width) { MutableStateFlow(null) }
+    override fun ancSlice(width: Int, isCollapsed: Boolean, hideLabel: Boolean): Flow<Slice?> {
+        return sliceByWidth.getOrPut(width) { MutableStateFlow(null) }
+    }
 
     fun putSlice(width: Int, slice: Slice?) {
         sliceByWidth.getOrPut(width) { MutableStateFlow(null) }.value = slice

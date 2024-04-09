@@ -53,6 +53,7 @@ import android.tracing.perfetto.InitArguments;
 import android.tracing.perfetto.Producer;
 import android.tracing.perfetto.TracingContext;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.util.LongArray;
 import android.util.Slog;
 import android.util.proto.ProtoInputStream;
@@ -67,6 +68,7 @@ import com.android.internal.protolog.common.LogLevel;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -166,76 +168,90 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         }
 
         mDataSource.trace(ctx -> {
-            final ProtoOutputStream os = ctx.newTracePacket();
+            try {
+                final ProtoOutputStream os = ctx.newTracePacket();
 
-            os.write(TIMESTAMP, SystemClock.elapsedRealtimeNanos());
+                os.write(TIMESTAMP, SystemClock.elapsedRealtimeNanos());
 
-            final long outProtologViewerConfigToken = os.start(PROTOLOG_VIEWER_CONFIG);
-            while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
-                if (pis.getFieldNumber() == (int) MESSAGES) {
-                    final long inMessageToken = pis.start(MESSAGES);
-                    final long outMessagesToken = os.start(MESSAGES);
-
-                    while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
-                        switch (pis.getFieldNumber()) {
-                            case (int) MessageData.MESSAGE_ID:
-                                os.write(MessageData.MESSAGE_ID,
-                                        pis.readLong(MessageData.MESSAGE_ID));
-                                break;
-                            case (int) MESSAGE:
-                                os.write(MESSAGE, pis.readString(MESSAGE));
-                                break;
-                            case (int) LEVEL:
-                                os.write(LEVEL, pis.readInt(LEVEL));
-                                break;
-                            case (int) GROUP_ID:
-                                os.write(GROUP_ID, pis.readInt(GROUP_ID));
-                                break;
-                            default:
-                                throw new RuntimeException(
-                                        "Unexpected field id " + pis.getFieldNumber());
-                        }
+                final long outProtologViewerConfigToken = os.start(PROTOLOG_VIEWER_CONFIG);
+                while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+                    if (pis.getFieldNumber() == (int) MESSAGES) {
+                        writeViewerConfigMessage(pis, os);
                     }
 
-                    pis.end(inMessageToken);
-                    os.end(outMessagesToken);
-                }
-
-                if (pis.getFieldNumber() == (int) GROUPS) {
-                    final long inGroupToken = pis.start(GROUPS);
-                    final long outGroupToken = os.start(GROUPS);
-
-                    while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
-                        switch (pis.getFieldNumber()) {
-                            case (int) ID:
-                                int id = pis.readInt(ID);
-                                os.write(ID, id);
-                                break;
-                            case (int) NAME:
-                                String name = pis.readString(NAME);
-                                os.write(NAME, name);
-                                break;
-                            case (int) TAG:
-                                String tag = pis.readString(TAG);
-                                os.write(TAG, tag);
-                                break;
-                            default:
-                                throw new RuntimeException(
-                                        "Unexpected field id " + pis.getFieldNumber());
-                        }
+                    if (pis.getFieldNumber() == (int) GROUPS) {
+                        writeViewerConfigGroup(pis, os);
                     }
-
-                    pis.end(inGroupToken);
-                    os.end(outGroupToken);
                 }
+
+                os.end(outProtologViewerConfigToken);
+
+                ctx.flush();
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Failed to read ProtoLog viewer config to dump on tracing end", e);
             }
-
-            os.end(outProtologViewerConfigToken);
-
-            ctx.flush();
         });
 
         mDataSource.flush();
+    }
+
+    private static void writeViewerConfigGroup(
+            ProtoInputStream pis, ProtoOutputStream os) throws IOException {
+        final long inGroupToken = pis.start(GROUPS);
+        final long outGroupToken = os.start(GROUPS);
+
+        while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            switch (pis.getFieldNumber()) {
+                case (int) ID:
+                    int id = pis.readInt(ID);
+                    os.write(ID, id);
+                    break;
+                case (int) NAME:
+                    String name = pis.readString(NAME);
+                    os.write(NAME, name);
+                    break;
+                case (int) TAG:
+                    String tag = pis.readString(TAG);
+                    os.write(TAG, tag);
+                    break;
+                default:
+                    throw new RuntimeException(
+                            "Unexpected field id " + pis.getFieldNumber());
+            }
+        }
+
+        pis.end(inGroupToken);
+        os.end(outGroupToken);
+    }
+
+    private static void writeViewerConfigMessage(
+            ProtoInputStream pis, ProtoOutputStream os) throws IOException {
+        final long inMessageToken = pis.start(MESSAGES);
+        final long outMessagesToken = os.start(MESSAGES);
+
+        while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            switch (pis.getFieldNumber()) {
+                case (int) MessageData.MESSAGE_ID:
+                    os.write(MessageData.MESSAGE_ID,
+                            pis.readLong(MessageData.MESSAGE_ID));
+                    break;
+                case (int) MESSAGE:
+                    os.write(MESSAGE, pis.readString(MESSAGE));
+                    break;
+                case (int) LEVEL:
+                    os.write(LEVEL, pis.readInt(LEVEL));
+                    break;
+                case (int) GROUP_ID:
+                    os.write(GROUP_ID, pis.readInt(GROUP_ID));
+                    break;
+                default:
+                    throw new RuntimeException(
+                            "Unexpected field id " + pis.getFieldNumber());
+            }
+        }
+
+        pis.end(inMessageToken);
+        os.end(outMessagesToken);
     }
 
     private void logToLogcat(String tag, LogLevel level, long messageHash,
@@ -423,7 +439,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         return sw.toString();
     }
 
-    private int internStacktraceString(TracingContext<ProtoLogDataSource.Instance,
+    private int internStacktraceString(TracingContext<
             ProtoLogDataSource.TlsState,
             ProtoLogDataSource.IncrementalState> ctx,
             String stacktrace) {
@@ -433,9 +449,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     }
 
     private int internStringArg(
-            TracingContext<ProtoLogDataSource.Instance,
-            ProtoLogDataSource.TlsState,
-            ProtoLogDataSource.IncrementalState> ctx,
+            TracingContext<ProtoLogDataSource.TlsState, ProtoLogDataSource.IncrementalState> ctx,
             String string
     ) {
         final ProtoLogDataSource.IncrementalState incrementalState = ctx.getIncrementalState();
@@ -444,9 +458,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     }
 
     private int internString(
-            TracingContext<ProtoLogDataSource.Instance,
-                ProtoLogDataSource.TlsState,
-                ProtoLogDataSource.IncrementalState> ctx,
+            TracingContext<ProtoLogDataSource.TlsState, ProtoLogDataSource.IncrementalState> ctx,
             Map<String, Integer> internMap,
             long fieldId,
             String string

@@ -83,7 +83,7 @@ import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.brightness.BrightnessUtils;
 import com.android.server.display.brightness.DisplayBrightnessController;
 import com.android.server.display.brightness.clamper.BrightnessClamperController;
-import com.android.server.display.brightness.strategy.AutomaticBrightnessStrategy;
+import com.android.server.display.brightness.strategy.AutomaticBrightnessStrategy2;
 import com.android.server.display.color.ColorDisplayService.ColorDisplayServiceInternal;
 import com.android.server.display.color.ColorDisplayService.ReduceBrightColorsListener;
 import com.android.server.display.config.HysteresisLevels;
@@ -440,7 +440,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     // Responsible for evaluating and tracking the automatic brightness relevant states.
     // Todo: This is a temporary workaround. Ideally DPC2 should never talk to the strategies
-    private final AutomaticBrightnessStrategy mAutomaticBrightnessStrategy;
+    private final AutomaticBrightnessStrategy2 mAutomaticBrightnessStrategy;
 
     // A record of state for skipping brightness ramps.
     private int mSkipRampState = RAMP_STATE_SKIP_NONE;
@@ -1337,9 +1337,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     ? AUTO_BRIGHTNESS_MODE_DOZE : AUTO_BRIGHTNESS_MODE_DEFAULT);
         }
 
-        final boolean userSetBrightnessChanged = mDisplayBrightnessController
-                .updateUserSetScreenBrightness();
-
         DisplayBrightnessState displayBrightnessState = mDisplayBrightnessController
                 .updateBrightness(mPowerRequest, state);
         float brightnessState = displayBrightnessState.getBrightness();
@@ -1348,7 +1345,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         boolean slowChange = displayBrightnessState.isSlowChange();
         // custom transition duration
         float customAnimationRate = displayBrightnessState.getCustomAnimationRate();
-
+        final boolean userSetBrightnessChanged =
+                mDisplayBrightnessController.getIsUserSetScreenBrightnessUpdated();
+        if (displayBrightnessState.getBrightnessEvent() != null) {
+            mTempBrightnessEvent.copyFrom(displayBrightnessState.getBrightnessEvent());
+        }
         // Set up the ScreenOff controller used when coming out of SCREEN_OFF and the ALS sensor
         // doesn't yet have a valid lux value to use with auto-brightness.
         if (mScreenOffBrightnessSensorController != null) {
@@ -1364,11 +1365,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // request changes.
         final boolean wasShortTermModelActive =
                 mAutomaticBrightnessStrategy.isShortTermModelActive();
-        mAutomaticBrightnessStrategy.setAutoBrightnessState(state,
-                mDisplayBrightnessController.isAllowAutoBrightnessWhileDozingConfig(),
-                mBrightnessReasonTemp.getReason(), mPowerRequest.policy,
-                mDisplayBrightnessController.getLastUserSetScreenBrightness(),
-                userSetBrightnessChanged);
+        if (!mFlags.isRefactorDisplayPowerControllerEnabled()) {
+            mAutomaticBrightnessStrategy.setAutoBrightnessState(state,
+                    mDisplayBrightnessController.isAllowAutoBrightnessWhileDozingConfig(),
+                    mBrightnessReasonTemp.getReason(), mPowerRequest.policy,
+                    mDisplayBrightnessController.getLastUserSetScreenBrightness(),
+                    userSetBrightnessChanged);
+        }
 
         // If the brightness is already set then it's been overridden by something other than the
         // user, or is a temporary adjustment.
@@ -1390,9 +1393,22 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         float currentBrightnessSetting = mDisplayBrightnessController.getCurrentBrightness();
         // Apply auto-brightness.
         int brightnessAdjustmentFlags = 0;
+        // All the conditions inside this if block will be moved to AutomaticBrightnessStrategy
+        if (mFlags.isRefactorDisplayPowerControllerEnabled()
+                && displayBrightnessState.getBrightnessReason().getReason()
+                        == BrightnessReason.REASON_AUTOMATIC) {
+            brightnessAdjustmentFlags =
+                    mAutomaticBrightnessStrategy.getAutoBrightnessAdjustmentReasonsFlags();
+            updateScreenBrightnessSetting = currentBrightnessSetting != brightnessState;
+            mBrightnessReasonTemp.setReason(BrightnessReason.REASON_AUTOMATIC);
+            if (mScreenOffBrightnessSensorController != null) {
+                mScreenOffBrightnessSensorController.setLightSensorEnabled(false);
+            }
+            setBrightnessFromOffload(PowerManager.BRIGHTNESS_INVALID_FLOAT);
+        }
         // AutomaticBrightnessStrategy has higher priority than OffloadBrightnessStrategy
-        if (Float.isNaN(brightnessState)
-                || mBrightnessReasonTemp.getReason() == BrightnessReason.REASON_OFFLOAD) {
+        if (!mFlags.isRefactorDisplayPowerControllerEnabled() && (Float.isNaN(brightnessState)
+                || mBrightnessReasonTemp.getReason() == BrightnessReason.REASON_OFFLOAD)) {
             if (mAutomaticBrightnessStrategy.isAutoBrightnessEnabled()) {
                 brightnessState = mAutomaticBrightnessStrategy.getAutomaticScreenBrightness(
                         mTempBrightnessEvent);
@@ -1422,8 +1438,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             }
         } else {
             // Any non-auto-brightness values such as override or temporary should still be subject
-            // to clamping so that they don't go beyond the current max as specified by HBM
-            // Controller.
+            // to clamping so that they don't go beyond the current max as specified by Brightness
+            // Range Controller.
             brightnessState = clampScreenBrightness(brightnessState);
             mAutomaticBrightnessStrategy.setAutoBrightnessApplied(false);
         }

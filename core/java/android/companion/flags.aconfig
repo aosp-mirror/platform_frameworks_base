@@ -1,5 +1,4 @@
 package: "android.companion"
-container: "system"
 
 flag {
     name: "new_association_builder"

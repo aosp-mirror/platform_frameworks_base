@@ -110,8 +110,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private static final String TAG_RELEASE = TAG + POSTFIX_RELEASE;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
 
-    private static final int MAX_RAPID_ACTIVITY_LAUNCH_COUNT = 500;
-    private static final long RAPID_ACTIVITY_LAUNCH_MS = 300;
+    private static final int MAX_RAPID_ACTIVITY_LAUNCH_COUNT = 50;
+    private static final long RAPID_ACTIVITY_LAUNCH_MS = 500;
     private static final long RESET_RAPID_ACTIVITY_LAUNCH_MS = 5 * RAPID_ACTIVITY_LAUNCH_MS;
 
     public static final int STOPPED_STATE_NOT_STOPPED = 0;
@@ -639,9 +639,15 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
 
         if (mRapidActivityLaunchCount > MAX_RAPID_ACTIVITY_LAUNCH_COUNT) {
-            Slog.w(TAG, "Killing " + mPid + " because of rapid activity launch");
-            r.getRootTask().moveTaskToBack(r.getTask());
-            mAtm.mH.post(() -> mAtm.mAmInternal.killProcess(mName, mUid, "rapidActivityLaunch"));
+            mRapidActivityLaunchCount = 0;
+            final Task task = r.getTask();
+            Slog.w(TAG, "Removing task " + task.mTaskId + " because of rapid activity launch");
+            mAtm.mH.post(() -> {
+                synchronized (mAtm.mGlobalLock) {
+                    task.removeImmediately("rapid-activity-launch");
+                }
+                mAtm.mAmInternal.killProcess(mName, mUid, "rapidActivityLaunch");
+            });
         }
     }
 

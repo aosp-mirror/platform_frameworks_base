@@ -4,7 +4,6 @@ austindelgado@google.com
 cinek@google.com
 dsandler@android.com
 dsandler@google.com
-dupin@google.com
 hackbod@android.com
 hackbod@google.com
 ilyamaty@google.com
@@ -49,7 +48,7 @@ per-file res/values/config_display.xml = file:/services/core/java/com/android/se
 # Wear
 per-file res/*-watch/* = file:/WEAR_OWNERS
 
-# Peformance
+# Performance
 per-file res/values/config.xml = file:/PERFORMANCE_OWNERS
 per-file res/values/symbols.xml = file:/PERFORMANCE_OWNERS
 
@@ -63,3 +62,11 @@ per-file res/xml/sms_short_codes.xml = file:/platform/frameworks/opt/telephony:/
 
 # TV Input Framework
 per-file res/values/config_tv_external_input_logging.xml = file:/services/core/java/com/android/server/tv/OWNERS
+
+# SysUi Color Team
+per-file res/values/colors.xml = arteiro@google.com
+per-file res/values/attrs.xml = arteiro@google.com
+per-file res/values/styles.xml = arteiro@google.com
+per-file res/values/symbols.xml = arteiro@google.com
+per-file res/values/themes_device_defaults.xml = arteiro@google.com
+per-file res/values/styles_material.xml = arteiro@google.com

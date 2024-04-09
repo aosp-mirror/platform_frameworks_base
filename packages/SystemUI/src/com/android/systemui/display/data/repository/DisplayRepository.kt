@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -66,6 +67,9 @@ interface DisplayRepository {
      * When `null`, it means there is no pending display waiting to be enabled.
      */
     val pendingDisplay: Flow<PendingDisplay?>
+
+    /** Whether the default display is currently off. */
+    val defaultDisplayOff: Flow<Boolean>
 
     /** Represents a connected display that has not been enabled yet. */
     interface PendingDisplay {
@@ -289,6 +293,11 @@ constructor(
                 }
             }
             .debugLog("pendingDisplay")
+
+    override val defaultDisplayOff: Flow<Boolean> =
+        displays
+            .map { displays -> displays.firstOrNull { it.displayId == Display.DEFAULT_DISPLAY } }
+            .map { it?.state == Display.STATE_OFF }
 
     private fun <T> Flow<T>.debugLog(flowName: String): Flow<T> {
         return if (DEBUG) {

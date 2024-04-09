@@ -27,6 +27,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Objects;
+
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class DisplayBrightnessStateTest {
@@ -101,7 +103,9 @@ public class DisplayBrightnessStateTest {
                 .append("\n    customAnimationRate:")
                 .append(displayBrightnessState.getCustomAnimationRate())
                 .append("\n    shouldUpdateScreenBrightnessSetting:")
-                .append(displayBrightnessState.shouldUpdateScreenBrightnessSetting());
+                .append(displayBrightnessState.shouldUpdateScreenBrightnessSetting())
+                .append("\n    mBrightnessEvent:")
+                .append(Objects.toString(displayBrightnessState.getBrightnessEvent(), "null"));
         return sb.toString();
     }
 }

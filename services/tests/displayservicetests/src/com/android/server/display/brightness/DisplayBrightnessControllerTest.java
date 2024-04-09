@@ -19,7 +19,7 @@ package com.android.server.display.brightness;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -111,8 +111,7 @@ public final class DisplayBrightnessControllerTest {
         DisplayBrightnessStrategy displayBrightnessStrategy = mock(DisplayBrightnessStrategy.class);
         int targetDisplayState = Display.STATE_DOZE;
         when(mDisplayBrightnessStrategySelector.selectStrategy(
-                eq(new StrategySelectionRequest(displayPowerRequest, targetDisplayState))))
-                .thenReturn(displayBrightnessStrategy);
+                any(StrategySelectionRequest.class))).thenReturn(displayBrightnessStrategy);
         mDisplayBrightnessController.updateBrightness(displayPowerRequest, targetDisplayState);
         verify(displayBrightnessStrategy).updateBrightness(displayPowerRequest);
         assertEquals(mDisplayBrightnessController.getCurrentDisplayBrightnessStrategy(),
@@ -164,6 +163,7 @@ public final class DisplayBrightnessControllerTest {
         // No brightness is set if the pending brightness is invalid
         mDisplayBrightnessController.setPendingScreenBrightness(Float.NaN);
         assertFalse(mDisplayBrightnessController.updateUserSetScreenBrightness());
+        assertFalse(mDisplayBrightnessController.getIsUserSetScreenBrightnessUpdated());
 
         // user set brightness is not set if the current and the pending brightness are same.
         float currentBrightness = 0.4f;
@@ -175,6 +175,7 @@ public final class DisplayBrightnessControllerTest {
         mDisplayBrightnessController.setPendingScreenBrightness(currentBrightness);
         mDisplayBrightnessController.setTemporaryBrightness(currentBrightness);
         assertFalse(mDisplayBrightnessController.updateUserSetScreenBrightness());
+        assertFalse(mDisplayBrightnessController.getIsUserSetScreenBrightnessUpdated());
         verify(temporaryBrightnessStrategy).setTemporaryScreenBrightness(
                 PowerManager.BRIGHTNESS_INVALID_FLOAT);
         assertEquals(mDisplayBrightnessController.getPendingScreenBrightness(),
@@ -188,6 +189,7 @@ public final class DisplayBrightnessControllerTest {
         mDisplayBrightnessController.setPendingScreenBrightness(pendingScreenBrightness);
         mDisplayBrightnessController.setTemporaryBrightness(temporaryScreenBrightness);
         assertTrue(mDisplayBrightnessController.updateUserSetScreenBrightness());
+        assertTrue(mDisplayBrightnessController.getIsUserSetScreenBrightnessUpdated());
         assertEquals(mDisplayBrightnessController.getCurrentBrightness(),
                 pendingScreenBrightness, /* delta= */ 0.0f);
         assertEquals(mDisplayBrightnessController.getLastUserSetScreenBrightness(),

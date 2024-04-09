@@ -1,5 +1,4 @@
 package: "com.android.media.playback.flags"
-container: "system"
 
 flag {
   name: "mediametadataretriever_default_rgba8888"

@@ -241,6 +241,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
+import android.util.IntArray;
 import android.util.MergedConfiguration;
 import android.util.Pair;
 import android.util.Slog;
@@ -567,7 +568,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Device default insets types shall be excluded from config app sizes. */
     final int mConfigTypes;
 
-    final int mLegacyConfigTypes;
+    final int mOverrideConfigTypes;
 
     final boolean mLimitedAlphaCompositing;
     final int mMaxUiWidth;
@@ -1106,6 +1107,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @GuardedBy("mGlobalLock")
     final SensitiveContentPackages mSensitiveContentPackages = new SensitiveContentPackages();
+    /**
+     * UIDs for which a Toast has been shown to indicate
+     * {@link LocalService#addBlockScreenCaptureForApps(ArraySet) screen capture blocking}. This is
+     * used to ensure we don't keep re-showing the Toast every time the window becomes visible.
+     * UIDs are removed when the app is removed from the block list.
+     */
+    @GuardedBy("mGlobalLock")
+    private final IntArray mCaptureBlockedToastShownUids = new IntArray();
 
     /** Listener to notify activity manager about app transitions. */
     final WindowManagerInternal.AppTransitionListener mActivityManagerAppTransitionNotifier
@@ -1238,20 +1247,18 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mFlags.mInsetsDecoupledConfiguration) {
             mDecorTypes = 0;
             mConfigTypes = 0;
-        } else if (isScreenSizeDecoupledFromStatusBarAndCutout) {
-            mDecorTypes = WindowInsets.Type.navigationBars();
-            mConfigTypes = WindowInsets.Type.navigationBars();
         } else {
             mDecorTypes = WindowInsets.Type.displayCutout() | WindowInsets.Type.navigationBars();
             mConfigTypes = WindowInsets.Type.displayCutout() | WindowInsets.Type.statusBars()
                     | WindowInsets.Type.navigationBars();
         }
-        if (isScreenSizeDecoupledFromStatusBarAndCutout) {
-            // Do not fallback to legacy value for enabled devices.
-            mLegacyConfigTypes = WindowInsets.Type.navigationBars();
+        if (isScreenSizeDecoupledFromStatusBarAndCutout && !mFlags.mInsetsDecoupledConfiguration) {
+            // If the global new behavior is not there, but the partial decouple flag is on.
+            mOverrideConfigTypes = 0;
         } else {
-            mLegacyConfigTypes = WindowInsets.Type.displayCutout() | WindowInsets.Type.statusBars()
-                    | WindowInsets.Type.navigationBars();
+            mOverrideConfigTypes =
+                    WindowInsets.Type.displayCutout() | WindowInsets.Type.statusBars()
+                            | WindowInsets.Type.navigationBars();
         }
 
         mLetterboxConfiguration = new LetterboxConfiguration(
@@ -8748,6 +8755,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (modified) {
                     WindowManagerService.this.refreshScreenCaptureDisabled();
                 }
+                if (sensitiveContentImprovements()) {
+                    for (int i = 0; i < packageInfos.size(); i++) {
+                        int uid = packageInfos.valueAt(i).getUid();
+                        if (mCaptureBlockedToastShownUids.contains(uid)) {
+                            mCaptureBlockedToastShownUids.remove(
+                                    mCaptureBlockedToastShownUids.indexOf(uid));
+                        }
+                    }
+                }
             }
         }
 
@@ -8757,6 +8773,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 boolean modified = mSensitiveContentPackages.clearBlockedApps();
                 if (modified) {
                     WindowManagerService.this.refreshScreenCaptureDisabled();
+                }
+                if (sensitiveContentImprovements()) {
+                    mCaptureBlockedToastShownUids.clear();
                 }
             }
         }
@@ -10159,9 +10178,13 @@ public class WindowManagerService extends IWindowManager.Stub
      * on sensitive content protections.
      */
     private void showToastIfBlockingScreenCapture(@NonNull WindowState w) {
-        // TODO(b/323580163): Check if already shown and update shown state.
-        if (mSensitiveContentPackages.shouldBlockScreenCaptureForApp(w.getOwningPackage(),
-                w.getOwningUid(), w.getWindowToken())) {
+        int uid = w.getOwningUid();
+        if (mCaptureBlockedToastShownUids.contains(uid)) {
+            return;
+        }
+        if (mSensitiveContentPackages.shouldBlockScreenCaptureForApp(w.getOwningPackage(), uid,
+                w.getWindowToken())) {
+            mCaptureBlockedToastShownUids.add(uid);
             mH.post(() -> {
                 Toast.makeText(mContext, Looper.getMainLooper(),
                                 mContext.getString(R.string.screen_not_shared_sensitive_content),

@@ -1,5 +1,4 @@
 package: "android.app.smartspace.flags"
-container: "system"
 
 flag {
   name: "remote_views"

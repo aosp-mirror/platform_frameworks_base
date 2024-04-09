@@ -1,5 +1,4 @@
 package: "android.hardware.radio"
-container: "system"
 
 flag {
     name: "hd_radio_improved"

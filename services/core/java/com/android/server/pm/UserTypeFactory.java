@@ -306,7 +306,7 @@ public final class UserTypeFactory {
                         R.color.black)
                 .setDarkThemeBadgeColors(
                         R.color.white)
-                .setDefaultRestrictions(getDefaultProfileRestrictions())
+                .setDefaultRestrictions(getDefaultPrivateProfileRestrictions())
                 .setDefaultCrossProfileIntentFilters(getDefaultPrivateCrossProfileIntentFilter())
                 .setDefaultUserProperties(new UserProperties.Builder()
                         .setStartWithParent(true)
@@ -427,6 +427,13 @@ public final class UserTypeFactory {
     private static Bundle getDefaultProfileRestrictions() {
         final Bundle restrictions = new Bundle();
         restrictions.putBoolean(UserManager.DISALLOW_WALLPAPER, true);
+        return restrictions;
+    }
+
+    @VisibleForTesting
+    static Bundle getDefaultPrivateProfileRestrictions() {
+        final Bundle restrictions = getDefaultProfileRestrictions();
+        restrictions.putBoolean(UserManager.DISALLOW_BLUETOOTH_SHARING, true);
         return restrictions;
     }
 

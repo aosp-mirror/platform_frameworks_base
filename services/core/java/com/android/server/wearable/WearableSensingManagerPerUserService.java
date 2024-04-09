@@ -17,6 +17,9 @@
 package com.android.server.wearable;
 
 import static android.service.wearable.WearableSensingService.HOTWORD_AUDIO_STREAM_BUNDLE_KEY;
+import static android.system.OsConstants.F_GETFL;
+import static android.system.OsConstants.O_ACCMODE;
+import static android.system.OsConstants.O_RDONLY;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -42,6 +45,8 @@ import android.os.SharedMemory;
 import android.service.voice.HotwordAudioStream;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.service.voice.VoiceInteractionManagerInternal.WearableHotwordDetectionCallback;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.system.OsConstants;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
@@ -276,7 +281,10 @@ final class WearableSensingManagerPerUserService extends
             ParcelFileDescriptor parcelFileDescriptor,
             @Nullable IWearableSensingCallback wearableSensingCallback,
             RemoteCallback statusCallback) {
-        Slog.i(TAG, "onProvideDataStream in per user service.");
+        Slog.i(
+                TAG,
+                "onProvideDataStream in per user service. Is data stream read-only? "
+                        + isReadOnly(parcelFileDescriptor));
         synchronized (mLock) {
             if (!setUpServiceIfNeeded()) {
                 Slog.w(TAG, "Detection service is not available at this moment.");
@@ -505,10 +513,49 @@ final class WearableSensingManagerPerUserService extends
                     String filename,
                     AndroidFuture<ParcelFileDescriptor> futureFromWearableSensingService)
                     throws RemoteException {
-                // TODO(b/331395522): Intercept the PFD received from the app process and verify it
-                // is read-only
-                callbackFromAppProcess.openFile(filename, futureFromWearableSensingService);
+                AndroidFuture<ParcelFileDescriptor> futureFromSystemServer =
+                        new AndroidFuture<ParcelFileDescriptor>()
+                                .whenComplete(
+                                        (pfdFromApp, throwable) -> {
+                                            if (throwable != null) {
+                                                Slog.e(
+                                                        TAG,
+                                                        "Error when reading file " + filename,
+                                                        throwable);
+                                                futureFromWearableSensingService.complete(null);
+                                                return;
+                                            }
+                                            if (isReadOnly(pfdFromApp)) {
+                                                futureFromWearableSensingService.complete(
+                                                        pfdFromApp);
+                                            } else {
+                                                Slog.w(
+                                                        TAG,
+                                                        "Received writable ParcelFileDescriptor"
+                                                            + " from app process. To prevent"
+                                                            + " arbitrary data egress, sending null"
+                                                            + " to WearableSensingService"
+                                                            + " instead.");
+                                                futureFromWearableSensingService.complete(null);
+                                            }
+                                        });
+                callbackFromAppProcess.openFile(filename, futureFromSystemServer);
             }
         };
+    }
+
+    private static boolean isReadOnly(ParcelFileDescriptor parcelFileDescriptor) {
+        try {
+            int readMode =
+                    Os.fcntlInt(parcelFileDescriptor.getFileDescriptor(), F_GETFL, 0) & O_ACCMODE;
+            return readMode == O_RDONLY;
+        } catch (ErrnoException ex) {
+            Slog.w(
+                    TAG,
+                    "Error encountered when trying to determine if the parcelFileDescriptor is"
+                        + " read-only. Treating it as not read-only",
+                    ex);
+        }
+        return false;
     }
 }

@@ -34,9 +34,10 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
-import com.google.android.collect.Sets;
 
 import com.android.server.backup.Flags;
+
+import com.google.android.collect.Sets;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,6 +65,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
     private static final String APP_LOCALES_HELPER = "app_locales";
     private static final String APP_GENDER_HELPER = "app_gender";
     private static final String COMPANION_HELPER = "companion";
+    private static final String SYSTEM_GENDER_HELPER = "system_gender";
 
     // These paths must match what the WallpaperManagerService uses.  The leaf *_FILENAME
     // are also used in the full-backup file format, so must not change unless steps are
@@ -99,7 +101,9 @@ public class SystemBackupAgent extends BackupAgentHelper {
                     NOTIFICATION_HELPER,
                     SYNC_SETTINGS_HELPER,
                     APP_LOCALES_HELPER,
-                    COMPANION_HELPER);
+                    COMPANION_HELPER,
+                    APP_GENDER_HELPER,
+                    SYSTEM_GENDER_HELPER);
 
     /** Helpers that are enabled for full, non-system users. */
     private static final Set<String> sEligibleHelpersForNonSystemUser =
@@ -139,6 +143,8 @@ public class SystemBackupAgent extends BackupAgentHelper {
         addHelperIfEligibleForUser(APP_GENDER_HELPER,
                 new AppGrammaticalGenderBackupHelper(mUserId));
         addHelperIfEligibleForUser(COMPANION_HELPER, new CompanionBackupHelper(mUserId));
+        addHelperIfEligibleForUser(SYSTEM_GENDER_HELPER,
+                new SystemGrammaticalGenderBackupHelper(mUserId));
     }
 
     @Override

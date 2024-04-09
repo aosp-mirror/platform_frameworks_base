@@ -18,6 +18,7 @@ package com.android.wm.shell.back;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.res.Configuration;
 import android.util.Log;
 import android.util.SparseArray;
 import android.window.BackNavigationInfo;
@@ -29,6 +30,7 @@ public class ShellBackAnimationRegistry {
     private final SparseArray<BackAnimationRunner> mAnimationDefinition = new SparseArray<>();
     private final ShellBackAnimation mDefaultCrossActivityAnimation;
     private final ShellBackAnimation mCustomizeActivityAnimation;
+    private final ShellBackAnimation mCrossTaskAnimation;
 
     public ShellBackAnimationRegistry(
             @ShellBackAnimation.CrossActivity @Nullable ShellBackAnimation crossActivityAnimation,
@@ -57,6 +59,7 @@ public class ShellBackAnimationRegistry {
 
         mDefaultCrossActivityAnimation = crossActivityAnimation;
         mCustomizeActivityAnimation = customizeActivityAnimation;
+        mCrossTaskAnimation = crossTaskAnimation;
 
         // TODO(b/236760237): register dialog close animation when it's completed.
     }
@@ -123,6 +126,12 @@ public class ShellBackAnimationRegistry {
         }
         mAnimationDefinition.set(
                 BackNavigationInfo.TYPE_CROSS_ACTIVITY, mDefaultCrossActivityAnimation.getRunner());
+    }
+
+    void onConfigurationChanged(Configuration newConfig) {
+        mCustomizeActivityAnimation.onConfigurationChanged(newConfig);
+        mDefaultCrossActivityAnimation.onConfigurationChanged(newConfig);
+        mCrossTaskAnimation.onConfigurationChanged(newConfig);
     }
 
     BackAnimationRunner getAnimationRunnerAndInit(BackNavigationInfo backNavigationInfo) {

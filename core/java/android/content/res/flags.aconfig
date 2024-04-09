@@ -1,5 +1,4 @@
 package: "android.content.res"
-container: "system"
 
 flag {
     name: "default_locale"

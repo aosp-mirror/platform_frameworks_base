@@ -80,4 +80,9 @@ public class TemporaryBrightnessStrategy implements DisplayBrightnessStrategy {
             StrategySelectionNotifyRequest strategySelectionNotifyRequest) {
         // DO NOTHING
     }
+
+    @Override
+    public int getReason() {
+        return BrightnessReason.REASON_TEMPORARY;
+    }
 }

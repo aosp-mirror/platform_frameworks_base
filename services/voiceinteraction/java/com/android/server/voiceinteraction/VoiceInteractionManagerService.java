@@ -180,7 +180,8 @@ public class VoiceInteractionManagerService extends SystemService {
                 LocalServices.getService(ActivityManagerInternal.class));
         mAtmInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityTaskManagerInternal.class));
-        mWmInternal = LocalServices.getService(WindowManagerInternal.class);
+        mWmInternal = Objects.requireNonNull(
+                LocalServices.getService(WindowManagerInternal.class));
         mDpmInternal = LocalServices.getService(DevicePolicyManagerInternal.class);
         LegacyPermissionManagerInternal permissionManagerInternal = LocalServices.getService(
                 LegacyPermissionManagerInternal.class);
@@ -2737,12 +2738,8 @@ public class VoiceInteractionManagerService extends SystemService {
                     isManagedProfileVisible = true;
                 }
             }
-            final ScreenCapture.ScreenshotHardwareBuffer shb;
-            if (mWmInternal != null) {
-                shb = mWmInternal.takeAssistScreenshot();
-            } else {
-                shb = null;
-            }
+            final ScreenCapture.ScreenshotHardwareBuffer shb =
+                    mWmInternal.takeAssistScreenshot();
             final Bitmap bm = shb != null ? shb.asBitmap() : null;
             // Now that everything is fetched, putting it in the launchIntent.
             if (bm != null) {

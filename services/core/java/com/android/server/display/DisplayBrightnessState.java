@@ -18,6 +18,7 @@ package com.android.server.display;
 
 import android.text.TextUtils;
 
+import com.android.server.display.brightness.BrightnessEvent;
 import com.android.server.display.brightness.BrightnessReason;
 
 import java.util.Objects;
@@ -43,6 +44,8 @@ public final class DisplayBrightnessState {
 
     private final float mCustomAnimationRate;
 
+    private final BrightnessEvent mBrightnessEvent;
+
     private DisplayBrightnessState(Builder builder) {
         mBrightness = builder.getBrightness();
         mSdrBrightness = builder.getSdrBrightness();
@@ -54,6 +57,7 @@ public final class DisplayBrightnessState {
         mMinBrightness = builder.getMinBrightness();
         mCustomAnimationRate = builder.getCustomAnimationRate();
         mShouldUpdateScreenBrightnessSetting = builder.shouldUpdateScreenBrightnessSetting();
+        mBrightnessEvent = builder.getBrightnessEvent();
     }
 
     /**
@@ -127,6 +131,13 @@ public final class DisplayBrightnessState {
         return mShouldUpdateScreenBrightnessSetting;
     }
 
+    /**
+     * @return The BrightnessEvent object
+     */
+    public BrightnessEvent getBrightnessEvent() {
+        return mBrightnessEvent;
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder("DisplayBrightnessState:");
@@ -144,6 +155,8 @@ public final class DisplayBrightnessState {
         stringBuilder.append("\n    customAnimationRate:").append(mCustomAnimationRate);
         stringBuilder.append("\n    shouldUpdateScreenBrightnessSetting:")
                 .append(mShouldUpdateScreenBrightnessSetting);
+        stringBuilder.append("\n    mBrightnessEvent:")
+                .append(Objects.toString(mBrightnessEvent, "null"));
         return stringBuilder.toString();
     }
 
@@ -173,7 +186,8 @@ public final class DisplayBrightnessState {
                 && mMinBrightness == otherState.getMinBrightness()
                 && mCustomAnimationRate == otherState.getCustomAnimationRate()
                 && mShouldUpdateScreenBrightnessSetting
-                    == otherState.shouldUpdateScreenBrightnessSetting();
+                    == otherState.shouldUpdateScreenBrightnessSetting()
+                && Objects.equals(mBrightnessEvent, otherState.getBrightnessEvent());
     }
 
     @Override
@@ -181,7 +195,7 @@ public final class DisplayBrightnessState {
         return Objects.hash(mBrightness, mSdrBrightness, mBrightnessReason,
                 mShouldUseAutoBrightness, mIsSlowChange, mMaxBrightness, mMinBrightness,
                 mCustomAnimationRate,
-                mShouldUpdateScreenBrightnessSetting);
+                mShouldUpdateScreenBrightnessSetting, mBrightnessEvent);
     }
 
     /**
@@ -206,6 +220,8 @@ public final class DisplayBrightnessState {
         private float mCustomAnimationRate = CUSTOM_ANIMATION_RATE_NOT_SET;
         private boolean mShouldUpdateScreenBrightnessSetting;
 
+        private BrightnessEvent mBrightnessEvent;
+
         /**
          * Create a builder starting with the values from the specified {@link
          * DisplayBrightnessState}.
@@ -225,6 +241,7 @@ public final class DisplayBrightnessState {
             builder.setCustomAnimationRate(state.getCustomAnimationRate());
             builder.setShouldUpdateScreenBrightnessSetting(
                     state.shouldUpdateScreenBrightnessSetting());
+            builder.setBrightnessEvent(state.getBrightnessEvent());
             return builder;
         }
 
@@ -399,6 +416,23 @@ public final class DisplayBrightnessState {
          */
         public DisplayBrightnessState build() {
             return new DisplayBrightnessState(this);
+        }
+
+
+        /**
+         * This is used to get the BrightnessEvent object from its builder
+         */
+        public BrightnessEvent getBrightnessEvent() {
+            return mBrightnessEvent;
+        }
+
+
+        /**
+         * This is used to set the BrightnessEvent object
+         */
+        public Builder setBrightnessEvent(BrightnessEvent brightnessEvent) {
+            mBrightnessEvent = brightnessEvent;
+            return this;
         }
     }
 }

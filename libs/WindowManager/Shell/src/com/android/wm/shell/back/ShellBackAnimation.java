@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.back;
 
+import android.content.res.Configuration;
 import android.window.BackNavigationInfo;
 
 import javax.inject.Qualifier;
@@ -47,5 +48,9 @@ public abstract class ShellBackAnimation {
      */
     public boolean prepareNextAnimation(BackNavigationInfo.CustomAnimationInfo animationInfo) {
         return false;
+    }
+
+    void onConfigurationChanged(Configuration newConfig) {
+
     }
 }

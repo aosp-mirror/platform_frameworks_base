@@ -1,5 +1,4 @@
 package: "android.multiuser"
-container: "system"
 
 flag {
     name: "save_global_and_guest_restrictions_on_system_user_xml"
