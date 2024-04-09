@@ -772,8 +772,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         row.setUserExpanded(true);
         row.setOnKeyguard(false);
         row.setSensitive(/* sensitive= */true, /* hideSensitive= */false);
-        row.setHideSensitive(/* hideSensitive= */true, /* animated= */false,
-                /* delay= */0L, /* duration= */0L);
+        row.setHideSensitiveForIntrinsicHeight(/* hideSensitive= */true);
 
         // THEN
         assertThat(row.isExpanded()).isFalse();
@@ -787,8 +786,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         row.setUserExpanded(true);
         row.setOnKeyguard(false);
         row.setSensitive(/* sensitive= */true, /* hideSensitive= */false);
-        row.setHideSensitive(/* hideSensitive= */false, /* animated= */false,
-                /* delay= */0L, /* duration= */0L);
+        row.setHideSensitiveForIntrinsicHeight(/* hideSensitive= */false);
 
         // THEN
         assertThat(row.isExpanded()).isTrue();

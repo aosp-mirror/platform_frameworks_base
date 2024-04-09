@@ -2804,12 +2804,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public boolean isExpanded(boolean allowOnKeyguard) {
-        if (DEBUG) {
-            if (!mShowingPublicInitialized && !allowOnKeyguard) {
-                Log.d(TAG, "mShowingPublic is not initialized.");
-            }
-        }
-        return !mShowingPublic && (!mOnKeyguard || allowOnKeyguard)
+        return (!shouldShowPublic()) && (!mOnKeyguard || allowOnKeyguard)
                 && (!hasUserChangedExpansion() && (isSystemExpanded() || isSystemChildExpanded())
                 || isUserExpanded());
     }
