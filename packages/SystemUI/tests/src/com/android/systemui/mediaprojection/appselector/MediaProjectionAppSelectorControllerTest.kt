@@ -258,6 +258,7 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
             colorBackground = 0,
             isForegroundTask = isForegroundTask,
             userType = RecentTask.UserType.STANDARD,
+            splitBounds = null,
         )
     }
 

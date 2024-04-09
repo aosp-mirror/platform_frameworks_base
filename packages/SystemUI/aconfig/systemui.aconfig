@@ -148,6 +148,16 @@ flag {
 }
 
 flag {
+   name: "pss_app_selector_recents_split_screen"
+   namespace: "systemui"
+   description: "Allows recent apps selected for partial screenshare to be launched in split screen mode"
+   bug: "320449039"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
     name: "notifications_background_icons"
     namespace: "systemui"
     description: "Moves part of the notification icon updates to the background."
