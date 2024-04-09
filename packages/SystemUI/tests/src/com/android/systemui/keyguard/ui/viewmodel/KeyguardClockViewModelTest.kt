@@ -23,6 +23,7 @@ import com.android.keyguard.KeyguardClockSwitch
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
 import com.android.systemui.keyguard.data.repository.keyguardClockRepository
 import com.android.systemui.keyguard.data.repository.keyguardRepository
@@ -49,6 +50,7 @@ import org.mockito.Mockito.mock
 
 @SmallTest
 @RunWith(JUnit4::class)
+@DisableSceneContainer
 class KeyguardClockViewModelTest : SysuiTestCase() {
     private lateinit var kosmos: Kosmos
     private lateinit var underTest: KeyguardClockViewModel
@@ -71,7 +73,6 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
     fun currentClockLayout_splitShadeOn_clockCentered_largeClock() =
         testScope.runTest {
             with(kosmos) {
@@ -84,7 +85,6 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
     fun currentClockLayout_splitShadeOn_clockNotCentered_largeClock_splitShadeLargeClock() =
         testScope.runTest {
             with(kosmos) {
@@ -98,7 +98,6 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
     fun currentClockLayout_splitShadeOn_clockNotCentered_smallClock_splitShadeSmallClock() =
         testScope.runTest {
             with(kosmos) {
@@ -112,7 +111,6 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
     fun currentClockLayout_singleShade_smallClock_smallClock() =
         testScope.runTest {
             with(kosmos) {
@@ -124,7 +122,6 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
     fun currentClockLayout_singleShade_largeClock_largeClock() =
         testScope.runTest {
             with(kosmos) {
@@ -136,7 +133,6 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
     fun hasCustomPositionUpdatedAnimation_withConfigTrue_isTrue() =
         testScope.runTest {
             with(kosmos) {
@@ -151,7 +147,6 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
     fun hasCustomPositionUpdatedAnimation_withConfigFalse_isFalse() =
         testScope.runTest {
             with(kosmos) {
@@ -167,7 +162,6 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
     fun testClockSize_alwaysSmallClockSize() =
         testScope.runTest {
             kosmos.fakeKeyguardClockRepository.setSelectedClockSize(SettingsClockSize.SMALL)
@@ -178,7 +172,6 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
     fun testClockSize_dynamicClockSize() =
         testScope.runTest {
             kosmos.keyguardClockRepository.setClockSize(KeyguardClockSwitch.SMALL)
@@ -191,7 +184,6 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
     fun isLargeClockVisible_whenLargeClockSize_isTrue() =
         testScope.runTest {
             kosmos.keyguardClockRepository.setClockSize(KeyguardClockSwitch.LARGE)
@@ -200,7 +192,6 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
     fun isLargeClockVisible_whenSmallClockSize_isFalse() =
         testScope.runTest {
             kosmos.keyguardClockRepository.setClockSize(KeyguardClockSwitch.SMALL)
