@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.component.anc.data.repository
+package com.android.systemui.volume.panel.component.anc.domain.model
 
 import androidx.slice.Slice
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 
-class FakeAncSliceRepository : AncSliceRepository {
+/** Modes current ANC slices state */
+sealed interface AncSlices {
 
-    private val sliceByWidth = mutableMapOf<Int, MutableStateFlow<Slice?>>()
+    data class Ready(
+        val popupSlice: Slice,
+        val buttonSlice: Slice,
+    ) : AncSlices
 
-    override fun ancSlice(width: Int, isCollapsed: Boolean, hideLabel: Boolean): Flow<Slice?> {
-        return sliceByWidth.getOrPut(width) { MutableStateFlow(null) }
-    }
-
-    fun putSlice(width: Int, slice: Slice?) {
-        sliceByWidth.getOrPut(width) { MutableStateFlow(null) }.value = slice
-    }
+    /** Couldn't one or both slices. */
+    data object Unavailable : AncSlices
 }

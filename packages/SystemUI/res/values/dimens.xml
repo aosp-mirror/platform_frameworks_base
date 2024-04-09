@@ -2001,4 +2001,7 @@
 
     <!-- SliceView grid gutter for ANC Slice -->
     <dimen name="abc_slice_grid_gutter">0dp</dimen>
+    <!-- SliceView icon size -->
+    <dimen name="abc_slice_big_pic_min_height">64dp</dimen>
+    <dimen name="abc_slice_big_pic_max_height">64dp</dimen>
 </resources>

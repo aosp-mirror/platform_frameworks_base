@@ -17,6 +17,7 @@
 package com.android.systemui.volume.panel.component.anc.domain
 
 import com.android.systemui.volume.panel.component.anc.domain.interactor.AncSliceInteractor
+import com.android.systemui.volume.panel.component.anc.domain.model.AncSlices
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import com.android.systemui.volume.panel.domain.ComponentAvailabilityCriteria
 import javax.inject.Inject
@@ -31,5 +32,6 @@ constructor(
     private val ancSliceInteractor: AncSliceInteractor,
 ) : ComponentAvailabilityCriteria {
 
-    override fun isAvailable(): Flow<Boolean> = ancSliceInteractor.ancSlice.map { it != null }
+    override fun isAvailable(): Flow<Boolean> =
+        ancSliceInteractor.ancSlices.map { it is AncSlices.Ready }
 }

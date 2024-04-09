@@ -72,7 +72,7 @@ class AncSliceRepositoryTest : SysuiTestCase() {
             testScope.runTest {
                 localMediaRepository.updateCurrentConnectedDevice(null)
 
-                val slice by collectLastValue(underTest.ancSlice(1))
+                val slice by collectLastValue(underTest.ancSlice(1, false, false))
                 runCurrent()
 
                 assertThat(slice).isNull()
@@ -86,7 +86,7 @@ class AncSliceRepositoryTest : SysuiTestCase() {
             testScope.runTest {
                 localMediaRepository.updateCurrentConnectedDevice(createMediaDevice())
 
-                val slice by collectLastValue(underTest.ancSlice(1))
+                val slice by collectLastValue(underTest.ancSlice(1, false, false))
                 runCurrent()
 
                 assertThat(slice).isNotNull()
