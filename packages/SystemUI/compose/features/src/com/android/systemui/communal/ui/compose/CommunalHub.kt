@@ -32,6 +32,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -45,6 +46,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -101,6 +103,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
@@ -119,6 +124,7 @@ import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.internal.R.dimen.system_app_widget_background_radius
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.ui.compose.Dimensions.CardOutlineWidth
 import com.android.systemui.communal.ui.compose.extensions.allowGestures
 import com.android.systemui.communal.ui.compose.extensions.detectLongPressGesture
@@ -223,32 +229,34 @@ fun CommunalHub(
                         .motionEventSpy { onMotionEvent(viewModel) }
                 },
     ) {
-        if (!viewModel.isEditMode && isEmptyState) {
-            EmptyStateCta(
-                contentPadding = contentPadding,
-                viewModel = viewModel,
-            )
-        } else {
-            CommunalHubLazyGrid(
-                communalContent = communalContent,
-                viewModel = viewModel,
-                contentPadding = contentPadding,
-                contentOffset = contentOffset,
-                setGridCoordinates = { gridCoordinates = it },
-                updateDragPositionForRemove = { offset ->
-                    isDraggingToRemove =
-                        isPointerWithinCoordinates(
-                            offset = gridCoordinates?.let { it.positionInWindow() + offset },
-                            containerToCheck = removeButtonCoordinates
-                        )
-                    isDraggingToRemove
-                },
-                onOpenWidgetPicker = onOpenWidgetPicker,
-                gridState = gridState,
-                contentListState = contentListState,
-                selectedKey = selectedKey,
-                widgetConfigurator = widgetConfigurator,
-            )
+        AccessibilityContainer(viewModel) {
+            if (!viewModel.isEditMode && isEmptyState) {
+                EmptyStateCta(
+                    contentPadding = contentPadding,
+                    viewModel = viewModel,
+                )
+            } else {
+                CommunalHubLazyGrid(
+                    communalContent = communalContent,
+                    viewModel = viewModel,
+                    contentPadding = contentPadding,
+                    contentOffset = contentOffset,
+                    setGridCoordinates = { gridCoordinates = it },
+                    updateDragPositionForRemove = { offset ->
+                        isDraggingToRemove =
+                            isPointerWithinCoordinates(
+                                offset = gridCoordinates?.let { it.positionInWindow() + offset },
+                                containerToCheck = removeButtonCoordinates
+                            )
+                        isDraggingToRemove
+                    },
+                    onOpenWidgetPicker = onOpenWidgetPicker,
+                    gridState = gridState,
+                    contentListState = contentListState,
+                    selectedKey = selectedKey,
+                    widgetConfigurator = widgetConfigurator,
+                )
+            }
         }
 
         // TODO(b/326060686): Remove this once keyguard indication area can persist over hub
@@ -1026,6 +1034,39 @@ private fun Umo(viewModel: BaseCommunalViewModel, modifier: Modifier = Modifier)
         // For reusing composition in lazy lists.
         onReset = {},
     )
+}
+
+/** Container of the glanceable hub grid to enable accessibility actions when focused. */
+@Composable
+fun AccessibilityContainer(viewModel: BaseCommunalViewModel, content: @Composable () -> Unit) {
+    val context = LocalContext.current
+    val isFocusable by viewModel.isFocusable.collectAsState(initial = false)
+    Box(
+        modifier =
+            Modifier.fillMaxWidth().wrapContentHeight().thenIf(
+                isFocusable && !viewModel.isEditMode
+            ) {
+                Modifier.focusable(isFocusable).semantics {
+                    contentDescription =
+                        context.getString(
+                            R.string.accessibility_content_description_for_communal_hub
+                        )
+                    customActions =
+                        listOf(
+                            CustomAccessibilityAction(
+                                context.getString(
+                                    R.string.accessibility_action_label_close_communal_hub
+                                )
+                            ) {
+                                viewModel.changeScene(CommunalScenes.Blank)
+                                true
+                            }
+                        )
+                }
+            }
+    ) {
+        content()
+    }
 }
 
 /**

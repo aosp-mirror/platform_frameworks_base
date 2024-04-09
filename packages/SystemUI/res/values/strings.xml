@@ -1168,6 +1168,10 @@
     <string name="work_mode_off_title">Unpause work apps?</string>
     <!-- Title for button to unpause on work profile. [CHAR LIMIT=NONE] -->
     <string name="work_mode_turn_on">Unpause</string>
+    <!-- Label for accessibility action that navigates to lock screen. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_label_close_communal_hub">Close widgets on lock screen</string>
+    <!-- Accessibility content description for communal hub. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_content_description_for_communal_hub">Widgets on lock screen</string>
 
     <!-- Related to user switcher --><skip/>
 
