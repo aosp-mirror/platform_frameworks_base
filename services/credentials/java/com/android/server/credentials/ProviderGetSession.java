@@ -22,6 +22,7 @@ import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.credentials.CredentialManager;
 import android.credentials.CredentialOption;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.GetCredentialException;
@@ -61,7 +62,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         BeginGetCredentialResponse>
         implements
         RemoteCredentialService.ProviderCallbacks<BeginGetCredentialResponse> {
-    private static final String TAG = "ProviderGetSession";
+    private static final String TAG = CredentialManager.TAG;
     // Key to be used as the entry key for an action entry
     public static final String ACTION_ENTRY_KEY = "action_key";
     // Key to be used as the entry key for the authentication entry

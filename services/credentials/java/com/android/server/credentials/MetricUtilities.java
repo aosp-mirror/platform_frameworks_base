@@ -20,6 +20,7 @@ import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.credentials.CredentialManager;
 import android.util.Slog;
 
 import com.android.internal.util.FrameworkStatsLog;
@@ -44,7 +45,7 @@ import java.util.Map;
 public class MetricUtilities {
     private static final boolean LOG_FLAG = true;
 
-    private static final String TAG = "MetricUtilities";
+    private static final String TAG = CredentialManager.TAG;
     public static final String USER_CANCELED_SUBSTRING = "TYPE_USER_CANCELED";
     public static final int MIN_EMIT_WAIT_TIME_MS = 10;
 

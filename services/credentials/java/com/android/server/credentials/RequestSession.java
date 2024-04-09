@@ -23,6 +23,7 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.credentials.CredentialManager;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.flags.Flags;
 import android.credentials.selection.ProviderData;
@@ -56,7 +57,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * every time a new response type is expected from the providers.
  */
 abstract class RequestSession<T, U, V> implements CredentialManagerUi.CredentialManagerUiCallback {
-    private static final String TAG = "RequestSession";
+    private static final String TAG = CredentialManager.TAG;
 
     public interface SessionLifetime {
         /** Called when the user makes a selection. */

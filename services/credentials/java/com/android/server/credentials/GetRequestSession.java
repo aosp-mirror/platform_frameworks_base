@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.credentials.CredentialManager;
 import android.credentials.CredentialOption;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.GetCredentialException;
@@ -48,7 +49,7 @@ import java.util.Set;
 public class GetRequestSession extends RequestSession<GetCredentialRequest,
         IGetCredentialCallback, GetCredentialResponse>
         implements ProviderSession.ProviderInternalCallback<GetCredentialResponse> {
-    private static final String TAG = "GetRequestSession";
+    private static final String TAG = CredentialManager.TAG;
 
     public GetRequestSession(Context context, RequestSession.SessionLifetime sessionCallback,
             Object lock, int userId, int callingUid,

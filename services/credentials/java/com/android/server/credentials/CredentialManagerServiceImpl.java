@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.credentials.CredentialManager;
 import android.credentials.CredentialProviderInfo;
 import android.service.credentials.CredentialProviderInfoFactory;
 import android.util.Slog;
@@ -36,7 +37,7 @@ import java.util.List;
  */
 public final class CredentialManagerServiceImpl extends
         AbstractPerUserSystemService<CredentialManagerServiceImpl, CredentialManagerService> {
-    private static final String TAG = "CredManSysServiceImpl";
+    private static final String TAG = CredentialManager.TAG;
 
     @GuardedBy("mLock")
     @NonNull
@@ -93,7 +94,10 @@ public final class CredentialManagerServiceImpl extends
     public ProviderSession initiateProviderSessionForRequestLocked(
             RequestSession requestSession, List<String> requestOptions) {
         if (!requestOptions.isEmpty() && !isServiceCapableLocked(requestOptions)) {
-            Slog.i(TAG, "Service does not have the required capabilities");
+            if (mInfo != null) {
+                Slog.i(TAG, "Service does not have the required capabilities: "
+                        + mInfo.getComponentName());
+            }
             return null;
         }
         if (mInfo == null) {
