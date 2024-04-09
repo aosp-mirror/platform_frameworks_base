@@ -21,7 +21,7 @@ import android.view.MotionEvent
 import android.widget.ImageButton
 
 /**
- * A custom [ImageButton] that intentionally does not handle hover events.
+ * A custom [ImageButton] for buttons inside handle menu that intentionally doesn't handle hovers.
  * This is due to the hover events being handled by [DesktopModeWindowDecorViewModel]
  * in order to take the status bar layer into account. Handling it in both classes results in a
  * flicker when the hover moves from outside to inside status bar layer.
