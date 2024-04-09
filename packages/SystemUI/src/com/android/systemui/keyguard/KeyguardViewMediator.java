@@ -1304,7 +1304,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
     private Consumer<Float> getRemoteSurfaceAlphaApplier() {
         return (Float alpha) -> {
-            if (mRemoteAnimationTarget == null) return;
+            if (mRemoteAnimationTarget == null) {
+                Log.e(TAG, "Attempting to set alpha on null animation target");
+                return;
+            }
             final View localView = mKeyguardViewControllerLazy.get().getViewRootImpl().getView();
             final SyncRtSurfaceTransactionApplier applier =
                     new SyncRtSurfaceTransactionApplier(localView);
@@ -1620,6 +1623,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         getRemoteSurfaceAlphaApplier(), mMainDispatcher);
                 collectFlow(viewRootImpl.getView(), viewModel.getTransitionEnded(),
                         getFinishedCallbackConsumer(), mMainDispatcher);
+            } else {
+                Log.e(TAG, "Keyguard ViewRootImpl is null");
             }
         }
         // Most services aren't available until the system reaches the ready state, so we
