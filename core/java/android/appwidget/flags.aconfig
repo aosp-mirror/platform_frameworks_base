@@ -32,3 +32,10 @@ flag {
   description: "Enable support for transporting draw instructions as data parcel"
   bug: "286130467"
 }
+
+flag {
+  name: "throttle_widget_updates"
+  namespace: "app_widgets"
+  description: "Throttle the widget view updates to mitigate transaction exceptions"
+  bug: "326145514"
+}
