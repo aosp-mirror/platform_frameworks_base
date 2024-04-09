@@ -62,4 +62,10 @@ public class SafetyLabelsFactory implements AslMarshallableFactory<SafetyLabels>
                                                 false)));
         return new SafetyLabels(version, dataLabels, securityLabels, thirdPartyVerification);
     }
+
+    /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
+    @Override
+    public SafetyLabels createFromOdElements(List<Element> elements) throws MalformedXmlException {
+        return null;
+    }
 }

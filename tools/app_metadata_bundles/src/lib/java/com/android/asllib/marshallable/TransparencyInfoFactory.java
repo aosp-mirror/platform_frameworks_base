@@ -49,4 +49,11 @@ public class TransparencyInfoFactory implements AslMarshallableFactory<Transpare
 
         return new TransparencyInfo(developerInfo, appInfo);
     }
+
+    /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
+    @Override
+    public TransparencyInfo createFromOdElements(List<Element> elements)
+            throws MalformedXmlException {
+        return null;
+    }
 }

@@ -40,4 +40,11 @@ public class ThirdPartyVerificationFactory
         String url = XmlUtils.getStringAttr(ele, XmlUtils.HR_ATTR_URL);
         return new ThirdPartyVerification(url);
     }
+
+    /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
+    @Override
+    public ThirdPartyVerification createFromOdElements(List<Element> elements)
+            throws MalformedXmlException {
+        return null;
+    }
 }

@@ -41,4 +41,11 @@ public class SecurityLabelsFactory implements AslMarshallableFactory<SecurityLab
                 XmlUtils.getBoolAttr(ele, XmlUtils.HR_ATTR_IS_DATA_ENCRYPTED, false);
         return new SecurityLabels(isDataDeletable, isDataEncrypted);
     }
+
+    /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
+    @Override
+    public SecurityLabels createFromOdElements(List<Element> elements)
+            throws MalformedXmlException {
+        return null;
+    }
 }

@@ -1,0 +1,11 @@
+<data-labels>
+    <data-shared dataCategory="audio"
+        dataType="sound_recordings"
+        purposes="analytics" />
+    <data-shared dataCategory="audio"
+        dataType="music_files"
+        purposes="analytics" />
+    <data-shared dataCategory="audio"
+        dataType="other"
+        purposes="analytics" />
+</data-labels>

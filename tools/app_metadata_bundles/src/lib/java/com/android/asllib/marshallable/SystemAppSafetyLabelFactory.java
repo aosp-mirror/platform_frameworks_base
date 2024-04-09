@@ -39,4 +39,11 @@ public class SystemAppSafetyLabelFactory implements AslMarshallableFactory<Syste
         String url = XmlUtils.getStringAttr(systemAppSafetyLabelEle, XmlUtils.HR_ATTR_URL);
         return new SystemAppSafetyLabel(url);
     }
+
+    /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
+    @Override
+    public SystemAppSafetyLabel createFromOdElements(List<Element> elements)
+            throws MalformedXmlException {
+        return null;
+    }
 }

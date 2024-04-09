@@ -142,4 +142,10 @@ public class AppInfo implements AslMarshallable {
         }
         return XmlUtils.listOf(appInfoEle);
     }
+
+    /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
+    @Override
+    public List<Element> toHrDomElements(Document doc) {
+        return List.of();
+    }
 }

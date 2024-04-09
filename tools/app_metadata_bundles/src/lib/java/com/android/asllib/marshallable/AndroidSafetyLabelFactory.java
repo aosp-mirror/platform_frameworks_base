@@ -55,4 +55,11 @@ public class AndroidSafetyLabelFactory implements AslMarshallableFactory<Android
         return new AndroidSafetyLabel(
                 version, systemAppSafetyLabel, safetyLabels, transparencyInfo);
     }
+
+    /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
+    @Override
+    public AndroidSafetyLabel createFromOdElements(List<Element> elements)
+            throws MalformedXmlException {
+        return null;
+    }
 }
