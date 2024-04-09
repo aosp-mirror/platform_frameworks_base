@@ -241,6 +241,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
+import android.util.IntArray;
 import android.util.MergedConfiguration;
 import android.util.Pair;
 import android.util.Slog;
@@ -1106,6 +1107,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @GuardedBy("mGlobalLock")
     final SensitiveContentPackages mSensitiveContentPackages = new SensitiveContentPackages();
+    /**
+     * UIDs for which a Toast has been shown to indicate
+     * {@link LocalService#addBlockScreenCaptureForApps(ArraySet) screen capture blocking}. This is
+     * used to ensure we don't keep re-showing the Toast every time the window becomes visible.
+     * UIDs are removed when the app is removed from the block list.
+     */
+    @GuardedBy("mGlobalLock")
+    private final IntArray mCaptureBlockedToastShownUids = new IntArray();
 
     /** Listener to notify activity manager about app transitions. */
     final WindowManagerInternal.AppTransitionListener mActivityManagerAppTransitionNotifier
@@ -8746,6 +8755,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (modified) {
                     WindowManagerService.this.refreshScreenCaptureDisabled();
                 }
+                if (sensitiveContentImprovements()) {
+                    for (int i = 0; i < packageInfos.size(); i++) {
+                        int uid = packageInfos.valueAt(i).getUid();
+                        if (mCaptureBlockedToastShownUids.contains(uid)) {
+                            mCaptureBlockedToastShownUids.remove(
+                                    mCaptureBlockedToastShownUids.indexOf(uid));
+                        }
+                    }
+                }
             }
         }
 
@@ -8755,6 +8773,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 boolean modified = mSensitiveContentPackages.clearBlockedApps();
                 if (modified) {
                     WindowManagerService.this.refreshScreenCaptureDisabled();
+                }
+                if (sensitiveContentImprovements()) {
+                    mCaptureBlockedToastShownUids.clear();
                 }
             }
         }
@@ -10157,9 +10178,13 @@ public class WindowManagerService extends IWindowManager.Stub
      * on sensitive content protections.
      */
     private void showToastIfBlockingScreenCapture(@NonNull WindowState w) {
-        // TODO(b/323580163): Check if already shown and update shown state.
-        if (mSensitiveContentPackages.shouldBlockScreenCaptureForApp(w.getOwningPackage(),
-                w.getOwningUid(), w.getWindowToken())) {
+        int uid = w.getOwningUid();
+        if (mCaptureBlockedToastShownUids.contains(uid)) {
+            return;
+        }
+        if (mSensitiveContentPackages.shouldBlockScreenCaptureForApp(w.getOwningPackage(), uid,
+                w.getWindowToken())) {
+            mCaptureBlockedToastShownUids.add(uid);
             mH.post(() -> {
                 Toast.makeText(mContext, Looper.getMainLooper(),
                                 mContext.getString(R.string.screen_not_shared_sensitive_content),
