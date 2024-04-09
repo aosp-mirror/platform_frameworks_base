@@ -23,7 +23,6 @@ import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 
-import static com.android.systemui.concurrency.FakeExecutorKosmosKt.getFakeExecutor;
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
 
 import static junit.framework.Assert.assertNotNull;
@@ -97,7 +96,6 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.kotlin.JavaAdapter;
-import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.wmshell.BubblesManager;
 
 import org.junit.Before;
@@ -182,7 +180,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 mHeadsUpManager,
                 PowerInteractorFactory.create().getPowerInteractor(),
                 mActiveNotificationsInteractor,
-                mKosmos.getFakeSceneContainerFlags(),
+                mKosmos.getSceneContainerFlags(),
                 () -> mKosmos.getSceneInteractor()
         );
 
