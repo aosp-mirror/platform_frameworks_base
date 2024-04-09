@@ -29,6 +29,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -80,7 +81,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
     private static final int POST_ANIMATION_DURATION_MS = 500;
 
     private final Rect mStartTaskRect = new Rect();
-    private final float mCornerRadius;
+    private float mCornerRadius;
 
     // The closing window properties.
     private final Rect mClosingStartRect = new Rect();
@@ -118,6 +119,11 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
                 new Callback(), new Runner(), context, CUJ_PREDICTIVE_BACK_CROSS_TASK);
         mBackground = background;
         mContext = context;
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        mCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(mContext);
     }
 
     private static float mapRange(float value, float min, float max) {

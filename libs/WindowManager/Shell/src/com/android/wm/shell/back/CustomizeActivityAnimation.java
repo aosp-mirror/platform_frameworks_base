@@ -29,6 +29,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.RemoteException;
@@ -63,7 +64,7 @@ import javax.inject.Inject;
 public class CustomizeActivityAnimation extends ShellBackAnimation {
     private final BackProgressAnimator mProgressAnimator = new BackProgressAnimator();
     private final BackAnimationRunner mBackAnimationRunner;
-    private final float mCornerRadius;
+    private float mCornerRadius;
     private final SurfaceControl.Transaction mTransaction;
     private final BackAnimationBackground mBackground;
     private RemoteAnimationTarget mEnteringTarget;
@@ -88,6 +89,7 @@ public class CustomizeActivityAnimation extends ShellBackAnimation {
     final Transformation mTransformation = new Transformation();
 
     private final Choreographer mChoreographer;
+    private final Context mContext;
 
     @Inject
     public CustomizeActivityAnimation(Context context, BackAnimationBackground background) {
@@ -108,6 +110,12 @@ public class CustomizeActivityAnimation extends ShellBackAnimation {
                 .setDampingRatio(SpringForce.DAMPING_RATIO_NO_BOUNCY));
         mTransaction = transaction == null ? new SurfaceControl.Transaction() : transaction;
         mChoreographer = choreographer != null ? choreographer : Choreographer.getInstance();
+        mContext = context;
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        mCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(mContext);
     }
 
     private float getLatestProgress() {
