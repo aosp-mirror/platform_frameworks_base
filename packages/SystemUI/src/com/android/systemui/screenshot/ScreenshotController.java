@@ -97,7 +97,6 @@ import java.util.function.Consumer;
 
 import javax.inject.Provider;
 
-
 /**
  * Controls the state and flow for screenshots.
  */

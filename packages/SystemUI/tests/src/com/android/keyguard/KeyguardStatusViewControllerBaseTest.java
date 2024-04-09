@@ -20,8 +20,6 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
-
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;

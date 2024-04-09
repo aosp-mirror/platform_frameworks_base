@@ -28,7 +28,6 @@ import dagger.Provides;
 
 import javax.inject.Named;
 
-
 /**
  * Module for providing dependencies to {@link com.android.systemui.dreams.touch.InputSession}.
  */

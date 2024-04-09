@@ -137,12 +137,12 @@ import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.volume.domain.interactor.VolumePanelNavigationInteractor;
 import com.android.systemui.volume.ui.navigation.VolumeNavigator;
 
+import dagger.Lazy;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-
-import dagger.Lazy;
 
 /**
  * Visual presentation of the volume dialog.

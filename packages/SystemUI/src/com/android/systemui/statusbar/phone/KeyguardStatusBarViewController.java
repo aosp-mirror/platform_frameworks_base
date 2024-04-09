@@ -19,8 +19,8 @@ package com.android.systemui.statusbar.phone;
 import static android.app.StatusBarManager.DISABLE2_SYSTEM_ICONS;
 import static android.app.StatusBarManager.DISABLE_SYSTEM_INFO;
 
-import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.Flags.updateUserSwitcherBackground;
+import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 
 import android.content.res.Configuration;
 import android.content.res.Resources;

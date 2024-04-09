@@ -66,6 +66,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
 import java.util.Optional;
+
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {

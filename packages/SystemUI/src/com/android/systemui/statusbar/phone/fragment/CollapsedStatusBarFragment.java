@@ -81,6 +81,8 @@ import com.android.systemui.util.settings.SecureSettings;
 
 import kotlin.Unit;
 
+import kotlinx.coroutines.DisposableHandle;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -90,8 +92,6 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-
-import kotlinx.coroutines.DisposableHandle;
 
 /**
  * Contains the collapsed status bar and handles hiding/showing based on disable flags

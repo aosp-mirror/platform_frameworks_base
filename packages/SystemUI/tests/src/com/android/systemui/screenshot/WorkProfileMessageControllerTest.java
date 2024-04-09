@@ -38,9 +38,11 @@ import android.widget.TextView;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 import com.android.systemui.util.FakeSharedPreferences;
+
+import kotlin.Unit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,9 +52,6 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
-import kotlin.Unit;
-
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)

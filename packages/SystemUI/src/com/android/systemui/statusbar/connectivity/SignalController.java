@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 
-
 /**
  * Common base class for handling signal for both wifi and mobile data.
  *

@@ -29,10 +29,10 @@ import androidx.preference.SwitchPreference;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.res.R;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeAvailabilityTracker;
 import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.res.R;
 import com.android.systemui.util.settings.GlobalSettings;
 
 public class DemoModeFragment extends PreferenceFragment implements OnPreferenceChangeListener {

@@ -31,13 +31,13 @@ import com.android.systemui.shared.condition.Monitor;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
+import kotlinx.coroutines.CoroutineScope;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import kotlinx.coroutines.CoroutineScope;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper

@@ -45,7 +45,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class HomeSoundEffectControllerTest extends SysuiTestCase {

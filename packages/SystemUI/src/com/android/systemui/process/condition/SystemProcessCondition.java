@@ -20,9 +20,9 @@ import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.process.ProcessWrapper;
 import com.android.systemui.shared.condition.Condition;
 
-import javax.inject.Inject;
-
 import kotlinx.coroutines.CoroutineScope;
+
+import javax.inject.Inject;
 
 /**
  * {@link SystemProcessCondition} checks to make sure the current process is being ran by the

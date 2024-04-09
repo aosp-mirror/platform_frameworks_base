@@ -44,7 +44,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class MagnificationGestureDetectorTest extends SysuiTestCase {

@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.notification.logging.nano.Notifications;
 import com.android.systemui.statusbar.notification.stack.PriorityBucket;
 
 import java.util.List;
+
 /**
  * Statsd logging for notification panel.
  */

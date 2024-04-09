@@ -32,8 +32,8 @@ import androidx.annotation.StyleRes;
 
 import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.res.R;
 import com.android.systemui.keyguard.KeyguardIndication;
+import com.android.systemui.res.R;
 
 /**
  * A view to show hints on Keyguard ("Swipe up to unlock", "Tap again to open").

@@ -36,6 +36,8 @@ import com.android.systemui.plugins.log.TableLogBufferBase;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
+import kotlinx.coroutines.CoroutineScope;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,8 +49,6 @@ import org.mockito.MockitoAnnotations;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-
-import kotlinx.coroutines.CoroutineScope;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)

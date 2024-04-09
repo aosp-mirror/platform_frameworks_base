@@ -16,9 +16,11 @@
 
 package com.android.systemui.robotests;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
-import static com.google.common.truth.Truth.assertThat;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

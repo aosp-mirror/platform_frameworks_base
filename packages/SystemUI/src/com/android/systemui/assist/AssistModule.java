@@ -26,10 +26,10 @@ import androidx.slice.Clock;
 import com.android.internal.app.AssistUtils;
 import com.android.systemui.dagger.SysUISingleton;
 
-import javax.inject.Named;
-
 import dagger.Module;
 import dagger.Provides;
+
+import javax.inject.Named;
 
 /** Module for dagger injections related to the Assistant. */
 @Module

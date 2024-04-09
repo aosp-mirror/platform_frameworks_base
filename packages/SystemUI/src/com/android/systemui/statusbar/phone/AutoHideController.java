@@ -30,7 +30,6 @@ import androidx.annotation.NonNull;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.AutoHideUiElement;
 
 import java.io.PrintWriter;

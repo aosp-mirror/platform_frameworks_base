@@ -48,12 +48,12 @@ import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.util.ViewController;
 
+import kotlinx.coroutines.CoroutineDispatcher;
+
 import java.util.Arrays;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import kotlinx.coroutines.CoroutineDispatcher;
 
 /**
  * View controller for {@link DreamOverlayContainerView}.

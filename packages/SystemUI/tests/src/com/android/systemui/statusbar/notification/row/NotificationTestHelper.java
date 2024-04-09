@@ -99,6 +99,10 @@ import com.android.systemui.util.time.SystemClockImpl;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.systemui.wmshell.BubblesTestActivity;
 
+import kotlin.coroutines.CoroutineContext;
+
+import kotlinx.coroutines.test.TestScope;
+
 import org.mockito.ArgumentCaptor;
 
 import java.util.Objects;
@@ -106,9 +110,6 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
-
-import kotlin.coroutines.CoroutineContext;
-import kotlinx.coroutines.test.TestScope;
 
 /**
  * A helper class to create {@link ExpandableNotificationRow} (for both individual and group

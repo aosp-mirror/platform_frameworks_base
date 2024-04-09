@@ -32,8 +32,6 @@ import android.hardware.HardwareBuffer;
 import android.media.Image;
 import android.util.Log;
 
-import com.android.systemui.screenshot.scroll.ScrollCaptureClient;
-
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 

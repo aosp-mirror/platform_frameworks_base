@@ -74,7 +74,6 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
-
 @SysUISingleton
 public class NavigationBarControllerImpl implements
         ConfigurationController.ConfigurationListener,

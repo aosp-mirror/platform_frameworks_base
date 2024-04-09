@@ -16,13 +16,13 @@
 
 package com.android.systemui.shade;
 
+import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
+import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
-import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
 
 import android.content.res.Resources;
 import android.os.Handler;
@@ -98,12 +98,12 @@ import com.android.systemui.util.kotlin.JavaAdapter;
 
 import dagger.Lazy;
 
+import kotlinx.coroutines.test.TestScope;
+
 import org.junit.After;
 import org.junit.Before;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import kotlinx.coroutines.test.TestScope;
 
 public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
     protected static final float QS_FRAME_START_X = 0f;

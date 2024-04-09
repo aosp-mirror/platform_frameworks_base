@@ -58,7 +58,6 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 
-
 /**
  * Displays an alphanumeric (latin-1) key entry for the user to enter
  * an unlock password

@@ -38,13 +38,13 @@ import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
+import dagger.Lazy;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /** Class to monitor and report the state of the phone. */
 @SysUISingleton
