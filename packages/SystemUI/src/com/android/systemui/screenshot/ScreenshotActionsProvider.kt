@@ -43,7 +43,11 @@ interface ScreenshotActionsProvider {
     fun onScrollChipReady(onClick: Runnable)
     fun setCompletedScreenshot(result: ScreenshotSavedResult)
 
-    fun onAssistContentAvailable(assistContent: AssistContent) {}
+    /**
+     * Provide the AssistContent for the focused task if available, null if the focused task isn't
+     * known or didn't return data.
+     */
+    fun onAssistContent(assistContent: AssistContent?) {}
 
     interface Factory {
         fun create(
