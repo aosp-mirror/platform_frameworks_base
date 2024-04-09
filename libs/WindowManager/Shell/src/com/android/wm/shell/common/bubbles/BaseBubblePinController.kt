@@ -82,6 +82,7 @@ abstract class BaseBubblePinController(private val screenSizeProvider: () -> Poi
     fun onDragEnd() {
         getDropTargetView()?.let { view -> view.animateOut { removeDropTargetView(view) } }
         dismissZone = null
+        listener?.onRelease(if (onLeft) LEFT else RIGHT)
     }
 
     /**
@@ -170,14 +171,22 @@ abstract class BaseBubblePinController(private val screenSizeProvider: () -> Poi
     /** Receive updates on location changes */
     interface LocationChangeListener {
         /**
-         * Bubble bar [BubbleBarLocation] has changed as a result of dragging
+         * Bubble bar has been dragged to a new [BubbleBarLocation]. And the drag is still in
+         * progress.
          *
          * Triggered when drag gesture passes the middle of the screen and before touch up. Can be
          * triggered multiple times per gesture.
          *
          * @param location new location as a result of the ongoing drag operation
          */
-        fun onChange(location: BubbleBarLocation)
+        fun onChange(location: BubbleBarLocation) {}
+
+        /**
+         * Bubble bar has been released in the [BubbleBarLocation].
+         *
+         * @param location final location of the bubble bar once drag is released
+         */
+        fun onRelease(location: BubbleBarLocation)
     }
 
     companion object {
