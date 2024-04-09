@@ -16,13 +16,10 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import android.content.Context
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.SettingsClockSize
 import com.android.systemui.plugins.clocks.ClockController
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -31,9 +28,7 @@ import kotlinx.coroutines.flow.map
 class KeyguardPreviewClockViewModel
 @Inject
 constructor(
-    @Application private val context: Context,
     interactor: KeyguardClockInteractor,
-    @Application private val applicationScope: CoroutineScope,
 ) {
 
     var shouldHighlightSelectedAffordance: Boolean = false

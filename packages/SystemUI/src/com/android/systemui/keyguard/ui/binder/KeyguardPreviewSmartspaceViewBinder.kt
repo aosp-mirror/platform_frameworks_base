@@ -32,7 +32,7 @@ object KeyguardPreviewSmartspaceViewBinder {
 
     @JvmStatic
     fun bind(
-        context: Context,
+        previewContext: Context,
         smartspace: View,
         splitShadePreview: Boolean,
         viewModel: KeyguardPreviewSmartspaceViewModel,
@@ -46,10 +46,12 @@ object KeyguardPreviewSmartspaceViewBinder {
                                 SettingsClockSize.DYNAMIC ->
                                     viewModel.getLargeClockSmartspaceTopPadding(
                                         splitShadePreview,
+                                        previewContext,
                                     )
                                 SettingsClockSize.SMALL ->
                                     viewModel.getSmallClockSmartspaceTopPadding(
                                         splitShadePreview,
+                                        previewContext,
                                     )
                             }
                         smartspace.setTopPadding(topPadding)
