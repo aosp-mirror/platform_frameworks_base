@@ -46,7 +46,15 @@ public:
 
     jobject createTlsStateGlobalRef(JNIEnv* env, PerfettoDsInstanceIndex inst_id);
     jobject createIncrementalStateGlobalRef(JNIEnv* env, PerfettoDsInstanceIndex inst_id);
-    void trace(JNIEnv* env, jobject trace_function);
+
+    bool TraceIterateBegin();
+    bool TraceIterateNext();
+    void TraceIterateBreak();
+    void WritePackets(JNIEnv* env, jobjectArray packets);
+
+    jobject GetCustomTls();
+    jobject GetIncrementalState();
+
     void flushAll();
 
 private:

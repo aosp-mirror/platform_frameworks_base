@@ -45,12 +45,6 @@ static struct {
 static struct {
     jclass clazz;
     jmethodID init;
-    jmethodID getAndClearAllPendingTracePackets;
-} gTracingContextClassInfo;
-
-static struct {
-    jclass clazz;
-    jmethodID init;
 } gCreateTlsStateArgsClassInfo;
 
 static struct {
@@ -68,32 +62,10 @@ struct IncrementalState {
     jobject jobj;
 };
 
-static void traceAllPendingPackets(JNIEnv* env, jobject jCtx, PerfettoDsTracerIterator* ctx) {
-    jobjectArray packets =
-            (jobjectArray)env
-                    ->CallObjectMethod(jCtx,
-                                       gTracingContextClassInfo.getAndClearAllPendingTracePackets);
-    if (env->ExceptionOccurred()) {
-        env->ExceptionDescribe();
-        env->ExceptionClear();
-
-        LOG_ALWAYS_FATAL("Failed to call java context finalize method");
-    }
-
-    int packets_count = env->GetArrayLength(packets);
-    for (int i = 0; i < packets_count; i++) {
-        jbyteArray packet_proto_buffer = (jbyteArray)env->GetObjectArrayElement(packets, i);
-
-        jbyte* raw_proto_buffer = env->GetByteArrayElements(packet_proto_buffer, 0);
-        int buffer_size = env->GetArrayLength(packet_proto_buffer);
-
-        struct PerfettoDsRootTracePacket trace_packet;
-        PerfettoDsTracerPacketBegin(ctx, &trace_packet);
-        PerfettoPbMsgAppendBytes(&trace_packet.msg.msg, (const uint8_t*)raw_proto_buffer,
-                                 buffer_size);
-        PerfettoDsTracerPacketEnd(ctx, &trace_packet);
-    }
-}
+// In a single thread there can be only one trace point active across all data source, so we can use
+// a single global thread_local variable to keep track of the active tracer iterator.
+thread_local static bool gInIteration;
+thread_local static struct PerfettoDsTracerIterator gIterator;
 
 PerfettoDataSource::PerfettoDataSource(JNIEnv* env, jobject javaDataSource,
                                        std::string dataSourceName)
@@ -164,44 +136,89 @@ jobject PerfettoDataSource::createIncrementalStateGlobalRef(JNIEnv* env,
     return env->NewGlobalRef(incrementalState.get());
 }
 
-void PerfettoDataSource::trace(JNIEnv* env, jobject traceFunction) {
-    PERFETTO_DS_TRACE(dataSource, ctx) {
-        ALOG(LOG_DEBUG, LOG_TAG, "\tin native trace callback function %p", this);
-        TlsState* tls_state =
-                reinterpret_cast<TlsState*>(PerfettoDsGetCustomTls(&dataSource, &ctx));
-        IncrementalState* incr_state = reinterpret_cast<IncrementalState*>(
-                PerfettoDsGetIncrementalState(&dataSource, &ctx));
+bool PerfettoDataSource::TraceIterateBegin() {
+    if (gInIteration) {
+        return false;
+    }
 
-        ALOG(LOG_DEBUG, LOG_TAG, "\t tls_state = %p", tls_state);
-        ALOG(LOG_DEBUG, LOG_TAG, "\t incr_state = %p", incr_state);
+    gIterator = PerfettoDsTraceIterateBegin(&dataSource);
 
-        ALOG(LOG_DEBUG, LOG_TAG, "\t tls_state->jobj = %p", tls_state->jobj);
-        ALOG(LOG_DEBUG, LOG_TAG, "\t incr_state->jobj = %p", incr_state->jobj);
+    if (gIterator.impl.tracer == nullptr) {
+        return false;
+    }
 
-        ScopedLocalRef<jobject> jCtx(env,
-                                     env->NewObject(gTracingContextClassInfo.clazz,
-                                                    gTracingContextClassInfo.init, &ctx,
-                                                    tls_state->jobj, incr_state->jobj));
+    gInIteration = true;
+    return true;
+}
 
-        ALOG(LOG_DEBUG, LOG_TAG, "\t jCtx = %p", jCtx.get());
+bool PerfettoDataSource::TraceIterateNext() {
+    if (!gInIteration) {
+        LOG_ALWAYS_FATAL("Tried calling TraceIterateNext outside of a tracer iteration.");
+        return false;
+    }
 
-        jclass objclass = env->GetObjectClass(traceFunction);
-        jmethodID method =
-                env->GetMethodID(objclass, "trace", "(Landroid/tracing/perfetto/TracingContext;)V");
-        if (method == 0) {
-            LOG_ALWAYS_FATAL("Failed to get method id");
-        }
+    PerfettoDsTraceIterateNext(&dataSource, &gIterator);
 
-        env->ExceptionClear();
+    if (gIterator.impl.tracer == nullptr) {
+        // Reached end of iterator. No more datasource instances.
+        gInIteration = false;
+        return false;
+    }
 
-        env->CallVoidMethod(traceFunction, method, jCtx.get());
-        if (env->ExceptionOccurred()) {
-            env->ExceptionDescribe();
-            env->ExceptionClear();
-            LOG_ALWAYS_FATAL("Failed to call java trace method");
-        }
+    return true;
+}
 
-        traceAllPendingPackets(env, jCtx.get(), &ctx);
+void PerfettoDataSource::TraceIterateBreak() {
+    if (!gInIteration) {
+        return;
+    }
+
+    PerfettoDsTraceIterateBreak(&dataSource, &gIterator);
+    gInIteration = false;
+}
+
+jobject PerfettoDataSource::GetCustomTls() {
+    if (!gInIteration) {
+        LOG_ALWAYS_FATAL("Tried getting CustomTls outside of a tracer iteration.");
+        return nullptr;
+    }
+
+    TlsState* tls_state =
+            reinterpret_cast<TlsState*>(PerfettoDsGetCustomTls(&dataSource, &gIterator));
+
+    return tls_state->jobj;
+}
+
+jobject PerfettoDataSource::GetIncrementalState() {
+    if (!gInIteration) {
+        LOG_ALWAYS_FATAL("Tried getting IncrementalState outside of a tracer iteration.");
+        return nullptr;
+    }
+
+    IncrementalState* incr_state = reinterpret_cast<IncrementalState*>(
+            PerfettoDsGetIncrementalState(&dataSource, &gIterator));
+
+    return incr_state->jobj;
+}
+
+void PerfettoDataSource::WritePackets(JNIEnv* env, jobjectArray packets) {
+    if (!gInIteration) {
+        LOG_ALWAYS_FATAL("Tried writing packets outside of a tracer iteration.");
+        return;
+    }
+
+    int packets_count = env->GetArrayLength(packets);
+    for (int i = 0; i < packets_count; i++) {
+        jbyteArray packet_proto_buffer = (jbyteArray)env->GetObjectArrayElement(packets, i);
+
+        jbyte* raw_proto_buffer = env->GetByteArrayElements(packet_proto_buffer, 0);
+        int buffer_size = env->GetArrayLength(packet_proto_buffer);
+
+        struct PerfettoDsRootTracePacket trace_packet;
+        PerfettoDsTracerPacketBegin(&gIterator, &trace_packet);
+        PerfettoPbMsgAppendBytes(&trace_packet.msg.msg, (const uint8_t*)raw_proto_buffer,
+                                 buffer_size);
+        PerfettoDsTracerPacketEnd(&gIterator, &trace_packet);
     }
 }
 
@@ -229,7 +246,7 @@ jlong nativeCreate(JNIEnv* env, jclass clazz, jobject javaDataSource, jstring na
 }
 
 void nativeDestroy(void* ptr) {
-    ALOG(LOG_DEBUG, LOG_TAG, "nativeCreate(%p)", ptr);
+    ALOG(LOG_DEBUG, LOG_TAG, "nativeDestroy(%p)", ptr);
     PerfettoDataSource* dataSource = reinterpret_cast<PerfettoDataSource*>(ptr);
     dataSource->decStrong((void*)nativeCreate);
 }
@@ -239,18 +256,10 @@ static jlong nativeGetFinalizer(JNIEnv* /* env */, jclass /* clazz */) {
     return static_cast<jlong>(reinterpret_cast<uintptr_t>(&nativeDestroy));
 }
 
-void nativeTrace(JNIEnv* env, jclass clazz, jlong dataSourcePtr, jobject traceFunctionInterface) {
-    ALOG(LOG_DEBUG, LOG_TAG, "nativeTrace(%p)", (void*)dataSourcePtr);
-    sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
-
-    datasource->trace(env, traceFunctionInterface);
-}
-
-void nativeFlush(JNIEnv* env, jclass clazz, jobject jCtx, jlong ctxPtr) {
-    ALOG(LOG_DEBUG, LOG_TAG, "nativeFlush(%p, %p)", jCtx, (void*)ctxPtr);
-    auto* ctx = reinterpret_cast<struct PerfettoDsTracerIterator*>(ctxPtr);
-    traceAllPendingPackets(env, jCtx, ctx);
-    PerfettoDsTracerFlush(ctx, nullptr, nullptr);
+void nativeFlush(JNIEnv* env, jclass clazz, jlong ds_ptr, jobjectArray packets) {
+    ALOG(LOG_DEBUG, LOG_TAG, "nativeFlush(%p)", (void*)ds_ptr);
+    sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(ds_ptr);
+    datasource->WritePackets(env, packets);
 }
 
 void nativeFlushAll(JNIEnv* env, jclass clazz, jlong ptr) {
@@ -414,11 +423,35 @@ void nativeReleasePerfettoInstanceLocked(JNIEnv* env, jclass clazz, jlong dataSo
     PerfettoDsImplReleaseInstanceLocked(datasource->dataSource.impl, instance_idx);
 }
 
+bool nativePerfettoDsTraceIterateBegin(JNIEnv* env, jclass clazz, jlong dataSourcePtr) {
+    sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
+    return datasource->TraceIterateBegin();
+}
+
+bool nativePerfettoDsTraceIterateNext(JNIEnv* env, jclass clazz, jlong dataSourcePtr) {
+    sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
+    return datasource->TraceIterateNext();
+}
+
+void nativePerfettoDsTraceIterateBreak(JNIEnv* env, jclass clazz, jlong dataSourcePtr) {
+    sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
+    return datasource->TraceIterateBreak();
+}
+
+jobject nativeGetCustomTls(JNIEnv* env, jclass clazz, jlong dataSourcePtr) {
+    sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
+    return datasource->GetCustomTls();
+}
+
+jobject nativeGetIncrementalState(JNIEnv* env, jclass clazz, jlong dataSourcePtr) {
+    sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
+    return datasource->GetIncrementalState();
+}
+
 const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
         {"nativeCreate", "(Landroid/tracing/perfetto/DataSource;Ljava/lang/String;)J",
          (void*)nativeCreate},
-        {"nativeTrace", "(JLandroid/tracing/perfetto/TraceFunction;)V", (void*)nativeTrace},
         {"nativeFlushAll", "(J)V", (void*)nativeFlushAll},
         {"nativeGetFinalizer", "()J", (void*)nativeGetFinalizer},
         {"nativeRegisterDataSource", "(JI)V", (void*)nativeRegisterDataSource},
@@ -426,11 +459,16 @@ const JNINativeMethod gMethods[] = {
          (void*)nativeGetPerfettoInstanceLocked},
         {"nativeReleasePerfettoInstanceLocked", "(JI)V",
          (void*)nativeReleasePerfettoInstanceLocked},
-};
+
+        {"nativePerfettoDsTraceIterateBegin", "(J)Z", (void*)nativePerfettoDsTraceIterateBegin},
+        {"nativePerfettoDsTraceIterateNext", "(J)Z", (void*)nativePerfettoDsTraceIterateNext},
+        {"nativePerfettoDsTraceIterateBreak", "(J)V", (void*)nativePerfettoDsTraceIterateBreak}};
 
 const JNINativeMethod gMethodsTracingContext[] = {
         /* name, signature, funcPtr */
-        {"nativeFlush", "(Landroid/tracing/perfetto/TracingContext;J)V", (void*)nativeFlush},
+        {"nativeFlush", "(J[[B)V", (void*)nativeFlush},
+        {"nativeGetCustomTls", "(J)Ljava/lang/Object;", (void*)nativeGetCustomTls},
+        {"nativeGetIncrementalState", "(J)Ljava/lang/Object;", (void*)nativeGetIncrementalState},
 };
 
 int register_android_tracing_PerfettoDataSource(JNIEnv* env) {
@@ -460,14 +498,6 @@ int register_android_tracing_PerfettoDataSource(JNIEnv* env) {
             env->GetMethodID(gPerfettoDataSourceClassInfo.clazz, "createIncrementalState",
                              "(Landroid/tracing/perfetto/CreateIncrementalStateArgs;)Ljava/lang/"
                              "Object;");
-
-    clazz = env->FindClass("android/tracing/perfetto/TracingContext");
-    gTracingContextClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
-    gTracingContextClassInfo.init = env->GetMethodID(gTracingContextClassInfo.clazz, "<init>",
-                                                     "(JLjava/lang/Object;Ljava/lang/Object;)V");
-    gTracingContextClassInfo.getAndClearAllPendingTracePackets =
-            env->GetMethodID(gTracingContextClassInfo.clazz, "getAndClearAllPendingTracePackets",
-                             "()[[B");
 
     clazz = env->FindClass("android/tracing/perfetto/CreateTlsStateArgs");
     gCreateTlsStateArgsClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
