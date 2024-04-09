@@ -2613,11 +2613,19 @@ public class DisplayManagerServiceTest {
         // Create default display device
         createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
         callback.waitForExpectedEvent();
+
+        callback.expectsEvent(EVENT_DISPLAY_ADDED);
         FakeDisplayDevice displayDevice =
                 createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_EXTERNAL);
+        callback.waitForExpectedEvent();
+
+        callback.expectsEvent(EVENT_DISPLAY_REMOVED);
+        displayManager.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+        callback.waitForExpectedEvent();
+
+        callback.expectsEvent(EVENT_DISPLAY_ADDED);
         LogicalDisplay display =
                 logicalDisplayMapper.getDisplayLocked(displayDevice, /* includeDisabled= */ true);
-        callback.expectsEvent(EVENT_DISPLAY_ADDED);
         logicalDisplayMapper.setEnabledLocked(display, /* isEnabled= */ true);
         logicalDisplayMapper.updateLogicalDisplays();
         callback.waitForExpectedEvent();
@@ -2640,6 +2648,7 @@ public class DisplayManagerServiceTest {
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
         FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
         bs.registerCallbackWithEventMask(callback, STANDARD_DISPLAY_EVENTS);
+        displayManager.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
         callback.expectsEvent(EVENT_DISPLAY_ADDED);
         // Create default display device
         createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
@@ -2653,7 +2662,6 @@ public class DisplayManagerServiceTest {
         logicalDisplayMapper.setEnabledLocked(display, /* isEnabled= */ true);
         logicalDisplayMapper.updateLogicalDisplays();
         callback.waitForExpectedEvent();
-        callback.clear();
 
         assertThrows(SecurityException.class, () -> bs.disableConnectedDisplay(displayId));
     }
@@ -3227,7 +3235,7 @@ public class DisplayManagerServiceTest {
 
         void waitForExpectedEvent(Duration timeout) {
             try {
-                assertWithMessage("Event '" + mExpectedEvent + "' is received.")
+                assertWithMessage("Expected '" + mExpectedEvent + "'")
                         .that(mLatch.await(timeout.toMillis(), TimeUnit.MILLISECONDS)).isTrue();
             } catch (InterruptedException ex) {
                 throw new AssertionError("Waiting for expected event interrupted", ex);
