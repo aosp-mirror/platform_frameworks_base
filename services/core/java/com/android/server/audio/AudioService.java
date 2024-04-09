@@ -4674,6 +4674,12 @@ public class AudioService extends IAudioService.Stub
         int streamTypeAlias = mStreamVolumeAlias[streamType];
         VolumeStreamState streamState = mStreamStates[streamTypeAlias];
 
+        if ((streamType == AudioManager.STREAM_VOICE_CALL)
+                && isInCommunication() && mDeviceBroker.isBluetoothScoActive()) {
+            Log.i(TAG, "setStreamVolume for STREAM_VOICE_CALL, switching to STREAM_BLUETOOTH_SCO");
+            streamType = AudioManager.STREAM_BLUETOOTH_SCO;
+        }
+
         final int device = (ada == null)
                 ? getDeviceForStream(streamType)
                 : ada.getInternalType();
