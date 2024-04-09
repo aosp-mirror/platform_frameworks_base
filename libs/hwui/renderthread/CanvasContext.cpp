@@ -73,7 +73,7 @@ CanvasContext* ScopedActiveContext::sActiveContext = nullptr;
 
 CanvasContext* CanvasContext::create(RenderThread& thread, bool translucent,
                                      RenderNode* rootRenderNode, IContextFactory* contextFactory,
-                                     int32_t uiThreadId, int32_t renderThreadId) {
+                                     pid_t uiThreadId, pid_t renderThreadId) {
     auto renderType = Properties::getRenderPipelineType();
 
     switch (renderType) {

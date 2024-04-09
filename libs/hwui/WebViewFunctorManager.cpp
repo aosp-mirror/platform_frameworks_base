@@ -87,7 +87,7 @@ void WebViewFunctor_release(int functor) {
     WebViewFunctorManager::instance().releaseFunctor(functor);
 }
 
-void WebViewFunctor_reportRenderingThreads(int functor, const int32_t* thread_ids, size_t size) {
+void WebViewFunctor_reportRenderingThreads(int functor, const pid_t* thread_ids, size_t size) {
     WebViewFunctorManager::instance().reportRenderingThreads(functor, thread_ids, size);
 }
 
@@ -265,8 +265,8 @@ void WebViewFunctor::reparentSurfaceControl(ASurfaceControl* parent) {
     funcs.transactionDeleteFunc(transaction);
 }
 
-void WebViewFunctor::reportRenderingThreads(const int32_t* thread_ids, size_t size) {
-    mRenderingThreads = std::vector<int32_t>(thread_ids, thread_ids + size);
+void WebViewFunctor::reportRenderingThreads(const pid_t* thread_ids, size_t size) {
+    mRenderingThreads = std::vector<pid_t>(thread_ids, thread_ids + size);
 }
 
 WebViewFunctorManager& WebViewFunctorManager::instance() {
@@ -355,7 +355,7 @@ void WebViewFunctorManager::destroyFunctor(int functor) {
     }
 }
 
-void WebViewFunctorManager::reportRenderingThreads(int functor, const int32_t* thread_ids,
+void WebViewFunctorManager::reportRenderingThreads(int functor, const pid_t* thread_ids,
                                                    size_t size) {
     std::lock_guard _lock{mLock};
     for (auto& iter : mFunctors) {
@@ -366,8 +366,8 @@ void WebViewFunctorManager::reportRenderingThreads(int functor, const int32_t* t
     }
 }
 
-std::vector<int32_t> WebViewFunctorManager::getRenderingThreadsForActiveFunctors() {
-    std::vector<int32_t> renderingThreads;
+std::vector<pid_t> WebViewFunctorManager::getRenderingThreadsForActiveFunctors() {
+    std::vector<pid_t> renderingThreads;
     std::lock_guard _lock{mLock};
     for (const auto& iter : mActiveFunctors) {
         const auto& functorThreads = iter->getRenderingThreads();

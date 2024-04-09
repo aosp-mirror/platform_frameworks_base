@@ -50,7 +50,7 @@ ASurfaceControl* WebViewFunctor::getSurfaceControl() {
 
 void WebViewFunctor::mergeTransaction(ASurfaceTransaction* transaction) {}
 
-void WebViewFunctor::reportRenderingThreads(const int32_t* thread_ids, size_t size) {}
+void WebViewFunctor::reportRenderingThreads(const pid_t* thread_ids, size_t size) {}
 
 void WebViewFunctor::reparentSurfaceControl(ASurfaceControl* parent) {}
 
@@ -70,11 +70,11 @@ void WebViewFunctorManager::onContextDestroyed() {}
 
 void WebViewFunctorManager::destroyFunctor(int functor) {}
 
-void WebViewFunctorManager::reportRenderingThreads(int functor, const int32_t* thread_ids,
+void WebViewFunctorManager::reportRenderingThreads(int functor, const pid_t* thread_ids,
                                                    size_t size) {}
 
-std::vector<int32_t> WebViewFunctorManager::getRenderingThreadsForActiveFunctors() {
-    return std::vector<int32_t>();
+std::vector<pid_t> WebViewFunctorManager::getRenderingThreadsForActiveFunctors() {
+    return {};
 }
 
 sp<WebViewFunctor::Handle> WebViewFunctorManager::handleFor(int functor) {
