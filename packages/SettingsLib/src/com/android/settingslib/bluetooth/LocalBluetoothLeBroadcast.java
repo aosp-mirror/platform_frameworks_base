@@ -42,6 +42,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -1116,10 +1117,19 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
             Log.d(TAG, "Skip notifyBroadcastStateChange, not triggered by Settings.");
             return;
         }
+        if (isWorkProfile(mContext)) {
+            Log.d(TAG, "Skip notifyBroadcastStateChange, not triggered for work profile.");
+            return;
+        }
         Intent intent = new Intent(ACTION_LE_AUDIO_SHARING_STATE_CHANGE);
         intent.putExtra(EXTRA_LE_AUDIO_SHARING_STATE, state);
         intent.setPackage(mContext.getPackageName());
         Log.e(TAG, "notifyBroadcastStateChange for state = " + state);
         mContext.sendBroadcast(intent);
+    }
+
+    private boolean isWorkProfile(Context context) {
+        UserManager userManager = context.getSystemService(UserManager.class);
+        return userManager != null && userManager.isManagedProfile();
     }
 }
