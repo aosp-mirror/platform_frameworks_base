@@ -41,9 +41,9 @@ fun BackAnimationSpec.Companion.createFloatingSurfaceAnimationSpec(
     maxMarginXdp: Float,
     maxMarginYdp: Float,
     minScale: Float,
-    translateXEasing: Interpolator = Interpolators.STANDARD_DECELERATE,
+    translateXEasing: Interpolator = Interpolators.BACK_GESTURE,
     translateYEasing: Interpolator = Interpolators.LINEAR,
-    scaleEasing: Interpolator = Interpolators.STANDARD_DECELERATE,
+    scaleEasing: Interpolator = Interpolators.BACK_GESTURE,
 ): BackAnimationSpec {
     return BackAnimationSpec { backEvent, progressY, result ->
         val displayMetrics = displayMetricsProvider()
