@@ -45,6 +45,7 @@ import com.android.systemui.res.R
 import com.android.systemui.shared.R as sharedR
 import dagger.Lazy
 import javax.inject.Inject
+import kotlinx.coroutines.DisposableHandle
 
 internal fun ConstraintSet.setVisibility(
     views: Iterable<View>,
@@ -65,19 +66,23 @@ constructor(
     val smartspaceViewModel: KeyguardSmartspaceViewModel,
     val blueprintInteractor: Lazy<KeyguardBlueprintInteractor>,
 ) : KeyguardSection() {
+    private var handle: DisposableHandle? = null
+
     override fun addViews(constraintLayout: ConstraintLayout) {}
 
     override fun bindData(constraintLayout: ConstraintLayout) {
         if (!MigrateClocksToBlueprint.isEnabled) {
             return
         }
-        KeyguardClockViewBinder.bind(
-            this,
-            constraintLayout,
-            keyguardClockViewModel,
-            clockInteractor,
-            blueprintInteractor.get()
-        )
+        handle?.dispose()
+        handle =
+            KeyguardClockViewBinder.bind(
+                this,
+                constraintLayout,
+                keyguardClockViewModel,
+                clockInteractor,
+                blueprintInteractor.get()
+            )
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
@@ -89,7 +94,13 @@ constructor(
         }
     }
 
-    override fun removeViews(constraintLayout: ConstraintLayout) {}
+    override fun removeViews(constraintLayout: ConstraintLayout) {
+        if (!MigrateClocksToBlueprint.isEnabled) {
+            return
+        }
+        handle?.dispose()
+        handle = null
+    }
 
     private fun buildConstraints(
         clock: ClockController,

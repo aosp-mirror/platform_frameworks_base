@@ -30,6 +30,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launch
 import com.android.settingslib.Utils
 import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.view.LaunchableImageView
@@ -41,11 +42,11 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.util.doOnEnd
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 /** This is only for a SINGLE Quick affordance */
 object KeyguardQuickAffordanceViewBinder {
@@ -53,6 +54,7 @@ object KeyguardQuickAffordanceViewBinder {
     private const val EXIT_DOZE_BUTTON_REVEAL_ANIMATION_DURATION_MS = 250L
     private const val SCALE_SELECTED_BUTTON = 1.23f
     private const val DIM_ALPHA = 0.3f
+    private const val TAG = "KeyguardQuickAffordanceViewBinder"
 
     /**
      * Defines interface for an object that acts as the binding between the view and its view-model.
@@ -74,14 +76,15 @@ object KeyguardQuickAffordanceViewBinder {
         alpha: Flow<Float>,
         falsingManager: FalsingManager?,
         vibratorHelper: VibratorHelper?,
+        mainImmediateDispatcher: CoroutineDispatcher,
         messageDisplayer: (Int) -> Unit,
     ): Binding {
         val button = view as ImageView
         val configurationBasedDimensions = MutableStateFlow(loadFromResources(view))
         val disposableHandle =
-            view.repeatWhenAttached {
+            view.repeatWhenAttached(mainImmediateDispatcher) {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    launch {
+                    launch("$TAG#viewModel.collect") {
                         viewModel.collect { buttonModel ->
                             updateButton(
                                 view = button,
@@ -93,7 +96,7 @@ object KeyguardQuickAffordanceViewBinder {
                         }
                     }
 
-                    launch {
+                    launch("$TAG#updateButtonAlpha") {
                         updateButtonAlpha(
                             view = button,
                             viewModel = viewModel,
@@ -101,7 +104,7 @@ object KeyguardQuickAffordanceViewBinder {
                         )
                     }
 
-                    launch {
+                    launch("$TAG#configurationBasedDimensions") {
                         configurationBasedDimensions.collect { dimensions ->
                             button.updateLayoutParams<ViewGroup.LayoutParams> {
                                 width = dimensions.buttonSizePx.width
