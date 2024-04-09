@@ -1,13 +1,11 @@
 package com.android.systemui.biometrics.domain.interactor
 
-import android.view.Display
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.display.data.repository.FakeDisplayRepository
-import com.android.systemui.display.data.repository.display
 import com.android.systemui.unfold.compat.ScreenSizeFoldProvider
 import com.android.systemui.unfold.updates.FoldProvider
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -101,14 +99,11 @@ class DisplayStateInteractorImplTest : SysuiTestCase() {
     fun isDefaultDisplayOffChanges() =
         testScope.runTest {
             val isDefaultDisplayOff by collectLastValue(interactor.isDefaultDisplayOff)
-            runCurrent()
 
-            displayRepository.emit(setOf(display(0, 0, Display.DEFAULT_DISPLAY, Display.STATE_OFF)))
-            displayRepository.emitDisplayChangeEvent(Display.DEFAULT_DISPLAY)
+            displayRepository.setDefaultDisplayOff(true)
             assertThat(isDefaultDisplayOff).isTrue()
 
-            displayRepository.emit(setOf(display(0, 0, Display.DEFAULT_DISPLAY, Display.STATE_ON)))
-            displayRepository.emitDisplayChangeEvent(Display.DEFAULT_DISPLAY)
+            displayRepository.setDefaultDisplayOff(false)
             assertThat(isDefaultDisplayOff).isFalse()
         }
 }
