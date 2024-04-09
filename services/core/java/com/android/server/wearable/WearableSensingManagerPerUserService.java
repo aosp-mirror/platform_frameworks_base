@@ -513,9 +513,33 @@ final class WearableSensingManagerPerUserService extends
                     String filename,
                     AndroidFuture<ParcelFileDescriptor> futureFromWearableSensingService)
                     throws RemoteException {
-                // TODO(b/331395522): Intercept the PFD received from the app process and verify it
-                // is read-only
-                callbackFromAppProcess.openFile(filename, futureFromWearableSensingService);
+                AndroidFuture<ParcelFileDescriptor> futureFromSystemServer =
+                        new AndroidFuture<ParcelFileDescriptor>()
+                                .whenComplete(
+                                        (pfdFromApp, throwable) -> {
+                                            if (throwable != null) {
+                                                Slog.e(
+                                                        TAG,
+                                                        "Error when reading file " + filename,
+                                                        throwable);
+                                                futureFromWearableSensingService.complete(null);
+                                                return;
+                                            }
+                                            if (isReadOnly(pfdFromApp)) {
+                                                futureFromWearableSensingService.complete(
+                                                        pfdFromApp);
+                                            } else {
+                                                Slog.w(
+                                                        TAG,
+                                                        "Received writable ParcelFileDescriptor"
+                                                            + " from app process. To prevent"
+                                                            + " arbitrary data egress, sending null"
+                                                            + " to WearableSensingService"
+                                                            + " instead.");
+                                                futureFromWearableSensingService.complete(null);
+                                            }
+                                        });
+                callbackFromAppProcess.openFile(filename, futureFromSystemServer);
             }
         };
     }
