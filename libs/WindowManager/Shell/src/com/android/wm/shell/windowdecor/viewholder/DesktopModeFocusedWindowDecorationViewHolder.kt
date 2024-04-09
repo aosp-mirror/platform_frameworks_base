@@ -17,8 +17,8 @@ internal class DesktopModeFocusedWindowDecorationViewHolder(
         onCaptionButtonClickListener: View.OnClickListener
 ) : DesktopModeWindowDecorationViewHolder(rootView) {
 
-    private val captionView: View = rootView.findViewById(R.id.desktop_mode_caption)
-    private val captionHandle: ImageButton = rootView.findViewById(R.id.caption_handle)
+    private val captionView: View = rootView.requireViewById(R.id.desktop_mode_caption)
+    private val captionHandle: ImageButton = rootView.requireViewById(R.id.caption_handle)
 
     init {
         captionView.setOnTouchListener(onCaptionTouchListener)
@@ -27,9 +27,10 @@ internal class DesktopModeFocusedWindowDecorationViewHolder(
     }
 
     override fun bindData(taskInfo: RunningTaskInfo) {
-        val captionColor = taskInfo.taskDescription.statusBarColor
-        val captionDrawable = captionView.background as GradientDrawable
-        captionDrawable.setColor(captionColor)
+        taskInfo.taskDescription?.statusBarColor?.let { captionColor ->
+            val captionDrawable = captionView.background as GradientDrawable
+            captionDrawable.setColor(captionColor)
+        }
 
         captionHandle.imageTintList = ColorStateList.valueOf(getCaptionHandleBarColor(taskInfo))
     }

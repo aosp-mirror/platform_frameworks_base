@@ -250,14 +250,14 @@
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Emparejando dispositivo…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"No se ha podido emparejar el dispositivo. El código QR no era correcto o el dispositivo no estaba conectado a la misma red."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Dirección IP y puerto"</string>
-    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Escanea el código QR"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Escanear código QR"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Empareja un dispositivo mediante Wi‑Fi escaneando un código QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Conéctate a una red Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, depuración, desarrollo"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Acceso directo a informe de errores"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Muestra un botón en el menú de encendido para crear un informe de errores"</string>
-    <string name="keep_screen_on" msgid="1187161672348797558">"Pantalla siempre encendida al cargar"</string>
-    <string name="keep_screen_on_summary" msgid="1510731514101925829">"La pantalla nunca entra en modo de suspensión si el dispositivo se está cargando"</string>
+    <string name="keep_screen_on" msgid="1187161672348797558">"Pantalla activa"</string>
+    <string name="keep_screen_on_summary" msgid="1510731514101925829">"La pantalla nunca entra en modo Suspensión si el dispositivo se está cargando"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Habilitar registro de Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Capturar paquetes de Bluetooth (después de cambiar esta opción, desactiva y activa el Bluetooth)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Desbloqueo de OEM"</string>
@@ -306,7 +306,7 @@
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Si este modo está habilitado, es posible que la dirección MAC del dispositivo cambie cada vez que se conecte a una red que tenga habilitada la aleatorización de MAC."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Medida"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"No medida"</string>
-    <string name="select_logd_size_title" msgid="1604578195914595173">"Tamaños del búfer de registro"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"Tamaños de los búferes de registro"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Elige el tamaño del Logger por búfer"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"¿Borrar almacenamiento continuo del registrador?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Cuando ya no supervisamos la actividad con el registrador de forma continua, estamos obligados a borrar los datos del registrador almacenados en el dispositivo."</string>
@@ -490,9 +490,9 @@
     <string name="install_other_apps" msgid="3232595082023199454">"Instalar aplicaciones desconocidas"</string>
     <string name="home" msgid="973834627243661438">"Página principal de ajustes"</string>
   <string-array name="battery_labels">
-    <item msgid="7878690469765357158">"0%"</item>
-    <item msgid="8894873528875953317">"50%"</item>
-    <item msgid="7529124349186240216">"100%"</item>
+    <item msgid="7878690469765357158">"0 %"</item>
+    <item msgid="8894873528875953317">"50 %"</item>
+    <item msgid="7529124349186240216">"100 %"</item>
   </string-array>
     <string name="charge_length_format" msgid="6941645744588690932">"Hace <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="4310625772926171089">"Tiempo restante: <xliff:g id="ID_1">%1$s</xliff:g>"</string>
@@ -545,7 +545,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"justo ahora"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Este teléfono"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Esta tablet"</string>
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Altavoz base"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Altavoz de la base"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositivo externo"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispositivo conectado"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este teléfono"</string>
