@@ -582,23 +582,6 @@ public class BatteryStatsHistory {
      * @param maxHistoryFiles      the largest number of history buffer files to keep
      * @param maxHistoryBufferSize the most amount of RAM to used for buffering of history steps
      */
-    public BatteryStatsHistory(File systemDir, int maxHistoryFiles, int maxHistoryBufferSize,
-            HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock,
-            MonotonicClock monotonicClock) {
-        this(systemDir, maxHistoryFiles, maxHistoryBufferSize,
-                stepDetailsCalculator, clock, monotonicClock, new TraceDelegate(),
-                new EventLogger());
-    }
-
-    public BatteryStatsHistory(File systemDir, int maxHistoryFiles, int maxHistoryBufferSize,
-            HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock,
-            MonotonicClock monotonicClock, TraceDelegate tracer, EventLogger eventLogger) {
-        this(Parcel.obtain(), systemDir, maxHistoryFiles, maxHistoryBufferSize,
-                stepDetailsCalculator, clock, monotonicClock, tracer, eventLogger);
-        initHistoryBuffer();
-    }
-
-    @VisibleForTesting
     public BatteryStatsHistory(Parcel historyBuffer, File systemDir,
             int maxHistoryFiles, int maxHistoryBufferSize,
             HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock,
@@ -607,12 +590,11 @@ public class BatteryStatsHistory {
                 clock, monotonicClock, tracer, eventLogger, null);
     }
 
-    private BatteryStatsHistory(Parcel historyBuffer, File systemDir,
+    private BatteryStatsHistory(@Nullable Parcel historyBuffer, @Nullable File systemDir,
             int maxHistoryFiles, int maxHistoryBufferSize,
-            HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock,
-            MonotonicClock monotonicClock, TraceDelegate tracer, EventLogger eventLogger,
-            BatteryStatsHistory writableHistory) {
-        mHistoryBuffer = historyBuffer;
+            @NonNull HistoryStepDetailsCalculator stepDetailsCalculator, @NonNull Clock clock,
+            @NonNull MonotonicClock monotonicClock, @NonNull TraceDelegate tracer,
+            @NonNull EventLogger eventLogger, @Nullable BatteryStatsHistory writableHistory) {
         mSystemDir = systemDir;
         mMaxHistoryBufferSize = maxHistoryBufferSize;
         mStepDetailsCalculator = stepDetailsCalculator;
@@ -625,9 +607,16 @@ public class BatteryStatsHistory {
             mMutable = false;
         }
 
+        if (historyBuffer != null) {
+            mHistoryBuffer = historyBuffer;
+        } else {
+            mHistoryBuffer = Parcel.obtain();
+            initHistoryBuffer();
+        }
+
         if (writableHistory != null) {
             mHistoryDir = writableHistory.mHistoryDir;
-        } else {
+        } else if (systemDir != null) {
             mHistoryDir = new BatteryHistoryDirectory(new File(systemDir, HISTORY_DIR),
                     monotonicClock, maxHistoryFiles);
             mHistoryDir.load();
@@ -636,33 +625,9 @@ public class BatteryStatsHistory {
                 activeFile = mHistoryDir.makeBatteryHistoryFile();
             }
             setActiveFile(activeFile);
+        } else {
+            mHistoryDir = null;
         }
-    }
-
-    public BatteryStatsHistory(int maxHistoryBufferSize,
-            HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock,
-            MonotonicClock monotonicClock) {
-        this(maxHistoryBufferSize, stepDetailsCalculator, clock, monotonicClock,
-                new TraceDelegate(), new EventLogger());
-    }
-
-    @VisibleForTesting
-    public BatteryStatsHistory(int maxHistoryBufferSize,
-            HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock,
-            MonotonicClock monotonicClock, TraceDelegate traceDelegate,
-            EventLogger eventLogger) {
-        mMaxHistoryBufferSize = maxHistoryBufferSize;
-        mStepDetailsCalculator = stepDetailsCalculator;
-        mTracer = traceDelegate;
-        mClock = clock;
-        mMonotonicClock = monotonicClock;
-        mEventLogger = eventLogger;
-
-        mHistoryBuffer = Parcel.obtain();
-        mSystemDir = null;
-        mHistoryDir = null;
-        mWritableHistory = null;
-        initHistoryBuffer();
     }
 
     /**

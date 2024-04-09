@@ -36,6 +36,8 @@ import android.hardware.power.stats.EnergyConsumerType;
 import android.hardware.power.stats.EnergyMeasurement;
 import android.hardware.power.stats.PowerEntity;
 import android.hardware.power.stats.StateResidencyResult;
+import android.os.Handler;
+import android.os.Looper;
 import android.platform.test.ravenwood.RavenwoodRule;
 import android.power.PowerStatsInternal;
 import android.util.IntArray;
@@ -45,6 +47,7 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.os.Clock;
 import com.android.internal.os.CpuScalingPolicies;
+import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerProfile;
 
 import org.junit.Before;
@@ -65,18 +68,23 @@ import java.util.concurrent.CompletableFuture;
 public class BatteryExternalStatsWorkerTest {
     @Rule
     public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private BatteryExternalStatsWorker mBatteryExternalStatsWorker;
-    private TestBatteryStatsImpl mBatteryStatsImpl;
     private TestPowerStatsInternal mPowerStatsInternal;
 
     @Before
     public void setUp() {
         final Context context = InstrumentationRegistry.getContext();
 
-        mBatteryStatsImpl = new TestBatteryStatsImpl(context);
+        BatteryStatsImpl batteryStats = new BatteryStatsImpl(
+                new BatteryStatsImpl.BatteryStatsConfig.Builder().build(), Clock.SYSTEM_CLOCK,
+                new MonotonicClock(0, Clock.SYSTEM_CLOCK), null,
+                new Handler(Looper.getMainLooper()), null, null, null,
+                new PowerProfile(context, true /* forTest */), buildScalingPolicies(),
+                new PowerStatsUidResolver());
         mPowerStatsInternal = new TestPowerStatsInternal();
-        mBatteryExternalStatsWorker = new BatteryExternalStatsWorker(new TestInjector(context),
-                mBatteryStatsImpl);
+        mBatteryExternalStatsWorker =
+                new BatteryExternalStatsWorker(new TestInjector(context), batteryStats);
     }
 
     @Test
@@ -218,25 +226,17 @@ public class BatteryExternalStatsWorkerTest {
         }
     }
 
-    public class TestBatteryStatsImpl extends BatteryStatsImpl {
-        public TestBatteryStatsImpl(Context context) {
-            super(new BatteryStatsConfig.Builder().build(), Clock.SYSTEM_CLOCK, null, null, null,
-                    null, null, null);
-            mPowerProfile = new PowerProfile(context, true /* forTest */);
-
-            SparseArray<int[]> cpusByPolicy = new SparseArray<>();
-            cpusByPolicy.put(0, new int[]{0, 1, 2, 3});
-            cpusByPolicy.put(4, new int[]{4, 5, 6, 7});
-            SparseArray<int[]> freqsByPolicy = new SparseArray<>();
-            freqsByPolicy.put(0, new int[]{300000, 1000000, 2000000});
-            freqsByPolicy.put(4, new int[]{300000, 1000000, 2500000, 3000000});
-            mCpuScalingPolicies = new CpuScalingPolicies(freqsByPolicy, freqsByPolicy);
-
-            initTimersAndCounters();
-        }
+    private static CpuScalingPolicies buildScalingPolicies() {
+        SparseArray<int[]> cpusByPolicy = new SparseArray<>();
+        cpusByPolicy.put(0, new int[]{0, 1, 2, 3});
+        cpusByPolicy.put(4, new int[]{4, 5, 6, 7});
+        SparseArray<int[]> freqsByPolicy = new SparseArray<>();
+        freqsByPolicy.put(0, new int[]{300000, 1000000, 2000000});
+        freqsByPolicy.put(4, new int[]{300000, 1000000, 2500000, 3000000});
+        return new CpuScalingPolicies(freqsByPolicy, freqsByPolicy);
     }
 
-    public class TestPowerStatsInternal extends PowerStatsInternal {
+    private static class TestPowerStatsInternal extends PowerStatsInternal {
         private final SparseArray<EnergyConsumer> mEnergyConsumers = new SparseArray();
         private final SparseArray<EnergyConsumerResult> mEnergyConsumerResults = new SparseArray();
         private final int mTimeSinceBoot = 0;
