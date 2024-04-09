@@ -103,7 +103,7 @@ import android.os.storage.StorageManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.security.AndroidKeyStoreMaintenance;
-import android.security.Authorization;
+import android.security.KeyStoreAuthorization;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
 import android.security.keystore.recovery.KeyChainProtectionParams;
@@ -289,6 +289,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     private final SyntheticPasswordManager mSpManager;
 
     private final KeyStore mKeyStore;
+    private final KeyStoreAuthorization mKeyStoreAuthorization;
     private final RecoverableKeyStoreManager mRecoverableKeyStoreManager;
     private final UnifiedProfilePasswordCache mUnifiedProfilePasswordCache;
 
@@ -623,6 +624,10 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         }
 
+        public KeyStoreAuthorization getKeyStoreAuthorization() {
+            return KeyStoreAuthorization.getInstance();
+        }
+
         public @NonNull UnifiedProfilePasswordCache getUnifiedProfilePasswordCache(KeyStore ks) {
             return new UnifiedProfilePasswordCache(ks);
         }
@@ -646,6 +651,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mInjector = injector;
         mContext = injector.getContext();
         mKeyStore = injector.getKeyStore();
+        mKeyStoreAuthorization = injector.getKeyStoreAuthorization();
         mRecoverableKeyStoreManager = injector.getRecoverableKeyStoreManager();
         mHandler = injector.getHandler(injector.getServiceThread());
         mStrongAuth = injector.getStrongAuth();
@@ -1434,7 +1440,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void unlockKeystore(int userId, SyntheticPassword sp) {
-        Authorization.onDeviceUnlocked(userId, sp.deriveKeyStorePassword());
+        mKeyStoreAuthorization.onDeviceUnlocked(userId, sp.deriveKeyStorePassword());
     }
 
     @VisibleForTesting /** Note: this method is overridden in unit tests */

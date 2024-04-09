@@ -55,8 +55,8 @@ public class BpcTestServiceCmdService extends Service {
         }
 
         @Override
-        public void setBinderProxyWatermarks(int high, int low) {
-            BinderInternal.nSetBinderProxyCountWatermarks(high, low);
+        public void setBinderProxyWatermarks(int high, int low, int warning) {
+            BinderInternal.nSetBinderProxyCountWatermarks(high, low, warning);
         }
 
         @Override
@@ -68,12 +68,23 @@ public class BpcTestServiceCmdService extends Service {
         public void setBinderProxyCountCallback(IBpcCallbackObserver observer) {
             if (observer != null) {
                 BinderInternal.setBinderProxyCountCallback(
-                        new BinderInternal.BinderProxyLimitListener() {
+                        new BinderInternal.BinderProxyCountEventListener() {
                             @Override
                             public void onLimitReached(int uid) {
                                 try {
                                     synchronized (observer) {
-                                        observer.onCallback(uid);
+                                        observer.onLimitReached(uid);
+                                    }
+                                } catch (Exception e) {
+                                    Log.e(TAG, e.toString());
+                                }
+                            }
+
+                            @Override
+                            public void onWarningThresholdReached(int uid) {
+                                try {
+                                    synchronized (observer) {
+                                        observer.onWarningThresholdReached(uid);
                                     }
                                 } catch (Exception e) {
                                     Log.e(TAG, e.toString());
