@@ -38,7 +38,6 @@ import com.android.systemui.shade.NotificationPanelView
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
@@ -86,7 +85,6 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
                 { mock(DeviceEntryBackgroundViewModel::class.java) },
                 { falsingManager },
                 { mock(VibratorHelper::class.java) },
-                mock(CoroutineDispatcher::class.java),
             )
     }
 
