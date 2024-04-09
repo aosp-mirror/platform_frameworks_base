@@ -16,6 +16,9 @@
 
 package android.media;
 
+import static com.android.media.flags.Flags.FLAG_UPDATE_CLIENT_PROFILE_PRIORITY;
+
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -968,6 +971,27 @@ public final class MediaCas implements AutoCloseable {
         setEventListener(listener, handler);
         createPlugin(casSystemId);
         registerClient(context, tvInputServiceSessionId, priorityHint);
+    }
+
+    /**
+     * Updates client priority with an arbitrary value along with a nice value.
+     *
+     * <p>Tuner resource manager (TRM) uses the client priority value to decide whether it is able
+     * to reclaim insufficient resources from another client.
+     *
+     * <p>The nice value represents how much the client intends to give up the resource when an
+     * insufficient resource situation happens.
+     *
+     * @see <a
+     *     href="https://source.android.com/docs/devices/tv/tuner-framework#priority-nice-value">
+     *     Priority value and nice value</a>
+     * @param priority the new priority. Any negative value would cause no-op on priority setting
+     *     and the API would only process nice value setting in that case.
+     * @param niceValue the nice value.
+     */
+    @FlaggedApi(FLAG_UPDATE_CLIENT_PROFILE_PRIORITY)
+    public boolean updateResourcePriority(int priority, int niceValue) {
+        return mTunerResourceManager.updateClientPriority(mClientId, priority, niceValue);
     }
 
     IHwBinder getBinder() {
