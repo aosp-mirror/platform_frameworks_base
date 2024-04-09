@@ -2840,6 +2840,7 @@ public class DisplayManagerServiceTest {
 
         float brightness1 = 0.3f;
         float brightness2 = 0.45f;
+        waitForIdleHandler(mPowerHandler);
 
         int userId1 = 123;
         int userId2 = 456;
@@ -2849,8 +2850,8 @@ public class DisplayManagerServiceTest {
         userInfo2.id = userId2;
         when(mUserManager.getUserSerialNumber(userId1)).thenReturn(12345);
         when(mUserManager.getUserSerialNumber(userId2)).thenReturn(45678);
-        final SystemService.TargetUser from = new SystemService.TargetUser(userInfo1);
-        final SystemService.TargetUser to = new SystemService.TargetUser(userInfo2);
+        final SystemService.TargetUser user1 = new SystemService.TargetUser(userInfo1);
+        final SystemService.TargetUser user2 = new SystemService.TargetUser(userInfo2);
 
         // The same brightness will be restored for a user only if auto-brightness is off,
         // otherwise the current lux will be used to determine the brightness.
@@ -2858,20 +2859,20 @@ public class DisplayManagerServiceTest {
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
 
-        displayManager.onUserSwitching(to, from);
+        displayManager.onUserSwitching(/* from= */ user2, /* to= */ user1);
         waitForIdleHandler(mPowerHandler);
         displayManagerBinderService.setBrightness(Display.DEFAULT_DISPLAY, brightness1);
-        displayManager.onUserSwitching(from, to);
+        displayManager.onUserSwitching(/* from= */ user1, /* to= */ user2);
         waitForIdleHandler(mPowerHandler);
         displayManagerBinderService.setBrightness(Display.DEFAULT_DISPLAY, brightness2);
 
-        displayManager.onUserSwitching(to, from);
+        displayManager.onUserSwitching(/* from= */ user2, /* to= */ user1);
         waitForIdleHandler(mPowerHandler);
         assertEquals(brightness1,
                 displayManagerBinderService.getBrightness(Display.DEFAULT_DISPLAY),
                 FLOAT_TOLERANCE);
 
-        displayManager.onUserSwitching(from, to);
+        displayManager.onUserSwitching(/* from= */ user1, /* to= */ user2);
         waitForIdleHandler(mPowerHandler);
         assertEquals(brightness2,
                 displayManagerBinderService.getBrightness(Display.DEFAULT_DISPLAY),
