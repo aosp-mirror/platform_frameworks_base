@@ -62,5 +62,16 @@ public abstract class GrammaticalInflectionManagerInternal {
      * Whether the package can get the system grammatical gender or not.
      */
     public abstract boolean canGetSystemGrammaticalGender(int uid, @Nullable String packageName);
+
+
+    /**
+     * Returns the system-gender to be backed up as a data-blob.
+     */
+    public abstract @Nullable byte[] getSystemBackupPayload(int userId);
+
+    /**
+     * Restores the system-gender that were previously backed up.
+     */
+    public abstract void applyRestoredSystemPayload(byte[] payload, int userId);
 }
 
