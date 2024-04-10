@@ -410,7 +410,7 @@ final class InputMethodBindingController {
             Slog.v(TAG,
                     "Removing window token: " + mCurToken + " for display: " + curTokenDisplayId);
         }
-        mWindowManagerInternal.removeWindowToken(mCurToken, false /* removeWindows */,
+        mWindowManagerInternal.removeWindowToken(mCurToken, true /* removeWindows */,
                 false /* animateExit */, curTokenDisplayId);
         mCurToken = null;
     }
