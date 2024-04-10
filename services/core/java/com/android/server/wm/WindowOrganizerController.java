@@ -68,6 +68,7 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityTaskManagerService.enforceTaskPermission;
+import static com.android.server.wm.ActivityTaskManagerService.isPip2ExperimentEnabled;
 import static com.android.server.wm.ActivityTaskSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_PINNED_TASK;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
@@ -828,18 +829,20 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     private int applyTaskChanges(Task tr, WindowContainerTransaction.Change c) {
+        final boolean wasPrevFocusableAndVisible = tr.isFocusableAndVisible();
+
         int effects = applyChanges(tr, c);
         final SurfaceControl.Transaction t = c.getBoundsChangeTransaction();
 
         if ((c.getChangeMask() & WindowContainerTransaction.Change.CHANGE_HIDDEN) != 0) {
             if (tr.setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, c.getHidden())) {
-                effects = TRANSACT_EFFECTS_LIFECYCLE;
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
             }
         }
 
         if ((c.getChangeMask() & CHANGE_FORCE_TRANSLUCENT) != 0) {
             tr.setForceTranslucent(c.getForceTranslucent());
-            effects = TRANSACT_EFFECTS_LIFECYCLE;
+            effects |= TRANSACT_EFFECTS_LIFECYCLE;
         }
 
         if ((c.getChangeMask() & WindowContainerTransaction.Change.CHANGE_DRAG_RESIZING) != 0) {
@@ -872,14 +875,28 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 boolean canEnterPip = activity.checkEnterPictureInPictureState(
                         "applyTaskChanges", true /* beforeStopping */);
                 if (canEnterPip) {
-                    canEnterPip = mService.mActivityClientController
-                            .requestPictureInPictureMode(activity);
+                    mService.mTaskSupervisor.beginDeferResume();
+                    try {
+                        canEnterPip = mService.mActivityClientController
+                                .requestPictureInPictureMode(activity);
+                    } finally {
+                        mService.mTaskSupervisor.endDeferResume();
+                        if (canEnterPip && !isPip2ExperimentEnabled()) {
+                            // Wait until the transaction is applied to only resume once.
+                            effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                        }
+                    }
                 }
                 if (!canEnterPip) {
                     // Restore the flag to its previous state when the activity cannot enter PIP.
                     activity.supportsEnterPipOnTaskSwitch = lastSupportsEnterPipOnTaskSwitch;
                 }
             }
+        }
+
+        // Activity in this Task may resume/pause when enter/exit pip.
+        if (wasPrevFocusableAndVisible != tr.isFocusableAndVisible()) {
+            effects |= TRANSACT_EFFECTS_LIFECYCLE;
         }
 
         return effects;
@@ -947,7 +964,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
         if ((c.getChangeMask() & CHANGE_FORCE_TRANSLUCENT) != 0) {
             taskFragment.setForceTranslucent(c.getForceTranslucent());
-            effects = TRANSACT_EFFECTS_LIFECYCLE;
+            effects |= TRANSACT_EFFECTS_LIFECYCLE;
         }
 
         effects |= applyChanges(taskFragment, c);
