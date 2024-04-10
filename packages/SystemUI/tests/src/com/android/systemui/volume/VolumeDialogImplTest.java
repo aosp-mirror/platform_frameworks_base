@@ -247,6 +247,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
             VolumeDialogController.StreamState ss = new VolumeDialogController.StreamState();
             ss.name = STREAMS.get(i);
             ss.level = 1;
+            ss.levelMin = 0;
+            ss.levelMax = 25;
             state.states.append(i, ss);
         }
         return state;
