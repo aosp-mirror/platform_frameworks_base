@@ -15,6 +15,7 @@
  */
 package com.android.keyguard
 
+import android.os.Trace
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -520,8 +521,12 @@ constructor(
     private fun handleDoze(doze: Float) {
         dozeAmount = doze
         clock?.run {
+            Trace.beginSection("$TAG#smallClock.animations.doze")
             smallClock.animations.doze(dozeAmount)
+            Trace.endSection()
+            Trace.beginSection("$TAG#largeClock.animations.doze")
             largeClock.animations.doze(dozeAmount)
+            Trace.endSection()
         }
         smallTimeListener?.update(doze < DOZE_TICKRATE_THRESHOLD)
         largeTimeListener?.update(doze < DOZE_TICKRATE_THRESHOLD)
@@ -536,10 +541,10 @@ constructor(
     internal fun listenForDozeAmountTransition(scope: CoroutineScope): Job {
         return scope.launch {
             merge(
-                    keyguardTransitionInteractor.aodToLockscreenTransition.map { step ->
+                    keyguardTransitionInteractor.transition(AOD, LOCKSCREEN).map { step ->
                         step.copy(value = 1f - step.value)
                     },
-                    keyguardTransitionInteractor.lockscreenToAodTransition,
+                    keyguardTransitionInteractor.transition(LOCKSCREEN, AOD),
                 ).filter {
                     it.transitionState != TransitionState.FINISHED
                 }
@@ -628,7 +633,7 @@ constructor(
     }
 
     companion object {
-        private val TAG = ClockEventController::class.simpleName!!
-        private val DOZE_TICKRATE_THRESHOLD = 0.99f
+        private const val TAG = "ClockEventController"
+        private const val DOZE_TICKRATE_THRESHOLD = 0.99f
     }
 }
