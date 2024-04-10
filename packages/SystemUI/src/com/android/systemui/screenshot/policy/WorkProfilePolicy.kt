@@ -27,8 +27,6 @@ import com.android.systemui.screenshot.policy.CaptureType.IsolatedTask
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 
-private const val POLICY_NAME = "WorkProfile"
-
 /**
  * Condition: When the top visible task (excluding PIP mode) belongs to a work user.
  *
@@ -39,10 +37,11 @@ class WorkProfilePolicy
 constructor(
     private val profileTypes: ProfileTypeRepository,
 ) : CapturePolicy {
+
     override suspend fun check(content: DisplayContentModel): PolicyResult {
         // The systemUI notification shade isn't a work app, skip.
         if (content.systemUiState.shadeExpanded) {
-            return NotMatched(policy = POLICY_NAME, reason = "Notification shade is expanded")
+            return NotMatched(policy = NAME, reason = "Notification shade is expanded")
         }
 
         // Find the first non PiP rootTask with a top child task owned by a work user
@@ -54,13 +53,13 @@ constructor(
                     profileTypes.getProfileType(child.userId) == ProfileType.WORK
                 }
                 ?: return NotMatched(
-                    policy = POLICY_NAME,
+                    policy = NAME,
                     reason = "The top-most non-PINNED task does not belong to a work profile user"
                 )
 
         // If matched, return parameters needed to modify the request.
         return PolicyResult.Matched(
-            policy = POLICY_NAME,
+            policy = NAME,
             reason = "The top-most non-PINNED task ($childTask) belongs to a work profile user",
             CaptureParameters(
                 type = IsolatedTask(taskId = childTask.id, taskBounds = childTask.bounds),
@@ -68,5 +67,9 @@ constructor(
                 owner = UserHandle.of(childTask.userId),
             )
         )
+    }
+
+    companion object {
+        val NAME = "WorkProfile"
     }
 }
