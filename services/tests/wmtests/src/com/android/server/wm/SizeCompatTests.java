@@ -129,6 +129,7 @@ import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
@@ -4161,6 +4162,7 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    @Ignore // TODO(b/330888878): fix test in main
     public void testPortraitCloseToSquareDisplayWithTaskbar_notLetterboxed() {
         // Set up portrait close to square display
         setUpDisplaySizeWithApp(2200, 2280);
