@@ -17,7 +17,6 @@
 package com.android.systemui.shade;
 
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
-import static com.android.systemui.flags.Flags.TRACKPAD_GESTURE_COMMON;
 import static com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING;
 import static com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
@@ -104,7 +103,6 @@ public class NotificationShadeWindowViewController implements Dumpable {
     private final PulsingGestureListener mPulsingGestureListener;
     private final LockscreenHostedDreamGestureListener mLockscreenHostedDreamGestureListener;
     private final NotificationInsetsController mNotificationInsetsController;
-    private final boolean mIsTrackpadCommonEnabled;
     private final FeatureFlagsClassic mFeatureFlagsClassic;
     private final SysUIKeyEventHandler mSysUIKeyEventHandler;
     private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
@@ -211,7 +209,6 @@ public class NotificationShadeWindowViewController implements Dumpable {
         mLockscreenHostedDreamGestureListener = lockscreenHostedDreamGestureListener;
         mNotificationInsetsController = notificationInsetsController;
         mGlanceableHubContainerController = glanceableHubContainerController;
-        mIsTrackpadCommonEnabled = featureFlagsClassic.isEnabled(TRACKPAD_GESTURE_COMMON);
         mFeatureFlagsClassic = featureFlagsClassic;
         mSysUIKeyEventHandler = sysUIKeyEventHandler;
         mPrimaryBouncerInteractor = primaryBouncerInteractor;
@@ -643,16 +640,10 @@ public class NotificationShadeWindowViewController implements Dumpable {
         if (mTouchActive) {
             final long now = mClock.uptimeMillis();
             final MotionEvent event;
-            if (mIsTrackpadCommonEnabled) {
-                event = MotionEvent.obtain(mDownEvent);
-                event.setDownTime(now);
-                event.setAction(MotionEvent.ACTION_CANCEL);
-                event.setLocation(0.0f, 0.0f);
-            } else {
-                event = MotionEvent.obtain(now, now,
-                        MotionEvent.ACTION_CANCEL, 0.0f, 0.0f, 0);
-                event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
-            }
+            event = MotionEvent.obtain(mDownEvent);
+            event.setDownTime(now);
+            event.setAction(MotionEvent.ACTION_CANCEL);
+            event.setLocation(0.0f, 0.0f);
             Log.w(TAG, "Canceling current touch event (should be very rare)");
             mView.dispatchTouchEvent(event);
             event.recycle();

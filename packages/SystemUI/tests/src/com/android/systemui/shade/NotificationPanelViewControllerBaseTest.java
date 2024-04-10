@@ -384,7 +384,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mFeatureFlags.set(Flags.TRACKPAD_GESTURE_FEATURES, false);
         mFeatureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false);
         mFeatureFlags.set(Flags.QS_USER_DETAIL_SHORTCUT, false);
 

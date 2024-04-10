@@ -38,8 +38,6 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED
 import com.android.systemui.flags.Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION
-import com.android.systemui.flags.Flags.TRACKPAD_GESTURE_COMMON
-import com.android.systemui.flags.Flags.TRACKPAD_GESTURE_FEATURES
 import com.android.systemui.keyevent.domain.interactor.SysUIKeyEventHandler
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -166,8 +164,6 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             .thenReturn(emptyFlow<TransitionStep>())
 
         featureFlagsClassic = FakeFeatureFlagsClassic()
-        featureFlagsClassic.set(TRACKPAD_GESTURE_COMMON, true)
-        featureFlagsClassic.set(TRACKPAD_GESTURE_FEATURES, false)
         featureFlagsClassic.set(SPLIT_SHADE_SUBPIXEL_OPTIMIZATION, true)
         featureFlagsClassic.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false)
         mSetFlagsRule.disableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)

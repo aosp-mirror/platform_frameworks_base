@@ -367,16 +367,6 @@ object Flags {
     val WM_ALWAYS_ENFORCE_PREDICTIVE_BACK =
         sysPropBooleanFlag("persist.wm.debug.predictive_back_always_enforce", default = false)
 
-    // TODO(b/254512728): Tracking Bug
-    @JvmField val NEW_BACK_AFFORDANCE = releasedFlag("new_back_affordance")
-
-
-    // TODO(b/270987164): Tracking Bug
-    @JvmField val TRACKPAD_GESTURE_FEATURES = releasedFlag("trackpad_gesture_features")
-
-    // TODO(b/273800936): Tracking Bug
-    @JvmField val TRACKPAD_GESTURE_COMMON = releasedFlag("trackpad_gesture_common")
-
     // TODO(b/251205791): Tracking Bug
     @JvmField val SCREENSHOT_APP_CLIPS = releasedFlag("screenshot_app_clips")
 

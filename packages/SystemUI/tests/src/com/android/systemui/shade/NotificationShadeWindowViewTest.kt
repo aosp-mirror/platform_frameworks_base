@@ -155,8 +155,6 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
             .thenReturn(emptyFlow())
 
         val featureFlags = FakeFeatureFlags()
-        featureFlags.set(Flags.TRACKPAD_GESTURE_COMMON, true)
-        featureFlags.set(Flags.TRACKPAD_GESTURE_FEATURES, false)
         featureFlags.set(Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION, true)
         featureFlags.set(Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false)
         mSetFlagsRule.disableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
