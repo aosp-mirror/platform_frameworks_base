@@ -204,7 +204,7 @@ public class SystemUIApplication extends Application implements
      */
 
     public void startSystemUserServicesIfNeeded() {
-        if (!mProcessWrapper.isSystemUser()) {
+        if (!shouldStartSystemUserServices()) {
             Log.wtf(TAG, "Tried starting SystemUser services on non-SystemUser");
             return;  // Per-user startables are handled in #startSystemUserServicesIfNeeded.
         }
@@ -227,7 +227,7 @@ public class SystemUIApplication extends Application implements
      * <p>This method must only be called from the main thread.</p>
      */
     void startSecondaryUserServicesIfNeeded() {
-        if (mProcessWrapper.isSystemUser()) {
+        if (!shouldStartSecondaryUserServices()) {
             return;  // Per-user startables are handled in #startSystemUserServicesIfNeeded.
         }
         // Sort the startables so that we get a deterministic ordering.
@@ -236,6 +236,14 @@ public class SystemUIApplication extends Application implements
         sortedStartables.putAll(mSysUIComponent.getPerUserStartables());
         startServicesIfNeeded(
                 sortedStartables, "StartSecondaryServices", null);
+    }
+
+    protected boolean shouldStartSystemUserServices() {
+        return mProcessWrapper.isSystemUser();
+    }
+
+    protected boolean shouldStartSecondaryUserServices() {
+        return !mProcessWrapper.isSystemUser();
     }
 
     private void startServicesIfNeeded(
