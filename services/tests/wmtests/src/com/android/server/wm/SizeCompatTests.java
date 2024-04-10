@@ -2326,6 +2326,92 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    public void testUserOverrideFullscreenForLandscapeDisplay() {
+        final int displayWidth = 1600;
+        final int displayHeight = 1400;
+        setUpDisplaySizeWithApp(displayWidth, displayHeight);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        spyOn(mActivity.mWmService.mLetterboxConfiguration);
+        doReturn(true).when(mActivity.mWmService.mLetterboxConfiguration)
+                .isUserAppAspectRatioFullscreenEnabled();
+
+        // Set user aspect ratio override
+        spyOn(mActivity.mLetterboxUiController);
+        doReturn(USER_MIN_ASPECT_RATIO_FULLSCREEN).when(mActivity.mLetterboxUiController)
+                .getUserMinAspectRatioOverrideCode();
+
+        prepareMinAspectRatio(mActivity, 16 / 9f, SCREEN_ORIENTATION_PORTRAIT);
+
+        final Rect bounds = mActivity.getBounds();
+
+        // bounds should be fullscreen
+        assertEquals(displayHeight, bounds.height());
+        assertEquals(displayWidth, bounds.width());
+    }
+
+    @Test
+    public void testUserOverrideFullscreenForPortraitDisplay() {
+        final int displayWidth = 1400;
+        final int displayHeight = 1600;
+        setUpDisplaySizeWithApp(displayWidth, displayHeight);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        spyOn(mActivity.mWmService.mLetterboxConfiguration);
+        doReturn(true).when(mActivity.mWmService.mLetterboxConfiguration)
+                .isUserAppAspectRatioFullscreenEnabled();
+
+        // Set user aspect ratio override
+        spyOn(mActivity.mLetterboxUiController);
+        doReturn(USER_MIN_ASPECT_RATIO_FULLSCREEN).when(mActivity.mLetterboxUiController)
+                .getUserMinAspectRatioOverrideCode();
+
+        prepareMinAspectRatio(mActivity, 16 / 9f, SCREEN_ORIENTATION_LANDSCAPE);
+
+        final Rect bounds = mActivity.getBounds();
+
+        // bounds should be fullscreen
+        assertEquals(displayHeight, bounds.height());
+        assertEquals(displayWidth, bounds.width());
+    }
+
+    @Test
+    public void testSystemFullscreenOverrideForLandscapeDisplay() {
+        final int displayWidth = 1600;
+        final int displayHeight = 1400;
+        setUpDisplaySizeWithApp(displayWidth, displayHeight);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        spyOn(mActivity.mLetterboxUiController);
+        doReturn(true).when(mActivity.mLetterboxUiController)
+                .isSystemOverrideToFullscreenEnabled();
+
+        prepareMinAspectRatio(mActivity, 16 / 9f, SCREEN_ORIENTATION_PORTRAIT);
+
+        final Rect bounds = mActivity.getBounds();
+
+        // bounds should be fullscreen
+        assertEquals(displayHeight, bounds.height());
+        assertEquals(displayWidth, bounds.width());
+    }
+
+    @Test
+    public void testSystemFullscreenOverrideForPortraitDisplay() {
+        final int displayWidth = 1400;
+        final int displayHeight = 1600;
+        setUpDisplaySizeWithApp(displayWidth, displayHeight);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        spyOn(mActivity.mLetterboxUiController);
+        doReturn(true).when(mActivity.mLetterboxUiController)
+                .isSystemOverrideToFullscreenEnabled();
+
+        prepareMinAspectRatio(mActivity, 16 / 9f, SCREEN_ORIENTATION_LANDSCAPE);
+
+        final Rect bounds = mActivity.getBounds();
+
+        // bounds should be fullscreen
+        assertEquals(displayHeight, bounds.height());
+        assertEquals(displayWidth, bounds.width());
+    }
+
+    @Test
     public void testUserOverrideSplitScreenAspectRatioForLandscapeDisplay() {
         final int displayWidth = 1600;
         final int displayHeight = 1400;
