@@ -146,4 +146,7 @@
 
     <!-- Georgian keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_georgian">Georgian</string>
+
+    <!-- Thai (Kedmanee variant) keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_thai_kedmanee">Thai (Kedmanee)</string>
 </resources>
