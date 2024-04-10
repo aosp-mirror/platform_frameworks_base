@@ -30,3 +30,24 @@ java_library_host {
         type: "full",
     },
 }
+
+java_test_host {
+    name: "extract-flagged-apis-test",
+    srcs: ["ExtractFlaggedApisTest.kt"],
+    libs: [
+        "extract_flagged_apis_proto",
+        "junit",
+        "libprotobuf-java-full",
+    ],
+    static_libs: [
+        "truth",
+        "truth-liteproto-extension",
+        "truth-proto-extension",
+    ],
+    data: [
+        ":extract-flagged-apis",
+    ],
+    test_options: {
+        unit_test: true,
+    },
+}
