@@ -950,13 +950,18 @@ public class LockSettingsService extends ILockSettings.Stub {
                             && android.multiuser.Flags.enablePrivateSpaceFeatures()
                             && android.multiuser.Flags.enableBiometricsToUnlockPrivateSpace()) {
                         mHandler.post(() -> {
-                            UserProperties userProperties =
-                                    mUserManager.getUserProperties(UserHandle.of(userId));
-                            if (userProperties != null
-                                    && userProperties.getAllowStoppingUserWithDelayedLocking()) {
-                                int strongAuthRequired = LockPatternUtils.StrongAuthTracker
-                                        .getDefaultFlags(mContext);
-                                requireStrongAuth(strongAuthRequired, userId);
+                            try {
+                                UserProperties userProperties =
+                                        mUserManager.getUserProperties(UserHandle.of(userId));
+                                if (userProperties != null && userProperties
+                                        .getAllowStoppingUserWithDelayedLocking()) {
+                                    int strongAuthRequired = LockPatternUtils.StrongAuthTracker
+                                            .getDefaultFlags(mContext);
+                                    requireStrongAuth(strongAuthRequired, userId);
+                                }
+                            } catch (IllegalArgumentException e) {
+                                Slogf.d(TAG, "User %d does not exist or has been removed",
+                                        userId);
                             }
                         });
                     }
