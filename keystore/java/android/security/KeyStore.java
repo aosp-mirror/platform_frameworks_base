@@ -16,8 +16,6 @@
 
 package android.security;
 
-import android.compat.annotation.UnsupportedAppUsage;
-
 /**
  * This class provides some constants and helper methods related to Android's Keystore service.
  * This class was originally much larger, but its functionality was superseded by other classes.
@@ -30,11 +28,4 @@ public class KeyStore {
 
     // Used for UID field to indicate the calling UID.
     public static final int UID_SELF = -1;
-
-    private static final KeyStore KEY_STORE = new KeyStore();
-
-    @UnsupportedAppUsage
-    public static KeyStore getInstance() {
-        return KEY_STORE;
-    }
 }
