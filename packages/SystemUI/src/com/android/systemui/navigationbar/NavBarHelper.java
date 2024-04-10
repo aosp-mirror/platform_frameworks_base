@@ -35,6 +35,7 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARE
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
@@ -74,6 +75,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import dagger.Lazy;
@@ -101,7 +103,7 @@ public final class NavBarHelper implements
         AccessibilityButtonModeObserver.ModeChangedListener,
         AccessibilityButtonTargetsObserver.TargetsChangedListener,
         OverviewProxyService.OverviewProxyListener, NavigationModeController.ModeChangedListener,
-        Dumpable, CommandQueue.Callbacks {
+        Dumpable, CommandQueue.Callbacks, ConfigurationController.ConfigurationListener {
     private static final String TAG = NavBarHelper.class.getSimpleName();
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -189,6 +191,7 @@ public final class NavBarHelper implements
             UserTracker userTracker,
             DisplayTracker displayTracker,
             NotificationShadeWindowController notificationShadeWindowController,
+            ConfigurationController configurationController,
             DumpManager dumpManager,
             CommandQueue commandQueue,
             @Main Executor mainExecutor) {
@@ -215,6 +218,7 @@ public final class NavBarHelper implements
 
         mNavBarMode = navigationModeController.addListener(this);
         mCommandQueue.addCallback(this);
+        configurationController.addCallback(this);
         overviewProxyService.addCallback(this);
         dumpManager.registerDumpable(this);
     }
@@ -357,6 +361,11 @@ public final class NavBarHelper implements
     @Override
     public void onAccessibilityButtonTargetsChanged(String targets) {
         updateA11yState();
+    }
+
+    @Override
+    public void onConfigChanged(Configuration newConfig) {
+        mEdgeBackGestureHandler.onConfigurationChanged(newConfig);
     }
 
     /**
