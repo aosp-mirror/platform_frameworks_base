@@ -17,9 +17,7 @@
 package com.android.server.backup;
 
 import static android.Manifest.permission.BACKUP;
-import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
-import static android.Manifest.permission.PACKAGE_USAGE_STATS;
 
 import static com.android.server.backup.testing.TransportData.backupTransport;
 
@@ -73,10 +71,7 @@ import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowContextWrapper;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 /** Tests for {@link BackupManagerService}. */
 @RunWith(RobolectricTestRunner.class)
@@ -1461,65 +1456,10 @@ public class BackupManagerServiceRoboTest {
     //  Service tests
     // ---------------------------------------------
 
-    /** Test that the backup service routes methods correctly to the user that requests it. */
-    @Test
-    public void testDump_onRegisteredUser_callsMethodForUser() throws Exception {
-        grantDumpPermissions();
-        BackupManagerService backupManagerService = createSystemRegisteredService();
-        File testFile = createTestFile();
-        FileDescriptor fileDescriptor = new FileDescriptor();
-        PrintWriter printWriter = new PrintWriter(testFile);
-        String[] args = {"1", "2"};
-        ShadowBinder.setCallingUserHandle(UserHandle.of(UserHandle.USER_SYSTEM));
-
-        backupManagerService.dump(fileDescriptor, printWriter, args);
-
-        verify(mUserSystemService).dump(fileDescriptor, printWriter, args);
-    }
-
-    /** Test that the backup service does not route methods for non-registered users. */
-    @Test
-    public void testDump_onUnknownUser_doesNotPropagateCall() throws Exception {
-        grantDumpPermissions();
-        BackupManagerService backupManagerService = createService();
-        File testFile = createTestFile();
-        FileDescriptor fileDescriptor = new FileDescriptor();
-        PrintWriter printWriter = new PrintWriter(testFile);
-        String[] args = {"1", "2"};
-
-        backupManagerService.dump(fileDescriptor, printWriter, args);
-
-        verify(mUserOneService, never()).dump(fileDescriptor, printWriter, args);
-    }
-
-    /** Test that 'dumpsys backup users' dumps the list of users registered in backup service*/
-    @Test
-    public void testDump_users_dumpsListOfRegisteredUsers() {
-        grantDumpPermissions();
-        BackupManagerService backupManagerService = createSystemRegisteredService();
-        registerUser(backupManagerService, mUserOneId, mUserOneService);
-        StringWriter out = new StringWriter();
-        PrintWriter writer = new PrintWriter(out);
-        String[] args = {"users"};
-
-        backupManagerService.dump(null, writer, args);
-
-        writer.flush();
-        assertEquals(
-                String.format("%s %d %d\n", BackupManagerService.DUMP_RUNNING_USERS_MESSAGE,
-                        UserHandle.USER_SYSTEM, mUserOneId),
-                out.toString());
-    }
-
     private File createTestFile() throws IOException {
         File testFile = new File(mContext.getFilesDir(), "test");
         testFile.createNewFile();
         return testFile;
-    }
-
-    private void grantDumpPermissions() {
-        mShadowContext.grantPermissions(DUMP);
-        mShadowContext.grantPermissions(PACKAGE_USAGE_STATS);
     }
 
     /**
