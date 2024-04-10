@@ -1565,8 +1565,9 @@ public interface WindowManager extends ViewManager {
      *     android:value="true|false"/&gt;
      * &lt;/activity&gt;
      * </pre>
+     *
+     * @hide
      */
-    @FlaggedApi(Flags.FLAG_UNTRUSTED_EMBEDDING_STATE_SHARING)
     String PROPERTY_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING_STATE_SHARING =
             "android.window.PROPERTY_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING_STATE_SHARING";
 
