@@ -16,10 +16,12 @@
 
 package com.android.server.inputmethod;
 
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -452,9 +454,12 @@ final class InputMethodBindingController {
         intent.setComponent(component);
         intent.putExtra(Intent.EXTRA_CLIENT_LABEL,
                 com.android.internal.R.string.input_method_binding_label);
+        var options = ActivityOptions.makeBasic()
+                .setPendingIntentCreatorBackgroundActivityStartMode(
+                        MODE_BACKGROUND_ACTIVITY_START_DENIED);
         intent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
                 mContext, 0, new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS),
-                PendingIntent.FLAG_IMMUTABLE));
+                PendingIntent.FLAG_IMMUTABLE, options.toBundle()));
         return intent;
     }
 
