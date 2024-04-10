@@ -22,7 +22,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.w3c.dom.Document;
 
 @RunWith(JUnit4.class)
 public class DataLabelsTest {
@@ -65,12 +64,9 @@ public class DataLabelsTest {
     private static final String UNRECOGNIZED_FILE_NAME = "data-category-unrecognized.xml";
     private static final String UNRECOGNIZED_TYPE_FILE_NAME = "data-category-unrecognized-type.xml";
 
-    private Document mDoc = null;
-
     @Before
     public void setUp() throws Exception {
         System.out.println("set up.");
-        mDoc = TestUtils.document();
     }
 
     /** Test for data labels accessed valid bool. */

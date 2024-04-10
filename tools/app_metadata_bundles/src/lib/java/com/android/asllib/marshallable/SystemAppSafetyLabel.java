@@ -50,6 +50,9 @@ public class SystemAppSafetyLabel implements AslMarshallable {
     /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
     @Override
     public List<Element> toHrDomElements(Document doc) {
-        return List.of();
+        Element systemAppSafetyLabelEle =
+                doc.createElement(XmlUtils.HR_TAG_SYSTEM_APP_SAFETY_LABEL);
+        systemAppSafetyLabelEle.setAttribute(XmlUtils.HR_ATTR_URL, mUrl);
+        return XmlUtils.listOf(systemAppSafetyLabelEle);
     }
 }

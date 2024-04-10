@@ -65,8 +65,10 @@ public class AslConverter {
                 return new AndroidSafetyLabelFactory()
                         .createFromHrElements(XmlUtils.listOf(appMetadataBundles));
             case ON_DEVICE:
-                throw new IllegalArgumentException(
-                        "Parsing from on-device format is not supported at this time.");
+                Element bundleEle =
+                        XmlUtils.getSingleChildElement(document, XmlUtils.OD_TAG_BUNDLE, true);
+                return new AndroidSafetyLabelFactory()
+                        .createFromOdElements(XmlUtils.listOf(bundleEle));
             default:
                 throw new IllegalStateException("Unrecognized input format.");
         }
@@ -89,8 +91,10 @@ public class AslConverter {
 
         switch (format) {
             case HUMAN_READABLE:
-                throw new IllegalArgumentException(
-                        "Outputting human-readable format is not supported at this time.");
+                for (var child : asl.toHrDomElements(document)) {
+                    document.appendChild(child);
+                }
+                break;
             case ON_DEVICE:
                 for (var child : asl.toOdDomElements(document)) {
                     document.appendChild(child);

@@ -22,7 +22,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.w3c.dom.Document;
 
 @RunWith(JUnit4.class)
 public class DataCategoryTest {
@@ -57,15 +56,12 @@ public class DataCategoryTest {
             "data-category-personal-unrecognized-type.xml";
     private static final String UNRECOGNIZED_CATEGORY_FILE_NAME = "data-category-unrecognized.xml";
 
-    private Document mDoc = null;
-
     /** Logic for setting up tests (empty if not yet needed). */
     public static void main(String[] params) throws Exception {}
 
     @Before
     public void setUp() throws Exception {
         System.out.println("set up.");
-        mDoc = TestUtils.document();
     }
 
     /** Test for data category personal. */
@@ -207,7 +203,7 @@ public class DataCategoryTest {
 
     private void testHrToOdDataCategory(String fileName) throws Exception {
         TestUtils.testHrToOd(
-                mDoc,
+                TestUtils.document(),
                 new DataCategoryFactory(),
                 DATA_CATEGORY_HR_PATH,
                 DATA_CATEGORY_OD_PATH,

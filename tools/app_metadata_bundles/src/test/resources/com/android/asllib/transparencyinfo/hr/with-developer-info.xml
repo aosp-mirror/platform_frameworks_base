@@ -7,5 +7,5 @@
         countryRegion="US"
         relationship="aosp"
         website="example.com"
-        appDeveloperRegistryId="registry_id" />
+        registryId="registry_id" />
 </transparency-info>

@@ -25,7 +25,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.w3c.dom.Document;
 
 import java.nio.file.Paths;
 import java.util.List;
@@ -36,11 +35,13 @@ public class DeveloperInfoTest {
     private static final String DEVELOPER_INFO_OD_PATH = "com/android/asllib/developerinfo/od";
     public static final List<String> REQUIRED_FIELD_NAMES =
             List.of("address", "countryRegion", "email", "name", "relationship");
+    public static final List<String> REQUIRED_FIELD_NAMES_OD =
+            List.of("address", "country_region", "email", "name", "relationship");
     public static final List<String> OPTIONAL_FIELD_NAMES = List.of("website", "registryId");
+    public static final List<String> OPTIONAL_FIELD_NAMES_OD =
+            List.of("website", "app_developer_registry_id");
 
     private static final String ALL_FIELDS_VALID_FILE_NAME = "all-fields-valid.xml";
-
-    private Document mDoc = null;
 
     /** Logic for setting up tests (empty if not yet needed). */
     public static void main(String[] params) throws Exception {}
@@ -48,7 +49,6 @@ public class DeveloperInfoTest {
     @Before
     public void setUp() throws Exception {
         System.out.println("set up.");
-        mDoc = TestUtils.document();
     }
 
     /** Test for all fields valid. */
@@ -56,6 +56,7 @@ public class DeveloperInfoTest {
     public void testAllFieldsValid() throws Exception {
         System.out.println("starting testAllFieldsValid.");
         testHrToOdDeveloperInfo(ALL_FIELDS_VALID_FILE_NAME);
+        testOdToHrDeveloperInfo(ALL_FIELDS_VALID_FILE_NAME);
     }
 
     /** Tests missing required fields fails. */
@@ -73,6 +74,18 @@ public class DeveloperInfoTest {
                     MalformedXmlException.class,
                     () -> new DeveloperInfoFactory().createFromHrElements(developerInfoEle));
         }
+
+        for (String reqField : REQUIRED_FIELD_NAMES_OD) {
+            System.out.println("testing missing required field od: " + reqField);
+            var developerInfoEle =
+                    TestUtils.getElementsFromResource(
+                            Paths.get(DEVELOPER_INFO_OD_PATH, ALL_FIELDS_VALID_FILE_NAME));
+            TestUtils.removeOdChildEleWithName(developerInfoEle.get(0), reqField);
+
+            assertThrows(
+                    MalformedXmlException.class,
+                    () -> new DeveloperInfoFactory().createFromOdElements(developerInfoEle));
+        }
     }
 
     /** Tests missing optional fields passes. */
@@ -85,16 +98,35 @@ public class DeveloperInfoTest {
             developerInfoEle.get(0).removeAttribute(optField);
             DeveloperInfo developerInfo =
                     new DeveloperInfoFactory().createFromHrElements(developerInfoEle);
-            developerInfo.toOdDomElements(mDoc);
+            developerInfo.toOdDomElements(TestUtils.document());
+        }
+
+        for (String optField : OPTIONAL_FIELD_NAMES_OD) {
+            var developerInfoEle =
+                    TestUtils.getElementsFromResource(
+                            Paths.get(DEVELOPER_INFO_OD_PATH, ALL_FIELDS_VALID_FILE_NAME));
+            TestUtils.removeOdChildEleWithName(developerInfoEle.get(0), optField);
+            DeveloperInfo developerInfo =
+                    new DeveloperInfoFactory().createFromOdElements(developerInfoEle);
+            developerInfo.toHrDomElements(TestUtils.document());
         }
     }
 
     private void testHrToOdDeveloperInfo(String fileName) throws Exception {
         TestUtils.testHrToOd(
-                mDoc,
+                TestUtils.document(),
                 new DeveloperInfoFactory(),
                 DEVELOPER_INFO_HR_PATH,
                 DEVELOPER_INFO_OD_PATH,
+                fileName);
+    }
+
+    private void testOdToHrDeveloperInfo(String fileName) throws Exception {
+        TestUtils.testOdToHr(
+                TestUtils.document(),
+                new DeveloperInfoFactory(),
+                DEVELOPER_INFO_OD_PATH,
+                DEVELOPER_INFO_HR_PATH,
                 fileName);
     }
 }

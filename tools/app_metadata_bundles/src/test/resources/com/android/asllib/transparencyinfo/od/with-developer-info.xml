@@ -7,5 +7,6 @@
         <string name="country_region" value="US"/>
         <long name="relationship" value="5"/>
         <string name="website" value="example.com"/>
+        <string name="app_developer_registry_id" value="registry_id"/>
     </pbundle_as_map>
 </pbundle_as_map>

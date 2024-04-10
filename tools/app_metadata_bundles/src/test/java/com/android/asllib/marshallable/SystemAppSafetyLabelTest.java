@@ -22,7 +22,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.w3c.dom.Document;
 
 @RunWith(JUnit4.class)
 public class SystemAppSafetyLabelTest {
@@ -34,15 +33,12 @@ public class SystemAppSafetyLabelTest {
     private static final String VALID_FILE_NAME = "valid.xml";
     private static final String MISSING_URL_FILE_NAME = "missing-url.xml";
 
-    private Document mDoc = null;
-
     /** Logic for setting up tests (empty if not yet needed). */
     public static void main(String[] params) throws Exception {}
 
     @Before
     public void setUp() throws Exception {
         System.out.println("set up.");
-        mDoc = TestUtils.document();
     }
 
     /** Test for valid. */
@@ -50,6 +46,7 @@ public class SystemAppSafetyLabelTest {
     public void testValid() throws Exception {
         System.out.println("starting testValid.");
         testHrToOdSystemAppSafetyLabel(VALID_FILE_NAME);
+        testOdToHrSystemAppSafetyLabel(VALID_FILE_NAME);
     }
 
     /** Tests missing url. */
@@ -57,6 +54,7 @@ public class SystemAppSafetyLabelTest {
     public void testMissingUrl() throws Exception {
         System.out.println("starting testMissingUrl.");
         hrToOdExpectException(MISSING_URL_FILE_NAME);
+        odToHrExpectException(MISSING_URL_FILE_NAME);
     }
 
     private void hrToOdExpectException(String fileName) {
@@ -64,12 +62,26 @@ public class SystemAppSafetyLabelTest {
                 new SystemAppSafetyLabelFactory(), SYSTEM_APP_SAFETY_LABEL_HR_PATH, fileName);
     }
 
+    private void odToHrExpectException(String fileName) {
+        TestUtils.odToHrExpectException(
+                new SystemAppSafetyLabelFactory(), SYSTEM_APP_SAFETY_LABEL_OD_PATH, fileName);
+    }
+
     private void testHrToOdSystemAppSafetyLabel(String fileName) throws Exception {
         TestUtils.testHrToOd(
-                mDoc,
+                TestUtils.document(),
                 new SystemAppSafetyLabelFactory(),
                 SYSTEM_APP_SAFETY_LABEL_HR_PATH,
                 SYSTEM_APP_SAFETY_LABEL_OD_PATH,
+                fileName);
+    }
+
+    private void testOdToHrSystemAppSafetyLabel(String fileName) throws Exception {
+        TestUtils.testOdToHr(
+                TestUtils.document(),
+                new SystemAppSafetyLabelFactory(),
+                SYSTEM_APP_SAFETY_LABEL_OD_PATH,
+                SYSTEM_APP_SAFETY_LABEL_HR_PATH,
                 fileName);
     }
 }

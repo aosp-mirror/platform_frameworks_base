@@ -54,6 +54,23 @@ public class TransparencyInfoFactory implements AslMarshallableFactory<Transpare
     @Override
     public TransparencyInfo createFromOdElements(List<Element> elements)
             throws MalformedXmlException {
-        return null;
+        Element transparencyInfoEle = XmlUtils.getSingleElement(elements);
+        if (transparencyInfoEle == null) {
+            AslgenUtil.logI("No TransparencyInfo found in od format.");
+            return null;
+        }
+
+        Element developerInfoEle =
+                XmlUtils.getOdPbundleWithName(
+                        transparencyInfoEle, XmlUtils.OD_NAME_DEVELOPER_INFO, false);
+        DeveloperInfo developerInfo =
+                new DeveloperInfoFactory().createFromOdElements(XmlUtils.listOf(developerInfoEle));
+
+        Element appInfoEle =
+                XmlUtils.getOdPbundleWithName(
+                        transparencyInfoEle, XmlUtils.OD_NAME_APP_INFO, false);
+        AppInfo appInfo = new AppInfoFactory().createFromOdElements(XmlUtils.listOf(appInfoEle));
+
+        return new TransparencyInfo(developerInfo, appInfo);
     }
 }
