@@ -112,7 +112,7 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"기기가 다시 시작되어 패턴을 입력해야 합니다."</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"기기가 다시 시작되어 PIN을 입력해야 합니다."</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"기기가 다시 시작되어 비밀번호를 입력해야 합니다."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"보안 강화를 위해 대신 패턴 사용"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"보안 강화를 위해 패턴 사용"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"보안 강화를 위해 대신 PIN 사용"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"보안 강화를 위해 대신 비밀번호 사용"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"관리자가 기기를 잠갔습니다."</string>
