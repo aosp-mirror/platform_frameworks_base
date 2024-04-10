@@ -42,6 +42,9 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Создать ключ доступа для входа в приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"Сохранить пароль для входа в приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Сохранить данные для входа в приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
+    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"Использовать способ разблокировки экрана, чтобы создать ключ доступа для приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
+    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"Использовать способ разблокировки экрана, чтобы создать пароль для приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
+    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"Использовать способ разблокировки экрана, чтобы сохранить данные для входа в приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
     <string name="passkey" msgid="632353688396759522">"ключ доступа"</string>
     <string name="password" msgid="6738570945182936667">"пароль"</string>
     <string name="passkeys" msgid="5733880786866559847">"ключи доступа"</string>

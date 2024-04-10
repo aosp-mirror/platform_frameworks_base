@@ -42,6 +42,12 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Të krijohet një çelës kalimi për t\'u identifikuar në <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"Të ruhet fjalëkalimi për t\'u identifikuar në <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Të ruhen informacionet e identifikimit për <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for choose_create_single_tap_passkey_title (3872793514041774218) -->
+    <skip />
+    <!-- no translation found for choose_create_single_tap_password_title (5231871886818921622) -->
+    <skip />
+    <!-- no translation found for choose_create_single_tap_sign_in_title (256498714574099587) -->
+    <skip />
     <string name="passkey" msgid="632353688396759522">"çelësin e kalimit"</string>
     <string name="password" msgid="6738570945182936667">"fjalëkalimi"</string>
     <string name="passkeys" msgid="5733880786866559847">"çelësat e kalimit"</string>
@@ -89,7 +95,7 @@
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Trokit për të shkyçur"</string>
     <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"Nuk ka informacione për identifikimin"</string>
     <string name="no_sign_in_info_in" msgid="2641118151920288356">"Nuk ka informacione regjistrimi në <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
-    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Identifikimet e menaxhimit"</string>
+    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Menaxho identifikimet"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Nga një pajisje tjetër"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Përdor një pajisje tjetër"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"Kërkesa u anulua nga <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

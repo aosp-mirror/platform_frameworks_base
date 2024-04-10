@@ -42,6 +42,12 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Tạo khoá truy cập để đăng nhập vào <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"Lưu mật khẩu để đăng nhập vào <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Lưu thông tin đăng nhập cho <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for choose_create_single_tap_passkey_title (3872793514041774218) -->
+    <skip />
+    <!-- no translation found for choose_create_single_tap_password_title (5231871886818921622) -->
+    <skip />
+    <!-- no translation found for choose_create_single_tap_sign_in_title (256498714574099587) -->
+    <skip />
     <string name="passkey" msgid="632353688396759522">"khoá đăng nhập"</string>
     <string name="password" msgid="6738570945182936667">"mật khẩu"</string>
     <string name="passkeys" msgid="5733880786866559847">"khoá truy cập"</string>
@@ -82,7 +88,7 @@
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Đăng nhập bằng cách khác"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Xem các lựa chọn"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Tiếp tục"</string>
-    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Tuỳ chọn đăng nhập"</string>
+    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Lựa chọn đăng nhập"</string>
     <string name="button_label_view_more" msgid="3429098227286495651">"Xem thêm"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Cho <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Trình quản lý mật khẩu đã khoá"</string>

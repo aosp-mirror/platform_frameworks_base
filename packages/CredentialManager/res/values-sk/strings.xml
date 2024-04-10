@@ -42,6 +42,9 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Chcete vytvoriť prístupový kľúč na prihlasovanie do aplikácie <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"Chcete uložiť heslo na prihlasovanie do aplikácie <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Chcete uložiť prihlasovacie údaje pre aplikáciu <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"Chcete pomocou zámky obrazovky vytvoriť prístupový kľúč pre <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"Chcete pomocou zámky obrazovky vytvoriť heslo pre <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"Chcete pomocou zámky obrazovky uložiť prihlasovacie údaje pre <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"prístupový kľúč"</string>
     <string name="password" msgid="6738570945182936667">"heslo"</string>
     <string name="passkeys" msgid="5733880786866559847">"prístupové kľúče"</string>

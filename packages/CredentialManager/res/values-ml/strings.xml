@@ -42,6 +42,9 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിലേക്ക് സൈൻ ഇൻ ചെയ്യാൻ പാസ്‌കീ സൃഷ്ടിക്കണോ?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിലേക്ക് സൈൻ ഇൻ ചെയ്യാൻ പാസ്‌വേഡ് സംരക്ഷിക്കണോ?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിനായി സൈൻ ഇൻ വിവരങ്ങൾ സംരക്ഷിക്കണോ?"</string>
+    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിനായി പാസ്‌കീ സൃഷ്ടിക്കാൻ നിങ്ങളുടെ സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കണോ?"</string>
+    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിനായി പാസ്‍വേഡ് സൃഷ്ടിക്കാൻ നിങ്ങളുടെ സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കണോ?"</string>
+    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിനായി സൈൻ ഇൻ വിവരങ്ങൾ സംരക്ഷിക്കാൻ നിങ്ങളുടെ സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കണോ?"</string>
     <string name="passkey" msgid="632353688396759522">"പാസ്‌കീ"</string>
     <string name="password" msgid="6738570945182936667">"പാസ്‌വേഡ്"</string>
     <string name="passkeys" msgid="5733880786866559847">"പാസ്‌കീകൾ"</string>

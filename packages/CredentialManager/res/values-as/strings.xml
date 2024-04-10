@@ -42,6 +42,9 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"<xliff:g id="APP_NAME">%1$s</xliff:g>ত ছাইন ইন কৰিবলৈ পাছকী সৃষ্টি কৰিবনে?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"<xliff:g id="APP_NAME">%1$s</xliff:g>ত ছাইন ইন কৰিবলৈ পাছৱৰ্ড ছেভ কৰিবনে?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে ছাইন ইনৰ তথ্য ছেভ কৰিবনে?"</string>
+    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে পাছকী সৃষ্টি কৰিবলৈ আপোনাৰ স্ক্ৰীন লক ব্যৱহাৰ কৰিবনে?"</string>
+    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে পাছৱৰ্ড সৃষ্টি কৰিবলৈ আপোনাৰ স্ক্ৰীন লক ব্যৱহাৰ কৰিবনে?"</string>
+    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে ছাইন ইনৰ তথ্য ছেভ কৰিবলৈ আপোনাৰ স্ক্ৰীন লক ব্যৱহাৰ কৰিবনে?"</string>
     <string name="passkey" msgid="632353688396759522">"পাছকী"</string>
     <string name="password" msgid="6738570945182936667">"পাছৱৰ্ড"</string>
     <string name="passkeys" msgid="5733880786866559847">"পাছকী"</string>
