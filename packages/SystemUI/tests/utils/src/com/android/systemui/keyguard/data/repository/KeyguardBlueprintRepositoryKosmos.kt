@@ -17,8 +17,6 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.os.fakeExecutorHandler
-import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor.Companion.SPLIT_SHADE_WEATHER_CLOCK_BLUEPRINT_ID
-import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor.Companion.WEATHER_CLOCK_BLUEPRINT_ID
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint.Companion.DEFAULT
@@ -34,8 +32,6 @@ val Kosmos.keyguardBlueprintRepository by
                 setOf(
                     defaultBlueprint,
                     splitShadeBlueprint,
-                    weatherClockBlueprint,
-                    splitShadeWeatherClockBlueprint,
                 ),
             handler = fakeExecutorHandler,
             assert = mock<ThreadAssert>(),
@@ -46,22 +42,6 @@ private val defaultBlueprint =
     object : KeyguardBlueprint {
         override val id: String
             get() = DEFAULT
-        override val sections: List<KeyguardSection>
-            get() = listOf()
-    }
-
-private val weatherClockBlueprint =
-    object : KeyguardBlueprint {
-        override val id: String
-            get() = WEATHER_CLOCK_BLUEPRINT_ID
-        override val sections: List<KeyguardSection>
-            get() = listOf()
-    }
-
-private val splitShadeWeatherClockBlueprint =
-    object : KeyguardBlueprint {
-        override val id: String
-            get() = SPLIT_SHADE_WEATHER_CLOCK_BLUEPRINT_ID
         override val sections: List<KeyguardSection>
             get() = listOf()
     }

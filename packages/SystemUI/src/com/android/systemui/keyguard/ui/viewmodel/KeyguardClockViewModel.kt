@@ -113,18 +113,38 @@ constructor(
         )
 
     val currentClockLayout: StateFlow<ClockLayout> =
-        combine(isLargeClockVisible, clockShouldBeCentered, shadeInteractor.shadeMode) {
+        combine(
                 isLargeClockVisible,
                 clockShouldBeCentered,
-                shadeMode ->
+                shadeInteractor.shadeMode,
+                currentClock
+            ) { isLargeClockVisible, clockShouldBeCentered, shadeMode, currentClock ->
                 val shouldUseSplitShade = shadeMode == ShadeMode.Split
-                when {
-                    shouldUseSplitShade && clockShouldBeCentered -> ClockLayout.LARGE_CLOCK
-                    shouldUseSplitShade && isLargeClockVisible ->
-                        ClockLayout.SPLIT_SHADE_LARGE_CLOCK
-                    shouldUseSplitShade -> ClockLayout.SPLIT_SHADE_SMALL_CLOCK
-                    isLargeClockVisible -> ClockLayout.LARGE_CLOCK
-                    else -> ClockLayout.SMALL_CLOCK
+                // TODO(b/326098079): make id a constant field in config
+                if (currentClock?.config?.id == "DIGITAL_CLOCK_WEATHER") {
+                    val weatherClockLayout =
+                        when {
+                            shouldUseSplitShade && clockShouldBeCentered ->
+                                ClockLayout.WEATHER_LARGE_CLOCK
+                            shouldUseSplitShade && isLargeClockVisible ->
+                                ClockLayout.SPLIT_SHADE_WEATHER_LARGE_CLOCK
+                            shouldUseSplitShade -> ClockLayout.SPLIT_SHADE_SMALL_CLOCK
+                            isLargeClockVisible -> ClockLayout.WEATHER_LARGE_CLOCK
+                            else -> ClockLayout.SMALL_CLOCK
+                        }
+                    weatherClockLayout
+                } else {
+                    val clockLayout =
+                        when {
+                            shouldUseSplitShade && clockShouldBeCentered -> ClockLayout.LARGE_CLOCK
+                            shouldUseSplitShade && isLargeClockVisible ->
+                                ClockLayout.SPLIT_SHADE_LARGE_CLOCK
+                            shouldUseSplitShade -> ClockLayout.SPLIT_SHADE_SMALL_CLOCK
+                            isLargeClockVisible -> ClockLayout.LARGE_CLOCK
+                            else -> ClockLayout.SMALL_CLOCK
+                        }
+
+                    clockLayout
                 }
             }
             .stateIn(
@@ -179,5 +199,7 @@ constructor(
         SMALL_CLOCK,
         SPLIT_SHADE_LARGE_CLOCK,
         SPLIT_SHADE_SMALL_CLOCK,
+        WEATHER_LARGE_CLOCK,
+        SPLIT_SHADE_WEATHER_LARGE_CLOCK,
     }
 }

@@ -16,9 +16,11 @@
 
 package com.android.systemui.keyguard.ui.composable.section
 
+import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
@@ -26,6 +28,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.SceneTransitionLayout
@@ -36,6 +42,7 @@ import com.android.systemui.keyguard.ui.composable.blueprint.ClockScenes.smallCl
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockScenes.splitShadeLargeClockScene
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockScenes.splitShadeSmallClockScene
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockTransition
+import com.android.systemui.keyguard.ui.composable.blueprint.WeatherClockScenes
 import com.android.systemui.keyguard.ui.composable.blueprint.rememberBurnIn
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import javax.inject.Inject
@@ -47,6 +54,7 @@ constructor(
     private val smartSpaceSection: SmartSpaceSection,
     private val mediaCarouselSection: MediaCarouselSection,
     private val clockSection: DefaultClockSection,
+    private val weatherClockSection: WeatherClockSection,
     private val clockInteractor: KeyguardClockInteractor,
 ) {
     @Composable
@@ -64,6 +72,10 @@ constructor(
                     splitShadeSmallClockScene
                 KeyguardClockViewModel.ClockLayout.LARGE_CLOCK -> largeClockScene
                 KeyguardClockViewModel.ClockLayout.SMALL_CLOCK -> smallClockScene
+                KeyguardClockViewModel.ClockLayout.WEATHER_LARGE_CLOCK ->
+                    WeatherClockScenes.largeClockScene
+                KeyguardClockViewModel.ClockLayout.SPLIT_SHADE_WEATHER_LARGE_CLOCK ->
+                    WeatherClockScenes.splitShadeLargeClockScene
             }
 
         SceneTransitionLayout(
@@ -86,6 +98,12 @@ constructor(
             scene(smallClockScene) { SmallClockWithSmartSpace() }
 
             scene(largeClockScene) { LargeClockWithSmartSpace() }
+
+            scene(WeatherClockScenes.largeClockScene) { WeatherLargeClockWithSmartSpace() }
+
+            scene(WeatherClockScenes.splitShadeLargeClockScene) {
+                WeatherLargeClockWithSmartSpace(modifier = Modifier.fillMaxWidth(0.5f))
+            }
         }
     }
 
@@ -145,5 +163,51 @@ constructor(
                 )
             }
         }
+    }
+
+    @Composable
+    private fun SceneScope.WeatherLargeClockWithSmartSpace(modifier: Modifier = Modifier) {
+        val burnIn = rememberBurnIn(clockInteractor)
+        val isLargeClockVisible by clockViewModel.isLargeClockVisible.collectAsState()
+        val currentClockState = clockViewModel.currentClock.collectAsState()
+
+        LaunchedEffect(isLargeClockVisible) {
+            if (isLargeClockVisible) {
+                burnIn.onSmallClockTopChanged(null)
+            }
+        }
+
+        Column(modifier = modifier) {
+            val currentClock = currentClockState.value ?: return@Column
+            with(weatherClockSection) { Time(clock = currentClock, modifier = Modifier) }
+            val density = LocalDensity.current
+            val context = LocalContext.current
+
+            with(smartSpaceSection) {
+                SmartSpace(
+                    burnInParams = burnIn.parameters,
+                    onTopChanged = burnIn.onSmartspaceTopChanged,
+                    modifier =
+                        Modifier.heightIn(
+                            min = getDimen(context, "enhanced_smartspace_height", density)
+                        )
+                )
+            }
+            with(weatherClockSection) { LargeClockSectionBelowSmartspace(clock = currentClock) }
+        }
+    }
+
+    /*
+     * Use this function to access dimen which cannot be access by R.dimen directly
+     * Currently use to access dimen from BcSmartspace
+     * @param name Name of resources
+     * @param density Density required to convert dimen from Int To Dp
+     */
+    private fun getDimen(context: Context, name: String, density: Density): Dp {
+        val res = context.packageManager.getResourcesForApplication(context.packageName)
+        val id = res.getIdentifier(name, "dimen", context.packageName)
+        var dimen: Dp
+        with(density) { dimen = (if (id == 0) 0 else res.getDimensionPixelSize(id)).toDp() }
+        return dimen
     }
 }
