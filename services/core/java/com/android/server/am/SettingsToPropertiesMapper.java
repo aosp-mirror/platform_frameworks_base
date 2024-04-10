@@ -170,6 +170,7 @@ public class SettingsToPropertiesMapper {
         "pixel_biometrics_face",
         "pixel_bluetooth",
         "pixel_connectivity_gps",
+        "pixel_continuity",
         "pixel_sensors",
         "pixel_system_sw_video",
         "pixel_watch",
