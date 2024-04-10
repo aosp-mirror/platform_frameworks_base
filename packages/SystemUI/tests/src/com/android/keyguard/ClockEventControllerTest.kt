@@ -319,9 +319,19 @@ class ClockEventControllerTest : SysuiTestCase() {
     fun listenForDozeAmountTransition_updatesClockDozeAmount() =
         runBlocking(IMMEDIATE) {
             val transitionStep = MutableStateFlow(TransitionStep())
-            whenever(keyguardTransitionInteractor.lockscreenToAodTransition)
+            whenever(
+                    keyguardTransitionInteractor.transition(
+                        KeyguardState.LOCKSCREEN,
+                        KeyguardState.AOD
+                    )
+                )
                 .thenReturn(transitionStep)
-            whenever(keyguardTransitionInteractor.aodToLockscreenTransition)
+            whenever(
+                    keyguardTransitionInteractor.transition(
+                        KeyguardState.AOD,
+                        KeyguardState.LOCKSCREEN
+                    )
+                )
                 .thenReturn(transitionStep)
 
             val job = underTest.listenForDozeAmountTransition(this)
