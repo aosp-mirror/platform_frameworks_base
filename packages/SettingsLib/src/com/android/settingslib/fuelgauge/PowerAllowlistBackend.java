@@ -26,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.os.IDeviceIdleController;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.telecom.DefaultDialerManager;
 import android.text.TextUtils;
@@ -119,6 +120,14 @@ public class PowerAllowlistBackend {
                 AppOpsManager.OP_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS, uid, pkg)
                 == AppOpsManager.MODE_ALLOWED) {
             return true;
+        }
+
+        if (android.app.admin.flags.Flags.disallowUserControlBgUsageFix()) {
+            // App is subject to DevicePolicyManager.setUserControlDisabledPackages() policy.
+            final int userId = UserHandle.getUserId(uid);
+            if (mAppContext.getPackageManager().isPackageStateProtected(pkg, userId)) {
+                return true;
+            }
         }
 
         return false;
