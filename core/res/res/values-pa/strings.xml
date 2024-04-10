@@ -844,7 +844,7 @@
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ਇੱਕ ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਚਿਤਾਵਨੀ ਤੋਂ ਬਿਨਾਂ ਟੈਬਲੈੱਟ ਦਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਬਿਨਾਂ ਚਿਤਾਵਨੀ ਦੇ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ ਦਾ ਡਾਟਾ ਮਿਟਾ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ।"</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਚਿਤਾਵਨੀ ਤੋਂ ਬਿਨਾਂ ਵਾਹਨ ਆਡੀਓ ਸਿਸਟਮ ਦਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ਇੱਕ ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਚਿਤਾਵਨੀ ਤੋਂ ਬਿਨਾਂ ਫ਼ੋਨ ਦਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰ ਕੇ ਚਿਤਾਵਨੀ ਤੋਂ ਬਿਨਾਂ ਫ਼ੋਨ ਦਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"ਪ੍ਰੋਫਾਈਲ ਡਾਟਾ ਮਿਟਾਓ"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"ਉਪਭੋਗਤਾ  ਡਾਟਾ  ਮਿਟਾਓ"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"ਬਿਨਾਂ ਚਿਤਾਵਨੀ ਦੇ ਇਸ ਟੈਬਲੈੱਟ ਤੇ ਮੌਜੂਦ ਇਸ ਵਰਤੋਂਕਾਰ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
@@ -1722,10 +1722,10 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ਬੰਦ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"ਕੀ <xliff:g id="SERVICE">%1$s</xliff:g> ਨੂੰ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦਾ ਪੂਰਾ ਕੰਟਰੋਲ ਦੇਣਾ ਹੈ?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"ਪੂਰਾ ਕੰਟਰੋਲ ਉਨ੍ਹਾਂ ਐਪਾਂ ਲਈ ਢੁਕਵਾਂ ਹੈ ਜੋ ਪਹੁੰਚਯੋਗਤਾ ਸੰਬੰਧੀ ਲੋੜਾਂ ਵਿੱਚ ਤੁਹਾਡੀ ਮਦਦ ਕਰਦੀਆਂ ਹਨ, ਪਰ ਜ਼ਿਆਦਾਤਰ ਐਪਾਂ ਲਈ ਢੁਕਵਾਂ ਨਹੀਂ ਹੁੰਦਾ।"</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ਸਕ੍ਰੀਨ ਨੂੰ ਦੇਖੋ ਅਤੇ ਕੰਟਰੋਲ ਕਰੋ"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ਸਕ੍ਰੀਨ ਨੂੰ ਦੇਖਣਾ ਅਤੇ ਕੰਟਰੋਲ ਕਰਨਾ"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ਇਹ ਸਕ੍ਰੀਨ \'ਤੇ ਸਾਰੀ ਸਮੱਗਰੀ ਪੜ੍ਹ ਸਕਦੀ ਹੈ ਅਤੇ ਸਮੱਗਰੀ ਨੂੰ ਦੂਜੀਆਂ ਐਪਾਂ ਦੇ ਉੱਪਰ ਦਿਖਾ ਸਕਦੀ ਹੈ।"</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"ਕਾਰਵਾਈਆਂ ਦੇਖੋ ਅਤੇ ਕਰੋ"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ਇਹ ਕਿਸੇ ਐਪ ਜਾਂ ਹਾਰਡਵੇਅਰ ਸੈਂਸਰ ਦੇ ਨਾਲ ਤੁਹਾਡੀਆਂ ਅੰਤਰਕਿਰਿਆਵਾਂ ਨੂੰ ਟਰੈਕ ਕਰ ਸਕਦੀ ਹੈ, ਅਤੇ ਤੁਹਾਡੀ ਤਰਫ਼ੋਂ ਐਪਾਂ ਦੇ ਨਾਲ ਅੰਤਰਕਿਰਿਆ ਕਰ ਸਕਦੀ ਹੈ।"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"ਕਾਰਵਾਈਆਂ ਦੇਖਣਾ ਅਤੇ ਕਰਨਾ"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ਇਹ ਕਿਸੇ ਐਪ ਜਾਂ ਹਾਰਡਵੇਅਰ ਸੈਂਸਰ ਦੇ ਨਾਲ ਤੁਹਾਡੀਆਂ ਅੰਤਰਕਿਰਿਆਵਾਂ ਨੂੰ ਟਰੈਕ ਕਰ ਸਕਦੀ ਹੈ ਅਤੇ ਤੁਹਾਡੀ ਤਰਫ਼ੋਂ ਐਪਾਂ ਦੇ ਨਾਲ ਅੰਤਰਕਿਰਿਆ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"ਕਰਨ ਦਿਓ"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"ਨਾ ਕਰਨ ਦਿਓ"</string>
     <string name="accessibility_dialog_button_uninstall" msgid="2952465517671708108">"ਅਣਸਥਾਪਤ ਕਰੋ"</string>

@@ -845,7 +845,7 @@
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Apagar os dados do tablet sem avisar através de uma reposição de dados de fábrica."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Apagar os dados do seu dispositivo Android TV sem avisar ao efetuar uma reposição de dados de fábrica."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Apague os dados do sistema de infoentretenimento sem aviso ao executar uma reposição de dados de fábrica."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Apaga os dados do telemóvel sem avisar ao efetuar uma reposição de dados de fábrica."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Apaga os dados do telemóvel sem avisar repondo os dados de fábrica."</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Apague os dados do perfil"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Apagar os dados do utilizador"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Apagar os dados deste utilizador neste tablet sem aviso."</string>
@@ -1391,7 +1391,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"O MIDI através de USB está ativado"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Dispositivo ligado como câmara Web"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Acessório USB ligado"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Toque para obter mais opções."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Toque para ver mais opções."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"A carregar o dispositivo ligado. Toque para obter mais opções."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Acessório de áudio analógico detetado"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"O dispositivo ligado não é compatível com este telemóvel. Toque para saber mais."</string>
@@ -1722,10 +1722,10 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ATIVADO"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"DESATIVADO"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Permitir que o serviço <xliff:g id="SERVICE">%1$s</xliff:g> tenha controlo total sobre o seu dispositivo?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"O controlo total é adequado para aplicações que ajudam nas necessidades de acessibilidade, mas não para a maioria das apps."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"O controlo total é adequado para apps que ajudam nas necessidades de acessibilidade, mas não para a maioria das apps."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ver e controlar o ecrã"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Pode ler todo o conteúdo do ecrã e sobrepor conteúdo a outras aplicações."</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Veja e execute ações"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Pode ler todo o conteúdo do ecrã e sobrepor conteúdo a outras apps."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Ver e executar ações"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Pode monitorizar as suas interações com uma app ou um sensor de hardware e interagir com apps em seu nome."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Permitir"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Recusar"</string>
