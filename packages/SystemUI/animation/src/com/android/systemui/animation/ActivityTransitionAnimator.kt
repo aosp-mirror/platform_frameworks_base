@@ -43,6 +43,7 @@ import androidx.annotation.UiThread
 import com.android.app.animation.Interpolators
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.policy.ScreenDecorationsUtils
+import com.android.systemui.Flags.activityTransitionUseLargestWindow
 import kotlin.math.roundToInt
 
 private const val TAG = "ActivityTransitionAnimator"
@@ -648,11 +649,27 @@ class ActivityTransitionAnimator(
             var candidate: RemoteAnimationTarget? = null
             for (it in apps) {
                 if (it.mode == RemoteAnimationTarget.MODE_OPENING) {
-                    if (!it.hasAnimatingParent) {
-                        return it
-                    }
-                    if (candidate == null) {
-                        candidate = it
+                    if (activityTransitionUseLargestWindow()) {
+                        if (
+                            candidate == null ||
+                                !it.hasAnimatingParent && candidate.hasAnimatingParent
+                        ) {
+                            candidate = it
+                            continue
+                        }
+                        if (
+                            !it.hasAnimatingParent &&
+                                it.screenSpaceBounds.hasGreaterAreaThan(candidate.screenSpaceBounds)
+                        ) {
+                            candidate = it
+                        }
+                    } else {
+                        if (!it.hasAnimatingParent) {
+                            return it
+                        }
+                        if (candidate == null) {
+                            candidate = it
+                        }
                     }
                 }
             }
@@ -959,6 +976,10 @@ class ActivityTransitionAnimator(
             } catch (e: RemoteException) {
                 e.printStackTrace()
             }
+        }
+
+        private fun Rect.hasGreaterAreaThan(other: Rect): Boolean {
+            return (this.width() * this.height()) > (other.width() * other.height())
         }
     }
 }

@@ -22,6 +22,7 @@ import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.hardware.biometrics.BiometricFingerprintConstants
 import android.hardware.biometrics.BiometricPrompt
 import android.hardware.biometrics.Flags.customBiometricPrompt
 import android.hardware.biometrics.PromptContentView
@@ -31,6 +32,7 @@ import android.view.MotionEvent
 import com.android.systemui.Flags.bpTalkback
 import com.android.systemui.biometrics.UdfpsUtils
 import com.android.systemui.biometrics.Utils
+import com.android.systemui.biometrics.domain.interactor.BiometricStatusInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
@@ -39,6 +41,7 @@ import com.android.systemui.biometrics.shared.model.BiometricModality
 import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
 import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.Job
@@ -65,6 +68,7 @@ constructor(
     promptSelectorInteractor: PromptSelectorInteractor,
     @Application private val context: Context,
     private val udfpsOverlayInteractor: UdfpsOverlayInteractor,
+    private val biometricStatusInteractor: BiometricStatusInteractor,
     private val udfpsUtils: UdfpsUtils
 ) {
     /** The set of modalities available for this prompt */
@@ -146,6 +150,24 @@ constructor(
 
     /** Fingerprint sensor state. */
     val fingerprintStartMode: Flow<FingerprintStartMode> = _fingerprintStartMode.asStateFlow()
+
+    /** Whether a finger has been acquired by the sensor */
+    // TODO(b/331948073): Add support for detecting SFPS finger without authentication running
+    val hasFingerBeenAcquired: Flow<Boolean> =
+        combine(biometricStatusInteractor.fingerprintAcquiredStatus, modalities) {
+                status,
+                modalities ->
+                modalities.hasSfps &&
+                    status is AcquiredFingerprintAuthenticationStatus &&
+                    status.acquiredInfo == BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START
+            }
+            .distinctUntilChanged()
+
+    /** Whether there is currently a finger on the sensor */
+    val hasFingerOnSensor: Flow<Boolean> =
+        combine(hasFingerBeenAcquired, _isOverlayTouched) { hasFingerBeenAcquired, overlayTouched ->
+            hasFingerBeenAcquired || overlayTouched
+        }
 
     private val _forceLargeSize = MutableStateFlow(false)
     private val _forceMediumSize = MutableStateFlow(false)

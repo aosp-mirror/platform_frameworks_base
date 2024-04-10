@@ -244,8 +244,7 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
     }
 
     private static boolean isArchivingEnabled() {
-        return android.content.pm.Flags.archiving()
-                || SystemProperties.getBoolean("pm.archiving.enabled", false);
+        return android.content.pm.Flags.archiving();
     }
 
     private boolean isCloneProfile(UserHandle userHandle) {

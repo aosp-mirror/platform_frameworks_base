@@ -1216,6 +1216,10 @@ final class LetterboxUiController {
                     || mUserAspectRatio == USER_MIN_ASPECT_RATIO_FULLSCREEN);
     }
 
+    boolean hasFullscreenOverride() {
+        return isSystemOverrideToFullscreenEnabled() || shouldApplyUserFullscreenOverride();
+    }
+
     float getUserMinAspectRatio() {
         switch (mUserAspectRatio) {
             case USER_MIN_ASPECT_RATIO_DISPLAY_SIZE:

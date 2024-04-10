@@ -457,6 +457,23 @@ object BiometricViewBinder {
                         }
                     }
                 }
+
+                // Retry and confirmation when finger on sensor
+                launch {
+                    combine(
+                            viewModel.canTryAgainNow,
+                            viewModel.hasFingerOnSensor,
+                            viewModel.isPendingConfirmation,
+                            ::Triple
+                        )
+                        .collect { (canRetry, fingerAcquired, pendingConfirmation) ->
+                            if (canRetry && fingerAcquired) {
+                                legacyCallback.onButtonTryAgain()
+                            } else if (pendingConfirmation && fingerAcquired) {
+                                viewModel.confirmAuthenticated()
+                            }
+                        }
+                }
             }
         }
 
