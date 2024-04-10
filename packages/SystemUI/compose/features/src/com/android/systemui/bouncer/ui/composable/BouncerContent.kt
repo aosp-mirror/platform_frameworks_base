@@ -160,7 +160,9 @@ private fun StandardLayout(
     FoldAware(
         modifier =
             modifier.padding(
+                start = 32.dp,
                 top = 92.dp,
+                end = 32.dp,
                 bottom = 48.dp,
             ),
         viewModel = viewModel,
