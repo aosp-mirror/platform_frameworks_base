@@ -66,6 +66,7 @@ java_sdk_library {
     ],
     impl_library_visibility: [
         "//frameworks/base:__subpackages__",
+        "//cts/hostsidetests/multidevices/nfc:__subpackages__",
         "//cts/tests/tests/nfc",
         "//packages/apps/Nfc:__subpackages__",
     ],
