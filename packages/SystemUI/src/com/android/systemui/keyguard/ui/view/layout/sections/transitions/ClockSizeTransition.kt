@@ -169,10 +169,7 @@ class ClockSizeTransition(
                     return@OnPreDrawListener true
                 }
 
-                anim.duration = duration
-                anim.startDelay = startDelay
-                anim.interpolator = interpolator
-                anim.addListener(
+                val listener =
                     object : AnimatorListenerAdapter() {
                         override fun onAnimationStart(anim: Animator) {
                             assignAnimValues("start", 0f, fromVis)
@@ -183,8 +180,21 @@ class ClockSizeTransition(
                             if (sendToBack) toView.translationZ = 0f
                             toView.viewTreeObserver.removeOnPreDrawListener(predrawCallback)
                         }
+
+                        override fun onAnimationPause(anim: Animator) {
+                            toView.viewTreeObserver.removeOnPreDrawListener(predrawCallback)
+                        }
+
+                        override fun onAnimationResume(anim: Animator) {
+                            toView.viewTreeObserver.addOnPreDrawListener(predrawCallback)
+                        }
                     }
-                )
+
+                anim.duration = duration
+                anim.startDelay = startDelay
+                anim.interpolator = interpolator
+                anim.addListener(listener)
+                anim.addPauseListener(listener)
 
                 assignAnimValues("init", 0f, fromVis)
                 toView.viewTreeObserver.addOnPreDrawListener(predrawCallback)
