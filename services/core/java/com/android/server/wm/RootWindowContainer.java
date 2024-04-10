@@ -72,7 +72,6 @@ import static com.android.server.wm.RootWindowContainerProto.KEYGUARD_CONTROLLER
 import static com.android.server.wm.RootWindowContainerProto.WINDOW_CONTAINER;
 import static com.android.server.wm.Task.REPARENT_LEAVE_ROOT_TASK_IN_PLACE;
 import static com.android.server.wm.Task.REPARENT_MOVE_ROOT_TASK_TO_FRONT;
-import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_INVISIBLE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -269,8 +268,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     private boolean mTaskLayersChanged = true;
     private int mTmpTaskLayerRank;
     private final RankTaskLayersRunnable mRankTaskLayersRunnable = new RankTaskLayersRunnable();
-
-    private final AttachApplicationHelper mAttachApplicationHelper = new AttachApplicationHelper();
 
     private String mDestroyAllActivitiesReason;
     private final Runnable mDestroyAllActivitiesRunnable = new Runnable() {
@@ -1838,11 +1835,39 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     boolean attachApplication(WindowProcessController app) throws RemoteException {
-        try {
-            return mAttachApplicationHelper.process(app);
-        } finally {
-            mAttachApplicationHelper.reset();
+        final ArrayList<ActivityRecord> activities = mService.mStartingProcessActivities;
+        RemoteException remoteException = null;
+        boolean hasActivityStarted = false;
+        for (int i = activities.size() - 1; i >= 0; i--) {
+            final ActivityRecord r = activities.get(i);
+            if (app.mUid != r.info.applicationInfo.uid || !app.mName.equals(r.processName)) {
+                // The attaching process does not match the starting activity.
+                continue;
+            }
+            // Consume the pending record.
+            activities.remove(i);
+            final TaskFragment tf = r.getTaskFragment();
+            if (tf == null || r.finishing || r.app != null
+                    // Ignore keyguard because the app may use show-when-locked when creating.
+                    || !r.shouldBeVisible(true /* ignoringKeyguard */)
+                    || !r.showToCurrentUser()) {
+                continue;
+            }
+            try {
+                final boolean canResume = r.isFocusable() && r == tf.topRunningActivity();
+                if (mTaskSupervisor.realStartActivityLocked(r, app, canResume,
+                        true /* checkConfig */)) {
+                    hasActivityStarted = true;
+                }
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Exception in new process when starting " + r, e);
+                remoteException = e;
+            }
         }
+        if (remoteException != null) {
+            throw remoteException;
+        }
+        return hasActivityStarted;
     }
 
     /**
@@ -3740,69 +3765,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     rankTaskLayers();
                 }
             }
-        }
-    }
-
-    private class AttachApplicationHelper implements Consumer<Task>, Predicate<ActivityRecord> {
-        private boolean mHasActivityStarted;
-        private RemoteException mRemoteException;
-        private WindowProcessController mApp;
-        private ActivityRecord mTop;
-
-        void reset() {
-            mHasActivityStarted = false;
-            mRemoteException = null;
-            mApp = null;
-            mTop = null;
-        }
-
-        boolean process(WindowProcessController app) throws RemoteException {
-            mApp = app;
-            for (int displayNdx = getChildCount() - 1; displayNdx >= 0; --displayNdx) {
-                getChildAt(displayNdx).forAllRootTasks(this);
-                if (mRemoteException != null) {
-                    throw mRemoteException;
-                }
-            }
-            if (!mHasActivityStarted) {
-                ensureActivitiesVisible();
-            }
-            return mHasActivityStarted;
-        }
-
-        @Override
-        public void accept(Task rootTask) {
-            if (mRemoteException != null) {
-                return;
-            }
-            if (rootTask.getVisibility(null /* starting */)
-                    == TASK_FRAGMENT_VISIBILITY_INVISIBLE) {
-                return;
-            }
-            mTop = rootTask.topRunningActivity();
-            rootTask.forAllActivities(this);
-        }
-
-        @Override
-        public boolean test(ActivityRecord r) {
-            if (r.finishing || !r.showToCurrentUser() || !r.visibleIgnoringKeyguard
-                    || r.app != null || mApp.mUid != r.info.applicationInfo.uid
-                    || !mApp.mName.equals(r.processName)) {
-                return false;
-            }
-
-            try {
-                if (mTaskSupervisor.realStartActivityLocked(r, mApp,
-                        mTop == r && r.getTask().canBeResumed(r) /* andResume */,
-                        true /* checkConfig */)) {
-                    mHasActivityStarted = true;
-                }
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Exception in new application when starting activity " + mTop, e);
-                mRemoteException = e;
-                return true;
-            }
-            return false;
         }
     }
 }
