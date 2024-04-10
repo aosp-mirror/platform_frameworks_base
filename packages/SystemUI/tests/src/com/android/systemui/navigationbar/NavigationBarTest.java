@@ -110,6 +110,7 @@ import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.DeviceConfigProxyFake;
@@ -274,8 +275,8 @@ public class NavigationBarTest extends SysuiTestCase {
                     mKeyguardStateController, mock(NavigationModeController.class),
                     mEdgeBackGestureHandlerFactory, mock(IWindowManager.class),
                     mock(UserTracker.class), mock(DisplayTracker.class),
-                    mNotificationShadeWindowController, mock(DumpManager.class),
-                    mock(CommandQueue.class), mSynchronousExecutor));
+                    mNotificationShadeWindowController, mock(ConfigurationController.class),
+                    mock(DumpManager.class), mock(CommandQueue.class), mSynchronousExecutor));
             mNavigationBar = createNavBar(mContext);
             mExternalDisplayNavigationBar = createNavBar(mSysuiTestableContextExternal);
         });
