@@ -1367,10 +1367,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 final IBinder callerActivityToken = operation.getActivityToken();
                 final Intent activityIntent = operation.getActivityIntent();
                 final Bundle activityOptions = operation.getBundle();
-                final int result = mService.getActivityStartController()
+                final int result = waitAsyncStart(() -> mService.getActivityStartController()
                         .startActivityInTaskFragment(taskFragment, activityIntent, activityOptions,
                                 callerActivityToken, caller.mUid, caller.mPid,
-                                errorCallbackToken);
+                                errorCallbackToken));
                 if (!isStartResultSuccessful(result)) {
                     sendTaskFragmentOperationFailure(organizer, errorCallbackToken, taskFragment,
                             opType, convertStartFailureToThrowable(result, activityIntent));
