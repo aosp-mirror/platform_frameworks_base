@@ -176,7 +176,7 @@ class HeadsUpManagerLogger @Inject constructor(
             bool1 = alert
             bool2 = hasEntry
         }, {
-            "request: update notification $str1 alert: $bool1 hasEntry: $bool2 reason: $str2"
+            "request: update notification $str1 alert: $bool1 hasEntry: $bool2"
         })
     }
 
@@ -186,7 +186,7 @@ class HeadsUpManagerLogger @Inject constructor(
             bool1 = alert
             bool2 = hasEntry
         }, {
-            "update notification $str1 alert: $bool1 hasEntry: $bool2 reason: $str2"
+            "update notification $str1 alert: $bool1 hasEntry: $bool2"
         })
     }
 
