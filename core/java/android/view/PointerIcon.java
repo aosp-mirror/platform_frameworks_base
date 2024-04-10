@@ -284,7 +284,7 @@ public final class PointerIcon implements Parcelable {
         if (bitmap == null) {
             throw new IllegalArgumentException("bitmap must not be null");
         }
-        validateHotSpot(bitmap, hotSpotX, hotSpotY);
+        validateHotSpot(bitmap, hotSpotX, hotSpotY, false /* isScaled */);
 
         PointerIcon icon = new PointerIcon(TYPE_CUSTOM);
         icon.mBitmap = bitmap;
@@ -517,7 +517,9 @@ public final class PointerIcon implements Parcelable {
 
         BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
         final Bitmap bitmap = getBitmapFromDrawable(bitmapDrawable);
-        validateHotSpot(bitmap, hotSpotX, hotSpotY);
+        // The bitmap and hotspot are loaded from the context, which means it is implicitly scaled
+        // to the current display density, so treat this as a scaled icon when verifying hotspot.
+        validateHotSpot(bitmap, hotSpotX, hotSpotY, true /* isScaled */);
         // Set the properties now that we have successfully loaded the icon.
         mBitmap = bitmap;
         mHotSpotX = hotSpotX;
@@ -531,11 +533,16 @@ public final class PointerIcon implements Parcelable {
                 + ", hotspotX=" + mHotSpotX + ", hotspotY=" + mHotSpotY + "}";
     }
 
-    private static void validateHotSpot(Bitmap bitmap, float hotSpotX, float hotSpotY) {
-        if (hotSpotX < 0 || hotSpotX >= bitmap.getWidth()) {
+    private static void validateHotSpot(Bitmap bitmap, float hotSpotX, float hotSpotY,
+            boolean isScaled) {
+        // Be more lenient when checking the hotspot for scaled icons to account for the restriction
+        // that bitmaps must have an integer size.
+        if (hotSpotX < 0 || (isScaled ? (int) hotSpotX > bitmap.getWidth()
+                : hotSpotX >= bitmap.getWidth())) {
             throw new IllegalArgumentException("x hotspot lies outside of the bitmap area");
         }
-        if (hotSpotY < 0 || hotSpotY >= bitmap.getHeight()) {
+        if (hotSpotY < 0 || (isScaled ? (int) hotSpotY > bitmap.getHeight()
+                : hotSpotY >= bitmap.getHeight())) {
             throw new IllegalArgumentException("y hotspot lies outside of the bitmap area");
         }
     }
