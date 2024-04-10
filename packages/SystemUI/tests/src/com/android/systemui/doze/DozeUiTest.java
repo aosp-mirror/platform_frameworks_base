@@ -41,6 +41,8 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
 import org.junit.After;
@@ -69,6 +71,7 @@ public class DozeUiTest extends SysuiTestCase {
     private Handler mHandler;
     private HandlerThread mHandlerThread;
     private DozeUi mDozeUi;
+    private FakeExecutor mFakeExecutor;
 
     @Before
     public void setUp() throws Exception {
@@ -80,9 +83,9 @@ public class DozeUiTest extends SysuiTestCase {
         mHandlerThread.start();
         mWakeLock = new WakeLockFake();
         mHandler = mHandlerThread.getThreadHandler();
-
+        mFakeExecutor = new FakeExecutor(new FakeSystemClock());
         mDozeUi = new DozeUi(mContext, mAlarmManager, mWakeLock, mHost, mHandler,
-                mDozeParameters, mDozeLog);
+                mDozeParameters, mFakeExecutor, mDozeLog);
         mDozeUi.setDozeMachine(mMachine);
     }
 
