@@ -31,11 +31,11 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.IndentingPrintWriter;
 import android.util.MutableBoolean;
 import android.util.MutableInt;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.broadcastradio.RadioEventLogger;
 import com.android.server.broadcastradio.RadioServiceUserController;
 import com.android.server.utils.Slogf;
 
@@ -389,7 +389,7 @@ final class TunerSession extends ITuner.Stub {
         }
     }
 
-    void dumpInfo(IndentingPrintWriter pw) {
+    void dumpInfo(android.util.IndentingPrintWriter pw) {
         pw.printf("TunerSession\n");
         pw.increaseIndent();
         pw.printf("HIDL HAL Session: %s\n", mHwSession);

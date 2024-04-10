@@ -26,7 +26,6 @@ import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
 import android.os.Binder;
 import android.os.RemoteException;
-import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 
@@ -139,7 +138,7 @@ final class IRadioServiceHidlImpl extends IRadioService.Stub {
                     + " without permission " + Manifest.permission.DUMP);
             return;
         }
-        IndentingPrintWriter radioPw = new IndentingPrintWriter(pw);
+        android.util.IndentingPrintWriter radioPw = new android.util.IndentingPrintWriter(pw);
         radioPw.printf("BroadcastRadioService\n");
 
         radioPw.increaseIndent();

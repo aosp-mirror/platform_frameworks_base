@@ -29,7 +29,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.util.IndentingPrintWriter;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -122,7 +121,8 @@ final class IRadioServiceAidlImpl extends IRadioService.Stub {
                     + " without permission " + Manifest.permission.DUMP);
             return;
         }
-        IndentingPrintWriter radioPrintWriter = new IndentingPrintWriter(printWriter);
+        android.util.IndentingPrintWriter radioPrintWriter =
+                new android.util.IndentingPrintWriter(printWriter);
         radioPrintWriter.printf("BroadcastRadioService\n");
 
         radioPrintWriter.increaseIndent();
