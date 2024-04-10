@@ -29,6 +29,7 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.WindowConfiguration.WindowingMode;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -40,6 +41,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
@@ -434,15 +436,20 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     private void loadAppInfo() {
+        final ActivityInfo activityInfo = mTaskInfo.topActivityInfo;
+        if (activityInfo == null) {
+            Log.e(TAG, "Top activity info not found in task");
+            return;
+        }
         PackageManager pm = mContext.getApplicationContext().getPackageManager();
         final IconProvider provider = new IconProvider(mContext);
-        mAppIconDrawable = provider.getIcon(mTaskInfo.topActivityInfo);
+        mAppIconDrawable = provider.getIcon(activityInfo);
         final Resources resources = mContext.getResources();
         final BaseIconFactory factory = new BaseIconFactory(mContext,
                 resources.getDisplayMetrics().densityDpi,
                 resources.getDimensionPixelSize(R.dimen.desktop_mode_caption_icon_radius));
         mAppIconBitmap = factory.createScaledBitmap(mAppIconDrawable, MODE_DEFAULT);
-        final ApplicationInfo applicationInfo = mTaskInfo.topActivityInfo.applicationInfo;
+        final ApplicationInfo applicationInfo = activityInfo.applicationInfo;
         mAppName = pm.getApplicationLabel(applicationInfo);
     }
 
