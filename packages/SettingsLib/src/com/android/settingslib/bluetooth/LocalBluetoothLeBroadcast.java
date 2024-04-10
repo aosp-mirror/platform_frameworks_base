@@ -336,7 +336,6 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                                         + ", sourceId = "
                                         + sourceId);
                     }
-                    updateFallbackActiveDeviceIfNeeded();
                 }
 
                 @Override
@@ -466,6 +465,15 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                                 : null,
                         ImmutableList.of(subgroupSettings));
         mServiceBroadcast.startBroadcast(settings);
+    }
+
+    /** Checks if the broadcast is playing. */
+    public boolean isPlaying(int broadcastId) {
+        if (mServiceBroadcast == null) {
+            Log.d(TAG, "check isPlaying failed, the BluetoothLeBroadcast is null.");
+            return false;
+        }
+        return mServiceBroadcast.isPlaying(broadcastId);
     }
 
     private BluetoothLeBroadcastSettings buildBroadcastSettings(
@@ -1025,6 +1033,16 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
 
     /** Update fallback active device if needed. */
     public void updateFallbackActiveDeviceIfNeeded() {
+        if (mServiceBroadcast == null) {
+            Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded due to broadcast profile is null");
+            return;
+        }
+        List<BluetoothLeBroadcastMetadata> sources = mServiceBroadcast.getAllBroadcastMetadata();
+        if (sources.stream()
+                .noneMatch(source -> mServiceBroadcast.isPlaying(source.getBroadcastId()))) {
+            Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded due to no broadcast ongoing");
+            return;
+        }
         if (mServiceBroadcastAssistant == null) {
             Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded due to assistant profile is null");
             return;
