@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.gallery.page
+package com.android.settingslib.spa.gallery.scaffold
 
 import android.os.Bundle
 import androidx.compose.foundation.layout.Box
@@ -33,24 +33,19 @@ import com.android.settingslib.spa.widget.scaffold.SettingsPager
 import com.android.settingslib.spa.widget.scaffold.SettingsScaffold
 import com.android.settingslib.spa.widget.ui.PlaceholderTitle
 
-private const val TITLE = "Sample SettingsPager"
+object NonScrollablePagerPageProvider : SettingsPageProvider {
+    override val name = "NonScrollablePager"
+    private const val TITLE = "Sample Non Scrollable SettingsPager"
 
-object SettingsPagerPageProvider : SettingsPageProvider {
-    override val name = "SettingsPager"
+    fun buildInjectEntry() = SettingsEntryBuilder.createInject(owner = createSettingsPage())
+        .setUiLayoutFn {
+            Preference(object : PreferenceModel {
+                override val title = TITLE
+                override val onClick = navigator(name)
+            })
+        }
 
-    fun buildInjectEntry(): SettingsEntryBuilder {
-        return SettingsEntryBuilder.createInject(owner = createSettingsPage())
-            .setUiLayoutFn {
-                Preference(object : PreferenceModel {
-                    override val title = TITLE
-                    override val onClick = navigator(name)
-                })
-            }
-    }
-
-    override fun getTitle(arguments: Bundle?): String {
-        return TITLE
-    }
+    override fun getTitle(arguments: Bundle?) = TITLE
 
     @Composable
     override fun Page(arguments: Bundle?) {
@@ -66,8 +61,8 @@ object SettingsPagerPageProvider : SettingsPageProvider {
 
 @Preview(showBackground = true)
 @Composable
-private fun SettingsPagerPagePreview() {
+private fun NonScrollablePagerPageProviderPreview() {
     SettingsTheme {
-        SettingsPagerPageProvider.Page(null)
+        NonScrollablePagerPageProvider.Page(null)
     }
 }
