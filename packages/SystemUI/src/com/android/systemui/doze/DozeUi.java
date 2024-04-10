@@ -26,11 +26,12 @@ import android.os.SystemClock;
 import android.text.format.Formatter;
 import android.util.Log;
 
-import com.android.systemui.DejankUtils;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.AlarmTimeout;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.wakelock.WakeLock;
 
 import java.util.Calendar;
@@ -52,14 +53,17 @@ public class DozeUi implements DozeMachine.Part {
     private final boolean mCanAnimateTransition;
     private final DozeParameters mDozeParameters;
     private final DozeLog mDozeLog;
-
+    private final DelayableExecutor mBgExecutor;
     private long mLastTimeTickElapsed = 0;
     // If time tick is scheduled and there's not a pending runnable to cancel:
-    private boolean mTimeTickScheduled;
+    private volatile boolean mTimeTickScheduled;
     private final Runnable mCancelTimeTickerRunnable =  new Runnable() {
         @Override
         public void run() {
-            mTimeTicker.cancel();
+            mDozeLog.tracePendingUnscheduleTimeTick(false, mTimeTickScheduled);
+            if (!mTimeTickScheduled) {
+                mTimeTicker.cancel();
+            }
         }
     };
 
@@ -67,11 +71,13 @@ public class DozeUi implements DozeMachine.Part {
     public DozeUi(Context context, AlarmManager alarmManager,
             WakeLock wakeLock, DozeHost host, @Main Handler handler,
             DozeParameters params,
+            @Background DelayableExecutor bgExecutor,
             DozeLog dozeLog) {
         mContext = context;
         mWakeLock = wakeLock;
         mHost = host;
         mHandler = handler;
+        mBgExecutor = bgExecutor;
         mCanAnimateTransition = !params.getDisplayNeedsBlanking();
         mDozeParameters = params;
         mTimeTicker = new AlarmTimeout(alarmManager, this::onTimeTick, "doze_time_tick", handler);
@@ -166,7 +172,6 @@ public class DozeUi implements DozeMachine.Part {
             return;
         }
         mTimeTickScheduled = true;
-        DejankUtils.removeCallbacks(mCancelTimeTickerRunnable);
 
         long time = System.currentTimeMillis();
         long delta = roundToNextMinute(time) - System.currentTimeMillis();
@@ -182,7 +187,8 @@ public class DozeUi implements DozeMachine.Part {
             return;
         }
         mTimeTickScheduled = false;
-        DejankUtils.postAfterTraversal(mCancelTimeTickerRunnable);
+        mDozeLog.tracePendingUnscheduleTimeTick(true, mTimeTickScheduled);
+        mBgExecutor.execute(mCancelTimeTickerRunnable);
     }
 
     private void verifyLastTimeTick() {
