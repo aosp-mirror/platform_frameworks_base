@@ -50,7 +50,7 @@ class ShowImeOnAppStartWhenLaunchingAppFromOverviewTest(flicker: LegacyFlickerTe
             testApp.launchViaIntent(wmHelper)
             testApp.openIME(wmHelper)
             this.setRotation(flicker.scenario.startRotation)
-            device.pressRecentApps()
+            tapl.launchedAppState.switchToOverview()
             wmHelper.StateSyncBuilder().withRecentsActivityVisible().waitForAndVerify()
         }
         transitions {
