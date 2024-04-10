@@ -1201,6 +1201,16 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                                 "mPrimaryBouncerToGoneTransitionViewModel.getNotificationAlpha()");
                     }, mMainDispatcher);
         }
+
+        // Ensures that flags are updated when an activity launches
+        collectFlow(mView,
+                mShadeAnimationInteractor.isLaunchingActivity(),
+                isLaunchingActivity -> {
+                    if (isLaunchingActivity) {
+                        updateSystemUiStateFlags();
+                    }
+                },
+                mMainDispatcher);
     }
 
     @VisibleForTesting
@@ -3632,7 +3642,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     + isFullyExpanded() + " inQs=" + mQsController.getExpanded());
         }
         mSysUiState
-                .setFlag(SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE, isPanelExpanded())
+                .setFlag(SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE,
+                        isPanelExpanded() && !isCollapsing())
                 .setFlag(SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED,
                         isFullyExpanded() && !mQsController.getExpanded())
                 .setFlag(SYSUI_STATE_QUICK_SETTINGS_EXPANDED,
