@@ -40,7 +40,6 @@ import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.View;
-import android.view.ViewRootImpl;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
@@ -293,60 +292,56 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 .setLayer(mCaptionContainerSurface, CAPTION_LAYER_Z_ORDER)
                 .show(mCaptionContainerSurface);
 
-        if (ViewRootImpl.CAPTION_ON_SHELL) {
-            outResult.mRootView.setTaskFocusState(mTaskInfo.isFocused);
+        outResult.mRootView.setTaskFocusState(mTaskInfo.isFocused);
 
-            // Caption insets
-            if (mIsCaptionVisible) {
-                // Caption inset is the full width of the task with the |captionHeight| and
-                // positioned at the top of the task bounds, also in absolute coordinates.
-                // So just reuse the task bounds and adjust the bottom coordinate.
-                mCaptionInsetsRect.set(taskBounds);
-                mCaptionInsetsRect.bottom = mCaptionInsetsRect.top + outResult.mCaptionHeight;
+        // Caption insets
+        if (mIsCaptionVisible) {
+            // Caption inset is the full width of the task with the |captionHeight| and
+            // positioned at the top of the task bounds, also in absolute coordinates.
+            // So just reuse the task bounds and adjust the bottom coordinate.
+            mCaptionInsetsRect.set(taskBounds);
+            mCaptionInsetsRect.bottom = mCaptionInsetsRect.top + outResult.mCaptionHeight;
 
-                // Caption bounding rectangles: these are optional, and are used to present finer
-                // insets than traditional |Insets| to apps about where their content is occluded.
-                // These are also in absolute coordinates.
-                final Rect[] boundingRects;
-                final int numOfElements = params.mOccludingCaptionElements.size();
-                if (numOfElements == 0) {
-                    boundingRects = null;
-                } else {
-                    // The customizable region can at most be equal to the caption bar.
+            // Caption bounding rectangles: these are optional, and are used to present finer
+            // insets than traditional |Insets| to apps about where their content is occluded.
+            // These are also in absolute coordinates.
+            final Rect[] boundingRects;
+            final int numOfElements = params.mOccludingCaptionElements.size();
+            if (numOfElements == 0) {
+                boundingRects = null;
+            } else {
+                // The customizable region can at most be equal to the caption bar.
+                if (params.mAllowCaptionInputFallthrough) {
+                    outResult.mCustomizableCaptionRegion.set(mCaptionInsetsRect);
+                }
+                boundingRects = new Rect[numOfElements];
+                for (int i = 0; i < numOfElements; i++) {
+                    final OccludingCaptionElement element =
+                            params.mOccludingCaptionElements.get(i);
+                    final int elementWidthPx =
+                            resources.getDimensionPixelSize(element.mWidthResId);
+                    boundingRects[i] =
+                            calculateBoundingRect(element, elementWidthPx, mCaptionInsetsRect);
+                    // Subtract the regions used by the caption elements, the rest is
+                    // customizable.
                     if (params.mAllowCaptionInputFallthrough) {
-                        outResult.mCustomizableCaptionRegion.set(mCaptionInsetsRect);
-                    }
-                    boundingRects = new Rect[numOfElements];
-                    for (int i = 0; i < numOfElements; i++) {
-                        final OccludingCaptionElement element =
-                                params.mOccludingCaptionElements.get(i);
-                        final int elementWidthPx =
-                                resources.getDimensionPixelSize(element.mWidthResId);
-                        boundingRects[i] =
-                                calculateBoundingRect(element, elementWidthPx, mCaptionInsetsRect);
-                        // Subtract the regions used by the caption elements, the rest is
-                        // customizable.
-                        if (params.mAllowCaptionInputFallthrough) {
-                            outResult.mCustomizableCaptionRegion.op(boundingRects[i],
-                                    Region.Op.DIFFERENCE);
-                        }
+                        outResult.mCustomizableCaptionRegion.op(boundingRects[i],
+                                Region.Op.DIFFERENCE);
                     }
                 }
-                // Add this caption as an inset source.
-                wct.addInsetsSource(mTaskInfo.token,
-                        mOwner, 0 /* index */, WindowInsets.Type.captionBar(), mCaptionInsetsRect,
-                        boundingRects);
-                wct.addInsetsSource(mTaskInfo.token,
-                        mOwner, 0 /* index */, WindowInsets.Type.mandatorySystemGestures(),
-                        mCaptionInsetsRect, null /* boundingRects */);
-            } else {
-                wct.removeInsetsSource(mTaskInfo.token, mOwner, 0 /* index */,
-                        WindowInsets.Type.captionBar());
-                wct.removeInsetsSource(mTaskInfo.token, mOwner, 0 /* index */,
-                        WindowInsets.Type.mandatorySystemGestures());
             }
+            // Add this caption as an inset source.
+            wct.addInsetsSource(mTaskInfo.token,
+                    mOwner, 0 /* index */, WindowInsets.Type.captionBar(), mCaptionInsetsRect,
+                    boundingRects);
+            wct.addInsetsSource(mTaskInfo.token,
+                    mOwner, 0 /* index */, WindowInsets.Type.mandatorySystemGestures(),
+                    mCaptionInsetsRect, null /* boundingRects */);
         } else {
-            startT.hide(mCaptionContainerSurface);
+            wct.removeInsetsSource(mTaskInfo.token, mOwner, 0 /* index */,
+                    WindowInsets.Type.captionBar());
+            wct.removeInsetsSource(mTaskInfo.token, mOwner, 0 /* index */,
+                    WindowInsets.Type.mandatorySystemGestures());
         }
 
         // Task surface itself
@@ -594,8 +589,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
      */
     public void addCaptionInset(WindowContainerTransaction wct) {
         final int captionHeightId = getCaptionHeightId(mTaskInfo.getWindowingMode());
-        if (!ViewRootImpl.CAPTION_ON_SHELL || captionHeightId == Resources.ID_NULL
-                || !mIsCaptionVisible) {
+        if (captionHeightId == Resources.ID_NULL || !mIsCaptionVisible) {
             return;
         }
 
