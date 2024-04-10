@@ -880,6 +880,14 @@ public class AccountManagerService
                     packagesToVisibility = Collections.emptyMap();
                     accountRemovedReceivers = Collections.emptyList();
                 }
+                if (notify) {
+                    Integer oldVisibility =
+                            accounts.accountsDb.findAccountVisibility(account, packageName);
+                    if (oldVisibility != null && oldVisibility == newVisibility) {
+                        // Database will not be updated - skip LOGIN_ACCOUNTS_CHANGED broadcast.
+                        notify = false;
+                    }
+                }
 
                 if (!updateAccountVisibilityLocked(account, packageName, newVisibility, accounts)) {
                     return false;
