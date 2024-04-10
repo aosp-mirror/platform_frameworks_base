@@ -432,7 +432,6 @@ constructor(
                     if (MigrateClocksToBlueprint.isEnabled) {
                         listenForDozeAmountTransition(this)
                         listenForAnyStateToAodTransition(this)
-                        listenForAnyStateToLockscreenTransition(this)
                     } else {
                         listenForDozeAmount(this)
                     }
@@ -563,17 +562,6 @@ constructor(
                 .filter { it.transitionState == TransitionState.STARTED }
                 .filter { it.from != LOCKSCREEN }
                 .collect { handleDoze(1f) }
-        }
-    }
-
-    @VisibleForTesting
-    internal fun listenForAnyStateToLockscreenTransition(scope: CoroutineScope): Job {
-        return scope.launch("$TAG#listenForAnyStateToLockscreenTransition") {
-            keyguardTransitionInteractor
-                    .transitionStepsToState(LOCKSCREEN)
-                    .filter { it.transitionState == TransitionState.STARTED }
-                    .filter { it.from != AOD }
-                    .collect { handleDoze(0f) }
         }
     }
 
