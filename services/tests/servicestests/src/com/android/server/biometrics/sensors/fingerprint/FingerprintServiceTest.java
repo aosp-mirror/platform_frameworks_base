@@ -243,6 +243,18 @@ public class FingerprintServiceTest {
     }
 
     @Test
+    public void registerAuthenticators_virtualFingerprintOnly() throws Exception {
+        initServiceWith(NAME_DEFAULT, NAME_VIRTUAL);
+        Settings.Secure.putInt(mSettingsRule.mockContentResolver(mContext),
+                Settings.Secure.BIOMETRIC_FINGERPRINT_VIRTUAL_ENABLED, 1);
+
+        mService.mServiceWrapper.registerAuthenticators(HIDL_AUTHENTICATORS);
+        waitForRegistration();
+
+        verify(mIBiometricService).registerAuthenticator(eq(ID_VIRTUAL), anyInt(), anyInt(), any());
+    }
+
+    @Test
     @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
     public void registerAuthenticatorsLegacy_virtualOnly() throws Exception {
         initServiceWith(NAME_DEFAULT, NAME_VIRTUAL);
