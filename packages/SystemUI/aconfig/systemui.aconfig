@@ -794,3 +794,13 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "register_battery_controller_receivers_in_corestartable"
+    namespace: "systemui"
+    description: "Decide whether to register the receivers in battery controller impl in the BatteryControllerStartable corestartable."
+    bug: "307517093"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
