@@ -56,6 +56,13 @@ flag {
 }
 
 flag {
+  name: "enable_hardware_shortcut_disables_warning"
+  namespace: "accessibility"
+  description: "When the user purposely enables the hardware shortcut, preemptively disables the first-time warning message."
+  bug: "287065325"
+}
+
+flag {
     name: "enable_magnification_joystick"
     namespace: "accessibility"
     description: "Whether to enable joystick controls for magnification"
