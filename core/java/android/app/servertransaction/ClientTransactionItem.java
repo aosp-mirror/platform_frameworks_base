@@ -53,6 +53,7 @@ public abstract class ClientTransactionItem implements BaseClientRequest, Parcel
         return true;
     }
 
+    // TODO(b/260873529): cleanup
     /**
      * If this {@link ClientTransactionItem} is updating configuration, returns the {@link Context}
      * it is updating; otherwise, returns {@code null}.

@@ -23,11 +23,17 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 import static com.android.window.flags.Flags.FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import android.app.Activity;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
@@ -76,6 +82,13 @@ public class ClientTransactionListenerControllerTest {
     private BiConsumer<IBinder, ActivityWindowInfo> mActivityWindowInfoListener;
     @Mock
     private IBinder mActivityToken;
+    @Mock
+    private Activity mActivity;
+    @Mock
+    private Resources mResources;
+
+    private Configuration mConfiguration;
+
 
     private DisplayManagerGlobal mDisplayManager;
     private Handler mHandler;
@@ -88,7 +101,12 @@ public class ClientTransactionListenerControllerTest {
         MockitoAnnotations.initMocks(this);
         mDisplayManager = new DisplayManagerGlobal(mIDisplayManager);
         mHandler = getInstrumentation().getContext().getMainThreadHandler();
-        mController = ClientTransactionListenerController.createInstanceForTesting(mDisplayManager);
+        mController = spy(ClientTransactionListenerController
+                .createInstanceForTesting(mDisplayManager));
+
+        mConfiguration = new Configuration();
+        doReturn(mConfiguration).when(mResources).getConfiguration();
+        doReturn(mResources).when(mActivity).getResources();
     }
 
     @Test
@@ -104,6 +122,43 @@ public class ClientTransactionListenerControllerTest {
         mHandler.runWithScissors(() -> { }, 0);
 
         verify(mListener).onDisplayChanged(123);
+    }
+
+    @Test
+    public void testOnContextConfigurationChanged() {
+        doNothing().when(mController).onDisplayChanged(anyInt());
+        doReturn(123).when(mActivity).getDisplayId();
+
+        // Not trigger onDisplayChanged when there is no change.
+        mController.onContextConfigurationPreChanged(mActivity);
+        mController.onContextConfigurationPostChanged(mActivity);
+
+        verify(mController, never()).onDisplayChanged(anyInt());
+
+        mController.onContextConfigurationPreChanged(mActivity);
+        mConfiguration.windowConfiguration.setMaxBounds(new Rect(0, 0, 100, 200));
+        mController.onContextConfigurationPostChanged(mActivity);
+
+        verify(mController).onDisplayChanged(123);
+    }
+
+    @Test
+    public void testOnContextConfigurationChanged_duringClientTransaction() {
+        doNothing().when(mController).onDisplayChanged(anyInt());
+        doReturn(123).when(mActivity).getDisplayId();
+
+        // Not trigger onDisplayChanged until ClientTransaction finished execution.
+        mController.onClientTransactionStarted();
+
+        mController.onContextConfigurationPreChanged(mActivity);
+        mConfiguration.windowConfiguration.setMaxBounds(new Rect(0, 0, 100, 200));
+        mController.onContextConfigurationPostChanged(mActivity);
+
+        verify(mController, never()).onDisplayChanged(anyInt());
+
+        mController.onClientTransactionFinished();
+
+        verify(mController).onDisplayChanged(123);
     }
 
     @Test

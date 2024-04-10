@@ -25,6 +25,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.app.ResourcesManager;
+import android.app.servertransaction.ClientTransactionListenerController;
 import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
@@ -137,12 +138,24 @@ public class WindowTokenClient extends Binder {
      *                                 should be dispatched to listeners.
      */
     @AnyThread
-    public void onConfigurationChanged(Configuration newConfig, int newDisplayId,
+    public void onConfigurationChanged(@NonNull Configuration newConfig, int newDisplayId,
             boolean shouldReportConfigChange) {
         final Context context = mContextRef.get();
         if (context == null) {
             return;
         }
+        final ClientTransactionListenerController controller =
+                ClientTransactionListenerController.getInstance();
+        controller.onContextConfigurationPreChanged(context);
+        try {
+            onConfigurationChangedInner(context, newConfig, newDisplayId, shouldReportConfigChange);
+        } finally {
+            controller.onContextConfigurationPostChanged(context);
+        }
+    }
+
+    private void onConfigurationChangedInner(@NonNull Context context,
+            @NonNull Configuration newConfig, int newDisplayId, boolean shouldReportConfigChange) {
         CompatibilityInfo.applyOverrideScaleIfNeeded(newConfig);
         final boolean displayChanged;
         final boolean shouldUpdateResources;
