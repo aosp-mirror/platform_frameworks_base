@@ -74,7 +74,7 @@
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Feloldja a(z) <xliff:g id="APP_NAME">%1$s</xliff:g> bejelentkezési lehetőségeit?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Mentett azonosítókulcs kiválasztása a(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazáshoz"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Mentett jelszó kiválasztása a(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazáshoz"</string>
-    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Mentett bejelentkezési adatok kiválasztása a(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazáshoz"</string>
+    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Mentett bejelentkezési adatok kiválasztása – <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Válasszon bejelentkezési adatokat – <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Kiválaszt egy lehetőséget a következőbe való bejelentkezéshez: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Használni szeretná ezt az információt a(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazásban?"</string>

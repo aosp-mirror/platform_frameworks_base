@@ -22,8 +22,8 @@
     <string name="string_continue" msgid="1346732695941131882">"जारी राख्नुहोस्"</string>
     <string name="string_more_options" msgid="2763852250269945472">"अर्को तरिकाले सेभ गर्नुहोस्"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"थप जान्नुहोस्"</string>
-    <string name="content_description_show_password" msgid="3283502010388521607">"पासवर्ड देखाइयोस्"</string>
-    <string name="content_description_hide_password" msgid="6841375971631767996">"पासवर्ड लुकाइयोस्"</string>
+    <string name="content_description_show_password" msgid="3283502010388521607">"पासवर्ड देखाउनुहोस्"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"पासवर्ड लुकाउनुहोस्"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"पासकीका सहायताले सुरक्षित रहनुहोस्"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"तपाईंले पासकी बनाउनुभयो भने तपाईंले जटिल पासवर्ड बनाउनु वा तिनलाई याद गरिराख्नु पर्दैन"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"पासकी भनेको तपाईंले आफ्नो फिंगरप्रिन्ट, अनुहार वा स्क्रिन लक प्रयोग गरेर बनाएको इन्क्रिप्ट गरिएको डिजिटल की हो"</string>
