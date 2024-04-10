@@ -1003,7 +1003,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Buka perbualan"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widget perbualan"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Ketik perbualan untuk menambahkan perbualan itu pada skrin Utama anda"</string>
-    <string name="no_conversations_text" msgid="5354115541282395015">"Perbualan terbaharu anda akan dipaparkan di sini"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Perbualan terbaharu akan dipaparkan di sini"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Perbualan keutamaan"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Perbualan terbaharu"</string>
     <string name="days_timestamp" msgid="5821854736213214331">"<xliff:g id="DURATION">%1$s</xliff:g> hari lalu"</string>
@@ -1071,7 +1071,7 @@
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# apl aktif}other{# apl aktif}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Maklumat baharu"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Apl aktif"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Apl ini aktif dan berfungsi walaupun anda tidak menggunakannya. Ini meningkatkan kefungsian apl tetapi mungkin akan memberikan kesan kepada hayat bateri."</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Apl ini aktif dan berfungsi walaupun anda tidak menggunakannya. Hal ini meningkatkan kefungsian apl tetapi akan memberikan kesan kepada hayat bateri."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Berhenti"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Dihentikan"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Selesai"</string>
