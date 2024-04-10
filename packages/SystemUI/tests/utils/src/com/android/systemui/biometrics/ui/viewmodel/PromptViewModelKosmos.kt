@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics.ui.viewmodel
 
 import android.content.applicationContext
+import com.android.systemui.biometrics.domain.interactor.biometricStatusInteractor
 import com.android.systemui.biometrics.domain.interactor.displayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.promptSelectorInteractor
 import com.android.systemui.biometrics.domain.interactor.udfpsOverlayInteractor
@@ -30,6 +31,7 @@ val Kosmos.promptViewModel by Fixture {
         promptSelectorInteractor = promptSelectorInteractor,
         context = applicationContext,
         udfpsOverlayInteractor = udfpsOverlayInteractor,
+        biometricStatusInteractor = biometricStatusInteractor,
         udfpsUtils = udfpsUtils
     )
 }
