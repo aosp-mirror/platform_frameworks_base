@@ -16,16 +16,23 @@
 
 package com.android.systemui.bouncer.domain.interactor
 
+import android.app.StatusBarManager.SESSION_KEYGUARD
 import com.android.compose.animation.scene.SceneKey
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.domain.interactor.AuthenticationResult
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Password
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Pattern
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Pin
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Sim
 import com.android.systemui.bouncer.data.repository.BouncerRepository
+import com.android.systemui.bouncer.shared.logging.BouncerUiEvent
 import com.android.systemui.classifier.FalsingClassifier
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
+import com.android.systemui.log.SessionTracker
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
@@ -50,6 +57,8 @@ constructor(
     private val deviceEntryFaceAuthInteractor: DeviceEntryFaceAuthInteractor,
     private val falsingInteractor: FalsingInteractor,
     private val powerInteractor: PowerInteractor,
+    private val uiEventLogger: UiEventLogger,
+    private val sessionTracker: SessionTracker,
     sceneInteractor: SceneInteractor,
 ) {
     private val _onIncorrectBouncerInput = MutableSharedFlow<Unit>()
@@ -162,6 +171,18 @@ constructor(
         ) {
             _onIncorrectBouncerInput.emit(Unit)
         }
+
+        if (authenticationInteractor.getAuthenticationMethod() in setOf(Pin, Password, Pattern)) {
+            if (authResult == AuthenticationResult.SUCCEEDED) {
+                uiEventLogger.log(BouncerUiEvent.BOUNCER_PASSWORD_SUCCESS)
+            } else if (authResult == AuthenticationResult.FAILED) {
+                uiEventLogger.log(
+                    BouncerUiEvent.BOUNCER_PASSWORD_FAILURE,
+                    sessionTracker.getSessionId(SESSION_KEYGUARD)
+                )
+            }
+        }
+
         return authResult
     }
 
