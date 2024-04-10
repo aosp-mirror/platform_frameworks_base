@@ -145,6 +145,7 @@ public class SettingsToPropertiesMapper {
         "core_experiments_team_internal",
         "core_graphics",
         "core_libraries",
+        "crumpet",
         "dck_framework",
         "devoptions_settings",
         "game",
