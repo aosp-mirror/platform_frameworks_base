@@ -2394,8 +2394,7 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Δοκιμή"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Κοινόχρηστο"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
-    <skip />
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Για λόγους ασφάλειας, έγινε απόκρυψη του περιεχομένου της εφαρμογής από την κοινή χρήση οθόνης"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Συνδέθηκε αυτόματα με δορυφόρο"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Μπορείτε να στέλνετε και να λαμβάνετε μηνύματα χωρίς δίκτυο κινητής τηλεφωνίας ή Wi-Fi."</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Άνοιγμα Messages"</string>

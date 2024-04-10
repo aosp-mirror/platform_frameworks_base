@@ -1970,7 +1970,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Չդասակարգված"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Դուք սահմանել եք այս ծանուցումների կարևորությունը:"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Կարևոր է, քանի որ որոշակի մարդիկ են ներգրավված:"</string>
-    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Հավելվածի հատուկ ծանուցում"</string>
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Հատուկ հավելվածի ծանուցում"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Թույլատրե՞լ <xliff:g id="APP">%1$s</xliff:g> հավելվածին <xliff:g id="ACCOUNT">%2$s</xliff:g> հաշվով նոր Օգտատեր ստեղծել (նման հաշվով Օգտատեր արդեն գոյություն ունի):"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Թույլատրե՞լ <xliff:g id="APP">%1$s</xliff:g> հավելվածին <xliff:g id="ACCOUNT">%2$s</xliff:g> հաշվով նոր Օգտատեր ստեղծել:"</string>
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"Ավելացնել վերահսկվող օգտատեր"</string>
@@ -2394,8 +2394,7 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Փորձնական"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Ընդհանուր"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
-    <skip />
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Անվտանգության նկատառումներից ելնելով՝ հավելվածի բովանդակությունը թաքցվել է էկրանի ցուցադրումից"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Ավտոմատ միացել է արբանյակին"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Դուք կարող եք ուղարկել և ստանալ հաղորդագրություններ՝ առանց բջջային կամ Wi-Fi կապի"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Բացել Messages-ը"</string>

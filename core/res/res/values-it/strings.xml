@@ -1193,7 +1193,7 @@
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Memoria insufficiente per il sistema. Assicurati di avere 250 MB di spazio libero e riavvia."</string>
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> è in esecuzione"</string>
     <string name="app_running_notification_text" msgid="5120815883400228566">"Tocca per ulteriori informazioni o per interrompere l\'app."</string>
-    <string name="ok" msgid="2646370155170753815">"OK"</string>
+    <string name="ok" msgid="2646370155170753815">"Ok"</string>
     <string name="cancel" msgid="6908697720451760115">"Annulla"</string>
     <string name="yes" msgid="9069828999585032361">"OK"</string>
     <string name="no" msgid="5122037903299899715">"Annulla"</string>
@@ -2395,8 +2395,7 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Condiviso"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
-    <skip />
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Contenuti dell\'app nascosti dalla condivisione schermo per sicurezza"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Connessione automatica al satellite"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Puoi inviare e ricevere messaggi senza una rete mobile o Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Apri Messaggi"</string>

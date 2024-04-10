@@ -1223,7 +1223,7 @@
     <string name="whichEditApplicationLabel" msgid="1463288652070140285">"Izmeni"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"Delite"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"Delite pomoću aplikacije %1$s"</string>
-    <string name="whichSendApplicationLabel" msgid="7467813004769188515">"Deli"</string>
+    <string name="whichSendApplicationLabel" msgid="7467813004769188515">"Deljenje"</string>
     <string name="whichSendToApplication" msgid="77101541959464018">"Pošaljite pomoću:"</string>
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"Pošaljite pomoću: %1$s"</string>
     <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"Pošalji"</string>
@@ -2395,8 +2395,7 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Zajedničko"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
-    <skip />
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Sadržaj aplikacije je skriven za deljenje sadržaja ekrana zbog bezbednosti"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Automatski povezano sa satelitom"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Možete da šaljete i primate poruke bez mobilne ili WiFi mreže"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Otvori Messages"</string>

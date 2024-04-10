@@ -1419,7 +1419,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"ಹಂಚಿಕೊಳ್ಳಿ"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ನಿರಾಕರಿಸಿ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ಇನ್‌ಪುಟ್‌‌ ವಿಧಾನವನ್ನು ಆರಿಸಿ"</string>
-    <string name="show_ime" msgid="6406112007347443383">"ಭೌತಿಕ ಕೀಬೋರ್ಡ್ ಸಕ್ರಿಯವಾಗಿರುವಾಗ ಅದನ್ನು ಪರದೆಯ ಮೇಲಿರಿಸಿ"</string>
+    <string name="show_ime" msgid="6406112007347443383">"ಭೌತಿಕ ಕೀಬೋರ್ಡ್ ಸಕ್ರಿಯವಾಗಿರುವಾಗ ಅದನ್ನು ಸ್ಕ್ರೀನ್ ಮೇಲಿರಿಸಿ"</string>
     <string name="hardware" msgid="3611039921284836033">"ಆನ್-ಸ್ಕ್ರೀನ್ ಕೀಬೋರ್ಡ್ ಬಳಸಿ"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> ಕಾನ್ಫಿಗರ್ ಮಾಡಿ"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"ಭೌತಿಕ ಕೀಬೋರ್ಡ್‌ಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿ"</string>
@@ -2394,8 +2394,7 @@
     <string name="profile_label_test" msgid="9168641926186071947">"ಪರೀಕ್ಷೆ"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"ಸಮುದಾಯ"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
-    <skip />
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ಭದ್ರತೆಗಾಗಿ ಸ್ಕ್ರೀನ್‌‌ ಹಂಚಿಕೊಳ್ಳುವಿಕೆಯಲ್ಲಿ ಆ್ಯಪ್ ಕಂಟೆಂಟ್‌ ಅನ್ನು ಮರೆಮಾಡಲಾಗಿದೆ"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"ಸ್ಯಾಟಲೈಟ್‌ಗೆ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"ನೀವು ಮೊಬೈಲ್ ಅಥವಾ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್ ಇಲ್ಲದೆಯೇ ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಬಹುದು ಮತ್ತು ಸ್ವೀಕರಿಸಬಹುದು"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ಅನ್ನು ತೆರೆಯಿರಿ"</string>

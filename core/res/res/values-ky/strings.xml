@@ -995,7 +995,7 @@
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Туура!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Дагы аракет кылыңыз"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Дагы аракет кылыңыз"</string>
-    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Элементтердин жана дайындардын кулпусун ачуу"</string>
+    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Функциялар менен колдонмолордун кулпусун ачуу"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Жүзүнөн таанып ачуу аракеттеринин чегинен аштыңыз"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"SIM карта жок"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Планшетте SIM карта жок."</string>
@@ -2394,8 +2394,7 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Сыноо"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Жалпы"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
-    <skip />
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Коопсуздук үчүн колдонмодогу контент бөлүшүлгөн экрандан жашырылды"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Спутникке автоматтык түрдө туташтырылган"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Сиз мобилдик же Wi-Fi тармагы жок эле билдирүүлөрдү жөнөтүп, ала аласыз"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Жазышуулар колдонмосун ачуу"</string>

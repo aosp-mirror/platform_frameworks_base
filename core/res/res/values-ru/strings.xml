@@ -833,7 +833,7 @@
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Отслеживает попытки ввода пароля при разблокировке экрана и блокирует планшетный ПК или удаляет с него все данные, если было сделано слишком много таких попыток."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Блокировать устройство Android TV или удалять с него все ваши данные при слишком большом количестве неудачных попыток ввести пароль для разблокировки экрана."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Блокировать информационно-развлекательную систему или удалять из нее все данные, если совершено слишком много неудачных попыток ввести пароль для разблокировки экрана."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Отслеживает попытки ввода пароля при разблокировке экрана и блокирует телефон или удаляет с него все данные, если было сделано слишком много таких попыток."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Отслеживать попытки ввода пароля при разблокировке экрана и блокировать телефон или удалять с него все данные, если было сделано слишком много таких попыток."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Отслеживать неверно введенные пароли при разблокировке экрана и блокировать планшет или удалять с него все данные, если сделано слишком много неудачных попыток."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Блокировать устройство Android TV или удалять с него все данные этого пользователя при слишком большом количестве неудачных попыток ввести пароль для разблокировки экрана."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Блокировать информационно-развлекательную систему или удалять все данные профиля, если совершено слишком много неудачных попыток ввести пароль для разблокировки экрана."</string>
@@ -2396,8 +2396,7 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Тестовый"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Совместный"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
-    <skip />
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Содержимое приложения исключено из демонстрации экрана в целях безопасности."</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Автоматически подключено к системам спутниковой связи"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Вы можете отправлять и получать сообщения без доступа к мобильной сети или Wi-Fi."</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Открыть Сообщения"</string>
