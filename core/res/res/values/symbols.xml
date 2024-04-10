@@ -5404,4 +5404,7 @@
   <java-symbol type="integer" name="config_wallpaperFrameRateCompatibility" />
 
   <java-symbol type="integer" name="config_defaultMinEmergencyGestureTapDurationMillis" />
+  <!-- Back swipe thresholds -->
+  <java-symbol type="dimen" name="navigation_edge_action_progress_threshold" />
+  <java-symbol type="dimen" name="back_progress_non_linear_factor" />
 </resources>

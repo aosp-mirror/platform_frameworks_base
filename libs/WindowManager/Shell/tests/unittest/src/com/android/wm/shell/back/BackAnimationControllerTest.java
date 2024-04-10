@@ -354,6 +354,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         // Verify that we prevent any interaction with the animator callback in case a new gesture
         // starts while the current back animation has not ended, instead the gesture is queued
         triggerBackGesture();
+        verify(mAnimatorCallback).setTriggerBack(eq(true));
         verifyNoMoreInteractions(mAnimatorCallback);
 
         // Finish previous back navigation.
@@ -394,6 +395,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         // starts while the current back animation has not ended, instead the gesture is queued
         triggerBackGesture();
         releaseBackGesture();
+        verify(mAnimatorCallback).setTriggerBack(eq(true));
         verifyNoMoreInteractions(mAnimatorCallback);
 
         // Finish previous back navigation.
@@ -532,7 +534,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
     }
 
     @Test
-    public void callbackShouldDeliverProgress() throws RemoteException {
+    public void appCallback_receivesStartAndInvoke() throws RemoteException {
         registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
 
         final int type = BackNavigationInfo.TYPE_CALLBACK;
@@ -551,8 +553,9 @@ public class BackAnimationControllerTest extends ShellTestCase {
         assertTrue("TriggerBack should have been true", result.mTriggerBack);
 
         verify(mAppCallback, times(1)).onBackStarted(any());
-        verify(mAppCallback, times(1)).onBackProgressed(any());
         verify(mAppCallback, times(1)).onBackInvoked();
+        // Progress events should be generated from the app process.
+        verify(mAppCallback, never()).onBackProgressed(any());
 
         verify(mAnimatorCallback, never()).onBackStarted(any());
         verify(mAnimatorCallback, never()).onBackProgressed(any());
@@ -639,7 +642,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
      */
     private void doStartEvents(int startX, int moveX) {
         doMotionEvent(MotionEvent.ACTION_DOWN, startX);
-        mController.onPilferPointers();
+        mController.onThresholdCrossed();
         doMotionEvent(MotionEvent.ACTION_MOVE, moveX);
     }
 
