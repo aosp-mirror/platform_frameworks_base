@@ -1603,8 +1603,18 @@ public class WallpaperManager {
             @SetWallpaperFlags int which, boolean originalBitmap) {
         checkExactlyOneWallpaperFlagSet(which);
         try {
-            return sGlobals.mService.getBitmapCrops(displaySizes, which, originalBitmap,
-                    mContext.getUserId());
+            List<Rect> result = sGlobals.mService.getBitmapCrops(
+                    displaySizes, which, originalBitmap, mContext.getUserId());
+            if (result != null) return result;
+            // mService.getBitmapCrops returns null if the requested wallpaper is an ImageWallpaper,
+            // but there are no crop hints and the bitmap size is unknown to the service (this
+            // mostly happens for the default wallpaper). In that case, fetch the bitmap dimensions
+            // and use the other getBitmapCrops API with no cropHints to figure out the crops.
+            Rect bitmapDimensions = peekBitmapDimensions(which, true);
+            if (bitmapDimensions == null) return List.of();
+            Point bitmapSize = new Point(bitmapDimensions.width(), bitmapDimensions.height());
+            return getBitmapCrops(bitmapSize, displaySizes, null);
+
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
