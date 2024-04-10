@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.utils;
+package android.util;
 
 import android.annotation.NonNull;
 import android.os.Handler;
