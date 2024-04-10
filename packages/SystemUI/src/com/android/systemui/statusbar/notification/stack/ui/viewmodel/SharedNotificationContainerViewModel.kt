@@ -207,9 +207,7 @@ constructor(
                 keyguardTransitionInteractor.finishedKeyguardState.map {
                     statesForConstrainedNotifications.contains(it)
                 },
-                keyguardTransitionInteractor
-                    .isInTransitionWhere { from, to -> from == LOCKSCREEN || to == LOCKSCREEN }
-                    .onStart { emit(false) }
+                keyguardTransitionInteractor.transitionValue(LOCKSCREEN).map { it > 0f },
             ) { constrainedNotificationState, transitioningToOrFromLockscreen ->
                 constrainedNotificationState || transitioningToOrFromLockscreen
             }
@@ -241,11 +239,10 @@ constructor(
                 keyguardTransitionInteractor.finishedKeyguardState.map { state ->
                     state == GLANCEABLE_HUB
                 },
-                keyguardTransitionInteractor
-                    .isInTransitionWhere { from, to ->
-                        from == GLANCEABLE_HUB || to == GLANCEABLE_HUB
-                    }
-                    .onStart { emit(false) }
+                or(
+                    keyguardTransitionInteractor.isInTransitionToState(GLANCEABLE_HUB),
+                    keyguardTransitionInteractor.isInTransitionFromState(GLANCEABLE_HUB),
+                ),
             ) { isOnGlanceableHub, transitioningToOrFromHub ->
                 isOnGlanceableHub || transitioningToOrFromHub
             }
@@ -290,12 +287,10 @@ constructor(
         var aodTransitionIsComplete = true
         return combine(
                 isOnLockscreenWithoutShade,
-                keyguardTransitionInteractor
-                    .isInTransitionWhere(
-                        fromStatePredicate = { it == LOCKSCREEN },
-                        toStatePredicate = { it == AOD }
-                    )
-                    .onStart { emit(false) },
+                keyguardTransitionInteractor.isInTransition(
+                    from = LOCKSCREEN,
+                    to = AOD,
+                ),
                 ::Pair
             )
             .transformWhile { (isOnLockscreenWithoutShade, aodTransitionIsRunning) ->

@@ -15,6 +15,8 @@ import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.testKosmos
@@ -22,7 +24,6 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.utils.GlobalWindowManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -42,8 +43,7 @@ import org.mockito.MockitoAnnotations
 class ResourceTrimmerTest : SysuiTestCase() {
     val kosmos = testKosmos()
 
-    private val testDispatcher = UnconfinedTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
+    private val testScope = kosmos.testScope
     private val keyguardRepository = kosmos.fakeKeyguardRepository
     private val featureFlags = kosmos.fakeFeatureFlagsClassic
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
@@ -74,7 +74,7 @@ class ResourceTrimmerTest : SysuiTestCase() {
                 kosmos.keyguardTransitionInteractor,
                 globalWindowManager,
                 testScope.backgroundScope,
-                testDispatcher,
+                kosmos.testDispatcher,
                 featureFlags
             )
         resourceTrimmer.start()

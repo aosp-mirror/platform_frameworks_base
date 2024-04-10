@@ -295,7 +295,8 @@ constructor(
     }
 
     private fun listenForSchedulingWatchdog() {
-        keyguardTransitionInteractor.anyStateToGoneTransition
+        keyguardTransitionInteractor
+            .transition(from = null, to = KeyguardState.GONE)
             .filter { it.transitionState == TransitionState.FINISHED }
             .onEach {
                 // We deliberately want to run this in background because scheduleWatchdog does
