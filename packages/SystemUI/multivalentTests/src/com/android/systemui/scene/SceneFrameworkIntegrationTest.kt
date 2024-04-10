@@ -293,6 +293,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 occlusionInteractor = kosmos.sceneContainerOcclusionInteractor,
                 faceUnlockInteractor = kosmos.deviceEntryFaceAuthInteractor,
                 deviceUnlockedInteractor = kosmos.deviceUnlockedInteractor,
+                shadeInteractor = kosmos.shadeInteractor,
             )
         startable.start()
 

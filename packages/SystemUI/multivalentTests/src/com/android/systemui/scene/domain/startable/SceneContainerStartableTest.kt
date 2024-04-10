@@ -48,14 +48,17 @@ import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.model.sysUiState
+import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
+import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shared.system.QuickStepContract
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
@@ -140,6 +143,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 occlusionInteractor = kosmos.sceneContainerOcclusionInteractor,
                 faceUnlockInteractor = kosmos.deviceEntryFaceAuthInteractor,
                 deviceUnlockedInteractor = kosmos.deviceUnlockedInteractor,
+                shadeInteractor = kosmos.shadeInteractor,
             )
     }
 
@@ -1127,6 +1131,33 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(kosmos.fakeDeviceEntryFaceAuthRepository.isAuthRunning.value).isTrue()
         }
 
+    @Test
+    fun switchToLockscreen_whenShadeBecomesNotTouchable() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val isShadeTouchable by collectLastValue(kosmos.shadeInteractor.isShadeTouchable)
+            val transitionStateFlow = prepareState()
+            underTest.start()
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            // Flung to bouncer, 90% of the way there:
+            transitionStateFlow.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Lockscreen,
+                    toScene = Scenes.Bouncer,
+                    progress = flowOf(0.9f),
+                    isInitiatedByUserInput = true,
+                    isUserInputOngoing = flowOf(false),
+                )
+            runCurrent()
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+
+            kosmos.fakePowerRepository.updateWakefulness(WakefulnessState.ASLEEP)
+            runCurrent()
+            assertThat(isShadeTouchable).isFalse()
+
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+        }
+
     private fun TestScope.emulateSceneTransition(
         transitionStateFlow: MutableStateFlow<ObservableTransitionState>,
         toScene: SceneKey,
@@ -1166,6 +1197,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
         isLockscreenEnabled: Boolean = true,
         startsAwake: Boolean = true,
         isDeviceProvisioned: Boolean = true,
+        isInteractive: Boolean = true,
     ): MutableStateFlow<ObservableTransitionState> {
         if (authenticationMethod?.isSecure == true) {
             assert(isLockscreenEnabled) {
@@ -1205,6 +1237,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
         } else {
             powerInteractor.setAsleepForTest()
         }
+        kosmos.fakePowerRepository.setInteractive(isInteractive)
 
         kosmos.fakeDeviceProvisioningRepository.setDeviceProvisioned(isDeviceProvisioned)
 

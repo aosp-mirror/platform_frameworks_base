@@ -52,8 +52,6 @@ constructor(
     val destinationScenes =
         qsSceneAdapter.isCustomizing.flatMapLatest { customizing ->
             if (customizing) {
-                // TODO(b/332749288) Empty map so there are no back handlers and back can close
-                // customizer
                 flowOf(emptyMap())
                 // TODO(b/330200163) Add an Up from Bottom to be able to collapse the shade
                 // while customizing
