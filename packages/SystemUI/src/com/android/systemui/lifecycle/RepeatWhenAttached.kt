@@ -70,7 +70,7 @@ fun View.repeatWhenAttached(
     var lifecycleOwner: ViewLifecycleOwner? = null
     val onAttachListener =
         object : View.OnAttachStateChangeListener {
-            override fun onViewAttachedToWindow(v: View?) {
+            override fun onViewAttachedToWindow(v: View) {
                 Assert.isMainThread()
                 lifecycleOwner?.onDestroy()
                 lifecycleOwner =
@@ -81,7 +81,7 @@ fun View.repeatWhenAttached(
                     )
             }
 
-            override fun onViewDetachedFromWindow(v: View?) {
+            override fun onViewDetachedFromWindow(v: View) {
                 lifecycleOwner?.onDestroy()
                 lifecycleOwner = null
             }
@@ -167,9 +167,10 @@ class ViewLifecycleOwner(
         registry.currentState = Lifecycle.State.DESTROYED
     }
 
-    override fun getLifecycle(): Lifecycle {
-        return registry
-    }
+    override val lifecycle: Lifecycle
+        get() {
+            return registry
+        }
 
     private fun updateState() {
         registry.currentState =

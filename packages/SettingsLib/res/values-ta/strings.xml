@@ -173,7 +173,7 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"பயனர்: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"சில இயல்புநிலைகள் அமைக்கப்பட்டன"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"இயல்புநிலைகள் எதுவும் அமைக்கப்படவில்லை"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"உரை வடிவத்திலிருந்து பேச்சுக்கான அமைப்பு"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"\'எழுத்திலிருந்து பேச்சு\' அமைப்புகள்"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"உரையிலிருந்து பேச்சாக மாற்றுதல்"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"பேச்சு வீதம்"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"பேசப்படும் உரையின் வேகம்"</string>
@@ -258,7 +258,7 @@
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"பிழை அறிக்கையைப் பெற பவர் மெனுவில் விருப்பத்தைக் காட்டு"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"செயலில் வைத்திரு"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"சார்ஜ் ஏறும்போது திரை எப்போதும் உறக்கநிலைக்குச் செல்லாது"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"புளூடூத் HCI ஸ்னுப் பதிவை இயக்கு"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"புளூடூத் HCI ஸ்னுப் பதிவை இயக்குதல்"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"புளூடூத் பேக்கெட்டுகளைக் கண்டறி. (இந்த அமைப்பை மாற்றிய பின்பு, புளூடூத்தை மாற்று)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM திறத்தல்"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"பூட்லோடரைத் திறக்க அனுமதி"</string>

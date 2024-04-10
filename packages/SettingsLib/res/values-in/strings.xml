@@ -175,7 +175,7 @@
     <string name="launch_defaults_none" msgid="8049374306261262709">"Tidak ada setelan default"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Setelan text-to-speech"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Output text-to-speech"</string>
-    <string name="tts_default_rate_title" msgid="3964187817364304022">"Kecepatan ucapan"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"Kecepatan bicara"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Kecepatan teks diucapkan"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Tinggi nada"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Memengaruhi nada ucapan yang disintesis"</string>
@@ -510,7 +510,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Gunakan bahasa sistem"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Gagal membuka setelan untuk <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Metode masukan ini mungkin dapat mengumpulkan semua teks yang Anda ketik, termasuk data pribadi seperti sandi dan nomor kartu kredit. Metode ini berasal dari aplikasi <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Gunakan metode masukan ini?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Catatan: Setelah boot ulang, aplikasi ini tidak dapat dimulai hingga kunci ponsel dibuka"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Catatan: Setelah perangkat dimulai ulang, aplikasi ini tidak dapat mulai berjalan hingga kunci ponsel dibuka"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"Status pendaftaran IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Terdaftar"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Tidak terdaftar"</string>

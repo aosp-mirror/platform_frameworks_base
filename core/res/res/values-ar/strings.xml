@@ -308,7 +308,7 @@
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"الوصول إلى جهات اتصالك"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"الموقع الجغرافي"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"الوصول إلى موقع هذا الجهاز"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"التقويم"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"‏تقويم Google"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"الوصول إلى تقويمك"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"‏إرسال رسائل قصيرة SMS وعرضها"</string>
@@ -1260,7 +1260,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"بدء التطبيقات."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"جارٍ إعادة التشغيل."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"ضغطت على زر التشغيل، يؤدي هذا عادةً إلى إيقاف الشاشة.\n\nجرِّب النقر بخفة أثناء إعداد بصمتك."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"لإيقاف عملية الإعداد، أغلِق الشاشة."</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"لإيقاف عملية الإعداد، أغلِق الشاشة"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"إيقاف"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"هل تريد مواصلة تأكيد بصمة إصبعك؟"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"ضغطت على زر التشغيل، يؤدي هذا عادةً إلى إيقاف الشاشة.\n\nجرِّب النقر بخفة لتأكيد بصمة إصبعك."</string>
@@ -1361,7 +1361,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"لا أذونات مطلوبة"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"قد يكلفك هذا مالاً."</string>
     <string name="dlg_ok" msgid="5103447663504839312">"حسنًا"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"‏جارٍ شحن هذا الجهاز عبر منفذ USB"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"‏جارٍ شحن هذا الجهاز عبر USB"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"‏جارٍ شحن الجهاز المتصل عبر USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"‏تمّ تفعيل نقل الملفات عبر USB"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"‏تمّ تفعيل PTP عبر USB"</string>

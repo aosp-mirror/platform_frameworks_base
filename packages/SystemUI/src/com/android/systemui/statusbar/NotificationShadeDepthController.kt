@@ -272,7 +272,7 @@ class NotificationShadeDepthController @Inject constructor(
                             blurUtils.blurRadiusOfRatio(animation.animatedValue as Float)
                 }
                 addListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) {
+                    override fun onAnimationEnd(animation: Animator) {
                         keyguardAnimator = null
                         wakeAndUnlockBlurRadius = 0f
                     }
@@ -553,7 +553,6 @@ class NotificationShadeDepthController @Inject constructor(
          */
         fun onWallpaperZoomOutChanged(zoomOut: Float)
 
-        @JvmDefault
         fun onBlurRadiusChanged(blurRadius: Int) {}
     }
 }

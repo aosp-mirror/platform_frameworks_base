@@ -21,10 +21,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Geef je pincode op"</string>
-    <string name="keyguard_enter_pin" msgid="8114529922480276834">"Geef de pincode op"</string>
+    <string name="keyguard_enter_pin" msgid="8114529922480276834">"Voer pincode in"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Geef je patroon op"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Teken het patroon"</string>
-    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Geef je wachtwoord op"</string>
+    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Voer je wachtwoord in"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"Geef het wachtwoord op"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Ongeldige kaart."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Opgeladen"</string>

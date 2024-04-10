@@ -23,13 +23,13 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
         appIcon: Drawable
 ) : DesktopModeWindowDecorationViewHolder(rootView) {
 
-    private val captionView: View = rootView.findViewById(R.id.desktop_mode_caption)
-    private val captionHandle: View = rootView.findViewById(R.id.caption_handle)
-    private val openMenuButton: View = rootView.findViewById(R.id.open_menu_button)
-    private val closeWindowButton: ImageButton = rootView.findViewById(R.id.close_window)
-    private val expandMenuButton: ImageButton = rootView.findViewById(R.id.expand_menu_button)
-    private val appNameTextView: TextView = rootView.findViewById(R.id.application_name)
-    private val appIconImageView: ImageView = rootView.findViewById(R.id.application_icon)
+    private val captionView: View = rootView.requireViewById(R.id.desktop_mode_caption)
+    private val captionHandle: View = rootView.requireViewById(R.id.caption_handle)
+    private val openMenuButton: View = rootView.requireViewById(R.id.open_menu_button)
+    private val closeWindowButton: ImageButton = rootView.requireViewById(R.id.close_window)
+    private val expandMenuButton: ImageButton = rootView.requireViewById(R.id.expand_menu_button)
+    private val appNameTextView: TextView = rootView.requireViewById(R.id.application_name)
+    private val appIconImageView: ImageView = rootView.requireViewById(R.id.application_icon)
 
     init {
         captionView.setOnTouchListener(onCaptionTouchListener)
@@ -45,7 +45,9 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
     override fun bindData(taskInfo: RunningTaskInfo) {
 
         val captionDrawable = captionView.background as GradientDrawable
-        captionDrawable.setColor(taskInfo.taskDescription.statusBarColor)
+        taskInfo.taskDescription?.statusBarColor?.let {
+            captionDrawable.setColor(it)
+        }
 
         closeWindowButton.imageTintList = ColorStateList.valueOf(
                 getCaptionCloseButtonColor(taskInfo))

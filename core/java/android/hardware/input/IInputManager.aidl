@@ -63,6 +63,9 @@ interface IInputManager {
     // active keyboard layout.
     int getKeyCodeForKeyLocation(int deviceId, in int locationKeyCode);
 
+    // Returns the mouse pointer speed.
+    int getMousePointerSpeed();
+
     // Temporarily changes the pointer speed.
     void tryPointerSpeed(int speed);
 

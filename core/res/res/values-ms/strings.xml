@@ -1009,7 +1009,7 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"Lupa corak?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"Buka kunci akaun"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"Terlalu banyak percubaan melukis corak"</string>
-    <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"Untuk membuka kunci, log masuk dengan akaun Google anda."</string>
+    <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"Untuk membuka kunci, log masuk dengan Google Account anda."</string>
     <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"Nama Pengguna (E-mel)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"Kata laluan"</string>
     <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"Log masuk"</string>
@@ -1660,7 +1660,7 @@
     <string name="kg_invalid_puk" msgid="4809502818518963344">"Masukkan semula kod PIN yang betul. Percubaan berulang akan melumpuhkan SIM secara kekal."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"Kod PIN tidak sepadan"</string>
     <string name="kg_login_too_many_attempts" msgid="699292728290654121">"Terlalu banyak percubaan melukis corak"</string>
-    <string name="kg_login_instructions" msgid="3619844310339066827">"Untuk membuka kunci, log masuk dengan akaun Google anda."</string>
+    <string name="kg_login_instructions" msgid="3619844310339066827">"Untuk membuka kunci, log masuk dengan Google Account anda."</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"Nama Pengguna (E-mel)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"Kata laluan"</string>
     <string name="kg_login_submit_button" msgid="893611277617096870">"Log masuk"</string>
@@ -1872,7 +1872,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Penjimat Bateri menghidupkan tema Gelap dan mengehadkan atau mematikan aktiviti latar, sesetengah kesan visual, ciri tertentu dan sesetengah sambungan rangkaian."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Penjimat Bateri menghidupkan tema Gelap dan mengehadkan atau mematikan aktiviti latar, sesetengah kesan visual, ciri tertentu dan sesetengah sambungan rangkaian."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Untuk membantu penggunaan data dikurangkan, Penjimat Data menghalang sesetengah apl daripada menghantar atau menerima data di latar. Apl yang sedang digunakan boleh mengakses data tetapi mungkin tidak secara kerap. Perkara ini mungkin bermaksud bahawa imej tidak dipaparkan sehingga anda mengetik pada imej itu, contohnya."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Untuk mengurangkan penggunaan data, Penjimat Data menghalang sesetengah apl daripada menghantar atau menerima data di latar. Apl yang sedang digunakan boleh mengakses data tetapi mungkin tidak secara kerap. Sebagai contoh, imej tidak dipaparkan sehingga anda mengetik pada imej itu."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Hidupkan Penjimat Data?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Hidupkan"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Selama satu minit (hingga{formattedTime})}other{Selama # minit (hingga {formattedTime})}}"</string>

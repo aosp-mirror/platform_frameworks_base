@@ -145,13 +145,10 @@ class PrivacyConfig @Inject constructor(
     }
 
     interface Callback {
-        @JvmDefault
         fun onFlagMicCameraChanged(flag: Boolean) {}
 
-        @JvmDefault
         fun onFlagLocationChanged(flag: Boolean) {}
 
-        @JvmDefault
         fun onFlagMediaProjectionChanged(flag: Boolean) {}
     }
 }

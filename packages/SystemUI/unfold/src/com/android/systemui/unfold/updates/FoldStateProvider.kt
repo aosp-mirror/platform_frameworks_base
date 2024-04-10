@@ -31,9 +31,9 @@ interface FoldStateProvider : CallbackController<FoldUpdatesListener> {
     val isFinishedOpening: Boolean
 
     interface FoldUpdatesListener {
-        @JvmDefault fun onHingeAngleUpdate(@FloatRange(from = 0.0, to = 180.0) angle: Float) {}
-        @JvmDefault fun onFoldUpdate(@FoldUpdate update: Int) {}
-        @JvmDefault fun onUnfoldedScreenAvailable() {}
+        fun onHingeAngleUpdate(@FloatRange(from = 0.0, to = 180.0) angle: Float) {}
+        fun onFoldUpdate(@FoldUpdate update: Int) {}
+        fun onUnfoldedScreenAvailable() {}
     }
 
     @IntDef(

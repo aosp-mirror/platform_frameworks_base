@@ -889,7 +889,7 @@
     <string name="phoneTypeOther" msgid="6918196243648754715">"Khác"</string>
     <string name="phoneTypeCallback" msgid="3455781500844157767">"Số gọi lại"</string>
     <string name="phoneTypeCar" msgid="4604775148963129195">"Ô tô"</string>
-    <string name="phoneTypeCompanyMain" msgid="4482773154536455441">"Số ĐT CQ chính"</string>
+    <string name="phoneTypeCompanyMain" msgid="4482773154536455441">"Số chính ở nơi làm việc"</string>
     <string name="phoneTypeIsdn" msgid="2496238954533998512">"ISDN"</string>
     <string name="phoneTypeMain" msgid="5199722006991000111">"Số chính"</string>
     <string name="phoneTypeOtherFax" msgid="3037145630364770357">"Số fax Khác"</string>
