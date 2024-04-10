@@ -525,6 +525,10 @@ final class WearableSensingManagerPerUserService extends
                                                 futureFromWearableSensingService.complete(null);
                                                 return;
                                             }
+                                            if (pfdFromApp == null) {
+                                                futureFromWearableSensingService.complete(null);
+                                                return;
+                                            }
                                             if (isReadOnly(pfdFromApp)) {
                                                 futureFromWearableSensingService.complete(
                                                         pfdFromApp);
