@@ -35,7 +35,7 @@ import java.util.Objects;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class AggregatedPowerStatsProcessorTest {
+public class PowerStatsProcessorTest {
 
     @Test
     public void createPowerEstimationPlan_allDeviceStatesPresentInUidStates() {
@@ -44,8 +44,8 @@ public class AggregatedPowerStatsProcessorTest {
                         .trackDeviceStates(STATE_POWER, STATE_SCREEN)
                         .trackUidStates(STATE_POWER, STATE_SCREEN, STATE_PROCESS_STATE);
 
-        AggregatedPowerStatsProcessor.PowerEstimationPlan plan =
-                new AggregatedPowerStatsProcessor.PowerEstimationPlan(config);
+        PowerStatsProcessor.PowerEstimationPlan plan =
+                new PowerStatsProcessor.PowerEstimationPlan(config);
         assertThat(deviceStateEstimatesToStrings(plan))
                 .containsExactly("[0, 0]", "[0, 1]", "[1, 0]", "[1, 1]");
         assertThat(combinedDeviceStatsToStrings(plan))
@@ -65,8 +65,8 @@ public class AggregatedPowerStatsProcessorTest {
                         .trackDeviceStates(STATE_POWER, STATE_SCREEN)
                         .trackUidStates(STATE_POWER, STATE_PROCESS_STATE);
 
-        AggregatedPowerStatsProcessor.PowerEstimationPlan plan =
-                new AggregatedPowerStatsProcessor.PowerEstimationPlan(config);
+        PowerStatsProcessor.PowerEstimationPlan plan =
+                new PowerStatsProcessor.PowerEstimationPlan(config);
 
         assertThat(deviceStateEstimatesToStrings(plan))
                 .containsExactly("[0, 0]", "[0, 1]", "[1, 0]", "[1, 1]");
@@ -81,13 +81,13 @@ public class AggregatedPowerStatsProcessorTest {
     }
 
     private static List<String> deviceStateEstimatesToStrings(
-            AggregatedPowerStatsProcessor.PowerEstimationPlan plan) {
+            PowerStatsProcessor.PowerEstimationPlan plan) {
         return plan.deviceStateEstimations.stream()
                 .map(dse -> dse.stateValues).map(Arrays::toString).toList();
     }
 
     private static List<String> combinedDeviceStatsToStrings(
-            AggregatedPowerStatsProcessor.PowerEstimationPlan plan) {
+            PowerStatsProcessor.PowerEstimationPlan plan) {
         return plan.combinedDeviceStateEstimations.stream()
                 .map(cds -> cds.deviceStateEstimations)
                 .map(dses -> dses.stream()
@@ -97,7 +97,7 @@ public class AggregatedPowerStatsProcessorTest {
     }
 
     private static List<String> uidStateEstimatesToStrings(
-            AggregatedPowerStatsProcessor.PowerEstimationPlan plan,
+            PowerStatsProcessor.PowerEstimationPlan plan,
             AggregatedPowerStatsConfig.PowerComponent config) {
         MultiStateStats.States[] uidStateConfig = config.getUidStateConfig();
         return plan.uidStateEstimates.stream()

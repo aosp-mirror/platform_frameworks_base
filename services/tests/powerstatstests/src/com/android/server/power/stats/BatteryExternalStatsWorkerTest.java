@@ -36,6 +36,7 @@ import android.hardware.power.stats.EnergyConsumerType;
 import android.hardware.power.stats.EnergyMeasurement;
 import android.hardware.power.stats.PowerEntity;
 import android.hardware.power.stats.StateResidencyResult;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.power.PowerStatsInternal;
 import android.util.IntArray;
 import android.util.SparseArray;
@@ -47,6 +48,7 @@ import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.PowerProfile;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -59,7 +61,10 @@ import java.util.concurrent.CompletableFuture;
  * atest FrameworksServicesTests:BatteryExternalStatsWorkerTest
  */
 @SuppressWarnings("GuardedBy")
+@android.platform.test.annotations.DisabledOnRavenwood
 public class BatteryExternalStatsWorkerTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
     private BatteryExternalStatsWorker mBatteryExternalStatsWorker;
     private TestBatteryStatsImpl mBatteryStatsImpl;
     private TestPowerStatsInternal mPowerStatsInternal;
@@ -215,7 +220,8 @@ public class BatteryExternalStatsWorkerTest {
 
     public class TestBatteryStatsImpl extends BatteryStatsImpl {
         public TestBatteryStatsImpl(Context context) {
-            super(Clock.SYSTEM_CLOCK, null, null, null, null, null, null);
+            super(new BatteryStatsConfig.Builder().build(), Clock.SYSTEM_CLOCK, null, null, null,
+                    null, null, null);
             mPowerProfile = new PowerProfile(context, true /* forTest */);
 
             SparseArray<int[]> cpusByPolicy = new SparseArray<>();

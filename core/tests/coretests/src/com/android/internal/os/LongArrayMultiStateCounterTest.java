@@ -55,6 +55,21 @@ public class LongArrayMultiStateCounterTest {
     }
 
     @Test
+    public void copyStatesFrom() {
+        LongArrayMultiStateCounter source = new LongArrayMultiStateCounter(2, 1);
+        updateValue(source, new long[]{0}, 1000);
+        source.setState(0, 1000);
+        source.setState(1, 2000);
+
+        LongArrayMultiStateCounter target = new LongArrayMultiStateCounter(2, 1);
+        target.copyStatesFrom(source);
+        updateValue(target, new long[]{1000}, 5000);
+
+        assertCounts(target, 0, new long[]{250});
+        assertCounts(target, 1, new long[]{750});
+    }
+
+    @Test
     public void setValue() {
         LongArrayMultiStateCounter counter = new LongArrayMultiStateCounter(2, 4);
 

@@ -267,5 +267,10 @@ android_ravenwood_test {
         generate_get_transaction_name: true,
         local_include_dirs: ["aidl"],
     },
+    java_resources: [
+        "res/xml/power_profile_test.xml",
+        "res/xml/power_profile_test_cpu_legacy.xml",
+        "res/xml/power_profile_test_modem.xml",
+    ],
     auto_gen_config: true,
 }

@@ -139,7 +139,7 @@ public class PowerStatsExporter {
             return;
         }
 
-        PowerStatsCollector.StatsArrayLayout layout = new PowerStatsCollector.StatsArrayLayout();
+        PowerStatsLayout layout = new PowerStatsLayout();
         layout.fromExtras(descriptor.extras);
 
         long[] deviceStats = new long[descriptor.statsArrayLength];
@@ -164,9 +164,20 @@ public class PowerStatsExporter {
         deviceScope.addConsumedPower(powerComponentId,
                 totalPower[0], BatteryConsumer.POWER_MODEL_UNDEFINED);
 
+        if (layout.isUidPowerAttributionSupported()) {
+            populateUidBatteryConsumers(batteryUsageStatsBuilder, powerComponent,
+                    powerComponentStats, layout);
+        }
+    }
+
+    private static void populateUidBatteryConsumers(
+            BatteryUsageStats.Builder batteryUsageStatsBuilder,
+            AggregatedPowerStatsConfig.PowerComponent powerComponent,
+            PowerComponentAggregatedPowerStats powerComponentStats,
+            PowerStatsLayout layout) {
+        int powerComponentId = powerComponent.getPowerComponentId();
+        PowerStats.Descriptor descriptor = powerComponentStats.getPowerStatsDescriptor();
         long[] uidStats = new long[descriptor.uidStatsArrayLength];
-        ArrayList<Integer> uids = new ArrayList<>();
-        powerComponentStats.collectUids(uids);
 
         boolean breakDownByProcState =
                 batteryUsageStatsBuilder.isProcessStateDataNeeded()
@@ -177,6 +188,8 @@ public class PowerStatsExporter {
         double[] powerByProcState =
                 new double[breakDownByProcState ? BatteryConsumer.PROCESS_STATE_COUNT : 1];
         double powerAllApps = 0;
+        ArrayList<Integer> uids = new ArrayList<>();
+        powerComponentStats.collectUids(uids);
         for (int uid : uids) {
             UidBatteryConsumer.Builder builder =
                     batteryUsageStatsBuilder.getOrCreateUidBatteryConsumerBuilder(uid);

@@ -75,7 +75,7 @@ public class AggregatedPowerStatsConfig {
         private final int mPowerComponentId;
         private @TrackedState int[] mTrackedDeviceStates;
         private @TrackedState int[] mTrackedUidStates;
-        private AggregatedPowerStatsProcessor mProcessor = NO_OP_PROCESSOR;
+        private PowerStatsProcessor mProcessor = NO_OP_PROCESSOR;
 
         PowerComponent(int powerComponentId) {
             this.mPowerComponentId = powerComponentId;
@@ -85,6 +85,9 @@ public class AggregatedPowerStatsConfig {
          * Configures which states should be tracked as separate dimensions for the entire device.
          */
         public PowerComponent trackDeviceStates(@TrackedState int... states) {
+            if (mTrackedDeviceStates != null) {
+                throw new IllegalStateException("Component is already configured");
+            }
             mTrackedDeviceStates = states;
             return this;
         }
@@ -93,6 +96,9 @@ public class AggregatedPowerStatsConfig {
          * Configures which states should be tracked as separate dimensions on a per-UID basis.
          */
         public PowerComponent trackUidStates(@TrackedState int... states) {
+            if (mTrackedUidStates != null) {
+                throw new IllegalStateException("Component is already configured");
+            }
             mTrackedUidStates = states;
             return this;
         }
@@ -102,7 +108,7 @@ public class AggregatedPowerStatsConfig {
          * before giving the aggregates stats to consumers. The processor can complete the
          * aggregation process, for example by computing estimated power usage.
          */
-        public PowerComponent setProcessor(@NonNull AggregatedPowerStatsProcessor processor) {
+        public PowerComponent setProcessor(@NonNull PowerStatsProcessor processor) {
             mProcessor = processor;
             return this;
         }
@@ -137,7 +143,7 @@ public class AggregatedPowerStatsConfig {
         }
 
         @NonNull
-        public AggregatedPowerStatsProcessor getProcessor() {
+        public PowerStatsProcessor getProcessor() {
             return mProcessor;
         }
 
@@ -153,6 +159,7 @@ public class AggregatedPowerStatsConfig {
             }
             return false;
         }
+
     }
 
     private final List<PowerComponent> mPowerComponents = new ArrayList<>();
@@ -168,23 +175,55 @@ public class AggregatedPowerStatsConfig {
         return builder;
     }
 
+    /**
+     * Creates a configuration for the specified power component, which is a subcomponent
+     * of a different power component.  The tracked states will be the same as the parent
+     * component's.
+     */
+    public PowerComponent trackPowerComponent(int powerComponentId,
+            int parentPowerComponentId) {
+        PowerComponent parent = null;
+        for (int i = 0; i < mPowerComponents.size(); i++) {
+            PowerComponent powerComponent = mPowerComponents.get(i);
+            if (powerComponent.getPowerComponentId() == parentPowerComponentId) {
+                parent = powerComponent;
+                break;
+            }
+        }
+
+        if (parent == null) {
+            throw new IllegalArgumentException(
+                    "Parent component " + parentPowerComponentId + " is not configured");
+        }
+
+        PowerComponent powerComponent = trackPowerComponent(powerComponentId);
+        powerComponent.mTrackedDeviceStates = parent.mTrackedDeviceStates;
+        powerComponent.mTrackedUidStates = parent.mTrackedUidStates;
+        return powerComponent;
+    }
+
     public List<PowerComponent> getPowerComponentsAggregatedStatsConfigs() {
         return mPowerComponents;
     }
 
-    private static final AggregatedPowerStatsProcessor NO_OP_PROCESSOR =
-            new AggregatedPowerStatsProcessor() {
+    private static final PowerStatsProcessor NO_OP_PROCESSOR =
+            new PowerStatsProcessor() {
                 @Override
-                public void finish(PowerComponentAggregatedPowerStats stats) {
+                void finish(PowerComponentAggregatedPowerStats stats) {
                 }
 
                 @Override
-                public String deviceStatsToString(PowerStats.Descriptor descriptor, long[] stats) {
+                String deviceStatsToString(PowerStats.Descriptor descriptor, long[] stats) {
                     return Arrays.toString(stats);
                 }
 
                 @Override
-                public String uidStatsToString(PowerStats.Descriptor descriptor, long[] stats) {
+                String stateStatsToString(PowerStats.Descriptor descriptor, int key, long[] stats) {
+                    return descriptor.getStateLabel(key) + " " + Arrays.toString(stats);
+                }
+
+                @Override
+                String uidStatsToString(PowerStats.Descriptor descriptor, long[] stats) {
                     return Arrays.toString(stats);
                 }
             };

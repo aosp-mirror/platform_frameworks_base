@@ -29,8 +29,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProcessor {
-    private static final String TAG = "CpuAggregatedPowerStatsProcessor";
+public class CpuPowerStatsProcessor extends PowerStatsProcessor {
+    private static final String TAG = "CpuPowerStatsProcessor";
 
     private static final double HOUR_IN_MILLIS = TimeUnit.HOURS.toMillis(1);
     private static final int UNKNOWN = -1;
@@ -64,7 +64,7 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
     private PowerStats.Descriptor mLastUsedDescriptor;
     // Cached results of parsing of current PowerStats.Descriptor. Only refreshed when
     // mLastUsedDescriptor changes
-    private CpuPowerStatsCollector.CpuStatsArrayLayout mStatsLayout;
+    private CpuPowerStatsLayout mStatsLayout;
     // Sequence of steps for power estimation and intermediate results.
     private PowerEstimationPlan mPlan;
 
@@ -73,8 +73,7 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
     // Temp array for retrieval of UID power stats, to avoid repeated allocations
     private long[] mTmpUidStatsArray;
 
-    public CpuAggregatedPowerStatsProcessor(PowerProfile powerProfile,
-            CpuScalingPolicies scalingPolicies) {
+    public CpuPowerStatsProcessor(PowerProfile powerProfile, CpuScalingPolicies scalingPolicies) {
         mCpuScalingPolicies = scalingPolicies;
         mCpuScalingStepCount = scalingPolicies.getScalingStepCount();
         mScalingStepToCluster = new int[mCpuScalingStepCount];
@@ -106,7 +105,7 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
         }
 
         mLastUsedDescriptor = descriptor;
-        mStatsLayout = new CpuPowerStatsCollector.CpuStatsArrayLayout();
+        mStatsLayout = new CpuPowerStatsLayout();
         mStatsLayout.fromExtras(descriptor.extras);
 
         mTmpDeviceStatsArray = new long[descriptor.statsArrayLength];
@@ -524,6 +523,12 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
         sb.append(" power: ").append(
                 BatteryStats.formatCharge(mStatsLayout.getDevicePowerEstimate(stats)));
         return sb.toString();
+    }
+
+    @Override
+    String stateStatsToString(PowerStats.Descriptor descriptor, int key, long[] stats) {
+        // Unsupported for this power component
+        return null;
     }
 
     @Override

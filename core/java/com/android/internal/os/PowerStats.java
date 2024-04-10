@@ -47,7 +47,7 @@ public final class PowerStats {
 
     private static final BatteryStatsHistory.VarintParceler VARINT_PARCELER =
             new BatteryStatsHistory.VarintParceler();
-    private static final byte PARCEL_FORMAT_VERSION = 1;
+    private static final byte PARCEL_FORMAT_VERSION = 2;
 
     private static final int PARCEL_FORMAT_VERSION_MASK = 0x000000FF;
     private static final int PARCEL_FORMAT_VERSION_SHIFT =
@@ -57,7 +57,12 @@ public final class PowerStats {
             Integer.numberOfTrailingZeros(STATS_ARRAY_LENGTH_MASK);
     public static final int MAX_STATS_ARRAY_LENGTH =
             (1 << Integer.bitCount(STATS_ARRAY_LENGTH_MASK)) - 1;
-    private static final int UID_STATS_ARRAY_LENGTH_MASK = 0x00FF0000;
+    private static final int STATE_STATS_ARRAY_LENGTH_MASK = 0x00FF0000;
+    private static final int STATE_STATS_ARRAY_LENGTH_SHIFT =
+            Integer.numberOfTrailingZeros(STATE_STATS_ARRAY_LENGTH_MASK);
+    public static final int MAX_STATE_STATS_ARRAY_LENGTH =
+            (1 << Integer.bitCount(STATE_STATS_ARRAY_LENGTH_MASK)) - 1;
+    private static final int UID_STATS_ARRAY_LENGTH_MASK = 0xFF000000;
     private static final int UID_STATS_ARRAY_LENGTH_SHIFT =
             Integer.numberOfTrailingZeros(UID_STATS_ARRAY_LENGTH_MASK);
     public static final int MAX_UID_STATS_ARRAY_LENGTH =
@@ -74,6 +79,10 @@ public final class PowerStats {
         private static final String XML_ATTR_ID = "id";
         private static final String XML_ATTR_NAME = "name";
         private static final String XML_ATTR_STATS_ARRAY_LENGTH = "stats-array-length";
+        private static final String XML_TAG_STATE = "state";
+        private static final String XML_ATTR_STATE_KEY = "key";
+        private static final String XML_ATTR_STATE_LABEL = "label";
+        private static final String XML_ATTR_STATE_STATS_ARRAY_LENGTH = "state-stats-array-length";
         private static final String XML_ATTR_UID_STATS_ARRAY_LENGTH = "uid-stats-array-length";
         private static final String XML_TAG_EXTRAS = "extras";
 
@@ -85,7 +94,24 @@ public final class PowerStats {
         public final int powerComponentId;
         public final String name;
 
+        /**
+         * Stats for the power component, such as the total usage time.
+         */
         public final int statsArrayLength;
+
+        /**
+         * Map of device state codes to their corresponding human-readable labels.
+         */
+        public final SparseArray<String> stateLabels;
+
+        /**
+         * Stats for a specific state of the power component, e.g. "mobile radio in the 5G mode"
+         */
+        public final int stateStatsArrayLength;
+
+        /**
+         * Stats for the usage of this power component by a specific UID (app)
+         */
         public final int uidStatsArrayLength;
 
         /**
@@ -95,16 +121,24 @@ public final class PowerStats {
         public final PersistableBundle extras;
 
         public Descriptor(@BatteryConsumer.PowerComponent int powerComponentId,
-                int statsArrayLength, int uidStatsArrayLength, @NonNull PersistableBundle extras) {
+                int statsArrayLength, @Nullable SparseArray<String> stateLabels,
+                int stateStatsArrayLength, int uidStatsArrayLength,
+                @NonNull PersistableBundle extras) {
             this(powerComponentId, BatteryConsumer.powerComponentIdToString(powerComponentId),
-                    statsArrayLength, uidStatsArrayLength, extras);
+                    statsArrayLength, stateLabels, stateStatsArrayLength, uidStatsArrayLength,
+                    extras);
         }
 
         public Descriptor(int customPowerComponentId, String name, int statsArrayLength,
+                @Nullable SparseArray<String> stateLabels, int stateStatsArrayLength,
                 int uidStatsArrayLength, PersistableBundle extras) {
             if (statsArrayLength > MAX_STATS_ARRAY_LENGTH) {
                 throw new IllegalArgumentException(
                         "statsArrayLength is too high. Max = " + MAX_STATS_ARRAY_LENGTH);
+            }
+            if (stateStatsArrayLength > MAX_STATE_STATS_ARRAY_LENGTH) {
+                throw new IllegalArgumentException(
+                        "stateStatsArrayLength is too high. Max = " + MAX_STATE_STATS_ARRAY_LENGTH);
             }
             if (uidStatsArrayLength > MAX_UID_STATS_ARRAY_LENGTH) {
                 throw new IllegalArgumentException(
@@ -113,8 +147,22 @@ public final class PowerStats {
             this.powerComponentId = customPowerComponentId;
             this.name = name;
             this.statsArrayLength = statsArrayLength;
+            this.stateLabels = stateLabels != null ? stateLabels : new SparseArray<>();
+            this.stateStatsArrayLength = stateStatsArrayLength;
             this.uidStatsArrayLength = uidStatsArrayLength;
             this.extras = extras;
+        }
+
+        /**
+         * Returns the label associated with the give state key, e.g. "5G-high" for the
+         * state of Mobile Radio representing the 5G mode and high signal power.
+         */
+        public String getStateLabel(int key) {
+            String label = stateLabels.get(key);
+            if (label != null) {
+                return label;
+            }
+            return name + "-" + Integer.toHexString(key);
         }
 
         /**
@@ -125,11 +173,18 @@ public final class PowerStats {
                              & PARCEL_FORMAT_VERSION_MASK)
                             | ((statsArrayLength << STATS_ARRAY_LENGTH_SHIFT)
                                & STATS_ARRAY_LENGTH_MASK)
+                            | ((stateStatsArrayLength << STATE_STATS_ARRAY_LENGTH_SHIFT)
+                               & STATE_STATS_ARRAY_LENGTH_MASK)
                             | ((uidStatsArrayLength << UID_STATS_ARRAY_LENGTH_SHIFT)
                                & UID_STATS_ARRAY_LENGTH_MASK);
             parcel.writeInt(firstWord);
             parcel.writeInt(powerComponentId);
             parcel.writeString(name);
+            parcel.writeInt(stateLabels.size());
+            for (int i = 0, size = stateLabels.size(); i < size; i++) {
+                parcel.writeInt(stateLabels.keyAt(i));
+                parcel.writeString(stateLabels.valueAt(i));
+            }
             extras.writeToParcel(parcel, 0);
         }
 
@@ -148,13 +203,22 @@ public final class PowerStats {
             }
             int statsArrayLength =
                     (firstWord & STATS_ARRAY_LENGTH_MASK) >>> STATS_ARRAY_LENGTH_SHIFT;
+            int stateStatsArrayLength =
+                    (firstWord & STATE_STATS_ARRAY_LENGTH_MASK) >>> STATE_STATS_ARRAY_LENGTH_SHIFT;
             int uidStatsArrayLength =
                     (firstWord & UID_STATS_ARRAY_LENGTH_MASK) >>> UID_STATS_ARRAY_LENGTH_SHIFT;
             int powerComponentId = parcel.readInt();
             String name = parcel.readString();
+            int stateLabelCount = parcel.readInt();
+            SparseArray<String> stateLabels = new SparseArray<>(stateLabelCount);
+            for (int i = stateLabelCount; i > 0; i--) {
+                int key = parcel.readInt();
+                String label = parcel.readString();
+                stateLabels.put(key, label);
+            }
             PersistableBundle extras = parcel.readPersistableBundle();
-            return new Descriptor(powerComponentId, name, statsArrayLength, uidStatsArrayLength,
-                    extras);
+            return new Descriptor(powerComponentId, name, statsArrayLength, stateLabels,
+                    stateStatsArrayLength, uidStatsArrayLength, extras);
         }
 
         @Override
@@ -163,11 +227,13 @@ public final class PowerStats {
             if (!(o instanceof Descriptor)) return false;
             Descriptor that = (Descriptor) o;
             return powerComponentId == that.powerComponentId
-                   && statsArrayLength == that.statsArrayLength
-                   && uidStatsArrayLength == that.uidStatsArrayLength
-                   && Objects.equals(name, that.name)
-                   && extras.size() == that.extras.size()        // Unparcel the Parcel if not yet
-                   && Bundle.kindofEquals(extras,
+                    && statsArrayLength == that.statsArrayLength
+                    && stateLabels.contentEquals(that.stateLabels)
+                    && stateStatsArrayLength == that.stateStatsArrayLength
+                    && uidStatsArrayLength == that.uidStatsArrayLength
+                    && Objects.equals(name, that.name)
+                    && extras.size() == that.extras.size()        // Unparcel the Parcel if not yet
+                    && Bundle.kindofEquals(extras,
                     that.extras);  // Since the Parcel is now unparceled, do a deep comparison
         }
 
@@ -179,7 +245,14 @@ public final class PowerStats {
             serializer.attributeInt(null, XML_ATTR_ID, powerComponentId);
             serializer.attribute(null, XML_ATTR_NAME, name);
             serializer.attributeInt(null, XML_ATTR_STATS_ARRAY_LENGTH, statsArrayLength);
+            serializer.attributeInt(null, XML_ATTR_STATE_STATS_ARRAY_LENGTH, stateStatsArrayLength);
             serializer.attributeInt(null, XML_ATTR_UID_STATS_ARRAY_LENGTH, uidStatsArrayLength);
+            for (int i = stateLabels.size() - 1; i >= 0; i--) {
+                serializer.startTag(null, XML_TAG_STATE);
+                serializer.attributeInt(null, XML_ATTR_STATE_KEY, stateLabels.keyAt(i));
+                serializer.attribute(null, XML_ATTR_STATE_LABEL, stateLabels.valueAt(i));
+                serializer.endTag(null, XML_TAG_STATE);
+            }
             try {
                 serializer.startTag(null, XML_TAG_EXTRAS);
                 extras.saveToXml(serializer);
@@ -199,6 +272,8 @@ public final class PowerStats {
             int powerComponentId = -1;
             String name = null;
             int statsArrayLength = 0;
+            SparseArray<String> stateLabels = new SparseArray<>();
+            int stateStatsArrayLength = 0;
             int uidStatsArrayLength = 0;
             PersistableBundle extras = null;
             int eventType = parser.getEventType();
@@ -212,8 +287,15 @@ public final class PowerStats {
                             name = parser.getAttributeValue(null, XML_ATTR_NAME);
                             statsArrayLength = parser.getAttributeInt(null,
                                     XML_ATTR_STATS_ARRAY_LENGTH);
+                            stateStatsArrayLength = parser.getAttributeInt(null,
+                                    XML_ATTR_STATE_STATS_ARRAY_LENGTH);
                             uidStatsArrayLength = parser.getAttributeInt(null,
                                     XML_ATTR_UID_STATS_ARRAY_LENGTH);
+                            break;
+                        case XML_TAG_STATE:
+                            int value = parser.getAttributeInt(null, XML_ATTR_STATE_KEY);
+                            String label = parser.getAttributeValue(null, XML_ATTR_STATE_LABEL);
+                            stateLabels.put(value, label);
                             break;
                         case XML_TAG_EXTRAS:
                             extras = PersistableBundle.restoreFromXml(parser);
@@ -225,11 +307,11 @@ public final class PowerStats {
             if (powerComponentId == -1) {
                 return null;
             } else if (powerComponentId >= BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID) {
-                return new Descriptor(powerComponentId, name, statsArrayLength, uidStatsArrayLength,
-                        extras);
+                return new Descriptor(powerComponentId, name, statsArrayLength,
+                        stateLabels, stateStatsArrayLength, uidStatsArrayLength, extras);
             } else if (powerComponentId < BatteryConsumer.POWER_COMPONENT_COUNT) {
-                return new Descriptor(powerComponentId, statsArrayLength, uidStatsArrayLength,
-                        extras);
+                return new Descriptor(powerComponentId, statsArrayLength, stateLabels,
+                        stateStatsArrayLength, uidStatsArrayLength, extras);
             } else {
                 Slog.e(TAG, "Unrecognized power component: " + powerComponentId);
                 return null;
@@ -247,12 +329,14 @@ public final class PowerStats {
                 extras.size();  // Unparcel
             }
             return "PowerStats.Descriptor{"
-                   + "powerComponentId=" + powerComponentId
-                   + ", name='" + name + '\''
-                   + ", statsArrayLength=" + statsArrayLength
-                   + ", uidStatsArrayLength=" + uidStatsArrayLength
-                   + ", extras=" + extras
-                   + '}';
+                    + "powerComponentId=" + powerComponentId
+                    + ", name='" + name + '\''
+                    + ", statsArrayLength=" + statsArrayLength
+                    + ", stateStatsArrayLength=" + stateStatsArrayLength
+                    + ", stateLabels=" + stateLabels
+                    + ", uidStatsArrayLength=" + uidStatsArrayLength
+                    + ", extras=" + extras
+                    + '}';
         }
     }
 
@@ -293,6 +377,12 @@ public final class PowerStats {
     public long[] stats;
 
     /**
+     * Device-wide mode stats, used when the power component can operate in different modes,
+     * e.g. RATs such as LTE and 5G.
+     */
+    public final SparseArray<long[]> stateStats = new SparseArray<>();
+
+    /**
      * Per-UID CPU stats.
      */
     public final SparseArray<long[]> uidStats = new SparseArray<>();
@@ -313,6 +403,15 @@ public final class PowerStats {
         parcel.writeInt(descriptor.powerComponentId);
         parcel.writeLong(durationMs);
         VARINT_PARCELER.writeLongArray(parcel, stats);
+
+        if (descriptor.stateStatsArrayLength != 0) {
+            parcel.writeInt(stateStats.size());
+            for (int i = 0; i < stateStats.size(); i++) {
+                parcel.writeInt(stateStats.keyAt(i));
+                VARINT_PARCELER.writeLongArray(parcel, stateStats.valueAt(i));
+            }
+        }
+
         parcel.writeInt(uidStats.size());
         for (int i = 0; i < uidStats.size(); i++) {
             parcel.writeInt(uidStats.keyAt(i));
@@ -347,6 +446,17 @@ public final class PowerStats {
             stats.durationMs = parcel.readLong();
             stats.stats = new long[descriptor.statsArrayLength];
             VARINT_PARCELER.readLongArray(parcel, stats.stats);
+
+            if (descriptor.stateStatsArrayLength != 0) {
+                int count = parcel.readInt();
+                for (int i = 0; i < count; i++) {
+                    int state = parcel.readInt();
+                    long[] stateStats = new long[descriptor.stateStatsArrayLength];
+                    VARINT_PARCELER.readLongArray(parcel, stateStats);
+                    stats.stateStats.put(state, stateStats);
+                }
+            }
+
             int uidCount = parcel.readInt();
             for (int i = 0; i < uidCount; i++) {
                 int uid = parcel.readInt();
@@ -376,6 +486,14 @@ public final class PowerStats {
         if (stats.length > 0) {
             sb.append("=").append(Arrays.toString(stats));
         }
+        if (descriptor.stateStatsArrayLength != 0) {
+            for (int i = 0; i < stateStats.size(); i++) {
+                sb.append(" [");
+                sb.append(descriptor.getStateLabel(stateStats.keyAt(i)));
+                sb.append("]=");
+                sb.append(Arrays.toString(stateStats.valueAt(i)));
+            }
+        }
         for (int i = 0; i < uidStats.size(); i++) {
             sb.append(uidPrefix)
                     .append(UserHandle.formatUid(uidStats.keyAt(i)))
@@ -391,6 +509,18 @@ public final class PowerStats {
         pw.println("PowerStats: " + descriptor.name + " (" + descriptor.powerComponentId + ')');
         pw.increaseIndent();
         pw.print("duration", durationMs).println();
+        if (descriptor.statsArrayLength != 0) {
+            pw.print("stats", Arrays.toString(stats)).println();
+        }
+        if (descriptor.stateStatsArrayLength != 0) {
+            for (int i = 0; i < stateStats.size(); i++) {
+                pw.print("state ");
+                pw.print(descriptor.getStateLabel(stateStats.keyAt(i)));
+                pw.print(": ");
+                pw.print(Arrays.toString(stateStats.valueAt(i)));
+                pw.println();
+            }
+        }
         for (int i = 0; i < uidStats.size(); i++) {
             pw.print("UID ");
             pw.print(uidStats.keyAt(i));

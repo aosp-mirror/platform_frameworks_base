@@ -28,6 +28,8 @@ import android.os.IBinder;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.RavenwoodFlagsValueProvider;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.provider.DeviceConfig;
 
 import androidx.test.InstrumentationRegistry;
@@ -52,11 +54,15 @@ import java.util.regex.Pattern;
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest
-@android.platform.test.annotations.IgnoreUnderRavenwood
+@android.platform.test.annotations.DisabledOnRavenwood(reason = "Integration test")
 public class CpuPowerStatsCollectorValidationTest {
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            DeviceFlagsValueProvider.createCheckFlagsRule();
+    @Rule(order = 0)
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
+    @Rule(order = 1)
+    public final CheckFlagsRule mCheckFlagsRule = RavenwoodRule.isOnRavenwood()
+            ? RavenwoodFlagsValueProvider.createAllOnCheckFlagsRule()
+            : DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private static final int WORK_DURATION_MS = 2000;
     private static final String TEST_PKG = "com.android.coretests.apps.bstatstestapp";

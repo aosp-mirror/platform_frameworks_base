@@ -30,6 +30,7 @@ import static com.android.server.power.stats.AggregatedPowerStatsConfig.STATE_SC
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 
 import android.os.BatteryConsumer;
 import android.os.PersistableBundle;
@@ -55,7 +56,7 @@ import java.util.Map;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class CpuAggregatedPowerStatsProcessorTest {
+public class CpuPowerStatsProcessorTest {
     @Rule(order = 0)
     public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
             .setProvideMainThread(true)
@@ -77,7 +78,7 @@ public class CpuAggregatedPowerStatsProcessorTest {
             .setCpuPowerBracket(2, 0, 2);
 
     private AggregatedPowerStatsConfig.PowerComponent mConfig;
-    private CpuAggregatedPowerStatsProcessor mProcessor;
+    private CpuPowerStatsProcessor mProcessor;
     private MockPowerComponentAggregatedPowerStats mStats;
 
     @Before
@@ -86,7 +87,7 @@ public class CpuAggregatedPowerStatsProcessorTest {
                 .trackDeviceStates(STATE_POWER, STATE_SCREEN)
                 .trackUidStates(STATE_POWER, STATE_SCREEN, STATE_PROCESS_STATE);
 
-        mProcessor = new CpuAggregatedPowerStatsProcessor(
+        mProcessor = new CpuPowerStatsProcessor(
                 mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies());
     }
 
@@ -197,7 +198,7 @@ public class CpuAggregatedPowerStatsProcessorTest {
 
     private static class MockPowerComponentAggregatedPowerStats extends
             PowerComponentAggregatedPowerStats {
-        private final CpuPowerStatsCollector.CpuStatsArrayLayout mStatsLayout;
+        private final CpuPowerStatsLayout mStatsLayout;
         private final PowerStats.Descriptor mDescriptor;
         private HashMap<String, long[]> mDeviceStats = new HashMap<>();
         private HashMap<String, long[]> mUidStats = new HashMap<>();
@@ -207,8 +208,8 @@ public class CpuAggregatedPowerStatsProcessorTest {
 
         MockPowerComponentAggregatedPowerStats(AggregatedPowerStatsConfig.PowerComponent config,
                 boolean useEnergyConsumers) {
-            super(config);
-            mStatsLayout = new CpuPowerStatsCollector.CpuStatsArrayLayout();
+            super(new AggregatedPowerStats(mock(AggregatedPowerStatsConfig.class)), config);
+            mStatsLayout = new CpuPowerStatsLayout();
             mStatsLayout.addDeviceSectionCpuTimeByScalingStep(3);
             mStatsLayout.addDeviceSectionCpuTimeByCluster(2);
             mStatsLayout.addDeviceSectionUsageDuration();
@@ -222,8 +223,8 @@ public class CpuAggregatedPowerStatsProcessorTest {
             PersistableBundle extras = new PersistableBundle();
             mStatsLayout.toExtras(extras);
             mDescriptor = new PowerStats.Descriptor(BatteryConsumer.POWER_COMPONENT_CPU,
-                    mStatsLayout.getDeviceStatsArrayLength(), mStatsLayout.getUidStatsArrayLength(),
-                    extras);
+                    mStatsLayout.getDeviceStatsArrayLength(), null, 0,
+                    mStatsLayout.getUidStatsArrayLength(), extras);
         }
 
         @Override
