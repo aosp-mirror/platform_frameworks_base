@@ -18,11 +18,11 @@ package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
 import android.tools.Rotation
-import android.tools.flicker.subject.exceptions.IncorrectRegionException
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.flicker.subject.exceptions.IncorrectRegionException
 import androidx.test.filters.RequiresDevice
 import com.android.wm.shell.flicker.pip.common.PipTransition
 import org.junit.FixMethodOrder

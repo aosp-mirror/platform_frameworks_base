@@ -16,9 +16,9 @@
 
 package com.android.server.wm.flicker.activityembedding.rotation
 
+import android.graphics.Rect
 import android.platform.test.annotations.Presubmit
 import android.tools.Position
-import android.tools.datatypes.Rect
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.traces.Condition
@@ -97,7 +97,7 @@ abstract class RotationTransition(flicker: LegacyFlickerTest) : ActivityEmbeddin
             val navBarPosition = display.navBarPosition(isGesturalNavigation)
             val navBarRegion = dump.layerState
                 .getLayerWithBuffer(ComponentNameMatcher.NAV_BAR)
-                ?.visibleRegion?.bounds ?: Rect.EMPTY
+                ?.visibleRegion?.bounds ?: Rect()
 
             when (navBarPosition) {
                 Position.TOP ->

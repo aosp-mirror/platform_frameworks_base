@@ -85,11 +85,11 @@ open class RotateSplitNoChangeTest(flicker: LegacyFlickerTest) : RotationTransit
                 // Compare dimensions of two splits, given we're using default split attributes,
                 // both activities take up the same visible size on the display.
                 check { "height" }
-                    .that(leftLayerRegion.region.height)
-                    .isEqual(rightLayerRegion.region.height)
+                    .that(leftLayerRegion.region.bounds.height())
+                    .isEqual(rightLayerRegion.region.bounds.height())
                 check { "width" }
-                    .that(leftLayerRegion.region.width)
-                    .isEqual(rightLayerRegion.region.width)
+                    .that(leftLayerRegion.region.bounds.width())
+                    .isEqual(rightLayerRegion.region.bounds.width())
                 leftLayerRegion.notOverlaps(rightLayerRegion.region)
                 // Layers of two activities sum to be fullscreen size on display.
                 leftLayerRegion.plus(rightLayerRegion.region).coversExactly(display.layerStackSpace)
@@ -108,11 +108,11 @@ open class RotateSplitNoChangeTest(flicker: LegacyFlickerTest) : RotationTransit
                 val rightLayerRegion =
                     this.visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
                 check { "height" }
-                    .that(leftLayerRegion.region.height)
-                    .isEqual(rightLayerRegion.region.height)
+                    .that(leftLayerRegion.region.bounds.height())
+                    .isEqual(rightLayerRegion.region.bounds.height())
                 check { "width" }
-                    .that(leftLayerRegion.region.width)
-                    .isEqual(rightLayerRegion.region.width)
+                    .that(leftLayerRegion.region.bounds.width())
+                    .isEqual(rightLayerRegion.region.bounds.width())
                 leftLayerRegion.notOverlaps(rightLayerRegion.region)
                 leftLayerRegion.plus(rightLayerRegion.region).coversExactly(display.layerStackSpace)
             }

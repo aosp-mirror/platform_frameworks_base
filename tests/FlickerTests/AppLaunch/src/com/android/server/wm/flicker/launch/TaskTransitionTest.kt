@@ -19,8 +19,9 @@ package com.android.server.wm.flicker.launch
 import android.app.Instrumentation
 import android.app.WallpaperManager
 import android.content.res.Resources
+import android.graphics.Rect
+import android.graphics.Region
 import android.platform.test.annotations.Presubmit
-import android.tools.datatypes.Region
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
@@ -210,6 +211,12 @@ class TaskTransitionTest(flicker: LegacyFlickerTest) : BaseTest(flicker) {
 
             return ComponentNameMatcher(rawComponentMatcher.className)
         }
+
+        private fun LayersTraceSubject.visibleRegionCovers(
+            component: IComponentMatcher,
+            expectedArea: Rect,
+            isOptional: Boolean = true
+        ): LayersTraceSubject = visibleRegionCovers(component, Region(expectedArea), isOptional)
 
         private fun LayersTraceSubject.visibleRegionCovers(
             component: IComponentMatcher,

@@ -115,7 +115,10 @@ class ShowImeOnAppStartWhenLaunchingAppFromFixedOrientationTest(flicker: LegacyF
                 .isEqual(true)
 
             imeLayerSubjects.forEach { imeLayerSubject ->
-                imeLayerSubject.check { "alpha" }.that(imeLayerSubject.layer.color.a).isEqual(1.0f)
+                imeLayerSubject
+                    .check { "alpha" }
+                    .that(imeLayerSubject.layer.color.alpha())
+                    .isEqual(1.0f)
             }
         }
     }
