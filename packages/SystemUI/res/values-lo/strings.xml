@@ -350,6 +350,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"ບັນຫາກ່ຽວກັບການບັນທຶກ"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"ເລີ່ມ"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"ຢຸດ"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"ລາຍງານຂໍ້ຜິດພາດ"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"ສ່ວນໃດຂອງປະສົບການອຸປະກອນຂອງທ່ານໄດ້ຮັບຜົນກະທົບ?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"ເລືອກປະເພດບັນຫາ"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"ບັນທຶກໜ້າຈໍ"</string>
@@ -364,12 +365,9 @@
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"ປານກາງ"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"ສູງ"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"ອຸປະກອນຊ່ວຍຟັງ"</string>
-    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
-    <skip />
-    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
-    <skip />
-    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"ອຸປະກອນຊ່ວຍຟັງ"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"ຈັບຄູ່ອຸປະກອນໃໝ່"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"ຄລິກເພື່ອຈັບຄູ່ອຸປະກອນໃໝ່"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ປົດບລັອກໄມໂຄຣໂຟນອຸປະກອນບໍ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ປົດບລັອກກ້ອງຖ່າຍຮູບອຸ​ປະ​ກອນບໍ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ຍົກເລີກການບລັອກກ້ອງຖ່າຍຮູບ ຫຼື ໄມໂຄຣໂຟນອຸ​ປະ​ກອນບໍ?"</string>
@@ -652,7 +650,7 @@
     <string name="tuner_warning_title" msgid="7721976098452135267">"ມ່ວນຊື່ນສຳລັບບາງຄົນ ແຕ່ບໍ່ແມ່ນສຳລັບທຸກຄົນ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner ໃຫ້ທ່ານມີວິທີພິເສດຕື່ມອີກໃນການປັບປ່ຽນ ແລະຕົບແຕ່ງສ່ວນຕໍ່ປະສານຜູ້ໃຊ້ຂອງ Android. ຄຸນສົມບັດທົດລອງໃຊ້ເຫຼົ່ານີ້ອາດຈະປ່ຽນແປງ, ຢຸດເຊົາ ຫຼືຫາຍໄປໃນການວາງຈຳໜ່າຍໃນອະນາຄົດ. ຈົ່ງດຳເນີນຕໍ່ດ້ວຍຄວາມລະມັດລະວັງ."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"ຄຸນສົມບັດທົດລອງໃຊ້ງານເຫຼົ່ານີ້ອາດຈະປ່ຽນແປງ, ຢຸດເຊົາ ຫຼືຫາຍໄປໃນການອອກຈຳໜ່າຍໃນອະນາຄົດ. ຈົ່ງສືບຕໍ່ດ້ວຍຄວາມລະມັດລະວັງ."</string>
-    <string name="got_it" msgid="477119182261892069">"ໄດ້​ແລ້ວ"</string>
+    <string name="got_it" msgid="477119182261892069">"ເຂົ້າ​ໃຈ​ແລ້ວ"</string>
     <string name="tuner_toast" msgid="3812684836514766951">"ຍິນດີດ້ວຍ! System UI Tuner ໄດ້ຖືກເພີ່ມໃສ່ການຕັ້ງຄ່າແລ້ວ"</string>
     <string name="remove_from_settings" msgid="633775561782209994">"ເອົາອອກ​ຈາກ​ການ​ຕັ້ງ​ຄ່າ"</string>
     <string name="remove_from_settings_prompt" msgid="551565437265615426">"ເອົາ System UI Tuner ອອກຈາກການຕັ້ງຄ່າ ແລະຢຸດການໃຊ້ທຸກຄຸນສົມບັດໃຊ້ງານຂອງມັນ?"</string>
@@ -744,7 +742,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"ສະຫຼັບແປ້ນພິມ"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"ຫຼື"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"ລຶບລ້າງຄຳຊອກຫາ"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"ທາງລັດ"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"ຄີລັດ"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"ທາງລັດການຊອກຫາ"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"ບໍ່ພົບທາງລັດ"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"ລະບົບ"</string>
@@ -769,9 +767,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"ເປີດຜູ້ຊ່ວຍ"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ໜ້າຈໍລັອກ"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"ຈົດບັນທຶກ"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"ການເຮັດຫຼາຍໜ້າວຽກພ້ອມກັນຂອງລະບົບ"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"ເຂົ້າສູ່ແບ່ງໜ້າຈໍດ້ວຍແອັບປັດຈຸບັນໄປຫາ RHS"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"ເຂົ້າສູ່ແບ່ງໜ້າຈໍດ້ວຍແອັບປັດຈຸບັນໄປຫາ LHS"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"ການເຮັດຫຼາຍໜ້າວຽກພ້ອມກັນ"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"ໃຊ້ການແບ່ງໜ້າຈໍກັບແອັບປັດຈຸບັນຢູ່ເບື້ອງຂວາ"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"ໃຊ້ການແບ່ງໜ້າຈໍກັບແອັບປັດຈຸບັນຢູ່ເບື້ອງຊ້າຍ"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"ສະຫຼັບຈາກແບ່ງໜ້າຈໍໄປເປັນເຕັມຈໍ"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"ສະຫຼັບໄປໃຊ້ແອັບຢູ່ຂວາ ຫຼື ທາງລຸ່ມໃນຂະນະທີ່ໃຊ້ແບ່ງໜ້າຈໍ"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"ສະຫຼັບໄປໃຊ້ແອັບຢູ່ຊ້າຍ ຫຼື ທາງເທິງໃນຂະນະທີ່ໃຊ້ແບ່ງໜ້າຈໍ"</string>

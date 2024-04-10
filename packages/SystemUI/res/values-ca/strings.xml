@@ -350,6 +350,8 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"Registra el problema"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Inicia"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Atura"</string>
+    <!-- no translation found for qs_record_issue_bug_report (8229031766918650079) -->
+    <skip />
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"L\'experiència amb el dispositiu s\'ha vist afectada?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Selecciona el tipus de problema"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Gravació de pantalla"</string>
@@ -363,14 +365,10 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Estàndard"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Mitjà"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Alt"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
-    <skip />
-    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
-    <skip />
-    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
-    <skip />
-    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Audiòfons"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Audiòfons"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Vincula un dispositiu nou"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Fes clic per vincular un dispositiu nou"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Vols desbloquejar el micròfon del dispositiu?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Vols desbloquejar la càmera del dispositiu?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Vols desbloquejar la càmera i el micròfon del dispositiu?"</string>
@@ -745,12 +743,12 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Canvia disposició de teclat"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"o"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Esborra la consulta de cerca"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Dreceres"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Tecles de drecera"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Cerca dreceres"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"No s\'ha trobat cap drecera"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Sistema"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Entrada"</string>
-    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Obre aplicacions"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Aplicacions obertes"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"Aplicació actual"</string>
     <string name="keyboard_shortcut_a11y_show_search_results" msgid="2865241062981833705">"S\'estan mostrant els resultats de la cerca"</string>
     <string name="keyboard_shortcut_a11y_filter_system" msgid="7744143131119370483">"S\'estan mostrant les dreceres del sistema"</string>
@@ -768,11 +766,11 @@
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Obre la llista d\'aplicacions"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Obre la configuració"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Obre l\'Assistent"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"Pantalla de bloqueig"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Bloqueja la pantalla"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Crea una nota"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Multitasques del sistema"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Entra al mode de pantalla dividida amb l\'aplicació actual a la dreta"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Entra al mode de pantalla dividida amb l\'aplicació actual a l\'esquerra"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitasca"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Utilitza la pantalla dividida amb l\'aplicació actual a la dreta"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Utilitza la pantalla dividida amb l\'aplicació actual a l\'esquerra"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Canvia de pantalla dividida a pantalla completa"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Canvia a l\'aplicació de la dreta o de sota amb la pantalla dividida"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Canvia a l\'aplicació de l\'esquerra o de dalt amb la pantalla dividida"</string>

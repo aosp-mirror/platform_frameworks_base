@@ -350,6 +350,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"ضبط مشکل"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"شروع"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"توقف"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"گزارش اشکال"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"کدام بخش تجربه استفاده از دستگاه تحت‌تأثیر قرار گرفت؟"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"انتخاب نوع مشکل"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"ضبط صفحه‌نمایش"</string>
@@ -363,14 +364,10 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"استاندارد"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"متوسط"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"بالا"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
-    <skip />
-    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
-    <skip />
-    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
-    <skip />
-    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"سمعک"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"سمعک"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"جفت کردن دستگاه جدید"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"برای جفت کردن دستگاه جدید، کلیک کنید"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"میکروفون دستگاه لغو انسداد شود؟"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"دوربین دستگاه لغو انسداد شود؟"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"دوربین و میکروفون دستگاه لغو انسداد شود؟"</string>
@@ -551,7 +548,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"این دستگاه را ولی‌تان مدیریت می‌کند. ولی‌تان می‌تواند اطلاعاتی مثل برنامه‌هایی که استفاده می‌کنید، مکانتان، و مدت تماشای صفحه‌تان را ببیند و مدیریت کند."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"‏با TrustAgent قفل را باز نگه‌دارید"</string>
-    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"دستگاه قفل شد، تعداد تلاش‌ها برای اصالت‌سنجی بسیار زیاد بود"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"به‌دلیل تلاش‌های بیش‌از حد برای اصالت‌سنجی، دستگاه قفل شد"</string>
     <string name="keyguard_indication_after_adaptive_auth_lock" msgid="2323400645470712787">"دستگاه قفل شد\nاصالت‌سنجی ناموفق بود"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. ‏<xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"تنظیمات صدا"</string>
@@ -745,7 +742,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"تغییر جانمایی صفحه‌کلید"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"یا"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"پاک کردن پُرسمان جستجو"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"میان‌برها"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"میان‌برهای صفحه‌کلید"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"جستجوی میان‌برها"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"میان‌بری پیدا نشد"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"سیستم"</string>
@@ -770,9 +767,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"باز کردن «دستیار»"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"قفل صفحه"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"یادداشت‌برداری"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"چندوظیفگی سیستم"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"وارد شدن به صفحهٔ دونیمه با برنامه فعلی در سمت راست"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"وارد شدن به صفحهٔ دونیمه با برنامه فعلی در سمت چپ"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"چندوظیفگی"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"استفاده از صفحهٔ دونیمه با برنامه فعلی در سمت راست"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"استفاده از صفحهٔ دونیمه با برنامه فعلی در سمت چپ"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"جابه‌جایی از صفحهٔ دونیمه به تمام صفحه"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"رفتن به برنامه سمت راست یا پایین درحین استفاده از صفحهٔ دونیمه"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"رفتن به برنامه سمت چپ یا بالا درحین استفاده از صفحهٔ دونیمه"</string>

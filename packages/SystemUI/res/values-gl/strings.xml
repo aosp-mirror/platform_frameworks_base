@@ -350,6 +350,8 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"Rexistrar problema"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Iniciar"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Deter"</string>
+    <!-- no translation found for qs_record_issue_bug_report (8229031766918650079) -->
+    <skip />
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Cal foi o problema na experiencia co dispositivo?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Selecciona o tipo de problema"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Gravación de pant."</string>
@@ -363,14 +365,10 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Nivel estándar"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Nivel medio"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Nivel alto"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
-    <skip />
-    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
-    <skip />
-    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
-    <skip />
-    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Dispositivos auditivos"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Dispositivos auditivos"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Vincular un dispositivo novo"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Fai clic para vincular un novo dispositivo"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Queres desbloquear o micrófono do dispositivo?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Queres desbloquear a cámara do dispositivo?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Queres desbloquear a cámara e o micrófono do dispositivo?"</string>
@@ -632,7 +630,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Configura un método de pago para comprar de xeito máis rápido e seguro co teléfono"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Amosar todo"</string>
-    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Tocar para abrir"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Toca para abrir"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Actualizando"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Desbloquear para usar"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Produciuse un problema ao obter as tarxetas. Téntao de novo máis tarde"</string>
@@ -745,7 +743,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Cambiar deseño do teclado"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"ou"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Borrar a busca"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Atallos"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Atallos de teclado"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Buscar atallos"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Non se atoparon atallos"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Sistema"</string>
@@ -770,9 +768,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Abrir Asistente"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Pantalla de bloqueo"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Crear nota"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Multitarefa do sistema"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Activar pantalla dividida con esta aplicación no lado dereito"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Activar pantalla dividida con esta aplicación no lado esquerdo"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitarefa"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Usar pantalla dividida coa aplicación actual na dereita"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Usar pantalla dividida coa aplicación actual na esquerda"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Cambiar de pantalla dividida a pantalla completa"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Cambiar á aplicación da dereita ou de abaixo coa pantalla dividida"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Cambiar á aplicación da esquerda ou de arriba coa pantalla dividida"</string>

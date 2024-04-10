@@ -350,6 +350,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"កត់ត្រាបញ្ហា"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"ចាប់ផ្ដើម"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"បញ្ឈប់"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"របាយការណ៍​អំពី​បញ្ហា"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"តើផ្នែកអ្វីនៃបទពិសោធប្រើប្រាស់ឧបករណ៍របស់អ្នកបានរងការប៉ះពាល់?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"ជ្រើសរើសប្រភេទបញ្ហា"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"ការថត​វីដេអូ​អេក្រង់"</string>
@@ -364,12 +365,9 @@
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"មធ្យម"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"ខ្ពស់"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"ឧបករណ៍ជំនួយការស្ដាប់"</string>
-    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
-    <skip />
-    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
-    <skip />
-    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"ឧបករណ៍ជំនួយការស្ដាប់"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"ផ្គូផ្គង​ឧបករណ៍ថ្មី"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"ចុច ដើម្បីផ្គូផ្គងឧបករណ៍ថ្មី"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ឈប់ទប់ស្កាត់​មីក្រូហ្វូន​របស់ឧបករណ៍ឬ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ឈប់ទប់ស្កាត់​កាមេរ៉ា​របស់ឧបករណ៍ឬ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ឈប់ទប់ស្កាត់​កាមេរ៉ា និងមីក្រូហ្វូន​របស់ឧបករណ៍ឬ?"</string>
@@ -607,7 +605,7 @@
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"សំឡេងលំហ"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"បិទ"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"ថេរ"</string>
-    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"ការតាមដានក្បាល"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"រេតាមក្បាល"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"ចុច​ដើម្បីប្ដូរ​មុខងារ​រោទ៍"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"បិទ​សំឡេង"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"បើក​សំឡេង"</string>
@@ -744,7 +742,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"ប្ដូរប្លង់ក្ដារចុច"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"ឬ"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"សម្អាត​សំណួរ​ស្វែងរក"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"ផ្លូវកាត់"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"ផ្លូវកាត់ក្ដារចុច"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"ស្វែងរកផ្លូវកាត់"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"រកផ្លូវកាត់មិនឃើញទេ"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"ប្រព័ន្ធ"</string>
@@ -769,9 +767,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"បើក​ជំនួយការ"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ចាក់​សោ​អេក្រង់"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"កត់​ចំណាំ"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"ការដំណើរការបានច្រើននៃប្រព័ន្ធ"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"ចូលក្នុងមុខងារបំបែកអេក្រង់ដោយប្រើកម្មវិធីបច្ចុប្បន្ននៅខាងស្ដាំដៃ"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"ចូលក្នុងមុខងារ​បំបែកអេក្រង់ដោយប្រើកម្មវិធីបច្ចុប្បន្ននៅខាងឆ្វេងដៃ"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"ការដំណើរការបានច្រើន"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"ប្រើមុខងារបំបែកអេក្រង់ជាមួយកម្មវិធីបច្ចុប្បន្ននៅខាងស្ដាំ"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"ប្រើមុខងារបំបែកអេក្រង់ជាមួយកម្មវិធីបច្ចុប្បន្ននៅខាងឆ្វេង"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"ប្ដូរពីមុខងារ​បំបែកអេក្រង់ទៅជាអេក្រង់ពេញ"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"ប្ដូរទៅកម្មវិធីនៅខាងស្ដាំ ឬខាងក្រោម ពេលកំពុងប្រើមុខងារ​បំបែកអេក្រង់"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"ប្ដូរទៅកម្មវិធីនៅខាងឆ្វេង ឬខាងលើ ពេលកំពុងប្រើមុខងារ​បំបែកអេក្រង់"</string>
