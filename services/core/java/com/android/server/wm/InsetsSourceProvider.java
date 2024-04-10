@@ -351,42 +351,47 @@ class InsetsSourceProvider {
                 ? windowState.wouldBeVisibleIfPolicyIgnored() && windowState.isVisibleByPolicy()
                 : mWindowContainer.isVisibleRequested();
         setServerVisible(isServerVisible);
-        if (mControl != null) {
-            boolean changed = false;
-            final Point position = getWindowFrameSurfacePosition();
-            if (mControl.setSurfacePosition(position.x, position.y) && mControlTarget != null) {
-                changed = true;
-                if (windowState != null && windowState.getWindowFrames().didFrameSizeChange()
-                        && windowState.mWinAnimator.getShown() && mWindowContainer.okToDisplay()) {
-                    mHasPendingPosition = true;
-                    windowState.applyWithNextDraw(mSetLeashPositionConsumer);
-                } else {
-                    Transaction t = mWindowContainer.getSyncTransaction();
-                    if (windowState != null) {
-                        // Make the buffer, token transformation, and leash position to be updated
-                        // together when the window is drawn for new rotation. Otherwise the window
-                        // may be outside the screen by the inconsistent orientations.
-                        final AsyncRotationController rotationController =
-                                mDisplayContent.getAsyncRotationController();
-                        if (rotationController != null) {
-                            final Transaction drawT =
-                                    rotationController.getDrawTransaction(windowState.mToken);
-                            if (drawT != null) {
-                                t = drawT;
-                            }
+        updateInsetsControlPosition(windowState);
+    }
+
+    void updateInsetsControlPosition(WindowState windowState) {
+        if (mControl == null) {
+            return;
+        }
+        boolean changed = false;
+        final Point position = getWindowFrameSurfacePosition();
+        if (mControl.setSurfacePosition(position.x, position.y) && mControlTarget != null) {
+            changed = true;
+            if (windowState != null && windowState.getWindowFrames().didFrameSizeChange()
+                    && windowState.mWinAnimator.getShown() && mWindowContainer.okToDisplay()) {
+                mHasPendingPosition = true;
+                windowState.applyWithNextDraw(mSetLeashPositionConsumer);
+            } else {
+                Transaction t = mWindowContainer.getSyncTransaction();
+                if (windowState != null) {
+                    // Make the buffer, token transformation, and leash position to be updated
+                    // together when the window is drawn for new rotation. Otherwise the window
+                    // may be outside the screen by the inconsistent orientations.
+                    final AsyncRotationController rotationController =
+                            mDisplayContent.getAsyncRotationController();
+                    if (rotationController != null) {
+                        final Transaction drawT =
+                                rotationController.getDrawTransaction(windowState.mToken);
+                        if (drawT != null) {
+                            t = drawT;
                         }
                     }
-                    mSetLeashPositionConsumer.accept(t);
                 }
+                mSetLeashPositionConsumer.accept(t);
             }
-            final Insets insetsHint = getInsetsHint();
-            if (!mControl.getInsetsHint().equals(insetsHint)) {
-                mControl.setInsetsHint(insetsHint);
-                changed = true;
-            }
-            if (changed) {
-                mStateController.notifyControlChanged(mControlTarget);
-            }
+        }
+        final Insets insetsHint = getInsetsHint();
+        if (!mControl.getInsetsHint().equals(insetsHint)) {
+            mControl.setInsetsHint(insetsHint);
+            changed = true;
+        }
+        if (changed) {
+            mStateController.notifyControlChanged(mControlTarget);
         }
     }
 
