@@ -439,6 +439,11 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             Slog.w(TAG, "performHapticFeedback; haptic vibration provider not ready.");
             return null;
         }
+        if (hapticVibrationProvider.isRestrictedHapticFeedback(constant)
+                && !hasPermission(android.Manifest.permission.VIBRATE_SYSTEM_CONSTANTS)) {
+            Slog.w(TAG, "performHapticFeedback; no permission for effect " + constant);
+            return null;
+        }
         VibrationEffect effect = hapticVibrationProvider.getVibrationForHapticFeedback(constant);
         if (effect == null) {
             Slog.w(TAG, "performHapticFeedback; vibration absent for effect " + constant);
