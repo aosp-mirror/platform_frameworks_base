@@ -125,6 +125,20 @@
     <!-- Use collapsed layout for media player in landscape QQS -->
     <bool name="config_quickSettingsMediaLandscapeCollapsed">true</bool>
 
+    <!-- For hearing devices related tool list. Need to be in ComponentName format (package/class).
+         Should be activity to be launched.
+         Already contains tool that holds intent: "com.android.settings.action.live_caption".
+         Maximum number is 3. -->
+    <string-array name="config_quickSettingsHearingDevicesRelatedToolName" translatable="false">
+    </string-array>
+
+    <!-- The drawable resource names. If provided, it will replace the corresponding icons in
+         config_quickSettingsHearingDevicesRelatedToolName. Can be empty to use original icons.
+         Already contains tool that holds intent: "com.android.settings.action.live_caption".
+         Maximum number is 3. -->
+    <string-array name="config_quickSettingsHearingDevicesRelatedToolIcon" translatable="false">
+    </string-array>
+
     <!-- Show indicator for Wifi on but not connected. -->
     <bool name="config_showWifiIndicatorWhenEnabled">false</bool>
 
