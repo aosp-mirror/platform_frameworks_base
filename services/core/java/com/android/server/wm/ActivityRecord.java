@@ -8544,7 +8544,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
         // If activity in fullscreen mode is letterboxed because of fixed orientation then bounds
         // are already calculated in resolveFixedOrientationConfiguration.
-        } else if (!isLetterboxedForFixedOrientationAndAspectRatio()) {
+        // Don't apply aspect ratio if app is overridden to fullscreen by device user/manufacturer.
+        } else if (!isLetterboxedForFixedOrientationAndAspectRatio()
+                && !mLetterboxUiController.hasFullscreenOverride()) {
             resolveAspectRatioRestriction(newParentConfiguration);
         }
 
