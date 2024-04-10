@@ -72,7 +72,10 @@ class TaskOperations {
     }
 
     void closeTask(WindowContainerToken taskToken) {
-        WindowContainerTransaction wct = new WindowContainerTransaction();
+        closeTask(taskToken, new WindowContainerTransaction());
+    }
+
+    void closeTask(WindowContainerToken taskToken, WindowContainerTransaction wct) {
         wct.removeTask(taskToken);
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             mTransitionStarter.startRemoveTransition(wct);

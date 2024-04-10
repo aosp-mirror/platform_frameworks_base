@@ -40,6 +40,7 @@ import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
 import android.view.WindowManager.TRANSIT_NONE
 import android.view.WindowManager.TRANSIT_OPEN
+import android.view.WindowManager.TRANSIT_TO_BACK
 import android.view.WindowManager.TRANSIT_TO_FRONT
 import android.window.RemoteTransition
 import android.window.TransitionInfo
@@ -381,7 +382,6 @@ class DesktopTasksController(
         )
         val wct = WindowContainerTransaction()
         exitSplitIfApplicable(wct, taskInfo)
-        moveHomeTaskToFront(wct)
         bringDesktopAppsToFront(taskInfo.displayId, wct)
         addMoveToDesktopChanges(wct, taskInfo)
         wct.setBounds(taskInfo.token, freeformBounds)
@@ -399,6 +399,22 @@ class DesktopTasksController(
         val wct = WindowContainerTransaction()
         wct.setBounds(taskInfo.token, Rect())
         shellTaskOrganizer.applyTransaction(wct)
+    }
+
+    /**
+     * Perform clean up of the desktop wallpaper activity if the closed window task is
+     * the last active task.
+     *
+     * @param wct transaction to modify if the last active task is closed
+     * @param taskId task id of the window that's being closed
+     */
+    fun onDesktopWindowClose(
+        wct: WindowContainerTransaction,
+        taskId: Int
+    ) {
+        if (desktopModeTaskRepository.isOnlyActiveTask(taskId)) {
+            removeWallpaperActivity(wct)
+        }
     }
 
     /** Move a task with given `taskId` to fullscreen */
@@ -680,9 +696,15 @@ class DesktopTasksController(
         KtProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: bringDesktopAppsToFront")
         val activeTasks = desktopModeTaskRepository.getActiveTasks(displayId)
 
-        // First move home to front and then other tasks on top of it
-        moveHomeTaskToFront(wct)
+        if (Flags.enableDesktopWindowingWallpaperActivity()) {
+            // Add translucent wallpaper activity to show the wallpaper underneath
+            addWallpaperActivity(wct)
+        } else {
+            // Move home to front
+            moveHomeTaskToFront(wct)
+        }
 
+        // Then move other tasks on top of it
         val allTasksInZOrder = desktopModeTaskRepository.getFreeformTasksInZOrder()
         activeTasks
             // Sort descending as the top task is at index 0. It should be ordered to top last
@@ -696,6 +718,26 @@ class DesktopTasksController(
             .getRunningTasks(context.displayId)
             .firstOrNull { task -> task.activityType == ACTIVITY_TYPE_HOME }
             ?.let { homeTask -> wct.reorder(homeTask.getToken(), true /* onTop */) }
+    }
+
+    private fun addWallpaperActivity(wct: WindowContainerTransaction) {
+        KtProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: addWallpaper")
+        val intent = Intent(context, DesktopWallpaperActivity::class.java)
+        val options = ActivityOptions.makeBasic().apply {
+            isPendingIntentBackgroundActivityLaunchAllowedByPermission = true
+            pendingIntentBackgroundActivityStartMode =
+                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+        }
+        val pendingIntent = PendingIntent.getActivity(context, /* requestCode = */ 0, intent,
+            PendingIntent.FLAG_IMMUTABLE)
+        wct.sendPendingIntent(pendingIntent, intent, options.toBundle())
+    }
+
+    private fun removeWallpaperActivity(wct: WindowContainerTransaction) {
+        desktopModeTaskRepository.wallpaperActivityToken?.let { token ->
+            KtProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: removeWallpaper")
+            wct.removeTask(token)
+        }
     }
 
     fun releaseVisualIndicator() {
@@ -745,6 +787,9 @@ class DesktopTasksController(
                     reason = "recents animation is running"
                     false
                 }
+                // Handle back navigation for the last window if wallpaper available
+                shouldRemoveWallpaper(request) ->
+                    true
                 // Only handle open or to front transitions
                 request.type != TRANSIT_OPEN && request.type != TRANSIT_TO_FRONT -> {
                     reason = "transition type not handled (${request.type})"
@@ -781,6 +826,7 @@ class DesktopTasksController(
 
         val result = triggerTask?.let { task ->
             when {
+                request.type == TRANSIT_TO_BACK -> handleBackNavigation(task)
                 // If display has tasks stashed, handle as stashed launch
                 task.isStashed -> handleStashedTaskLaunch(task)
                 // Check if the task has a top transparent activity
@@ -826,6 +872,14 @@ class DesktopTasksController(
 
     private fun shouldLaunchAsModal(task: TaskInfo): Boolean {
         return Flags.enableDesktopWindowingModalsPolicy() && isSingleTopActivityTranslucent(task)
+    }
+
+    private fun shouldRemoveWallpaper(request: TransitionRequestInfo): Boolean {
+        return Flags.enableDesktopWindowingWallpaperActivity() &&
+                request.type == TRANSIT_TO_BACK &&
+                request.triggerTask?.let { task ->
+                    desktopModeTaskRepository.isOnlyActiveTask(task.taskId)
+                } ?: false
     }
 
     private fun handleFreeformTaskLaunch(task: RunningTaskInfo): WindowContainerTransaction? {
@@ -882,6 +936,19 @@ class DesktopTasksController(
             return null
         return WindowContainerTransaction().also { wct ->
             addMoveToFullscreenChanges(wct, task)
+        }
+    }
+
+    /** Handle back navigation by removing wallpaper activity if it's the last active task */
+    private fun handleBackNavigation(task: RunningTaskInfo): WindowContainerTransaction? {
+        if (desktopModeTaskRepository.isOnlyActiveTask(task.taskId) &&
+            desktopModeTaskRepository.wallpaperActivityToken != null) {
+            // Remove wallpaper activity when the last active task is removed
+            return WindowContainerTransaction().also { wct ->
+                removeWallpaperActivity(wct)
+            }
+        } else {
+            return null
         }
     }
 

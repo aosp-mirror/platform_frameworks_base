@@ -119,6 +119,57 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
     }
 
     @Test
+    fun isOnlyActiveTask_noActiveTasks() {
+        // Not an active task
+        assertThat(repo.isOnlyActiveTask(1)).isFalse()
+    }
+
+    @Test
+    fun isOnlyActiveTask_singleActiveTask() {
+        repo.addActiveTask(DEFAULT_DISPLAY, 1)
+        // The only active task
+        assertThat(repo.isActiveTask(1)).isTrue()
+        assertThat(repo.isOnlyActiveTask(1)).isTrue()
+        // Not an active task
+        assertThat(repo.isActiveTask(99)).isFalse()
+        assertThat(repo.isOnlyActiveTask(99)).isFalse()
+    }
+
+    @Test
+    fun isOnlyActiveTask_multipleActiveTasks() {
+        repo.addActiveTask(DEFAULT_DISPLAY, 1)
+        repo.addActiveTask(DEFAULT_DISPLAY, 2)
+        // Not the only task
+        assertThat(repo.isActiveTask(1)).isTrue()
+        assertThat(repo.isOnlyActiveTask(1)).isFalse()
+        // Not the only task
+        assertThat(repo.isActiveTask(2)).isTrue()
+        assertThat(repo.isOnlyActiveTask(2)).isFalse()
+        // Not an active task
+        assertThat(repo.isActiveTask(99)).isFalse()
+        assertThat(repo.isOnlyActiveTask(99)).isFalse()
+    }
+
+    @Test
+    fun isOnlyActiveTask_multipleDisplays() {
+        repo.addActiveTask(DEFAULT_DISPLAY, 1)
+        repo.addActiveTask(DEFAULT_DISPLAY, 2)
+        repo.addActiveTask(SECOND_DISPLAY, 3)
+        // Not the only task on DEFAULT_DISPLAY
+        assertThat(repo.isActiveTask(1)).isTrue()
+        assertThat(repo.isOnlyActiveTask(1)).isFalse()
+        // Not the only task on DEFAULT_DISPLAY
+        assertThat(repo.isActiveTask(2)).isTrue()
+        assertThat(repo.isOnlyActiveTask(2)).isFalse()
+        // The only active task on SECOND_DISPLAY
+        assertThat(repo.isActiveTask(3)).isTrue()
+        assertThat(repo.isOnlyActiveTask(3)).isTrue()
+        // Not an active task
+        assertThat(repo.isActiveTask(99)).isFalse()
+        assertThat(repo.isOnlyActiveTask(99)).isFalse()
+    }
+
+    @Test
     fun addListener_notifiesVisibleFreeformTask() {
         repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 1, visible = true)
         val listener = TestVisibilityListener()
