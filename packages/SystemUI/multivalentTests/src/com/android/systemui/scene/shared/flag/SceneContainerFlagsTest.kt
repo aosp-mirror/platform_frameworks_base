@@ -22,6 +22,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.EnableSceneContainer
+import com.android.systemui.kosmos.Kosmos
 import com.google.common.truth.Truth
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,6 +36,7 @@ internal class SceneContainerFlagsTest : SysuiTestCase() {
     fun isNotEnabled_withoutAconfigFlags() {
         Truth.assertThat(SceneContainerFlag.isEnabled).isEqualTo(false)
         Truth.assertThat(SceneContainerFlagsImpl().isEnabled()).isEqualTo(false)
+        Truth.assertThat(Kosmos().sceneContainerFlags.isEnabled()).isEqualTo(false)
     }
 
     @Test
@@ -42,5 +44,6 @@ internal class SceneContainerFlagsTest : SysuiTestCase() {
     fun isEnabled_withAconfigFlags() {
         Truth.assertThat(SceneContainerFlag.isEnabled).isEqualTo(true)
         Truth.assertThat(SceneContainerFlagsImpl().isEnabled()).isEqualTo(true)
+        Truth.assertThat(Kosmos().sceneContainerFlags.isEnabled()).isEqualTo(true)
     }
 }
