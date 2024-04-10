@@ -17,6 +17,7 @@
 package android.view;
 
 import static com.android.text.flags.Flags.handwritingCursorPosition;
+import static com.android.text.flags.Flags.handwritingUnsupportedMessage;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
@@ -607,7 +608,9 @@ public class HandwritingInitiator {
             final View candidateView = findBestCandidateView(hoverX, hoverY, /* isHover */ true);
 
             if (candidateView != null) {
-                mCachedHoverTarget = new WeakReference<>(candidateView);
+                if (!handwritingUnsupportedMessage()) {
+                    mCachedHoverTarget = new WeakReference<>(candidateView);
+                }
                 return candidateView;
             }
         }
