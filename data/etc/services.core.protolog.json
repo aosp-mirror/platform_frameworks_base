@@ -1045,12 +1045,6 @@
       "group": "WM_DEBUG_BACK_PREVIEW",
       "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
-    "-1459414342866553129": {
-      "message": "Current focused window being animated by recents. Overriding back callback to recents controller callback.",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_BACK_PREVIEW",
-      "at": "com\/android\/server\/wm\/BackNavigationController.java"
-    },
     "2881085074175114605": {
       "message": "Focused window didn't have a valid surface drawn.",
       "level": "DEBUG",
