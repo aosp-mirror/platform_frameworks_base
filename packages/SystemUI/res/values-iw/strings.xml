@@ -323,7 +323,7 @@
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"אפליקציות לעבודה"</string>
     <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"בהשהיה"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"תאורת לילה"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"התכונה מופעלת בשקיעה"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"מופעלת בשקיעה"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"עד הזריחה"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"תופעל בשעה <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"עד <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -581,7 +581,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"‏%1$s. יש להקיש כדי להשתיק. ייתכן ששירותי הנגישות יושתקו."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"‏%1$s. יש להקיש כדי להעביר למצב רטט."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"‏%1$s. יש להקיש כדי להשתיק."</string>
-    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"בקרת הרעש"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"בקרת רעש"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"יש להקיש כדי לשנות את מצב תוכנת הצלצול"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"השתקה"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ביטול ההשתקה"</string>
@@ -725,7 +725,7 @@
     <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"מוצגים: קיצורי הדרך של הקלט"</string>
     <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"מוצגים: קיצורי הדרך לפתיחת אפליקציות"</string>
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"מוצגים: קיצורי הדרך של האפליקציה הנוכחית"</string>
-    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"הצגת הודעות"</string>
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"הצגת התראות"</string>
     <string name="group_system_full_screenshot" msgid="5742204844232667785">"צילום המסך"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"הצגת מקשי הקיצור"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"חזרה"</string>

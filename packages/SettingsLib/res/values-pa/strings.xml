@@ -487,7 +487,7 @@
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ਚਾਰਜ ਨਹੀਂ ਹੋ ਰਿਹਾ"</string>
     <string name="battery_info_status_not_charging" msgid="1103084691314264664">"ਕਨੈਕਟ ਹੋ ਗਿਆ, ਪਰ ਚਾਰਜ ਨਹੀਂ ਹੋ ਰਿਹਾ ਹੈ"</string>
-    <string name="battery_info_status_full" msgid="1339002294876531312">"ਚਾਰਜ ਹੋ ਗਈ"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"ਬੈਟਰੀ ਚਾਰਜ ਹੋ ਗਈ"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"ਪੂਰੀ ਚਾਰਜ ਹੋ ਗਈ ਹੈ"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"ਚਾਰਜਿੰਗ ਨੂੰ ਰੋਕਿਆ ਗਿਆ ਹੈ"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਕੰਟਰੋਲ ਕੀਤੀ ਗਈ"</string>

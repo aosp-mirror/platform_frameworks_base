@@ -323,7 +323,7 @@
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Geschäftliche Apps"</string>
     <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"Pausiert"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Nachtlicht"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"An bei Sonnenuntergang"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"An: Sonnenuntergang"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Bis Sonnenaufgang"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"An um <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Bis <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -562,7 +562,7 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Nein danke"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Bildschirm wurde fixiert"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"App vom Bildschirm losgelöst"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"Anruf"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"Anrufen"</string>
     <string name="stream_system" msgid="7663148785370565134">"System"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Klingelton"</string>
     <string name="stream_music" msgid="2188224742361847580">"Medien"</string>
@@ -581,7 +581,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Zum Stummschalten tippen. Bedienungshilfen werden unter Umständen stummgeschaltet."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Zum Aktivieren der Vibration tippen."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Zum Stummschalten tippen."</string>
-    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Geräuschunterdrückung"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Geräusch­unterdrückung"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Zum Ändern des Klingeltonmodus tippen"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"Stummschalten"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"Aufheben der Stummschaltung"</string>
@@ -745,7 +745,7 @@
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Im Splitscreen: eine App durch eine andere ersetzen"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Eingabe"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Zur nächsten Sprache wechseln"</string>
-    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Zu vorheriger Sprache wechseln"</string>
+    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Zur vorherigen Sprache wechseln"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"Auf Emoji zugreifen"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Auf Spracheingabe zugreifen"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Apps"</string>
@@ -757,7 +757,7 @@
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Musik"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Kalender"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Rechner"</string>
-    <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Karten"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Bitte nicht stören"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Tastenkombination für Lautstärketasten"</string>
     <string name="battery" msgid="769686279459897127">"Akku"</string>

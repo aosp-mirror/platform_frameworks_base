@@ -110,7 +110,7 @@
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonski pozivi"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Prenos datoteke"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Ulazni uređaj"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Pristup Internetu"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Pristup internetu"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Dozvoli kontakte i istoriju poziva"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Informacije će se koristiti za obaveštenja o pozivima i drugo"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Deljenje internet veze"</string>
@@ -611,8 +611,8 @@
     <string name="user_new_profile_name" msgid="2405500423304678841">"Novi profil"</string>
     <string name="user_info_settings_title" msgid="6351390762733279907">"Podaci o korisniku"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"Podaci o profilu"</string>
-    <string name="user_need_lock_message" msgid="4311424336209509301">"Da biste mogli da napravite ograničeni profil, treba da podesite zaključavanje ekrana da biste zaštitili aplikacije i lične podatke."</string>
-    <string name="user_set_lock_button" msgid="1427128184982594856">"Podesi zaključavanje"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Da biste mogli da napravite ograničeni profil, treba da podesite otključavanje ekrana da biste zaštitili aplikacije i lične podatke."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Podesi otključavanje"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Pređi na korisnika <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Pravi se novi korisnik…"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Pravi se novi gost…"</string>

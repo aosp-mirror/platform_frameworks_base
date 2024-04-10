@@ -1105,7 +1105,7 @@
     <string name="menu_sym_shortcut_label" msgid="4037566049061218776">"копче Sym+"</string>
     <string name="menu_function_shortcut_label" msgid="2367112760987662566">"копче Function+"</string>
     <string name="menu_space_shortcut_label" msgid="5949311515646872071">"празен простор"</string>
-    <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"внеси"</string>
+    <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"избриши"</string>
     <string name="search_go" msgid="2141477624421347086">"Пребарај"</string>
     <string name="search_hint" msgid="455364685740251925">"Пребарување…"</string>
@@ -1303,7 +1303,7 @@
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"Слика од меморијата на <xliff:g id="PROC">%1$s</xliff:g> ви е достапна за споделување. Бидете внимателни: оваа слика од меморијата можеби ги содржи сите чувствителни лични информации до коишто процесот има пристап, што може да вклучуваат работи што сте ги напишале."</string>
     <string name="sendText" msgid="493003724401350724">"Избери дејство за текст"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Јачина на звук на ѕвонче"</string>
-    <string name="volume_music" msgid="7727274216734955095">"Јачина на аудио/видео звук"</string>
+    <string name="volume_music" msgid="7727274216734955095">"Јачина на звук за аудио/видео"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Се репродуцира преку Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Поставено ѕвонење на тивко"</string>
     <string name="volume_call" msgid="7625321655265747433">"Јачина на звук на дојдовен повик"</string>
@@ -1314,7 +1314,7 @@
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Јачина на звук на Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Јачина на звук на мелодија"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"Јачина на звук на повик"</string>
-    <string name="volume_icon_description_media" msgid="4997633254078171233">"Јачина на аудио/видео звук"</string>
+    <string name="volume_icon_description_media" msgid="4997633254078171233">"Јачина на звук за аудио/видео"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Јачина на звук за известување"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Стандардна мелодија"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Стандардна (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1672,7 +1672,7 @@
     <string name="kg_wrong_password" msgid="2384677900494439426">"Погрешна лозинка"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"Погрешен PIN"</string>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Употреби ја својата шема"</string>
-    <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Внеси PIN на SIM картичка"</string>
+    <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Внесете PIN за SIM-картичката"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"Впишете PIN"</string>
     <string name="kg_password_instructions" msgid="7179782578809398050">"Внеси лозинка"</string>
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM картичката е сега оневозможена. Внесете ПУК код за да продолжите. Контактирајте го операторот за детали."</string>
@@ -1987,7 +1987,7 @@
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Прекини ја паузата"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Итен случај"</string>
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Поставете заклучување екран"</string>
-    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Поставување заклучување екран"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Поставете заклучување екран"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"За да користите „Приватен простор“, поставете заклучување екран на уредов"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Апликацијата не е достапна"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> не е достапна во моментов."</string>

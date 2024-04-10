@@ -644,10 +644,10 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Статус&lt;/b&gt;: знижено до \"Без звуку\""</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Статус&lt;/b&gt;: пріоритет підвищено"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Статус&lt;/b&gt;: пріоритет знижено"</string>
-    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"З’являється вгорі сповіщень про розмови та як зображення профілю на заблокованому екрані"</string>
-    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"З’являється вгорі сповіщень про розмови та як зображення профілю на заблокованому екрані, показується у вигляді спливаючої підказки"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"З’являється вгорі сповіщень про розмови та як зображення профілю на заблокованому екрані, показується навіть у режимі \"Не турбувати\""</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"З’являється вгорі сповіщень про розмови та як зображення профілю на заблокованому екрані, відображається як спливаючий чат, перериває режим \"Не турбувати\""</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"З’являється вгорі сповіщень про розмови і як зображення профілю на заблокованому екрані"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"З’являється вгорі сповіщень про розмови і як зображення профілю на заблокованому екрані, показується у вигляді спливаючої підказки"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"З’являється вгорі сповіщень про розмови і як зображення профілю на заблокованому екрані, показується навіть у режимі \"Не турбувати\""</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"З’являється вгорі сповіщень про розмови і як зображення профілю на заблокованому екрані, відображається як спливаючий чат, перериває режим \"Не турбувати\""</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Пріоритет"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не підтримує функції розмов"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ці сповіщення не можна змінити."</string>
@@ -750,7 +750,7 @@
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Відкрити голосовий ввід"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Додатки"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Асистент"</string>
-    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Веб-переглядач"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Вебпереглядач"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Контакти"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"Електронна пошта"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
@@ -869,7 +869,7 @@
     <string name="instant_apps_message" msgid="6112428971833011754">"Додаток відкрито без встановлення."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Додаток відкрито без встановлення. Торкніться, щоб дізнатися більше."</string>
     <string name="app_info" msgid="5153758994129963243">"Про додаток"</string>
-    <string name="go_to_web" msgid="636673528981366511">"Веб-переглядач"</string>
+    <string name="go_to_web" msgid="636673528981366511">"Вебпереглядач"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Мобільний трафік"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>

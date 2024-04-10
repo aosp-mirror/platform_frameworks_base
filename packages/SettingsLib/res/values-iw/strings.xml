@@ -109,7 +109,7 @@
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"אודיו של מדיה"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"שיחות טלפון"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"העברת קבצים"</string>
-    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"מכשיר קלט"</string>
+    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"התקן קלט"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"גישה לאינטרנט"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"אישור גישה אל אנשי קשר והיסטוריית שיחות"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"המידע ישמש להודעות על שיחות ועוד"</string>
@@ -555,7 +555,7 @@
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"הטאבלט הזה"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"הרמקול של אביזר העגינה"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"רמקול של אביזר העגינה"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"מכשיר חיצוני"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"המכשיר המחובר"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"הטלפון הזה"</string>

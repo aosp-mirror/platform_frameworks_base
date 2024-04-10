@@ -555,7 +555,7 @@
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ეს ტაბლეტი"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"დინამიკის სამაგრი"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"სამაგრის დინამიკი"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"გარე მოწყობილობა"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"დაკავშირებული მოწყობილობა"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ეს ტელეფონი"</string>

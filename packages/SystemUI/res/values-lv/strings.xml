@@ -103,8 +103,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Aktīvs paziņojums par ekrāna ierakstīšanas sesiju"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Vai sākt ierakstīšanu?"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Ierakstīšanas laikā Android var piekļūt visam, kas tiek rādīts jūsu ekrānā vai atskaņots jūsu ierīcē. Tāpēc piesardzīgi apejieties ar parolēm, maksājumu informāciju, ziņojumiem, fotoattēliem un audio un video saturu."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Lietotnes ierakstīšanas laikā Android var piekļūt visam, kas tiek rādīts vai atskaņots attiecīgajā lietotnē. Tāpēc piesardzīgi apejieties ar parolēm, maksājumu informāciju, ziņojumiem, fotoattēliem un audio un video saturu."</string>
-    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Sāk ierakstīšanu"</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Lietotnes ierakstīšanas laikā Android var piekļūt visam, kas tiek rādīts vai atskaņots attiecīgajā lietotnē. Tāpēc ar parolēm, maksājumu informāciju, ziņojumiem, fotoattēliem un audio un video saturu rīkojieties piesardzīgi."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Sākt ierakstīšanu"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Ierakstīt audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Ierīces audio"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Skaņa no jūsu ierīces, piemēram, mūzika, sarunas un zvana signāli"</string>
@@ -261,7 +261,7 @@
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Nav pieejama neviena pārī savienota ierīce."</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Lai pievienotu vai atvienotu kādu ierīci, pieskarieties."</string>
-    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Savienošana pārī ar jaunu ierīci"</string>
+    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Savienot pārī ar jaunu ierīci"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Skatīt visas"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Izmantot Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Savienojums izveidots"</string>
@@ -564,7 +564,7 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Lietotne tika atsprausta"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"Zvans"</string>
     <string name="stream_system" msgid="7663148785370565134">"Sistēma"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Zvans"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Skaņas signāls"</string>
     <string name="stream_music" msgid="2188224742361847580">"Multivide"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Signāls"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Paziņojums"</string>
@@ -737,7 +737,7 @@
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Atvērt iestatījumus"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Atvērt Asistentu"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Bloķēt ekrānu"</string>
-    <string name="group_system_quick_memo" msgid="3764560265935722903">"Piezīmes izveide"</string>
+    <string name="group_system_quick_memo" msgid="3764560265935722903">"Izveidot piezīmi"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Sistēmas vairākuzdevumu režīms"</string>
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Pāriet ekrāna sadalīšanas režīmā ar pašreizējo lietotni pa labi"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Pāriet ekrāna sadalīšanas režīmā ar pašreizējo lietotni pa kreisi"</string>

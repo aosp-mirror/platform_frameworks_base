@@ -589,7 +589,7 @@
     <string name="volume_dialog_title" msgid="6502703403483577940">"Helitugevuse juhtnupud: %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Kõnede ja märguannete puhul telefon heliseb (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"Esitamine jätkub seadmes <xliff:g id="LABEL">%s</xliff:g>"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Heli esitamine jätkub"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Heli esitatakse seadmes"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Süsteemi kasutajaliidese tuuner"</string>
     <string name="status_bar" msgid="4357390266055077437">"Olekuriba"</string>
     <string name="demo_mode" msgid="263484519766901593">"Süsteemi kasutajaliidese demorežiim"</string>
@@ -737,7 +737,7 @@
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Seadete avamine"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistendi avamine"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Lukustuskuva"</string>
-    <string name="group_system_quick_memo" msgid="3764560265935722903">"Kirjuta märkus"</string>
+    <string name="group_system_quick_memo" msgid="3764560265935722903">"Märkme tegemine"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Süsteemi multitegumtöö"</string>
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Ekraanikuva jagamine, nii et praegune rakendus on paremal"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Ekraanikuva jagamine, nii et praegune rakendus on vasakul"</string>

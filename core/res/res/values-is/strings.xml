@@ -1969,7 +1969,7 @@
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Viltu leyfa <xliff:g id="APP">%1$s</xliff:g> að stofna nýjan notanda með <xliff:g id="ACCOUNT">%2$s</xliff:g> (notandi með þennan reikning er þegar fyrir hendi)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Leyfa <xliff:g id="APP">%1$s</xliff:g> að stofna nýjan notanda með <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"Bæta við stýrðum notanda"</string>
-    <string name="language_selection_title" msgid="52674936078683285">"Bæta við tungumáli"</string>
+    <string name="language_selection_title" msgid="52674936078683285">"Bæta tungumáli við"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Svæðisval"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Sláðu inn heiti tungumáls"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Tillögur"</string>
@@ -1987,7 +1987,7 @@
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Ljúka hléi"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Neyðartilvik"</string>
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Stilltu skjálás"</string>
-    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Stilltu skjálás"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Stilla skjálás"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Stilltu skjálás í tækinu til að nota leynirými"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Forrit er ekki tiltækt"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> er ekki tiltækt núna."</string>

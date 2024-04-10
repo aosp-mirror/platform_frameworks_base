@@ -995,7 +995,7 @@
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Perbaiki!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Coba lagi"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Coba lagi"</string>
-    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Membuka kunci untuk semua fitur dan data"</string>
+    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Buka kunci untuk melihat semua fitur dan data"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Percobaan Buka dengan Wajah melebihi batas maksimum"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Tidak ada SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Tidak ada SIM di tablet."</string>
@@ -1365,7 +1365,7 @@
     <string name="sim_removed_message" msgid="8469588437451533845">"Jaringan seluler tidak akan tersedia sampai Anda memulai ulang dengan SIM yang valid."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Selesai"</string>
     <string name="sim_added_title" msgid="2976783426741012468">"SIM ditambahkan"</string>
-    <string name="sim_added_message" msgid="6602906609509958680">"Mulai ulang perangkat Anda untuk mengakses jaringan selular."</string>
+    <string name="sim_added_message" msgid="6602906609509958680">"Mulai ulang perangkat Anda untuk mengakses jaringan seluler."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Mulai Ulang"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Aktifkan layanan seluler"</string>
     <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"Download aplikasi operator untuk mengaktifkan SIM baru"</string>
@@ -1723,9 +1723,9 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Izinkan <xliff:g id="SERVICE">%1$s</xliff:g> mengontrol perangkat Anda secara penuh?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kontrol penuh sesuai untuk aplikasi yang mendukung kebutuhan aksesibilitas Anda, tetapi tidak untuk sebagian besar aplikasi."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Melihat dan mengontrol layar"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Voice Access dapat membaca semua konten di layar dan menampilkan konten di atas aplikasi lain."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Membaca semua konten di layar dan menampilkan konten di atas aplikasi lain."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Menampilkan dan melakukan tindakan"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Voice Access dapat melacak interaksi Anda dengan aplikasi atau sensor hardware, dan berinteraksi dengan aplikasi untuk Anda."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Melacak interaksi Anda dengan aplikasi atau sensor hardware, dan berinteraksi dengan aplikasi untuk Anda."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Izinkan"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Tolak"</string>
     <string name="accessibility_dialog_button_uninstall" msgid="2952465517671708108">"Uninstal"</string>
@@ -1988,7 +1988,7 @@
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Darurat"</string>
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Setel kunci layar"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Setel kunci layar"</string>
-    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Untuk menggunakan ruang pribadi, setel kunci layar di perangkat ini"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Untuk menggunakan ruang privasi, setel kunci layar di perangkat ini"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikasi tidak tersedia"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak tersedia saat ini."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> tidak tersedia"</string>

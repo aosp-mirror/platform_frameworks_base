@@ -437,7 +437,7 @@
     <string name="transcode_default" msgid="3784803084573509491">"Considerar que os apps são compatíveis com formatos modernos"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Mostrar notificações de transcodificação"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Desativar cache da transcodificação"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Configurações o Widevine"</string>
+    <string name="widevine_settings_title" msgid="4023329801172572917">"Configurações de Widevine"</string>
     <string name="force_l3_fallback_title" msgid="4987972688770202547">"Forçar substituição do L3"</string>
     <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Selecione para forçar a substituição do L3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Serviços em execução"</string>
@@ -522,7 +522,7 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"Estado do registro de IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Registrado"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Não registrado"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"Não disponível"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"Indisponível"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"O MAC é randomizado"</string>
     <string name="wifi_tether_connected_summary" msgid="5100712926640492336">"{count,plural, =1{1 dispositivo conectado}one{# dispositivo conectado}other{# dispositivos conectados}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Mais tempo."</string>
@@ -641,7 +641,7 @@
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Excluir"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Salvar"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"Sair do modo visitante"</string>
-    <string name="guest_reset_button" msgid="2515069346223503479">"Redefinir Sessão de visitante"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Redefinir sessão de visitante"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Sair do modo visitante"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Todas as atividades serão excluídas ao sair"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Você pode salvar ou excluir sua atividade ao sair"</string>

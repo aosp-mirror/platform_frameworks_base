@@ -738,7 +738,7 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"បើក​ជំនួយការ"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ចាក់​សោ​អេក្រង់"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"កត់​ចំណាំ"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"ការដំណើរការបានច្រើននៃប្រព័ន្ធ"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"ការដំណើរការច្រើនរបស់ប្រព័ន្ធ"</string>
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"ចូលក្នុងមុខងារបំបែកអេក្រង់ដោយប្រើកម្មវិធីបច្ចុប្បន្ននៅខាងស្ដាំដៃ"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"ចូលក្នុងមុខងារ​បំបែកអេក្រង់ដោយប្រើកម្មវិធីបច្ចុប្បន្ននៅខាងឆ្វេងដៃ"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"ប្ដូរពីមុខងារ​បំបែកអេក្រង់ទៅជាអេក្រង់ពេញ"</string>

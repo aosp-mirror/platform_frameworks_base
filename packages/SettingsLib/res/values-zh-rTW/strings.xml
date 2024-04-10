@@ -483,7 +483,7 @@
     <string name="battery_info_status_charging" msgid="4279958015430387405">"充電中"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"快速充電中"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"慢速充電中"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"正在進行無線充電"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"正在無線充電"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"充電中"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"非充電中"</string>
     <string name="battery_info_status_not_charging" msgid="1103084691314264664">"已連接，但未充電"</string>
@@ -491,7 +491,7 @@
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"充電完成"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"目前暫停充電"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"已由管理員停用"</string>
-    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"由限制設定控管"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"由受限制的設定控管"</string>
     <string name="disabled" msgid="8017887509554714950">"已停用"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"允許"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"不允許"</string>
@@ -536,7 +536,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"鬧鐘與提醒"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"允許設定鬧鐘和提醒"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"鬧鐘和提醒"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"允許這個應用程式設定鬧鐘及安排有時效性的動作。這麼做會讓用程式在背景執行，可能比較耗電。\n\n如果關閉這項權限，這個應用程式設定的現有鬧鐘將不會響起，而且應用程式也無法在預定的時間發出活動提醒。"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"允許這個應用程式設定鬧鐘及安排有時效性的動作。之後應用程式可以在背景執行，並可能耗用較多電量。\n\n如果關閉這項權限，這個應用程式設定的現有鬧鐘將不會響起，系統也無法在預定的時間發出活動提醒。"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"時間表, 鬧鐘, 提醒, 時鐘"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"開啟"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"開啟「零打擾」模式"</string>
