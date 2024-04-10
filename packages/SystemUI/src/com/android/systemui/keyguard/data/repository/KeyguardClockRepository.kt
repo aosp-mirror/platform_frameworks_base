@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import android.content.Context
 import android.os.UserHandle
 import android.provider.Settings
 import com.android.keyguard.ClockEventController
@@ -24,9 +25,12 @@ import com.android.keyguard.KeyguardClockSwitch.LARGE
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.flags.FeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.SettingsClockSize
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockId
+import com.android.systemui.res.R
 import com.android.systemui.shared.clocks.ClockRegistry
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
@@ -47,7 +51,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
 interface KeyguardClockRepository {
-    /** clock size determined by notificationPanelViewController, LARGE or SMALL */
+    /**
+     * clock size determined by notificationPanelViewController, LARGE or SMALL
+     *
+     * @deprecated When scene container flag is on use clockSize from domain level.
+     */
     val clockSize: StateFlow<Int>
 
     /** clock size selected in picker, DYNAMIC or SMALL */
@@ -61,6 +69,9 @@ interface KeyguardClockRepository {
     val previewClock: Flow<ClockController>
 
     val clockEventController: ClockEventController
+
+    val shouldForceSmallClock: Boolean
+
     fun setClockSize(@ClockSize size: Int)
 }
 
@@ -73,6 +84,8 @@ constructor(
     override val clockEventController: ClockEventController,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     @Application private val applicationScope: CoroutineScope,
+    @Application private val applicationContext: Context,
+    private val featureFlags: FeatureFlagsClassic,
 ) : KeyguardClockRepository {
 
     /** Receive SMALL or LARGE clock should be displayed on keyguard. */
@@ -134,6 +147,12 @@ constructor(
             // at the same time
             clockRegistry.createCurrentClock()
         }
+
+    override val shouldForceSmallClock: Boolean
+        get() =
+            featureFlags.isEnabled(Flags.LOCKSCREEN_ENABLE_LANDSCAPE) &&
+                // True on small landscape screens
+                applicationContext.resources.getBoolean(R.bool.force_small_clock_on_lockscreen)
 
     private fun getClockSize(): SettingsClockSize {
         return if (

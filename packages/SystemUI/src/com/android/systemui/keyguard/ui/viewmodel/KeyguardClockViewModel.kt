@@ -26,7 +26,6 @@ import com.android.systemui.customization.R as customizationR
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.keyguard.shared.model.SettingsClockSize
 import com.android.systemui.res.R
@@ -46,11 +45,10 @@ import kotlinx.coroutines.flow.stateIn
 class KeyguardClockViewModel
 @Inject
 constructor(
-    keyguardInteractor: KeyguardInteractor,
-    private val keyguardClockInteractor: KeyguardClockInteractor,
+    keyguardClockInteractor: KeyguardClockInteractor,
     @Application private val applicationScope: CoroutineScope,
     notifsKeyguardInteractor: NotificationsKeyguardInteractor,
-    @VisibleForTesting val shadeInteractor: ShadeInteractor,
+    @get:VisibleForTesting val shadeInteractor: ShadeInteractor,
 ) {
     var burnInLayer: Layer? = null
     val useLargeClock: Boolean
@@ -99,7 +97,7 @@ constructor(
             )
 
     val clockShouldBeCentered: StateFlow<Boolean> =
-        keyguardInteractor.clockShouldBeCentered.stateIn(
+        keyguardClockInteractor.clockShouldBeCentered.stateIn(
             scope = applicationScope,
             started = SharingStarted.WhileSubscribed(),
             initialValue = false
