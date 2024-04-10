@@ -14,33 +14,47 @@
  * limitations under the License.
  */
 
-package com.android.server.broadcastradio.hal2;
+package com.android.server.broadcastradio;
 
-import android.util.IndentingPrintWriter;
+import android.text.TextUtils;
 import android.util.LocalLog;
 import android.util.Log;
 
 import com.android.server.utils.Slogf;
 
-final class RadioEventLogger {
+/**
+ * Event logger to log and dump events of broadcast radio service client for HIDL and AIDL
+ * broadcast HAL.
+ */
+public final class RadioEventLogger {
     private final String mTag;
+    private final boolean mDebug;
     private final LocalLog mEventLogger;
 
-    RadioEventLogger(String tag, int loggerQueueSize) {
+    public RadioEventLogger(String tag, int loggerQueueSize) {
         mTag = tag;
+        mDebug = Log.isLoggable(mTag, Log.DEBUG);
         mEventLogger = new LocalLog(loggerQueueSize);
     }
 
-    @SuppressWarnings("AnnotateFormatMethod")
-    void logRadioEvent(String logFormat, Object... args) {
-        String log = String.format(logFormat, args);
+    /**
+     * Log broadcast radio service event
+     * @param logFormat String format of log message
+     * @param args Arguments of log message
+     */
+    public void logRadioEvent(String logFormat, Object... args) {
+        String log = TextUtils.formatSimple(logFormat, args);
         mEventLogger.log(log);
-        if (Log.isLoggable(mTag, Log.DEBUG)) {
-            Slogf.d(mTag, log);
+        if (mDebug) {
+            Slogf.d(mTag, logFormat, args);
         }
     }
 
-    void dump(IndentingPrintWriter pw) {
+    /**
+     * Dump broadcast radio service event
+     * @param pw Indenting print writer for dump
+     */
+    public void dump(android.util.IndentingPrintWriter pw) {
         mEventLogger.dump(pw);
     }
 }

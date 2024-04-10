@@ -22,7 +22,6 @@ import android.hardware.radio.IAnnouncementListener;
 import android.hardware.radio.ICloseHandle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.IndentingPrintWriter;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -94,7 +93,7 @@ public final class AnnouncementAggregator extends ICloseHandle.Stub {
             if (mCloseHandle != null) mCloseHandle.close();
         }
 
-        public void dumpInfo(IndentingPrintWriter pw) {
+        public void dumpInfo(android.util.IndentingPrintWriter pw) {
             pw.printf("ModuleWatcher:\n");
 
             pw.increaseIndent();
@@ -192,7 +191,8 @@ public final class AnnouncementAggregator extends ICloseHandle.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter printWriter, String[] args) {
-        IndentingPrintWriter announcementPrintWriter = new IndentingPrintWriter(printWriter);
+        android.util.IndentingPrintWriter announcementPrintWriter =
+                new android.util.IndentingPrintWriter(printWriter);
         announcementPrintWriter.printf("AnnouncementAggregator\n");
 
         announcementPrintWriter.increaseIndent();
