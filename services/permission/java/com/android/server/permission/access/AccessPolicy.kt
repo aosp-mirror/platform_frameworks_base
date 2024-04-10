@@ -16,7 +16,6 @@
 
 package com.android.server.permission.access
 
-import android.permission.flags.Flags
 import android.util.Slog
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
@@ -79,7 +78,7 @@ private constructor(
             setPackageStates(packageStates)
             setDisabledSystemPackageStates(disabledSystemPackageStates)
             packageStates.forEach { (_, packageState) ->
-                if (Flags.ignoreApexPermissions() && packageState.isApex) {
+                if (packageState.isApex) {
                     return@forEach
                 }
                 mutateAppIdPackageNames()
@@ -107,7 +106,7 @@ private constructor(
         newState.mutateUserStatesNoWrite()[userId] = MutableUserState()
         forEachSchemePolicy { with(it) { onUserAdded(userId) } }
         newState.externalState.packageStates.forEach { (_, packageState) ->
-            if (Flags.ignoreApexPermissions() && packageState.isApex) {
+            if (packageState.isApex) {
                 return@forEach
             }
             upgradePackageVersion(packageState, userId)
@@ -133,7 +132,7 @@ private constructor(
             setPackageStates(packageStates)
             setDisabledSystemPackageStates(disabledSystemPackageStates)
             packageStates.forEach { (packageName, packageState) ->
-                if (Flags.ignoreApexPermissions() && packageState.isApex) {
+                if (packageState.isApex) {
                     return@forEach
                 }
                 if (packageState.volumeUuid == volumeUuid) {
@@ -161,7 +160,7 @@ private constructor(
             with(it) { onStorageVolumeMounted(volumeUuid, packageNames, isSystemUpdated) }
         }
         packageStates.forEach { (_, packageState) ->
-            if (Flags.ignoreApexPermissions() && packageState.isApex) {
+            if (packageState.isApex) {
                 return@forEach
             }
             if (packageState.volumeUuid == volumeUuid) {
