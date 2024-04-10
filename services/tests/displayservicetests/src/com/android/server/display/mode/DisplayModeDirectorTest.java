@@ -338,8 +338,6 @@ public class DisplayModeDirectorTest {
                 .thenReturn(false);
         when(resources.getBoolean(R.bool.config_refreshRateSynchronizationEnabled))
                 .thenReturn(false);
-        when(resources.getBoolean(R.bool.config_supportsDvrr))
-                .thenReturn(false);
         when(resources.getInteger(R.integer.config_displayWhiteBalanceBrightnessFilterHorizon))
                 .thenReturn(10000);
         when(resources.getInteger(R.integer.config_defaultPeakRefreshRate))
@@ -393,41 +391,87 @@ public class DisplayModeDirectorTest {
 
     private DisplayModeDirector createDirectorFromRefreshRateArray(
             float[] refreshRates, int baseModeId, float defaultRefreshRate) {
-        Display.Mode[] modes = new Display.Mode[refreshRates.length];
-        Display.Mode defaultMode = null;
-        for (int i = 0; i < refreshRates.length; i++) {
-            modes[i] = new Display.Mode(
-                    /*modeId=*/baseModeId + i, /*width=*/1000, /*height=*/1000, refreshRates[i]);
-            if (refreshRates[i] == defaultRefreshRate) {
-                defaultMode = modes[i];
-            }
-        }
+        return createDirectorFromRefreshRateArray(refreshRates, baseModeId, defaultRefreshRate,
+                new int[]{DISPLAY_ID});
+    }
+
+    private DisplayModeDirector createDirectorFromRefreshRateArray(
+            float[] refreshRates, int baseModeId, float defaultRefreshRate, int[] displayIds) {
+        Display.Mode[] modes = createDisplayModes(refreshRates, baseModeId);
+        Display.Mode defaultMode = getDefaultMode(modes, defaultRefreshRate);
+
         assertThat(defaultMode).isNotNull();
-        return createDirectorFromModeArray(modes, defaultMode);
+        return createDirectorFromModeArray(modes, defaultMode, displayIds);
     }
 
     private DisplayModeDirector createDirectorFromModeArray(Display.Mode[] modes,
             Display.Mode defaultMode) {
+        return createDirectorFromModeArray(modes, defaultMode, new int[]{DISPLAY_ID});
+    }
+
+    private DisplayModeDirector createDirectorFromModeArray(Display.Mode[] modes,
+            Display.Mode defaultMode, int[] displayIds) {
         DisplayModeDirector director =
                 new DisplayModeDirector(mContext, mHandler, mInjector, mDisplayManagerFlags);
         director.setLoggingEnabled(true);
-        SparseArray<Display.Mode[]> supportedModesByDisplay = new SparseArray<>();
-        supportedModesByDisplay.put(DISPLAY_ID, modes);
-        director.injectSupportedModesByDisplay(supportedModesByDisplay);
-        SparseArray<Display.Mode> defaultModesByDisplay = new SparseArray<>();
-        defaultModesByDisplay.put(DISPLAY_ID, defaultMode);
-        director.injectDefaultModeByDisplay(defaultModesByDisplay);
+        setupModesForDisplays(director, displayIds , modes, defaultMode);
         return director;
     }
 
     private DisplayModeDirector createDirectorFromFpsRange(int minFps, int maxFps) {
+        return createDirectorFromRefreshRateArray(
+                createRefreshRateRanges(minFps, maxFps),
+                /*baseModeId=*/minFps,
+                /*defaultRefreshRate=*/minFps,
+                new int[]{DISPLAY_ID});
+    }
+
+    private DisplayModeDirector createDirectorFromFpsRange(
+            int minFps, int maxFps, int[] displayIds) {
+        return createDirectorFromRefreshRateArray(
+                createRefreshRateRanges(minFps, maxFps),
+                /*baseModeId=*/minFps,
+                /*defaultRefreshRate=*/minFps,
+                displayIds);
+    }
+
+    private void setupModesForDisplays(DisplayModeDirector director, int[] displayIds,
+            Display.Mode[] modes, Display.Mode defaultMode) {
+        SparseArray<Display.Mode[]> supportedModesByDisplay = new SparseArray<>();
+        SparseArray<Display.Mode> defaultModesByDisplay = new SparseArray<>();
+        for (int displayId: displayIds) {
+            supportedModesByDisplay.put(displayId, modes);
+            defaultModesByDisplay.put(displayId, defaultMode);
+        }
+        director.injectSupportedModesByDisplay(supportedModesByDisplay);
+        director.injectDefaultModeByDisplay(defaultModesByDisplay);
+    }
+
+    private Display.Mode[] createDisplayModes(float[] refreshRates, int baseModeId) {
+        Display.Mode[] modes = new Display.Mode[refreshRates.length];
+        for (int i = 0; i < refreshRates.length; i++) {
+            modes[i] = new Display.Mode(
+                    /*modeId=*/baseModeId + i, /*width=*/1000, /*height=*/1000, refreshRates[i]);
+        }
+        return modes;
+    }
+
+    private Display.Mode getDefaultMode(Display.Mode[] modes, float defaultRefreshRate) {
+        for (Display.Mode mode : modes) {
+            if (mode.getRefreshRate() == defaultRefreshRate) {
+                return mode;
+            }
+        }
+        return null;
+    }
+
+    private float[] createRefreshRateRanges(int minFps, int maxFps) {
         int numRefreshRates = maxFps - minFps + 1;
         float[] refreshRates = new float[numRefreshRates];
         for (int i = 0; i < numRefreshRates; i++) {
             refreshRates[i] = minFps + i;
         }
-        return createDirectorFromRefreshRateArray(refreshRates, /*baseModeId=*/minFps,
-                /*defaultRefreshRate=*/minFps);
+        return refreshRates;
     }
 
     @Test
@@ -1893,6 +1937,7 @@ public class DisplayModeDirectorTest {
         mInjector.mDisplayInfo.displayId = DISPLAY_ID_2;
 
         DisplayModeDirector director = createDirectorFromModeArray(TEST_MODES, DEFAULT_MODE_60);
+        director.start(createMockSensorManager());
 
         SparseArray<Vote> votes = new SparseArray<>();
         votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 50f));

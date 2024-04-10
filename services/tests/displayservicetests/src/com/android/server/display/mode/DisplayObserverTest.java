@@ -39,6 +39,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Resources;
 import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManagerInternal;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.DeviceConfigInterface;
@@ -426,8 +427,12 @@ public class DisplayObserverTest {
             return true;
         }).when(mInjector).getDisplayInfo(eq(EXTERNAL_DISPLAY), /*displayInfo=*/ any());
 
-        doAnswer(c -> mock(SensorManagerInternal.class)).when(mInjector).getSensorManagerInternal();
+        doAnswer(c -> mock(SensorManagerInternal.class))
+                .when(mInjector).getSensorManagerInternal();
         doAnswer(c -> mock(DeviceConfigInterface.class)).when(mInjector).getDeviceConfig();
+        doAnswer(c -> mock(DisplayManagerInternal.class))
+                .when(mInjector).getDisplayManagerInternal();
+
 
         mDefaultDisplay = mock(Display.class);
         when(mDefaultDisplay.getDisplayId()).thenReturn(DEFAULT_DISPLAY);

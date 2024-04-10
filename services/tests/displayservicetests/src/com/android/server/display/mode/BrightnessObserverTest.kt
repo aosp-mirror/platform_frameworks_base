@@ -19,6 +19,7 @@ package com.android.server.display.mode
 import android.content.Context
 import android.content.ContextWrapper
 import android.hardware.display.BrightnessInfo
+import android.util.SparseBooleanArray
 import android.view.Display
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.filters.SmallTest
@@ -62,8 +63,11 @@ class BrightnessObserverTest {
         whenever(mockFlags.isVsyncLowLightVoteEnabled).thenReturn(testCase.vsyncLowLightVoteEnabled)
         val displayModeDirector = DisplayModeDirector(
                 spyContext, testHandler, mockInjector, mockFlags)
+        val vrrByDisplay = SparseBooleanArray()
+        vrrByDisplay.put(Display.DEFAULT_DISPLAY, testCase.vrrSupported)
+        displayModeDirector.injectVrrByDisplay(vrrByDisplay)
         val brightnessObserver = displayModeDirector.BrightnessObserver(
-                spyContext, testHandler, mockInjector, testCase.vrrSupported, mockFlags)
+                spyContext, testHandler, mockInjector, mockFlags)
 
         brightnessObserver.onRefreshRateSettingChangedLocked(0.0f, 120.0f)
         brightnessObserver.updateBlockingZoneThresholds(mockDeviceConfig, false)

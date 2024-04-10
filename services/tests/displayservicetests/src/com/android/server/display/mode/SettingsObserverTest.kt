@@ -19,6 +19,8 @@ package com.android.server.display.mode
 import android.content.Context
 import android.content.ContextWrapper
 import android.provider.Settings
+import android.util.SparseBooleanArray
+import android.view.Display
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.filters.SmallTest
 import com.android.internal.util.test.FakeSettingsProvider
@@ -39,7 +41,6 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWith(TestParameterInjector::class)
 class SettingsObserverTest {
-
     @get:Rule
     val mockitoRule = MockitoJUnit.rule()
 
@@ -68,8 +69,11 @@ class SettingsObserverTest {
 
         val displayModeDirector = DisplayModeDirector(
                 spyContext, testHandler, mockInjector, mockFlags)
+        val vrrByDisplay = SparseBooleanArray()
+        vrrByDisplay.put(Display.DEFAULT_DISPLAY, testCase.vrrSupported)
+        displayModeDirector.injectVrrByDisplay(vrrByDisplay)
         val settingsObserver = displayModeDirector.SettingsObserver(
-                spyContext, testHandler, testCase.dvrrSupported, mockFlags)
+                spyContext, testHandler, mockFlags)
 
         settingsObserver.onChange(
                 false, Settings.Global.getUriFor(Settings.Global.LOW_POWER_MODE), 1)
@@ -79,7 +83,7 @@ class SettingsObserverTest {
     }
 
     enum class SettingsObserverTestCase(
-            val dvrrSupported: Boolean,
+            val vrrSupported: Boolean,
             val vsyncLowPowerVoteEnabled: Boolean,
             val lowPowerModeEnabled: Boolean,
             internal val expectedVote: Vote?

@@ -176,7 +176,9 @@
                 <xs:element type="idleScreenRefreshRateTimeout" name="idleScreenRefreshRateTimeout" minOccurs="0">
                     <xs:annotation name="final"/>
                 </xs:element>
-
+                <xs:element name="supportsVrr" type="xs:boolean" minOccurs="0">
+                    <xs:annotation name="final"/>
+                </xs:element>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
