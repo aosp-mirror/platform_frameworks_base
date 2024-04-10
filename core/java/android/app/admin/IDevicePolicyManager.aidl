@@ -623,8 +623,10 @@ interface IDevicePolicyManager {
 
     int[] getSubscriptionIds(String callerPackageName);
 
-    void setMaxPolicyStorageLimit(String packageName, int storageLimit);
-    int getMaxPolicyStorageLimit(String packageName);
+    void setMaxPolicyStorageLimit(String callerPackageName, int storageLimit);
+    void forceSetMaxPolicyStorageLimit(String callerPackageName, int storageLimit);
+    int getMaxPolicyStorageLimit(String callerPackageName);
+    int getPolicySizeForAdmin(String callerPackageName, in EnforcingAdmin admin);
 
     int getHeadlessDeviceOwnerMode(String callerPackageName);
 }

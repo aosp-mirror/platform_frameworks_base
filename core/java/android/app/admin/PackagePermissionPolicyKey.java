@@ -59,7 +59,7 @@ public final class PackagePermissionPolicyKey extends PolicyKey {
     public PackagePermissionPolicyKey(@NonNull String identifier, @NonNull String packageName,
             @NonNull String permissionName) {
         super(identifier);
-        if (Flags.devicePolicySizeTrackingInternalEnabled()) {
+        if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
             PolicySizeVerifier.enforceMaxPackageNameLength(packageName);
             PolicySizeVerifier.enforceMaxStringLength(permissionName, "permissionName");
         }
