@@ -68,14 +68,6 @@
   <string name="choose_create_option_password_title">Save password to sign in to <xliff:g id="app_name" example="Tribank">%1$s</xliff:g>?</string>
   <!-- This appears as the title of the modal bottom sheet for users to choose the create option inside a provider when the credential type is others. [CHAR LIMIT=200] -->
   <string name="choose_create_option_sign_in_title">Save sign-in info for <xliff:g id="app_name" example="Tribank">%1$s</xliff:g>?</string>
-  <!-- This appears as a description of the modal bottom sheet when the single tap sign in flow is used for the create passkey flow. [CHAR LIMIT=200] -->
-  <string name="choose_create_single_tap_passkey_title">Use your screen lock to create a passkey for <xliff:g id="app_name" example="Shrine">%1$s</xliff:g>?</string>
-  <!-- This appears as a description of the modal bottom sheet when the single tap sign in flow is used for the create password flow. [CHAR LIMIT=200] -->
-  <string name="choose_create_single_tap_password_title">Use your screen lock to create a password for <xliff:g id="app_name" example="Shrine">%1$s</xliff:g>?</string>
-  <!-- This appears as a description of the modal bottom sheet when the single tap sign in flow is used for the create flow when the credential type is others. [CHAR LIMIT=200] -->
-  <!-- TODO(b/326243891) : Confirm with team on dynamically setting this based on recent product and ux discussions (does not disrupt e2e) -->
-  <string name="choose_create_single_tap_sign_in_title">Use your screen lock to save sign in info for <xliff:g id="app_name" example="Shrine">%1$s</xliff:g>?</string>
-  <!-- Types which are inserted as a placeholder as credentialTypes for other strings. [CHAR LIMIT=200] -->
   <string name="passkey">passkey</string>
   <string name="password">password</string>
   <string name="passkeys">passkeys</string>
@@ -133,6 +125,12 @@
   <string name="get_dialog_title_single_tap_for">Use your screen lock to sign in to <xliff:g id="app_name" example="Shrine">%1$s</xliff:g> with <xliff:g id="username" example="beckett-bakery@gmail.com">%2$s</xliff:g></string>
   <!-- This appears as the title of the dialog asking for user confirmation to use the single user credential (previously saved or to be created) to sign in to the app. [CHAR LIMIT=200] -->
   <string name="get_dialog_title_use_sign_in_for">Use your sign-in for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
+  <!-- This appears as the description of the modal bottom sheet asking for user confirmation to use the biometric screen embedded within credential manager for passkey authentication. [CHAR LIMIT=200] -->
+  <string name="get_dialog_description_single_tap_passkey">Sign in to <xliff:g id="app_name" example="YouTube">%1$s</xliff:g> with your saved passkey for <xliff:g id="username" example="beckett@gmail.com">%2$s</xliff:g>.</string>
+  <!-- This appears as the description of the modal bottom sheet asking for user confirmation to use the biometric screen embedded within credential manager for password authentication. [CHAR LIMIT=200] -->
+  <string name="get_dialog_description_single_tap_password">Sign in to <xliff:g id="app_name" example="YouTube">%1$s</xliff:g> with your saved password for <xliff:g id="username" example="beckett@gmail.com">%2$s</xliff:g>.</string>
+  <!-- This appears as the description of the modal bottom sheet asking for user confirmation to use the biometric screen embedded within credential manager for saved sign-in authentication. [CHAR LIMIT=200] -->
+  <string name="get_dialog_description_single_tap_saved_sign_in">Sign in to <xliff:g id="app_name" example="YouTube">%1$s</xliff:g> with your saved sign-in info for <xliff:g id="username" example="beckett@gmail.com">%2$s</xliff:g>.</string>
   <!-- This appears as the title of the dialog asking for user confirmation to unlock / authenticate (e.g. via fingerprint, faceId, passcode etc.) so that we can retrieve their sign-in options. [CHAR LIMIT=200] -->
   <string name="get_dialog_title_unlock_options_for">Unlock sign-in options for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
   <!-- This appears as the title of the dialog asking for user to make a choice from multiple previously saved passkey to sign in to the app. [CHAR LIMIT=200] -->
