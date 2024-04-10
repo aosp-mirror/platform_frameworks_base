@@ -9,8 +9,8 @@ flag {
 }
 
 flag {
-    name: "de_hidl"
-    namespace: "biometrics_framework"
-    description: "feature flag for biometrics de-hidl"
-    bug: "287332354"
+  name: "use_vhal_for_testing"
+  namespace: "biometrics_framework"
+  description: "This flag controls whether virtual HAL is used for testing instead of TestHal "
+  bug: "294254230"
 }
