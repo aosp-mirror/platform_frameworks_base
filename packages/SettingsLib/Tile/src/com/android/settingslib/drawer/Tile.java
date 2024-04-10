@@ -19,6 +19,7 @@ package com.android.settingslib.drawer;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_ORDER;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_PROFILE;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_NEW_TASK;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_GROUP_KEY;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_KEYHINT;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SEARCHABLE;
@@ -79,6 +80,9 @@ public abstract class Tile implements Parcelable {
         mComponentName = mComponentInfo.name;
         mCategory = category;
         mMetaData = metaData;
+        if (mMetaData != null) {
+            mGroupKey = metaData.getString(META_DATA_PREFERENCE_GROUP_KEY);
+        }
         mIntent = new Intent().setClassName(mComponentPackage, mComponentName);
         if (isNewTask()) {
             mIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
