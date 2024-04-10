@@ -29,11 +29,6 @@
   public protected *;
 }
 
-# Derivatives of SystemService and other services created via reflection
--keep,allowoptimization,allowaccessmodification class * extends com.android.server.SystemService {
-  public <methods>;
-}
-
 # Accessed from com.android.compos APEX
 -keep,allowoptimization,allowaccessmodification class com.android.internal.art.ArtStatsLog {
    public static void write(...);

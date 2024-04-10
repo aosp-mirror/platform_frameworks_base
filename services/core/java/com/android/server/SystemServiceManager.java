@@ -44,6 +44,9 @@ import com.android.server.am.EventLogTags;
 import com.android.server.pm.ApexManager;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
+import com.android.tools.r8.keepanno.annotations.KeepTarget;
+import com.android.tools.r8.keepanno.annotations.TypePattern;
+import com.android.tools.r8.keepanno.annotations.UsesReflection;
 
 import dalvik.system.PathClassLoader;
 
@@ -207,6 +210,11 @@ public final class SystemServiceManager implements Dumpable {
      * @throws RuntimeException if the service fails to start.
      */
     @android.ravenwood.annotation.RavenwoodKeep
+    @UsesReflection(
+            @KeepTarget(
+                    instanceOfClassConstantExclusive = SystemService.class,
+                    methodName = "<init>",
+                    methodParameterTypePatterns = {@TypePattern(constant = Context.class)}))
     public <T extends SystemService> T startService(Class<T> serviceClass) {
         try {
             final String name = serviceClass.getName();
