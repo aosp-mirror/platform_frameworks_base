@@ -4175,8 +4175,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     public void enableShortcutsForTargets(
             boolean enable, @UserShortcutType int shortcutTypes,
             @NonNull List<String> shortcutTargets, @UserIdInt int userId) {
-        mContext.enforceCallingPermission(
-                Manifest.permission.MANAGE_ACCESSIBILITY, "enableShortcutsForTargets");
+        if (android.view.accessibility.Flags.migrateEnableShortcuts()) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.MANAGE_ACCESSIBILITY, "enableShortcutsForTargets");
+        } else {
+            mContext.enforceCallingPermission(
+                    Manifest.permission.MANAGE_ACCESSIBILITY, "enableShortcutsForTargets");
+        }
         for (int shortcutType : USER_SHORTCUT_TYPES) {
             if ((shortcutTypes & shortcutType) == shortcutType) {
                 enableShortcutForTargets(enable, shortcutType, shortcutTargets, userId);

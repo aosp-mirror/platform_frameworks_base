@@ -420,7 +420,7 @@ public class AccessibilityShortcutControllerTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
+    @EnableFlags(Flags.FLAG_MIGRATE_ENABLE_SHORTCUTS)
     public void testClickingDisableButtonInDialog_shouldClearShortcutId() throws Exception {
         configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
         configureValidShortcutService();
@@ -443,7 +443,7 @@ public class AccessibilityShortcutControllerTest {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
+    @DisableFlags(Flags.FLAG_MIGRATE_ENABLE_SHORTCUTS)
     public void testClickingDisableButtonInDialog_shouldClearShortcutId_old() throws Exception {
         configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
         configureValidShortcutService();
@@ -467,7 +467,7 @@ public class AccessibilityShortcutControllerTest {
 
     @Test
     @EnableFlags(Flags.FLAG_UPDATE_ALWAYS_ON_A11Y_SERVICE)
-    @DisableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
+    @DisableFlags(Flags.FLAG_MIGRATE_ENABLE_SHORTCUTS)
     public void turnOffVolumeShortcutForAlwaysOnA11yService_shouldTurnOffA11yService()
             throws Exception {
         configureApplicationTargetSdkVersion(Build.VERSION_CODES.R);
@@ -480,7 +480,7 @@ public class AccessibilityShortcutControllerTest {
 
     @Test
     @EnableFlags(Flags.FLAG_UPDATE_ALWAYS_ON_A11Y_SERVICE)
-    @DisableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
+    @DisableFlags(Flags.FLAG_MIGRATE_ENABLE_SHORTCUTS)
     public void turnOffVolumeShortcutForAlwaysOnA11yService_hasOtherTypesShortcut_shouldNotTurnOffA11yService()
             throws Exception {
         configureApplicationTargetSdkVersion(Build.VERSION_CODES.R);
@@ -527,7 +527,7 @@ public class AccessibilityShortcutControllerTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
+    @EnableFlags(Flags.FLAG_MIGRATE_ENABLE_SHORTCUTS)
     public void testTurnOnDefaultA11yServiceInDialog_defaultServiceShortcutTurnsOn()
             throws Exception {
         configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
@@ -551,7 +551,7 @@ public class AccessibilityShortcutControllerTest {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
+    @DisableFlags(Flags.FLAG_MIGRATE_ENABLE_SHORTCUTS)
     public void testTurnOnDefaultA11yServiceInDialog_defaultServiceShortcutTurnsOn_old()
             throws Exception {
         configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
@@ -574,7 +574,7 @@ public class AccessibilityShortcutControllerTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
+    @EnableFlags(Flags.FLAG_MIGRATE_ENABLE_SHORTCUTS)
     public void testTurnOffDefaultA11yServiceInDialog_defaultServiceShortcutTurnsOff()
             throws Exception {
         configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
@@ -598,7 +598,7 @@ public class AccessibilityShortcutControllerTest {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
+    @DisableFlags(Flags.FLAG_MIGRATE_ENABLE_SHORTCUTS)
     public void testTurnOffDefaultA11yServiceInDialog_defaultServiceShortcutTurnsOff_old()
             throws Exception {
         configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
