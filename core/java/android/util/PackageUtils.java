@@ -203,9 +203,8 @@ public final class PackageUtils {
         }
 
         File f = new File(filePath);
-        try {
-            DigestInputStream digestInputStream = new DigestInputStream(new FileInputStream(f),
-                    messageDigest);
+        try (DigestInputStream digestInputStream = new DigestInputStream(new FileInputStream(f),
+                messageDigest)) {
             while (digestInputStream.read(fileBuffer) != -1);
         } catch (IOException e) {
             e.printStackTrace();
