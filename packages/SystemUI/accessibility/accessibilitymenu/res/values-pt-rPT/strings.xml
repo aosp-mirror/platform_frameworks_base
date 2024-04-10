@@ -21,7 +21,7 @@
     <string name="previous_button_content_description" msgid="840869171117765966">"Ir para o ecrã anterior"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"Ir para o ecrã seguinte"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"O menu Acessibilidade disponibiliza um menu grande no ecrã para controlar o dispositivo. Pode bloquear o dispositivo, controlar o volume e o brilho, fazer capturas de ecrã e muito mais."</string>
-    <string name="accessibility_menu_summary" msgid="340071398148208130">"Controle o dispositivo através do menu grande"</string>
+    <string name="accessibility_menu_summary" msgid="340071398148208130">"Controlar dispositivo através do menu grande"</string>
     <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Definições do menu Acessibilidade"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"Botões grandes"</string>
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"Aumentar o tamanho dos botões do menu Acessibilidade"</string>
