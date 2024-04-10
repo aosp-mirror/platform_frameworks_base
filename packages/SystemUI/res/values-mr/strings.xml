@@ -726,7 +726,7 @@
     <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"इनपुट शॉर्टकट दाखवत आहे"</string>
     <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"ॲप्स उघडणारे शॉर्टकट दाखवत आहे"</string>
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"सद्य अ‍ॅपसाठी शॉर्टकट दाखवत आहे"</string>
-    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"सूचना पहा"</string>
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"नोटिफिकेशन पहा"</string>
     <string name="group_system_full_screenshot" msgid="5742204844232667785">"स्क्रीनशॉट घ्या"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"शॉर्टकट दाखवा"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"मागे जा"</string>

@@ -963,7 +963,7 @@
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Huỷ"</string>
     <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"Đã ẩn nút hỗ trợ tiếp cận"</string>
     <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"Nhấn để hiện nút hỗ trợ tiếp cận"</string>
-    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Đã xoá phím tắt dành cho <xliff:g id="FEATURE_NAME">%s</xliff:g>"</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Đã xoá lối tắt cho <xliff:g id="FEATURE_NAME">%s</xliff:g>"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{Đã xoá # lối tắt}other{Đã xoá # lối tắt}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Chuyển lên trên cùng bên trái"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Chuyển lên trên cùng bên phải"</string>
@@ -1252,7 +1252,7 @@
     <string name="mirror_display" msgid="2515262008898122928">"Phản chiếu màn hình"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"Đóng"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"Đã kết nối màn hình"</string>
-    <string name="privacy_dialog_title" msgid="7839968133469098311">"Micrô và máy ảnh"</string>
+    <string name="privacy_dialog_title" msgid="7839968133469098311">"Micrô và camera"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"Hoạt động sử dụng gần đây của ứng dụng"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Xem hoạt động truy cập gần đây"</string>
     <string name="privacy_dialog_done_button" msgid="4504330708531434263">"Xong"</string>

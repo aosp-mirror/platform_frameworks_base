@@ -647,7 +647,7 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;狀態：&lt;/b&gt;已調降順序"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"顯示在對話通知頂端 (螢幕鎖定時會顯示為個人資料相片)"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"以對話框的形式顯示在對話通知頂端 (螢幕鎖定時會顯示為個人資料相片)"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"顯示在對話通知頂端 (螢幕鎖定時會顯示為個人資料相片)，並會中斷「零打擾」模式"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"顯示在對話通知頂端 (螢幕鎖定時會顯示個人資料相片)，並會中斷「零打擾」模式"</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"以對話框的形式顯示在對話通知頂端 (螢幕鎖定時會顯示為個人資料相片)，並會中斷「零打擾」模式"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"優先"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」不支援對話功能"</string>
@@ -719,7 +719,7 @@
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"找不到快速鍵"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"系統"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"輸入"</string>
-    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"已開啟的應用程式"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"開啟應用程式"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"目前的應用程式"</string>
     <string name="keyboard_shortcut_a11y_show_search_results" msgid="2865241062981833705">"顯示搜尋結果"</string>
     <string name="keyboard_shortcut_a11y_filter_system" msgid="7744143131119370483">"顯示系統快速鍵"</string>
@@ -732,8 +732,8 @@
     <string name="group_system_go_back" msgid="2730322046244918816">"返回"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"前往主畫面"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"查看最近開啟的應用程式"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"前往最近開啟的應用程式"</string>
-    <string name="group_system_cycle_back" msgid="8194102916946802902">"返回最近開啟的應用程式"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"向前循環切換最近開啟的應用程式"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"向後循環切換最近開啟的應用程式"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"開啟應用程式清單"</string>
     <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"顯示工作列"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"開啟設定"</string>
@@ -836,7 +836,7 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"編輯設定順序。"</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"電源鍵選單"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"第 <xliff:g id="ID_1">%1$d</xliff:g> 頁，共 <xliff:g id="ID_2">%2$d</xliff:g> 頁"</string>
-    <string name="tuner_lock_screen" msgid="2267383813241144544">"鎖定畫面"</string>
+    <string name="tuner_lock_screen" msgid="2267383813241144544">"螢幕鎖定"</string>
     <string name="finder_active" msgid="7907846989716941952">"即使這支手機關機，仍可透過「尋找我的裝置」找出手機位置"</string>
     <string name="shutdown_progress" msgid="5464239146561542178">"關機中…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"查看處理步驟"</string>
@@ -1162,7 +1162,7 @@
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# 個應用程式正在運作}other{# 個應用程式正在運作}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"新資訊"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"運作中的應用程式"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"即使你並未使用，這些應用程式仍會持續運作。這可提升應用程式效能，但也可能影響電池續航力。"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"這些應用程式會在沒有使用的情況下持續運作。應用程式的實用度會因此提升，但也可能影響電池續航力。"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"停止"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"已停止"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"完成"</string>
@@ -1253,7 +1253,7 @@
     <string name="dismiss_dialog" msgid="2195508495854675882">"關閉"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"螢幕已連結"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"麥克風和相機"</string>
-    <string name="privacy_dialog_summary" msgid="2458769652125995409">"最近曾使用感應器的應用程式"</string>
+    <string name="privacy_dialog_summary" msgid="2458769652125995409">"最近使用的應用程式"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"查看近期存取記錄"</string>
     <string name="privacy_dialog_done_button" msgid="4504330708531434263">"完成"</string>
     <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"展開並顯示選項"</string>

@@ -208,7 +208,7 @@
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"Bluetooth түзмөгүнүн сүрөтчөсү"</string>
     <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"Түзмөктүн чоо-жайын конфигурациялоо үчүн чыкылдатыңыз"</string>
     <string name="accessibility_bluetooth_device_settings_see_all" msgid="9111952496905423543">"Бардык түзмөктөрдү көрүү үчүн чыкылдатыңыз"</string>
-    <string name="accessibility_bluetooth_device_settings_pair_new_device" msgid="2435184865793496966">"Жаңы түзмөктү жупташтыруу үчүн чыкылдатыңыз"</string>
+    <string name="accessibility_bluetooth_device_settings_pair_new_device" msgid="2435184865793496966">"Жаңы түзмөк кошуу үчүн чыкылдатыңыз"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Батарея кубатынын деңгээли белгисиз."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> менен туташкан."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> менен туташты."</string>
@@ -262,7 +262,7 @@
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Жупташкан түзмөктөр жок"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Түзмөктү туташтыруу же ажыратуу үчүн таптаңыз"</string>
-    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Жаңы түзмөктү жупташтыруу"</string>
+    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Жаңы түзмөк кошуу"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Баарын көрүү"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Иштетүү"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Туташты"</string>
@@ -688,7 +688,7 @@
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Ортолотуу"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Боштук"</string>
-    <string name="keyboard_key_enter" msgid="8633362970109751646">"Киргизүү"</string>
+    <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Артка өчүрүү"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Ойнотуу/Тындыруу"</string>
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Токтотуу"</string>
@@ -1254,21 +1254,21 @@
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"Экран туташтырылды"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Микрофон жана камера"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"Жакында колдонмолордо иштетилген"</string>
-    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Акыркы пайдалануусун көрүү"</string>
+    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Соңку маалыматты көрүү"</string>
     <string name="privacy_dialog_done_button" msgid="4504330708531434263">"Бүттү"</string>
     <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"Параметрлерди жайып көрсөтүү"</string>
     <string name="privacy_dialog_collapse_action" msgid="277419962019466347">"Жыйыштыруу"</string>
     <string name="privacy_dialog_close_app_button" msgid="8006250171305878606">"Бул колдонмону жабуу"</string>
     <string name="privacy_dialog_close_app_message" msgid="1316408652526310985">"<xliff:g id="APP_NAME">%1$s</xliff:g> жабылды"</string>
     <string name="privacy_dialog_manage_service" msgid="8320590856621823604">"Кызматты тескөө"</string>
-    <string name="privacy_dialog_manage_permissions" msgid="2543451567190470413">"Кирүү мүмкүнчүлүгүн тескөө"</string>
+    <string name="privacy_dialog_manage_permissions" msgid="2543451567190470413">"Жеткиликтүүлүгүн башкаруу"</string>
     <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"Телефон чалууда колдонулуп жатат"</string>
     <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"Акыркы жолу телефон чалууда колдонулду"</string>
-    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосунда иштетилип жатат"</string>
+    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосунда иштеп жатат"</string>
     <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"Акыркы жолу <xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосунда иштетилди"</string>
-    <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосунда иштетилип жатат (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
+    <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосунда иштеп жатат (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Акыркы жолу <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) колдонмосунда иштетилди"</string>
-    <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосунда иштетилип жатат (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосунда иштеп жатат (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Акыркы жолу <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) колдонмосунда иштетилди"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Баскычтоптун жарыгы"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d ичинен %1$d-деңгээл"</string>

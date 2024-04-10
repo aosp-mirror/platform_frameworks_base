@@ -143,7 +143,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Telefoon"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Spraakassistent"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Portemonnee"</string>
-    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR-codescanner"</string>
+    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR-code­scanner"</string>
     <string name="accessibility_unlock_button" msgid="3613812140816244310">"Ontgrendeld"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Apparaat vergrendeld"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Gezicht scannen"</string>
@@ -606,7 +606,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Ontgrendelen om te gebruiken"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Er is een probleem opgetreden bij het ophalen van je kaarten. Probeer het later opnieuw."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Instellingen voor vergrendelscherm"</string>
-    <string name="qr_code_scanner_title" msgid="1938155688725760702">"QR-codescanner"</string>
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"QR-code­scanner"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Updaten"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Werkprofiel"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Vliegtuig­modus"</string>
@@ -797,8 +797,8 @@
     <string name="right_keycode" msgid="2480715509844798438">"Toetscode rechts"</string>
     <string name="left_icon" msgid="5036278531966897006">"Icoon links"</string>
     <string name="right_icon" msgid="1103955040645237425">"Icoon rechts"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Houd vast en sleep om tegels toe te voegen"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Houd vast en sleep om tegels opnieuw in te delen"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Houd een tegel ingedrukt en sleep om die toe te voegen"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Houd een tegel ingedrukt en sleep om die te verplaatsen"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Sleep hier naartoe om te verwijderen"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Je hebt minimaal <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> tegels nodig"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Bewerken"</string>
@@ -1230,7 +1230,7 @@
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Nog <xliff:g id="PERCENTAGE">%s</xliff:g> batterijlading"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Verbind je stylus met een oplader"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Batterij van stylus bijna leeg"</string>
-    <string name="video_camera" msgid="7654002575156149298">"Videocamera"</string>
+    <string name="video_camera" msgid="7654002575156149298">"Video­camera"</string>
     <string name="call_from_work_profile_title" msgid="5418253516453177114">"Kan niet bellen vanuit een app voor persoonlijke doeleinden"</string>
     <string name="call_from_work_profile_text" msgid="2856337395968118274">"Je organisatie staat je alleen toe om te bellen vanuit werk-apps"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Overschakelen naar werkprofiel"</string>
