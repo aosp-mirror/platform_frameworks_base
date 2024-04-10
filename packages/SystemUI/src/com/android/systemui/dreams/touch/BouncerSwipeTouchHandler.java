@@ -37,6 +37,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.systemui.Flags;
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.dreams.touch.scrim.ScrimController;
 import com.android.systemui.dreams.touch.scrim.ScrimManager;
@@ -124,13 +125,19 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                 public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
                         float distanceY) {
                     if (mCapture == null) {
-                        // If the user scrolling favors a vertical direction, begin capturing
-                        // scrolls.
-                        mCapture = Math.abs(distanceY) > Math.abs(distanceX);
                         mBouncerInitiallyShowing = mCentralSurfaces
                                 .map(CentralSurfaces::isBouncerShowing)
                                 .orElse(false);
 
+                        if (Flags.dreamOverlayBouncerSwipeDirectionFiltering()) {
+                            mCapture = Math.abs(distanceY) > Math.abs(distanceX)
+                                    && ((distanceY < 0 && mBouncerInitiallyShowing)
+                                    || (distanceY > 0 && !mBouncerInitiallyShowing));
+                        } else {
+                            // If the user scrolling favors a vertical direction, begin capturing
+                            // scrolls.
+                            mCapture = Math.abs(distanceY) > Math.abs(distanceX);
+                        }
                         if (mCapture) {
                             // reset expanding
                             mExpanded = false;

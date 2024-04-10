@@ -31,6 +31,8 @@ import android.animation.ValueAnimator;
 import android.content.pm.UserInfo;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
@@ -41,6 +43,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.dreams.touch.scrim.ScrimController;
@@ -277,6 +280,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     /**
      * Makes sure swiping up when bouncer initially showing doesn't change the expansion amount.
      */
+    @DisableFlags(Flags.FLAG_DREAM_OVERLAY_BOUNCER_SWIPE_DIRECTION_FILTERING)
     @Test
     public void testSwipeUp_whenBouncerInitiallyShowing_doesNotSetExpansion() {
         when(mCentralSurfaces.isBouncerShowing()).thenReturn(true);
@@ -297,8 +301,36 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
                 0, 0, 0);
 
-        assertThat(gestureListener.onScroll(event1, event2, 0, distanceY))
-                .isTrue();
+        assertThat(gestureListener.onScroll(event1, event2, 0, distanceY)).isTrue();
+
+        verify(mScrimController, never()).expand(any());
+    }
+
+    /**
+     * Makes sure swiping up when bouncer initially showing doesn't change the expansion amount.
+     */
+    @Test
+    @EnableFlags(Flags.FLAG_DREAM_OVERLAY_BOUNCER_SWIPE_DIRECTION_FILTERING)
+    public void testSwipeUp_whenBouncerInitiallyShowing_doesNotSetExpansion_directionFiltering() {
+        when(mCentralSurfaces.isBouncerShowing()).thenReturn(true);
+
+        mTouchHandler.onSessionStart(mTouchSession);
+        ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
+                ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
+        verify(mTouchSession).registerGestureListener(gestureListenerCaptor.capture());
+
+        final OnGestureListener gestureListener = gestureListenerCaptor.getValue();
+
+        final float percent = .3f;
+        final float distanceY = SCREEN_HEIGHT_PX * percent;
+
+        // Swiping up near the top of the screen where the touch initiation region is.
+        final MotionEvent event1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
+                0, distanceY, 0);
+        final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
+                0, 0, 0);
+
+        assertThat(gestureListener.onScroll(event1, event2, 0, distanceY)).isFalse();
 
         verify(mScrimController, never()).expand(any());
     }
@@ -307,6 +339,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
      * Makes sure swiping down when bouncer initially hidden doesn't change the expansion amount.
      */
     @Test
+    @DisableFlags(Flags.FLAG_DREAM_OVERLAY_BOUNCER_SWIPE_DIRECTION_FILTERING)
     public void testSwipeDown_whenBouncerInitiallyHidden_doesNotSetExpansion() {
         mTouchHandler.onSessionStart(mTouchSession);
         ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
@@ -324,8 +357,34 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
                 0, SCREEN_HEIGHT_PX, 0);
 
-        assertThat(gestureListener.onScroll(event1, event2, 0, distanceY))
-                .isTrue();
+        assertThat(gestureListener.onScroll(event1, event2, 0, -distanceY)).isTrue();
+
+        verify(mScrimController, never()).expand(any());
+    }
+
+    /**
+     * Makes sure swiping down when bouncer initially hidden doesn't change the expansion amount.
+     */
+    @Test
+    @EnableFlags(Flags.FLAG_DREAM_OVERLAY_BOUNCER_SWIPE_DIRECTION_FILTERING)
+    public void testSwipeDown_whenBouncerInitiallyHidden_doesNotSetExpansion_directionFiltering() {
+        mTouchHandler.onSessionStart(mTouchSession);
+        ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
+                ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
+        verify(mTouchSession).registerGestureListener(gestureListenerCaptor.capture());
+
+        final OnGestureListener gestureListener = gestureListenerCaptor.getValue();
+
+        final float percent = .15f;
+        final float distanceY = SCREEN_HEIGHT_PX * percent;
+
+        // Swiping down near the bottom of the screen where the touch initiation region is.
+        final MotionEvent event1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
+                0, SCREEN_HEIGHT_PX - distanceY, 0);
+        final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
+                0, SCREEN_HEIGHT_PX, 0);
+
+        assertThat(gestureListener.onScroll(event1, event2, 0, -distanceY)).isFalse();
 
         verify(mScrimController, never()).expand(any());
     }
@@ -444,7 +503,8 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                 0, direction == Direction.UP ? SCREEN_HEIGHT_PX - distanceY : distanceY, 0);
 
         reset(mScrimController);
-        assertThat(gestureListener.onScroll(event1, event2, 0, distanceY))
+        assertThat(gestureListener.onScroll(event1, event2, 0,
+                direction == Direction.UP ? distanceY : -distanceY))
                 .isTrue();
 
         // Ensure only called once
@@ -643,7 +703,8 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
                 0, direction == Direction.UP ? SCREEN_HEIGHT_PX - distanceY : distanceY, 0);
 
-        assertThat(gestureListenerCaptor.getValue().onScroll(event1, event2, 0, distanceY))
+        assertThat(gestureListenerCaptor.getValue().onScroll(event1, event2, 0,
+                direction == Direction.UP ? distanceY : -distanceY))
                 .isTrue();
 
         final MotionEvent upEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP,
