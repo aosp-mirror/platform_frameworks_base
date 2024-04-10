@@ -57,11 +57,18 @@ class AlternateBouncerWindowViewModelTest : SysuiTestCase() {
                     stepFromAlternateBouncer(0f, TransitionState.STARTED),
                     stepFromAlternateBouncer(.4f),
                     stepFromAlternateBouncer(.6f),
-                    stepFromAlternateBouncer(1f),
                 ),
                 testScope,
             )
             assertThat(alternateBouncerWindowRequired).isTrue()
+
+            transitionRepository.sendTransitionSteps(
+                listOf(
+                    stepFromAlternateBouncer(1.0f, TransitionState.FINISHED),
+                ),
+                testScope,
+            )
+            assertThat(alternateBouncerWindowRequired).isFalse()
         }
 
     @Test

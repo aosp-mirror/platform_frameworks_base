@@ -102,7 +102,7 @@ constructor(
                 to = GONE,
             )
 
-        return shadeInteractor.shadeExpansion.flatMapLatest { shadeExpansion ->
+        return shadeInteractor.isAnyExpanded.flatMapLatest { isAnyExpanded ->
             transitionAnimation
                 .sharedFlow(
                     duration = duration,
@@ -110,7 +110,7 @@ constructor(
                     onStart = {
                         leaveShadeOpen = statusBarStateController.leaveOpenOnKeyguardHide()
                         willRunDismissFromKeyguard = willRunAnimationOnKeyguard()
-                        isShadeExpanded = shadeExpansion > 0f
+                        isShadeExpanded = isAnyExpanded
                     },
                     onStep = { 1f - it },
                 )

@@ -119,6 +119,7 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
     fun faceAuthIsRequestedWhenLockscreenBecomesVisibleFromOffState() =
         testScope.runTest {
             underTest.start()
+            runCurrent()
 
             powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_LID)
             faceWakeUpTriggersConfig.setTriggerFaceAuthOnWakeUpFrom(
@@ -160,6 +161,7 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
     fun faceAuthIsRequestedWhenLockscreenBecomesVisibleFromAodState() =
         testScope.runTest {
             underTest.start()
+            runCurrent()
 
             powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_LID)
             faceWakeUpTriggersConfig.setTriggerFaceAuthOnWakeUpFrom(
@@ -207,6 +209,7 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
     fun faceAuthIsRequestedWhenLockscreenBecomesVisibleFromDozingState() =
         testScope.runTest {
             underTest.start()
+            runCurrent()
 
             powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_LID)
             faceWakeUpTriggersConfig.setTriggerFaceAuthOnWakeUpFrom(
