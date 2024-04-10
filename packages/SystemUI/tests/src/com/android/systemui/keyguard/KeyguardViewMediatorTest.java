@@ -25,8 +25,8 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOM
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
-import static com.android.systemui.Flags.FLAG_REFACTOR_GET_CURRENT_USER;
 import static com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR;
+import static com.android.systemui.Flags.FLAG_REFACTOR_GET_CURRENT_USER;
 import static com.android.systemui.keyguard.KeyguardViewMediator.DELAYED_KEYGUARD_ACTION;
 import static com.android.systemui.keyguard.KeyguardViewMediator.KEYGUARD_LOCK_AFTER_DELAY_DEFAULT;
 import static com.android.systemui.keyguard.KeyguardViewMediator.REBOOT_MAINLINE_UPDATE;
@@ -102,7 +102,6 @@ import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.scene.FakeWindowRootViewComponent;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.scene.ui.view.WindowRootView;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationShadeWindowControllerImpl;
@@ -222,7 +221,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock DreamViewModel mDreamViewModel;
     private @Mock CommunalTransitionViewModel mCommunalTransitionViewModel;
     private @Mock SystemPropertiesHelper mSystemPropertiesHelper;
-    private @Mock SceneContainerFlags mSceneContainerFlags;
 
     private FakeFeatureFlags mFeatureFlags;
     private final int mDefaultUserId = 100;
@@ -270,7 +268,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mShadeWindowLogger,
                 () -> mSelectedUserInteractor,
                 mUserTracker,
-                mSceneContainerFlags,
                 mKosmos::getCommunalInteractor);
         mFeatureFlags = new FakeFeatureFlags();
         mSetFlagsRule.enableFlags(FLAG_REFACTOR_GET_CURRENT_USER);

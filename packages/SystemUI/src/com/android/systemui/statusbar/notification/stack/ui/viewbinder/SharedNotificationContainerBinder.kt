@@ -29,7 +29,6 @@ import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
@@ -49,7 +48,6 @@ import kotlinx.coroutines.launch
 class SharedNotificationContainerBinder
 @Inject
 constructor(
-    private val sceneContainerFlags: SceneContainerFlags,
     private val controller: NotificationStackScrollLayoutController,
     private val notificationStackSizeCalculator: NotificationStackSizeCalculator,
     private val notificationScrollViewBinder: NotificationScrollViewBinder,
@@ -130,7 +128,7 @@ constructor(
                             .collect { controller.setMaxDisplayedNotifications(it) }
                     }
 
-                    if (!sceneContainerFlags.isEnabled()) {
+                    if (!SceneContainerFlag.isEnabled) {
                         launch {
                             viewModel.bounds.collect {
                                 val animate =
@@ -166,7 +164,7 @@ constructor(
                 }
             }
 
-        if (sceneContainerFlags.isEnabled()) {
+        if (SceneContainerFlag.isEnabled) {
             disposables += notificationScrollViewBinder.bindWhileAttached()
         }
 

@@ -52,7 +52,6 @@ import com.android.systemui.keyguard.ui.viewmodel.keyguardRootViewModel
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
-import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.mockLargeScreenHeaderHelper
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
@@ -128,7 +127,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : 
 
     @Before
     fun setUp() {
-        assertThat(kosmos.sceneContainerFlags.isEnabled()).isEqualTo(SceneContainerFlag.isEnabled)
+        assertThat(SceneContainerFlag.isEnabled).isEqualTo(SceneContainerFlag.isEnabled)
         overrideResource(R.bool.config_use_split_notification_shade, false)
         movementFlow = MutableStateFlow(BurnInModel())
         whenever(aodBurnInViewModel.movement(any())).thenReturn(movementFlow)

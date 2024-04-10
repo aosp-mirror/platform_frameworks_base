@@ -22,6 +22,7 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
@@ -30,7 +31,6 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
@@ -52,6 +52,7 @@ import org.mockito.Mockito.verify
 @ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableSceneContainer
 class ShadeControllerSceneImplTest : SysuiTestCase() {
     private val kosmos = Kosmos()
     private val testScope = kosmos.testScope
@@ -64,7 +65,6 @@ class ShadeControllerSceneImplTest : SysuiTestCase() {
     @Before
     fun setup() {
         kosmos.testCase = this
-        kosmos.fakeSceneContainerFlags.enabled = true
         kosmos.fakeFeatureFlagsClassic.apply {
             set(Flags.FULL_SCREEN_USER_SWITCHER, false)
             set(Flags.NSSL_DEBUG_LINES, false)

@@ -98,7 +98,7 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.buttons.KeyButtonView;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
@@ -146,7 +146,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private static final long MAX_BACKOFF_MILLIS = 10 * 60 * 1000;
 
     private final Context mContext;
-    private final SceneContainerFlags mSceneContainerFlags;
     private final Executor mMainExecutor;
     private final ShellInterface mShellInterface;
     private final Lazy<ShadeViewController> mShadeViewControllerLazy;
@@ -208,7 +207,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         @Override
         public void onStatusBarTouchEvent(MotionEvent event) {
             verifyCallerAndClearCallingIdentity("onStatusBarTouchEvent", () -> {
-                if (mSceneContainerFlags.isEnabled()) {
+                if (SceneContainerFlag.isEnabled()) {
                     //TODO(b/329863123) implement latency tracking for shade scene
                     Log.i(TAG_OPS, "Scene container enabled. Latency tracking not started.");
                 } else if (event.getActionMasked() == ACTION_DOWN) {
@@ -223,7 +222,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
                         // If scene framework is enabled, set the scene container window to
                         // visible and let the touch "slip" into that window.
-                        if (mSceneContainerFlags.isEnabled()) {
+                        if (SceneContainerFlag.isEnabled()) {
                             mSceneInteractor.get().onRemoteUserInteractionStarted("launcher swipe");
                         } else {
                             mShadeViewControllerLazy.get().startInputFocusTransfer();
@@ -232,7 +231,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                     if (action == ACTION_UP || action == ACTION_CANCEL) {
                         mInputFocusTransferStarted = false;
 
-                        if (!mSceneContainerFlags.isEnabled()) {
+                        if (!SceneContainerFlag.isEnabled()) {
                             float velocity = (event.getY() - mInputFocusTransferStartY)
                                     / (event.getEventTime() - mInputFocusTransferStartMillis);
                             if (action == ACTION_CANCEL) {
@@ -612,7 +611,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             KeyguardUnlockAnimationController sysuiUnlockAnimationController,
             InWindowLauncherUnlockAnimationManager inWindowLauncherUnlockAnimationManager,
             AssistUtils assistUtils,
-            SceneContainerFlags sceneContainerFlags,
             DumpManager dumpManager,
             Optional<UnfoldTransitionProgressForwarder> unfoldTransitionProgressForwarder,
             BroadcastDispatcher broadcastDispatcher
@@ -624,7 +622,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
 
         mContext = context;
-        mSceneContainerFlags = sceneContainerFlags;
         mMainExecutor = mainExecutor;
         mShellInterface = shellInterface;
         mShadeViewControllerLazy = shadeViewControllerLazy;

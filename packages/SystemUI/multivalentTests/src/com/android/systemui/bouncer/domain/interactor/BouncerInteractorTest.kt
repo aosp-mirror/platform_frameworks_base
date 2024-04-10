@@ -28,11 +28,11 @@ import com.android.systemui.authentication.shared.model.AuthenticationPatternCoo
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.res.R
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.seconds
@@ -48,9 +48,10 @@ import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableSceneContainer
 class BouncerInteractorTest : SysuiTestCase() {
 
-    private val kosmos = testKosmos().apply { fakeSceneContainerFlags.enabled = true }
+    private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val authenticationInteractor = kosmos.authenticationInteractor
 

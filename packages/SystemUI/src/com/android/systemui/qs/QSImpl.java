@@ -60,7 +60,7 @@ import com.android.systemui.qs.footer.ui.binder.FooterActionsViewBinder;
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.res.R;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.settings.brightness.MirrorController;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.CommandQueue;
@@ -174,8 +174,6 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
     @Nullable
     private View mFooterActionsView;
 
-    private final SceneContainerFlags mSceneContainerFlags;
-
     @Inject
     public QSImpl(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
             SysuiStatusBarStateController statusBarStateController, CommandQueue commandQueue,
@@ -188,8 +186,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
             FooterActionsViewModel.Factory footerActionsViewModelFactory,
             FooterActionsViewBinder footerActionsViewBinder,
             LargeScreenShadeInterpolator largeScreenShadeInterpolator,
-            FeatureFlags featureFlags,
-            SceneContainerFlags sceneContainerFlags) {
+            FeatureFlags featureFlags) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
         mQsMediaHost = qsMediaHost;
         mQqsMediaHost = qqsMediaHost;
@@ -205,8 +202,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         mFooterActionsViewModelFactory = footerActionsViewModelFactory;
         mFooterActionsViewBinder = footerActionsViewBinder;
         mListeningAndVisibilityLifecycleOwner = new ListeningAndVisibilityLifecycleOwner();
-        mSceneContainerFlags = sceneContainerFlags;
-        if (mSceneContainerFlags.isEnabled()) {
+        if (SceneContainerFlag.isEnabled()) {
             mStatusBarState = StatusBarState.SHADE;
         }
     }
@@ -224,7 +220,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         mQSPanelController.init();
         mQuickQSPanelController.init();
 
-        if (!mSceneContainerFlags.isEnabled()) {
+        if (!SceneContainerFlag.isEnabled()) {
             mQSFooterActionsViewModel = mFooterActionsViewModelFactory
                     .create(mListeningAndVisibilityLifecycleOwner);
             bindFooterActionsView(mRootView);
@@ -249,7 +245,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
                         mScrollListener.onQsPanelScrollChanged(scrollY);
                     }
                 });
-        mQSPanelScrollView.setScrollingEnabled(!mSceneContainerFlags.isEnabled());
+        mQSPanelScrollView.setScrollingEnabled(!SceneContainerFlag.isEnabled());
         mHeader = mRootView.findViewById(R.id.header);
         mFooter = qsComponent.getQSFooter();
 
@@ -509,7 +505,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
 
     @VisibleForTesting
     boolean isKeyguardState() {
-        if (mSceneContainerFlags.isEnabled()) {
+        if (SceneContainerFlag.isEnabled()) {
             return false;
         } else {
             // We want the freshest state here since otherwise we'll have some weirdness if earlier
@@ -573,7 +569,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
     }
 
     private void setKeyguardShowing(boolean keyguardShowing) {
-        if (!mSceneContainerFlags.isEnabled()) {
+        if (!SceneContainerFlag.isEnabled()) {
             if (DEBUG) Log.d(TAG, "setKeyguardShowing " + keyguardShowing);
             mLastQSExpansion = -1;
 
@@ -651,7 +647,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
 
     @Override
     public int getHeightDiff() {
-        if (mSceneContainerFlags.isEnabled()) {
+        if (SceneContainerFlag.isEnabled()) {
             return mQSPanelController.getViewBottom() - mHeader.getBottom()
                     + mHeader.getPaddingBottom();
         } else {
@@ -720,7 +716,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         mQSPanelController.getTileLayout().setExpansion(expansion, proposedTranslation);
         mQuickQSPanelController.getTileLayout().setExpansion(expansion, proposedTranslation);
 
-        if (!mSceneContainerFlags.isEnabled()) {
+        if (!SceneContainerFlag.isEnabled()) {
             float qsScrollViewTranslation =
                     onKeyguard && !mShowCollapsedOnKeyguard ? panelTranslationY : 0;
             mQSPanelScrollView.setTranslationY(qsScrollViewTranslation);
@@ -824,7 +820,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
             mQsBounds.set(-sideMargin, 0, mQSPanelScrollView.getWidth() + sideMargin,
                     mQSPanelScrollView.getHeight());
         }
-        if (!mSceneContainerFlags.isEnabled()) {
+        if (!SceneContainerFlag.isEnabled()) {
             mQSPanelScrollView.setClipBounds(mQsBounds);
 
             mQSPanelScrollView.getLocationOnScreen(mLocationTemp);
@@ -907,7 +903,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         // The customize state changed, so our height changed.
         mContainer.updateExpansion();
         boolean customizing = isCustomizing();
-        if (mSceneContainerFlags.isEnabled()) {
+        if (SceneContainerFlag.isEnabled()) {
             mQSPanelController.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
         } else {
             mQSPanelScrollView.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
@@ -984,7 +980,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
 
     @Override
     public void onStateChanged(int newState) {
-        if (mSceneContainerFlags.isEnabled() || newState == mStatusBarState) {
+        if (SceneContainerFlag.isEnabled() || newState == mStatusBarState) {
             return;
         }
         mStatusBarState = newState;

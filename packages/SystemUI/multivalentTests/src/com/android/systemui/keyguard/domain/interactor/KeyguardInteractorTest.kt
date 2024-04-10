@@ -28,6 +28,7 @@ import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepositor
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
@@ -37,8 +38,6 @@ import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
-import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
@@ -76,7 +75,6 @@ class KeyguardInteractorTest : SysuiTestCase() {
             repository = repository,
             commandQueue = commandQueue,
             powerInteractor = PowerInteractorFactory.create().powerInteractor,
-            sceneContainerFlags = kosmos.sceneContainerFlags,
             bouncerRepository = bouncerRepository,
             configurationInteractor = ConfigurationInteractor(FakeConfigurationRepository()),
             shadeRepository = shadeRepository,
@@ -249,9 +247,9 @@ class KeyguardInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableSceneContainer
     fun animationDozingTransitions() =
         testScope.runTest {
-            kosmos.fakeSceneContainerFlags.enabled = true
             val isAnimate by collectLastValue(underTest.animateDozingTransitions)
 
             underTest.setAnimateDozingTransitions(true)

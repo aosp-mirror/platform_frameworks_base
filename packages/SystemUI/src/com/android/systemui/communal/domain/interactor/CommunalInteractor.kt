@@ -55,7 +55,7 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.smartspace.data.repository.SmartspaceRepository
@@ -107,7 +107,6 @@ constructor(
     private val userManager: UserManager,
     private val dockManager: DockManager,
     sceneInteractor: SceneInteractor,
-    sceneContainerFlags: SceneContainerFlags,
     @CommunalLog logBuffer: LogBuffer,
     @CommunalTableLog tableLogBuffer: TableLogBuffer,
 ) {
@@ -216,7 +215,7 @@ constructor(
      */
     // TODO(b/323215860): rename to something more appropriate after cleaning up usages
     val isCommunalShowing: Flow<Boolean> =
-        flow { emit(sceneContainerFlags.isEnabled()) }
+        flow { emit(SceneContainerFlag.isEnabled) }
             .flatMapLatest { sceneContainerEnabled ->
                 if (sceneContainerEnabled) {
                     sceneInteractor.currentScene.map { it == Scenes.Communal }

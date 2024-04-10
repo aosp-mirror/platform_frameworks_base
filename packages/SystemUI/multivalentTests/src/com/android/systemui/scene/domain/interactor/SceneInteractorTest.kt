@@ -23,13 +23,13 @@ import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.data.repository.sceneContainerRepository
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.testKosmos
@@ -45,6 +45,7 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableSceneContainer
 class SceneInteractorTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
@@ -55,7 +56,6 @@ class SceneInteractorTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        kosmos.fakeSceneContainerFlags.enabled = true
         underTest = kosmos.sceneInteractor
     }
 

@@ -34,7 +34,6 @@ import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.settings.userTracker
 import com.android.systemui.smartspace.data.repository.smartspaceRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
@@ -46,21 +45,20 @@ val Kosmos.communalInteractor by Fixture {
         broadcastDispatcher = broadcastDispatcher,
         communalRepository = communalRepository,
         widgetRepository = communalWidgetRepository,
-        mediaRepository = communalMediaRepository,
         communalPrefsRepository = communalPrefsRepository,
+        mediaRepository = communalMediaRepository,
         smartspaceRepository = smartspaceRepository,
-        appWidgetHost = mock(),
         keyguardInteractor = keyguardInteractor,
+        communalSettingsInteractor = communalSettingsInteractor,
+        appWidgetHost = mock(),
         editWidgetsActivityStarter = editWidgetsActivityStarter,
         userTracker = userTracker,
         activityStarter = activityStarter,
         userManager = userManager,
         dockManager = fakeDockManager,
+        sceneInteractor = sceneInteractor,
         logBuffer = logcatLogBuffer("CommunalInteractor"),
         tableLogBuffer = mock(),
-        communalSettingsInteractor = communalSettingsInteractor,
-        sceneInteractor = sceneInteractor,
-        sceneContainerFlags = sceneContainerFlags,
     )
 }
 

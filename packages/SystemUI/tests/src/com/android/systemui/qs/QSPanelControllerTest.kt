@@ -17,13 +17,13 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.customize.QSCustomizerController
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.res.R
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.settings.brightness.BrightnessController
 import com.android.systemui.settings.brightness.BrightnessSliderController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.tuner.TunerService
 import com.google.common.truth.Truth.assertThat
+import javax.inject.Provider
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -36,7 +36,6 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import javax.inject.Provider
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
@@ -64,8 +63,6 @@ class QSPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var configuration: Configuration
     @Mock private lateinit var pagedTileLayout: PagedTileLayout
     @Mock private lateinit var longPressEffectProvider: Provider<QSLongPressEffect>
-
-    private val sceneContainerFlags = FakeSceneContainerFlags()
 
     private lateinit var controller: QSPanelController
     private val testableResources: TestableResources = mContext.orCreateTestableResources
@@ -103,7 +100,6 @@ class QSPanelControllerTest : SysuiTestCase() {
             falsingManager,
             statusBarKeyguardViewManager,
             ResourcesSplitShadeStateController(),
-            sceneContainerFlags,
             longPressEffectProvider,
         )
     }

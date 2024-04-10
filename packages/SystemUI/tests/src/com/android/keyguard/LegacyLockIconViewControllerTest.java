@@ -43,6 +43,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.biometrics.UdfpsController;
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams;
 import com.android.systemui.doze.util.BurnInHelperKt;
+import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.statusbar.StatusBarState;
 
 import org.junit.Test;
@@ -373,7 +374,6 @@ public class LegacyLockIconViewControllerTest extends LegacyLockIconViewControll
     @Test
     public void longPress_showBouncer_sceneContainerNotEnabled() {
         init(/* useMigrationFlag= */ false);
-        mKosmos.getFakeSceneContainerFlags().setEnabled(false);
         when(mFalsingManager.isFalseLongTap(anyInt())).thenReturn(false);
 
         // WHEN longPress
@@ -385,9 +385,9 @@ public class LegacyLockIconViewControllerTest extends LegacyLockIconViewControll
     }
 
     @Test
+    @EnableSceneContainer
     public void longPress_showBouncer() {
         init(/* useMigrationFlag= */ false);
-        mKosmos.getFakeSceneContainerFlags().setEnabled(true);
         when(mFalsingManager.isFalseLongTap(anyInt())).thenReturn(false);
 
         // WHEN longPress
@@ -399,9 +399,9 @@ public class LegacyLockIconViewControllerTest extends LegacyLockIconViewControll
     }
 
     @Test
+    @EnableSceneContainer
     public void longPress_falsingTriggered_doesNotShowBouncer() {
         init(/* useMigrationFlag= */ false);
-        mKosmos.getFakeSceneContainerFlags().setEnabled(true);
         when(mFalsingManager.isFalseLongTap(anyInt())).thenReturn(true);
 
         // WHEN longPress

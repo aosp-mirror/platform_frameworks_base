@@ -23,11 +23,11 @@ import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
@@ -46,11 +46,11 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableSceneContainer
 class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
 
     private val kosmos =
         testKosmos().apply {
-            fakeSceneContainerFlags.enabled = true
             fakeFeatureFlagsClassic.apply {
                 set(Flags.FULL_SCREEN_USER_SWITCHER, false)
                 set(Flags.NSSL_DEBUG_LINES, false)

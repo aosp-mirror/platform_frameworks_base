@@ -16,14 +16,11 @@
 
 package com.android.systemui.bouncer.shared.flag
 
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 
-class FakeComposeBouncerFlags(
-    private val sceneContainerFlags: SceneContainerFlags,
-    var composeBouncerEnabled: Boolean = false
-) : ComposeBouncerFlags {
+class FakeComposeBouncerFlags(var composeBouncerEnabled: Boolean = false) : ComposeBouncerFlags {
     override fun isComposeBouncerOrSceneContainerEnabled(): Boolean {
-        return sceneContainerFlags.isEnabled() || composeBouncerEnabled
+        return SceneContainerFlag.isEnabled || composeBouncerEnabled
     }
 
     @Deprecated(

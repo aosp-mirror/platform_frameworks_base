@@ -44,7 +44,7 @@ import com.android.systemui.plugins.FalsingManager.FalsingBeliefListener
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -92,7 +92,6 @@ constructor(
     private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
     private val bouncerInteractor: BouncerInteractor,
     private val keyguardInteractor: KeyguardInteractor,
-    private val flags: SceneContainerFlags,
     private val sysUiState: SysUiState,
     @DisplayId private val displayId: Int,
     private val sceneLogger: SceneLogger,
@@ -111,7 +110,7 @@ constructor(
 ) : CoreStartable {
 
     override fun start() {
-        if (flags.isEnabled()) {
+        if (SceneContainerFlag.isEnabled) {
             sceneLogger.logFrameworkEnabled(isEnabled = true)
             hydrateVisibility()
             automaticallySwitchScenes()
@@ -124,16 +123,18 @@ constructor(
         } else {
             sceneLogger.logFrameworkEnabled(
                 isEnabled = false,
-                reason = flags.requirementDescription(),
+                reason = SceneContainerFlag.requirementDescription(),
             )
         }
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) =
         pw.asIndenting().run {
-            printSection("SceneContainerFlags") {
-                println("isEnabled", flags.isEnabled())
-                printSection("requirementDescription") { println(flags.requirementDescription()) }
+            printSection("SceneContainerFlag") {
+                println("isEnabled", SceneContainerFlag.isEnabled)
+                printSection("requirementDescription") {
+                    println(SceneContainerFlag.requirementDescription())
+                }
             }
         }
 
@@ -288,7 +289,8 @@ constructor(
                                 Scenes.Gone to "device was unlocked in Bouncer scene"
                             } else {
                                 val prevScene = previousScene.value
-                                (prevScene ?: Scenes.Gone) to
+                                (prevScene
+                                    ?: Scenes.Gone) to
                                     "device was unlocked in Bouncer scene, from sceneKey=$prevScene"
                             }
                         isOnLockscreen ->

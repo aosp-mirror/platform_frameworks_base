@@ -57,6 +57,7 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.media.controls.ui.view.MediaHost;
 import com.android.systemui.qs.customize.QSCustomizerController;
@@ -66,7 +67,6 @@ import com.android.systemui.qs.footer.ui.binder.FooterActionsViewBinder;
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.res.R;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.CommandQueue;
@@ -115,7 +115,6 @@ public class QSImplTest extends SysuiTestCase {
     @Mock private FooterActionsViewBinder mFooterActionsViewBinder;
     @Mock private LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
     @Mock private FeatureFlagsClassic mFeatureFlags;
-    @Mock private SceneContainerFlags mSceneContainerFlags;
     private ViewGroup mQsView;
 
     private final CommandQueue mCommandQueue =
@@ -127,7 +126,6 @@ public class QSImplTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        when(mSceneContainerFlags.isEnabled()).thenReturn(false);
 
         mUnderTest = instantiate();
 
@@ -496,8 +494,8 @@ public class QSImplTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableSceneContainer
     public void testSceneContainerFlagsEnabled_FooterActionsRemoved_controllerNotStarted() {
-        when(mSceneContainerFlags.isEnabled()).thenReturn(true);
         clearInvocations(
                 mFooterActionsViewBinder, mFooterActionsViewModel, mFooterActionsViewModelFactory);
         QSImpl other = instantiate();
@@ -513,9 +511,8 @@ public class QSImplTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableSceneContainer
     public void testSceneContainerFlagsEnabled_statusBarStateIsShade() {
-        when(mSceneContainerFlags.isEnabled()).thenReturn(true);
-
         mUnderTest.onStateChanged(KEYGUARD);
         assertThat(mUnderTest.getStatusBarState()).isEqualTo(SHADE);
 
@@ -524,9 +521,8 @@ public class QSImplTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableSceneContainer
     public void testSceneContainerFlagsEnabled_isKeyguardState_alwaysFalse() {
-        when(mSceneContainerFlags.isEnabled()).thenReturn(true);
-
         mUnderTest.onStateChanged(KEYGUARD);
         assertThat(mUnderTest.isKeyguardState()).isFalse();
 
@@ -559,8 +555,8 @@ public class QSImplTest extends SysuiTestCase {
                 mFooterActionsViewModelFactory,
                 mFooterActionsViewBinder,
                 mLargeScreenShadeInterpolator,
-                mFeatureFlags,
-                mSceneContainerFlags);
+                mFeatureFlags
+        );
     }
 
     private void setUpOther() {

@@ -180,7 +180,6 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 mHeadsUpManager,
                 PowerInteractorFactory.create().getPowerInteractor(),
                 mActiveNotificationsInteractor,
-                mKosmos.getSceneContainerFlags(),
                 () -> mKosmos.getSceneInteractor()
         );
 

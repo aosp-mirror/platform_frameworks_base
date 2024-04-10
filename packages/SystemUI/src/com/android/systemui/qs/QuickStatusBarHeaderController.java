@@ -17,7 +17,7 @@
 package com.android.systemui.qs;
 
 import com.android.systemui.qs.dagger.QSScope;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
@@ -34,12 +34,11 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
 
     @Inject
     QuickStatusBarHeaderController(QuickStatusBarHeader view,
-            QuickQSPanelController quickQSPanelController,
-            SceneContainerFlags sceneContainerFlags
+            QuickQSPanelController quickQSPanelController
     ) {
         super(view);
         mQuickQSPanelController = quickQSPanelController;
-        mSceneContainerEnabled = sceneContainerFlags.isEnabled();
+        mSceneContainerEnabled = SceneContainerFlag.isEnabled();
     }
     @Override
     protected void onViewAttached() {

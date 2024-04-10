@@ -31,6 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -101,6 +102,7 @@ import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.communal.shared.model.CommunalScenes;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.fragments.FragmentService;
@@ -120,7 +122,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
 import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirrorShowingInteractor;
@@ -336,8 +337,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     private final DumpManager mDumpManager = new DumpManager();
     private final ScreenLifecycle mScreenLifecycle = new ScreenLifecycle(mDumpManager);
 
-    private final FakeSceneContainerFlags mSceneContainerFlags = new FakeSceneContainerFlags();
-
     private final BrightnessMirrorShowingInteractor mBrightnessMirrorShowingInteractor =
             mKosmos.getBrightnessMirrorShowingInteractor();
 
@@ -351,7 +350,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // Turn AOD on and toggle feature flag for jank fixes
         mFeatureFlags.set(Flags.ZJ_285570694_LOCKSCREEN_TRANSITION_FROM_AOD, true);
         when(mDozeParameters.getAlwaysOn()).thenReturn(true);
-        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
+        if (!com.android.systemui.Flags.sceneContainer()) {
+            mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
+        }
 
         IThermalService thermalService = mock(IThermalService.class);
         mPowerManager = new PowerManager(mContext, mPowerManagerService, thermalService,
@@ -426,22 +427,25 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
             ((Runnable) invocation.getArgument(0)).run();
             return null;
         }).when(mNotificationShadeWindowController).batchApplyWindowLayoutParams(any());
-
-        mShadeController = spy(new ShadeControllerImpl(
-                mCommandQueue,
-                mMainExecutor,
-                mock(WindowRootViewVisibilityInteractor.class),
-                mKeyguardStateController,
-                mStatusBarStateController,
-                mStatusBarKeyguardViewManager,
-                mStatusBarWindowController,
-                mDeviceProvisionedController,
-                mNotificationShadeWindowController,
-                0,
-                () -> mNotificationPanelViewController,
-                () -> mAssistManager,
-                () -> mNotificationGutsManager
-        ));
+        if (com.android.systemui.Flags.sceneContainer()) {
+            mShadeController = spy(mKosmos.getShadeController());
+        } else {
+            mShadeController = spy(new ShadeControllerImpl(
+                    mCommandQueue,
+                    mMainExecutor,
+                    mock(WindowRootViewVisibilityInteractor.class),
+                    mKeyguardStateController,
+                    mStatusBarStateController,
+                    mStatusBarKeyguardViewManager,
+                    mStatusBarWindowController,
+                    mDeviceProvisionedController,
+                    mNotificationShadeWindowController,
+                    0,
+                    () -> mNotificationPanelViewController,
+                    () -> mAssistManager,
+                    () -> mNotificationGutsManager
+            ));
+        }
         mShadeController.setNotificationShadeWindowViewController(
                 mNotificationShadeWindowViewController);
         mShadeController.setNotificationPresenter(mNotificationPresenter);
@@ -562,7 +566,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mUserTracker,
                 () -> mFingerprintManager,
                 mActivityStarter,
-                mSceneContainerFlags,
                 mBrightnessMirrorShowingInteractor
         );
         mScreenLifecycle.addObserver(mCentralSurfaces.mScreenObserver);
@@ -1095,25 +1098,24 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableSceneContainer
     public void brightnesShowingChanged_flagEnabled_ScrimControllerNotified() {
-        mSceneContainerFlags.setEnabled(true);
         mCentralSurfaces.registerCallbacks();
 
         mBrightnessMirrorShowingInteractor.setMirrorShowing(true);
         mTestScope.getTestScheduler().runCurrent();
-        verify(mScrimController).transitionTo(ScrimState.BRIGHTNESS_MIRROR);
+        verify(mScrimController, atLeastOnce()).transitionTo(ScrimState.BRIGHTNESS_MIRROR);
 
         mBrightnessMirrorShowingInteractor.setMirrorShowing(false);
         mTestScope.getTestScheduler().runCurrent();
         ArgumentCaptor<ScrimState> captor = ArgumentCaptor.forClass(ScrimState.class);
         // The default is to call the one with the callback argument
-        verify(mScrimController).transitionTo(captor.capture(), any());
+        verify(mScrimController, atLeastOnce()).transitionTo(captor.capture(), any());
         assertThat(captor.getValue()).isNotEqualTo(ScrimState.BRIGHTNESS_MIRROR);
     }
 
     @Test
     public void brightnesShowingChanged_flagDisabled_ScrimControllerNotified() {
-        mSceneContainerFlags.setEnabled(false);
         mCentralSurfaces.registerCallbacks();
 
         mBrightnessMirrorShowingInteractor.setMirrorShowing(true);
