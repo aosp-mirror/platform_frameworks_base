@@ -45,8 +45,10 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.IAccessibilityManager;
+import android.widget.flags.Flags;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -205,27 +207,41 @@ public class Toast {
         INotificationManager service = getService();
         String pkg = mContext.getOpPackageName();
         TN tn = mTN;
-        tn.mNextView = new WeakReference<>(mNextView);
+        if (Flags.toastNoWeakref()) {
+            tn.mNextView = mNextView;
+        } else {
+            tn.mNextViewWeakRef = new WeakReference<>(mNextView);
+        }
         final boolean isUiContext = mContext.isUiContext();
         final int displayId = mContext.getDisplayId();
 
+        boolean wasEnqueued = false;
         try {
             if (Compatibility.isChangeEnabled(CHANGE_TEXT_TOASTS_IN_THE_SYSTEM)) {
                 if (mNextView != null) {
                     // It's a custom toast
-                    service.enqueueToast(pkg, mToken, tn, mDuration, isUiContext, displayId);
+                    wasEnqueued = service.enqueueToast(pkg, mToken, tn, mDuration, isUiContext,
+                            displayId);
                 } else {
                     // It's a text toast
                     ITransientNotificationCallback callback =
                             new CallbackBinder(mCallbacks, mHandler);
-                    service.enqueueTextToast(pkg, mToken, mText, mDuration, isUiContext, displayId,
-                            callback);
+                    wasEnqueued = service.enqueueTextToast(pkg, mToken, mText, mDuration,
+                            isUiContext, displayId, callback);
                 }
             } else {
-                service.enqueueToast(pkg, mToken, tn, mDuration, isUiContext, displayId);
+                wasEnqueued = service.enqueueToast(pkg, mToken, tn, mDuration, isUiContext,
+                        displayId);
             }
         } catch (RemoteException e) {
             // Empty
+        } finally {
+            if (Flags.toastNoWeakref()) {
+                if (!wasEnqueued) {
+                    tn.mNextViewWeakRef = null;
+                    tn.mNextView = null;
+                }
+            }
         }
     }
 
@@ -581,6 +597,16 @@ public class Toast {
         }
     }
 
+    /**
+     * Get the Toast.TN ITransientNotification object
+     * @return TN
+     * @hide
+     */
+    @VisibleForTesting
+    public TN getTn() {
+        return mTN;
+    }
+
     // =======================================================================================
     // All the gunk below is the interaction with the Notification Service, which handles
     // the proper ordering of these system-wide.
@@ -599,7 +625,11 @@ public class Toast {
         return sService;
     }
 
-    private static class TN extends ITransientNotification.Stub {
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public static class TN extends ITransientNotification.Stub {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
         private final WindowManager.LayoutParams mParams;
 
@@ -620,7 +650,9 @@ public class Toast {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
         View mView;
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
-        WeakReference<View> mNextView;
+        WeakReference<View> mNextViewWeakRef;
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+        View mNextView;
         int mDuration;
 
         WindowManager mWM;
@@ -662,14 +694,22 @@ public class Toast {
                             handleHide();
                             // Don't do this in handleHide() because it is also invoked by
                             // handleShow()
-                            mNextView = null;
+                            if (Flags.toastNoWeakref()) {
+                                mNextView = null;
+                            } else {
+                                mNextViewWeakRef = null;
+                            }
                             break;
                         }
                         case CANCEL: {
                             handleHide();
                             // Don't do this in handleHide() because it is also invoked by
                             // handleShow()
-                            mNextView = null;
+                            if (Flags.toastNoWeakref()) {
+                                mNextView = null;
+                            } else {
+                                mNextViewWeakRef = null;
+                            }
                             try {
                                 getService().cancelToast(mPackageName, mToken);
                             } catch (RemoteException e) {
@@ -716,21 +756,43 @@ public class Toast {
         }
 
         public void handleShow(IBinder windowToken) {
-            if (localLOGV) Log.v(TAG, "HANDLE SHOW: " + this + " mView=" + mView
-                    + " mNextView=" + mNextView);
+            if (Flags.toastNoWeakref()) {
+                if (localLOGV) {
+                    Log.v(TAG, "HANDLE SHOW: " + this + " mView=" + mView
+                            + " mNextView=" + mNextView);
+                }
+            } else {
+                if (localLOGV) {
+                    Log.v(TAG, "HANDLE SHOW: " + this + " mView=" + mView
+                            + " mNextView=" + mNextViewWeakRef);
+                }
+            }
             // If a cancel/hide is pending - no need to show - at this point
             // the window token is already invalid and no need to do any work.
             if (mHandler.hasMessages(CANCEL) || mHandler.hasMessages(HIDE)) {
                 return;
             }
-            if (mNextView != null && mView != mNextView.get()) {
-                // remove the old view if necessary
-                handleHide();
-                mView = mNextView.get();
-                if (mView != null) {
-                    mPresenter.show(mView, mToken, windowToken, mDuration, mGravity, mX, mY,
-                            mHorizontalMargin, mVerticalMargin,
-                            new CallbackBinder(getCallbacks(), mHandler));
+            if (Flags.toastNoWeakref()) {
+                if (mNextView != null && mView != mNextView) {
+                    // remove the old view if necessary
+                    handleHide();
+                    mView = mNextView;
+                    if (mView != null) {
+                        mPresenter.show(mView, mToken, windowToken, mDuration, mGravity, mX, mY,
+                                mHorizontalMargin, mVerticalMargin,
+                                new CallbackBinder(getCallbacks(), mHandler));
+                    }
+                }
+            } else {
+                if (mNextViewWeakRef != null && mView != mNextViewWeakRef.get()) {
+                    // remove the old view if necessary
+                    handleHide();
+                    mView = mNextViewWeakRef.get();
+                    if (mView != null) {
+                        mPresenter.show(mView, mToken, windowToken, mDuration, mGravity, mX, mY,
+                                mHorizontalMargin, mVerticalMargin,
+                                new CallbackBinder(getCallbacks(), mHandler));
+                    }
                 }
             }
         }
@@ -743,6 +805,23 @@ public class Toast {
                         "Trying to hide toast view different than the last one displayed");
                 mPresenter.hide(new CallbackBinder(getCallbacks(), mHandler));
                 mView = null;
+            }
+        }
+
+        /**
+         * Get the next view to show for enqueued toasts
+         * Custom toast views are deprecated.
+         * @see #setView(View)
+         *
+         * @return next view
+         * @hide
+         */
+        @VisibleForTesting
+        public View getNextView() {
+            if (Flags.toastNoWeakref()) {
+                return mNextView;
+            } else {
+                return (mNextViewWeakRef != null) ? mNextViewWeakRef.get() : null;
             }
         }
     }
