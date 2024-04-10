@@ -19,9 +19,11 @@ package com.android.systemui.dreams.touch;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.platform.test.annotations.EnableFlags;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Choreographer;
@@ -31,6 +33,7 @@ import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.shared.system.InputMonitorCompat;
@@ -125,6 +128,18 @@ public class InputSessionTest extends SysuiTestCase {
         mEventListener.onInputEvent(event);
         verify(mInputEventListener).onInputEvent(eq(event));
         verify(mInputMonitor, never()).pilferPointers();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_DREAM_INPUT_SESSION_PILFER_ONCE)
+    public void testPilferOnce() {
+        createSession(true);
+        final MotionEvent event = Mockito.mock(MotionEvent.class);
+        when(mGestureDetector.onTouchEvent(event)).thenReturn(true);
+        mEventListener.onInputEvent(event);
+        mEventListener.onInputEvent(event);
+        verify(mInputEventListener, times(2)).onInputEvent(eq(event));
+        verify(mInputMonitor, times(1)).pilferPointers();
     }
 
     /**

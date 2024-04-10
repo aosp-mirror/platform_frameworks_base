@@ -23,6 +23,7 @@ import android.view.Choreographer;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 
+import com.android.systemui.Flags;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.shared.system.InputMonitorCompat;
@@ -40,6 +41,12 @@ public class InputSession {
     private final InputMonitorCompat mInputMonitor;
     private final InputChannelCompat.InputEventReceiver mInputEventReceiver;
     private final GestureDetector mGestureDetector;
+
+    // Pilfering is a destructive operation. Once pilfering starts, the all events will be captured
+    // by the associated monitor. We track whether we're pilfering since initiating pilfering
+    // requires reaching out to the InputManagerService, which can be a heavy operation. This is
+    // especially costly if this is happening on a continuous stream of motion events.
+    private boolean mPilfering;
 
     /**
      * Default session constructor.
@@ -70,7 +77,9 @@ public class InputSession {
 
                     if (ev instanceof MotionEvent
                             && mGestureDetector.onTouchEvent((MotionEvent) ev)
-                            && pilferOnGestureConsume) {
+                            && pilferOnGestureConsume
+                            && !(mPilfering && Flags.dreamInputSessionPilferOnce())) {
+                        mPilfering = true;
                         mInputMonitor.pilferPointers();
                     }
                 });
