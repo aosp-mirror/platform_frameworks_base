@@ -412,9 +412,9 @@ public class ScreenshotController {
 
             if (screenshot.getTaskId() >= 0) {
                 mAssistContentRequester.requestAssistContent(screenshot.getTaskId(),
-                        assistContent -> {
-                            mActionsProvider.onAssistContentAvailable(assistContent);
-                        });
+                        assistContent -> mActionsProvider.onAssistContent(assistContent));
+            } else {
+                mActionsProvider.onAssistContent(null);
             }
         } else {
             saveScreenshotInWorkerThread(screenshot.getUserHandle(), finisher,
