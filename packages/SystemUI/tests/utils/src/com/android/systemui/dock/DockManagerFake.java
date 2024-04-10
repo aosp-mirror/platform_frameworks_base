@@ -49,6 +49,7 @@ public class DockManagerFake implements DockManager {
         return mDocked;
     }
 
+    /** Sets the docked state */
     public void setIsDocked(boolean docked) {
         mDocked = docked;
     }
@@ -58,6 +59,7 @@ public class DockManagerFake implements DockManager {
         return false;
     }
 
+    /** Notifies callbacks of dock state change */
     public void setDockEvent(int event) {
         mCallback.onEvent(event);
     }

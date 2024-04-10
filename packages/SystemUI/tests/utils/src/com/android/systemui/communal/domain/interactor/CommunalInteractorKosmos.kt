@@ -23,6 +23,7 @@ import com.android.systemui.communal.data.repository.communalPrefsRepository
 import com.android.systemui.communal.data.repository.communalRepository
 import com.android.systemui.communal.data.repository.communalWidgetRepository
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
+import com.android.systemui.dock.fakeDockManager
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
@@ -54,6 +55,7 @@ val Kosmos.communalInteractor by Fixture {
         userTracker = userTracker,
         activityStarter = activityStarter,
         userManager = userManager,
+        dockManager = fakeDockManager,
         logBuffer = logcatLogBuffer("CommunalInteractor"),
         tableLogBuffer = mock(),
         communalSettingsInteractor = communalSettingsInteractor,

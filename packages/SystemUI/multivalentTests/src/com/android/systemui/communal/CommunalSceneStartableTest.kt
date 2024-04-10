@@ -120,19 +120,20 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
-    fun exitingDream_forceCommunalScene() =
+    fun occluded_forceBlankScene() =
         with(kosmos) {
             testScope.runTest {
                 val scene by collectLastValue(communalInteractor.desiredScene)
-                assertThat(scene).isEqualTo(CommunalScenes.Blank)
+                communalInteractor.changeScene(CommunalScenes.Communal)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
 
                 updateDocked(true)
                 fakeKeyguardTransitionRepository.sendTransitionSteps(
-                    from = KeyguardState.DREAMING,
-                    to = KeyguardState.LOCKSCREEN,
+                    from = KeyguardState.GLANCEABLE_HUB,
+                    to = KeyguardState.OCCLUDED,
                     testScope = this
                 )
-                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+                assertThat(scene).isEqualTo(CommunalScenes.Blank)
             }
         }
 

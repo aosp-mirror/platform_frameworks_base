@@ -87,12 +87,12 @@ constructor(
             scope.launch {
                 keyguardOcclusionInteractor.isShowWhenLockedActivityOnTop
                     .filterRelevantKeyguardStateAnd { onTop -> !onTop }
-                    .sample(communalInteractor.isIdleOnCommunal, ::Pair)
-                    .collect { (_, isIdleOnCommunal) ->
+                    .sample(communalInteractor.isIdleOnCommunal, communalInteractor.showByDefault)
+                    .collect { (_, isIdleOnCommunal, showCommunalByDefault) ->
                         // Occlusion signals come from the framework, and should interrupt any
                         // existing transition
                         val to =
-                            if (isIdleOnCommunal) {
+                            if (isIdleOnCommunal || showCommunalByDefault) {
                                 KeyguardState.GLANCEABLE_HUB
                             } else {
                                 KeyguardState.LOCKSCREEN
@@ -106,15 +106,16 @@ constructor(
                     .sample(
                         keyguardInteractor.isKeyguardShowing,
                         communalInteractor.isIdleOnCommunal,
+                        communalInteractor.showByDefault,
                     )
-                    .filterRelevantKeyguardStateAnd { (isOccluded, isShowing, _) ->
+                    .filterRelevantKeyguardStateAnd { (isOccluded, isShowing, _, _) ->
                         !isOccluded && isShowing
                     }
-                    .collect { (_, _, isIdleOnCommunal) ->
+                    .collect { (_, _, isIdleOnCommunal, showCommunalByDefault) ->
                         // Occlusion signals come from the framework, and should interrupt any
                         // existing transition
                         val to =
-                            if (isIdleOnCommunal) {
+                            if (isIdleOnCommunal || showCommunalByDefault) {
                                 KeyguardState.GLANCEABLE_HUB
                             } else {
                                 KeyguardState.LOCKSCREEN
@@ -175,6 +176,7 @@ constructor(
             duration =
                 when (toState) {
                     KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
+                    KeyguardState.GLANCEABLE_HUB -> TO_GLANCEABLE_HUB_DURATION
                     else -> DEFAULT_DURATION
                 }.inWholeMilliseconds
         }
@@ -184,6 +186,7 @@ constructor(
         const val TAG = "FromOccludedTransitionInteractor"
         private val DEFAULT_DURATION = 500.milliseconds
         val TO_LOCKSCREEN_DURATION = 933.milliseconds
+        val TO_GLANCEABLE_HUB_DURATION = 250.milliseconds
         val TO_AOD_DURATION = DEFAULT_DURATION
         val TO_DOZING_DURATION = DEFAULT_DURATION
     }

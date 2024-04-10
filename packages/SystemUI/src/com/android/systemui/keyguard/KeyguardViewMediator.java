@@ -137,6 +137,7 @@ import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.TransitionAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.communal.ui.viewmodel.CommunalTransitionViewModel;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
@@ -584,7 +585,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
     private CentralSurfaces mCentralSurfaces;
 
-    private IRemoteAnimationFinishedCallback mUnoccludeFromDreamFinishedCallback;
+    private IRemoteAnimationFinishedCallback mUnoccludeFinishedCallback;
 
     private final DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener =
             new DeviceConfig.OnPropertiesChangedListener() {
@@ -1234,10 +1235,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                             mUnoccludeAnimator.cancel();
                         }
 
-                        if (isDream) {
+                        if (isDream || mShowCommunalByDefault) {
                             initAlphaForAnimationTargets(wallpapers);
-                            mDreamViewModel.get().startTransitionFromDream();
-                            mUnoccludeFromDreamFinishedCallback = finishedCallback;
+                            if (isDream) {
+                                mDreamViewModel.get().startTransitionFromDream();
+                            }
+                            mUnoccludeFinishedCallback = finishedCallback;
                             return;
                         }
 
@@ -1319,10 +1322,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
     private Consumer<TransitionStep> getFinishedCallbackConsumer() {
         return (TransitionStep step) -> {
-            if (mUnoccludeFromDreamFinishedCallback == null) return;
+            if (mUnoccludeFinishedCallback == null) return;
             try {
-                mUnoccludeFromDreamFinishedCallback.onAnimationFinished();
-                mUnoccludeFromDreamFinishedCallback = null;
+                mUnoccludeFinishedCallback.onAnimationFinished();
+                mUnoccludeFinishedCallback = null;
             } catch (RemoteException e) {
                 Log.e(TAG, "Wasn't able to callback", e);
             }
@@ -1365,7 +1368,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private final SessionTracker mSessionTracker;
     private final CoroutineDispatcher mMainDispatcher;
     private final Lazy<DreamViewModel> mDreamViewModel;
+    private final Lazy<CommunalTransitionViewModel> mCommunalTransitionViewModel;
     private RemoteAnimationTarget mRemoteAnimationTarget;
+    private Boolean mShowCommunalByDefault;
 
     private final Lazy<WindowManagerLockscreenVisibilityManager> mWmLockscreenVisibilityManager;
 
@@ -1414,6 +1419,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             SystemClock systemClock,
             @Main CoroutineDispatcher mainDispatcher,
             Lazy<DreamViewModel> dreamViewModel,
+            Lazy<CommunalTransitionViewModel> communalTransitionViewModel,
             SystemPropertiesHelper systemPropertiesHelper,
             Lazy<WindowManagerLockscreenVisibilityManager> wmLockscreenVisibilityManager,
             SelectedUserInteractor selectedUserInteractor,
@@ -1485,6 +1491,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         mSessionTracker = sessionTracker;
 
         mDreamViewModel = dreamViewModel;
+        mCommunalTransitionViewModel = communalTransitionViewModel;
         mWmLockscreenVisibilityManager = wmLockscreenVisibilityManager;
         mMainDispatcher = mainDispatcher;
 
@@ -1615,10 +1622,18 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
             ViewRootImpl viewRootImpl = mKeyguardViewControllerLazy.get().getViewRootImpl();
             if (viewRootImpl != null) {
-                final DreamViewModel viewModel = mDreamViewModel.get();
-                collectFlow(viewRootImpl.getView(), viewModel.getDreamAlpha(),
+                final DreamViewModel dreamViewModel = mDreamViewModel.get();
+                final CommunalTransitionViewModel communalViewModel =
+                        mCommunalTransitionViewModel.get();
+                collectFlow(viewRootImpl.getView(), dreamViewModel.getDreamAlpha(),
                         getRemoteSurfaceAlphaApplier(), mMainDispatcher);
-                collectFlow(viewRootImpl.getView(), viewModel.getTransitionEnded(),
+                collectFlow(viewRootImpl.getView(), dreamViewModel.getTransitionEnded(),
+                        getFinishedCallbackConsumer(), mMainDispatcher);
+                collectFlow(viewRootImpl.getView(), communalViewModel.getShowByDefault(),
+                        (showByDefault) ->
+                                mShowCommunalByDefault = showByDefault, mMainDispatcher);
+                collectFlow(viewRootImpl.getView(),
+                        communalViewModel.getTransitionFromOccludedEnded(),
                         getFinishedCallbackConsumer(), mMainDispatcher);
             }
         }
