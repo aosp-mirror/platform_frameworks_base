@@ -99,7 +99,7 @@ constructor(
     mediaRepository: CommunalMediaRepository,
     smartspaceRepository: SmartspaceRepository,
     keyguardInteractor: KeyguardInteractor,
-    communalSettingsInteractor: CommunalSettingsInteractor,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     private val appWidgetHost: CommunalAppWidgetHost,
     private val editWidgetsActivityStarter: EditWidgetsActivityStarter,
     private val userTracker: UserTracker,
@@ -358,7 +358,14 @@ constructor(
     /** A list of widget content to be displayed in the communal hub. */
     val widgetContent: Flow<List<WidgetContent>> =
         combine(
-            widgetRepository.communalWidgets.map { filterWidgetsByExistingUsers(it) },
+            widgetRepository.communalWidgets
+                .map { filterWidgetsByExistingUsers(it) }
+                .combine(communalSettingsInteractor.allowedByDevicePolicyForWorkProfile) {
+                    // exclude widgets under work profile if not allowed by device policy
+                    widgets,
+                    allowedForWorkProfile ->
+                    filterWidgetsAllowedByDevicePolicy(widgets, allowedForWorkProfile)
+                },
             communalSettingsInteractor.communalWidgetCategories,
             updateOnWorkProfileBroadcastReceived,
         ) { widgets, allowedCategories, _ ->
@@ -378,6 +385,19 @@ constructor(
                     )
                 }
             }
+        }
+
+    /** Filter widgets based on whether their associated profile is allowed by device policy. */
+    private fun filterWidgetsAllowedByDevicePolicy(
+        list: List<CommunalWidgetContentModel>,
+        allowedByDevicePolicyForWorkProfile: Boolean
+    ): List<CommunalWidgetContentModel> =
+        if (allowedByDevicePolicyForWorkProfile) {
+            list
+        } else {
+            // Get associated work profile for the currently selected user.
+            val workProfile = userTracker.userProfiles.find { it.isManagedProfile }
+            list.filter { it.providerInfo.profile.identifier != workProfile?.id }
         }
 
     /** A flow of available smartspace targets. Currently only showing timers. */

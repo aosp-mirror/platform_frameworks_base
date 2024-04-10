@@ -16,6 +16,8 @@
 
 package com.android.systemui.communal.domain.interactor
 
+import android.content.pm.UserInfo
+import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.communal.data.model.CommunalEnabledState
 import com.android.systemui.communal.data.model.CommunalWidgetCategories
 import com.android.systemui.communal.data.repository.CommunalSettingsRepository
@@ -24,13 +26,18 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.dagger.CommunalTableLog
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
+import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -40,8 +47,10 @@ class CommunalSettingsInteractor
 @Inject
 constructor(
     @Background private val bgScope: CoroutineScope,
+    @Background private val bgExecutor: Executor,
     private val repository: CommunalSettingsRepository,
     userInteractor: SelectedUserInteractor,
+    private val userTracker: UserTracker,
     @CommunalTableLog tableLogBuffer: TableLogBuffer,
 ) {
     /** Whether or not communal is enabled for the currently selected user. */
@@ -67,5 +76,34 @@ constructor(
                 // Start this eagerly since the value can be accessed synchronously.
                 started = SharingStarted.Eagerly,
                 initialValue = CommunalWidgetCategories().categories
+            )
+
+    private val workProfileUserInfoCallbackFlow: Flow<UserInfo?> = conflatedCallbackFlow {
+        fun send(profiles: List<UserInfo>) {
+            trySend(profiles.find { it.isManagedProfile })
+        }
+
+        val callback =
+            object : UserTracker.Callback {
+                override fun onProfilesChanged(profiles: List<UserInfo>) {
+                    send(profiles)
+                }
+            }
+        userTracker.addCallback(callback, bgExecutor)
+        send(userTracker.userProfiles)
+
+        awaitClose { userTracker.removeCallback(callback) }
+    }
+
+    /** Whether or not keyguard widgets are allowed for work profile by device policy manager. */
+    val allowedByDevicePolicyForWorkProfile: StateFlow<Boolean> =
+        workProfileUserInfoCallbackFlow
+            .flatMapLatest { workProfile ->
+                workProfile?.let { repository.getAllowedByDevicePolicy(it) } ?: flowOf(false)
+            }
+            .stateIn(
+                scope = bgScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false
             )
 }

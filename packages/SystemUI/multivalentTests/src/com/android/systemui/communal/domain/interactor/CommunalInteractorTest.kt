@@ -17,6 +17,8 @@
 
 package com.android.systemui.communal.domain.interactor
 
+import android.app.admin.DevicePolicyManager
+import android.app.admin.devicePolicyManager
 import android.app.smartspace.SmartspaceTarget
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
@@ -32,6 +34,7 @@ import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.communal.data.repository.CommunalSettingsRepositoryImpl
 import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
 import com.android.systemui.communal.data.repository.FakeCommunalPrefsRepository
@@ -71,6 +74,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
@@ -929,7 +933,6 @@ class CommunalInteractorTest : SysuiTestCase() {
             keyguardRepository.setKeyguardShowing(true)
             keyguardRepository.setKeyguardOccluded(false)
             tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
-            userRepository.setSelectedUserInfo(mainUser)
 
             val userInfos = listOf(MAIN_USER_INFO, USER_INFO_WORK)
             userRepository.setUserInfos(userInfos)
@@ -937,6 +940,7 @@ class CommunalInteractorTest : SysuiTestCase() {
                 userInfos = userInfos,
                 selectedUserIndex = 0,
             )
+            userRepository.setSelectedUserInfo(MAIN_USER_INFO)
             runCurrent()
 
             // Widgets available.
@@ -955,7 +959,6 @@ class CommunalInteractorTest : SysuiTestCase() {
                 AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD,
                 mainUser.id
             )
-            runCurrent()
 
             // Only the keyguard widget is enabled.
             assertThat(widgetContent).hasSize(3)
@@ -974,7 +977,6 @@ class CommunalInteractorTest : SysuiTestCase() {
             keyguardRepository.setKeyguardShowing(true)
             keyguardRepository.setKeyguardOccluded(false)
             tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
-            userRepository.setSelectedUserInfo(mainUser)
 
             val userInfos = listOf(MAIN_USER_INFO, USER_INFO_WORK)
             userRepository.setUserInfos(userInfos)
@@ -982,6 +984,7 @@ class CommunalInteractorTest : SysuiTestCase() {
                 userInfos = userInfos,
                 selectedUserIndex = 0,
             )
+            userRepository.setSelectedUserInfo(MAIN_USER_INFO)
             runCurrent()
 
             // Widgets available.
@@ -1001,7 +1004,6 @@ class CommunalInteractorTest : SysuiTestCase() {
                     AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN,
                 mainUser.id
             )
-            runCurrent()
 
             // All widgets are enabled.
             assertThat(widgetContent).hasSize(3)
@@ -1011,6 +1013,79 @@ class CommunalInteractorTest : SysuiTestCase() {
             }
         }
 
+    @Test
+    fun filterWidgets_whenDisallowedByDevicePolicyForWorkProfile() =
+        testScope.runTest {
+            // Keyguard showing, and tutorial completed.
+            keyguardRepository.setKeyguardShowing(true)
+            keyguardRepository.setKeyguardOccluded(false)
+            tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
+
+            val userInfos = listOf(MAIN_USER_INFO, USER_INFO_WORK)
+            userRepository.setUserInfos(userInfos)
+            userTracker.set(
+                userInfos = userInfos,
+                selectedUserIndex = 0,
+            )
+            userRepository.setSelectedUserInfo(MAIN_USER_INFO)
+            runCurrent()
+
+            val widgetContent by collectLastValue(underTest.widgetContent)
+            // Given three widgets, and one of them is associated with work profile.
+            val widget1 = createWidgetForUser(1, USER_INFO_WORK.id)
+            val widget2 = createWidgetForUser(2, MAIN_USER_INFO.id)
+            val widget3 = createWidgetForUser(3, MAIN_USER_INFO.id)
+            val widgets = listOf(widget1, widget2, widget3)
+            widgetRepository.setCommunalWidgets(widgets)
+
+            setKeyguardFeaturesDisabled(
+                USER_INFO_WORK,
+                DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL
+            )
+
+            // Widget under work profile is filtered out and the remaining two link to main user id.
+            assertThat(widgetContent).hasSize(2)
+            widgetContent!!.forEach { model ->
+                assertThat(model.providerInfo.profile?.identifier).isEqualTo(MAIN_USER_INFO.id)
+            }
+        }
+
+    @Test
+    fun filterWidgets_whenAllowedByDevicePolicyForWorkProfile() =
+        testScope.runTest {
+            // Keyguard showing, and tutorial completed.
+            keyguardRepository.setKeyguardShowing(true)
+            keyguardRepository.setKeyguardOccluded(false)
+            tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
+
+            val userInfos = listOf(MAIN_USER_INFO, USER_INFO_WORK)
+            userRepository.setUserInfos(userInfos)
+            userTracker.set(
+                userInfos = userInfos,
+                selectedUserIndex = 0,
+            )
+            userRepository.setSelectedUserInfo(MAIN_USER_INFO)
+            runCurrent()
+
+            val widgetContent by collectLastValue(underTest.widgetContent)
+            // Given three widgets, and one of them is associated with work profile.
+            val widget1 = createWidgetForUser(1, USER_INFO_WORK.id)
+            val widget2 = createWidgetForUser(2, MAIN_USER_INFO.id)
+            val widget3 = createWidgetForUser(3, MAIN_USER_INFO.id)
+            val widgets = listOf(widget1, widget2, widget3)
+            widgetRepository.setCommunalWidgets(widgets)
+
+            setKeyguardFeaturesDisabled(
+                USER_INFO_WORK,
+                DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NONE
+            )
+
+            // Widget under work profile is available.
+            assertThat(widgetContent).hasSize(3)
+            assertThat(widgetContent!![0].providerInfo.profile?.identifier)
+                .isEqualTo(USER_INFO_WORK.id)
+        }
+
     private fun smartspaceTimer(id: String, timestamp: Long = 0L): SmartspaceTarget {
         val timer = mock(SmartspaceTarget::class.java)
         whenever(timer.smartspaceTargetId).thenReturn(id)
@@ -1018,6 +1093,15 @@ class CommunalInteractorTest : SysuiTestCase() {
         whenever(timer.remoteViews).thenReturn(mock(RemoteViews::class.java))
         whenever(timer.creationTimeMillis).thenReturn(timestamp)
         return timer
+    }
+
+    private fun setKeyguardFeaturesDisabled(user: UserInfo, disabledFlags: Int) {
+        whenever(kosmos.devicePolicyManager.getKeyguardDisabledFeatures(nullable(), eq(user.id)))
+            .thenReturn(disabledFlags)
+        kosmos.broadcastDispatcher.sendIntentToMatchingReceiversOnly(
+            context,
+            Intent(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
+        )
     }
 
     private fun createWidgetForUser(appWidgetId: Int, userId: Int): CommunalWidgetContentModel =
@@ -1044,6 +1128,13 @@ class CommunalInteractorTest : SysuiTestCase() {
 
     private companion object {
         val MAIN_USER_INFO = UserInfo(0, "primary", UserInfo.FLAG_MAIN)
-        val USER_INFO_WORK = UserInfo(10, "work", UserInfo.FLAG_PROFILE)
+        val USER_INFO_WORK =
+            UserInfo(
+                10,
+                "work",
+                /* iconPath= */ "",
+                /* flags= */ 0,
+                UserManager.USER_TYPE_PROFILE_MANAGED,
+            )
     }
 }
