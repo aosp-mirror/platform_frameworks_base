@@ -162,15 +162,6 @@ class DozeLogger @Inject constructor(
         })
     }
 
-    fun logPendingUnscheduleTimeTick(isPending: Boolean, isTimeTickScheduled: Boolean) {
-        buffer.log(TAG, INFO, {
-            bool1 = isPending
-            bool2 = isTimeTickScheduled
-        }, {
-            "Pending unschedule time tick, isPending=$bool1, isTimeTickScheduled:$bool2"
-        })
-    }
-
     fun logDozeStateChanged(state: DozeMachine.State) {
         buffer.log(TAG, INFO, {
             str1 = state.name

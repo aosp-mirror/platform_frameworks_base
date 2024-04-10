@@ -32,7 +32,6 @@ import androidx.core.content.res.ResourcesCompat
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.animation.view.LaunchableImageView
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.ui.binder.KeyguardIndicationAreaBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
 import com.android.systemui.keyguard.ui.view.KeyguardIndicationArea
@@ -44,7 +43,6 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.statusbar.VibratorHelper
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.flow.Flow
 
@@ -56,7 +54,6 @@ constructor(
     private val vibratorHelper: VibratorHelper,
     private val indicationController: KeyguardIndicationController,
     private val indicationAreaViewModel: KeyguardIndicationAreaViewModel,
-    @Main private val mainImmediateDispatcher: CoroutineDispatcher,
 ) {
     /**
      * Renders a single lockscreen shortcut.
@@ -164,7 +161,6 @@ constructor(
                         transitionAlpha,
                         falsingManager,
                         vibratorHelper,
-                        mainImmediateDispatcher,
                     ) {
                         indicationController.showTransientIndication(it)
                     }
