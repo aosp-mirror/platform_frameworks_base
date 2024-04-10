@@ -24,6 +24,9 @@ import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
 
 import static com.android.launcher3.icons.BaseIconFactory.MODE_DEFAULT;
+import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getFineResizeCornerSize;
+import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getLargeResizeCornerSize;
+import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeEdgeHandleSize;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -288,17 +291,14 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 .getScaledTouchSlop();
         mDragDetector.setTouchSlop(touchSlop);
 
-        final int resizeHandle = mResult.mRootView.getResources()
-                .getDimensionPixelSize(R.dimen.freeform_resize_handle);
-        final int resizeCorner = mResult.mRootView.getResources()
-                .getDimensionPixelSize(R.dimen.freeform_resize_corner);
-
         // If either task geometry or position have changed, update this task's
         // exclusion region listener
+        final Resources res = mResult.mRootView.getResources();
         if (mDragResizeListener.setGeometry(
                 new DragResizeWindowGeometry(mRelayoutParams.mCornerRadius,
-                        new Size(mResult.mWidth, mResult.mHeight), resizeHandle, resizeCorner),
-                touchSlop) || !mTaskInfo.positionInParent.equals(mPositionInParent)) {
+                        new Size(mResult.mWidth, mResult.mHeight), getResizeEdgeHandleSize(res),
+                        getFineResizeCornerSize(res), getLargeResizeCornerSize(res)), touchSlop)
+                || !mTaskInfo.positionInParent.equals(mPositionInParent)) {
             updateExclusionRegion();
         }
 
