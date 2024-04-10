@@ -5753,17 +5753,22 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Override
         public void setApplicationCategoryHint(String packageName, int categoryHint,
                 String callerPackageName) {
+            final int callingUid = Binder.getCallingUid();
+            final int userId = UserHandle.getCallingUserId();
             final FunctionalUtils.ThrowingBiFunction<PackageStateMutator.InitialState, Computer,
                     PackageStateMutator.Result> implementation = (initialState, computer) -> {
-                if (computer.getInstantAppPackageName(Binder.getCallingUid()) != null) {
+                if (computer.getInstantAppPackageName(callingUid) != null) {
                     throw new SecurityException(
                             "Instant applications don't have access to this method");
                 }
-                mInjector.getSystemService(AppOpsManager.class)
-                        .checkPackage(Binder.getCallingUid(), callerPackageName);
+                final int callerPackageUid = computer.getPackageUid(callerPackageName, 0, userId);
+                if (callerPackageUid != callingUid) {
+                    throw new SecurityException(
+                            "Package " + callerPackageName + " does not belong to " + callingUid);
+                }
 
                 PackageStateInternal packageState = computer.getPackageStateForInstalledAndFiltered(
-                        packageName, Binder.getCallingUid(), UserHandle.getCallingUserId());
+                        packageName, callingUid, userId);
                 if (packageState == null) {
                     throw new IllegalArgumentException("Unknown target package " + packageName);
                 }
