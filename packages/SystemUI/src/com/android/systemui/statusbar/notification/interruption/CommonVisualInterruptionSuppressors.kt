@@ -27,6 +27,7 @@ import android.database.ContentObserver
 import android.hardware.display.AmbientDisplayConfiguration
 import android.os.Handler
 import android.os.PowerManager
+import android.provider.Settings
 import android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED
 import android.provider.Settings.Global.HEADS_UP_OFF
 import com.android.systemui.dagger.qualifiers.Main
@@ -42,6 +43,7 @@ import com.android.systemui.statusbar.notification.interruption.VisualInterrupti
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.util.settings.GlobalSettings
+import com.android.systemui.util.settings.SystemSettings
 import com.android.systemui.util.time.SystemClock
 
 class PeekDisabledSuppressor(
@@ -231,6 +233,7 @@ class AlertKeyguardVisibilitySuppressor(
 class AvalancheSuppressor(
     private val avalancheProvider: AvalancheProvider,
     private val systemClock: SystemClock,
+    private val systemSettings: SystemSettings,
 ) :
     VisualInterruptionFilter(
         types = setOf(PEEK, PULSE),
@@ -253,12 +256,23 @@ class AvalancheSuppressor(
     }
 
     override fun shouldSuppress(entry: NotificationEntry): Boolean {
-        val timeSinceAvalanche = systemClock.currentTimeMillis() - avalancheProvider.startTime
-        val isActive = timeSinceAvalanche < avalancheProvider.timeoutMs
+        if (!isCooldownEnabled()) {
+            reason = "FALSE avalanche cooldown setting DISABLED"
+            return false
+        }
+        val timeSinceAvalancheMs = systemClock.currentTimeMillis() - avalancheProvider.startTime
+        val timedOut = timeSinceAvalancheMs >= avalancheProvider.timeoutMs
+        if (timedOut) {
+            reason = "FALSE avalanche event TIMED OUT. " +
+                    "${timeSinceAvalancheMs/1000} seconds since last avalanche"
+            return false
+        }
         val state = calculateState(entry)
-        val suppress = isActive && state == State.SUPPRESS
-        reason = "avalanche suppress=$suppress isActive=$isActive state=$state"
-        return suppress
+        if (state != State.SUPPRESS) {
+            reason = "FALSE avalanche IN ALLOWLIST: $state"
+            return false
+        }
+        return true
     }
 
     private fun calculateState(entry: NotificationEntry): State {
@@ -293,5 +307,12 @@ class AvalancheSuppressor(
             return State.ALLOW_COLORIZED
         }
         return State.SUPPRESS
+    }
+
+    private fun isCooldownEnabled(): Boolean {
+        return systemSettings.getInt(
+            Settings.System.NOTIFICATION_COOLDOWN_ENABLED,
+            /* def */ 1
+        ) == 1
     }
 }
