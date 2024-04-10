@@ -465,10 +465,34 @@ private val ROTATION_90_INPUTS =
         nativeYOutsideSensor = 150f,
     )
 
-/* ROTATION_180 is not supported. It's treated the same as ROTATION_0. */
+/*
+ * ROTATION_180 map:
+ * _ _ _ _
+ * _ _ s _
+ * _ _ s _
+ * _ _ _ _
+ * _ O _ _
+ * _ _ _ _
+ *
+ * (_) empty space
+ * (S) sensor
+ * (O) touch outside of the sensor
+ */
+private val ROTATION_180_NATIVE_SENSOR_BOUNDS =
+    Rect(
+        200, /* left */
+        100, /* top */
+        300, /* right */
+        300, /* bottom */
+    )
 private val ROTATION_180_INPUTS =
-    ROTATION_0_INPUTS.copy(
+    OrientationBasedInputs(
         rotation = Surface.ROTATION_180,
+        nativeOrientation = (ORIENTATION - Math.PI.toFloat() / 2),
+        nativeXWithinSensor = ROTATION_180_NATIVE_SENSOR_BOUNDS.exactCenterX(),
+        nativeYWithinSensor = ROTATION_180_NATIVE_SENSOR_BOUNDS.exactCenterY(),
+        nativeXOutsideSensor = 150f,
+        nativeYOutsideSensor = 450f,
     )
 
 /*
@@ -636,33 +660,6 @@ private fun genPositiveTestCases(
                 expected = expected,
             )
         }
-    }
-}
-
-private fun genTestCasesForUnsupportedAction(
-    motionEventAction: Int
-): List<SinglePointerTouchProcessorTest.TestCase> {
-    val isGoodOverlap = true
-    val previousPointerOnSensorIds = listOf(INVALID_POINTER_ID, POINTER_ID_1)
-    return previousPointerOnSensorIds.map { previousPointerOnSensorId ->
-        val overlayParams = ROTATION_0_INPUTS.toOverlayParams(scaleFactor = 1f)
-        val nativeX = ROTATION_0_INPUTS.getNativeX(isGoodOverlap)
-        val nativeY = ROTATION_0_INPUTS.getNativeY(isGoodOverlap)
-        val event =
-            MOTION_EVENT.copy(
-                action = motionEventAction,
-                x = nativeX,
-                y = nativeY,
-                minor = NATIVE_MINOR,
-                major = NATIVE_MAJOR,
-            )
-        SinglePointerTouchProcessorTest.TestCase(
-            event = event,
-            currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = isGoodOverlap)),
-            previousPointerOnSensorId = previousPointerOnSensorId,
-            overlayParams = overlayParams,
-            expected = TouchProcessorResult.Failure(),
-        )
     }
 }
 
