@@ -1162,7 +1162,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
             invocationOnMock.callRealMethod();
             return null;
         }).when(surface).lockCanvas(any());
-        mWm.mAccessibilityController.drawMagnifiedRegionBorderIfNeeded(displayId);
+        mWm.mAccessibilityController
+                .recomputeMagnifiedRegionAndDrawMagnifiedRegionBorderIfNeeded(displayId);
         waitUntilHandlersIdle();
         try {
             verify(surface).lockCanvas(any());
@@ -1170,7 +1171,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
             clearInvocations(surface);
             // Invalidate and redraw.
             mWm.mAccessibilityController.onDisplaySizeChanged(mDisplayContent);
-            mWm.mAccessibilityController.drawMagnifiedRegionBorderIfNeeded(displayId);
+            mWm.mAccessibilityController
+                    .recomputeMagnifiedRegionAndDrawMagnifiedRegionBorderIfNeeded(displayId);
             // Turn off magnification to release surface.
             mWm.mAccessibilityController.setMagnificationCallbacks(displayId, null);
             waitUntilHandlersIdle();

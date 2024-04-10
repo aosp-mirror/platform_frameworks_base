@@ -466,20 +466,17 @@ final class AccessibilityController {
         }
     }
 
-    void drawMagnifiedRegionBorderIfNeeded(int displayId) {
-        if (Flags.alwaysDrawMagnificationFullscreenBorder()) {
-            return;
-        }
-
+    void recomputeMagnifiedRegionAndDrawMagnifiedRegionBorderIfNeeded(int displayId) {
         if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
             mAccessibilityTracing.logTrace(
-                    TAG + ".drawMagnifiedRegionBorderIfNeeded",
+                    TAG + ".recomputeMagnifiedRegionAndDrawMagnifiedRegionBorderIfNeeded",
                     FLAGS_MAGNIFICATION_CALLBACK,
                     "displayId=" + displayId);
         }
+
         final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
         if (displayMagnifier != null) {
-            displayMagnifier.drawMagnifiedRegionBorderIfNeeded();
+            displayMagnifier.recomputeMagnifiedRegionAndDrawMagnifiedRegionBorderIfNeeded();
         }
         // Not relevant for the window observer.
     }
@@ -936,11 +933,13 @@ final class AccessibilityController {
             }
         }
 
-        void drawMagnifiedRegionBorderIfNeeded() {
+        void recomputeMagnifiedRegionAndDrawMagnifiedRegionBorderIfNeeded() {
             if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
-                mAccessibilityTracing.logTrace(LOG_TAG + ".drawMagnifiedRegionBorderIfNeeded",
+                mAccessibilityTracing.logTrace(LOG_TAG
+                                + ".recomputeMagnifiedRegionAndDrawMagnifiedRegionBorderIfNeeded",
                         FLAGS_MAGNIFICATION_CALLBACK);
             }
+            recomputeBounds();
 
             if (!Flags.alwaysDrawMagnificationFullscreenBorder()) {
                 mMagnifiedViewport.drawWindowIfNeeded();
@@ -1245,7 +1244,6 @@ final class AccessibilityController {
             }
 
             void drawWindowIfNeeded() {
-                recomputeBounds();
                 mWindow.postDrawIfNeeded();
             }
 
