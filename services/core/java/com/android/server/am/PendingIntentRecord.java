@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.START_SUCCESS;
 
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
@@ -55,6 +56,7 @@ import android.util.TimeUtils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.modules.expresslog.Counter;
 import com.android.server.wm.SafeActivityOptions;
 
 import java.io.PrintWriter;
@@ -446,6 +448,16 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
         SafeActivityOptions mergedOptions = null;
         synchronized (controller.mLock) {
             if (canceled) {
+                if (cancelReason == CANCEL_REASON_OWNER_FORCE_STOPPED
+                        && controller.mAmInternal.getUidProcessState(callingUid)
+                                == PROCESS_STATE_TOP) {
+                    Counter.logIncrementWithUid(
+                            "app.value_force_stop_cancelled_pi_sent_from_top_per_caller",
+                            callingUid);
+                    Counter.logIncrementWithUid(
+                            "app.value_force_stop_cancelled_pi_sent_from_top_per_owner",
+                            uid);
+                }
                 return ActivityManager.START_CANCELED;
             }
 
