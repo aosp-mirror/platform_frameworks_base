@@ -35,6 +35,9 @@
     <!-- Mobile Radio power stats collection throttle period in milliseconds. -->
     <integer name="config_defaultPowerStatsThrottlePeriodMobileRadio">3600000</integer>
 
+    <!-- Mobile Radio power stats collection throttle period in milliseconds. -->
+    <integer name="config_defaultPowerStatsThrottlePeriodWifi">3600000</integer>
+
     <!-- PowerStats aggregation period in milliseconds. This is the interval at which the power
     stats aggregation procedure is performed and the results stored in PowerStatsStore. -->
     <integer name="config_powerStatsAggregationPeriod">14400000</integer>

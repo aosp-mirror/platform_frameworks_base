@@ -266,6 +266,8 @@ android.telephony.CellSignalStrength
 android.telephony.ModemActivityInfo
 android.telephony.ServiceState
 
+android.os.connectivity.WifiActivityEnergyInfo
+
 com.android.server.LocalServices
 
 com.android.internal.util.BitUtils

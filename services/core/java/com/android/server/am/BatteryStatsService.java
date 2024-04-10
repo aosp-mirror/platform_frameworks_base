@@ -412,6 +412,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 com.android.internal.R.integer.config_defaultPowerStatsThrottlePeriodCpu);
         final long powerStatsThrottlePeriodMobileRadio = context.getResources().getInteger(
                 com.android.internal.R.integer.config_defaultPowerStatsThrottlePeriodMobileRadio);
+        final long powerStatsThrottlePeriodWifi = context.getResources().getInteger(
+                com.android.internal.R.integer.config_defaultPowerStatsThrottlePeriodWifi);
         mBatteryStatsConfig =
                 new BatteryStatsImpl.BatteryStatsConfig.Builder()
                         .setResetOnUnplugHighBatteryLevel(resetOnUnplugHighBatteryLevel)
@@ -422,6 +424,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         .setPowerStatsThrottlePeriodMillis(
                                 BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
                                 powerStatsThrottlePeriodMobileRadio)
+                        .setPowerStatsThrottlePeriodMillis(
+                                BatteryConsumer.POWER_COMPONENT_WIFI,
+                                powerStatsThrottlePeriodWifi)
                         .build();
         mPowerStatsUidResolver = new PowerStatsUidResolver();
         mStats = new BatteryStatsImpl(mBatteryStatsConfig, Clock.SYSTEM_CLOCK, mMonotonicClock,
@@ -518,14 +523,19 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     public void systemServicesReady() {
         mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_CPU,
                 Flags.streamlinedBatteryStats());
-        mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
-                Flags.streamlinedConnectivityBatteryStats());
         mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
                 BatteryConsumer.POWER_COMPONENT_CPU,
                 Flags.streamlinedBatteryStats());
+
+        mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
+                Flags.streamlinedConnectivityBatteryStats());
         mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
                 BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
                 Flags.streamlinedConnectivityBatteryStats());
+
+        mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_WIFI,
+                Flags.streamlinedConnectivityBatteryStats());
+
         mWorker.systemServicesReady();
         mStats.systemServicesReady(mContext);
         mCpuWakeupStats.systemServicesReady();
