@@ -37,6 +37,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
 /** Models UI state and handles user input for the lockscreen scene. */
@@ -52,16 +54,23 @@ constructor(
     val notifications: NotificationsPlaceholderViewModel,
 ) {
     val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
-        combine(
-                deviceEntryInteractor.isUnlocked,
-                communalInteractor.isCommunalAvailable,
-                shadeInteractor.shadeMode,
-            ) { isDeviceUnlocked, isCommunalAvailable, shadeMode ->
-                destinationScenes(
-                    isDeviceUnlocked = isDeviceUnlocked,
-                    isCommunalAvailable = isCommunalAvailable,
-                    shadeMode = shadeMode,
-                )
+        shadeInteractor.isShadeTouchable
+            .flatMapLatest { isShadeTouchable ->
+                if (!isShadeTouchable) {
+                    flowOf(emptyMap())
+                } else {
+                    combine(
+                        deviceEntryInteractor.isUnlocked,
+                        communalInteractor.isCommunalAvailable,
+                        shadeInteractor.shadeMode,
+                    ) { isDeviceUnlocked, isCommunalAvailable, shadeMode ->
+                        destinationScenes(
+                            isDeviceUnlocked = isDeviceUnlocked,
+                            isCommunalAvailable = isCommunalAvailable,
+                            shadeMode = shadeMode,
+                        )
+                    }
+                }
             }
             .stateIn(
                 scope = applicationScope,

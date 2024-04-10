@@ -26,6 +26,7 @@ import com.android.compose.animation.scene.observableTransitionState
 import com.android.compose.animation.scene.transitions
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.res.R
@@ -41,6 +42,11 @@ object Communal {
 }
 
 val sceneTransitions = transitions {
+    to(CommunalScenes.Communal, key = CommunalTransitionKeys.SimpleFade) {
+        spec = tween(durationMillis = 250)
+        fade(Communal.Elements.Scrim)
+        fade(Communal.Elements.Content)
+    }
     to(CommunalScenes.Communal) {
         spec = tween(durationMillis = 1000)
         translate(Communal.Elements.Content, Edge.Right)

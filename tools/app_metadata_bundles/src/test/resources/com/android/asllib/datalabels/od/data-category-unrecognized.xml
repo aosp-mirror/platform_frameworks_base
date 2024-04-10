@@ -1,0 +1,11 @@
+<pbundle_as_map name="data_labels">
+    <pbundle_as_map name="data_shared">
+        <pbundle_as_map name="unrecognized">
+    <pbundle_as_map name="email_address">
+        <int-array name="purposes" num="1">
+            <item value="2" />
+        </int-array>
+    </pbundle_as_map>
+</pbundle_as_map>
+    </pbundle_as_map>
+</pbundle_as_map>

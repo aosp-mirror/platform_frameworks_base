@@ -88,6 +88,7 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WALLPAPER;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WIFI;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WINDOWS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WIPE_DATA;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_STORAGE_LIMIT;
 import static android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS;
 import static android.Manifest.permission.MASTER_CLEAR;
 import static android.Manifest.permission.NOTIFY_PENDING_SYSTEM_UPDATE;
@@ -268,6 +269,7 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOM
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.server.SystemTimeZone.TIME_ZONE_CONFIDENCE_HIGH;
 import static com.android.server.am.ActivityManagerService.STOCK_PM_FLAGS;
+import static com.android.server.devicepolicy.DevicePolicyEngine.DEFAULT_POLICY_SIZE_LIMIT;
 import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_DEVICE_OWNER;
 import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_PROFILE_OWNER;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
@@ -742,7 +744,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * These cannot be set on the managed profile's parent DPM instance
      */
     private static final int PROFILE_KEYGUARD_FEATURES_PROFILE_ONLY =
-            DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS;
+            DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS
+                    | DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL;
 
     /** Keyguard features that are allowed to be set on a managed profile */
     private static final int PROFILE_KEYGUARD_FEATURES =
@@ -2251,8 +2254,38 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 if (userHandle == UserHandle.USER_SYSTEM) {
                     mStateCache.setDeviceProvisioned(policy.mUserSetupComplete);
                 }
+                if (Flags.headlessSingleUserBadDeviceAdminStateFix()) {
+                    fixBadDeviceAdminStateForInternalUsers(userHandle, policy);
+                }
             }
             return policy;
+        }
+    }
+
+    private void fixBadDeviceAdminStateForInternalUsers(int userId, DevicePolicyData policy) {
+        ComponentName component = mOwners.getDeviceOwnerComponent();
+        int doUserId = mOwners.getDeviceOwnerUserId();
+        ComponentName cloudDpc = new ComponentName(
+                "com.google.android.apps.work.clouddpc",
+                "com.google.android.apps.work.clouddpc.receivers.CloudDeviceAdminReceiver");
+        if (component == null || doUserId != userId || !component.equals(cloudDpc)) {
+            return;
+        }
+        Slogf.i(LOG_TAG, "Attempting to apply a temp fix for cloudpc internal users' bad state.");
+        final int n = policy.mAdminList.size();
+        for (int i = 0; i < n; i++) {
+            ActiveAdmin admin = policy.mAdminList.get(i);
+            if (component.equals(admin.info.getComponent())) {
+                Slogf.i(LOG_TAG, "An ActiveAdmin already exists, fix not required.");
+                return;
+            }
+        }
+        DeviceAdminInfo dai = findAdmin(component, userId, /* throwForMissingPermission= */ false);
+        if (dai != null) {
+            ActiveAdmin ap = new ActiveAdmin(dai, /* parent */ false);
+            policy.mAdminMap.put(ap.info.getComponent(), ap);
+            policy.mAdminList.add(ap);
+            Slogf.i(LOG_TAG, "Fix applied, an ActiveAdmin has been added.");
         }
     }
 
@@ -12138,7 +12171,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         if (packageList != null) {
-            if (!Flags.devicePolicySizeTrackingInternalEnabled()) {
+            if (!Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
                 for (String pkg : packageList) {
                     PolicySizeVerifier.enforceMaxPackageNameLength(pkg);
                 }
@@ -13913,7 +13946,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
 
-        if (!Flags.devicePolicySizeTrackingInternalEnabled()) {
+        if (!Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
             PolicySizeVerifier.enforceMaxStringLength(accountType, "account type");
         }
 
@@ -14527,7 +14560,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public void setLockTaskPackages(ComponentName who, String callerPackageName, String[] packages)
             throws SecurityException {
         Objects.requireNonNull(packages, "packages is null");
-        if (!Flags.devicePolicySizeTrackingInternalEnabled()) {
+        if (!Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
             for (String pkg : packages) {
                 PolicySizeVerifier.enforceMaxPackageNameLength(pkg);
             }
@@ -24536,19 +24569,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void setMaxPolicyStorageLimit(String callerPackageName, int storageLimit) {
-        if (!Flags.devicePolicySizeTrackingInternalEnabled()) {
+        if (!Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
             return;
         }
         CallerIdentity caller = getCallerIdentity(callerPackageName);
         enforcePermission(MANAGE_PROFILE_AND_DEVICE_OWNERS, caller.getPackageName(),
                 caller.getUserId());
 
+        if (storageLimit < DEFAULT_POLICY_SIZE_LIMIT && storageLimit != -1) {
+            throw new IllegalArgumentException("Can't set a size limit less than the minimum "
+                    + "allowed size.");
+        }
         mDevicePolicyEngine.setMaxPolicyStorageLimit(storageLimit);
     }
 
     @Override
     public int getMaxPolicyStorageLimit(String callerPackageName) {
-        if (!Flags.devicePolicySizeTrackingInternalEnabled()) {
+        if (!Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
             return -1;
         }
         CallerIdentity caller = getCallerIdentity(callerPackageName);
@@ -24556,6 +24593,32 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 caller.getUserId());
 
         return mDevicePolicyEngine.getMaxPolicyStorageLimit();
+    }
+
+    @Override
+    public void forceSetMaxPolicyStorageLimit(String callerPackageName, int storageLimit) {
+        if (!Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
+            return;
+        }
+        CallerIdentity caller = getCallerIdentity(callerPackageName);
+        enforcePermission(MANAGE_DEVICE_POLICY_STORAGE_LIMIT, caller.getPackageName(),
+                caller.getUserId());
+
+        mDevicePolicyEngine.setMaxPolicyStorageLimit(storageLimit);
+    }
+
+    @Override
+    public int getPolicySizeForAdmin(
+            String callerPackageName, android.app.admin.EnforcingAdmin admin) {
+        if (!Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
+            return -1;
+        }
+        CallerIdentity caller = getCallerIdentity(callerPackageName);
+        enforcePermission(MANAGE_DEVICE_POLICY_STORAGE_LIMIT, caller.getPackageName(),
+                caller.getUserId());
+
+        return mDevicePolicyEngine.getPolicySizeForAdmin(
+                EnforcingAdmin.createEnforcingAdmin(admin));
     }
 
     @Override

@@ -79,6 +79,16 @@ public class DataLabels implements AslMarshallable {
         return XmlUtils.listOf(dataLabelsEle);
     }
 
+    /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
+    @Override
+    public List<Element> toHrDomElements(Document doc) {
+        Element dataLabelsEle = doc.createElement(XmlUtils.HR_TAG_DATA_LABELS);
+        maybeAppendHrDataUsages(doc, dataLabelsEle, mDataAccessed, XmlUtils.HR_TAG_DATA_ACCESSED);
+        maybeAppendHrDataUsages(doc, dataLabelsEle, mDataCollected, XmlUtils.HR_TAG_DATA_COLLECTED);
+        maybeAppendHrDataUsages(doc, dataLabelsEle, mDataShared, XmlUtils.HR_TAG_DATA_SHARED);
+        return XmlUtils.listOf(dataLabelsEle);
+    }
+
     private void maybeAppendDataUsages(
             Document doc,
             Element dataLabelsEle,
@@ -99,5 +109,43 @@ public class DataLabels implements AslMarshallable {
             dataUsageEle.appendChild(dataCategoryEle);
         }
         dataLabelsEle.appendChild(dataUsageEle);
+    }
+
+    private void maybeAppendHrDataUsages(
+            Document doc,
+            Element dataLabelsEle,
+            Map<String, DataCategory> dataCategoriesMap,
+            String dataUsageTypeName) {
+        if (dataCategoriesMap.isEmpty()) {
+            return;
+        }
+        for (String dataCategoryName : dataCategoriesMap.keySet()) {
+            DataCategory dataCategory = dataCategoriesMap.get(dataCategoryName);
+            for (String dataTypeName : dataCategory.getDataTypes().keySet()) {
+                DataType dataType = dataCategory.getDataTypes().get(dataTypeName);
+                // XmlUtils.appendChildren(dataLabelsEle, dataType.toHrDomElements(doc));
+                Element hrDataTypeEle = doc.createElement(dataUsageTypeName);
+                hrDataTypeEle.setAttribute(XmlUtils.HR_ATTR_DATA_CATEGORY, dataCategoryName);
+                hrDataTypeEle.setAttribute(XmlUtils.HR_ATTR_DATA_TYPE, dataTypeName);
+                XmlUtils.maybeSetHrBoolAttr(
+                        hrDataTypeEle,
+                        XmlUtils.HR_ATTR_IS_COLLECTION_OPTIONAL,
+                        dataType.getIsCollectionOptional());
+                XmlUtils.maybeSetHrBoolAttr(
+                        hrDataTypeEle,
+                        XmlUtils.HR_ATTR_IS_SHARING_OPTIONAL,
+                        dataType.getIsSharingOptional());
+                XmlUtils.maybeSetHrBoolAttr(
+                        hrDataTypeEle, XmlUtils.HR_ATTR_EPHEMERAL, dataType.getEphemeral());
+                hrDataTypeEle.setAttribute(
+                        XmlUtils.HR_ATTR_PURPOSES,
+                        String.join(
+                                "|",
+                                dataType.getPurposes().stream()
+                                        .map(DataType.Purpose::toString)
+                                        .toList()));
+                dataLabelsEle.appendChild(hrDataTypeEle);
+            }
+        }
     }
 }

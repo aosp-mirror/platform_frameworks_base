@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.credentials.Constants;
+import android.credentials.CredentialManager;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.GetCandidateCredentialsException;
 import android.credentials.GetCandidateCredentialsResponse;
@@ -54,7 +55,7 @@ import java.util.Set;
 public class GetCandidateRequestSession extends RequestSession<GetCredentialRequest,
         IGetCandidateCredentialsCallback, GetCandidateCredentialsResponse>
         implements ProviderSession.ProviderInternalCallback<GetCredentialResponse> {
-    private static final String TAG = "GetCandidateRequestSession";
+    private static final String TAG = CredentialManager.TAG;
 
     private static final String SESSION_ID_KEY = "autofill_session_id";
     private static final String REQUEST_ID_KEY = "autofill_request_id";

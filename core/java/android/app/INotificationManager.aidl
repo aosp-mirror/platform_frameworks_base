@@ -50,8 +50,8 @@ interface INotificationManager
     void cancelAllNotifications(String pkg, int userId);
 
     void clearData(String pkg, int uid, boolean fromApp);
-    void enqueueTextToast(String pkg, IBinder token, CharSequence text, int duration, boolean isUiContext, int displayId, @nullable ITransientNotificationCallback callback);
-    void enqueueToast(String pkg, IBinder token, ITransientNotification callback, int duration, boolean isUiContext, int displayId);
+    boolean enqueueTextToast(String pkg, IBinder token, CharSequence text, int duration, boolean isUiContext, int displayId, @nullable ITransientNotificationCallback callback);
+    boolean enqueueToast(String pkg, IBinder token, ITransientNotification callback, int duration, boolean isUiContext, int displayId);
     void cancelToast(String pkg, IBinder token);
     void finishToken(String pkg, IBinder token);
 

@@ -21,10 +21,10 @@ import android.graphics.Rect
 /** What to capture */
 sealed interface CaptureType {
     /** Capture the entire screen contents. */
-    class FullScreen(val displayId: Int) : CaptureType
+    data class FullScreen(val displayId: Int) : CaptureType
 
     /** Capture the contents of the task only. */
-    class IsolatedTask(
+    data class IsolatedTask(
         val taskId: Int,
         val taskBounds: Rect?,
     ) : CaptureType

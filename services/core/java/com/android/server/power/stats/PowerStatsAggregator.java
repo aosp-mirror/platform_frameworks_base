@@ -32,7 +32,7 @@ public class PowerStatsAggregator {
     private static final long UNINITIALIZED = -1;
     private final AggregatedPowerStatsConfig mAggregatedPowerStatsConfig;
     private final BatteryStatsHistory mHistory;
-    private final SparseArray<AggregatedPowerStatsProcessor> mProcessors = new SparseArray<>();
+    private final SparseArray<PowerStatsProcessor> mProcessors = new SparseArray<>();
     private AggregatedPowerStats mStats;
     private int mCurrentBatteryState = AggregatedPowerStatsConfig.POWER_STATE_BATTERY;
     private int mCurrentScreenState = AggregatedPowerStatsConfig.SCREEN_STATE_OTHER;
@@ -43,7 +43,7 @@ public class PowerStatsAggregator {
         mHistory = history;
         for (AggregatedPowerStatsConfig.PowerComponent powerComponentsConfig :
                 aggregatedPowerStatsConfig.getPowerComponentsAggregatedStatsConfigs()) {
-            AggregatedPowerStatsProcessor processor = powerComponentsConfig.getProcessor();
+            PowerStatsProcessor processor = powerComponentsConfig.getProcessor();
             mProcessors.put(powerComponentsConfig.getPowerComponentId(), processor);
         }
     }

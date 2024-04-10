@@ -225,7 +225,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     protected static final int BIOMETRIC_STATE_STOPPED = 0;
 
     /** Biometric authentication state: Listening. */
-    private static final int BIOMETRIC_STATE_RUNNING = 1;
+    protected static final int BIOMETRIC_STATE_RUNNING = 1;
 
     /**
      * Biometric authentication: Cancelling and waiting for the relevant biometric service to
@@ -1145,7 +1145,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         if (getUserCanSkipBouncer(userId)) {
             mTrustManager.unlockedByBiometricForUser(userId, FACE);
         }
-        updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
         mLogger.d("onFaceAuthenticated");
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
@@ -1155,6 +1154,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         isStrongBiometric);
             }
         }
+
+        // Intentionally update the fingerprint running state after sending the
+        // onBiometricAuthenticated callback to listeners. Updating the fingerprint listening state
+        // can update the state of the device which listeners to the callback may rely on.
+        // For example, the alternate bouncer visibility state or udfps finger down state.
+        updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
 
         // Only authenticate face once when assistant is visible
         mAssistantVisible = false;

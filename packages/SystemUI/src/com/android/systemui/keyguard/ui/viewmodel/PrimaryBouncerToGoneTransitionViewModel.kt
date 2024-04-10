@@ -18,10 +18,9 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor.Companion.TO_GONE_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor
+import com.android.systemui.keyguard.shared.RefactorKeyguardDismissIntent
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.ScrimAlpha
@@ -46,7 +45,6 @@ constructor(
     private val statusBarStateController: SysuiStatusBarStateController,
     private val primaryBouncerInteractor: PrimaryBouncerInteractor,
     keyguardDismissActionInteractor: Lazy<KeyguardDismissActionInteractor>,
-    featureFlags: FeatureFlagsClassic,
     bouncerToGoneFlows: BouncerToGoneFlows,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) {
@@ -82,7 +80,7 @@ constructor(
 
     /** Bouncer container alpha */
     val bouncerAlpha: Flow<Float> =
-        if (featureFlags.isEnabled(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT)) {
+        if (RefactorKeyguardDismissIntent.isEnabled) {
             keyguardDismissActionInteractor
                 .get()
                 .willAnimateDismissActionOnLockscreen
@@ -106,7 +104,7 @@ constructor(
 
     /** Lockscreen alpha */
     val lockscreenAlpha: Flow<Float> =
-        if (featureFlags.isEnabled(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT)) {
+        if (RefactorKeyguardDismissIntent.isEnabled) {
             keyguardDismissActionInteractor
                 .get()
                 .willAnimateDismissActionOnLockscreen

@@ -48,12 +48,34 @@ class ScreenshotViewModel(private val accessibilityManager: AccessibilityManager
         return action.id
     }
 
+    fun setActionVisibility(actionId: Int, visible: Boolean) {
+        val actionList = _actions.value.toMutableList()
+        val index = actionList.indexOfFirst { it.id == actionId }
+        if (index >= 0) {
+            actionList[index] =
+                ActionButtonViewModel(
+                    actionList[index].appearance,
+                    actionId,
+                    visible,
+                    actionList[index].onClicked
+                )
+            _actions.value = actionList
+        } else {
+            Log.w(TAG, "Attempted to update unknown action id $actionId")
+        }
+    }
+
     fun updateActionAppearance(actionId: Int, appearance: ActionButtonAppearance) {
         val actionList = _actions.value.toMutableList()
         val index = actionList.indexOfFirst { it.id == actionId }
         if (index >= 0) {
             actionList[index] =
-                ActionButtonViewModel(appearance, actionId, actionList[index].onClicked)
+                ActionButtonViewModel(
+                    appearance,
+                    actionId,
+                    actionList[index].visible,
+                    actionList[index].onClicked
+                )
             _actions.value = actionList
         } else {
             Log.w(TAG, "Attempted to update unknown action id $actionId")

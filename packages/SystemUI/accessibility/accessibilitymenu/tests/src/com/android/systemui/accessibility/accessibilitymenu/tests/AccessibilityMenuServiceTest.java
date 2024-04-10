@@ -30,8 +30,6 @@ import static com.android.systemui.accessibility.accessibilitymenu.Accessibility
 import static com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService.INTENT_TOGGLE_MENU;
 import static com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService.PACKAGE_NAME;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Instrumentation;
 import android.app.KeyguardManager;
@@ -449,7 +447,10 @@ public class AccessibilityMenuServiceTest {
         closeScreen();
         wakeUpScreen();
 
-        assertThat(isMenuVisible()).isFalse();
+        TestUtils.waitUntil("Menu did not close.",
+                TIMEOUT_UI_CHANGE_S,
+                () -> !isMenuVisible()
+        );
     }
 
     @Test

@@ -16,8 +16,10 @@
 
 package com.android.asllib.util;
 
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.util.ArrayList;
@@ -118,59 +120,37 @@ public class XmlUtils {
     public static final String TRUE_STR = "true";
     public static final String FALSE_STR = "false";
 
-    /** Gets the single top-level {@link Element} having the {@param tagName}. */
-    public static Element getSingleElement(Document doc, String tagName)
-            throws MalformedXmlException {
-        var elements = doc.getElementsByTagName(tagName);
-        return getSingleElement(elements, tagName);
+    /** Gets the top-level children with the tag name.. */
+    public static List<Element> getChildrenByTagName(Node parentEle, String tagName) {
+        var elements = XmlUtils.asElementList(parentEle.getChildNodes());
+        return elements.stream().filter(e -> e.getTagName().equals(tagName)).toList();
     }
 
     /**
      * Gets the single {@link Element} within {@param parentEle} and having the {@param tagName}.
      */
-    public static Element getSingleChildElement(Element parentEle, String tagName)
+    public static Element getSingleChildElement(Node parentEle, String tagName, boolean required)
             throws MalformedXmlException {
-        var elements = parentEle.getElementsByTagName(tagName);
-        return getSingleElement(elements, tagName, true);
-    }
+        String parentTagNameForErrorMsg =
+                (parentEle instanceof Element) ? ((Element) parentEle).getTagName() : "Node";
+        var elements = getChildrenByTagName(parentEle, tagName);
 
-    /**
-     * Gets the single {@link Element} within {@param parentEle} and having the {@param tagName}.
-     */
-    public static Element getSingleChildElement(Element parentEle, String tagName, boolean required)
-            throws MalformedXmlException {
-        var elements = parentEle.getElementsByTagName(tagName);
-        return getSingleElement(elements, tagName, required);
-    }
-
-    /** Gets the single {@link Element} from {@param elements} */
-    public static Element getSingleElement(NodeList elements, String tagName)
-            throws MalformedXmlException {
-        return getSingleElement(elements, tagName, true);
-    }
-
-    /** Gets the single {@link Element} from {@param elements} */
-    public static Element getSingleElement(NodeList elements, String tagName, boolean required)
-            throws MalformedXmlException {
-        if (elements.getLength() > 1) {
+        if (elements.size() > 1) {
             throw new MalformedXmlException(
                     String.format(
-                            "Expected 1 element \"%s\" in NodeList but got %s.",
-                            tagName, elements.getLength()));
-        } else if (elements.getLength() == 0) {
+                            "Expected 1 %s in %s but got %s.",
+                            tagName, parentTagNameForErrorMsg, elements.size()));
+        } else if (elements.isEmpty()) {
             if (required) {
                 throw new MalformedXmlException(
-                        String.format("Found no element \"%s\" in NodeList.", tagName));
+                        String.format(
+                                "Expected 1 %s in %s but got 0.",
+                                tagName, parentTagNameForErrorMsg));
             } else {
                 return null;
             }
         }
-        var elementAsNode = elements.item(0);
-        if (!(elementAsNode instanceof Element)) {
-            throw new MalformedXmlException(
-                    String.format("%s was not a valid XML element.", tagName));
-        }
-        return ((Element) elementAsNode);
+        return elements.get(0);
     }
 
     /** Gets the single {@link Element} within {@param elements}. */
@@ -227,6 +207,13 @@ public class XmlUtils {
         ele.setAttribute(XmlUtils.OD_ATTR_NAME, name);
         ele.setAttribute(XmlUtils.OD_ATTR_VALUE, String.valueOf(b));
         return ele;
+    }
+
+    /** Sets human-readable bool attribute if non-null. */
+    public static void maybeSetHrBoolAttr(Element ele, String attrName, Boolean b) {
+        if (b != null) {
+            ele.setAttribute(attrName, String.valueOf(b));
+        }
     }
 
     /** Create an on-device Long DOM Element with the given attribute name. */
@@ -303,6 +290,57 @@ public class XmlUtils {
         return b;
     }
 
+    /** Gets a Boolean attribute. */
+    public static Boolean getOdBoolEle(Element ele, String nameName, boolean required)
+            throws MalformedXmlException {
+        List<Element> boolEles =
+                XmlUtils.getChildrenByTagName(ele, XmlUtils.OD_TAG_BOOLEAN).stream()
+                        .filter(e -> e.getAttribute(XmlUtils.OD_ATTR_NAME).equals(nameName))
+                        .toList();
+        if (boolEles.size() > 1) {
+            throw new MalformedXmlException(
+                    String.format("Found more than one %s in %s.", nameName, ele.getTagName()));
+        }
+        if (boolEles.isEmpty()) {
+            if (required) {
+                throw new MalformedXmlException(
+                        String.format("Found no %s in %s.", nameName, ele.getTagName()));
+            }
+            return null;
+        }
+        Element boolEle = boolEles.get(0);
+
+        Boolean b = XmlUtils.fromString(boolEle.getAttribute(XmlUtils.OD_ATTR_VALUE));
+        if (b == null && required) {
+            throw new MalformedXmlException(
+                    String.format(
+                            "Boolean %s was required but missing, in %s.",
+                            nameName, ele.getTagName()));
+        }
+        return b;
+    }
+
+    /** Gets a OD Pbundle Element attribute with the specified name. */
+    public static Element getOdPbundleWithName(Element ele, String nameName, boolean required)
+            throws MalformedXmlException {
+        List<Element> eles =
+                XmlUtils.getChildrenByTagName(ele, XmlUtils.OD_TAG_PBUNDLE_AS_MAP).stream()
+                        .filter(e -> e.getAttribute(XmlUtils.OD_ATTR_NAME).equals(nameName))
+                        .toList();
+        if (eles.size() > 1) {
+            throw new MalformedXmlException(
+                    String.format("Found more than one %s in %s.", nameName, ele.getTagName()));
+        }
+        if (eles.isEmpty()) {
+            if (required) {
+                throw new MalformedXmlException(
+                        String.format("Found no %s in %s.", nameName, ele.getTagName()));
+            }
+            return null;
+        }
+        return eles.get(0);
+    }
+
     /** Gets a required String attribute. */
     public static String getStringAttr(Element ele, String attrName) throws MalformedXmlException {
         return getStringAttr(ele, attrName, true);
@@ -323,6 +361,33 @@ public class XmlUtils {
             }
         }
         return s;
+    }
+
+    /** Gets on-device style int array. */
+    public static List<Integer> getOdIntArray(Element ele, String nameName, boolean required)
+            throws MalformedXmlException {
+        List<Element> intArrayEles =
+                XmlUtils.getChildrenByTagName(ele, XmlUtils.OD_TAG_INT_ARRAY).stream()
+                        .filter(e -> e.getAttribute(XmlUtils.OD_ATTR_NAME).equals(nameName))
+                        .toList();
+        if (intArrayEles.size() > 1) {
+            throw new MalformedXmlException(
+                    String.format("Found more than one %s in %s.", nameName, ele.getTagName()));
+        }
+        if (intArrayEles.isEmpty()) {
+            if (required) {
+                throw new MalformedXmlException(
+                        String.format("Found no %s in %s.", nameName, ele.getTagName()));
+            }
+            return List.of();
+        }
+        Element intArrayEle = intArrayEles.get(0);
+        List<Element> itemEles = XmlUtils.getChildrenByTagName(intArrayEle, XmlUtils.OD_TAG_ITEM);
+        List<Integer> ints = new ArrayList<Integer>();
+        for (Element itemEle : itemEles) {
+            ints.add(Integer.parseInt(XmlUtils.getStringAttr(itemEle, XmlUtils.OD_ATTR_VALUE)));
+        }
+        return ints;
     }
 
     /**

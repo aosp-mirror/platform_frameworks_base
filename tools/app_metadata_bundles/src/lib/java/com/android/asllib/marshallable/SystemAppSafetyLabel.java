@@ -46,4 +46,10 @@ public class SystemAppSafetyLabel implements AslMarshallable {
                 XmlUtils.createOdStringEle(doc, XmlUtils.OD_NAME_URL, mUrl));
         return XmlUtils.listOf(systemAppSafetyLabelEle);
     }
+
+    /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
+    @Override
+    public List<Element> toHrDomElements(Document doc) {
+        return List.of();
+    }
 }

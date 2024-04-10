@@ -50,13 +50,24 @@ class FakeKeyguardClockRepository @Inject constructor() : KeyguardClockRepositor
         get() = _previewClock
     override val clockEventController: ClockEventController
         get() = mock()
+    override val shouldForceSmallClock: Boolean
+        get() = _shouldForceSmallClock
+    private var _shouldForceSmallClock: Boolean = false
 
     override fun setClockSize(@ClockSize size: Int) {
         _clockSize.value = size
     }
 
+    fun setSelectedClockSize(size: SettingsClockSize) {
+        selectedClockSize.value = size
+    }
+
     fun setCurrentClock(clockController: ClockController) {
         _currentClock.value = clockController
+    }
+
+    fun setShouldForceSmallClock(shouldForceSmallClock: Boolean) {
+        _shouldForceSmallClock = shouldForceSmallClock
     }
 }
 

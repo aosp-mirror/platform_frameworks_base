@@ -57,4 +57,10 @@ public class DeveloperInfoFactory implements AslMarshallableFactory<DeveloperInf
                 website,
                 appDeveloperRegistryId);
     }
+
+    /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
+    @Override
+    public DeveloperInfo createFromOdElements(List<Element> elements) throws MalformedXmlException {
+        return null;
+    }
 }

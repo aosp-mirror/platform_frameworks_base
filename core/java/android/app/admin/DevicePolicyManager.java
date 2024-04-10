@@ -54,6 +54,7 @@ import static android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY;
 import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
 import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
+import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_INTERNAL_BUG_FIX_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_THEFT_API_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED;
@@ -7055,9 +7056,10 @@ public class DevicePolicyManager {
     public static final int KEYGUARD_DISABLE_FEATURES_NONE = 0;
 
     /**
-     * Disable all keyguard widgets. Has no effect starting from
-     * {@link android.os.Build.VERSION_CODES#LOLLIPOP} since keyguard widget is only supported
-     * on Android versions lower than 5.0.
+     * Disable all keyguard widgets. Has no effect between {@link
+     * android.os.Build.VERSION_CODES#LOLLIPOP} and {@link
+     * android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} (both inclusive), since keyguard widget is
+     * only supported on Android versions lower than 5.0 and versions higher than 14.
      */
     public static final int KEYGUARD_DISABLE_WIDGETS_ALL = 1 << 0;
 
@@ -7156,7 +7158,8 @@ public class DevicePolicyManager {
     public static final int ORG_OWNED_PROFILE_KEYGUARD_FEATURES_PARENT_ONLY =
             DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA
                     | DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS
-                    | DevicePolicyManager.KEYGUARD_DISABLE_SHORTCUTS_ALL;
+                    | DevicePolicyManager.KEYGUARD_DISABLE_SHORTCUTS_ALL
+                    | DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL;
 
     /**
      * Keyguard features that when set on a normal or organization-owned managed profile, have
@@ -8977,6 +8980,10 @@ public class DevicePolicyManager {
      * by applications in the managed profile.
      * </ul>
      * <p>
+     * From version {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}, the profile owner of a
+     * managed profile can also set {@link #KEYGUARD_DISABLE_WIDGETS_ALL} which disables keyguard
+     * widgets for the managed profile.
+     * <p>
      * From version {@link android.os.Build.VERSION_CODES#R} the profile owner of an
      * organization-owned managed profile can set:
      * <ul>
@@ -8984,6 +8991,12 @@ public class DevicePolicyManager {
      * parent profile.
      * <li>{@link #KEYGUARD_DISABLE_SECURE_NOTIFICATIONS} which affects the parent user when called
      * on the parent profile.
+     * </ul>
+     * Starting from version {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} the profile
+     * owner of an organization-owned managed profile can set:
+     * <ul>
+     * <li>{@link #KEYGUARD_DISABLE_WIDGETS_ALL} which affects the parent user when called on the
+     * parent profile.
      * </ul>
      * {@link #KEYGUARD_DISABLE_TRUST_AGENTS}, {@link #KEYGUARD_DISABLE_FINGERPRINT},
      * {@link #KEYGUARD_DISABLE_FACE}, {@link #KEYGUARD_DISABLE_IRIS},
@@ -17552,6 +17565,48 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 return mService.getMaxPolicyStorageLimit(mContext.getPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Force sets the maximum storage size allowed for policies associated with an admin regardless
+     * of the default value set in the system, unlike {@link #setMaxPolicyStorageLimit} which can
+     * only set it to a value higher than the default value set by the system.Setting a limit of -1
+     * effectively removes any storage restrictions.
+     *
+     * @param storageLimit Maximum storage allowed in bytes. Use -1 to disable limits.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(permission.MANAGE_DEVICE_POLICY_STORAGE_LIMIT)
+    @FlaggedApi(FLAG_DEVICE_POLICY_SIZE_TRACKING_INTERNAL_BUG_FIX_ENABLED)
+    public void forceSetMaxPolicyStorageLimit(int storageLimit) {
+        if (mService != null) {
+            try {
+                mService.forceSetMaxPolicyStorageLimit(mContext.getPackageName(), storageLimit);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Retrieves the size of the current policies set by the {@code admin}.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(permission.MANAGE_DEVICE_POLICY_STORAGE_LIMIT)
+    @FlaggedApi(FLAG_DEVICE_POLICY_SIZE_TRACKING_INTERNAL_BUG_FIX_ENABLED)
+    public int getPolicySizeForAdmin(@NonNull EnforcingAdmin admin) {
+        if (mService != null) {
+            try {
+                return mService.getPolicySizeForAdmin(mContext.getPackageName(), admin);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

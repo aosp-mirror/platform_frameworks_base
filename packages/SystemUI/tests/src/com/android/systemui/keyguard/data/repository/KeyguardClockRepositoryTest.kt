@@ -21,7 +21,10 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.ClockEventController
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.SettingsClockSize
+import com.android.systemui.res.R
 import com.android.systemui.shared.clocks.ClockRegistry
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth
@@ -49,6 +52,7 @@ class KeyguardClockRepositoryTest : SysuiTestCase() {
     private lateinit var fakeSettings: FakeSettings
     @Mock private lateinit var clockRegistry: ClockRegistry
     @Mock private lateinit var clockEventController: ClockEventController
+    private val fakeFeatureFlagsClassic = FakeFeatureFlagsClassic()
 
     @Before
     fun setup() {
@@ -63,7 +67,9 @@ class KeyguardClockRepositoryTest : SysuiTestCase() {
                 clockRegistry,
                 clockEventController,
                 dispatcher,
-                scope.backgroundScope
+                scope.backgroundScope,
+                context,
+                fakeFeatureFlagsClassic,
             )
     }
 
@@ -81,5 +87,13 @@ class KeyguardClockRepositoryTest : SysuiTestCase() {
             fakeSettings.putInt(Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK, 1)
             val value = collectLastValue(underTest.selectedClockSize)
             Truth.assertThat(value()).isEqualTo(SettingsClockSize.DYNAMIC)
+        }
+
+    @Test
+    fun testShouldForceSmallClock() =
+        scope.runTest {
+            overrideResource(R.bool.force_small_clock_on_lockscreen, true)
+            fakeFeatureFlagsClassic.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, true)
+            Truth.assertThat(underTest.shouldForceSmallClock).isTrue()
         }
 }

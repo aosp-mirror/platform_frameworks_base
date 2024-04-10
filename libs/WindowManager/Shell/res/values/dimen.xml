@@ -254,6 +254,8 @@
     <dimen name="bubble_bar_expanded_view_caption_dot_size">4dp</dimen>
     <!-- The spacing between the dots for the caption menu in the bubble bar expanded view.. -->
     <dimen name="bubble_bar_expanded_view_caption_dot_spacing">4dp</dimen>
+    <!-- Width of the expanded bubble bar view shown when the bubble is expanded. -->
+    <dimen name="bubble_bar_expanded_view_width">412dp</dimen>
     <!-- Minimum width of the bubble bar manage menu. -->
     <dimen name="bubble_bar_manage_menu_min_width">200dp</dimen>
     <!-- Size of the dismiss icon in the bubble bar manage menu. -->
@@ -423,8 +425,9 @@
     <!-- Height of desktop mode caption for fullscreen tasks. -->
     <dimen name="desktop_mode_fullscreen_decor_caption_height">36dp</dimen>
 
-    <!-- Width of desktop mode caption for fullscreen tasks. -->
-    <dimen name="desktop_mode_fullscreen_decor_caption_width">128dp</dimen>
+    <!-- Width of desktop mode caption for fullscreen tasks.
+        80 dp for handle + 20 dp for room to grow on the sides when hovered. -->
+    <dimen name="desktop_mode_fullscreen_decor_caption_width">100dp</dimen>
 
     <!-- Required empty space to be visible for partially offscreen tasks. -->
     <dimen name="freeform_required_visible_empty_space_in_header">48dp</dimen>

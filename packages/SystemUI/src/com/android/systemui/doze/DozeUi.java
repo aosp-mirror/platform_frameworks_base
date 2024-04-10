@@ -54,8 +54,6 @@ public class DozeUi implements DozeMachine.Part {
     private final DozeParameters mDozeParameters;
     private final DozeLog mDozeLog;
     private final DelayableExecutor mBgExecutor;
-
-    private Runnable mCancelRunnable = null;
     private long mLastTimeTickElapsed = 0;
     // If time tick is scheduled and there's not a pending runnable to cancel:
     private volatile boolean mTimeTickScheduled;

@@ -23,6 +23,7 @@ import com.android.systemui.communal.data.repository.communalPrefsRepository
 import com.android.systemui.communal.data.repository.communalRepository
 import com.android.systemui.communal.data.repository.communalWidgetRepository
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
+import com.android.systemui.dock.fakeDockManager
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
@@ -33,7 +34,7 @@ import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
+import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.settings.userTracker
 import com.android.systemui.smartspace.data.repository.smartspaceRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
@@ -54,11 +55,12 @@ val Kosmos.communalInteractor by Fixture {
         userTracker = userTracker,
         activityStarter = activityStarter,
         userManager = userManager,
+        dockManager = fakeDockManager,
         logBuffer = logcatLogBuffer("CommunalInteractor"),
         tableLogBuffer = mock(),
         communalSettingsInteractor = communalSettingsInteractor,
         sceneInteractor = sceneInteractor,
-        sceneContainerFlags = fakeSceneContainerFlags,
+        sceneContainerFlags = sceneContainerFlags,
     )
 }
 

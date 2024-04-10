@@ -1212,6 +1212,10 @@ public class ConversationLayout extends FrameLayout
                 }
             }
         }
+        if (android.app.Flags.cleanUpSpansAndNewLines() && conversationText != null) {
+            // remove formatting from title.
+            conversationText = conversationText.toString();
+        }
 
         if (conversationIcon == null) {
             conversationIcon = largeIcon;

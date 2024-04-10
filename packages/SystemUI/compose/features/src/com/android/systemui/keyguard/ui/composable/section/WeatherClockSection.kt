@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.composable.section
 
+import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -27,18 +28,14 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.viewinterop.AndroidView
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.padding
-import com.android.systemui.customization.R
-import com.android.systemui.keyguard.ui.composable.blueprint.ClockElementKeys.weatherSmallClockElementKey
+import com.android.systemui.customization.R as customizationR
 import com.android.systemui.keyguard.ui.composable.blueprint.WeatherClockElementKeys
-import com.android.systemui.keyguard.ui.composable.modifier.burnInAware
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
-import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.plugins.clocks.ClockController
 import javax.inject.Inject
@@ -55,12 +52,19 @@ constructor(
         clock: ClockController,
         modifier: Modifier = Modifier,
     ) {
-        WeatherElement(
-            weatherClockElementViewId = R.id.weather_clock_time,
-            clock = clock,
-            elementKey = WeatherClockElementKeys.timeElementKey,
-            modifier = modifier.wrapContentSize(),
-        )
+        Row(
+            modifier =
+                Modifier.padding(
+                    horizontal = dimensionResource(customizationR.dimen.clock_padding_start)
+                )
+        ) {
+            WeatherElement(
+                weatherClockElementViewId = customizationR.id.weather_clock_time,
+                clock = clock,
+                elementKey = WeatherClockElementKeys.timeElementKey,
+                modifier = modifier,
+            )
+        }
     }
 
     @Composable
@@ -69,7 +73,7 @@ constructor(
         modifier: Modifier = Modifier,
     ) {
         WeatherElement(
-            weatherClockElementViewId = R.id.weather_clock_date,
+            weatherClockElementViewId = customizationR.id.weather_clock_date,
             clock = clock,
             elementKey = WeatherClockElementKeys.dateElementKey,
             modifier = modifier,
@@ -82,7 +86,7 @@ constructor(
         modifier: Modifier = Modifier,
     ) {
         WeatherElement(
-            weatherClockElementViewId = R.id.weather_clock_weather_icon,
+            weatherClockElementViewId = customizationR.id.weather_clock_weather_icon,
             clock = clock,
             elementKey = WeatherClockElementKeys.weatherIconElementKey,
             modifier = modifier.wrapContentSize(),
@@ -95,7 +99,7 @@ constructor(
         modifier: Modifier = Modifier,
     ) {
         WeatherElement(
-            weatherClockElementViewId = R.id.weather_clock_alarm_dnd,
+            weatherClockElementViewId = customizationR.id.weather_clock_alarm_dnd,
             clock = clock,
             elementKey = WeatherClockElementKeys.dndAlarmElementKey,
             modifier = modifier.wrapContentSize(),
@@ -108,7 +112,7 @@ constructor(
         modifier: Modifier = Modifier,
     ) {
         WeatherElement(
-            weatherClockElementViewId = R.id.weather_clock_temperature,
+            weatherClockElementViewId = customizationR.id.weather_clock_temperature,
             clock = clock,
             elementKey = WeatherClockElementKeys.temperatureElementKey,
             modifier = modifier.wrapContentSize(),
@@ -126,12 +130,16 @@ constructor(
             content {
                 AndroidView(
                     factory = {
-                        val view =
-                            clock.largeClock.layout.views.first {
-                                it.id == weatherClockElementViewId
-                            }
-                        (view.parent as? ViewGroup)?.removeView(view)
-                        view
+                        try {
+                            val view =
+                                clock.largeClock.layout.views.first {
+                                    it.id == weatherClockElementViewId
+                                }
+                            (view.parent as? ViewGroup)?.removeView(view)
+                            view
+                        } catch (e: NoSuchElementException) {
+                            View(it)
+                        }
                     },
                     update = {},
                     modifier = modifier
@@ -147,45 +155,21 @@ constructor(
         Row(
             modifier =
                 Modifier.height(IntrinsicSize.Max)
-                    .padding(horizontal = dimensionResource(R.dimen.clock_padding_start))
+                    .padding(
+                        horizontal = dimensionResource(customizationR.dimen.clock_padding_start)
+                    )
         ) {
             Date(clock = clock, modifier = Modifier.wrapContentSize())
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier =
+                    Modifier.fillMaxSize()
+                        .padding(
+                            start = dimensionResource(customizationR.dimen.clock_padding_start)
+                        )
+            ) {
                 Weather(clock = clock, modifier = Modifier.align(Alignment.TopStart))
                 Temperature(clock = clock, modifier = Modifier.align(Alignment.BottomEnd))
                 DndAlarmStatus(clock = clock, modifier = Modifier.align(Alignment.TopEnd))
-            }
-        }
-    }
-
-    @Composable
-    fun SceneScope.SmallClock(
-        burnInParams: BurnInParameters,
-        modifier: Modifier = Modifier,
-        clock: ClockController,
-    ) {
-        val localContext = LocalContext.current
-        MovableElement(key = weatherSmallClockElementKey, modifier) {
-            content {
-                AndroidView(
-                    factory = {
-                        val view = clock.smallClock.view
-                        if (view.parent != null) {
-                            (view.parent as? ViewGroup)?.removeView(view)
-                        }
-                        view
-                    },
-                    modifier =
-                        modifier
-                            .height(dimensionResource(R.dimen.small_clock_height))
-                            .padding(start = dimensionResource(R.dimen.clock_padding_start))
-                            .padding(top = { viewModel.getSmallClockTopMargin(localContext) })
-                            .burnInAware(
-                                viewModel = aodBurnInViewModel,
-                                params = burnInParams,
-                            ),
-                    update = {},
-                )
             }
         }
     }

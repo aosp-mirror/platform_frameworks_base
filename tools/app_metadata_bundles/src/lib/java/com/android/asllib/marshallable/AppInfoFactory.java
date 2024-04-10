@@ -72,4 +72,10 @@ public class AppInfoFactory implements AslMarshallableFactory<AppInfo> {
                 email,
                 website);
     }
+
+    /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
+    @Override
+    public AppInfo createFromOdElements(List<Element> elements) throws MalformedXmlException {
+        return null;
+    }
 }

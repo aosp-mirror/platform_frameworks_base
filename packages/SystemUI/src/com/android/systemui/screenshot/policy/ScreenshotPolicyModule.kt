@@ -16,8 +16,13 @@
 
 package com.android.systemui.screenshot.policy
 
+import android.content.ComponentName
+import android.content.Context
+import android.os.Process
 import com.android.systemui.Flags.screenshotPrivateProfile
+import com.android.systemui.SystemUIService
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.screenshot.ImageCapture
 import com.android.systemui.screenshot.RequestProcessor
@@ -60,6 +65,7 @@ interface ScreenshotPolicyModule {
         @Provides
         @SysUISingleton
         fun bindScreenshotRequestProcessor(
+            @Application context: Context,
             @Background background: CoroutineDispatcher,
             imageCapture: ImageCapture,
             policyProvider: Provider<ScreenshotPolicy>,
@@ -68,10 +74,13 @@ interface ScreenshotPolicyModule {
         ): ScreenshotRequestProcessor {
             return if (screenshotPrivateProfile()) {
                 PolicyRequestProcessor(
-                    background,
-                    imageCapture,
-                    displayContentRepoProvider.get(),
-                    policyListProvider.get()
+                    background = background,
+                    capture = imageCapture,
+                    displayTasks = displayContentRepoProvider.get(),
+                    policies = policyListProvider.get(),
+                    defaultOwner = Process.myUserHandle(),
+                    defaultComponent =
+                        ComponentName(context.packageName, SystemUIService::class.java.toString())
                 )
             } else {
                 RequestProcessor(imageCapture, policyProvider.get())

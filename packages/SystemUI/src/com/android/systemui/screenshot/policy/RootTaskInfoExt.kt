@@ -18,12 +18,10 @@ package com.android.systemui.screenshot.policy
 
 import android.app.ActivityTaskManager.RootTaskInfo
 import com.android.systemui.screenshot.data.model.ChildTaskModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.map
 
-internal fun RootTaskInfo.childTasksTopDown(): Flow<ChildTaskModel> {
-    return ((numActivities - 1) downTo 0).asFlow().map { index ->
+/** The child tasks of A RootTaskInfo as [ChildTaskModel] in top-down (z-index ascending) order. */
+internal fun RootTaskInfo.childTasksTopDown(): Sequence<ChildTaskModel> {
+    return ((childTaskIds.size - 1) downTo 0).asSequence().map { index ->
         ChildTaskModel(
             childTaskIds[index],
             childTaskNames[index],
@@ -31,17 +29,4 @@ internal fun RootTaskInfo.childTasksTopDown(): Flow<ChildTaskModel> {
             childTaskUserIds[index]
         )
     }
-}
-
-internal suspend fun RootTaskInfo.firstChildTaskOrNull(
-    filter: suspend (Int) -> Boolean
-): Pair<RootTaskInfo, Int>? {
-    // Child tasks are provided in bottom-up order
-    // Filtering is done top-down, so iterate backwards here.
-    for (index in numActivities - 1 downTo 0) {
-        if (filter(index)) {
-            return (this to index)
-        }
-    }
-    return null
 }

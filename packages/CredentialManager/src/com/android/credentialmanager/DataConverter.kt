@@ -53,8 +53,9 @@ import androidx.credentials.provider.RemoteEntry
 import org.json.JSONObject
 import android.credentials.flags.Flags
 import com.android.credentialmanager.createflow.isBiometricFlow
+import com.android.credentialmanager.createflow.isFlowAutoSelectable
 import com.android.credentialmanager.getflow.TopBrandingContent
-import com.android.credentialmanager.ktx.predetermineAndValidateBiometricFlow
+import com.android.credentialmanager.ktx.retrieveEntryBiometricRequest
 import java.time.Instant
 
 fun getAppLabel(
@@ -431,7 +432,12 @@ class CreateFlowUtils {
                 remoteEntryProvider = remoteEntryProvider,
             )
             val isBiometricFlow = if (activeEntry == null) false else isBiometricFlow(activeEntry,
-                sortedCreateOptionsPairs, requestDisplayInfo)
+                isFlowAutoSelectable(
+                    requestDisplayInfo = requestDisplayInfo,
+                    activeEntry = activeEntry,
+                    sortedCreateOptionsPairs = sortedCreateOptionsPairs
+                )
+            )
             val initialScreenState = toCreateScreenState(
                 createOptionSize = createOptionsPairs.size,
                 remoteEntry = remoteEntry,
@@ -514,7 +520,7 @@ class CreateFlowUtils {
                         it.hasHint("androidx.credentials.provider.createEntry.SLICE_HINT_AUTO_" +
                             "SELECT_ALLOWED")
                     }?.text == "true",
-                    biometricRequest = predetermineAndValidateBiometricFlow(it,
+                    biometricRequest = retrieveEntryBiometricRequest(it,
                         CREATE_ENTRY_PREFIX),
                 )
                 )

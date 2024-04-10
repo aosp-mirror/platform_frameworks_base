@@ -3399,21 +3399,21 @@ public class NotificationManagerService extends SystemService {
         // ============================================================================
 
         @Override
-        public void enqueueTextToast(String pkg, IBinder token, CharSequence text, int duration,
+        public boolean enqueueTextToast(String pkg, IBinder token, CharSequence text, int duration,
                 boolean isUiContext, int displayId,
                 @Nullable ITransientNotificationCallback textCallback) {
-            enqueueToast(pkg, token, text, /* callback= */ null, duration, isUiContext, displayId,
-                    textCallback);
+            return enqueueToast(pkg, token, text, /* callback= */ null, duration, isUiContext,
+                    displayId, textCallback);
         }
 
         @Override
-        public void enqueueToast(String pkg, IBinder token, ITransientNotification callback,
+        public boolean enqueueToast(String pkg, IBinder token, ITransientNotification callback,
                 int duration, boolean isUiContext, int displayId) {
-            enqueueToast(pkg, token, /* text= */ null, callback, duration, isUiContext, displayId,
-                    /* textCallback= */ null);
+            return enqueueToast(pkg, token, /* text= */ null, callback, duration, isUiContext,
+                    displayId, /* textCallback= */ null);
         }
 
-        private void enqueueToast(String pkg, IBinder token, @Nullable CharSequence text,
+        private boolean enqueueToast(String pkg, IBinder token, @Nullable CharSequence text,
                 @Nullable ITransientNotification callback, int duration, boolean isUiContext,
                 int displayId, @Nullable ITransientNotificationCallback textCallback) {
             if (DBG) {
@@ -3425,7 +3425,7 @@ public class NotificationManagerService extends SystemService {
                     || (text != null && callback != null) || token == null) {
                 Slog.e(TAG, "Not enqueuing toast. pkg=" + pkg + " text=" + text + " callback="
                         + " token=" + token);
-                return;
+                return false;
             }
 
             final int callingUid = Binder.getCallingUid();
@@ -3451,7 +3451,7 @@ public class NotificationManagerService extends SystemService {
             boolean isAppRenderedToast = (callback != null);
             if (!checkCanEnqueueToast(pkg, callingUid, displayId, isAppRenderedToast,
                     isSystemToast)) {
-                return;
+                return false;
             }
 
             synchronized (mToastQueue) {
@@ -3477,7 +3477,7 @@ public class NotificationManagerService extends SystemService {
                                 if (count >= MAX_PACKAGE_TOASTS) {
                                     Slog.e(TAG, "Package has already queued " + count
                                             + " toasts. Not showing more. Package=" + pkg);
-                                    return;
+                                    return false;
                                 }
                             }
                         }
@@ -3513,6 +3513,7 @@ public class NotificationManagerService extends SystemService {
                     Binder.restoreCallingIdentity(callingId);
                 }
             }
+            return true;
         }
 
         @GuardedBy("mToastQueue")

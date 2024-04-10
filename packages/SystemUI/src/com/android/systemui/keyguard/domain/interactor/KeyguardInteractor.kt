@@ -210,7 +210,8 @@ constructor(
                 keyguardTransitionInteractor
                     .transitionValue(GONE)
                     .map { it == 1f }
-                    .onStart { emit(false) },
+                    .onStart { emit(false) }
+                    .distinctUntilChanged(),
                 repository.topClippingBounds
             ) { _, isGone, topClippingBounds ->
                 if (!isGone) {

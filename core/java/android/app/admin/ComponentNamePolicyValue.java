@@ -31,7 +31,7 @@ public final class ComponentNamePolicyValue extends PolicyValue<ComponentName> {
 
     public ComponentNamePolicyValue(@NonNull ComponentName value) {
         super(value);
-        if (Flags.devicePolicySizeTrackingInternalEnabled()) {
+        if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
             PolicySizeVerifier.enforceMaxComponentNameLength(value);
         }
     }

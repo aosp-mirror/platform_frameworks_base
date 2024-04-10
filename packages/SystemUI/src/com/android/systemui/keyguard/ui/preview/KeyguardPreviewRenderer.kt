@@ -327,9 +327,12 @@ constructor(
         smartSpaceView = lockscreenSmartspaceController.buildAndConnectDateView(parentView)
 
         val topPadding: Int =
-            smartspaceViewModel.getLargeClockSmartspaceTopPadding(previewInSplitShade())
-        val startPadding: Int = smartspaceViewModel.getSmartspaceStartPadding()
-        val endPadding: Int = smartspaceViewModel.getSmartspaceEndPadding()
+            smartspaceViewModel.getLargeClockSmartspaceTopPadding(
+                previewInSplitShade(),
+                previewContext,
+            )
+        val startPadding: Int = smartspaceViewModel.getSmartspaceStartPadding(previewContext)
+        val endPadding: Int = smartspaceViewModel.getSmartspaceEndPadding(previewContext)
 
         smartSpaceView?.let {
             it.setPaddingRelative(startPadding, topPadding, endPadding, 0)
@@ -387,7 +390,6 @@ constructor(
                     null, // device entry haptics not required for preview mode
                     null, // falsing manager not required for preview mode
                     null, // keyguard view mediator is not required for preview mode
-                    mainDispatcher,
                 )
         }
         rootView.addView(
@@ -411,10 +413,11 @@ constructor(
             setUpClock(previewContext, rootView)
             if (MigrateClocksToBlueprint.isEnabled) {
                 KeyguardPreviewClockViewBinder.bind(
-                    context,
+                    previewContext,
                     keyguardRootView,
                     clockViewModel,
-                    ::updateClockAppearance
+                    clockRegistry,
+                    ::updateClockAppearance,
                 )
             } else {
                 KeyguardPreviewClockViewBinder.bind(
@@ -429,7 +432,7 @@ constructor(
 
         smartSpaceView?.let {
             KeyguardPreviewSmartspaceViewBinder.bind(
-                context,
+                previewContext,
                 it,
                 previewInSplitShade(),
                 smartspaceViewModel
@@ -454,7 +457,6 @@ constructor(
                     alpha = flowOf(1f),
                     falsingManager = falsingManager,
                     vibratorHelper = vibratorHelper,
-                    mainImmediateDispatcher = mainDispatcher,
                 ) { message ->
                     indicationController.showTransientIndication(message)
                 }
@@ -469,7 +471,6 @@ constructor(
                     alpha = flowOf(1f),
                     falsingManager = falsingManager,
                     vibratorHelper = vibratorHelper,
-                    mainImmediateDispatcher = mainDispatcher,
                 ) { message ->
                     indicationController.showTransientIndication(message)
                 }

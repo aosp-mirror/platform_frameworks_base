@@ -16,20 +16,20 @@
 
 package com.android.server.power.stats;
 
+import static org.junit.Assert.assertEquals;
+
 import android.os.Binder;
 import android.os.Process;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.BinderTransactionNameResolver;
 
-import junit.framework.TestCase;
-
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,9 +37,14 @@ import java.util.Collection;
 /**
  * Test cases for android.os.BatteryStats, system server Binder call stats.
  */
-@RunWith(AndroidJUnit4.class)
 @SmallTest
-public class BatteryStatsBinderCallStatsTest extends TestCase {
+@android.platform.test.annotations.DisabledOnRavenwood(blockedBy = BinderCallsStats.class)
+public class BatteryStatsBinderCallStatsTest {
+
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+            .setProvideMainThread(true)
+            .build();
 
     private static final int TRANSACTION_CODE1 = 100;
     private static final int TRANSACTION_CODE2 = 101;
@@ -88,7 +93,6 @@ public class BatteryStatsBinderCallStatsTest extends TestCase {
         assertEquals(8, value.recordedCallCount);
         assertEquals(500, value.recordedCpuTimeMicros);
     }
-
 
     @Test
     public void testProportionalSystemServiceUsage_noStatsForSomeMethods() throws Exception {

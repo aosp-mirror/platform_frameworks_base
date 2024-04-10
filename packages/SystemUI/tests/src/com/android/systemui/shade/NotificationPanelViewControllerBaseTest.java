@@ -398,7 +398,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         mFakeKeyguardRepository = keyguardInteractorDeps.getRepository();
         mKeyguardBottomAreaInteractor = new KeyguardBottomAreaInteractor(mFakeKeyguardRepository);
         mFakeKeyguardClockRepository = new FakeKeyguardClockRepository();
-        mKeyguardClockInteractor = new KeyguardClockInteractor(mFakeKeyguardClockRepository);
+        mKeyguardClockInteractor = mKosmos.getKeyguardClockInteractor();
         mKeyguardInteractor = keyguardInteractorDeps.getKeyguardInteractor();
         mShadeRepository = new FakeShadeRepository();
         mShadeAnimationInteractor = new ShadeAnimationInteractorLegacyImpl(

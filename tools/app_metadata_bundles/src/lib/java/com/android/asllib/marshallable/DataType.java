@@ -160,6 +160,12 @@ public class DataType implements AslMarshallable {
         return XmlUtils.listOf(dataTypeEle);
     }
 
+    /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
+    @Override
+    public List<Element> toHrDomElements(Document doc) {
+        return List.of();
+    }
+
     private static void maybeAddBoolToOdElement(
             Document doc, Element parentEle, Boolean b, String odName) {
         if (b == null) {

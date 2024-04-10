@@ -23,6 +23,7 @@ import android.app.admin.devicePolicyManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
 import android.content.pm.UserInfo
+import android.os.UserManager.USER_TYPE_PROFILE_MANAGED
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.provider.Settings
@@ -59,6 +60,7 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
         kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
         setKeyguardFeaturesDisabled(PRIMARY_USER, KEYGUARD_DISABLE_FEATURES_NONE)
         setKeyguardFeaturesDisabled(SECONDARY_USER, KEYGUARD_DISABLE_FEATURES_NONE)
+        setKeyguardFeaturesDisabled(WORK_PROFILE, KEYGUARD_DISABLE_FEATURES_NONE)
         underTest = kosmos.communalSettingsRepository
     }
 
@@ -133,6 +135,30 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
 
     @EnableFlags(FLAG_COMMUNAL_HUB)
     @Test
+    fun widgetsAllowedForWorkProfile_isFalse_whenDisallowedByDevicePolicy() =
+        testScope.runTest {
+            val widgetsAllowedForWorkProfile by
+                collectLastValue(underTest.getAllowedByDevicePolicy(WORK_PROFILE))
+            assertThat(widgetsAllowedForWorkProfile).isTrue()
+
+            setKeyguardFeaturesDisabled(WORK_PROFILE, KEYGUARD_DISABLE_WIDGETS_ALL)
+            assertThat(widgetsAllowedForWorkProfile).isFalse()
+        }
+
+    @EnableFlags(FLAG_COMMUNAL_HUB)
+    @Test
+    fun hubIsEnabled_whenDisallowedByDevicePolicyForWorkProfile() =
+        testScope.runTest {
+            val enabledStateForPrimaryUser by
+                collectLastValue(underTest.getEnabledState(PRIMARY_USER))
+            assertThat(enabledStateForPrimaryUser?.enabled).isTrue()
+
+            setKeyguardFeaturesDisabled(WORK_PROFILE, KEYGUARD_DISABLE_WIDGETS_ALL)
+            assertThat(enabledStateForPrimaryUser?.enabled).isTrue()
+        }
+
+    @EnableFlags(FLAG_COMMUNAL_HUB)
+    @Test
     fun hubIsDisabledByUserAndDevicePolicy() =
         testScope.runTest {
             val enabledState by collectLastValue(underTest.getEnabledState(PRIMARY_USER))
@@ -189,5 +215,13 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
         val PRIMARY_USER =
             UserInfo(/* id= */ 0, /* name= */ "primary user", /* flags= */ UserInfo.FLAG_MAIN)
         val SECONDARY_USER = UserInfo(/* id= */ 1, /* name= */ "secondary user", /* flags= */ 0)
+        val WORK_PROFILE =
+            UserInfo(
+                10,
+                "work",
+                /* iconPath= */ "",
+                /* flags= */ 0,
+                USER_TYPE_PROFILE_MANAGED,
+            )
     }
 }

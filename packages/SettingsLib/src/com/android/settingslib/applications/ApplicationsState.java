@@ -1993,6 +1993,40 @@ public class ApplicationsState {
     };
 
     /**
+     * Displays a combined list with "downloaded" and "visible in launcher" apps which belong to a
+     * user which is either not in quiet mode or allows showing apps even when in quiet mode.
+     */
+    public static final AppFilter FILTER_DOWNLOADED_AND_LAUNCHER_NOT_QUIET = new AppFilter() {
+        @Override
+        public void init() {
+        }
+
+        @Override
+        public boolean filterApp(@NonNull AppEntry entry) {
+            if (entry.hideInQuietMode) {
+                return false;
+            }
+            if (AppUtils.isInstant(entry.info)) {
+                return false;
+            } else if (hasFlag(entry.info.flags, ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) {
+                return true;
+            } else if (!hasFlag(entry.info.flags, ApplicationInfo.FLAG_SYSTEM)) {
+                return true;
+            } else if (entry.hasLauncherEntry) {
+                return true;
+            } else if (hasFlag(entry.info.flags, ApplicationInfo.FLAG_SYSTEM) && entry.isHomeApp) {
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void refreshAppEntryOnRebuild(@NonNull AppEntry appEntry, boolean hideInQuietMode) {
+            appEntry.hideInQuietMode = hideInQuietMode;
+        }
+    };
+
+    /**
      * Displays a combined list with "downloaded" and "visible in launcher" apps only.
      */
     public static final AppFilter FILTER_DOWNLOADED_AND_LAUNCHER_AND_INSTANT = new AppFilter() {

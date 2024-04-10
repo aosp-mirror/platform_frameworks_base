@@ -318,4 +318,11 @@
         android:label="@string/keyboard_layout_georgian"
         android:keyboardLayout="@raw/keyboard_layout_georgian"
         android:keyboardLocale="ka-Geor" />
+
+    <keyboard-layout
+        android:name="keyboard_layout_thai_kedmanee"
+        android:label="@string/keyboard_layout_thai_kedmanee"
+        android:keyboardLayout="@raw/keyboard_layout_thai_kedmanee"
+        android:keyboardLocale="th-Thai"
+        android:keyboardLayoutType="extended" />
 </keyboard-layouts>

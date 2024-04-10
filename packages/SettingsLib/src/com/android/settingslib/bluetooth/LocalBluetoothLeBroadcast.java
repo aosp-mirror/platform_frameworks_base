@@ -42,6 +42,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -336,7 +337,6 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                                         + ", sourceId = "
                                         + sourceId);
                     }
-                    updateFallbackActiveDeviceIfNeeded();
                 }
 
                 @Override
@@ -466,6 +466,15 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                                 : null,
                         ImmutableList.of(subgroupSettings));
         mServiceBroadcast.startBroadcast(settings);
+    }
+
+    /** Checks if the broadcast is playing. */
+    public boolean isPlaying(int broadcastId) {
+        if (mServiceBroadcast == null) {
+            Log.d(TAG, "check isPlaying failed, the BluetoothLeBroadcast is null.");
+            return false;
+        }
+        return mServiceBroadcast.isPlaying(broadcastId);
     }
 
     private BluetoothLeBroadcastSettings buildBroadcastSettings(
@@ -1025,6 +1034,16 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
 
     /** Update fallback active device if needed. */
     public void updateFallbackActiveDeviceIfNeeded() {
+        if (mServiceBroadcast == null) {
+            Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded due to broadcast profile is null");
+            return;
+        }
+        List<BluetoothLeBroadcastMetadata> sources = mServiceBroadcast.getAllBroadcastMetadata();
+        if (sources.stream()
+                .noneMatch(source -> mServiceBroadcast.isPlaying(source.getBroadcastId()))) {
+            Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded due to no broadcast ongoing");
+            return;
+        }
         if (mServiceBroadcastAssistant == null) {
             Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded due to assistant profile is null");
             return;
@@ -1117,10 +1136,19 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
             Log.d(TAG, "Skip notifyBroadcastStateChange, not triggered by Settings.");
             return;
         }
+        if (isWorkProfile(mContext)) {
+            Log.d(TAG, "Skip notifyBroadcastStateChange, not triggered for work profile.");
+            return;
+        }
         Intent intent = new Intent(ACTION_LE_AUDIO_SHARING_STATE_CHANGE);
         intent.putExtra(EXTRA_LE_AUDIO_SHARING_STATE, state);
         intent.setPackage(mContext.getPackageName());
         Log.e(TAG, "notifyBroadcastStateChange for state = " + state);
         mContext.sendBroadcast(intent);
+    }
+
+    private boolean isWorkProfile(Context context) {
+        UserManager userManager = context.getSystemService(UserManager.class);
+        return userManager != null && userManager.isManagedProfile();
     }
 }

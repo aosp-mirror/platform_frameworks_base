@@ -21,6 +21,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.credentials.ClearCredentialStateException;
 import android.credentials.ClearCredentialStateRequest;
+import android.credentials.CredentialManager;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.IClearCredentialStateCallback;
 import android.credentials.selection.ProviderData;
@@ -41,7 +42,7 @@ import java.util.Set;
 public final class ClearRequestSession extends RequestSession<ClearCredentialStateRequest,
         IClearCredentialStateCallback, Void>
         implements ProviderSession.ProviderInternalCallback<Void> {
-    private static final String TAG = "GetRequestSession";
+    private static final String TAG = CredentialManager.TAG;
 
     public ClearRequestSession(Context context, RequestSession.SessionLifetime sessionCallback,
             Object lock, int userId, int callingUid,

@@ -24,7 +24,6 @@ import com.android.settingslib.volume.shared.model.AudioStreamModel
 import com.android.settingslib.volume.shared.model.RingerMode
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.res.R
-import com.android.systemui.volume.panel.component.volume.domain.interactor.VolumeSliderInteractor
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -44,7 +43,6 @@ constructor(
     @Assisted private val coroutineScope: CoroutineScope,
     private val context: Context,
     private val audioVolumeInteractor: AudioVolumeInteractor,
-    private val volumeSliderInteractor: VolumeSliderInteractor,
 ) : SliderViewModel {
 
     private val audioStream = audioStreamWrapper.audioStream
@@ -105,10 +103,6 @@ constructor(
         return State(
             value = volume.toFloat(),
             valueRange = volumeRange.first.toFloat()..volumeRange.last.toFloat(),
-            valueText =
-                SliderViewModel.formatValue(
-                    volumeSliderInteractor.processVolumeToValue(volume, volumeRange)
-                ),
             icon = getIcon(ringerMode),
             label = labelsByStream[audioStream]?.let(context::getString)
                     ?: error("No label for the stream: $audioStream"),
@@ -157,7 +151,6 @@ constructor(
         override val valueRange: ClosedFloatingPointRange<Float>,
         override val icon: Icon,
         override val label: String,
-        override val valueText: String,
         override val disabledMessage: String?,
         override val isEnabled: Boolean,
         override val a11yStep: Int,

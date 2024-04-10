@@ -589,6 +589,7 @@ package android.app.admin {
     method @RequiresPermission(android.Manifest.permission.FORCE_DEVICE_POLICY_MANAGER_LOGS) public long forceNetworkLogs();
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void forceRemoveActiveAdmin(@NonNull android.content.ComponentName, int);
     method @RequiresPermission(android.Manifest.permission.FORCE_DEVICE_POLICY_MANAGER_LOGS) public long forceSecurityLogs();
+    method @FlaggedApi("android.app.admin.flags.device_policy_size_tracking_internal_bug_fix_enabled") @RequiresPermission("android.permission.MANAGE_DEVICE_POLICY_STORAGE_LIMIT") public void forceSetMaxPolicyStorageLimit(int);
     method public void forceUpdateUserSetupComplete(int);
     method @NonNull public java.util.Set<java.lang.String> getDefaultCrossProfilePackages();
     method @Deprecated public int getDeviceOwnerType(@NonNull android.content.ComponentName);
@@ -599,6 +600,7 @@ package android.app.admin {
     method public long getLastSecurityLogRetrievalTime();
     method public java.util.List<java.lang.String> getOwnerInstalledCaCerts(@NonNull android.os.UserHandle);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS) public java.util.Set<java.lang.String> getPolicyExemptApps();
+    method @FlaggedApi("android.app.admin.flags.device_policy_size_tracking_internal_bug_fix_enabled") @RequiresPermission("android.permission.MANAGE_DEVICE_POLICY_STORAGE_LIMIT") public int getPolicySizeForAdmin(@NonNull android.app.admin.EnforcingAdmin);
     method public boolean isCurrentInputMethodSetByOwner();
     method public boolean isFactoryResetProtectionPolicySupported();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public boolean isNewUserDisclaimerAcknowledged();
@@ -665,6 +667,10 @@ package android.app.admin {
 
   public final class DpcAuthority extends android.app.admin.Authority {
     field @NonNull public static final android.app.admin.DpcAuthority DPC_AUTHORITY;
+  }
+
+  public final class EnforcingAdmin implements android.os.Parcelable {
+    ctor @FlaggedApi("android.app.admin.flags.device_policy_size_tracking_internal_bug_fix_enabled") public EnforcingAdmin(@NonNull String, @NonNull android.app.admin.Authority, @NonNull android.os.UserHandle, @Nullable android.content.ComponentName);
   }
 
   public final class FlagUnion extends android.app.admin.ResolutionMechanism<java.lang.Integer> {

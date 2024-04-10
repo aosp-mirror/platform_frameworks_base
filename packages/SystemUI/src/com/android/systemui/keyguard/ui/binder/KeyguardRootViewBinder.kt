@@ -33,7 +33,6 @@ import android.view.WindowInsets
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
-import com.android.app.tracing.coroutines.launch
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
 import com.android.systemui.Flags.newAodTransition
@@ -73,7 +72,6 @@ import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
 import kotlin.math.min
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
@@ -81,6 +79,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 /** Bind occludingAppDeviceEntryMessageViewModel to run whenever the keyguard view is attached. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -101,7 +100,6 @@ object KeyguardRootViewBinder {
         vibratorHelper: VibratorHelper?,
         falsingManager: FalsingManager?,
         keyguardViewMediator: KeyguardViewMediator?,
-        mainImmediateDispatcher: CoroutineDispatcher,
     ): DisposableHandle {
         val disposables = DisposableHandles()
         val childViews = mutableMapOf<Int, View>()
@@ -125,9 +123,9 @@ object KeyguardRootViewBinder {
             )
 
         disposables +=
-            view.repeatWhenAttached(mainImmediateDispatcher) {
+            view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
-                    launch("$TAG#occludingAppDeviceEntryMessageViewModel.message") {
+                    launch {
                         occludingAppDeviceEntryMessageViewModel.message.collect { biometricMessage
                             ->
                             if (biometricMessage?.message != null) {
@@ -146,7 +144,7 @@ object KeyguardRootViewBinder {
                     if (
                         KeyguardBottomAreaRefactor.isEnabled || DeviceEntryUdfpsRefactor.isEnabled
                     ) {
-                        launch("$TAG#viewModel.alpha") {
+                        launch {
                             viewModel.alpha(viewState).collect { alpha ->
                                 view.alpha = alpha
                                 if (KeyguardBottomAreaRefactor.isEnabled) {
@@ -158,21 +156,21 @@ object KeyguardRootViewBinder {
                     }
 
                     if (MigrateClocksToBlueprint.isEnabled) {
-                        launch("$TAG#viewModel.burnInLayerVisibility") {
+                        launch {
                             viewModel.burnInLayerVisibility.collect { visibility ->
                                 childViews[burnInLayerId]?.visibility = visibility
                                 childViews[aodNotificationIconContainerId]?.visibility = visibility
                             }
                         }
 
-                        launch("$TAG#viewModel.burnInLayerAlpha") {
+                        launch {
                             viewModel.burnInLayerAlpha.collect { alpha ->
                                 childViews[statusViewId]?.alpha = alpha
                                 childViews[aodNotificationIconContainerId]?.alpha = alpha
                             }
                         }
 
-                        launch("$TAG#viewModel.topClippingBounds") {
+                        launch {
                             val clipBounds = Rect()
                             viewModel.topClippingBounds.collect { clipTop ->
                                 if (clipTop == null) {
@@ -189,13 +187,13 @@ object KeyguardRootViewBinder {
                             }
                         }
 
-                        launch("$TAG#viewModel.lockscreenStateAlpha") {
+                        launch {
                             viewModel.lockscreenStateAlpha(viewState).collect { alpha ->
                                 childViews[statusViewId]?.alpha = alpha
                             }
                         }
 
-                        launch("$TAG#viewModel.translationY") {
+                        launch {
                             // When translation happens in burnInLayer, it won't be weather clock
                             // large clock isn't added to burnInLayer due to its scale transition
                             // so we also need to add translation to it here
@@ -207,7 +205,7 @@ object KeyguardRootViewBinder {
                             }
                         }
 
-                        launch("$TAG#viewModel.translationX") {
+                        launch {
                             viewModel.translationX.collect { state ->
                                 val px = state.value ?: return@collect
                                 when {
@@ -234,7 +232,7 @@ object KeyguardRootViewBinder {
                             }
                         }
 
-                        launch("$TAG#viewModel.scale") {
+                        launch {
                             viewModel.scale.collect { scaleViewModel ->
                                 if (scaleViewModel.scaleClockOnly) {
                                     // For clocks except weather clock, we have scale transition
@@ -265,7 +263,7 @@ object KeyguardRootViewBinder {
                         }
 
                         if (NotificationIconContainerRefactor.isEnabled) {
-                            launch("$TAG#viewModel.isNotifIconContainerVisible") {
+                            launch {
                                 val iconsAppearTranslationPx =
                                     configuration
                                         .getDimensionPixelSize(R.dimen.shelf_appear_translation)
@@ -282,7 +280,7 @@ object KeyguardRootViewBinder {
                         }
 
                         interactionJankMonitor?.let { jankMonitor ->
-                            launch("$TAG#viewModel.goneToAodTransition") {
+                            launch {
                                 viewModel.goneToAodTransition.collect {
                                     when (it.transitionState) {
                                         TransitionState.STARTED -> {
@@ -308,7 +306,7 @@ object KeyguardRootViewBinder {
                         }
                     }
 
-                    launch("$TAG#shadeInteractor.isAnyFullyExpanded") {
+                    launch {
                         shadeInteractor.isAnyFullyExpanded.collect { isFullyAnyExpanded ->
                             view.visibility =
                                 if (isFullyAnyExpanded) {
@@ -319,12 +317,10 @@ object KeyguardRootViewBinder {
                         }
                     }
 
-                    launch("$TAG#burnInParams.collect") {
-                        burnInParams.collect { viewModel.updateBurnInParams(it) }
-                    }
+                    launch { burnInParams.collect { viewModel.updateBurnInParams(it) } }
 
                     if (deviceEntryHapticsInteractor != null && vibratorHelper != null) {
-                        launch("$TAG#deviceEntryHapticsInteractor.playSuccessHaptic") {
+                        launch {
                             deviceEntryHapticsInteractor.playSuccessHaptic.collect {
                                 vibratorHelper.performHapticFeedback(
                                     view,
@@ -334,7 +330,7 @@ object KeyguardRootViewBinder {
                             }
                         }
 
-                        launch("$TAG#deviceEntryHapticsInteractor.playErrorHaptic") {
+                        launch {
                             deviceEntryHapticsInteractor.playErrorHaptic.collect {
                                 vibratorHelper.performHapticFeedback(
                                     view,
@@ -589,5 +585,4 @@ object KeyguardRootViewBinder {
 
     private const val ID = "occluding_app_device_entry_unlock_msg"
     private const val AOD_ICONS_APPEAR_DURATION: Long = 200
-    private const val TAG = "KeyguardRootViewBinder"
 }

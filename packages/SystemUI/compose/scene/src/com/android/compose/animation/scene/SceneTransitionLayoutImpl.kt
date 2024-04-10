@@ -204,15 +204,16 @@ internal class SceneTransitionLayoutImpl(
                     }
 
                 // Handle back events.
-                // TODO(b/290184746): Make sure that this works with SystemUI once we use
-                // SceneTransitionLayout in Flexiglass.
-                scene(state.transitionState.currentScene).userActions[Back]?.let { result ->
-                    // TODO(b/290184746): Handle predictive back and use result.distance if
-                    // specified.
-                    BackHandler {
-                        val targetScene = result.toScene
-                        if (state.canChangeScene(targetScene)) {
-                            with(state) { coroutineScope.onChangeScene(targetScene) }
+                val targetSceneForBackOrNull =
+                    scene(state.transitionState.currentScene).userActions[Back]?.toScene
+                BackHandler(
+                    enabled = targetSceneForBackOrNull != null,
+                ) {
+                    targetSceneForBackOrNull?.let { targetSceneForBack ->
+                        // TODO(b/290184746): Handle predictive back and use result.distance if
+                        // specified.
+                        if (state.canChangeScene(targetSceneForBack)) {
+                            with(state) { coroutineScope.onChangeScene(targetSceneForBack) }
                         }
                     }
                 }

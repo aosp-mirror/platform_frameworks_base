@@ -117,7 +117,7 @@ public abstract class AccessibilityTarget implements TargetOperations, OnTargetS
     @Override
     public void onCheckedChanged(boolean isChecked) {
         setShortcutEnabled(isChecked);
-        if (Flags.a11yQsShortcut()) {
+        if (Flags.migrateEnableShortcuts()) {
             final AccessibilityManager am =
                     getContext().getSystemService(AccessibilityManager.class);
             am.enableShortcutsForTargets(

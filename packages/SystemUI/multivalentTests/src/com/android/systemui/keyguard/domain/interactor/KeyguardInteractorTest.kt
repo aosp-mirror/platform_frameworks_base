@@ -38,6 +38,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
+import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
@@ -75,7 +76,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
             repository = repository,
             commandQueue = commandQueue,
             powerInteractor = PowerInteractorFactory.create().powerInteractor,
-            sceneContainerFlags = kosmos.fakeSceneContainerFlags,
+            sceneContainerFlags = kosmos.sceneContainerFlags,
             bouncerRepository = bouncerRepository,
             configurationInteractor = ConfigurationInteractor(FakeConfigurationRepository()),
             shadeRepository = shadeRepository,

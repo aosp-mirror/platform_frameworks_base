@@ -323,7 +323,13 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         overlayParams = updatedOverlayParams
         sensorBounds = updatedOverlayParams.sensorBounds
         getTouchOverlay()?.let {
-            windowManager.updateViewLayout(it, coreLayoutParams.updateDimensions(null))
+            if (addViewRunnable != null) {
+                // Only updateViewLayout if there's no pending view to add to WM.
+                // If there is a pending view, that means the view hasn't been added yet so there's
+                // no need to update any layouts. Instead the correct params will be used when the
+                // view is eventually added.
+                windowManager.updateViewLayout(it, coreLayoutParams.updateDimensions(null))
+            }
         }
     }
 

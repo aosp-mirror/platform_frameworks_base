@@ -16,7 +16,11 @@
 
 package com.android.systemui.communal.ui.viewmodel
 
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToGlanceableHubTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GlanceableHubToDreamingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GlanceableHubToLockscreenTransitionViewModel
@@ -25,6 +29,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.merge
 
 /** View model for transitions related to the communal hub. */
@@ -37,6 +42,8 @@ constructor(
     lockscreenToGlanceableHubTransitionViewModel: LockscreenToGlanceableHubTransitionViewModel,
     dreamToGlanceableHubTransitionViewModel: DreamingToGlanceableHubTransitionViewModel,
     glanceableHubToDreamTransitionViewModel: GlanceableHubToDreamingTransitionViewModel,
+    communalInteractor: CommunalInteractor,
+    keyguardTransitionInteractor: KeyguardTransitionInteractor,
 ) {
     /**
      * Whether UMO location should be on communal. This flow is responsive to transitions so that a
@@ -51,4 +58,14 @@ constructor(
                 glanceableHubToDreamTransitionViewModel.showUmo,
             )
             .distinctUntilChanged()
+
+    /** Whether to show communal by default */
+    val showByDefault: Flow<Boolean> = communalInteractor.showByDefault
+
+    val transitionFromOccludedEnded =
+        keyguardTransitionInteractor.transitionStepsFromState(KeyguardState.OCCLUDED).filter { step
+            ->
+            step.transitionState == TransitionState.FINISHED ||
+                step.transitionState == TransitionState.CANCELED
+        }
 }

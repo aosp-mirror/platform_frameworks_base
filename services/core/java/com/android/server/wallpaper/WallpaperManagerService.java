@@ -2269,6 +2269,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             Point croppedBitmapSize = new Point(
                     (int) (0.5f + wallpaper.cropHint.width() / wallpaper.mSampleSize),
                     (int) (0.5f + wallpaper.cropHint.height() / wallpaper.mSampleSize));
+            if (croppedBitmapSize.equals(0, 0)) {
+                // There is an ImageWallpaper, but there are no crop hints and the bitmap size is
+                // unknown (e.g. the default wallpaper). Return a special "null" value that will be
+                // handled by WallpaperManager, which will fetch the dimensions of the wallpaper.
+                return null;
+            }
             SparseArray<Rect> relativeDefaultCrops =
                     mWallpaperCropper.getDefaultCrops(relativeSuggestedCrops, croppedBitmapSize);
             SparseArray<Rect> adjustedRelativeSuggestedCrops = new SparseArray<>();

@@ -78,13 +78,8 @@ internal fun getCreateEntry(
 */
 internal fun isBiometricFlow(
     activeEntry: ActiveEntry,
-    sortedCreateOptionsPairs: List<Pair<CreateOptionInfo, EnabledProviderInfo>>,
-    requestDisplayInfo: RequestDisplayInfo,
-) = findBiometricFlowEntry(activeEntry, isFlowAutoSelectable(
-    requestDisplayInfo = requestDisplayInfo,
-    activeEntry = activeEntry,
-    sortedCreateOptionsPairs = sortedCreateOptionsPairs
-)) != null
+    isAutoSelectFlow: Boolean,
+) = findBiometricFlowEntry(activeEntry, isAutoSelectFlow) != null
 
 /**
  * This utility presents the correct resource string for the create flows title conditionally.

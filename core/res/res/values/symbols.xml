@@ -404,7 +404,6 @@
   <java-symbol type="bool" name="config_supportAudioSourceUnprocessed" />
   <java-symbol type="bool" name="config_freeformWindowManagement" />
   <java-symbol type="bool" name="config_supportsBubble" />
-  <java-symbol type="bool" name="config_supportsDvrr" />
   <java-symbol type="bool" name="config_supportsMultiWindow" />
   <java-symbol type="bool" name="config_supportsSplitScreenMultiWindow" />
   <java-symbol type="bool" name="config_supportsMultiDisplay" />
@@ -5217,6 +5216,7 @@
   <java-symbol type="bool" name="config_batteryStatsResetOnUnplugHighBatteryLevel" />
   <java-symbol type="bool" name="config_batteryStatsResetOnUnplugAfterSignificantCharge" />
   <java-symbol type="integer" name="config_defaultPowerStatsThrottlePeriodCpu" />
+  <java-symbol type="integer" name="config_defaultPowerStatsThrottlePeriodMobileRadio" />
   <java-symbol type="integer" name="config_powerStatsAggregationPeriod" />
   <java-symbol type="integer" name="config_aggregatedPowerStatsSpanDuration" />
 

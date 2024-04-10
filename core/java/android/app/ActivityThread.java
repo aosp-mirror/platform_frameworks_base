@@ -2608,7 +2608,14 @@ public final class ActivityThread extends ClientTransactionHandler
                     break;
                 case EXECUTE_TRANSACTION:
                     final ClientTransaction transaction = (ClientTransaction) msg.obj;
-                    mTransactionExecutor.execute(transaction);
+                    final ClientTransactionListenerController controller =
+                            ClientTransactionListenerController.getInstance();
+                    controller.onClientTransactionStarted();
+                    try {
+                        mTransactionExecutor.execute(transaction);
+                    } finally {
+                        controller.onClientTransactionFinished();
+                    }
                     if (isSystem()) {
                         // Client transactions inside system process are recycled on the client side
                         // instead of ClientLifecycleManager to avoid being cleared before this
@@ -6745,6 +6752,21 @@ public final class ActivityThread extends ClientTransactionHandler
      * @param activityWindowInfo the window info of the given activity.
      */
     void handleActivityConfigurationChanged(@NonNull ActivityClientRecord r,
+            @NonNull Configuration overrideConfig, int displayId,
+            @NonNull ActivityWindowInfo activityWindowInfo, boolean alwaysReportChange) {
+        final ClientTransactionListenerController controller =
+                ClientTransactionListenerController.getInstance();
+        final Context contextToUpdate = r.activity;
+        controller.onContextConfigurationPreChanged(contextToUpdate);
+        try {
+            handleActivityConfigurationChangedInner(r, overrideConfig, displayId,
+                    activityWindowInfo, alwaysReportChange);
+        } finally {
+            controller.onContextConfigurationPostChanged(contextToUpdate);
+        }
+    }
+
+    private void handleActivityConfigurationChangedInner(@NonNull ActivityClientRecord r,
             @NonNull Configuration overrideConfig, int displayId,
             @NonNull ActivityWindowInfo activityWindowInfo, boolean alwaysReportChange) {
         synchronized (mPendingOverrideConfigs) {

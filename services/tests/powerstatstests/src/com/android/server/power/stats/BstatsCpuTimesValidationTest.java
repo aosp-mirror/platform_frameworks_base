@@ -46,6 +46,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.SystemClock;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.DebugUtils;
@@ -74,9 +75,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @LargeTest
-@RunWith(AndroidJUnit4.class)
-@android.platform.test.annotations.IgnoreUnderRavenwood
+@android.platform.test.annotations.DisabledOnRavenwood(reason = "Integration test")
 public class BstatsCpuTimesValidationTest {
+    @Rule(order = 0)
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private static final String TAG = BstatsCpuTimesValidationTest.class.getSimpleName();
 
     private static final String TEST_PKG = "com.android.coretests.apps.bstatstestapp";
@@ -112,10 +115,15 @@ public class BstatsCpuTimesValidationTest {
     private static boolean sCpuFreqTimesAvailable;
     private static boolean sPerProcStateTimesAvailable;
 
-    @Rule public TestName testName = new TestName();
+    @Rule(order = 1)
+    public TestName testName = new TestName();
 
     @BeforeClass
     public static void setupOnce() throws Exception {
+        if (RavenwoodRule.isOnRavenwood()) {
+            return;
+        }
+
         sContext = InstrumentationRegistry.getContext();
         sUiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         sContext.getPackageManager().setApplicationEnabledSetting(TEST_PKG,
@@ -127,6 +135,10 @@ public class BstatsCpuTimesValidationTest {
 
     @AfterClass
     public static void tearDownOnce() throws Exception {
+        if (RavenwoodRule.isOnRavenwood()) {
+            return;
+        }
+
         executeCmd("cmd deviceidle whitelist -" + TEST_PKG);
         if (sBatteryStatsConstsUpdated) {
             Settings.Global.putString(sContext.getContentResolver(),

@@ -66,6 +66,7 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
+import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.scene.shared.model.FakeSceneDataSource
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
@@ -209,7 +210,6 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
 
         val keyguardKeyboardInteractor = KeyguardKeyboardInteractor(FakeKeyboardRepository())
         featureFlags = FakeFeatureFlags()
-        featureFlags.set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false)
         featureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false)
 
         mSetFlagsRule.enableFlags(
@@ -217,7 +217,8 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         )
         mSetFlagsRule.disableFlags(
             FLAG_SIDEFPS_CONTROLLER_REFACTOR,
-            AConfigFlags.FLAG_KEYGUARD_WM_STATE_REFACTOR
+            AConfigFlags.FLAG_KEYGUARD_WM_STATE_REFACTOR,
+            AConfigFlags.FLAG_REFACTOR_KEYGUARD_DISMISS_INTENT,
         )
 
         keyguardPasswordViewController =
@@ -267,7 +268,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 falsingManager,
                 userSwitcherController,
                 featureFlags,
-                kosmos.fakeSceneContainerFlags,
+                kosmos.sceneContainerFlags,
                 globalSettings,
                 sessionTracker,
                 Optional.of(sideFpsController),

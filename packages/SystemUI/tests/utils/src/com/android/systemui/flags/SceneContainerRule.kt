@@ -18,6 +18,7 @@ package com.android.systemui.flags
 
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import org.junit.Assert
+import org.junit.AssumptionViolatedException
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
@@ -33,10 +34,7 @@ class SceneContainerRule : TestRule {
         return object : Statement() {
             @Throws(Throwable::class)
             override fun evaluate() {
-                val hasAnnotation =
-                    description?.testClass?.getAnnotation(EnableSceneContainer::class.java) !=
-                        null || description?.getAnnotation(EnableSceneContainer::class.java) != null
-                if (hasAnnotation) {
+                if (description.hasAnnotation<EnableSceneContainer>()) {
                     Assert.assertTrue(
                         "SceneContainerFlag.isEnabled is false:" +
                             "\n * Did you forget to add a new aconfig flag dependency in" +
@@ -45,8 +43,31 @@ class SceneContainerRule : TestRule {
                         SceneContainerFlag.isEnabled
                     )
                 }
+                if (
+                    description.hasAnnotation<BrokenWithSceneContainer>() &&
+                        SceneContainerFlag.isEnabled
+                ) {
+                    runCatching { base?.evaluate() }
+                        .onFailure { exception ->
+                            if (exception is AssumptionViolatedException) {
+                                throw AssertionError(
+                                    "This is marked @BrokenWithSceneContainer, but was skipped.",
+                                    exception
+                                )
+                            }
+                            throw AssumptionViolatedException("Test is still broken", exception)
+                        }
+                    throw AssertionError(
+                        "HOORAY! You fixed a test that was marked @BrokenWithSceneContainer. " +
+                            "Remove the obsolete annotation to fix this failure."
+                    )
+                }
                 base?.evaluate()
             }
         }
     }
+
+    inline fun <reified T : Annotation> Description?.hasAnnotation(): Boolean =
+        this?.testClass?.getAnnotation(T::class.java) != null ||
+            this?.getAnnotation(T::class.java) != null
 }

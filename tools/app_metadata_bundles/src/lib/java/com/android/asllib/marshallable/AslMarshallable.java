@@ -23,6 +23,9 @@ import java.util.List;
 
 public interface AslMarshallable {
 
-    /** Creates the on-device DOM element from the AslMarshallable Java Object. */
+    /** Creates the on-device DOM elements from the AslMarshallable Java Object. */
     List<Element> toOdDomElements(Document doc);
+
+    /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
+    List<Element> toHrDomElements(Document doc);
 }

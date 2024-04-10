@@ -174,27 +174,6 @@ class BackNavigationController {
                 }
             }
 
-            // This is needed to bridge the old and new back behavior with recents.  While in
-            // Overview with live tile enabled, the previous app is technically focused but we
-            // add an input consumer to capture all input that would otherwise go to the apps
-            // being controlled by the animation. This means that the window resolved is not
-            // the right window to consume back while in overview, so we need to route it to
-            // launcher and use the legacy behavior of injecting KEYCODE_BACK since the existing
-            // compat callback in VRI only works when the window is focused.
-            // This symptom also happen while shell transition enabled, we can check that by
-            // isTransientLaunch to know whether the focus window is point to live tile.
-            final RecentsAnimationController recentsAnimationController =
-                    wmService.getRecentsAnimationController();
-            final ActivityRecord tmpAR = window.mActivityRecord;
-            if ((tmpAR != null && tmpAR.isActivityTypeHomeOrRecents()
-                    && tmpAR.mTransitionController.isTransientLaunch(tmpAR))
-                    || (recentsAnimationController != null
-                    && recentsAnimationController.shouldApplyInputConsumer(tmpAR))) {
-                ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "Current focused window being animated by "
-                        + "recents. Overriding back callback to recents controller callback.");
-                return null;
-            }
-
             if (!window.isDrawn()) {
                 ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
                         "Focused window didn't have a valid surface drawn.");

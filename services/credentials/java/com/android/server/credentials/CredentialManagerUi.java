@@ -48,7 +48,6 @@ import java.util.UUID;
 
 /** Initiates the Credential Manager UI and receives results. */
 public class CredentialManagerUi {
-    private static final String TAG = "CredentialManagerUi";
     @NonNull
     private final CredentialManagerUiCallback mCallbacks;
     @NonNull

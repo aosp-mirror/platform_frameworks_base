@@ -30,6 +30,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.android.credentialmanager.common.BiometricFlowType
+import com.android.credentialmanager.common.BiometricPromptState
 import com.android.credentialmanager.common.BiometricResult
 import com.android.credentialmanager.common.BiometricState
 import com.android.credentialmanager.model.EntryInfo
@@ -40,7 +42,7 @@ import com.android.credentialmanager.common.ProviderActivityState
 import com.android.credentialmanager.createflow.ActiveEntry
 import com.android.credentialmanager.createflow.CreateCredentialUiState
 import com.android.credentialmanager.createflow.CreateScreenState
-import com.android.credentialmanager.createflow.findBiometricFlowEntry
+import com.android.credentialmanager.createflow.isBiometricFlow
 import com.android.credentialmanager.getflow.GetCredentialUiState
 import com.android.credentialmanager.getflow.GetScreenState
 import com.android.credentialmanager.logging.LifecycleEvent
@@ -303,13 +305,23 @@ class CredentialSelectorViewModel(
     }
 
     fun createFlowOnEntrySelectedFromMoreOptionScreen(activeEntry: ActiveEntry) {
+        val isBiometricFlow = isBiometricFlow(activeEntry = activeEntry, isAutoSelectFlow = false)
+        if (isBiometricFlow) {
+            // This atomically ensures that the only edge case that *restarts* the biometric flow
+            // doesn't risk a configuration change bug on the more options page during create.
+            // Namely, it's atomic in that it happens only on a tap, and it is not possible to
+            // reproduce a tap and a rotation at the same time. However, even if it were, it would
+            // just be an alternate way to jump back into the biometric selection flow after this
+            // reset, and thus, the state machine is maintained.
+            onBiometricPromptStateChange(BiometricPromptState.INACTIVE)
+        }
         uiState = uiState.copy(
             createCredentialUiState = uiState.createCredentialUiState?.copy(
                 currentScreenState =
                 // An autoselect flow never makes it to the more options screen
-                if (findBiometricFlowEntry(activeEntry = activeEntry,
-                        isAutoSelectFlow = false) != null) CreateScreenState.BIOMETRIC_SELECTION
-                else if (
+                if (isBiometricFlow) {
+                    CreateScreenState.BIOMETRIC_SELECTION
+                } else if (
                     uiState.createCredentialUiState?.requestDisplayInfo?.userSetDefaultProviderIds
                         ?.contains(activeEntry.activeProvider.id) ?: true ||
                     !(uiState.createCredentialUiState?.foundCandidateFromUserDefaultProvider
@@ -374,6 +386,46 @@ class CredentialSelectorViewModel(
             onInternalError()
         }
     }
+
+    /**************************************************************************/
+    /*****                     Biometric Flow Callbacks                   *****/
+    /**************************************************************************/
+
+    /**
+     * This allows falling back from the biometric prompt screen to the normal get flow by applying
+     * a reset to all necessary states involved in the fallback.
+     */
+    fun fallbackFromBiometricToNormalFlow(biometricFlowType: BiometricFlowType) {
+        onBiometricPromptStateChange(BiometricPromptState.INACTIVE)
+        when (biometricFlowType) {
+            BiometricFlowType.GET -> getFlowOnBackToPrimarySelectionScreen()
+            BiometricFlowType.CREATE -> createFlowOnUseOnceSelected()
+        }
+    }
+
+    /**
+     * This method can be used to change the [BiometricPromptState] according to the necessity.
+     * For example, if resetting, one might use [BiometricPromptState.INACTIVE], but if the flow
+     * has just launched, to avoid configuration errors, one can use
+     * [BiometricPromptState.PENDING].
+     */
+    fun onBiometricPromptStateChange(biometricPromptState: BiometricPromptState) {
+        uiState = uiState.copy(
+            biometricState = uiState.biometricState.copy(
+                biometricStatus = biometricPromptState
+            )
+        )
+    }
+
+    /**
+     * This returns the present biometric state.
+     */
+    fun getBiometricPromptState(): BiometricPromptState =
+        uiState.biometricState.biometricStatus
+
+    /**************************************************************************/
+    /*****                     Misc. Callbacks/Logs                       *****/
+    /**************************************************************************/
 
     @Composable
     fun logUiEvent(uiEventEnum: UiEventEnum) {

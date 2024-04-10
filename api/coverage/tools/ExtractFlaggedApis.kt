@@ -28,12 +28,10 @@ fun main(args: Array<String>) {
     val builder = FlagApiMap.newBuilder()
     for (pkg in cb.getPackages().packages) {
         val packageName = pkg.qualifiedName()
-        pkg.allClasses()
-            .filter { it.methods().size > 0 }
-            .forEach {
-                extractFlaggedApisFromClass(it, it.methods(), packageName, builder)
-                extractFlaggedApisFromClass(it, it.constructors(), packageName, builder)
-            }
+        pkg.allClasses().forEach {
+            extractFlaggedApisFromClass(it, it.methods(), packageName, builder)
+            extractFlaggedApisFromClass(it, it.constructors(), packageName, builder)
+        }
     }
     val flagApiMap = builder.build()
     FileWriter(args[1]).use { it.write(flagApiMap.toString()) }
@@ -45,6 +43,7 @@ fun extractFlaggedApisFromClass(
     packageName: String,
     builder: FlagApiMap.Builder
 ) {
+    if (methods.isEmpty()) return
     val classFlag =
         classItem.modifiers
             .findAnnotation("android.annotation.FlaggedApi")

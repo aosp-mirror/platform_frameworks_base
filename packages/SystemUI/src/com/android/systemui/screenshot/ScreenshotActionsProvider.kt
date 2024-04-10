@@ -28,7 +28,6 @@ import com.android.systemui.screenshot.ActionIntentCreator.createShareWithSubjec
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_EDIT_TAPPED
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_PREVIEW_TAPPED
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_SHARE_TAPPED
-import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_SMART_ACTION_TAPPED
 import com.android.systemui.screenshot.ui.viewmodel.ActionButtonAppearance
 import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel
 import dagger.assisted.Assisted
@@ -43,7 +42,11 @@ interface ScreenshotActionsProvider {
     fun onScrollChipReady(onClick: Runnable)
     fun setCompletedScreenshot(result: ScreenshotSavedResult)
 
-    fun onAssistContentAvailable(assistContent: AssistContent) {}
+    /**
+     * Provide the AssistContent for the focused task if available, null if the focused task isn't
+     * known or didn't return data.
+     */
+    fun onAssistContent(assistContent: AssistContent?) {}
 
     interface Factory {
         fun create(
@@ -59,7 +62,6 @@ class DefaultScreenshotActionsProvider
 constructor(
     private val context: Context,
     private val viewModel: ScreenshotViewModel,
-    private val smartActionsProvider: SmartActionsProvider,
     private val uiEventLogger: UiEventLogger,
     @Assisted val request: ScreenshotData,
     @Assisted val requestId: String,
@@ -115,37 +117,6 @@ constructor(
                 )
             }
         }
-
-        smartActionsProvider.requestQuickShare(request, requestId) { quickShare ->
-            if (!quickShare.actionIntent.isImmutable) {
-                viewModel.addAction(
-                    ActionButtonAppearance(
-                        quickShare.getIcon().loadDrawable(context),
-                        quickShare.title,
-                        quickShare.title
-                    )
-                ) {
-                    debugLog(LogConfig.DEBUG_ACTIONS) { "Quickshare tapped" }
-                    onDeferrableActionTapped { result ->
-                        uiEventLogger.log(
-                            SCREENSHOT_SMART_ACTION_TAPPED,
-                            0,
-                            request.packageNameString
-                        )
-                        val pendingIntentWithUri =
-                            smartActionsProvider.wrapIntent(
-                                quickShare,
-                                result.uri,
-                                result.subject,
-                                requestId
-                            )
-                        actionExecutor.sendPendingIntent(pendingIntentWithUri)
-                    }
-                }
-            } else {
-                Log.w(TAG, "Received immutable quick share pending intent; ignoring")
-            }
-        }
     }
 
     override fun onScrollChipReady(onClick: Runnable) {
@@ -167,21 +138,6 @@ constructor(
         }
         this.result = result
         pendingAction?.invoke(result)
-        smartActionsProvider.requestSmartActions(request, requestId, result) { smartActions ->
-            smartActions.forEach {
-                smartActions.forEach { action ->
-                    viewModel.addAction(
-                        ActionButtonAppearance(
-                            action.getIcon().loadDrawable(context),
-                            action.title,
-                            action.title,
-                        )
-                    ) {
-                        actionExecutor.sendPendingIntent(action.actionIntent)
-                    }
-                }
-            }
-        }
     }
 
     private fun onDeferrableActionTapped(onResult: (ScreenshotSavedResult) -> Unit) {

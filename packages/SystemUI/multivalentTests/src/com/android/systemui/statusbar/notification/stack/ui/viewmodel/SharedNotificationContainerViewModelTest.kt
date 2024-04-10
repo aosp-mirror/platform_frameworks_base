@@ -31,6 +31,7 @@ import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.flags.BrokenWithSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.andSceneContainer
@@ -50,6 +51,8 @@ import com.android.systemui.keyguard.ui.viewmodel.aodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardRootViewModel
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.mockLargeScreenHeaderHelper
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
@@ -96,10 +99,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : 
 
     val kosmos =
         testKosmos().apply {
-            fakeFeatureFlagsClassic.apply {
-                set(Flags.FULL_SCREEN_USER_SWITCHER, false)
-                set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false)
-            }
+            fakeFeatureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
         }
 
     init {
@@ -128,6 +128,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : 
 
     @Before
     fun setUp() {
+        assertThat(kosmos.sceneContainerFlags.isEnabled()).isEqualTo(SceneContainerFlag.isEnabled)
         overrideResource(R.bool.config_use_split_notification_shade, false)
         movementFlow = MutableStateFlow(BurnInModel())
         whenever(aodBurnInViewModel.movement(any())).thenReturn(movementFlow)
@@ -313,6 +314,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : 
         }
 
     @Test
+    @BrokenWithSceneContainer(bugId = 333132830)
     fun glanceableHubAlpha_lockscreenToHub() =
         testScope.runTest {
             val alpha by collectLastValue(underTest.glanceableHubAlpha)
@@ -462,6 +464,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : 
         }
 
     @Test
+    @BrokenWithSceneContainer(bugId = 333132830)
     fun isOnLockscreenWithoutShade() =
         testScope.runTest {
             val isOnLockscreenWithoutShade by collectLastValue(underTest.isOnLockscreenWithoutShade)
@@ -498,6 +501,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : 
         }
 
     @Test
+    @BrokenWithSceneContainer(bugId = 333132830)
     fun isOnGlanceableHubWithoutShade() =
         testScope.runTest {
             val isOnGlanceableHubWithoutShade by
@@ -679,6 +683,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : 
         }
 
     @Test
+    @BrokenWithSceneContainer(bugId = 333132830)
     fun maxNotificationsOnLockscreen_DoesNotUpdateWhenUserInteracting() =
         testScope.runTest {
             var notificationCount = 10
@@ -715,6 +720,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : 
         }
 
     @Test
+    @BrokenWithSceneContainer(bugId = 333132830)
     fun maxNotificationsOnShade() =
         testScope.runTest {
             val calculateSpace = { space: Float, useExtraShelfSpace: Boolean -> 10 }
@@ -801,6 +807,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : 
         }
 
     @Test
+    @BrokenWithSceneContainer(bugId = 333132830)
     fun alphaOnFullQsExpansion() =
         testScope.runTest {
             val viewState = ViewStateAccessor()
@@ -908,6 +915,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : 
         }
 
     @Test
+    @BrokenWithSceneContainer(bugId = 333132830)
     fun shadeCollapseFadeIn() =
         testScope.runTest {
             val fadeIn by collectValues(underTest.shadeCollapseFadeIn)
