@@ -1630,6 +1630,7 @@ public class TransitionTests extends WindowTestsBase {
         assertTrue(controller.mWaitingTransitions.contains(transition));
         assertTrue(controller.isTransientHide(appTask));
         assertTrue(controller.isTransientVisible(appTask));
+        assertTrue(controller.isTransientLaunch(recent));
     }
 
     @Test
