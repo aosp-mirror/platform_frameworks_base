@@ -2800,12 +2800,11 @@ public final class NfcAdapter {
     @TestApi
     @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
     public void notifyPollingLoop(@NonNull PollingFrame pollingFrame) {
-        Bundle frame = pollingFrame.toBundle();
         try {
             if (sService == null) {
                 attemptDeadServiceRecovery(null);
             }
-            sService.notifyPollingLoop(frame);
+            sService.notifyPollingLoop(pollingFrame);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             // Try one more time
@@ -2814,7 +2813,7 @@ public final class NfcAdapter {
                 return;
             }
             try {
-                sService.notifyPollingLoop(frame);
+                sService.notifyPollingLoop(pollingFrame);
             } catch (RemoteException ee) {
                 Log.e(TAG, "Failed to recover NFC Service.");
             }

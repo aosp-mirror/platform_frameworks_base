@@ -101,47 +101,37 @@ public final class PollingFrame implements Parcelable{
     /**
      * KEY_POLLING_LOOP_TYPE is the Bundle key for the type of
      * polling loop frame in the Bundle included in MSG_POLLING_LOOP.
-     *
-     * @hide
      */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
-    public static final String KEY_POLLING_LOOP_TYPE = "android.nfc.cardemulation.TYPE";
+    private static final String KEY_POLLING_LOOP_TYPE = "android.nfc.cardemulation.TYPE";
 
     /**
      * KEY_POLLING_LOOP_DATA is the Bundle key for the raw data of captured from
      * the polling loop frame in the Bundle included in MSG_POLLING_LOOP.
-     *
-     * @hide
      */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
-    public static final String KEY_POLLING_LOOP_DATA = "android.nfc.cardemulation.DATA";
+    private static final String KEY_POLLING_LOOP_DATA = "android.nfc.cardemulation.DATA";
 
     /**
      * KEY_POLLING_LOOP_GAIN is the Bundle key for the field strength of
      * the polling loop frame in the Bundle included in MSG_POLLING_LOOP.
-     *
-     * @hide
-     */
+    */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
-    public static final String KEY_POLLING_LOOP_GAIN = "android.nfc.cardemulation.GAIN";
+    private static final String KEY_POLLING_LOOP_GAIN = "android.nfc.cardemulation.GAIN";
 
     /**
      * KEY_POLLING_LOOP_TIMESTAMP is the Bundle key for the timestamp of
      * the polling loop frame in the Bundle included in MSG_POLLING_LOOP.
-     *
-     * @hide
-     */
+    */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
-    public static final String KEY_POLLING_LOOP_TIMESTAMP = "android.nfc.cardemulation.TIMESTAMP";
+    private static final String KEY_POLLING_LOOP_TIMESTAMP = "android.nfc.cardemulation.TIMESTAMP";
 
     /**
      * KEY_POLLING_LOOP_TIMESTAMP is the Bundle key for whether this polling frame triggered
      * autoTransact in the Bundle included in MSG_POLLING_LOOP.
-     *
-     * @hide
-     */
+    */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
-    public static final String KEY_POLLING_LOOP_TRIGGERED_AUTOTRANSACT =
+    private static final String KEY_POLLING_LOOP_TRIGGERED_AUTOTRANSACT =
             "android.nfc.cardemulation.TRIGGERED_AUTOTRANSACT";
 
 
@@ -151,7 +141,7 @@ public final class PollingFrame implements Parcelable{
     private final int mGain;
     @DurationMillisLong
     private final long mTimestamp;
-    private final boolean mTriggeredAutoTransact;
+    private boolean mTriggeredAutoTransact;
 
     public static final @NonNull Parcelable.Creator<PollingFrame> CREATOR =
             new Parcelable.Creator<>() {
@@ -166,7 +156,7 @@ public final class PollingFrame implements Parcelable{
                 }
             };
 
-    PollingFrame(Bundle frame) {
+    private PollingFrame(Bundle frame) {
         mType = frame.getInt(KEY_POLLING_LOOP_TYPE);
         byte[] data = frame.getByteArray(KEY_POLLING_LOOP_DATA);
         mData = (data == null) ? new byte[0] : data;
@@ -239,6 +229,13 @@ public final class PollingFrame implements Parcelable{
     }
 
     /**
+     * @hide
+     */
+    public void setTriggeredAutoTransact(boolean triggeredAutoTransact) {
+        mTriggeredAutoTransact = triggeredAutoTransact;
+    }
+
+    /**
      * Returns whether this frame triggered the device to automatically disable observe mode and
      * allow one transaction.
      */
@@ -257,11 +254,9 @@ public final class PollingFrame implements Parcelable{
     }
 
     /**
-     *
-     * @hide
      * @return a Bundle representing this frame
      */
-    public Bundle toBundle() {
+    private Bundle toBundle() {
         Bundle frame = new Bundle();
         frame.putInt(KEY_POLLING_LOOP_TYPE, getType());
         if (getVendorSpecificGain() != -1) {
