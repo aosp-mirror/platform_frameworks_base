@@ -61,7 +61,6 @@ import android.annotation.AnyThread;
 import android.annotation.BinderThread;
 import android.annotation.DrawableRes;
 import android.annotation.DurationMillisLong;
-import android.annotation.EnforcePermission;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -172,7 +171,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
-import com.android.internal.view.IInputMethodManager;
 import com.android.server.AccessibilityManagerInternal;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
@@ -211,8 +209,9 @@ import java.util.function.IntConsumer;
 /**
  * This class provides a system service that manages input methods.
  */
-public final class InputMethodManagerService extends IInputMethodManager.Stub
-        implements Handler.Callback {
+public final class InputMethodManagerService implements IInputMethodManagerImpl.Callback,
+        ZeroJankProxy.Callback, Handler.Callback {
+
     // Virtual device id for test.
     private static final Integer VIRTUAL_STYLUS_ID_FOR_TEST = 999999;
     static final boolean DEBUG = false;
@@ -1236,21 +1235,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void onStart() {
             mService.publishLocalService();
-            IInputMethodManager.Stub service;
+            IInputMethodManagerImpl.Callback service;
             if (Flags.useZeroJankProxy()) {
-                service =
-                        new ZeroJankProxy(
-                                mService.mHandler::post,
-                                mService,
-                                () -> {
-                                    synchronized (ImfLock.class) {
-                                        return mService.isInputShown();
-                                    }
-                                });
+                service = new ZeroJankProxy(mService.mHandler::post, mService);
             } else {
                 service = mService;
             }
-            publishBinderService(Context.INPUT_METHOD_SERVICE, service, false /*allowIsolated*/,
+            publishBinderService(Context.INPUT_METHOD_SERVICE,
+                    IInputMethodManagerImpl.create(service), false /*allowIsolated*/,
                     DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_NORMAL | DUMP_FLAG_PROTO);
         }
 
@@ -1935,10 +1927,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Nullable
-    ClientState getClientState(IInputMethodClient client) {
-        synchronized (ImfLock.class) {
-            return mClientController.getClient(client.asBinder());
-        }
+    @GuardedBy("ImfLock.class")
+    @Override
+    public ClientState getClientStateLocked(IInputMethodClient client) {
+        return mClientController.getClient(client.asBinder());
     }
 
     // TODO(b/314150112): Move this to ClientController.
@@ -2017,7 +2009,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("ImfLock.class")
-    private boolean isInputShown() {
+    @Override
+    public boolean isInputShownLocked() {
         return mVisibilityStateComputer.isInputShown();
     }
 
@@ -3133,11 +3126,16 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     public void startConnectionlessStylusHandwriting(IInputMethodClient client, int userId,
             @Nullable CursorAnchorInfo cursorAnchorInfo, @Nullable String delegatePackageName,
             @Nullable String delegatorPackageName,
-            @NonNull IConnectionlessHandwritingCallback callback) throws RemoteException {
+            @NonNull IConnectionlessHandwritingCallback callback) {
         synchronized (ImfLock.class) {
             if (!mBindingController.supportsConnectionlessStylusHandwriting()) {
                 Slog.w(TAG, "Connectionless stylus handwriting mode unsupported by IME.");
-                callback.onError(CONNECTIONLESS_HANDWRITING_ERROR_UNSUPPORTED);
+                try {
+                    callback.onError(CONNECTIONLESS_HANDWRITING_ERROR_UNSUPPORTED);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to report CONNECTIONLESS_HANDWRITING_ERROR_UNSUPPORTED", e);
+                    e.rethrowAsRuntimeException();
+                }
                 return;
             }
         }
@@ -3148,7 +3146,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             synchronized (ImfLock.class) {
                 if (!mClientController.verifyClientAndPackageMatch(client, delegatorPackageName)) {
                     Slog.w(TAG, "startConnectionlessStylusHandwriting() fail");
-                    callback.onError(CONNECTIONLESS_HANDWRITING_ERROR_OTHER);
+                    try {
+                        callback.onError(CONNECTIONLESS_HANDWRITING_ERROR_OTHER);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Failed to report CONNECTIONLESS_HANDWRITING_ERROR_OTHER", e);
+                        e.rethrowAsRuntimeException();
+                    }
                     throw new IllegalArgumentException("Delegator doesn't match UID");
                 }
             }
@@ -3172,7 +3175,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         if (!startStylusHandwriting(
                 client, false, immsCallback, cursorAnchorInfo, isForDelegation)) {
-            callback.onError(CONNECTIONLESS_HANDWRITING_ERROR_OTHER);
+            try {
+                callback.onError(CONNECTIONLESS_HANDWRITING_ERROR_OTHER);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to report CONNECTIONLESS_HANDWRITING_ERROR_OTHER", e);
+                e.rethrowAsRuntimeException();
+            }
         }
     }
 
@@ -3272,11 +3280,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             @UserIdInt int userId,
             @NonNull String delegatePackageName,
             @NonNull String delegatorPackageName,
-            @InputMethodManager.HandwritingDelegateFlags int flags, IBooleanListener callback)
-            throws RemoteException {
+            @InputMethodManager.HandwritingDelegateFlags int flags, IBooleanListener callback) {
         boolean result = acceptStylusHandwritingDelegation(
                 client, userId, delegatePackageName, delegatorPackageName, flags);
-        callback.onResult(result);
+        try {
+            callback.onResult(result);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to report result=" + result, e);
+            e.rethrowAsRuntimeException();
+        }
     }
 
     @Override
@@ -3367,7 +3379,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     boolean showCurrentInputLocked(IBinder windowToken,
             @NonNull ImeTracker.Token statsToken, @InputMethodManager.ShowFlags int flags,
-            int lastClickToolType, @Nullable ResultReceiver resultReceiver,
+            @MotionEvent.ToolType int lastClickToolType, @Nullable ResultReceiver resultReceiver,
             @SoftInputShowHideReason int reason) {
         if (!mVisibilityStateComputer.onImeShowFlags(statsToken, flags)) {
             return false;
@@ -3413,7 +3425,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 "InputMethodManagerService#hideSoftInput");
         synchronized (ImfLock.class) {
             if (!canInteractWithImeLocked(uid, client, "hideSoftInput", statsToken)) {
-                if (isInputShown()) {
+                if (isInputShownLocked()) {
                     ImeTracker.forLogging().onFailed(
                             statsToken, ImeTracker.PHASE_SERVER_CLIENT_FOCUSED);
                 } else {
@@ -3436,10 +3448,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    @EnforcePermission(Manifest.permission.TEST_INPUT_METHOD)
+    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.TEST_INPUT_METHOD)
     public void hideSoftInputFromServerForTest() {
-        super.hideSoftInputFromServerForTest_enforcePermission();
-
         synchronized (ImfLock.class) {
             hideCurrentInputLocked(mImeBindingState.mFocusedWindow, 0 /* flags */,
                     SoftInputShowHideReason.HIDE_SOFT_INPUT);
@@ -3472,7 +3482,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // TODO(b/246309664): Clean up IMMS#mImeWindowVis
         IInputMethodInvoker curMethod = getCurMethodLocked();
         final boolean shouldHideSoftInput = curMethod != null
-                && (isInputShown() || (mImeWindowVis & InputMethodService.IME_ACTIVE) != 0);
+                && (isInputShownLocked() || (mImeWindowVis & InputMethodService.IME_ACTIVE) != 0);
 
         mVisibilityStateComputer.requestImeVisibility(windowToken, false);
         if (shouldHideSoftInput) {
@@ -3845,13 +3855,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    @EnforcePermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.WRITE_SECURE_SETTINGS)
     @Override
     public void showInputMethodPickerFromSystem(int auxiliarySubtypeMode, int displayId) {
         // Always call subtype picker, because subtype picker is a superset of input method
         // picker.
-        super.showInputMethodPickerFromSystem_enforcePermission();
-
         mHandler.obtainMessage(MSG_SHOW_IM_SUBTYPE_PICKER, auxiliarySubtypeMode, displayId)
                 .sendToTarget();
     }
@@ -3859,10 +3867,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     /**
      * A test API for CTS to make sure that the input method menu is showing.
      */
-    @EnforcePermission(Manifest.permission.TEST_INPUT_METHOD)
+    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.TEST_INPUT_METHOD)
     public boolean isInputMethodPickerShownForTest() {
-        super.isInputMethodPickerShownForTest_enforcePermission();
-
         synchronized (ImfLock.class) {
             return mMenuController.isisInputMethodPickerShownForTestLocked();
         }
@@ -4162,11 +4168,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         });
     }
 
-    @EnforcePermission(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
+    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
     @Override
     public void removeImeSurface() {
-        super.removeImeSurface_enforcePermission();
-
         mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE).sendToTarget();
     }
 
@@ -4275,11 +4279,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      * a stylus deviceId is not already registered on device.
      */
     @BinderThread
-    @EnforcePermission(Manifest.permission.TEST_INPUT_METHOD)
+    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.TEST_INPUT_METHOD)
     @Override
     public void addVirtualStylusIdForTestSession(IInputMethodClient client) {
-        super.addVirtualStylusIdForTestSession_enforcePermission();
-
         int uid = Binder.getCallingUid();
         synchronized (ImfLock.class) {
             if (!canInteractWithImeLocked(uid, client, "addVirtualStylusIdForTestSession",
@@ -4302,12 +4304,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      * @param timeout to set in milliseconds. To reset to default, use a value <= zero.
      */
     @BinderThread
-    @EnforcePermission(Manifest.permission.TEST_INPUT_METHOD)
+    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.TEST_INPUT_METHOD)
     @Override
     public void setStylusWindowIdleTimeoutForTest(
             IInputMethodClient client, @DurationMillisLong long timeout) {
-        super.setStylusWindowIdleTimeoutForTest_enforcePermission();
-
         int uid = Binder.getCallingUid();
         synchronized (ImfLock.class) {
             if (!canInteractWithImeLocked(uid, client, "setStylusWindowIdleTimeoutForTest",
@@ -4403,10 +4403,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    @EnforcePermission(Manifest.permission.CONTROL_UI_TRACING)
+    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.CONTROL_UI_TRACING)
     @Override
     public void startImeTrace() {
-        super.startImeTrace_enforcePermission();
         ImeTracing.getInstance().startTrace(null /* printwriter */);
         synchronized (ImfLock.class) {
             mClientController.forAllClients(c -> c.mClient.setImeTraceEnabled(true /* enabled */));
@@ -4414,11 +4413,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    @EnforcePermission(Manifest.permission.CONTROL_UI_TRACING)
+    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.CONTROL_UI_TRACING)
     @Override
     public void stopImeTrace() {
-        super.stopImeTrace_enforcePermission();
-
         ImeTracing.getInstance().stopTrace(null /* printwriter */);
         synchronized (ImfLock.class) {
             mClientController.forAllClients(c -> c.mClient.setImeTraceEnabled(false /* enabled */));
@@ -4698,7 +4695,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         // implemented so that auxiliary subtypes will be excluded when the soft
                         // keyboard is invisible.
                         synchronized (ImfLock.class) {
-                            showAuxSubtypes = isInputShown();
+                            showAuxSubtypes = isInputShownLocked();
                         }
                         break;
                     case InputMethodManager.SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES:
@@ -5845,7 +5842,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @BinderThread
     @Override
-    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         PriorityDump.dump(mPriorityDumper, fd, pw, args);
@@ -5975,7 +5972,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     public void onShellCommand(@Nullable FileDescriptor in, @Nullable FileDescriptor out,
             @Nullable FileDescriptor err,
             @NonNull String[] args, @Nullable ShellCallback callback,
-            @NonNull ResultReceiver resultReceiver) throws RemoteException {
+            @NonNull ResultReceiver resultReceiver, @NonNull Binder self) {
         final int callingUid = Binder.getCallingUid();
         // Reject any incoming calls from non-shell users, including ones from the system user.
         if (callingUid != Process.ROOT_UID && callingUid != Process.SHELL_UID) {
@@ -5996,7 +5993,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             throw new SecurityException(errorMsg);
         }
         new ShellCommandImpl(this).exec(
-                this, in, out, err, args, callback, resultReceiver);
+                self, in, out, err, args, callback, resultReceiver);
     }
 
     private static final class ShellCommandImpl extends ShellCommand {
