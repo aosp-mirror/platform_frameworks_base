@@ -185,16 +185,16 @@ class ScreenshotPolicyImplTest : SysuiTestCase() {
         }
 }
 
-const val YOUTUBE_HOME_ACTIVITY =
+private const val YOUTUBE_HOME_ACTIVITY =
     "com.google.android.youtube/" + "com.google.android.youtube.app.honeycomb.Shell\$HomeActivity"
 
-const val FILES_HOME_ACTIVITY =
+private const val FILES_HOME_ACTIVITY =
     "com.google.android.apps.nbu.files/" + "com.google.android.apps.nbu.files.home.HomeActivity"
 
-const val YOUTUBE_PIP_ACTIVITY =
+private const val YOUTUBE_PIP_ACTIVITY =
     "com.google.android.youtube/" +
         "com.google.android.apps.youtube.app.watchwhile.WatchWhileActivity"
 
-const val LAUNCHER_ACTIVITY =
+private const val LAUNCHER_ACTIVITY =
     "com.google.android.apps.nexuslauncher/" +
         "com.google.android.apps.nexuslauncher.NexusLauncherActivity"
