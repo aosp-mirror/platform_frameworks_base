@@ -159,7 +159,7 @@ public class PipTransition extends PipTransitionController {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        if (transition == mEnterTransition) {
+        if (transition == mEnterTransition || info.getType() == TRANSIT_PIP) {
             mEnterTransition = null;
             if (mPipScheduler.isInSwipePipToHomeTransition()) {
                 // If this is the second transition as a part of swipe PiP to home cuj,

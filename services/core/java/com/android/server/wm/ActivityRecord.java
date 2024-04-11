@@ -1312,6 +1312,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 pw.println(prefix + "supportsPictureInPicture=" + info.supportsPictureInPicture());
                 pw.println(prefix + "supportsEnterPipOnTaskSwitch: "
                         + supportsEnterPipOnTaskSwitch);
+                pw.println(prefix + "mPauseSchedulePendingForPip=" + mPauseSchedulePendingForPip);
             }
             if (getMaxAspectRatio() != 0) {
                 pw.println(prefix + "maxAspectRatio=" + getMaxAspectRatio());
