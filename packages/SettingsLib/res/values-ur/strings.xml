@@ -106,28 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"فعال، صرف بائیں طرف"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"فعال، صرف دائیں طرف"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"فعال، صرف بائیں اور دائیں طرف"</string>
-    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
-    <skip />
-    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
-    <skip />
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"فعال (صرف میڈیا)، <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"‏فعال (صرف میڈیا)، L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> بیٹری، R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> بیٹری"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"منسلک ہے (آڈیو کے اشتراک کو سپورٹ کرتا ہے)، <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"‏منسلک ہے (آڈیو کے اشتراک کو سپورٹ کرتا ہے)، L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> بیٹری، R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> بیٹری"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"منسلک ہے (آڈیو کے اشتراک کو سپورٹ کرتا ہے)، بائیں <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"منسلک ہے (آڈیو کے اشتراک کو سپورٹ کرتا ہے)، دائیں <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"فعال (صرف میڈیا)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"آڈیو کے اشتراک کو سپورٹ کرتا ہے"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"فعال (صرف میڈیا)، صرف بائیں"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"فعال (صرف میڈیا)، صرف دائیں"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"فعال (صرف میڈیا)، بائیں اور دائیں"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"میڈيا آڈیو"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"فون کالز"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"فائل کی منتقلی"</string>
@@ -487,7 +476,7 @@
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"آپ کے استعمال کی بنیاد پر تقریباً <xliff:g id="TIME">%1$s</xliff:g> تک بیٹری چلے گی"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"تقریباً <xliff:g id="TIME">%1$s</xliff:g> تک بیٹری چلے گی (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"تقریباً <xliff:g id="TIME">%1$s</xliff:g> تک بیٹری چلے گی"</string>
-    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> تک"</string>
+    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"‫<xliff:g id="TIME">%1$s</xliff:g> تک"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"‫<xliff:g id="TIME">%1$s</xliff:g> تک بیٹری ختم ہو سکتی ہے"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g> سے کم باقی ہے"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g> سے کم باقی ہے (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>

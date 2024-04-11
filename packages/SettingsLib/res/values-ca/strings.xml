@@ -106,28 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Actiu, només l\'esquerre"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Actiu, només el dret"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Actiu, esquerre i dret"</string>
-    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
-    <skip />
-    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
-    <skip />
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"Actiu (només contingut multimèdia), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"Actiu (només contingut multimèdia), E: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> de bateria, D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> de bateria"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"Connectat (admet compartició d\'àudio), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"Connectat (admet compartició d\'àudio), E: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> de bateria, D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> de bateria"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"Connectat (admet compartició d\'àudio), esquerre <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"Connectat (admet compartició d\'àudio), dret <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Actiu (només contingut multimèdia)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Admet compartició d\'àudio"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Actiu (només contingut multimèdia), només esquerre"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Actiu (només contingut multimèdia), només dret"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Actiu (només contingut multimèdia), esquerre i dret"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Àudio multimèdia"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Trucades telefòniques"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transferència de fitxers"</string>
@@ -487,7 +476,7 @@
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Hauria de durar aproximadament fins a les <xliff:g id="TIME">%1$s</xliff:g> segons l\'ús que en facis"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"Hauria de durar aproximadament fins a les <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Hauria de durar aproximadament fins a les <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Fins a les <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"fins a les <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"És possible que la bateria s\'esgoti a les <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Temps restant inferior a <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Temps restant inferior a <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -514,7 +503,7 @@
     <string name="disabled" msgid="8017887509554714950">"Desactivat"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Amb permís"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Sense permís"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Instal·lar aplicacions desconegudes"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Instal·la aplicacions desconegudes"</string>
     <string name="home" msgid="973834627243661438">"Pàgina d\'inici de configuració"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>

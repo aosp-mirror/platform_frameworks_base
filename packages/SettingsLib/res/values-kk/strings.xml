@@ -106,32 +106,21 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Тек сол жағы қосулы"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Тек оң жағы қосулы"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Екеуі де қосулы"</string>
-    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
-    <skip />
-    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
-    <skip />
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"Істеп тұр (тек мультимедиа), батарея зарядының деңгейі: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"Істеп тұр (тек мультимедиа). Сол жақ: батарея зарядының деңгейі — <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>. Оң жақ: батарея зарядының деңгейі — <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"Қосылды (аудио бөлісуге мүмкіндік береді), батарея зарядының деңгейі:<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"Қосылды (аудио бөлісуге мүмкіндік береді). Сол жақ: батарея зарядының деңгейі — <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>. Оң жақ: батарея зарядының деңгейі — <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"Қосылды (аудио бөлісуге мүмкіндік береді), сол жақ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"Қосылды (аудио бөлісуге мүмкіндік береді), оң жақ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Істеп тұр (тек мультимедиа)."</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Аудио бөлісуге мүмкіндік береді."</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Тек сол жақ істеп тұр (мультимедиа ғана)."</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Тек оң жақ істеп тұр (мультимедиа ғана)."</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Сол және оң жақ істеп тұр (мультимедиа ғана)."</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Mультимeдиа дыбысы"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Телефон қоңыраулары"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Файл жіберу"</string>
-    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Кіріс құрылғысы"</string>
+    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Енгізу құрылғысы"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Интернетке қосылу"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Контакт пен қоңырау тарихына рұқсат беру"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Ақпарат қоңырау туралы хабарландыру, т.б. үшін қолданылады."</string>
@@ -208,7 +197,7 @@
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Дауыс жиілігі"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Синтезделген сөйлеу үніне әсер етеді"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"Тіл"</string>
-    <string name="tts_lang_use_system" msgid="6312945299804012406">"Жүйелік тілді пайдалану"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"Жүйе тілін пайдалану"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"Тіл таңдалған жоқ"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"Сөйлеу мәтіні үшін тілге тән дауыс орнатады"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"Үлгіні тыңдау"</string>

@@ -106,28 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Iyasebenza, ngakwesokunxele kuphela"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Iyasebenza, ngakwesokudla kuphela"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Iyasebenza, ngakwesokunxele nakwesokudla"</string>
-    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
-    <skip />
-    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
-    <skip />
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"Ibhethri (imidiya kuphela), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> liyasebenza"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"Liyasebenza (imidiya kuphela), L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ibhethri, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ibhethri"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"Ixhunyiwe (isekela ukwabelana ngokuqoshiwe), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> webhethri"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"Ixhunyiwe (isekela ukwabelana ngokuqoshiwe), L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> webhethri, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> webhethri"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"Ixhunyiwe (isekela ukwabelana ngokuqoshiwe), ngakwesokunxele ngu-<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"Ixhunyiwe (isekela ukwabelana ngokuqoshiwe), ngakwesokudla ngu-<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Kuyasebenza (imidiya kuphela)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Isekela ukwabelana ngokuqoshiwe"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Iyasebenza (imidiya kuphela), ngakwesokunxele kuphela"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Kuyasebenza (imidiya kuphela), ngakwesokudla kuphela"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Kuyasebenza (imidiya kuphela), ngakwesokunxele nakwesokudla"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Umsindo wemidiya"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Amakholi efoni"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Dlulisa ifayela"</string>

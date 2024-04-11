@@ -106,28 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktivní, pouze levé"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktivní, pouze pravé"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktivní, levé a pravé"</string>
-    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
-    <skip />
-    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
-    <skip />
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"Aktivní (pouze média), baterie: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"Aktivní (pouze média), baterie: L <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, P <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"Připojeno (podporuje sdílení zvuku), baterie: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"Připojeno (podporuje sdílení zvuku), baterie: L <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, P <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"Připojeno (podporuje sdílení zvuku), levé <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"Připojeno (podporuje sdílení zvuku), pravé <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Aktivní (pouze média)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Podporuje sdílení zvuku"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Aktivní (pouze média), pouze levé"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Aktivní (pouze média), pouze pravé"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Aktivní (pouze média), levé a pravé"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Zvuk médií"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonní hovory"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Přenos souborů"</string>
@@ -709,7 +698,7 @@
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Výchozí"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Zapínání obrazovky"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Povolit zapínání obrazovky"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Povolte aplikaci zapínat obrazovku. Pokud aplikace bude mít toto oprávnění, může kdykoli zapnout obrazovku bez požadavku uživatele."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Aplikaci můžete povolit zapínat obrazovku. Pokud bude mít toto oprávnění, může kdykoli zapnout obrazovku bez požadavku uživatele."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Zastavit vysílání v aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Pokud budete vysílat v aplikaci <xliff:g id="SWITCHAPP">%1$s</xliff:g> nebo změníte výstup, aktuální vysílání se zastaví"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Vysílat v aplikaci <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

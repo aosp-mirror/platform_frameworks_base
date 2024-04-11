@@ -106,28 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"使用中，僅左耳"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"使用中，僅右耳"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"使用中，左右耳"</string>
-    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
-    <skip />
-    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
-    <skip />
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"啟用 (僅限媒體)，<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> 剩餘電力"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"啟用 (僅限媒體)，左側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> 剩餘電力，右側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> 剩餘電力"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"已連線 (支援音訊分享)，<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> 剩餘電力"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"已連線 (支援音訊分享)，左側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> 剩餘電力，右側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> 剩餘電力"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"已連線 (支援音訊分享)，左側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"已連線 (支援音訊分享)，右側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"啟用 (僅限媒體)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"支援音訊分享"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"左側啟用 (僅限媒體)"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"右側啟用 (僅限媒體)"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"左右側同時啟用 (僅限媒體)"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"媒體音訊"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"通話"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"檔案傳輸"</string>
@@ -555,7 +544,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"鬧鐘與提醒"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"允許設定鬧鐘和提醒"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"鬧鐘和提醒"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"允許這個應用程式設定鬧鐘及安排有時效性的動作。這麼做會讓用程式在背景執行，可能比較耗電。\n\n如果關閉這項權限，這個應用程式設定的現有鬧鐘將不會響起，而且應用程式也無法在預定的時間發出活動提醒。"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"允許這個應用程式設定鬧鐘及安排有時效性的動作。之後應用程式可以在背景執行，並可能耗用較多電量。\n\n如果關閉這項權限，這個應用程式設定的現有鬧鐘將不會響起，系統也無法在預定的時間發出活動提醒。"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"時間表, 鬧鐘, 提醒, 時鐘"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"開啟"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"開啟「零打擾」模式"</string>
