@@ -1369,8 +1369,8 @@
     <string name="sim_added_message" msgid="6602906609509958680">"Reinicie o dispositivo para acessar a rede móvel."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Reiniciar"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Ativar serviço móvel"</string>
-    <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"Faça o download do app da operadora para ativar seu novo chip"</string>
-    <string name="install_carrier_app_notification_text_app_name" msgid="4086877327264106484">"Faça o download do app <xliff:g id="APP_NAME">%1$s</xliff:g> para ativar seu novo chip"</string>
+    <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"Baixe o app da operadora para ativar seu novo chip"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="4086877327264106484">"Baixe o app <xliff:g id="APP_NAME">%1$s</xliff:g> para ativar seu novo chip"</string>
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"Fazer download do app"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"Novo chip inserido"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"Toque para configurar"</string>
@@ -1742,7 +1742,7 @@
     <string name="color_inversion_feature_name" msgid="2672824491933264951">"Inversão de cores"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Correção de cor"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modo uma mão"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Escurecer a tela"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Escurecer ainda mais a tela"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Aparelhos auditivos"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Teclas de volume pressionadas. Serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ativado."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Teclas de volume pressionadas. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desativado."</string>
