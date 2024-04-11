@@ -16,8 +16,8 @@
 
 package com.android.systemui.dreams.touch.dagger;
 
-import static com.android.systemui.dreams.touch.dagger.DreamTouchModule.INPUT_SESSION_NAME;
-import static com.android.systemui.dreams.touch.dagger.DreamTouchModule.PILFER_ON_GESTURE_CONSUME;
+import static com.android.systemui.ambient.touch.dagger.AmbientTouchModule.INPUT_SESSION_NAME;
+import static com.android.systemui.ambient.touch.dagger.AmbientTouchModule.PILFER_ON_GESTURE_CONSUME;
 
 import android.view.GestureDetector;
 

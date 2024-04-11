@@ -16,7 +16,7 @@
 
 package com.android.systemui.dreams.touch;
 
-import static com.android.systemui.dreams.touch.dagger.DreamTouchModule.PILFER_ON_GESTURE_CONSUME;
+import static com.android.systemui.ambient.touch.dagger.AmbientTouchModule.PILFER_ON_GESTURE_CONSUME;
 
 import android.os.Looper;
 import android.view.Choreographer;

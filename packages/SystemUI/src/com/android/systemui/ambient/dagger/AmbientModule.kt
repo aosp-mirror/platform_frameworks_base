@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dreams.touch.dagger;
+package com.android.systemui.ambient.dagger
 
-import dagger.Module;
+import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
+import com.android.systemui.dreams.touch.dagger.InputSessionComponent
+import dagger.Module
 
-/**
- * {@link DreamTouchModule} encapsulates dream touch-related components.
- */
-@Module(includes = {
-            BouncerSwipeModule.class,
-            ShadeModule.class,
-        }, subcomponents = {
-            InputSessionComponent.class,
-})
-public interface DreamTouchModule {
-    String INPUT_SESSION_NAME = "INPUT_SESSION_NAME";
-    String PILFER_ON_GESTURE_CONSUME = "PILFER_ON_GESTURE_CONSUME";
+@Module(subcomponents = [AmbientTouchComponent::class, InputSessionComponent::class])
+interface AmbientModule {
+    companion object {
+        const val TOUCH_HANDLERS = "touch_handlers"
+    }
 }

@@ -43,6 +43,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.PhoneWindow;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent;
 import com.android.systemui.complication.Complication;
 import com.android.systemui.complication.dagger.ComplicationComponent;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -93,6 +94,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     private boolean mDestroyed = false;
 
     private final ComplicationComponent mComplicationComponent;
+
+    private final AmbientTouchComponent mAmbientTouchComponent;
 
     private final com.android.systemui.dreams.complication.dagger.ComplicationComponent
             mDreamComplicationComponent;
@@ -162,6 +165,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             com.android.systemui.dreams.complication.dagger.ComplicationComponent.Factory
                     dreamComplicationComponentFactory,
             DreamOverlayComponent.Factory dreamOverlayComponentFactory,
+            AmbientTouchComponent.Factory ambientTouchComponentFactory,
             DreamOverlayStateController stateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             UiEventLogger uiEventLogger,
@@ -194,7 +198,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mDreamComplicationComponent = dreamComplicationComponentFactory.create(
                 mComplicationComponent.getVisibilityController(), touchInsetManager);
         mDreamOverlayComponent = dreamOverlayComponentFactory.create(lifecycleOwner,
-                mComplicationComponent.getComplicationHostViewController(), touchInsetManager,
+                mComplicationComponent.getComplicationHostViewController(), touchInsetManager);
+        mAmbientTouchComponent = ambientTouchComponentFactory.create(lifecycleOwner,
                 new HashSet<>(Arrays.asList(
                         mDreamComplicationComponent.getHideComplicationTouchHandler())));
         mLifecycleOwner = lifecycleOwner;
@@ -239,7 +244,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
         mDreamOverlayContainerViewController =
                 mDreamOverlayComponent.getDreamOverlayContainerViewController();
-        mDreamOverlayTouchMonitor = mDreamOverlayComponent.getDreamOverlayTouchMonitor();
+        mDreamOverlayTouchMonitor = mAmbientTouchComponent.getDreamOverlayTouchMonitor();
         mDreamOverlayTouchMonitor.init();
 
         mStateController.setShouldShowComplications(shouldShowComplications());

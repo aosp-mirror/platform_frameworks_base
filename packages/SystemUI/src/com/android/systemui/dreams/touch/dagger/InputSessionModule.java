@@ -16,7 +16,7 @@
 
 package com.android.systemui.dreams.touch.dagger;
 
-import static com.android.systemui.dreams.touch.dagger.DreamTouchModule.INPUT_SESSION_NAME;
+import static com.android.systemui.ambient.touch.dagger.AmbientTouchModule.INPUT_SESSION_NAME;
 
 import android.view.GestureDetector;
 
