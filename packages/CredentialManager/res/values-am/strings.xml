@@ -42,6 +42,9 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"ወደ <xliff:g id="APP_NAME">%1$s</xliff:g> ለመግባት የይለፍ ቁልፍ ይፈጠር?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"ወደ <xliff:g id="APP_NAME">%1$s</xliff:g> ለመግባት የይለፍ ቃል ይቀመጥ?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"የ<xliff:g id="APP_NAME">%1$s</xliff:g> የመግቢያ መረጃ ይቀመጥ?"</string>
+    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"ለ<xliff:g id="APP_NAME">%1$s</xliff:g> የይለፍ ቁልፍ ለመፍጠር የማያ ገጽ መቆለፊያዎን መጠቀም ይፈልጋሉ?"</string>
+    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"ለ<xliff:g id="APP_NAME">%1$s</xliff:g> የይለፍ ቃል ለመፍጠር የማያ ገጽ መቆለፊያዎን መጠቀም ይፈልጋሉ?"</string>
+    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"የ<xliff:g id="APP_NAME">%1$s</xliff:g> መግቢያ መረጃን ለማስቀመጥ የማያ ገጽ መቆለፊያዎን መጠቀም ይፈልጋሉ?"</string>
     <string name="passkey" msgid="632353688396759522">"የይለፍ ቁልፍ"</string>
     <string name="password" msgid="6738570945182936667">"የይለፍ ቃል"</string>
     <string name="passkeys" msgid="5733880786866559847">"የይለፍ ቁልፎች"</string>

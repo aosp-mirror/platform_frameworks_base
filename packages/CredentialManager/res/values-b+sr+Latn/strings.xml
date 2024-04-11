@@ -42,6 +42,9 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Želite da napravite pristupni ključ da biste se prijavili u <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"Želite da sačuvate lozinku da biste se prijavili u <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Želite da sačuvate podatke za prijavljivanje za: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"Želite da koristite otključavanje ekrana da biste napravili pristupni ključ za: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"Želite da koristite otključavanje ekrana da biste napravili lozinku za: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"Želite da koristite otključavanje ekrana da biste sačuvali podatke za prijavljivanje za: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"pristupni kôd"</string>
     <string name="password" msgid="6738570945182936667">"lozinka"</string>
     <string name="passkeys" msgid="5733880786866559847">"pristupni kodovi"</string>

@@ -42,6 +42,9 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"<xliff:g id="APP_NAME">%1$s</xliff:g>‌కు సైన్ ఇన్ చేయడానికి పాస్-కీని క్రియేట్ చేయాలా?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"<xliff:g id="APP_NAME">%1$s</xliff:g>‌కు సైన్ ఇన్ చేయడానికి పాస్‌వర్డ్‌ను సేవ్ చేయాలా?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"<xliff:g id="APP_NAME">%1$s</xliff:g> కోసం సైన్ ఇన్ సమాచారాన్ని సేవ్ చేయాలా?"</string>
+    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"మీ స్క్రీన్ లాక్‌ను ఉపయోగించి <xliff:g id="APP_NAME">%1$s</xliff:g>‌కు పాస్-కీని క్రియేట్ చేయాలా?"</string>
+    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"మీ స్క్రీన్ లాక్‌ను ఉపయోగించి <xliff:g id="APP_NAME">%1$s</xliff:g>‌కు పాస్‌వర్డ్‌ను క్రియేట్ చేయాలా?"</string>
+    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"మీ స్క్రీన్ లాక్‌ను ఉపయోగించి <xliff:g id="APP_NAME">%1$s</xliff:g>‌కు సంబంధించిన సైన్-ఇన్ సమాచారాన్ని సేవ్ చేయాలా?"</string>
     <string name="passkey" msgid="632353688396759522">"పాస్-కీ"</string>
     <string name="password" msgid="6738570945182936667">"పాస్‌వర్డ్"</string>
     <string name="passkeys" msgid="5733880786866559847">"పాస్-కీలు"</string>

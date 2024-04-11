@@ -22,8 +22,8 @@
     <string name="string_continue" msgid="1346732695941131882">"जारी राख्नुहोस्"</string>
     <string name="string_more_options" msgid="2763852250269945472">"अर्को तरिकाले सेभ गर्नुहोस्"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"थप जान्नुहोस्"</string>
-    <string name="content_description_show_password" msgid="3283502010388521607">"पासवर्ड देखाइयोस्"</string>
-    <string name="content_description_hide_password" msgid="6841375971631767996">"पासवर्ड लुकाइयोस्"</string>
+    <string name="content_description_show_password" msgid="3283502010388521607">"पासवर्ड देखाउनुहोस्"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"पासवर्ड लुकाउनुहोस्"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"पासकीका सहायताले सुरक्षित रहनुहोस्"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"तपाईंले पासकी बनाउनुभयो भने तपाईंले जटिल पासवर्ड बनाउनु वा तिनलाई याद गरिराख्नु पर्दैन"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"पासकी भनेको तपाईंले आफ्नो फिंगरप्रिन्ट, अनुहार वा स्क्रिन लक प्रयोग गरेर बनाएको इन्क्रिप्ट गरिएको डिजिटल की हो"</string>
@@ -42,6 +42,9 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्न पासकी बनाउने हो?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्न पासवर्ड सेभ गर्ने हो?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन गर्न प्रयोग गरिने जानकारी सेभ गर्ने हो?"</string>
+    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा पासकी बनाउन आफ्नो स्क्रिन लक प्रयोग गर्ने हो?"</string>
+    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा पासवर्ड राख्न आफ्नो स्क्रिन लक प्रयोग गर्ने हो?"</string>
+    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इनसम्बन्धी जानकारी सेभ गर्न आफ्नो स्क्रिन लक प्रयोग गर्ने हो?"</string>
     <string name="passkey" msgid="632353688396759522">"पासकी"</string>
     <string name="password" msgid="6738570945182936667">"पासवर्ड"</string>
     <string name="passkeys" msgid="5733880786866559847">"पासकीहरू"</string>

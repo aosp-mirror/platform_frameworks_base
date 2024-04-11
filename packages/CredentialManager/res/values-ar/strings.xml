@@ -42,6 +42,9 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"هل تريد إنشاء مفتاح مرور لتسجيل الدخول إلى \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"؟"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"هل تريد حفظ كلمة المرور لتسجيل الدخول إلى \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"؟"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"هل تريد حفظ معلومات تسجيل الدخول إلى \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"؟"</string>
+    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"هل تريد استخدام قفل الشاشة لإنشاء مفتاح مرور لتطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"؟"</string>
+    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"هل تريد استخدام قفل الشاشة لإنشاء كلمة مرور لتطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"؟"</string>
+    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"هل تريد استخدام قفل الشاشة لحفظ معلومات تسجيل الدخول لتطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"؟"</string>
     <string name="passkey" msgid="632353688396759522">"مفتاح المرور"</string>
     <string name="password" msgid="6738570945182936667">"كلمة المرور"</string>
     <string name="passkeys" msgid="5733880786866559847">"مفاتيح المرور"</string>

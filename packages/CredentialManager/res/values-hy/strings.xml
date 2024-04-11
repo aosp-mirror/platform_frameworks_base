@@ -27,7 +27,7 @@
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Անցաբառերի հետ ավելի ապահով է"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Անցաբառերի շնորհիվ դուք բարդ գաղտնաբառեր ստեղծելու կամ հիշելու անհրաժեշտություն չեք ունենա"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Անցաբառերը գաղտնագրված թվային բանալիներ են, որոնք ստեղծվում են մատնահետքի, դեմքով ապակողպման կամ էկրանի կողպման օգտագործմամբ"</string>
-    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Դուք կարող եք մուտք գործել այլ սարքերում, քանի որ անցաբառերը պահվում են գաղտնաբառերի կառավարիչում"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Դուք կարող եք մուտք գործել այլ սարքերում, քանի որ մուտքի բանալիները պահվում են գաղտնաբառերի կառավարիչում"</string>
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"Ավելին՝ անցաբառերի մասին"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Գաղտնաբառեր չպահանջող տեխնոլոգիա"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"Անցաբառերը ձեզ թույլ են տալիս մուտք գործել առանց գաղտնաբառերի։ Ձեզ պարզապես հարկավոր է օգտագործել ձեր մատնահետքը, դիմաճանաչումը, PIN կոդը կամ նախշը՝ ձեր ինքնությունը հաստատելու և անցաբառ ստեղծելու համար։"</string>
@@ -42,6 +42,12 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Ստեղծե՞լ անցաբառ՝ <xliff:g id="APP_NAME">%1$s</xliff:g> հավելված մուտք գործելու համար"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"Պահե՞լ գաղտնաբառը՝ <xliff:g id="APP_NAME">%1$s</xliff:g> հավելված մուտք գործելու համար"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Պահե՞լ «<xliff:g id="APP_NAME">%1$s</xliff:g>» հավելվածի մուտքի տվյալները"</string>
+    <!-- no translation found for choose_create_single_tap_passkey_title (3872793514041774218) -->
+    <skip />
+    <!-- no translation found for choose_create_single_tap_password_title (5231871886818921622) -->
+    <skip />
+    <!-- no translation found for choose_create_single_tap_sign_in_title (256498714574099587) -->
+    <skip />
     <string name="passkey" msgid="632353688396759522">"անցաբառ"</string>
     <string name="password" msgid="6738570945182936667">"գաղտնաբառ"</string>
     <string name="passkeys" msgid="5733880786866559847">"անցաբառեր"</string>
@@ -53,7 +59,7 @@
     <string name="save_password_on_other_device_title" msgid="5829084591948321207">"Պահե՞լ գաղտնաբառն այլ սարքում"</string>
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Պահե՞լ մուտքի տվյալներն այլ սարքում"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Միշտ մուտք գործե՞լ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> հավելվածի միջոցով"</string>
-    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Այս գաղտնաբառերի կառավարչում <xliff:g id="USERNAME">%1$s</xliff:g> օգտատերը կկարողանա պահել իր գաղտնաբառերն ու անցաբառերը, որպեսզի հետագայում ավելի արագ մուտք գործի հաշիվ"</string>
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Այս գաղտնաբառերի կառավարչում <xliff:g id="USERNAME">%1$s</xliff:g> օգտատերը կկարողանա պահել իր գաղտնաբառերն ու մուտքի բանալիները, որպեսզի հետագայում ավելի արագ մուտք գործի հաշիվ"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Նշել որպես կանխադրված"</string>
     <string name="settings" msgid="6536394145760913145">"Կարգավորումներ"</string>
     <string name="use_once" msgid="9027366575315399714">"Օգտագործել մեկ անգամ"</string>

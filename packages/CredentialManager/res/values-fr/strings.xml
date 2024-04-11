@@ -42,6 +42,12 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Créer une clé d\'accès pour se connecter à <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"Enregistrer un mot de passe pour se connecter à <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Enregistrer les informations de connexion pour <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
+    <!-- no translation found for choose_create_single_tap_passkey_title (3872793514041774218) -->
+    <skip />
+    <!-- no translation found for choose_create_single_tap_password_title (5231871886818921622) -->
+    <skip />
+    <!-- no translation found for choose_create_single_tap_sign_in_title (256498714574099587) -->
+    <skip />
     <string name="passkey" msgid="632353688396759522">"clé d\'accès"</string>
     <string name="password" msgid="6738570945182936667">"mot de passe"</string>
     <string name="passkeys" msgid="5733880786866559847">"clés d\'accès"</string>
@@ -75,7 +81,7 @@
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Déverrouiller les options de connexion pour <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Choisir une clé d\'accès enregistrée pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Choisir un mot de passe enregistré pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Choisir des informations de connexion enregistrées pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Choisissez les identifiants à utiliser pour la connexion à <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Choisir des infos de connexion pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Choisir une option pour <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Utiliser ces informations dans <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>

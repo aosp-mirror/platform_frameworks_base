@@ -42,6 +42,12 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Да се создаде криптографски клуч за најавување на <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"Да се зачува лозинката за најавување на <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Да се зачуваат податоците за најавување за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for choose_create_single_tap_passkey_title (3872793514041774218) -->
+    <skip />
+    <!-- no translation found for choose_create_single_tap_password_title (5231871886818921622) -->
+    <skip />
+    <!-- no translation found for choose_create_single_tap_sign_in_title (256498714574099587) -->
+    <skip />
     <string name="passkey" msgid="632353688396759522">"криптографски клуч"</string>
     <string name="password" msgid="6738570945182936667">"лозинка"</string>
     <string name="passkeys" msgid="5733880786866559847">"криптографски клучеви"</string>

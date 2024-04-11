@@ -42,6 +42,9 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосуна кирүү үчүн киргизүүчү ачкычты түзөсүзбү?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосуна кирүү үчүн сырсөздү сактайсызбы?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"<xliff:g id="APP_NAME">%1$s</xliff:g> үчүн кирүү маалыматы сакталсынбы?"</string>
+    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу үчүн киргизүүчү ачкыч катары экрандын кулпусун колдоносузбу?"</string>
+    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу үчүн сырсөз катары экрандын кулпусун колдоносузбу?"</string>
+    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу үчүн кирүү маалыматы катары экрандын кулпусун колдоносузбу?"</string>
     <string name="passkey" msgid="632353688396759522">"киргизүүчү ачкыч"</string>
     <string name="password" msgid="6738570945182936667">"сырсөз"</string>
     <string name="passkeys" msgid="5733880786866559847">"киргизүүчү ачкычтар"</string>
