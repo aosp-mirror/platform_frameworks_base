@@ -1527,6 +1527,7 @@
   <java-symbol type="layout" name="number_picker" />
   <java-symbol type="layout" name="permissions_package_list_item" />
   <java-symbol type="layout" name="popup_menu_item_layout" />
+  <java-symbol type="layout" name="popup_menu_item_layout_material" />
   <java-symbol type="layout" name="popup_menu_header_item_layout" />
   <java-symbol type="layout" name="remote_views_adapter_default_loading_view" />
   <java-symbol type="layout" name="search_bar" />
