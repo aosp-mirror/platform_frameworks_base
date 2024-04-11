@@ -23,7 +23,10 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.UiContext;
+import android.content.ComponentCallbacks;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -47,7 +50,7 @@ import com.android.systemui.res.R;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
-class FullscreenMagnificationController {
+class FullscreenMagnificationController implements ComponentCallbacks {
 
     private final Context mContext;
     private final AccessibilityManager mAccessibilityManager;
@@ -63,6 +66,8 @@ class FullscreenMagnificationController {
     private static final Region sEmptyRegion = new Region();
     private ValueAnimator mShowHideBorderAnimator;
     private Executor mExecutor;
+    private boolean mFullscreenMagnificationActivated = false;
+    private final Configuration mConfiguration;
 
     FullscreenMagnificationController(
             @UiContext Context context,
@@ -95,6 +100,7 @@ class FullscreenMagnificationController {
                 - mContext.getResources().getDimensionPixelSize(
                 R.dimen.magnifier_border_width_fullscreen);
         mDisplayId = mContext.getDisplayId();
+        mConfiguration = new Configuration(context.getResources().getConfiguration());
         mShowHideBorderAnimator = valueAnimator;
         mShowHideBorderAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -121,18 +127,19 @@ class FullscreenMagnificationController {
     }
 
     /**
-     * In {@link com.android.server.accessibility.magnification.FullScreenMagnificationController
-     * .DisplayMagnification#setActivated(boolean)}, onFullScreenMagnificationActivationState is
-     * only called when there is an activation status change. Therefore, we could assume that we
-     * won't be calling "create border" when another creating border animation is running or
-     * "remove border" when another removing border animation is running.
+     * Check the fullscreen magnification activation status, and proceed corresponding actions when
+     * there is an activation change.
      */
     @UiThread
     void onFullscreenMagnificationActivationChanged(boolean activated) {
-        if (activated) {
-            createFullscreenMagnificationBorder();
-        } else {
-            removeFullscreenMagnificationBorder();
+        final boolean changed = (mFullscreenMagnificationActivated != activated);
+        if (changed) {
+            mFullscreenMagnificationActivated = activated;
+            if (activated) {
+                createFullscreenMagnificationBorder();
+            } else {
+                removeFullscreenMagnificationBorder();
+            }
         }
     }
 
@@ -142,6 +149,7 @@ class FullscreenMagnificationController {
      */
     @UiThread
     private void removeFullscreenMagnificationBorder() {
+        mContext.unregisterComponentCallbacks(this);
         mShowHideBorderAnimator.reverse();
     }
 
@@ -162,6 +170,9 @@ class FullscreenMagnificationController {
      */
     @UiThread
     private void createFullscreenMagnificationBorder() {
+        onConfigurationChanged(mContext.getResources().getConfiguration());
+        mContext.registerComponentCallbacks(this);
+
         if (mSurfaceControlViewHost == null) {
             // Create the view only if it does not exist yet. If we are trying to enable fullscreen
             // magnification before it was fully disabled, we use the previous view instead of
@@ -225,5 +236,42 @@ class FullscreenMagnificationController {
         // The touchable region of the mFullscreenBorder will be empty since we are going to allow
         // all touch events to go through this view.
         surfaceControl.setTouchableRegion(sEmptyRegion);
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        final int configDiff = newConfig.diff(mConfiguration);
+        mConfiguration.setTo(newConfig);
+        onConfigurationChanged(configDiff);
+    }
+
+    @VisibleForTesting
+    void onConfigurationChanged(int configDiff) {
+        boolean reCreateWindow = false;
+        if ((configDiff & ActivityInfo.CONFIG_DENSITY) != 0
+                || (configDiff & ActivityInfo.CONFIG_SCREEN_SIZE) != 0
+                || (configDiff & ActivityInfo.CONFIG_ORIENTATION) != 0) {
+            updateDimensions();
+            mWindowBounds.set(mWindowManager.getCurrentWindowMetrics().getBounds());
+            reCreateWindow = true;
+        }
+
+        if (mFullscreenBorder != null && reCreateWindow) {
+            final int newWidth = mWindowBounds.width() + 2 * mBorderOffset;
+            final int newHeight = mWindowBounds.height() + 2 * mBorderOffset;
+            mSurfaceControlViewHost.relayout(newWidth, newHeight);
+        }
+    }
+
+    private void updateDimensions() {
+        mBorderOffset = mContext.getResources().getDimensionPixelSize(
+                R.dimen.magnifier_border_width_fullscreen_with_offset)
+                - mContext.getResources().getDimensionPixelSize(
+                        R.dimen.magnifier_border_width_fullscreen);
+    }
+
+    @Override
+    public void onLowMemory() {
+
     }
 }

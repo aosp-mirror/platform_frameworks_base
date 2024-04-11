@@ -31,6 +31,9 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.SurfaceControl;
@@ -46,6 +49,7 @@ import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 
 import org.junit.After;
 import org.junit.Before;
@@ -68,6 +72,7 @@ public class FullscreenMagnificationControllerTest extends SysuiTestCase {
     private SurfaceControlViewHost mSurfaceControlViewHost;
     private ValueAnimator mShowHideBorderAnimator;
     private SurfaceControl.Transaction mTransaction;
+    private TestableWindowManager mWindowManager;
 
     @Before
     public void setUp() {
@@ -75,6 +80,9 @@ public class FullscreenMagnificationControllerTest extends SysuiTestCase {
                 spy(new SurfaceControlViewHost(mContext, mContext.getDisplay(),
                         new InputTransferToken(), "FullscreenMagnification")));
         Supplier<SurfaceControlViewHost> scvhSupplier = () -> mSurfaceControlViewHost;
+        final WindowManager wm = mContext.getSystemService(WindowManager.class);
+        mWindowManager = new TestableWindowManager(wm);
+        mContext.addMockSystemService(Context.WINDOW_SERVICE, mWindowManager);
 
         mTransaction = new SurfaceControl.Transaction();
         mShowHideBorderAnimator = spy(newNullTargetObjectAnimator());
@@ -185,6 +193,46 @@ public class FullscreenMagnificationControllerTest extends SysuiTestCase {
         assertTrue("Failed to wait for animation to be finished",
                 animationEndLatch.await(ANIMATION_TIMEOUT_MS, TimeUnit.MILLISECONDS));
         verify(mShowHideBorderAnimator).reverse();
+    }
+
+    @Test
+    public void onScreenSizeChanged_activated_borderChangedToExpectedSize()
+            throws InterruptedException {
+        CountDownLatch transactionCommittedLatch = new CountDownLatch(1);
+        CountDownLatch animationEndLatch = new CountDownLatch(1);
+        mTransaction.addTransactionCommittedListener(
+                Runnable::run, transactionCommittedLatch::countDown);
+        mShowHideBorderAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                animationEndLatch.countDown();
+            }
+        });
+        getInstrumentation().runOnMainSync(() ->
+                //Enable fullscreen magnification
+                mFullscreenMagnificationController
+                        .onFullscreenMagnificationActivationChanged(true));
+        assertTrue("Failed to wait for transaction committed",
+                transactionCommittedLatch.await(WAIT_TIMEOUT_S, TimeUnit.SECONDS));
+        assertTrue("Failed to wait for animation to be finished",
+                animationEndLatch.await(ANIMATION_TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        final Rect testWindowBounds = new Rect(
+                mWindowManager.getCurrentWindowMetrics().getBounds());
+        testWindowBounds.set(testWindowBounds.left, testWindowBounds.top,
+                testWindowBounds.right + 100, testWindowBounds.bottom + 100);
+        mWindowManager.setWindowBounds(testWindowBounds);
+
+        getInstrumentation().runOnMainSync(() ->
+                mFullscreenMagnificationController.onConfigurationChanged(
+                        ActivityInfo.CONFIG_SCREEN_SIZE));
+
+        int borderOffset = mContext.getResources().getDimensionPixelSize(
+                R.dimen.magnifier_border_width_fullscreen_with_offset)
+                - mContext.getResources().getDimensionPixelSize(
+                R.dimen.magnifier_border_width_fullscreen);
+        final int newWidth = testWindowBounds.width() + 2 * borderOffset;
+        final int newHeight = testWindowBounds.height() + 2 * borderOffset;
+        verify(mSurfaceControlViewHost).relayout(newWidth, newHeight);
     }
 
     private ValueAnimator newNullTargetObjectAnimator() {
