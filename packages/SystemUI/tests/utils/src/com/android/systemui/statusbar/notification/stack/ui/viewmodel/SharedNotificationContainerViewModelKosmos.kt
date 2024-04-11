@@ -36,6 +36,7 @@ import com.android.systemui.keyguard.ui.viewmodel.lockscreenToGoneTransitionView
 import com.android.systemui.keyguard.ui.viewmodel.lockscreenToOccludedTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.lockscreenToPrimaryBouncerTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.occludedToAodTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.occludedToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.occludedToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.primaryBouncerToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.primaryBouncerToLockscreenTransitionViewModel
@@ -74,6 +75,7 @@ val Kosmos.sharedNotificationContainerViewModel by Fixture {
         lockscreenToPrimaryBouncerTransitionViewModel =
             lockscreenToPrimaryBouncerTransitionViewModel,
         occludedToAodTransitionViewModel = occludedToAodTransitionViewModel,
+        occludedToGoneTransitionViewModel = occludedToGoneTransitionViewModel,
         occludedToLockscreenTransitionViewModel = occludedToLockscreenTransitionViewModel,
         primaryBouncerToGoneTransitionViewModel = primaryBouncerToGoneTransitionViewModel,
         primaryBouncerToLockscreenTransitionViewModel =
