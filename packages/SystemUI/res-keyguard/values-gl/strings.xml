@@ -108,9 +108,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Requírese o padrón tras reiniciar o dispositivo"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"Requírese o PIN tras reiniciar o dispositivo"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Requírese o contrasinal tras reiniciar o dispositivo"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Utiliza un padrón para obter maior seguranza"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Utiliza un padrón para unha maior seguranza"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Utiliza un PIN para obter maior seguranza"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Utiliza un contrasinal para obter maior seguranza"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Utiliza un contrasinal para unha maior seguranza"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"O administrador bloqueou o dispositivo"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"O dispositivo bloqueouse manualmente"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Non se recoñeceu"</string>

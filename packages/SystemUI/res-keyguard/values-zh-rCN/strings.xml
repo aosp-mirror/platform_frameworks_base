@@ -22,7 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"输入您的 PIN 码"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"输入 PIN 码"</string>
-    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"绘制您的图案"</string>
+    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"绘制解锁图案"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"绘制图案"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"输入您的密码"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"输入密码"</string>
@@ -108,7 +108,7 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"设备重启后，必须绘制图案才能解锁"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"设备重启后，必须输入 PIN 码才能解锁"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"设备重启后，必须输入密码才能解锁"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"为增强安全性，请改用图案"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"为增强安全性，请改用解锁图案"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"为增强安全性，请改用 PIN 码"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"为增强安全性，请改用密码"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"管理员已锁定设备"</string>
