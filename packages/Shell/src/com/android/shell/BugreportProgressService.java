@@ -16,6 +16,7 @@
 
 package com.android.shell;
 
+import static android.app.admin.flags.Flags.onboardingBugreportStorageBugFix;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
@@ -89,9 +90,9 @@ import com.android.internal.app.ChooserActivity;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
-import com.google.android.collect.Lists;
-
 import libcore.io.Streams;
+
+import com.google.android.collect.Lists;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -109,6 +110,8 @@ import java.security.NoSuchAlgorithmException;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -442,10 +445,14 @@ public class BugreportProgressService extends Service {
         }
     }
 
-    private static void sendRemoteBugreportFinishedBroadcast(Context context,
+    private void sendRemoteBugreportFinishedBroadcast(Context context,
             String bugreportFileName, File bugreportFile, long nonce) {
-        cleanupOldFiles(REMOTE_BUGREPORT_FILES_AMOUNT, REMOTE_MIN_KEEP_AGE,
-                bugreportFile.getParentFile());
+        // Remote bugreports are stored in the same directory as normal bugreports, meaning that
+        // the remote bugreport storage limit will get applied to normal bugreports whenever a
+        // remote bugreport is triggered. The fix in cleanupOldFiles applies the normal bugreport
+        // limit to the remote bugreports as a quick fix.
+        cleanupOldFiles(
+                REMOTE_BUGREPORT_FILES_AMOUNT, REMOTE_MIN_KEEP_AGE, bugreportFile.getParentFile());
         final Intent intent = new Intent(DevicePolicyManager.ACTION_REMOTE_BUGREPORT_DISPATCH);
         final Uri bugreportUri = getUri(context, bugreportFile);
         final String bugreportHash = generateFileHash(bugreportFileName);
@@ -496,18 +503,58 @@ public class BugreportProgressService extends Service {
         return fileHash;
     }
 
-    static void cleanupOldFiles(final int minCount, final long minAge, File bugreportsDir) {
+    void cleanupOldFiles(final int minCount, final long minAge, File bugreportsDir) {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    FileUtils.deleteOlderFiles(bugreportsDir, minCount, minAge);
+                    if (onboardingBugreportStorageBugFix()) {
+                        cleanupOldBugreports();
+                    } else {
+                        FileUtils.deleteOlderFiles(bugreportsDir, minCount, minAge);
+                    }
                 } catch (RuntimeException e) {
                     Log.e(TAG, "RuntimeException deleting old files", e);
                 }
                 return null;
             }
         }.execute();
+    }
+
+    private void cleanupOldBugreports() {
+        final File[] files = mBugreportsDir.listFiles();
+        if (files == null) return;
+
+        // Sort with newest files first
+        Arrays.sort(files, new Comparator<File>() {
+            @Override
+            public int compare(File lhs, File rhs) {
+                return Long.compare(rhs.lastModified(), lhs.lastModified());
+            }
+        });
+
+        int normalBugreportFilesCount = 0;
+        int deferredBugreportFilesCount = 0;
+        for (int i = 0; i < files.length; i++) {
+            final File file = files[i];
+
+            // tmp files are deferred bugreports which have their separate storage limit
+            boolean isDeferredBugreportFile = file.getName().endsWith(".tmp");
+            if (isDeferredBugreportFile) {
+                deferredBugreportFilesCount++;
+            } else {
+                normalBugreportFilesCount++;
+            }
+            // Keep files newer than minAgeMs
+            final long age = System.currentTimeMillis() - file.lastModified();
+            final int count = isDeferredBugreportFile
+                    ? deferredBugreportFilesCount : normalBugreportFilesCount;
+            if (count > MIN_KEEP_COUNT  && age > MIN_KEEP_AGE) {
+                if (file.delete()) {
+                    Log.d(TAG, "Deleted old file " + file);
+                }
+            }
+        }
     }
 
     /**
