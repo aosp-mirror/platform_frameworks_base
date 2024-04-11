@@ -497,6 +497,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -628,6 +630,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     // the notification will not be legible to the user.
     private static final int MAX_BUGREPORT_TITLE_SIZE = 100;
     private static final int MAX_BUGREPORT_DESCRIPTION_SIZE = 150;
+
+    private static final DateTimeFormatter DROPBOX_TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZ");
 
     OomAdjuster mOomAdjuster;
 
@@ -2167,21 +2172,24 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     static class VolatileDropboxEntryStates {
         private final Boolean mIsProcessFrozen;
+        private final ZonedDateTime mTimestamp;
 
-        private VolatileDropboxEntryStates(Boolean frozenState) {
+        private VolatileDropboxEntryStates(Boolean frozenState, ZonedDateTime timestamp) {
             this.mIsProcessFrozen = frozenState;
+            this.mTimestamp = timestamp;
         }
 
-        public static VolatileDropboxEntryStates withProcessFrozenState(boolean frozenState) {
-            return new VolatileDropboxEntryStates(frozenState);
-        }
-
-        public static VolatileDropboxEntryStates emptyVolatileDropboxEnytyStates() {
-            return new VolatileDropboxEntryStates(null);
+        public static VolatileDropboxEntryStates withProcessFrozenStateAndTimestamp(
+                boolean frozenState, ZonedDateTime timestamp) {
+            return new VolatileDropboxEntryStates(frozenState, timestamp);
         }
 
         public Boolean isProcessFrozen() {
             return mIsProcessFrozen;
+        }
+
+        public ZonedDateTime getTimestamp() {
+            return mTimestamp;
         }
     }
 
@@ -9677,6 +9685,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                     (volatileStates != null && volatileStates.isProcessFrozen() != null)
                     ? volatileStates.isProcessFrozen() : process.mOptRecord.isFrozen()
                 ).append("\n");
+            }
+            if (volatileStates != null && volatileStates.getTimestamp() != null) {
+                String formattedTime = DROPBOX_TIME_FORMATTER.format(
+                    volatileStates.getTimestamp());
+                sb.append("Timestamp: ").append(formattedTime).append("\n");
             }
             int flags = process.info.flags;
             final IPackageManager pm = AppGlobals.getPackageManager();
