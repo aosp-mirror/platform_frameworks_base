@@ -15,19 +15,17 @@
  */
 
 #define ATRACE_TAG ATRACE_TAG_VIEW
-#include "GraphicsJNI.h"
-
 #include <Animator.h>
 #include <DamageAccumulator.h>
 #include <Matrix.h>
 #include <RenderNode.h>
-#ifdef __ANDROID__ // Layoutlib does not support CanvasContext
-#include <renderthread/CanvasContext.h>
-#endif
 #include <TreeInfo.h>
 #include <effects/StretchEffect.h>
 #include <gui/TraceUtils.h>
 #include <hwui/Paint.h>
+#include <renderthread/CanvasContext.h>
+
+#include "GraphicsJNI.h"
 
 namespace android {
 
@@ -640,7 +638,6 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
 
             ATRACE_NAME("Update SurfaceView position");
 
-#ifdef __ANDROID__ // Layoutlib does not support CanvasContext
             JNIEnv* env = jnienv();
             // Update the new position synchronously. We cannot defer this to
             // a worker pool to process asynchronously because the UI thread
@@ -669,7 +666,6 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
                 env->DeleteGlobalRef(mListener);
                 mListener = nullptr;
             }
-#endif
         }
 
         virtual void onPositionLost(RenderNode& node, const TreeInfo* info) override {
@@ -682,7 +678,6 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
 
             ATRACE_NAME("SurfaceView position lost");
             JNIEnv* env = jnienv();
-#ifdef __ANDROID__ // Layoutlib does not support CanvasContext
             // Update the lost position synchronously. We cannot defer this to
             // a worker pool to process asynchronously because the UI thread
             // may be unblocked by the time a worker thread can process this,
@@ -698,7 +693,6 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
                 env->DeleteGlobalRef(mListener);
                 mListener = nullptr;
             }
-#endif
         }
 
     private:
@@ -750,7 +744,6 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
                 StretchEffectBehavior::Shader) {
                 JNIEnv* env = jnienv();
 
-#ifdef __ANDROID__  // Layoutlib does not support CanvasContext
                 SkVector stretchDirection = effect->getStretchDirection();
                 jboolean keepListening = env->CallStaticBooleanMethod(
                         gPositionListener.clazz, gPositionListener.callApplyStretch, mListener,
@@ -762,7 +755,6 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
                     env->DeleteGlobalRef(mListener);
                     mListener = nullptr;
                 }
-#endif
             }
         }
 
