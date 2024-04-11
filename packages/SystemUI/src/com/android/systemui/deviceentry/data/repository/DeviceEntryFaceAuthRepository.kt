@@ -40,7 +40,6 @@ import com.android.systemui.deviceentry.shared.model.FailedFaceAuthenticationSta
 import com.android.systemui.deviceentry.shared.model.HelpFaceAuthenticationStatus
 import com.android.systemui.deviceentry.shared.model.SuccessFaceAuthenticationStatus
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.BiometricType
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
@@ -51,6 +50,7 @@ import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.SysUiFaceAuthenticateOptions
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.log.FaceAuthenticationLogger
@@ -313,10 +313,16 @@ constructor(
         // or device starts going to sleep.
         merge(
                 powerInteractor.isAsleep,
-                if (KeyguardWmStateRefactor.isEnabled) {
-                    keyguardTransitionInteractor.isInTransitionToState(KeyguardState.GONE)
-                } else {
-                    keyguardRepository.keyguardDoneAnimationsFinished.map { true }
+                combine(
+                    keyguardTransitionInteractor.isFinishedInState(KeyguardState.GONE),
+                    keyguardInteractor.statusBarState,
+                ) { isFinishedInGoneState, statusBarState ->
+                    // When the user is dragging the primary bouncer in (up) by manually scrolling
+                    // up on the lockscreen, the device won't be irreversibly transitioned to GONE
+                    // until the statusBarState updates to SHADE, so we check that here.
+                    // Else, we could reset the face auth state too early and end up in a strange
+                    // state.
+                    isFinishedInGoneState && statusBarState == StatusBarState.SHADE
                 },
                 userRepository.selectedUser.map {
                     it.selectionStatus == SelectionStatus.SELECTION_IN_PROGRESS
