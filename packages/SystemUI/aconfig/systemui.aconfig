@@ -477,10 +477,13 @@ flag {
 }
 
 flag {
-    name: "screenshot_private_profile"
+    name: "screenshot_private_profile_behavior_fix"
     namespace: "systemui"
     description: "Private profile support for screenshots"
     bug: "327613051"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
