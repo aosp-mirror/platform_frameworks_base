@@ -18,6 +18,7 @@ package com.android.systemui.media.controls.ui.util
 
 import android.app.WallpaperColors
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
@@ -27,6 +28,7 @@ import android.util.Log
 import com.android.systemui.media.controls.ui.animation.backgroundEndFromScheme
 import com.android.systemui.media.controls.ui.animation.backgroundStartFromScheme
 import com.android.systemui.monet.ColorScheme
+import com.android.systemui.monet.Style
 import com.android.systemui.util.getColorWithAlpha
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -93,5 +95,22 @@ object MediaArtworkHelper {
                 getColorWithAlpha(backgroundEndFromScheme(colorScheme), endAlpha)
             )
         return LayerDrawable(arrayOf(albumArt, gradient))
+    }
+
+    /** Returns [ColorScheme] of media app given its [packageName]. */
+    fun getColorScheme(
+        applicationContext: Context,
+        packageName: String,
+        tag: String,
+        style: Style = Style.TONAL_SPOT
+    ): ColorScheme? {
+        return try {
+            // Set up media source app's logo.
+            val icon = applicationContext.packageManager.getApplicationIcon(packageName)
+            ColorScheme(WallpaperColors.fromDrawable(icon), darkTheme = true, style)
+        } catch (e: PackageManager.NameNotFoundException) {
+            Log.w(tag, "Fail to get media app info", e)
+            null
+        }
     }
 }
