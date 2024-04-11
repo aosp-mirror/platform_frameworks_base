@@ -76,6 +76,7 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.os.UidBatteryConsumer;
 import android.os.UserHandle;
 import android.os.WakeLockStats;
 import android.os.WorkSource;
@@ -158,6 +159,7 @@ import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1107,6 +1109,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 FrameworkStatsLog.BATTERY_USAGE_STATS_BEFORE_RESET,
                 null, // use default PullAtomMetadata values
                 DIRECT_EXECUTOR, pullAtomCallback);
+        if (Flags.addBatteryUsageStatsSliceAtom()) {
+            statsManager.setPullAtomCallback(
+                    FrameworkStatsLog.BATTERY_USAGE_STATS_PER_UID,
+                    null, // use default PullAtomMetadata values
+                    DIRECT_EXECUTOR,
+                    pullAtomCallback);
+        }
     }
 
     /** StatsPullAtomCallback for pulling BatteryUsageStats data. */
@@ -1115,7 +1124,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         public int onPullAtom(int atomTag, List<StatsEvent> data) {
             final BatteryUsageStats bus;
             switch (atomTag) {
-                case FrameworkStatsLog.BATTERY_USAGE_STATS_SINCE_RESET:
+                case FrameworkStatsLog.BATTERY_USAGE_STATS_SINCE_RESET: {
                     @SuppressLint("MissingPermission")
                     final double minConsumedPowerThreshold =
                             DeviceConfig.getFloat(DEVICE_CONFIG_NAMESPACE,
@@ -1130,6 +1139,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                     .build();
                     bus = getBatteryUsageStats(List.of(querySinceReset)).get(0);
                     break;
+                }
                 case FrameworkStatsLog.BATTERY_USAGE_STATS_SINCE_RESET_USING_POWER_PROFILE_MODEL:
                     final BatteryUsageStatsQuery queryPowerProfile =
                             new BatteryUsageStatsQuery.Builder()
@@ -1141,7 +1151,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                     .build();
                     bus = getBatteryUsageStats(List.of(queryPowerProfile)).get(0);
                     break;
-                case FrameworkStatsLog.BATTERY_USAGE_STATS_BEFORE_RESET:
+                case FrameworkStatsLog.BATTERY_USAGE_STATS_BEFORE_RESET: {
                     final long sessionStart =
                             getLastBatteryUsageStatsBeforeResetAtomPullTimestamp();
                     final long sessionEnd;
@@ -1158,6 +1168,31 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     bus = getBatteryUsageStats(List.of(queryBeforeReset)).get(0);
                     setLastBatteryUsageStatsBeforeResetAtomPullTimestamp(sessionEnd);
                     break;
+                }
+                case FrameworkStatsLog.BATTERY_USAGE_STATS_PER_UID: {
+                    if (!Flags.addBatteryUsageStatsSliceAtom()) {
+                        return StatsManager.PULL_SKIP;
+                    }
+
+                    @SuppressLint("MissingPermission")
+                    final double minConsumedPowerThreshold =
+                            DeviceConfig.getFloat(
+                                    DEVICE_CONFIG_NAMESPACE,
+                                    MIN_CONSUMED_POWER_THRESHOLD_KEY,
+                                    0);
+                    final long sessionStart = 0;
+                    final long sessionEnd = System.currentTimeMillis();
+                    final BatteryUsageStatsQuery query =
+                            new BatteryUsageStatsQuery.Builder()
+                                    .setMaxStatsAgeMs(0)
+                                    .includeProcessStateData()
+                                    .includeVirtualUids()
+                                    .aggregateSnapshots(sessionStart, sessionEnd)
+                                    .setMinConsumedPowerThreshold(minConsumedPowerThreshold)
+                                    .build();
+                    bus = getBatteryUsageStats(List.of(query)).get(0);
+                    return StatsPerUidLogger.logStats(bus, data);
+                }
                 default:
                     throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
             }
@@ -1166,6 +1201,262 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             data.add(FrameworkStatsLog.buildStatsEvent(atomTag, statsProto));
 
             return StatsManager.PULL_SUCCESS;
+        }
+    }
+
+    private static class StatsPerUidLogger {
+
+        private static final int STATSD_METRIC_MAX_DIMENSIONS_COUNT = 3000;
+
+        private static final int[] UID_PROCESS_STATES = {
+            BatteryConsumer.PROCESS_STATE_UNSPECIFIED,
+            BatteryConsumer.PROCESS_STATE_FOREGROUND,
+            BatteryConsumer.PROCESS_STATE_BACKGROUND,
+            BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE,
+            BatteryConsumer.PROCESS_STATE_CACHED
+        };
+
+        public record SessionInfo(
+                long startTs,
+                long endTs,
+                long duration,
+                int dischargePercentage,
+                long dischargeDuration) {}
+        ;
+
+        static int logStats(BatteryUsageStats bus, List<StatsEvent> data) {
+            final SessionInfo sessionInfo =
+                    new SessionInfo(
+                            bus.getStatsStartTimestamp(),
+                            bus.getStatsEndTimestamp(),
+                            bus.getStatsDuration(),
+                            bus.getDischargePercentage(),
+                            bus.getDischargeDurationMs());
+
+            if (DBG) {
+                Slog.d(TAG, "BatteryUsageStats dump = " + bus);
+            }
+            final BatteryConsumer deviceConsumer =
+                    bus.getAggregateBatteryConsumer(
+                            BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
+
+            final float totalDeviceConsumedPowerMah = (float) deviceConsumer.getConsumedPower();
+
+            for (@BatteryConsumer.PowerComponent int componentId = 0;
+                    componentId < BatteryConsumer.POWER_COMPONENT_COUNT;
+                    componentId++) {
+
+                for (@BatteryConsumer.ProcessState int processState : UID_PROCESS_STATES) {
+
+                    if (!addStatsForPredefinedComponent(
+                            data,
+                            sessionInfo,
+                            Process.INVALID_UID,
+                            processState,
+                            totalDeviceConsumedPowerMah,
+                            deviceConsumer,
+                            componentId)) {
+                        return StatsManager.PULL_SUCCESS;
+                    }
+                }
+            }
+
+            final int customPowerComponentCount = deviceConsumer.getCustomPowerComponentCount();
+            for (int componentId = BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
+                    componentId
+                            < BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID
+                                    + customPowerComponentCount;
+                    componentId++) {
+
+                if (!addStatsForCustomComponent(
+                        data,
+                        sessionInfo,
+                        Process.INVALID_UID,
+                        BatteryConsumer.PROCESS_STATE_UNSPECIFIED,
+                        0,
+                        totalDeviceConsumedPowerMah,
+                        deviceConsumer,
+                        componentId)) {
+                    return StatsManager.PULL_SUCCESS;
+                }
+            }
+
+            final List<UidBatteryConsumer> uidConsumers = bus.getUidBatteryConsumers();
+            uidConsumers.sort(
+                    Comparator.<BatteryConsumer>comparingDouble(BatteryConsumer::getConsumedPower)
+                            .reversed());
+
+            // Log single atom for BatteryUsageStats per uid/process_state/component/etc.
+            for (UidBatteryConsumer uidConsumer : uidConsumers) {
+                final int uid = uidConsumer.getUid();
+                final float totalConsumedPowerMah = (float) uidConsumer.getConsumedPower();
+
+                for (@BatteryConsumer.PowerComponent int componentId = 0;
+                        componentId < BatteryConsumer.POWER_COMPONENT_COUNT;
+                        componentId++) {
+
+                    for (@BatteryConsumer.ProcessState int processState : UID_PROCESS_STATES) {
+
+                        if (!addStatsForPredefinedComponent(
+                                data,
+                                sessionInfo,
+                                uid,
+                                processState,
+                                totalConsumedPowerMah,
+                                uidConsumer,
+                                componentId)) {
+                            return StatsManager.PULL_SUCCESS;
+                        }
+                    }
+                }
+
+                // looping over custom components
+                for (int componentId = BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
+                        componentId
+                                < BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID
+                                        + customPowerComponentCount;
+                        componentId++) {
+                    for (@BatteryConsumer.ProcessState int processState : UID_PROCESS_STATES) {
+                        final long timeInStateMillis =
+                                uidConsumer.getTimeInProcessStateMs(processState);
+                        if (timeInStateMillis <= 0) {
+                            continue;
+                        }
+
+                        if (!addStatsForCustomComponent(
+                                data,
+                                sessionInfo,
+                                uid,
+                                processState,
+                                timeInStateMillis,
+                                totalConsumedPowerMah,
+                                uidConsumer,
+                                componentId)) {
+                            return StatsManager.PULL_SUCCESS;
+                        }
+                    }
+                }
+            }
+            return StatsManager.PULL_SUCCESS;
+        }
+
+        private static boolean addStatsForPredefinedComponent(
+                List<StatsEvent> data,
+                SessionInfo sessionInfo,
+                int uid,
+                @BatteryConsumer.ProcessState int processState,
+                float totalConsumedPowerMah,
+                BatteryConsumer batteryConsumer,
+                @BatteryConsumer.PowerComponent int componentId) {
+            final BatteryConsumer.Key key = batteryConsumer.getKey(componentId, processState);
+            if (key == null) {
+                return true;
+            }
+
+            final String powerComponentName = BatteryConsumer.powerComponentIdToString(componentId);
+            final float powerMah = (float) batteryConsumer.getConsumedPower(key);
+            final long powerComponentDurationMillis = batteryConsumer.getUsageDurationMillis(key);
+
+            if (powerMah == 0 && powerComponentDurationMillis == 0) {
+                return true;
+            }
+
+            long timeInState = 0;
+            if (batteryConsumer instanceof UidBatteryConsumer) {
+                timeInState =
+                        ((UidBatteryConsumer) batteryConsumer)
+                                .getTimeInProcessStateMs(processState);
+            }
+
+            return addStatsAtom(
+                    data,
+                    sessionInfo,
+                    uid,
+                    processState,
+                    timeInState,
+                    powerComponentName,
+                    totalConsumedPowerMah,
+                    powerMah,
+                    powerComponentDurationMillis);
+        }
+
+        private static boolean addStatsForCustomComponent(
+                List<StatsEvent> data,
+                SessionInfo sessionInfo,
+                int uid,
+                @BatteryConsumer.ProcessState int processState,
+                long timeInStateMillis,
+                float totalConsumedPowerMah,
+                BatteryConsumer batteryConsumer,
+                int componentId) {
+
+            if (componentId < BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID) {
+                throw new IllegalArgumentException("Invalid custom component id: " + componentId);
+            }
+
+            final float powerMah =
+                    (float) batteryConsumer.getConsumedPowerForCustomComponent(componentId);
+            if (powerMah == 0) {
+                return true;
+            }
+
+            final String powerComponentName =
+                    batteryConsumer.getCustomPowerComponentName(componentId);
+
+            final long powerComponentDurationMillis =
+                    batteryConsumer.getUsageDurationForCustomComponentMillis(componentId);
+
+            return addStatsAtom(
+                    data,
+                    sessionInfo,
+                    uid,
+                    processState,
+                    timeInStateMillis,
+                    powerComponentName,
+                    totalConsumedPowerMah,
+                    powerMah,
+                    powerComponentDurationMillis);
+        }
+
+        /**
+         * Returns true on success and false if reached max atoms capacity and no more atoms should
+         * be added
+         */
+        private static boolean addStatsAtom(
+                List<StatsEvent> data,
+                SessionInfo sessionInfo,
+                int uid,
+                int processState,
+                long timeInStateMillis,
+                String powerComponentName,
+                float totalConsumedPowerMah,
+                float powerComponentMah,
+                long powerComponentDurationMillis) {
+            data.add(
+                    FrameworkStatsLog.buildStatsEvent(
+                            FrameworkStatsLog.BATTERY_USAGE_STATS_PER_UID,
+                            sessionInfo.startTs(),
+                            sessionInfo.endTs(),
+                            sessionInfo.duration(),
+                            sessionInfo.dischargePercentage(),
+                            sessionInfo.dischargeDuration(),
+                            uid,
+                            processState,
+                            timeInStateMillis,
+                            powerComponentName,
+                            totalConsumedPowerMah,
+                            powerComponentMah,
+                            powerComponentDurationMillis));
+
+            // Early termination due to statsd dimensions guardrail
+            if (data.size() == STATSD_METRIC_MAX_DIMENSIONS_COUNT) {
+                Slog.w(
+                        TAG,
+                        "BATTERY_USAGE_STATS_PER_UID is complete reaching"
+                                + " dimension guardrail");
+                return false;
+            }
+            return true;
         }
     }
 
@@ -2824,9 +3115,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         pw.println("  --checkin: generate output for a checkin report; will write (and clear) the");
         pw.println("             last old completed stats when they had been reset.");
         pw.println("  -c: write the current stats in checkin format.");
-        pw.println("  --proto: write the current aggregate stats (without history) in proto format.");
+        pw.println(
+                "  --proto: write the current aggregate stats (without history) in proto format.");
         pw.println("  --history: show only history data.");
-        pw.println("  --history-start <num>: show only history data starting at given time offset.");
+        pw.println(
+                "  --history-start <num>: show only history data starting at given time offset.");
         pw.println("  --history-create-events <num>: create <num> of battery history events.");
         pw.println("  --charged: only output data since last charged.");
         pw.println("  --daily: only output full daily data.");
@@ -2850,12 +3143,15 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         pw.println("  -h: print this help text.");
         pw.println("Battery stats (batterystats) commands:");
         pw.println("  enable|disable <option>");
-        pw.println("    Enable or disable a running option.  Option state is not saved across boots.");
+        pw.println(
+                "    Enable or disable a running option.  Option state is not saved across boots.");
         pw.println("    Options are:");
         pw.println("      full-history: include additional detailed events in battery history:");
         pw.println("          wake_lock_in, alarms and proc events");
         pw.println("      no-auto-reset: don't automatically reset stats when unplugged");
-        pw.println("      pretend-screen-off: pretend the screen is off, even if screen state changes");
+        pw.println(
+                "      pretend-screen-off: pretend the screen is off, even if screen state"
+                        + " changes");
     }
 
     private void dumpSettings(PrintWriter pw) {
