@@ -258,8 +258,8 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testTreatmentDisabledPerApp_noForceRotationOrRefresh()
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
-        when(mActivity.mLetterboxUiController.shouldForceRotateForCameraCompat())
-                .thenReturn(false);
+        doReturn(false).when(mActivity.mLetterboxUiController)
+                .shouldForceRotateForCameraCompat();
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
 
@@ -459,8 +459,9 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testOnActivityConfigurationChanging_refreshDisabledViaFlag_noRefresh()
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
-        when(mActivity.mLetterboxUiController.shouldRefreshActivityForCameraCompat())
-                .thenReturn(false);
+
+        doReturn(false).when(
+                mActivity.mLetterboxUiController).shouldRefreshActivityForCameraCompat();
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
         callOnActivityConfigurationChanging(mActivity, /* isDisplayRotationChanging */ true);
