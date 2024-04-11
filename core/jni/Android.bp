@@ -123,6 +123,7 @@ cc_library_shared_for_libandroid_runtime {
             srcs: [
                 "AndroidRuntime.cpp",
                 "com_android_internal_content_F2fsUtils.cpp",
+                "com_android_internal_content_FileSystemUtils.cpp",
                 "com_android_internal_content_NativeLibraryHelper.cpp",
                 "com_google_android_gles_jni_EGLImpl.cpp",
                 "com_google_android_gles_jni_GLImpl.cpp", // TODO: .arm
