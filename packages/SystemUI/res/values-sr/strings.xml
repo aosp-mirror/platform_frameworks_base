@@ -739,7 +739,7 @@
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Отвори подешавања"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Отвори помоћника"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Закључавање екрана"</string>
-    <string name="group_system_quick_memo" msgid="3764560265935722903">"Направите белешку"</string>
+    <string name="group_system_quick_memo" msgid="3764560265935722903">"Направи белешку"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Обављање више задатака система истовремено"</string>
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Покрени подељени екран за актуелну апликацију на десној страни"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Покрени подељени екран за актуелну апликацију на левој страни"</string>
@@ -1264,9 +1264,9 @@
     <string name="privacy_dialog_manage_permissions" msgid="2543451567190470413">"Управљај приступом"</string>
     <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"Користи телефонски позив"</string>
     <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"Недавно коришћено у телефонском позиву"</string>
-    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"Користе <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"Користи <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"Недавно користила апликација <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"Користе <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
+    <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"Користи <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Недавно користила апликација <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Користе <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Недавно користила апликација <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>

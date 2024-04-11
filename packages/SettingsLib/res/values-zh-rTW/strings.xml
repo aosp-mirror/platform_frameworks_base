@@ -536,7 +536,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"鬧鐘與提醒"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"允許設定鬧鐘和提醒"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"鬧鐘和提醒"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"允許這個應用程式設定鬧鐘及安排有時效性的動作。這麼做會讓用程式在背景執行，可能比較耗電。\n\n如果關閉這項權限，這個應用程式設定的現有鬧鐘將不會響起，而且應用程式也無法在預定的時間發出活動提醒。"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"允許這個應用程式設定鬧鐘及安排有時效性的動作。之後應用程式可以在背景執行，並可能耗用較多電量。\n\n如果關閉這項權限，這個應用程式設定的現有鬧鐘將不會響起，系統也無法在預定的時間發出活動提醒。"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"時間表, 鬧鐘, 提醒, 時鐘"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"開啟"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"開啟「零打擾」模式"</string>

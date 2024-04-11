@@ -186,10 +186,10 @@
   </string-array>
   <string-array name="select_logd_size_summaries">
     <item msgid="409235464399258501">"Wył."</item>
-    <item msgid="4195153527464162486">"64 KB/bufor dziennika"</item>
-    <item msgid="7464037639415220106">"256 KB/bufor dziennika"</item>
-    <item msgid="8539423820514360724">"1 MB/bufor dziennika"</item>
-    <item msgid="1984761927103140651">"4 MB/bufor dziennika"</item>
+    <item msgid="4195153527464162486">"64 KB / bufor dziennika"</item>
+    <item msgid="7464037639415220106">"256 KB / bufor dziennika"</item>
+    <item msgid="8539423820514360724">"1 MB / bufor dziennika"</item>
+    <item msgid="1984761927103140651">"4 MB / bufor dziennika"</item>
     <item msgid="2983219471251787208">"8 MB na bufor dziennika"</item>
   </string-array>
   <string-array name="select_logpersist_titles">

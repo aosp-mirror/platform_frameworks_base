@@ -747,7 +747,7 @@
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Išskaidyto ekrano režimu: pakeisti iš vienos programos į kitą"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Įvestis"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Perjungti į kitą kalbą"</string>
-    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Perjungti ankstesnę kalbą"</string>
+    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Perjungti į ankstesnę kalbą"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"Pasiekti jaustuką"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Pasiekti rašymą balsu"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Programos"</string>
@@ -1265,7 +1265,7 @@
     <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"Naudotojo telefono skambučio programa"</string>
     <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"Neseniai naudojo telefono skambučio programa"</string>
     <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"Naudoja <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"Neseniai naudojo „<xliff:g id="APP_NAME">%1$s</xliff:g>“"</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"Neseniai naudojo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"Naudoja <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Neseniai naudojo „<xliff:g id="APP_NAME">%1$s</xliff:g>“ (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Naudoja <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>

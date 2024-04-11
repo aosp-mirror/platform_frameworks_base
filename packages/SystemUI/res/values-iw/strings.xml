@@ -726,7 +726,7 @@
     <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"מוצגים: קיצורי הדרך של הקלט"</string>
     <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"מוצגים: קיצורי הדרך לפתיחת אפליקציות"</string>
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"מוצגים: קיצורי הדרך של האפליקציה הנוכחית"</string>
-    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"הצגת הודעות"</string>
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"הצגת התראות"</string>
     <string name="group_system_full_screenshot" msgid="5742204844232667785">"צילום המסך"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"הצגת מקשי הקיצור"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"חזרה"</string>

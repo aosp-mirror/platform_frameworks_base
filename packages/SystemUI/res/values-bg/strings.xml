@@ -1253,7 +1253,7 @@
     <string name="dismiss_dialog" msgid="2195508495854675882">"Отхвърляне"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"Свързан е екран"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Микрофон и камера"</string>
-    <string name="privacy_dialog_summary" msgid="2458769652125995409">"Скорошно използване на приложението"</string>
+    <string name="privacy_dialog_summary" msgid="2458769652125995409">"Скорошно използване от приложенията"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Вижте скорошния достъп"</string>
     <string name="privacy_dialog_done_button" msgid="4504330708531434263">"Готово"</string>
     <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"Разгъване и показване на опциите"</string>

@@ -117,7 +117,7 @@
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Prikaz dodira na zaslonu"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Zaustavi"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Dijeli"</string>
-    <string name="screenrecord_save_title" msgid="1886652605520893850">"Snimanje zaslona spremljeno"</string>
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"Snimanje zaslona je spremljeno"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Dodirnite za prikaz"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Pogreška prilikom spremanja snimke zaslona"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Pogreška prilikom pokretanja snimanja zaslona"</string>
@@ -726,28 +726,28 @@
     <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"Prikazuju se prečaci za unos"</string>
     <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"Prikazuju se prečaci koji otvaraju aplikacije"</string>
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"Prikazuju se prečaci za trenutačnu aplikaciju"</string>
-    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Prikaži obavijesti"</string>
-    <string name="group_system_full_screenshot" msgid="5742204844232667785">"Snimi zaslon"</string>
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Prikaz obavijesti"</string>
+    <string name="group_system_full_screenshot" msgid="5742204844232667785">"Snimanje zaslona"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Prikaži prečace"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"Natrag"</string>
-    <string name="group_system_access_home_screen" msgid="4130366993484706483">"Idi na početni zaslon"</string>
-    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Prikaži nedavne aplikacije"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Kruži unaprijed kroz nedavne aplikacije"</string>
-    <string name="group_system_cycle_back" msgid="8194102916946802902">"Kruži unatrag kroz nedavne aplikacije"</string>
-    <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Otvori popis aplikacija"</string>
+    <string name="group_system_access_home_screen" msgid="4130366993484706483">"Otvaranje početnog zaslona"</string>
+    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Prikaz nedavnih aplikacija"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Kruženje unaprijed kroz nedavne aplikacije"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Kruženje unatrag kroz nedavne aplikacije"</string>
+    <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Otvaranje popisa aplikacija"</string>
     <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Pokaži traku sa zadacima"</string>
-    <string name="group_system_access_system_settings" msgid="8731721963449070017">"Otvori postavke"</string>
-    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Otvori Asistenta"</string>
+    <string name="group_system_access_system_settings" msgid="8731721963449070017">"Otvaranje postavki"</string>
+    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Otvaranje asistenta"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Zaključavanje zaslona"</string>
-    <string name="group_system_quick_memo" msgid="3764560265935722903">"Zapišite bilješku"</string>
+    <string name="group_system_quick_memo" msgid="3764560265935722903">"Pisanje bilješke"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Obavljanje više zadataka sustava"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Otvori podijeljeni zaslon s trenutačnom aplikacijom s desne strane"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Otvori podijeljeni zaslon s trenutačnom aplikacijom s lijeve strane"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Prijeđi s podijeljenog zaslona na cijeli zaslon"</string>
+    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Otvaranje podijeljenog zaslona s trenutačnom aplikacijom s desne strane"</string>
+    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Otvaranje podijeljenog zaslona s trenutačnom aplikacijom s lijeve strane"</string>
+    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Prelazak s podijeljenog zaslona na cijeli zaslon"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Tijekom podijeljenog zaslona: zamijeni aplikaciju drugom"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Unos"</string>
-    <string name="input_switch_input_language_next" msgid="3782155659868227855">"Prijeđi na sljedeći jezik"</string>
-    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Prijeđi na prethodni jezik"</string>
+    <string name="input_switch_input_language_next" msgid="3782155659868227855">"Prelazak na sljedeći jezik"</string>
+    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Prelazak na prethodni jezik"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"Pristupanje emojijima"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Pristupanje unosu teksta govorom"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Aplikacije"</string>
@@ -1265,7 +1265,7 @@
     <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"Koristi telefonski poziv"</string>
     <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"Nedavno korišteno tijekom telefonskog poziva"</string>
     <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"Koristi: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"Nedavno koristila aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"Nedavno je koristila aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"Koristi: <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Nedavno koristila aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Koristi: <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>

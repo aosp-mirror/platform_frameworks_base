@@ -639,15 +639,15 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Bez dźwięku i wibracji"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Brak dźwięku i wibracji, wyświetlają się niżej w sekcji rozmów"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"Mogą włączać dzwonek lub wibracje w zależności od ustawień urządzenia"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Mogą włączyć dzwonek lub wibracje w zależności od ustawień urządzenia. Rozmowy z aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g> są domyślnie wyświetlane jako dymki."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Mogą włączać dzwonek lub wibracje w zależności od ustawień urządzenia. Rozmowy z aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g> są domyślnie wyświetlane jako dymki."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Pozwól systemowi decydować, czy o powiadomieniu powinien informować dźwięk czy wibracja"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Stan:&lt;/b&gt; zmieniony na Domyślny"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Stan:&lt;/b&gt; zmieniono na Ciche"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Stan:&lt;/b&gt; podniesiono ważność"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Stan:&lt;/b&gt; obniżono ważność"</string>
-    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady"</string>
-    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady, jako dymek"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady, przerywa działanie trybu Nie przeszkadzać"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Wyświetlają się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Wyświetlają się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady, jako dymek"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Wyświetlają się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady, przerywają działanie trybu Nie przeszkadzać"</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady, jako dymek, przerywa działanie trybu Nie przeszkadzać"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorytetowe"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> nie obsługuje funkcji rozmów"</string>
@@ -726,28 +726,28 @@
     <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"Pokazuję skróty dotyczące danych wejściowych"</string>
     <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"Pokazuję skróty otwierające aplikacje"</string>
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"Pokazuję skróty dotyczące bieżącej aplikacji"</string>
-    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Wyświetlanie powiadomień"</string>
-    <string name="group_system_full_screenshot" msgid="5742204844232667785">"Robienie zrzutu ekranu"</string>
-    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Pokazywanie skrótów"</string>
-    <string name="group_system_go_back" msgid="2730322046244918816">"Przechodzenie wstecz"</string>
-    <string name="group_system_access_home_screen" msgid="4130366993484706483">"Wyświetlanie ekranu głównego"</string>
-    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Wyświetlanie ostatnich aplikacji"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Przełączanie się do przodu między ostatnimi aplikacjami"</string>
-    <string name="group_system_cycle_back" msgid="8194102916946802902">"Przełączanie się wstecz między ostatnimi aplikacjami"</string>
-    <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Otwieranie listy aplikacji"</string>
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Wyświetl powiadomienia"</string>
+    <string name="group_system_full_screenshot" msgid="5742204844232667785">"Zapisz zrzut ekranu"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Pokaż skróty"</string>
+    <string name="group_system_go_back" msgid="2730322046244918816">"Przejdź wstecz"</string>
+    <string name="group_system_access_home_screen" msgid="4130366993484706483">"Wyświetl ekran główny"</string>
+    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Wyświetl ostatnie aplikacje"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Przełącz się do przodu między ostatnimi aplikacjami"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Przełącz się wstecz między ostatnimi aplikacjami"</string>
+    <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Otwórz listę aplikacji"</string>
     <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Pokazywanie paska aplikacji"</string>
-    <string name="group_system_access_system_settings" msgid="8731721963449070017">"Otwieranie ustawień"</string>
-    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Otwieranie asystenta"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"Blokada ekranu"</string>
+    <string name="group_system_access_system_settings" msgid="8731721963449070017">"Otwórz ustawienia"</string>
+    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Otwórz asystenta"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Zablokuj ekran"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Zanotuj"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Wielozadaniowość w systemie"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Uruchamianie trybu podzielonego ekranu z bieżącą aplikacją po prawej"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Uruchamianie trybu podzielonego ekranu z bieżącą aplikacją po lewej"</string>
+    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Uruchom tryb podzielonego ekranu z bieżącą aplikacją po prawej"</string>
+    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Uruchom tryb podzielonego ekranu z bieżącą aplikacją po lewej"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Przełącz podzielony ekran na pełny ekran"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Podczas podzielonego ekranu: zastępowanie aplikacji"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Wprowadzanie"</string>
-    <string name="input_switch_input_language_next" msgid="3782155659868227855">"Przełączanie na następny język"</string>
-    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Przełączanie na poprzedni język"</string>
+    <string name="input_switch_input_language_next" msgid="3782155659868227855">"Przełącz na następny język"</string>
+    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Przełącz na poprzedni język"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"Otwieranie emotikonów"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Otwieranie pisania głosowego"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Aplikacje"</string>

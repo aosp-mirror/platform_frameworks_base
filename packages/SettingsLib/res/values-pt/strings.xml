@@ -437,7 +437,7 @@
     <string name="transcode_default" msgid="3784803084573509491">"Considerar que os apps são compatíveis com formatos modernos"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Mostrar notificações de transcodificação"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Desativar cache da transcodificação"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Configurações o Widevine"</string>
+    <string name="widevine_settings_title" msgid="4023329801172572917">"Configurações de Widevine"</string>
     <string name="force_l3_fallback_title" msgid="4987972688770202547">"Forçar substituição do L3"</string>
     <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Selecione para forçar a substituição do L3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Serviços em execução"</string>

@@ -109,7 +109,7 @@
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"الإعدادات الصوتية للوسائط"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"المكالمات الهاتفية"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"نقل الملف"</string>
-    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"جهاز الإرسال"</string>
+    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"جهاز إدخال بيانات"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"الوصول إلى الإنترنت"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"السماح بالوصول إلى جهات الاتصال وسجلّ المكالمات"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"سيتم استخدام المعلومات لإرسال إشعارات المكالمات وغيرها"</string>
@@ -180,8 +180,8 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"تم ضبط بعض الإعدادات التلقائية"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"لم يتم ضبط إعدادات تلقائية"</string>
     <string name="tts_settings" msgid="8130616705989351312">"إعدادات تحويل النص إلى كلام"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"إخراج النص إلى كلام"</string>
-    <string name="tts_default_rate_title" msgid="3964187817364304022">"معدل سرعة الكلام"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"الصوت عند تحويل النص إلى كلام"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"سرعة الكلام"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"سرعة قول الكلام"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"درجة الصوت"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"للتأثير في نبرة الكلام المُرَكَّب"</string>
@@ -493,8 +493,8 @@
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"إعدادات يتحكم فيها المشرف"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"يتحكّم فيه إعداد محظور"</string>
     <string name="disabled" msgid="8017887509554714950">"غير مفعّل"</string>
-    <string name="external_source_trusted" msgid="1146522036773132905">"مسموح به"</string>
-    <string name="external_source_untrusted" msgid="5037891688911672227">"غير مسموح به"</string>
+    <string name="external_source_trusted" msgid="1146522036773132905">"تطبيق مسموح به"</string>
+    <string name="external_source_untrusted" msgid="5037891688911672227">"تطبيق غير مسموح به"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"تثبيت التطبيقات غير المعروفة"</string>
     <string name="home" msgid="973834627243661438">"الشاشة الرئيسية للإعدادات"</string>
   <string-array name="battery_labels">
@@ -536,7 +536,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"المنبّهات والتذكيرات"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"السماح بضبط المنبّهات والتذكيرات"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"المنبّهات والتذكيرات"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"يمكنك السماح لهذا التطبيق بضبط المنبّهات وجدولة الإجراءات لتنفيذها في الوقت المناسب. ويسمح هذا الإذن بتشغيل التطبيق في الخلفية، ما قد يستهلك المزيد من البطارية.\n\nفي حال عدم تفعيل هذا الإذن، لن تعمل المنبهات الحالية والأحداث المستندة إلى الوقت المضبوطة في هذا التطبيق."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"يمكنك السماح لهذا التطبيق بضبط المنبّهات وجدولة الإجراءات لتنفيذها في الوقت المناسب. ويسمح هذا الإذن بتشغيل التطبيق في الخلفية، ما قد يستهلك المزيد من البطارية.\n\nفي حال عدم تفعيل هذا الإذن، لن تعمل المنبهات المضبوطة والأحداث المستندة إلى الوقت المجدولة حاليًا في هذا التطبيق."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"جدول زمني، جدولة، منبّه، تذكير، ساعة"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"تفعيل"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"تفعيل ميزة \"عدم الإزعاج\""</string>
