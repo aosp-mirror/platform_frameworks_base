@@ -67,6 +67,7 @@ import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityWindowInfo;
+import android.view.accessibility.Flags;
 import android.view.inputmethod.EditorInfo;
 
 import com.android.internal.inputmethod.CancellationGroup;
@@ -623,6 +624,18 @@ public abstract class AccessibilityService extends Service {
      * Action to trigger dpad center keyevent.
      */
     public static final int GLOBAL_ACTION_DPAD_CENTER = 20;
+
+    /**
+     * Action to trigger menu key event.
+     */
+    @FlaggedApi(Flags.FLAG_GLOBAL_ACTION_MENU)
+    public static final int GLOBAL_ACTION_MENU = 21;
+
+    /**
+     * Action to trigger media play/pause key event.
+     */
+    @FlaggedApi(Flags.FLAG_GLOBAL_ACTION_MEDIA_PLAY_PAUSE)
+    public static final int GLOBAL_ACTION_MEDIA_PLAY_PAUSE = 22;
 
     private static final String LOG_TAG = "AccessibilityService";
 

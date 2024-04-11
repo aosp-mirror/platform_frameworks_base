@@ -5882,6 +5882,10 @@
     <string name="accessibility_system_action_hardware_a11y_shortcut_label">Accessibility Shortcut</string>
     <!-- Label for dismissing the notification shade [CHAR LIMIT=NONE] -->
     <string name="accessibility_system_action_dismiss_notification_shade">Dismiss Notification Shade</string>
+     <!-- Label for menu action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_menu_label">Menu</string>
+     <!-- Label for media play/pause action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_media_play_pause_label">Media Play/Pause</string>
     <!-- Label for Dpad up action [CHAR LIMIT=NONE] -->
     <string name="accessibility_system_action_dpad_up_label">Dpad Up</string>
     <!-- Label for Dpad down action [CHAR LIMIT=NONE] -->
