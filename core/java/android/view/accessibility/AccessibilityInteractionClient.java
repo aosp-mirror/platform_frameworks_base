@@ -27,6 +27,7 @@ import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresNoPermission;
 import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -1190,6 +1191,8 @@ public final class AccessibilityInteractionClient
     /**
      * {@inheritDoc}
      */
+    @Override
+    @RequiresNoPermission
     public void setFindAccessibilityNodeInfoResult(AccessibilityNodeInfo info,
                 int interactionId) {
         synchronized (mInstanceLock) {
@@ -1231,6 +1234,8 @@ public final class AccessibilityInteractionClient
     /**
      * {@inheritDoc}
      */
+    @Override
+    @RequiresNoPermission
     public void setFindAccessibilityNodeInfosResult(List<AccessibilityNodeInfo> infos,
                 int interactionId) {
         synchronized (mInstanceLock) {
@@ -1260,6 +1265,7 @@ public final class AccessibilityInteractionClient
      * {@inheritDoc}
      */
     @Override
+    @RequiresNoPermission
     public void setPrefetchAccessibilityNodeInfoResult(@NonNull List<AccessibilityNodeInfo> infos,
                                                        int interactionId) {
         int interactionIdWaitingForPrefetchResultCopy = -1;
@@ -1324,6 +1330,8 @@ public final class AccessibilityInteractionClient
     /**
      * {@inheritDoc}
      */
+    @Override
+    @RequiresNoPermission
     public void setPerformAccessibilityActionResult(boolean succeeded, int interactionId) {
         synchronized (mInstanceLock) {
             if (interactionId > mInteractionId) {
@@ -1372,6 +1380,7 @@ public final class AccessibilityInteractionClient
      * @param interactionId The interaction id of the request.
      */
     @Override
+    @RequiresNoPermission
     public void sendTakeScreenshotOfWindowError(
             @AccessibilityService.ScreenshotErrorCode int errorCode, int interactionId) {
         synchronized (mInstanceLock) {
@@ -1729,6 +1738,7 @@ public final class AccessibilityInteractionClient
      * @param interactionId The interaction id of the request.
      */
     @Override
+    @RequiresNoPermission
     public void sendAttachOverlayResult(
             @AccessibilityService.AttachOverlayResult int result, int interactionId) {
         if (!Flags.a11yOverlayCallbacks()) {
