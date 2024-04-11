@@ -1389,6 +1389,30 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    fun dreamingToPrimaryBouncer() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to DREAMING
+            keyguardRepository.setDreaming(true)
+            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.DREAMING)
+            runCurrent()
+
+            // WHEN the primary bouncer is set to show
+            bouncerRepository.setPrimaryShow(true)
+            runCurrent()
+
+            // THEN a transition to PRIMARY_BOUNCER should occur
+            assertThat(transitionRepository)
+                .startedTransition(
+                    ownerName = "FromDreamingTransitionInteractor",
+                    from = KeyguardState.DREAMING,
+                    to = KeyguardState.PRIMARY_BOUNCER,
+                    animatorAssertion = { it.isNotNull() },
+                )
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
     fun dreamingToAod() =
         testScope.runTest {
             // GIVEN a prior transition has run to DREAMING
