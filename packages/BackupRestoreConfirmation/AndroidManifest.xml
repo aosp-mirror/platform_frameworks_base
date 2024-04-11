@@ -26,7 +26,8 @@
                  android:allowBackup="false"
                  android:permission="android.permission.CONFIRM_FULL_BACKUP" >
 
-        <activity android:name=".BackupRestoreConfirmation" 
+        <activity android:name=".BackupRestoreConfirmation"
+                  android:theme="@style/OptOutEdgeToEdgeEnforcement"
                   android:title=""
                   android:windowSoftInputMode="stateAlwaysHidden"
                   android:excludeFromRecents="true"
