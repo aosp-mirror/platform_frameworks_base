@@ -24,16 +24,18 @@ import android.view.GestureDetector;
 import com.android.systemui.dreams.touch.InputSession;
 import com.android.systemui.shared.system.InputChannelCompat;
 
-import javax.inject.Named;
-
 import dagger.BindsInstance;
 import dagger.Subcomponent;
+
+import javax.inject.Named;
 
 /**
  * {@link InputSessionComponent} generates {@link InputSession} with specific instances bound for
  * the session name and whether touches should be pilfered when consumed.
  */
-@Subcomponent
+@Subcomponent(
+        modules = { InputSessionModule.class }
+)
 public interface InputSessionComponent {
     /**
      * Generates {@link InputSessionComponent}.
