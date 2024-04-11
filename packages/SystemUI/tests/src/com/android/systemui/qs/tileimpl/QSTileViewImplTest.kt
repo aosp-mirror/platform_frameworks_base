@@ -18,7 +18,6 @@ package com.android.systemui.qs.tileimpl
 
 import android.content.Context
 import android.graphics.drawable.Drawable
-import android.platform.test.annotations.EnableFlags
 import android.service.quicksettings.Tile
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -28,10 +27,12 @@ import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.TextView
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags.FLAG_QUICK_SETTINGS_VISUAL_HAPTICS_LONGPRESS
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.haptics.qs.QSLongPressEffect
+import com.android.systemui.haptics.qs.qsLongPressEffect
 import com.android.systemui.plugins.qs.QSTile
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -50,13 +51,14 @@ class QSTileViewImplTest : SysuiTestCase() {
     private lateinit var tileView: FakeTileView
     private lateinit var customDrawableView: View
     private lateinit var chevronView: View
+    private val kosmos = testKosmos()
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         context.ensureTestableResources()
 
-        tileView = FakeTileView(context, false)
+        tileView = FakeTileView(context, false, kosmos.qsLongPressEffect)
         customDrawableView = tileView.requireViewById(R.id.customDrawable)
         chevronView = tileView.requireViewById(R.id.chevron)
     }
@@ -383,7 +385,6 @@ class QSTileViewImplTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(FLAG_QUICK_SETTINGS_VISUAL_HAPTICS_LONGPRESS)
     fun onStateChange_longPressEffectActive_withInvalidDuration_doesNotCreateEffect() {
         val state = QSTile.State() // A state that handles longPress
 
@@ -393,12 +394,11 @@ class QSTileViewImplTest : SysuiTestCase() {
         // WHEN the state changes
         tileView.changeState(state)
 
-        // THEN the long-press effect is not created
-        assertThat(tileView.hasLongPressEffect).isFalse()
+        // THEN the long-press effect is not initialized
+        assertThat(tileView.isLongPressEffectInitialized).isFalse()
     }
 
     @Test
-    @EnableFlags(FLAG_QUICK_SETTINGS_VISUAL_HAPTICS_LONGPRESS)
     fun onStateChange_longPressEffectActive_withValidDuration_createsEffect() {
         // GIVEN a test state that handles long-press and a valid long-press effect duration
         val state = QSTile.State()
@@ -406,12 +406,11 @@ class QSTileViewImplTest : SysuiTestCase() {
         // WHEN the state changes
         tileView.changeState(state)
 
-        // THEN the long-press effect created
-        assertThat(tileView.hasLongPressEffect).isTrue()
+        // THEN the long-press effect is initialized
+        assertThat(tileView.isLongPressEffectInitialized).isTrue()
     }
 
     @Test
-    @EnableFlags(FLAG_QUICK_SETTINGS_VISUAL_HAPTICS_LONGPRESS)
     fun onStateChange_fromLongPress_to_noLongPress_unBoundsTile() {
         // GIVEN a state that no longer handles long-press
         val state = QSTile.State()
@@ -421,11 +420,10 @@ class QSTileViewImplTest : SysuiTestCase() {
         tileView.changeState(state)
 
         // THEN the view binder no longer binds the view to the long-press effect
-        assertThat(tileView.isLongPressEffectBound).isFalse()
+        assertThat(tileView.longPressEffectHandle).isNull()
     }
 
     @Test
-    @EnableFlags(FLAG_QUICK_SETTINGS_VISUAL_HAPTICS_LONGPRESS)
     fun onStateChange_fromNoLongPress_to_longPress_bindsTile() {
         // GIVEN that the tile has changed to a state that does not handle long-press
         val state = QSTile.State()
@@ -437,15 +435,53 @@ class QSTileViewImplTest : SysuiTestCase() {
         tileView.changeState(state)
 
         // THEN the view is bounded to the long-press effect
-        assertThat(tileView.isLongPressEffectBound).isTrue()
+        assertThat(tileView.longPressEffectHandle).isNotNull()
+    }
+
+    @Test
+    fun onStateChange_withoutLongPressEffect_fromLongPress_to_noLongPress_neverBindsEffect() {
+        // GIVEN a tile where the long-press effect is null
+        tileView = FakeTileView(context, false, null)
+
+        // GIVEN a state that no longer handles long-press
+        val state = QSTile.State()
+        state.handlesLongClick = false
+
+        // WHEN the state changes
+        tileView.changeState(state)
+
+        // THEN the view binder does not bind the view and no effect is initialized
+        assertThat(tileView.longPressEffectHandle).isNull()
+        assertThat(tileView.isLongPressEffectInitialized).isFalse()
+    }
+
+    @Test
+    fun onStateChange_withoutLongPressEffect_fromNoLongPress_to_longPress_neverBindsEffect() {
+        // GIVEN a tile where the long-press effect is null
+        tileView = FakeTileView(context, false, null)
+
+        // GIVEN that the tile has changed to a state that does not handle long-press
+        val state = QSTile.State()
+        state.handlesLongClick = false
+        tileView.changeState(state)
+
+        // WHEN the state changes back to handling long-press
+        state.handlesLongClick = true
+        tileView.changeState(state)
+
+        // THEN the view binder does not bind the view and no effect is initialized
+        assertThat(tileView.longPressEffectHandle).isNull()
+        assertThat(tileView.isLongPressEffectInitialized).isFalse()
     }
 
     class FakeTileView(
         context: Context,
-        collapsed: Boolean
+        collapsed: Boolean,
+        longPressEffect: QSLongPressEffect?,
     ) : QSTileViewImpl(
             ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings),
-            collapsed
+            collapsed,
+            longPressEffect,
     ) {
         var constantLongPressEffectDuration = 500
 
