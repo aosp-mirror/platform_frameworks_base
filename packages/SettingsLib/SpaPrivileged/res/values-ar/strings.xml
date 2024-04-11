@@ -20,8 +20,8 @@
     <string name="no_applications" msgid="5800789569715871963">"ليس هناك أي تطبيقات."</string>
     <string name="menu_show_system" msgid="906304605807554788">"إظهار عمليات النظام"</string>
     <string name="menu_hide_system" msgid="374571689914923020">"إخفاء عمليات النظام"</string>
-    <string name="app_permission_summary_allowed" msgid="6115213465364138103">"مسموح به"</string>
-    <string name="app_permission_summary_not_allowed" msgid="58396132188553920">"غير مسموح به"</string>
+    <string name="app_permission_summary_allowed" msgid="6115213465364138103">"تطبيق مسموح به"</string>
+    <string name="app_permission_summary_not_allowed" msgid="58396132188553920">"تطبيق غير مسموح به"</string>
     <string name="version_text" msgid="4001669804596458577">"الإصدار <xliff:g id="VERSION_NUM">%1$s</xliff:g>"</string>
     <string name="cloned_app_info_label" msgid="1765651167024478391">"نسخة طبق الأصل من \"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>\""</string>
 </resources>
