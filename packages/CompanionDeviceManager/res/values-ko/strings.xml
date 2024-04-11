@@ -30,7 +30,7 @@
     <string name="summary_app_streaming" msgid="295548145144086753">"%1$s에서 오디오, 사진, 비밀번호, 메시지 등 휴대전화에 표시되거나 휴대전화에서 재생되는 모든 항목에 액세스할 수 있습니다.&lt;br/&gt;&lt;br/&gt;이 권한에 대한 액세스를 삭제할 때까지 %1$s에서 앱을 스트리밍할 수 있습니다."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"교차 기기 서비스"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g>에서 <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> 대신 기기 간에 앱을 스트리밍할 수 있는 권한을 요청하고 있습니다."</string>
-    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g>에서 <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> 대신 기기 간 앱을 표시하고 스트리밍할 권한을 요청하고 있습니다."</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g>에서 <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> 대신 연결된 기기의 앱을 표시하고 스트리밍할 권한을 요청하고 있습니다."</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;이 휴대전화에서 이 정보에 액세스하도록 허용"</string>

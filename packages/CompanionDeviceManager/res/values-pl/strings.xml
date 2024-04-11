@@ -30,7 +30,7 @@
     <string name="summary_app_streaming" msgid="295548145144086753">"%1$s będzie mieć dostęp do wszystkiego, co jest widoczne i odtwarzane na telefonie, w tym do dźwięku, zdjęć, haseł i wiadomości.&lt;br/&gt;&lt;br/&gt;%1$s będzie w stanie strumieniować aplikacje, dopóki nie usuniesz dostępu do tego uprawnienia."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Usługi na innym urządzeniu"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> prosi w imieniu urządzenia <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> o uprawnienia dotyczące strumieniowego odtwarzania treści z aplikacji na innym urządzeniu"</string>
-    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g> prosi w imieniu urządzenia <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> o pozwolenie na wyświetlanie i strumieniowanie aplikacji między Twoimi urządzeniami"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> prosi w imieniu urządzenia <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> o pozwolenie na wyświetlanie i strumieniowanie aplikacji między Twoimi urządzeniami"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"Zezwól aplikacji &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; na dostęp do tych informacji na Twoim telefonie"</string>

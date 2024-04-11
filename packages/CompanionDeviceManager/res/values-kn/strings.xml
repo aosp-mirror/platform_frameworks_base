@@ -30,7 +30,7 @@
     <string name="summary_app_streaming" msgid="295548145144086753">"ಆಡಿಯೋ, ಫೋಟೋಗಳು, ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಮತ್ತು ಸಂದೇಶಗಳು ಸೇರಿದಂತೆ ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ ಗೋಚರಿಸುವ ಅಥವಾ ಪ್ಲೇ ಆಗುವ ಯಾವುದೇ ಕಂಟೆಂಟ್‌ಗೆ %1$s ಆ್ಯಕ್ಸೆಸ್ ಹೊಂದಿರುತ್ತದೆ.&lt;br/&gt;&lt;br/&gt;ನೀವು ಈ ಅನುಮತಿಗೆ ಇರುವ ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ತೆಗೆದುಹಾಕುವವರೆಗೆ %1$s ಗೆ ಆ್ಯಪ್‌ಗಳನ್ನು ಸ್ಟ್ರೀಮ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗುತ್ತದೆ."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"ಕ್ರಾಸ್-ಡಿವೈಸ್ ಸೇವೆಗಳು"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"ನಿಮ್ಮ ಸಾಧನಗಳ ನಡುವೆ ಆ್ಯಪ್‌ಗಳನ್ನು ಸ್ಟ್ರೀಮ್ ಮಾಡಲು ನಿಮ್ಮ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> ನ ಪರವಾಗಿ <xliff:g id="APP_NAME">%1$s</xliff:g> ಅನುಮತಿಯನ್ನು ವಿನಂತಿಸಿಕೊಳ್ಳುತ್ತಿದೆ"</string>
-    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"ನಿಮ್ಮ ಸಾಧನಗಳ ನಡುವೆ ಆ್ಯಪ್‌ಗಳನ್ನು ಪ್ರದರ್ಶಿಸಲು ಮತ್ತು ಸ್ಟ್ರೀಮ್ ಮಾಡಲು ನಿಮ್ಮ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> ಪರವಾಗಿ <xliff:g id="APP_NAME">%1$s</xliff:g> ಅನುಮತಿಯನ್ನು ವಿನಂತಿಸುತ್ತಿದೆ"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"ನಿಮ್ಮ ಸಾಧನಗಳ ನಡುವೆ ಆ್ಯಪ್‌ಗಳನ್ನು ಪ್ರದರ್ಶಿಸಲು ಮತ್ತು ಸ್ಟ್ರೀಮ್ ಮಾಡಲು ನಿಮ್ಮ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> ಪರವಾಗಿ <xliff:g id="APP_NAME">%1$s</xliff:g> ಅನುಮತಿಯನ್ನು ವಿನಂತಿಸುತ್ತಿವೆ"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"ನಿಮ್ಮ ಫೋನ್ ಮೂಲಕ ಈ ಮಾಹಿತಿಯನ್ನು ಪ್ರವೇಶಿಸಲು &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ಗೆ ಅನುಮತಿಸಿ"</string>
