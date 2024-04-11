@@ -12,7 +12,7 @@
     <string name="lockscreen_label" msgid="648347953557887087">"Sluitskerm"</string>
     <string name="quick_settings_label" msgid="2999117381487601865">"Kitsinstellings"</string>
     <string name="notifications_label" msgid="6829741046963013567">"Kennisgewings"</string>
-    <string name="screenshot_label" msgid="863978141223970162">"Skermkiekie"</string>
+    <string name="screenshot_label" msgid="863978141223970162">"Skermskoot"</string>
     <string name="screenshot_utterance" msgid="1430760563401895074">"Neem skermkiekie"</string>
     <string name="volume_up_label" msgid="8592766918780362870">"Volume harder"</string>
     <string name="volume_down_label" msgid="8574981863656447346">"Volume sagter"</string>

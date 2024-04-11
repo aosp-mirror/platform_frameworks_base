@@ -21,7 +21,7 @@
     <string name="previous_button_content_description" msgid="840869171117765966">"Мурунку экранга өтүү"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"Кийинки экранга өтүү"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"Атайын мүмкүнчүлүктөр менюсу — бул түзмөгүңүздү көзөмөлдөөнү жеңилдетүүгө ылайыкташтырылган экрандагы чоң меню. Түзмөгүңүздү кулпулап, үнүнүн катуулугун жана экрандын жарыктыгын көзөмөлдөп, скриншотторду тартып жана башка аракеттерди аткара аласыз."</string>
-    <string name="accessibility_menu_summary" msgid="340071398148208130">"Түзмөктү чоң менюдан башкаруу"</string>
+    <string name="accessibility_menu_summary" msgid="340071398148208130">"Түзмөктү чоң менюдан башкарасыз"</string>
     <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Атайын мүмкүнчүлүктөр менюсунун параметрлери"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"Чоң баскычтар"</string>
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"Атайын мүмкүнчүлүктөр менюсундагы баскычтардын өлчөмүн чоңойтот"</string>
