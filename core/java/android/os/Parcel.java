@@ -863,6 +863,28 @@ public final class Parcel {
     }
 
     /** @hide */
+    public void removeClassCookie(Class clz, Object expectedCookie) {
+        if (mClassCookies != null) {
+            Object removedCookie = mClassCookies.remove(clz);
+            if (removedCookie != expectedCookie) {
+                Log.wtf(TAG, "Expected to remove " + expectedCookie + " (with key=" + clz
+                        + ") but instead removed " + removedCookie);
+            }
+        } else {
+            Log.wtf(TAG, "Expected to remove " + expectedCookie + " (with key=" + clz
+                    + ") but no cookies were present");
+        }
+    }
+
+    /**
+     * Whether {@link #setClassCookie} has been called with the specified {@code clz}.
+     * @hide
+     */
+    public boolean hasClassCookie(Class clz) {
+        return mClassCookies != null && mClassCookies.containsKey(clz);
+    }
+
+    /** @hide */
     public final void adoptClassCookies(Parcel from) {
         mClassCookies = from.mClassCookies;
     }
