@@ -50,6 +50,9 @@ class ShowImeOnAppStartWhenLaunchingAppFromOverviewTest(flicker: LegacyFlickerTe
             testApp.launchViaIntent(wmHelper)
             testApp.openIME(wmHelper)
             this.setRotation(flicker.scenario.startRotation)
+            if (flicker.scenario.isTablet) {
+                tapl.launchedAppState.swipeUpToUnstashTaskbar()
+            }
             tapl.launchedAppState.switchToOverview()
             wmHelper.StateSyncBuilder().withRecentsActivityVisible().waitForAndVerify()
         }
