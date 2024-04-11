@@ -26,7 +26,9 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.MediaTestHelper
 import com.android.systemui.media.controls.shared.model.MediaData
+import com.android.systemui.media.controls.shared.model.MediaDataLoadingModel
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
+import com.android.systemui.media.controls.shared.model.SmartspaceMediaLoadingModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -142,6 +144,37 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
 
             assertThat(smartspaceMediaData).isNotEqualTo(mediaRecommendation)
             assertThat(smartspaceMediaData?.isActive).isFalse()
+        }
+
+    @Test
+    fun addMediaDataLoadingState() =
+        testScope.runTest {
+            val mediaDataLoadedStates by collectLastValue(underTest.mediaDataLoadedStates)
+            val instanceId = InstanceId.fakeInstanceId(123)
+            val mediaLoadedStates = mutableListOf(MediaDataLoadingModel.Loaded(instanceId))
+
+            underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(instanceId))
+
+            assertThat(mediaDataLoadedStates).isEqualTo(mediaLoadedStates)
+
+            mediaLoadedStates.remove(MediaDataLoadingModel.Loaded(instanceId))
+
+            underTest.addMediaDataLoadingState(MediaDataLoadingModel.Removed(instanceId))
+
+            assertThat(mediaDataLoadedStates).isEqualTo(mediaLoadedStates)
+        }
+
+    @Test
+    fun setRecommendationsLoadingState() =
+        testScope.runTest {
+            val recommendationsLoadingState by
+                collectLastValue(underTest.recommendationsLoadingState)
+            val recommendationsLoadingModel =
+                SmartspaceMediaLoadingModel.Loaded(KEY_MEDIA_SMARTSPACE)
+
+            underTest.setRecommedationsLoadingState(recommendationsLoadingModel)
+
+            assertThat(recommendationsLoadingState).isEqualTo(recommendationsLoadingModel)
         }
 
     companion object {
