@@ -7,6 +7,16 @@ message Capability {
   string name = 1;
 }
 
+message VMCapability {
+  string name  = 1;
+}
+
+message FrameworkCapability {
+  string name  = 1;
+}
+
 message Capabilities {
   repeated Capability values = 1;
+  repeated VMCapability vm_capabilities = 2;
+  repeated FrameworkCapability framework_capabilities = 3;
 }
