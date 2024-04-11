@@ -1129,7 +1129,9 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         }
 
         updateSelectedRingerContainerDescription(true);
-
+        mSelectedRingerContainer.setImportantForAccessibility(
+                View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        mSelectedRingerContainer.clearFocus();
         mIsRingerDrawerOpen = true;
     }
 
@@ -1175,7 +1177,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 .start();
 
         updateSelectedRingerContainerDescription(false);
-
+        mSelectedRingerContainer.setImportantForAccessibility(
+                View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
         mIsRingerDrawerOpen = false;
     }
 
@@ -1746,7 +1749,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             boolean isZenMuted = mState.zenMode == Global.ZEN_MODE_ALARMS
                     || mState.zenMode == Global.ZEN_MODE_NO_INTERRUPTIONS
                     || (mState.zenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
-                        && mState.disallowRinger);
+                    && mState.disallowRinger);
             enableRingerViewsH(!isZenMuted);
             switch (mState.ringerModeInternal) {
                 case AudioManager.RINGER_MODE_VIBRATE:
@@ -1796,7 +1799,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
                 super.onInitializeAccessibilityNodeInfo(host, info);
                 info.addAction(new AccessibilityNodeInfo.AccessibilityAction(
-                                AccessibilityNodeInfo.ACTION_CLICK, hintLabel));
+                        AccessibilityNodeInfo.ACTION_CLICK, hintLabel));
             }
         });
     }
