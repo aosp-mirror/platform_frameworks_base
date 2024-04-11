@@ -32,7 +32,6 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.wear.compose.material.ChipColors
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.wear.compose.material.ChipDefaults
 import com.android.credentialmanager.R
@@ -80,8 +79,7 @@ fun CredentialsScreenChip(
     icon: Drawable? = null,
     isAuthenticationEntryLocked: Boolean = false,
     modifier: Modifier = Modifier,
-    colors: ChipColors =
-        ChipDefaults.chipColors(backgroundColor = colorResource(R.color.wear_material_almond)),
+    colors: ChipColors = ChipDefaults.primaryChipColors(),
     ) {
     val labelParam: (@Composable RowScope.() -> Unit) =
         {
@@ -168,11 +166,9 @@ fun ContinueChip(onClick: () -> Unit) {
             WearButtonText(
                 text = stringResource(R.string.dialog_continue_button),
                 textAlign = TextAlign.Center,
-                color = colorResource(R.color.wear_material_almond_dark),
             )
         },
-        colors =
-        ChipDefaults.chipColors(backgroundColor = colorResource(R.color.wear_material_almond)),
+        colors = ChipDefaults.primaryChipColors(),
     )
 }
 

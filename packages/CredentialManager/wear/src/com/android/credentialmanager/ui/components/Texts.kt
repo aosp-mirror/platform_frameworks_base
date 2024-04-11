@@ -26,7 +26,6 @@ import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.android.compose.theme.LocalAndroidColorScheme
 import androidx.wear.compose.material.MaterialTheme as WearMaterialTheme
 
 @Composable
@@ -34,7 +33,7 @@ fun WearTitleText(text: String, modifier: Modifier = Modifier) {
     Text(
         modifier = modifier.wrapContentSize(),
         text = text,
-        color = LocalAndroidColorScheme.current.onSurface,
+        color = WearMaterialTheme.colors.onSurface,
         textAlign = TextAlign.Center,
         style = WearMaterialTheme.typography.title3,
     )
@@ -45,7 +44,7 @@ fun WearDisplayNameText(text: String, modifier: Modifier = Modifier) {
     Text(
         modifier = modifier.wrapContentSize(),
         text = text,
-        color = LocalAndroidColorScheme.current.onSurface,
+        color = WearMaterialTheme.colors.onSurfaceVariant,
         textAlign = TextAlign.Center,
         overflow = TextOverflow.Ellipsis,
         maxLines = 2,
@@ -56,28 +55,30 @@ fun WearDisplayNameText(text: String, modifier: Modifier = Modifier) {
 @Composable
 fun WearUsernameText(
     text: String,
+    textAlign: TextAlign = TextAlign.Center,
     modifier: Modifier = Modifier,
     onTextLayout: (TextLayoutResult) -> Unit = {},
 ) {
     Text(
         modifier = modifier.padding(start = 8.dp, end = 8.dp).wrapContentSize(),
         text = text,
-        color = LocalAndroidColorScheme.current.onSurfaceVariant,
+        color = WearMaterialTheme.colors.onSurfaceVariant,
         style = WearMaterialTheme.typography.caption1,
         overflow = TextOverflow.Ellipsis,
-        textAlign = TextAlign.Center,
+        textAlign = textAlign,
         maxLines = 2,
         onTextLayout = onTextLayout,
     )
 }
 
+// used for primary label in button
 @Composable
 fun WearButtonText(
     text: String,
     textAlign: TextAlign,
     maxLines: Int = 1,
     modifier: Modifier = Modifier,
-    color: Color = LocalAndroidColorScheme.current.onSurface,
+    color: Color = WearMaterialTheme.colors.onSurface,
     onTextLayout: (TextLayoutResult) -> Unit = {},
 ) {
     Text(
@@ -101,8 +102,8 @@ fun WearSecondaryLabel(
     Text(
         modifier = modifier.wrapContentSize(),
         text = text,
-        color = LocalAndroidColorScheme.current.onSurfaceVariant,
-        style = WearMaterialTheme.typography.button,
+        color = WearMaterialTheme.colors.onSurfaceVariant,
+        style = WearMaterialTheme.typography.caption1,
         overflow = TextOverflow.Ellipsis,
         textAlign = TextAlign.Start,
         maxLines = 1,
