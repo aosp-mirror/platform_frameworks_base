@@ -19,20 +19,20 @@ package com.android.systemui.keyguard.shared.model
 enum class TransitionState {
     /* Transition has begun. */
     STARTED {
-        override fun isActive() = true
+        override fun isTransitioning() = true
     },
     /* Transition is actively running. */
     RUNNING {
-        override fun isActive() = true
+        override fun isTransitioning() = true
     },
     /* Transition has completed successfully. */
     FINISHED {
-        override fun isActive() = false
+        override fun isTransitioning() = false
     },
     /* Transition has been interrupted, and not completed successfully. */
     CANCELED {
-        override fun isActive() = false
+        override fun isTransitioning() = false
     };
 
-    abstract fun isActive(): Boolean
+    abstract fun isTransitioning(): Boolean
 }

@@ -84,7 +84,7 @@ constructor(
 
         applicationScope.launch(bgDispatcher) {
             // We drop 1 to avoid triggering on initial collect().
-            keyguardTransitionInteractor.transition(from = null, to = GONE).collect { transition ->
+            keyguardTransitionInteractor.transition(to = GONE).collect { transition ->
                 if (transition.transitionState == TransitionState.FINISHED) {
                     onKeyguardGone()
                 }
