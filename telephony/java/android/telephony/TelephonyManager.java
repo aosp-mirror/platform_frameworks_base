@@ -19264,6 +19264,26 @@ public class TelephonyManager {
     }
 
     /**
+     * Returns whether the AOSP domain selection service is supported.
+     *
+     * @return {@code true} if the AOSP domain selection service is supported.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CALLING)
+    public boolean isAospDomainSelectionService() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isAospDomainSelectionService();
+            }
+        } catch (RemoteException ex) {
+            Rlog.w(TAG, "RemoteException", ex);
+        }
+        return false;
+    }
+
+    /**
      * Returns the primary IMEI (International Mobile Equipment Identity) of the device as
      * mentioned in GSMA TS.37. {@link #getImei(int)} returns the IMEI that belongs to the selected
      * slotID whereas this API {@link #getPrimaryImei()} returns primary IMEI of the device.

@@ -3244,6 +3244,12 @@ interface ITelephony {
     boolean clearDomainSelectionServiceOverride();
 
     /**
+     * @return {@code true} if the AOSP domain selection service is supported,
+     *         {@code false} otherwise.
+     */
+    boolean isAospDomainSelectionService();
+
+    /**
      * Enable or disable notifications sent for cellular identifier disclosure events.
      *
      * Disclosure events are defined as instances where a device has sent a cellular identifier
