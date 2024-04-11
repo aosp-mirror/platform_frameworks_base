@@ -8942,8 +8942,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 : mDisplayContent.getDisplayInfo();
         final Task task = getTask();
         task.calculateInsetFrames(mTmpBounds /* outNonDecorBounds */,
-                outStableBounds /* outStableBounds */, parentBounds /* bounds */, di,
-                true /* useLegacyInsetsForStableBounds */);
+                outStableBounds /* outStableBounds */, parentBounds /* bounds */, di);
         final int orientationWithInsets = outStableBounds.height() >= outStableBounds.width()
                 ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
         // If orientation does not match the orientation with insets applied, then a
