@@ -795,4 +795,27 @@ public class BluetoothUtils {
     public static Set<String> getExclusiveManagers() {
         return EXCLUSIVE_MANAGERS;
     }
+
+    /**
+     * Get CSIP group id for {@link CachedBluetoothDevice}.
+     *
+     * <p>If CachedBluetoothDevice#getGroupId is invalid, fetch group id from
+     * LeAudioProfile#getGroupId.
+     */
+    public static int getGroupId(@NonNull CachedBluetoothDevice cachedDevice) {
+        int groupId = cachedDevice.getGroupId();
+        String anonymizedAddress = cachedDevice.getDevice().getAnonymizedAddress();
+        if (groupId != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
+            Log.d(TAG, "getGroupId by CSIP profile for device: " + anonymizedAddress);
+            return groupId;
+        }
+        for (LocalBluetoothProfile profile : cachedDevice.getProfiles()) {
+            if (profile instanceof LeAudioProfile) {
+                Log.d(TAG, "getGroupId by LEA profile for device: " + anonymizedAddress);
+                return ((LeAudioProfile) profile).getGroupId(cachedDevice.getDevice());
+            }
+        }
+        Log.d(TAG, "getGroupId return invalid id for device: " + anonymizedAddress);
+        return BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
+    }
 }
