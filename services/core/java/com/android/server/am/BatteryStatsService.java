@@ -133,6 +133,7 @@ import com.android.server.power.stats.PowerStatsScheduler;
 import com.android.server.power.stats.PowerStatsStore;
 import com.android.server.power.stats.PowerStatsUidResolver;
 import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
+import com.android.server.power.stats.WifiPowerStatsProcessor;
 import com.android.server.power.stats.wakeups.CpuWakeupStats;
 
 import java.io.File;
@@ -485,6 +486,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
                 .setProcessor(
                         new CpuPowerStatsProcessor(mPowerProfile, mCpuScalingPolicies));
+
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)
                 .trackDeviceStates(
                         AggregatedPowerStatsConfig.STATE_POWER,
@@ -495,9 +497,21 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
                 .setProcessor(
                         new MobileRadioPowerStatsProcessor(mPowerProfile));
+
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_PHONE,
                         BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)
                 .setProcessor(new PhoneCallPowerStatsProcessor());
+
+        config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_WIFI)
+                .trackDeviceStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN)
+                .trackUidStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN,
+                        AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
+                .setProcessor(
+                        new WifiPowerStatsProcessor(mPowerProfile));
         return config;
     }
 
