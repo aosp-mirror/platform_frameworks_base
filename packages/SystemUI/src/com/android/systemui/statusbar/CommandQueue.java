@@ -50,6 +50,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.view.KeyEvent;
@@ -516,7 +517,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         /**
          * @see IStatusBar#showMediaOutputSwitcher
          */
-        default void showMediaOutputSwitcher(String packageName) {}
+        default void showMediaOutputSwitcher(String packageName, UserHandle userHandle) {}
 
         /**
          * @see IStatusBar#confirmImmersivePrompt
@@ -1361,7 +1362,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         }
     }
     @Override
-    public void showMediaOutputSwitcher(String packageName) {
+    public void showMediaOutputSwitcher(String packageName, UserHandle userHandle) {
         int callingUid = Binder.getCallingUid();
         if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
             throw new SecurityException("Call only allowed from system server.");
@@ -1369,6 +1370,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = packageName;
+            args.arg2 = userHandle;
             mHandler.obtainMessage(MSG_SHOW_MEDIA_OUTPUT_SWITCHER, args).sendToTarget();
         }
     }
@@ -1939,8 +1941,10 @@ public class CommandQueue extends IStatusBar.Stub implements
                 case MSG_SHOW_MEDIA_OUTPUT_SWITCHER:
                     args = (SomeArgs) msg.obj;
                     String clientPackageName = (String) args.arg1;
+                    UserHandle clientUserHandle = (UserHandle) args.arg2;
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).showMediaOutputSwitcher(clientPackageName);
+                        mCallbacks.get(i).showMediaOutputSwitcher(clientPackageName,
+                                clientUserHandle);
                     }
                     break;
                 case MSG_CONFIRM_IMMERSIVE_PROMPT:
