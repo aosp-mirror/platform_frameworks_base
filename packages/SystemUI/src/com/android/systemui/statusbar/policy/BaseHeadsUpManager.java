@@ -908,8 +908,12 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
                     mLogger.logAutoRemoveCanceled(mEntry, reason);
                 }
             };
-            mAvalancheController.update(this, runnable,
-                    reason + " removeAutoRemovalCallbacks");
+            if (isHeadsUpEntry(this.mEntry.getKey())) {
+                mAvalancheController.update(this, runnable, reason + " cancelAutoRemovalCallbacks");
+            } else {
+                // Just removed
+                runnable.run();
+            }
         }
 
         public void scheduleAutoRemovalCallback(FinishTimeUpdater finishTimeCalculator,
