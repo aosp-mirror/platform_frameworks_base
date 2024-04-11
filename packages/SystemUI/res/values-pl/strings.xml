@@ -568,15 +568,15 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Bez dźwięku i wibracji"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Brak dźwięku i wibracji, wyświetlają się niżej w sekcji rozmów"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"Mogą włączać dzwonek lub wibracje w zależności od ustawień urządzenia"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Mogą włączyć dzwonek lub wibracje w zależności od ustawień urządzenia. Rozmowy z aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g> są domyślnie wyświetlane jako dymki."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Mogą włączać dzwonek lub wibracje w zależności od ustawień urządzenia. Rozmowy z aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g> są domyślnie wyświetlane jako dymki."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Pozwól systemowi decydować, czy o powiadomieniu powinien informować dźwięk czy wibracja"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Stan:&lt;/b&gt; zmieniony na Domyślny"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Stan:&lt;/b&gt; zmieniono na Ciche"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Stan:&lt;/b&gt; podniesiono ważność"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Stan:&lt;/b&gt; obniżono ważność"</string>
-    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady"</string>
-    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady, jako dymek"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady, przerywa działanie trybu Nie przeszkadzać"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Wyświetlają się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Wyświetlają się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady, jako dymek"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Wyświetlają się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady, przerywają działanie trybu Nie przeszkadzać"</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady, jako dymek, przerywa działanie trybu Nie przeszkadzać"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorytetowe"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> nie obsługuje funkcji rozmów"</string>
@@ -654,17 +654,17 @@
     <string name="group_system_go_back" msgid="8838454003680364227">"Wstecz: powrót do poprzedniego stanu (przycisk Wstecz)"</string>
     <string name="group_system_access_home_screen" msgid="1857344316928441909">"Otwieranie ekranu głównego"</string>
     <string name="group_system_overview_open_apps" msgid="6897128761003265350">"Przegląd otwartych aplikacji"</string>
-    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Przełączanie się między ostatnimi aplikacjami (do przodu)"</string>
-    <string name="group_system_cycle_back" msgid="5163464503638229131">"Przełączanie się między ostatnimi aplikacjami (wstecz)"</string>
+    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Przełącz się między ostatnimi aplikacjami (do przodu)"</string>
+    <string name="group_system_cycle_back" msgid="5163464503638229131">"Przełącz się między ostatnimi aplikacjami (wstecz)"</string>
     <string name="group_system_access_all_apps_search" msgid="488070738028991753">"Otwieranie listy wszystkich aplikacji i wyszukiwanie (tj. wyszukiwarka/Launcher)"</string>
     <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"Ukrywanie i ponowne pokazywanie paska aplikacji"</string>
     <string name="group_system_access_system_settings" msgid="7961639365383008053">"Otwieranie ustawień systemu"</string>
     <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Otwieranie Asystenta Google"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"Blokada ekranu"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Zablokuj ekran"</string>
     <string name="group_system_quick_memo" msgid="2914234890158583919">"Otwieranie aplikacji do notatek w przypadku szybkich notatek"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Wielozadaniowość w systemie"</string>
-    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Uruchamianie trybu podzielonego ekranu z bieżącą aplikacją po prawej"</string>
-    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Uruchamianie trybu podzielonego ekranu z bieżącą aplikacją po lewej"</string>
+    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Uruchom tryb podzielonego ekranu z bieżącą aplikacją po prawej"</string>
+    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Uruchom tryb podzielonego ekranu z bieżącą aplikacją po lewej"</string>
     <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Przełączanie podzielonego ekranu na pełny ekran"</string>
     <string name="system_multitasking_replace" msgid="844285282472557186">"Podczas podzielonego ekranu: zastępowanie aplikacji"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Wprowadzanie"</string>
