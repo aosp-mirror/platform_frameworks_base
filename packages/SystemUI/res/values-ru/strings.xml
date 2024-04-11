@@ -350,6 +350,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"Запись неисправности"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Начать"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Остановить"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Отчет об ошибке"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"С чем связана проблема, с которой вы столкнулись?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Выберите тип проблемы"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Запись экрана"</string>
@@ -363,14 +364,10 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Стандартная"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Средняя"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Высокая"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
-    <skip />
-    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
-    <skip />
-    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
-    <skip />
-    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Слуховые аппараты"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Слуховые аппараты"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Подключить новое устройство"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Нажмите, чтобы подключить новое устройство"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Разблокировать микрофон устройства?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Разблокировать камеру устройства?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Разблокировать камеру и микрофон устройства?"</string>
@@ -678,7 +675,7 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Статус:&lt;/b&gt; уровень важности понижен"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Появляется в верхней части уведомлений о сообщениях, а также в качестве фото профиля на заблокированном экране"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Появляется в верхней части уведомлений о сообщениях, в виде всплывающего чата, а также в качестве фото профиля на заблокированном экране."</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Появляется в верхней части уведомлений о сообщениях, а также в качестве фото профиля на заблокированном экране, прерывает режим \"Не беспокоить\"."</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Появляется в верхней части уведомлений о сообщениях, а также в виде фото профиля на заблокированном экране, прерывает режим \"Не беспокоить\"."</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Появляется в верхней части уведомлений о сообщениях, в виде всплывающего чата, а также в качестве фото профиля на заблокированном экране, прерывает режим \"Не беспокоить\"."</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" не поддерживает функции разговоров."</string>
@@ -745,7 +742,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Переключение раскладки"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"или"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Удалить поисковый запрос"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Сочетания клавиш"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Быстрые клавиши"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Поиск сочетаний клавиш"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Нет сочетаний клавиш."</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Система"</string>
@@ -770,9 +767,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Открыть Ассистента"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Заблокировать экран"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Создать заметку"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Режим многозадачности"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Включить разделение экрана с текущим приложением справа"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Включить разделение экрана с текущим приложением слева"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Многозадачность"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Разделить экран и поместить это приложение справа"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Разделить экран и поместить это приложение слева"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Изменить режим разделения экрана на полноэкранный режим"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Перейти к приложению справа или внизу на разделенном экране"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Перейти к приложению слева или вверху на разделенном экране"</string>
@@ -783,7 +780,7 @@
     <string name="input_access_emoji" msgid="8105642858900406351">"Открыть список эмодзи"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Активировать голосовой ввод"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Приложения"</string>
-    <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Открыть Ассистента"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Ассистент"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Браузер"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Контакты"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"Эл. почта"</string>
@@ -1123,8 +1120,8 @@
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Номер сборки"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Номер сборки скопирован в буфер обмена."</string>
     <string name="basic_status" msgid="2315371112182658176">"Открытый чат"</string>
-    <string name="select_conversation_title" msgid="6716364118095089519">"Виджеты чатов"</string>
-    <string name="select_conversation_text" msgid="3376048251434956013">"Нажмите на чат, чтобы добавить его на главный экран"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"Виджеты разговоров"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Нажмите на разговор, чтобы добавить его на главный экран"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"Здесь появятся ваши недавние разговоры."</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Важные разговоры"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Недавние разговоры"</string>
@@ -1291,7 +1288,7 @@
     <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"Развернуть и показать параметры"</string>
     <string name="privacy_dialog_collapse_action" msgid="277419962019466347">"Свернуть"</string>
     <string name="privacy_dialog_close_app_button" msgid="8006250171305878606">"Закрыть это приложение"</string>
-    <string name="privacy_dialog_close_app_message" msgid="1316408652526310985">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" закрыто."</string>
+    <string name="privacy_dialog_close_app_message" msgid="1316408652526310985">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" закрыто"</string>
     <string name="privacy_dialog_manage_service" msgid="8320590856621823604">"Настроить сервис"</string>
     <string name="privacy_dialog_manage_permissions" msgid="2543451567190470413">"Настроить доступ"</string>
     <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"Сейчас используется для телефонного звонка"</string>

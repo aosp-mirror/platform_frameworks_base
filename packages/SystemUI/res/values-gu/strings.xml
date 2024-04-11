@@ -333,7 +333,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"સૂર્યોદય સુધી"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g> વાગ્યે"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> સુધી"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"ઘેરી થીમ"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"ડાર્ક થીમ"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"બૅટરી સેવર"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"સૂર્યાસ્ત વખતે"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"સૂર્યોદય સુધી"</string>
@@ -350,6 +350,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"રેકોર્ડિંગમાં સમસ્યા"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"શરૂ કરો"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"રોકો"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"બગ રિપોર્ટ"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"ડિવાઇસ સંબંધી તમારા અનુભવના કયા ભાગને અસર થઈ હતી?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"સમસ્યાનો પ્રકાર પસંદ કરો"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"સ્ક્રીન રેકોર્ડ કરો"</string>
@@ -363,14 +364,10 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"સ્ટૅન્ડર્ડ"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"મધ્યમ"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"વધુ"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
-    <skip />
-    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
-    <skip />
-    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
-    <skip />
-    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"સાંભળવામાં મદદ આપતા ડિવાઇસ"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"સાંભળવામાં મદદ આપતા ડિવાઇસ"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"નવા ડિવાઇસ સાથે જોડાણ કરો"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"નવા ડિવાઇસ સાથે જોડાણ કરવા માટે ક્લિક કરો"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ડિવાઇસના માઇક્રોફોનને અનબ્લૉક કરીએ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ડિવાઇસના કૅમેરાને અનબ્લૉક કરીએ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ડિવાઇસના કૅમેરા અને માઇક્રોફોનને અનબ્લૉક કરીએ?"</string>
@@ -745,7 +742,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"કીબોર્ડ લેઆઉટ સ્વિચ કરો"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"અથવા"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"શોધ ક્વેરી સાફ કરો"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"શૉર્ટકટ"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"કીબોર્ડ શૉર્ટકટ"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"શૉર્ટકટ શોધો"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"કોઈ શૉર્ટકટ મળ્યો નથી"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"સિસ્ટમ"</string>
@@ -770,9 +767,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistant ખોલો"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"લૉક સ્ક્રીન"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"નોંધ લો"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"સિસ્ટમ દ્વારા એકથી વધુ કાર્યો કરવા"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"જમણી બાજુ પર હાલની ઍપ સાથે વિભાજિત સ્ક્રીનમાં દાખલ થાઓ"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"ડાબી બાજુ પર હાલની ઍપ સાથે વિભાજિત સ્ક્રીનમાં દાખલ થાઓ"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"એકસાથે એકથી વધુ કાર્યો કરવા"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"જમણી બાજુએ વર્તમાન ઍપ સાથે વિભાજિત સ્ક્રીનનો ઉપયોગ કરો"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"ડાબી બાજુએ વર્તમાન ઍપ સાથે વિભાજિત સ્ક્રીનનો ઉપયોગ કરો"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"વિભાજિત સ્ક્રીનથી પૂર્ણ સ્ક્રીન પર સ્વિચ કરો"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"વિભાજિત સ્ક્રીનનો ઉપયોગ કરતી વખતે જમણી બાજુ કે નીચેની ઍપ પર સ્વિચ કરો"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"વિભાજિત સ્ક્રીનનો ઉપયોગ કરતી વખતે ડાબી બાજુની કે ઉપરની ઍપ પર સ્વિચ કરો"</string>

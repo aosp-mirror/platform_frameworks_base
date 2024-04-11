@@ -350,6 +350,8 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"문제 기록"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"시작"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"중지"</string>
+    <!-- no translation found for qs_record_issue_bug_report (8229031766918650079) -->
+    <skip />
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"기기 경험의 어떤 부분에 영향이 있었나요?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"문제 유형 선택"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"화면 녹화"</string>
@@ -363,14 +365,10 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"표준"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"보통"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"높음"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
-    <skip />
-    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
-    <skip />
-    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
-    <skip />
-    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"청각 보조 기기"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"청각 보조 기기"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"새 기기와 페어링"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"새 기기와 페어링하려면 클릭하세요"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"기기 마이크를 차단 해제하시겠습니까?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"기기 카메라를 차단 해제하시겠습니까?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"기기 카메라 및 마이크를 차단 해제하시겠습니까?"</string>
@@ -745,7 +743,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"키보드 레이아웃 전환"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"또는"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"검색어 삭제"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"단축키"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"단축키"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"단축키 검색"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"단축키 없음"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"시스템"</string>
@@ -770,9 +768,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"어시스턴트 열기"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"잠금 화면"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"메모 작성"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"시스템 멀티태스킹"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"현재 앱을 오른쪽으로 보내는 화면 분할 입력"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"현재 앱을 왼쪽으로 보내는 화면 분할 입력"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"멀티태스킹"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"현재 앱이 오른쪽에 오도록 화면 분할 사용"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"현재 앱이 왼쪽에 오도록 화면 분할 사용"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"화면 분할에서 전체 화면으로 전환"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"화면 분할을 사용하는 중에 오른쪽 또는 아래쪽에 있는 앱으로 전환하기"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"화면 분할을 사용하는 중에 왼쪽 또는 위쪽에 있는 앱으로 전환하기"</string>

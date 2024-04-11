@@ -350,6 +350,8 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"録音に関する問題"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"開始"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"停止"</string>
+    <!-- no translation found for qs_record_issue_bug_report (8229031766918650079) -->
+    <skip />
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"デバイスのどの部分が影響を受けましたか？"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"問題の種類を選択する"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"スクリーン レコード"</string>
@@ -364,12 +366,9 @@
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"中"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"高"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"補聴器"</string>
-    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
-    <skip />
-    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
-    <skip />
-    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"補聴器"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"新しいデバイスとペア設定"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"クリックすると、新しいデバイスをペア設定できます"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"デバイスのマイクのブロックを解除しますか？"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"デバイスのカメラのブロックを解除しますか？"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"デバイスのカメラとマイクのブロックを解除しますか？"</string>
@@ -744,7 +743,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"キーボード レイアウトの切り替え"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"または"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"検索クエリをクリア"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"ショートカット"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"キーボード ショートカット"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"ショートカットの検索"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"ショートカットがありません"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"システム"</string>
@@ -769,9 +768,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"アシスタントを開く"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"画面をロック"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"メモを入力する"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"システム マルチタスク"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"分割画面にして現在のアプリを右側に設定する"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"分割画面にして現在のアプリを左側に設定する"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"マルチタスク"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"分割画面の使用（現在のアプリを右側に表示）"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"分割画面の使用（現在のアプリを左側に表示）"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"分割画面から全画面に切り替える"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"分割画面の使用時に右側または下部のアプリに切り替える"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"分割画面の使用時に左側または上部のアプリに切り替える"</string>
