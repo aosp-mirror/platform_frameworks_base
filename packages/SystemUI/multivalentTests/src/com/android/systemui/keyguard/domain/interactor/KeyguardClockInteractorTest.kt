@@ -191,7 +191,7 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
             val value by collectLastValue(underTest.clockShouldBeCentered)
             kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
             kosmos.activeNotificationListRepository.setActiveNotifs(1)
-            kosmos.headsUpNotificationRepository.headsUpAnimatingAway.value = true
+            kosmos.headsUpNotificationRepository.isHeadsUpAnimatingAway.value = true
             kosmos.keyguardRepository.setIsDozing(true)
             assertThat(value).isEqualTo(false)
         }

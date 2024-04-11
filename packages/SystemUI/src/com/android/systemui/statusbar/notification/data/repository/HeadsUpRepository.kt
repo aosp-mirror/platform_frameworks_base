@@ -29,9 +29,9 @@ interface HeadsUpRepository {
 
     /**
      * True if we are exiting the headsUp pinned mode, and some notifications might still be
-     * animating out. This is used to keep the touchable regions in a reasonable state.
+     * animating out. This is used to keep their view container visible.
      */
-    val headsUpAnimatingAway: Flow<Boolean>
+    val isHeadsUpAnimatingAway: Flow<Boolean>
 
     /** The heads up row that should be displayed on top. */
     val topHeadsUpRow: Flow<HeadsUpRowRepository?>

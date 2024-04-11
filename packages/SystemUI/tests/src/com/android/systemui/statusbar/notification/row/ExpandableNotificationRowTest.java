@@ -398,7 +398,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     }
 
     @Test
-    public void testAboveShelfChangedListenerCalledHeadsUpGoingAway() throws Exception {
+    public void testAboveShelfChangedListenerCalledHeadsUpAnimatingAway() throws Exception {
         ExpandableNotificationRow row = mNotificationTestHelper.createRow();
         AboveShelfChangedListener listener = mock(AboveShelfChangedListener.class);
         row.setAboveShelfChangedListener(listener);

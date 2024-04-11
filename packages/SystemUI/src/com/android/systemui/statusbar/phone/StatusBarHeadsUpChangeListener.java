@@ -98,11 +98,11 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener,
                 // we need to keep the panel open artificially, let's wait until the
                 //animation
                 // is finished.
-                mHeadsUpManager.setHeadsUpGoingAway(true);
+                mHeadsUpManager.setHeadsUpAnimatingAway(true);
                 mNsslController.runAfterAnimationFinished(() -> {
                     if (!mHeadsUpManager.hasPinnedHeadsUp()) {
                         mNotificationShadeWindowController.setHeadsUpShowing(false);
-                        mHeadsUpManager.setHeadsUpGoingAway(false);
+                        mHeadsUpManager.setHeadsUpAnimatingAway(false);
                     }
                     mNotificationRemoteInputManager.onPanelCollapsed();
                 });
