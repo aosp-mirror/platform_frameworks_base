@@ -25,6 +25,7 @@ import static android.hardware.biometrics.BiometricPrompt.DISMISSED_REASON_NEGAT
 
 import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTH_CALLED;
 import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTH_STARTED;
+import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTH_PAUSED;
 import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTH_STARTED_UI_SHOWING;
 import static com.android.server.biometrics.BiometricServiceStateProto.STATE_ERROR_PENDING_SYSUI;
 
@@ -280,6 +281,44 @@ public class AuthSessionTest {
 
         assertThat(faceSensor.getSensorState()).isEqualTo(BiometricSensor.STATE_STOPPED);
         assertThat(session.getState()).isEqualTo(STATE_ERROR_PENDING_SYSUI);
+
+        session.onDialogAnimatedIn(true);
+
+        assertThat(session.getState()).isEqualTo(STATE_AUTH_STARTED_UI_SHOWING);
+        assertThat(fingerprintSensor.getSensorState()).isEqualTo(
+                BiometricSensor.STATE_AUTHENTICATING);
+    }
+
+    @Test
+    public void testOnRejectionReceivedBeforeOnDialogAnimatedIn() throws RemoteException {
+        final int fingerprintId = 0;
+        final int faceId = 1;
+        setupFingerprint(fingerprintId, FingerprintSensorProperties.TYPE_REAR);
+        setupFace(faceId, false /* confirmationAlwaysRequired */,
+                mock(IBiometricAuthenticator.class));
+        final AuthSession session = createAuthSession(mSensors,
+                false /* checkDevicePolicyManager */,
+                Authenticators.BIOMETRIC_STRONG,
+                TEST_REQUEST_ID,
+                0 /* operationId */,
+                0 /* userId */);
+        session.goToInitialState();
+
+        for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
+            assertThat(sensor.getSensorState()).isEqualTo(BiometricSensor.STATE_WAITING_FOR_COOKIE);
+            session.onCookieReceived(
+                    session.mPreAuthInfo.eligibleSensors.get(sensor.id).getCookie());
+        }
+        assertThat(session.allCookiesReceived()).isTrue();
+        assertThat(session.getState()).isEqualTo(STATE_AUTH_STARTED);
+
+        final BiometricSensor faceSensor = session.mPreAuthInfo.eligibleSensors.get(faceId);
+        final BiometricSensor fingerprintSensor = session.mPreAuthInfo.eligibleSensors.get(
+                fingerprintId);
+        session.onAuthenticationRejected(faceId);
+
+        assertThat(faceSensor.getSensorState()).isEqualTo(BiometricSensor.STATE_CANCELING);
+        assertThat(session.getState()).isEqualTo(STATE_AUTH_PAUSED);
 
         session.onDialogAnimatedIn(true);
 
