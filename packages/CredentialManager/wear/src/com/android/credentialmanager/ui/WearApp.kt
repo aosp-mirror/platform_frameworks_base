@@ -124,7 +124,6 @@ fun WearApp(
                 handleGetNavigation(
                     navController = navController,
                     state = state,
-                    onCloseApp = onCloseApp,
                     selectEntry = selectEntry
                 )
             }
@@ -147,7 +146,6 @@ fun WearApp(
 private fun handleGetNavigation(
     navController: NavController,
     state: CredentialSelectorUiState.Get,
-    onCloseApp: () -> Unit,
     selectEntry: (entry: EntryInfo, isAutoSelected: Boolean) -> Unit,
 ) {
     when (state) {

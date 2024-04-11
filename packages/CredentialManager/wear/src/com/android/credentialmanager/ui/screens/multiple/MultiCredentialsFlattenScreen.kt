@@ -27,7 +27,7 @@ import com.android.credentialmanager.CredentialSelectorUiState.Get.MultipleEntry
 import com.android.credentialmanager.FlowEngine
 import com.android.credentialmanager.R
 import com.android.credentialmanager.common.ui.components.WearButtonText
-import com.android.credentialmanager.common.ui.components.WearDisplayNameText
+import com.android.credentialmanager.common.ui.components.WearSecondaryLabel
 import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.ui.components.CredentialsScreenChipSpacer
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
@@ -64,10 +64,9 @@ fun MultiCredentialsFlattenScreen(
 
         credentialSelectorUiState.accounts.forEach { userNameEntries ->
             item {
-                WearDisplayNameText(
+                WearSecondaryLabel(
                     text = userNameEntries.userName,
-                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 14.dp,
-                        end = 14.dp)
+                    modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)
                 )
             }
 
@@ -86,9 +85,9 @@ fun MultiCredentialsFlattenScreen(
             }
         }
         item {
-            WearDisplayNameText(
+            WearSecondaryLabel(
                 text = stringResource(R.string.provider_list_title),
-                modifier = Modifier.padding(top = 12.dp, bottom = 8.dp, start = 14.dp, end = 14.dp)
+                modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)
             )
         }
         credentialSelectorUiState.actionEntryList.forEach { actionEntry ->
