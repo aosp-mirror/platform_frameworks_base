@@ -183,3 +183,10 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "enable_color_correction_saturation"
+    namespace: "accessibility"
+    description: "Feature allows users to change color correction saturation for daltonizer."
+    bug: "322829049"
+}
