@@ -38,6 +38,8 @@ public class ShadowBluetoothAdapter extends org.robolectric.shadows.ShadowBlueto
     private List<BluetoothDevice> mMostRecentlyConnectedDevices;
     private BluetoothProfile.ServiceListener mServiceListener;
     private ParcelUuid[] mParcelUuids;
+    private int mIsLeAudioBroadcastSourceSupported;
+    private int mIsLeAudioBroadcastAssistantSupported;
 
     @Implementation
     protected boolean getProfileProxy(Context context, BluetoothProfile.ServiceListener listener,
@@ -96,5 +98,23 @@ public class ShadowBluetoothAdapter extends org.robolectric.shadows.ShadowBlueto
 
     public void setUuids(ParcelUuid[] uuids) {
         mParcelUuids = uuids;
+    }
+
+    @Implementation
+    protected int isLeAudioBroadcastSourceSupported() {
+        return mIsLeAudioBroadcastSourceSupported;
+    }
+
+    public void setIsLeAudioBroadcastSourceSupported(int isSupported) {
+        mIsLeAudioBroadcastSourceSupported = isSupported;
+    }
+
+    @Implementation
+    protected int isLeAudioBroadcastAssistantSupported() {
+        return mIsLeAudioBroadcastAssistantSupported;
+    }
+
+    public void setIsLeAudioBroadcastAssistantSupported(int isSupported) {
+        mIsLeAudioBroadcastAssistantSupported = isSupported;
     }
 }

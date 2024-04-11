@@ -57,6 +57,7 @@ public class BluetoothEventManager {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final LocalBluetoothAdapter mLocalAdapter;
+    private final LocalBluetoothManager mBtManager;
     private final CachedBluetoothDeviceManager mDeviceManager;
     private final IntentFilter mAdapterIntentFilter, mProfileIntentFilter;
     private final Map<String, Handler> mHandlerMap;
@@ -80,10 +81,15 @@ public class BluetoothEventManager {
      * userHandle passed in is {@code null}, we register event receiver for the
      * {@code context.getUser()} handle.
      */
-    BluetoothEventManager(LocalBluetoothAdapter adapter,
-            CachedBluetoothDeviceManager deviceManager, Context context,
-            android.os.Handler handler, @Nullable UserHandle userHandle) {
+    BluetoothEventManager(
+            LocalBluetoothAdapter adapter,
+            LocalBluetoothManager btManager,
+            CachedBluetoothDeviceManager deviceManager,
+            Context context,
+            android.os.Handler handler,
+            @Nullable UserHandle userHandle) {
         mLocalAdapter = adapter;
+        mBtManager = btManager;
         mDeviceManager = deviceManager;
         mAdapterIntentFilter = new IntentFilter();
         mProfileIntentFilter = new IntentFilter();
@@ -210,10 +216,26 @@ public class BluetoothEventManager {
         }
     }
 
-    void dispatchProfileConnectionStateChanged(@NonNull CachedBluetoothDevice device, int state,
-            int bluetoothProfile) {
+    void dispatchProfileConnectionStateChanged(
+            @NonNull CachedBluetoothDevice device, int state, int bluetoothProfile) {
         for (BluetoothCallback callback : mCallbacks) {
             callback.onProfileConnectionStateChanged(device, state, bluetoothProfile);
+        }
+
+        // Trigger updateFallbackActiveDeviceIfNeeded when ASSISTANT profile disconnected when
+        // audio sharing is enabled.
+        if (bluetoothProfile == BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT
+                && state == BluetoothAdapter.STATE_DISCONNECTED
+                && BluetoothUtils.isAudioSharingEnabled()) {
+            LocalBluetoothProfileManager profileManager = mBtManager.getProfileManager();
+            if (profileManager != null
+                    && profileManager.getLeAudioBroadcastProfile() != null
+                    && profileManager.getLeAudioBroadcastProfile().isProfileReady()
+                    && profileManager.getLeAudioBroadcastAssistantProfile() != null
+                    && profileManager.getLeAudioBroadcastAssistantProfile().isProfileReady()) {
+                Log.d(TAG, "updateFallbackActiveDeviceIfNeeded, ASSISTANT profile disconnected");
+                profileManager.getLeAudioBroadcastProfile().updateFallbackActiveDeviceIfNeeded();
+            }
         }
     }
 
@@ -536,7 +558,6 @@ public class BluetoothEventManager {
                 default:
                     Log.w(TAG, "ActiveDeviceChangedHandler: unknown action " + action);
                     return;
-
             }
             dispatchAclStateChanged(activeDevice, state);
         }
