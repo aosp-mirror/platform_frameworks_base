@@ -16,7 +16,6 @@
 
 package android.app.servertransaction;
 
-import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static org.junit.Assert.assertEquals;
@@ -29,9 +28,6 @@ import static org.mockito.Mockito.verify;
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.ClientTransactionHandler;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -107,35 +103,6 @@ public class ClientTransactionItemTest {
     }
 
     @Test
-    public void testActivityConfigurationChangeItem_getContextToUpdate() {
-        final ActivityConfigurationChangeItem item = ActivityConfigurationChangeItem
-                .obtain(mActivityToken, mConfiguration, mActivityWindowInfo);
-        final Context context = item.getContextToUpdate(mHandler);
-
-        assertEquals(mActivity, context);
-    }
-
-    @Test
-    public void testActivityRelaunchItem_getContextToUpdate() {
-        final ActivityRelaunchItem item = ActivityRelaunchItem
-                .obtain(mActivityToken, null /* pendingResults */, null  /* pendingNewIntents */,
-                        0 /* configChange */, mMergedConfiguration, false /* preserveWindow */,
-                        mActivityWindowInfo);
-        final Context context = item.getContextToUpdate(mHandler);
-
-        assertEquals(mActivity, context);
-    }
-
-    @Test
-    public void testConfigurationChangeItem_getContextToUpdate() {
-        final ConfigurationChangeItem item = ConfigurationChangeItem
-                .obtain(mConfiguration, DEVICE_ID_DEFAULT);
-        final Context context = item.getContextToUpdate(mHandler);
-
-        assertEquals(ActivityThread.currentApplication(), context);
-    }
-
-    @Test
     public void testDestroyActivityItem_preExecute() {
         final DestroyActivityItem item = DestroyActivityItem
                 .obtain(mActivityToken, false /* finished */);
@@ -166,26 +133,6 @@ public class ClientTransactionItemTest {
     }
 
     @Test
-    public void testLaunchActivityItem_getContextToUpdate() {
-        final LaunchActivityItem item = new TestUtils.LaunchActivityItemBuilder(
-                mActivityToken, new Intent(), new ActivityInfo())
-                .build();
-
-        final Context context = item.getContextToUpdate(mHandler);
-
-        assertEquals(ActivityThread.currentApplication(), context);
-    }
-
-    @Test
-    public void testMoveToDisplayItem_getContextToUpdate() {
-        final MoveToDisplayItem item = MoveToDisplayItem
-                .obtain(mActivityToken, DEFAULT_DISPLAY, mConfiguration, mActivityWindowInfo);
-        final Context context = item.getContextToUpdate(mHandler);
-
-        assertEquals(mActivity, context);
-    }
-
-    @Test
     public void testWindowContextInfoChangeItem_execute() {
         final WindowContextInfoChangeItem item = WindowContextInfoChangeItem
                 .obtain(mWindowClientToken, mConfiguration, DEFAULT_DISPLAY);
@@ -193,17 +140,6 @@ public class ClientTransactionItemTest {
 
         verify(mHandler).handleWindowContextInfoChanged(mWindowClientToken,
                 new WindowContextInfo(mConfiguration, DEFAULT_DISPLAY));
-    }
-
-    @Test
-    public void testWindowContextInfoChangeItem_getContextToUpdate() {
-        doReturn(mWindowContext).when(mHandler).getWindowContext(mWindowClientToken);
-
-        final WindowContextInfoChangeItem item = WindowContextInfoChangeItem
-                .obtain(mWindowClientToken, mConfiguration, DEFAULT_DISPLAY);
-        final Context context = item.getContextToUpdate(mHandler);
-
-        assertEquals(mWindowContext, context);
     }
 
     @Test
@@ -220,7 +156,7 @@ public class ClientTransactionItemTest {
         final WindowStateResizeItem item = WindowStateResizeItem.obtain(mWindow, mFrames,
                 true /* reportDraw */, mMergedConfiguration, mInsetsState, true /* forceLayout */,
                 true /* alwaysConsumeSystemBars */, 123 /* displayId */, 321 /* syncSeqId */,
-                true /* dragResizing */, mActivityToken, mActivityWindowInfo);
+                true /* dragResizing */, mActivityWindowInfo);
         item.execute(mHandler, mPendingActions);
 
         verify(mWindow).resized(mFrames,
@@ -228,16 +164,4 @@ public class ClientTransactionItemTest {
                 true /* alwaysConsumeSystemBars */, 123 /* displayId */, 321 /* syncSeqId */,
                 true /* dragResizing */, mActivityWindowInfo);
     }
-
-    @Test
-    public void testWindowStateResizeItem_getContextToUpdate() {
-        final WindowStateResizeItem item = WindowStateResizeItem.obtain(mWindow, mFrames,
-                true /* reportDraw */, mMergedConfiguration, mInsetsState, true /* forceLayout */,
-                true /* alwaysConsumeSystemBars */, 123 /* displayId */, 321 /* syncSeqId */,
-                true /* dragResizing */, mActivityToken, mActivityWindowInfo);
-        final Context context = item.getContextToUpdate(mHandler);
-
-        assertEquals(ActivityThread.currentApplication(), context);
-    }
-
 }

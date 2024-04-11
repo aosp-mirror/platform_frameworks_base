@@ -23,7 +23,6 @@ import android.annotation.Nullable;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.app.ResultInfo;
-import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -86,12 +85,6 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
             @NonNull PendingTransactionActions pendingActions) {
         final ActivityClientRecord r = getActivityClientRecord(client);
         client.reportRelaunch(r);
-    }
-
-    @Nullable
-    @Override
-    public Context getContextToUpdate(@NonNull ClientTransactionHandler client) {
-        return client.getActivity(getActivityToken());
     }
 
     // ObjectPoolItem implementation
