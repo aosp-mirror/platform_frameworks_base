@@ -751,3 +751,13 @@ flag {
     description: "Glow bar indicator reveals upon keyboard docking."
     bug: "324600132"
 }
+
+flag {
+  name: "dream_overlay_bouncer_swipe_direction_filtering"
+  namespace: "systemui"
+  description: "do not initiate bouncer swipe when the direction is opposite of the expansion"
+  bug: "333632464"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
