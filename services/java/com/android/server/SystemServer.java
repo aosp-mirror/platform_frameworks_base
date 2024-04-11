@@ -313,8 +313,8 @@ public final class SystemServer implements Dumpable {
     private static final long SLOW_DELIVERY_THRESHOLD_MS = 200;
 
     /*
-     * Implementation class names. TODO: Move them to a codegen class or load
-     * them from the build system somehow.
+     * Implementation class names for services in the {@code SYSTEMSERVERCLASSPATH}
+     * from {@code PRODUCT_SYSTEM_SERVER_JARS} that are *not* in {@code services.jar}.
      */
     private static final String ARC_NETWORK_SERVICE_CLASS =
             "com.android.server.arc.net.ArcNetworkService";
@@ -322,26 +322,6 @@ public final class SystemServer implements Dumpable {
             "com.android.server.arc.persistent_data_block.ArcPersistentDataBlockService";
     private static final String ARC_SYSTEM_HEALTH_SERVICE =
             "com.android.server.arc.health.ArcSystemHealthService";
-    private static final String STATS_COMPANION_APEX_PATH =
-            "/apex/com.android.os.statsd/javalib/service-statsd.jar";
-    private static final String STATS_COMPANION_LIFECYCLE_CLASS =
-            "com.android.server.stats.StatsCompanion$Lifecycle";
-    private static final String SCHEDULING_APEX_PATH =
-            "/apex/com.android.scheduling/javalib/service-scheduling.jar";
-    private static final String REBOOT_READINESS_LIFECYCLE_CLASS =
-            "com.android.server.scheduling.RebootReadinessManagerService$Lifecycle";
-    private static final String WIFI_APEX_SERVICE_JAR_PATH =
-            "/apex/com.android.wifi/javalib/service-wifi.jar";
-    private static final String WIFI_SERVICE_CLASS =
-            "com.android.server.wifi.WifiService";
-    private static final String WIFI_SCANNING_SERVICE_CLASS =
-            "com.android.server.wifi.scanner.WifiScanningService";
-    private static final String WIFI_RTT_SERVICE_CLASS =
-            "com.android.server.wifi.rtt.RttService";
-    private static final String WIFI_AWARE_SERVICE_CLASS =
-            "com.android.server.wifi.aware.WifiAwareService";
-    private static final String WIFI_P2P_SERVICE_CLASS =
-            "com.android.server.wifi.p2p.WifiP2pService";
     private static final String LOWPAN_SERVICE_CLASS =
             "com.android.server.lowpan.LowpanService";
     private static final String THERMAL_OBSERVER_CLASS =
@@ -368,21 +348,19 @@ public final class SystemServer implements Dumpable {
             "com.android.clockwork.settings.WearSettingsService";
     private static final String WRIST_ORIENTATION_SERVICE_CLASS =
             "com.android.clockwork.wristorientation.WristOrientationService";
-
     private static final String IOT_SERVICE_CLASS =
             "com.android.things.server.IoTSystemService";
     private static final String CAR_SERVICE_HELPER_SERVICE_CLASS =
             "com.android.internal.car.CarServiceHelperService";
+
+    /*
+     * Implementation class names for services in the {@code SYSTEMSERVERCLASSPATH}
+     * from {@code PRODUCT_APEX_SYSTEM_SERVER_JARS}.
+     */
     private static final String APPSEARCH_MODULE_LIFECYCLE_CLASS =
             "com.android.server.appsearch.AppSearchModule$Lifecycle";
     private static final String ISOLATED_COMPILATION_SERVICE_CLASS =
             "com.android.server.compos.IsolatedCompilationService";
-    private static final String CONNECTIVITY_SERVICE_APEX_PATH =
-            "/apex/com.android.tethering/javalib/service-connectivity.jar";
-    private static final String CONNECTIVITY_SERVICE_INITIALIZER_CLASS =
-            "com.android.server.ConnectivityServiceInitializer";
-    private static final String NETWORK_STATS_SERVICE_INITIALIZER_CLASS =
-            "com.android.server.NetworkStatsServiceInitializer";
     private static final String MEDIA_COMMUNICATION_SERVICE_CLASS =
             "com.android.server.media.MediaCommunicationService";
     private static final String HEALTHCONNECT_MANAGER_SERVICE_CLASS =
@@ -390,17 +368,8 @@ public final class SystemServer implements Dumpable {
     private static final String ROLE_SERVICE_CLASS = "com.android.role.RoleService";
     private static final String ENHANCED_CONFIRMATION_SERVICE_CLASS =
             "com.android.ecm.EnhancedConfirmationService";
-
-    private static final String UWB_APEX_SERVICE_JAR_PATH =
-            "/apex/com.android.uwb/javalib/service-uwb.jar";
-    private static final String UWB_SERVICE_CLASS = "com.android.server.uwb.UwbService";
-    private static final String BLUETOOTH_APEX_SERVICE_JAR_PATH =
-            "/apex/com.android.btservices/javalib/service-bluetooth.jar";
-    private static final String BLUETOOTH_SERVICE_CLASS =
-            "com.android.server.bluetooth.BluetoothService";
     private static final String SAFETY_CENTER_SERVICE_CLASS =
             "com.android.safetycenter.SafetyCenterService";
-
     private static final String SDK_SANDBOX_MANAGER_SERVICE_CLASS =
             "com.android.server.sdksandbox.SdkSandboxManagerService$Lifecycle";
     private static final String AD_SERVICES_MANAGER_SERVICE_CLASS =
@@ -411,11 +380,47 @@ public final class SystemServer implements Dumpable {
     private static final String UPDATABLE_DEVICE_CONFIG_SERVICE_CLASS =
             "com.android.server.deviceconfig.DeviceConfigInit$Lifecycle";
 
+    /*
+     * Implementation class names and jar locations for services in
+     * {@code STANDALONE_SYSTEMSERVER_JARS}.
+     */
+    private static final String STATS_COMPANION_APEX_PATH =
+            "/apex/com.android.os.statsd/javalib/service-statsd.jar";
+    private static final String STATS_COMPANION_LIFECYCLE_CLASS =
+            "com.android.server.stats.StatsCompanion$Lifecycle";
+    private static final String SCHEDULING_APEX_PATH =
+            "/apex/com.android.scheduling/javalib/service-scheduling.jar";
+    private static final String REBOOT_READINESS_LIFECYCLE_CLASS =
+            "com.android.server.scheduling.RebootReadinessManagerService$Lifecycle";
+    private static final String WIFI_APEX_SERVICE_JAR_PATH =
+            "/apex/com.android.wifi/javalib/service-wifi.jar";
+    private static final String WIFI_SERVICE_CLASS =
+            "com.android.server.wifi.WifiService";
+    private static final String WIFI_SCANNING_SERVICE_CLASS =
+            "com.android.server.wifi.scanner.WifiScanningService";
+    private static final String WIFI_RTT_SERVICE_CLASS =
+            "com.android.server.wifi.rtt.RttService";
+    private static final String WIFI_AWARE_SERVICE_CLASS =
+            "com.android.server.wifi.aware.WifiAwareService";
+    private static final String WIFI_P2P_SERVICE_CLASS =
+            "com.android.server.wifi.p2p.WifiP2pService";
+    private static final String CONNECTIVITY_SERVICE_APEX_PATH =
+            "/apex/com.android.tethering/javalib/service-connectivity.jar";
+    private static final String CONNECTIVITY_SERVICE_INITIALIZER_CLASS =
+            "com.android.server.ConnectivityServiceInitializer";
+    private static final String NETWORK_STATS_SERVICE_INITIALIZER_CLASS =
+            "com.android.server.NetworkStatsServiceInitializer";
+    private static final String UWB_APEX_SERVICE_JAR_PATH =
+            "/apex/com.android.uwb/javalib/service-uwb.jar";
+    private static final String UWB_SERVICE_CLASS = "com.android.server.uwb.UwbService";
+    private static final String BLUETOOTH_APEX_SERVICE_JAR_PATH =
+            "/apex/com.android.btservices/javalib/service-bluetooth.jar";
+    private static final String BLUETOOTH_SERVICE_CLASS =
+            "com.android.server.bluetooth.BluetoothService";
     private static final String DEVICE_LOCK_SERVICE_CLASS =
             "com.android.server.devicelock.DeviceLockService";
     private static final String DEVICE_LOCK_APEX_PATH =
             "/apex/com.android.devicelock/javalib/service-devicelock.jar";
-
     private static final String PROFILING_SERVICE_LIFECYCLE_CLASS =
             "android.os.profiling.ProfilingService$Lifecycle";
     private static final String PROFILING_SERVICE_JAR_PATH =
