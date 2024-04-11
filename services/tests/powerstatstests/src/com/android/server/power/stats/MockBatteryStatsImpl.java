@@ -35,6 +35,7 @@ import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeRea
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidUserSysTimeReader;
 import com.android.internal.os.KernelSingleUidTimeReader;
+import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.power.EnergyConsumerStats;
 
@@ -73,10 +74,13 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
 
     MockBatteryStatsImpl(BatteryStatsConfig config, Clock clock, File historyDirectory,
             Handler handler, PowerStatsUidResolver powerStatsUidResolver) {
-        super(config, clock, historyDirectory, handler, powerStatsUidResolver,
-                mock(FrameworkStatsLogger.class), mock(BatteryStatsHistory.TraceDelegate.class),
+        super(config, clock, new MonotonicClock(0, clock), historyDirectory, handler,
+                mock(PlatformIdleStateCallback.class), mock(EnergyStatsRetriever.class),
+                mock(UserInfoProvider.class), mock(PowerProfile.class),
+                new CpuScalingPolicies(new SparseArray<>(), new SparseArray<>()),
+                powerStatsUidResolver, mock(FrameworkStatsLogger.class),
+                mock(BatteryStatsHistory.TraceDelegate.class),
                 mock(BatteryStatsHistory.EventLogger.class));
-        initTimersAndCounters();
         setMaxHistoryBuffer(128 * 1024);
 
         setExternalStatsSyncLocked(mExternalStatsSync);
