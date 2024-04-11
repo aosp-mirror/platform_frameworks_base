@@ -622,6 +622,7 @@ public final class PowerManagerService extends SystemService
     // Value we store for tracking face down behavior.
     @VisibleForTesting
     boolean mIsFaceDown = false;
+    private boolean mUseFaceDownDetector = true;
     private long mLastFlipTime = 0L;
 
     // The screen brightness setting override from the window manager
@@ -3253,7 +3254,7 @@ public final class PowerManagerService extends SystemService
                     mScreenTimeoutOverridePolicy.getScreenTimeoutOverrideLocked(
                             mWakeLockSummary, screenOffTimeout);
         }
-        if (mIsFaceDown) {
+        if (mIsFaceDown && mUseFaceDownDetector) {
             shortestScreenOffTimeout = Math.min(screenDimDuration, shortestScreenOffTimeout);
         }
 
@@ -4701,6 +4702,7 @@ public final class PowerManagerService extends SystemService
             pw.println("  mHoldingDisplaySuspendBlocker=" + mHoldingDisplaySuspendBlocker);
             pw.println("  mLastFlipTime=" + mLastFlipTime);
             pw.println("  mIsFaceDown=" + mIsFaceDown);
+            pw.println("  mUseFaceDownDetector=" + mUseFaceDownDetector);
 
             pw.println();
             pw.println("Settings and Configuration:");
@@ -6921,6 +6923,16 @@ public final class PowerManagerService extends SystemService
                 Binder.restoreCallingIdentity(ident);
             }
         }
+
+        public void setUseFaceDownDetector(boolean enable) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mUseFaceDownDetector = enable;
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
     }
 
     @VisibleForTesting
