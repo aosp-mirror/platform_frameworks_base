@@ -719,7 +719,7 @@
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"No s\'ha trobat cap drecera"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Sistema"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Entrada"</string>
-    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Obre aplicacions"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Aplicacions obertes"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"Aplicació actual"</string>
     <string name="keyboard_shortcut_a11y_show_search_results" msgid="2865241062981833705">"S\'estan mostrant els resultats de la cerca"</string>
     <string name="keyboard_shortcut_a11y_filter_system" msgid="7744143131119370483">"S\'estan mostrant les dreceres del sistema"</string>
@@ -738,7 +738,7 @@
     <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Mostra la barra de tasques"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Obre la configuració"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Obre l\'Assistent"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"Pantalla de bloqueig"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Bloqueja la pantalla"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Crea una nota"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Multitasques del sistema"</string>
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Entra al mode de pantalla dividida amb l\'aplicació actual a la dreta"</string>

@@ -739,7 +739,7 @@
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Atvērt iestatījumus"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Atvērt Asistentu"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Bloķēt ekrānu"</string>
-    <string name="group_system_quick_memo" msgid="3764560265935722903">"Piezīmes izveide"</string>
+    <string name="group_system_quick_memo" msgid="3764560265935722903">"Izveidot piezīmi"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Sistēmas vairākuzdevumu režīms"</string>
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Pāriet ekrāna sadalīšanas režīmā ar pašreizējo lietotni pa labi"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Pāriet ekrāna sadalīšanas režīmā ar pašreizējo lietotni pa kreisi"</string>

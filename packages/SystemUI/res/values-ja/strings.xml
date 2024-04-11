@@ -741,8 +741,8 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"画面をロック"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"メモを入力する"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"システム マルチタスク"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"分割画面にして現在のアプリを右側に設定する"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"分割画面にして現在のアプリを左側に設定する"</string>
+    <string name="system_multitasking_rhs" msgid="2454557648974553729">"分割画面にして現在のアプリを右側に配置する"</string>
+    <string name="system_multitasking_lhs" msgid="3516599774920979402">"分割画面にして現在のアプリを左側に配置する"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"分割画面から全画面に切り替える"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"分割画面中: アプリを順に置換する"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"入力"</string>

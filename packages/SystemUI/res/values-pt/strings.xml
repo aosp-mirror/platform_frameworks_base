@@ -739,7 +739,7 @@
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Abrir configurações"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Abrir o Google Assistente"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Tela de bloqueio"</string>
-    <string name="group_system_quick_memo" msgid="3764560265935722903">"Crie uma nota"</string>
+    <string name="group_system_quick_memo" msgid="3764560265935722903">"Criar nota"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Multitarefa do sistema"</string>
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Usar a tela dividida com o app atual à direita"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Usar a tela dividida com o app atual à esquerda"</string>
@@ -798,7 +798,7 @@
     <string name="left_icon" msgid="5036278531966897006">"Ícone à esquerda"</string>
     <string name="right_icon" msgid="1103955040645237425">"Ícone à direita"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Mantenha pressionado e arraste para adicionar blocos"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Para reorganizar, toque no bloco sem soltar e arraste."</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Para reorganizar, toque no bloco sem soltar e arraste"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Arraste aqui para remover"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"É preciso haver pelo menos <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> blocos"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Editar"</string>
@@ -1265,7 +1265,7 @@
     <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"Em uso pela ligação telefônica"</string>
     <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"Usado recentemente em uma ligação telefônica"</string>
     <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"Em uso pelo app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"Usado recentemente pelo app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"Uso recente pelo app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"Em uso pelo app <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Usado recentemente pelo app <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Em uso pelo app <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>

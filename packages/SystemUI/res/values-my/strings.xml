@@ -231,7 +231,7 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"အ​ကြောင်းကြားစာအကွက်"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"အမြန်လုပ် အပြင်အဆင်"</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"‘အမြန်ဆက်တင်များ’ နှင့် ‘အကြောင်းကြားစာအကွက်’။"</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"မျက်နှာပြင် သော့ပိတ်ရန်"</string>
+    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"လော့ခ်မျက်နှာပြင်"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"အလုပ်သုံး လော့ခ်မျက်နှာပြင်"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"ပိတ်ရန်"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"လုံးဝ အသံပိတ်ထားရန်"</string>
@@ -574,7 +574,7 @@
     <string name="stream_accessibility" msgid="3873610336741987152">"အများသုံးနိုင်မှု"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"အသံမြည်သည်"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"တုန်ခါသည်"</string>
-    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"အသံတိတ်သည်"</string>
+    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"အသံပိတ်ရန်"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"ကာစ်လုပ်ရန်"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"ဖုန်းမြည်သံပိတ်ထားသဖြင့် မရနိုင်ပါ"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s။ အသံပြန်ဖွင့်ရန် တို့ပါ။"</string>
@@ -836,7 +836,7 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"ဆက်တင်များ၏ အစီအစဉ်ကို တည်းဖြတ်ပါ။"</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"ပါဝါမီနူး"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"စာမျက်နှာ <xliff:g id="ID_2">%2$d</xliff:g> အနက်မှ စာမျက်နှာ <xliff:g id="ID_1">%1$d</xliff:g>"</string>
-    <string name="tuner_lock_screen" msgid="2267383813241144544">"လော့ခ်ချထားချိန် မျက်နှာပြင်"</string>
+    <string name="tuner_lock_screen" msgid="2267383813241144544">"လော့ခ်မျက်နှာပြင်"</string>
     <string name="finder_active" msgid="7907846989716941952">"ပါဝါပိတ်ထားသော်လည်း Find My Device ဖြင့် ဤဖုန်းကို ရှာနိုင်သည်"</string>
     <string name="shutdown_progress" msgid="5464239146561542178">"စက်ပိတ်နေသည်…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"ဂရုပြုစရာ အဆင့်များ ကြည့်ရန်"</string>
