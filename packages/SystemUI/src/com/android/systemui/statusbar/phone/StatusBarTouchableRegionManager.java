@@ -121,7 +121,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
                         updateTouchableRegion();
                     }
                 });
-        mHeadsUpManager.addHeadsUpPhoneListener(this::onHeadsUpGoingAwayStateChanged);
+        mHeadsUpManager.addHeadsUpPhoneListener(this::onHeadsUpAnimatingAwayStateChanged);
 
         mNotificationShadeWindowController = notificationShadeWindowController;
         mNotificationShadeWindowController.setForcePluginOpenListener((forceOpen) -> {
@@ -214,7 +214,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
                 && (mNotificationShadeWindowView.getRootWindowInsets() != null)
                 && (mNotificationShadeWindowView.getRootWindowInsets().getDisplayCutout() != null);
         boolean shouldObserve = mHeadsUpManager.hasPinnedHeadsUp()
-                        || mHeadsUpManager.isHeadsUpGoingAway()
+                        || mHeadsUpManager.isHeadsUpAnimatingAwayValue()
                         || mForceCollapsedUntilLayout
                         || hasCutoutInset
                         || mNotificationShadeWindowController.getForcePluginOpen();
@@ -288,8 +288,8 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
                 || mUnlockedScreenOffAnimationController.isAnimationPlaying();
     }
 
-    private void onHeadsUpGoingAwayStateChanged(boolean headsUpGoingAway) {
-        if (!headsUpGoingAway) {
+    private void onHeadsUpAnimatingAwayStateChanged(boolean headsUpAnimatingAway) {
+        if (!headsUpAnimatingAway) {
             updateTouchableRegionAfterLayout();
         } else {
             updateTouchableRegion();

@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 val Kosmos.headsUpNotificationRepository by Fixture { FakeHeadsUpNotificationRepository() }
 
 class FakeHeadsUpNotificationRepository : HeadsUpRepository {
-    override val headsUpAnimatingAway: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    override val isHeadsUpAnimatingAway: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val topHeadsUpRow: Flow<HeadsUpRowRepository?> = MutableStateFlow(null)
     override val activeHeadsUpRows: MutableStateFlow<Set<HeadsUpRowRepository>> =
         MutableStateFlow(emptySet())
