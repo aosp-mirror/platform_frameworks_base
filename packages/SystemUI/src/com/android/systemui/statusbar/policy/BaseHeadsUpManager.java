@@ -256,10 +256,15 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         // A copy is necessary here as we are changing the underlying map.  This would cause
         // undefined behavior if we iterated over the key set directly.
         ArraySet<String> keysToRemove = new ArraySet<>(mHeadsUpEntryMap.keySet());
+
+        // Must get waiting keys before calling removeEntry, which clears waiting entries in
+        // AvalancheController
+        List<String> waitingKeysToRemove = mAvalancheController.getWaitingKeys();
+
         for (String key : keysToRemove) {
             removeEntry(key);
         }
-        for (String key : mAvalancheController.getWaitingKeys()) {
+        for (String key : waitingKeysToRemove) {
             removeEntry(key);
         }
     }
