@@ -157,7 +157,7 @@ constructor(
      * Receive all [TransitionStep] matching a filter of [from]->[to]. Allow nulls in order to match
      * any transition, for instance (any)->GONE.
      */
-    fun transition(from: KeyguardState?, to: KeyguardState?): Flow<TransitionStep> {
+    fun transition(from: KeyguardState? = null, to: KeyguardState? = null): Flow<TransitionStep> {
         if (from == null && to == null) {
             throw IllegalArgumentException("from and to cannot both be null")
         }
@@ -198,8 +198,7 @@ constructor(
 
     /** The last [TransitionStep] with a [TransitionState] of FINISHED */
     val finishedKeyguardTransitionStep: Flow<TransitionStep> =
-        repository.transitions
-            .filter { step -> step.transitionState == TransitionState.FINISHED }
+        repository.transitions.filter { step -> step.transitionState == TransitionState.FINISHED }
 
     /** The destination state of the last [TransitionState.STARTED] transition. */
     val startedKeyguardState: SharedFlow<KeyguardState> =
@@ -377,7 +376,7 @@ constructor(
         state: KeyguardState,
     ): Flow<Boolean> {
         return getOrCreateFlow(Edge(from = null, to = state))
-            .mapLatest { it.transitionState.isActive() }
+            .mapLatest { it.transitionState.isTransitioning() }
             .onStart { emit(false) }
             .distinctUntilChanged()
     }
@@ -391,7 +390,7 @@ constructor(
         to: KeyguardState,
     ): Flow<Boolean> {
         return getOrCreateFlow(Edge(from = from, to = to))
-            .mapLatest { it.transitionState.isActive() }
+            .mapLatest { it.transitionState.isTransitioning() }
             .onStart { emit(false) }
             .distinctUntilChanged()
     }
@@ -403,7 +402,7 @@ constructor(
         state: KeyguardState,
     ): Flow<Boolean> {
         return getOrCreateFlow(Edge(from = state, to = null))
-            .mapLatest { it.transitionState.isActive() }
+            .mapLatest { it.transitionState.isTransitioning() }
             .onStart { emit(false) }
             .distinctUntilChanged()
     }

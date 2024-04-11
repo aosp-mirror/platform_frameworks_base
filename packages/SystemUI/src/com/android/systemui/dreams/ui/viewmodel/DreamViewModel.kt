@@ -98,7 +98,7 @@ constructor(
             .distinctUntilChanged()
 
     val transitionEnded =
-        keyguardTransitionInteractor.transition(from = DREAMING, to = null).filter { step ->
+        keyguardTransitionInteractor.transition(from = DREAMING).filter { step ->
             step.transitionState == TransitionState.FINISHED ||
                 step.transitionState == TransitionState.CANCELED
         }

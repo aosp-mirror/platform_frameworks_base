@@ -603,7 +603,7 @@ constructor(
     internal fun listenForAnyStateToGoneKeyguardTransition(scope: CoroutineScope): Job {
         return scope.launch {
             keyguardTransitionInteractor
-                .transition(from = null, to = GONE)
+                .transition(to = GONE)
                 .filter { it.transitionState == TransitionState.FINISHED }
                 .collect {
                     showMediaCarousel()
@@ -616,7 +616,7 @@ constructor(
     internal fun listenForAnyStateToLockscreenTransition(scope: CoroutineScope): Job {
         return scope.launch {
             keyguardTransitionInteractor
-                .transition(from = null, to = LOCKSCREEN)
+                .transition(to = LOCKSCREEN)
                 .filter { it.transitionState == TransitionState.FINISHED }
                 .collect {
                     if (!allowMediaPlayerOnLockScreen) {

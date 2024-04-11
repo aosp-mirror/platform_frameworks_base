@@ -94,9 +94,9 @@ constructor(
                     occludedToLockscreen,
                     aodToLockscreen ->
                     val translationY =
-                        if (aodToLockscreen.transitionState.isActive()) {
+                        if (aodToLockscreen.transitionState.isTransitioning()) {
                             aodToLockscreen.value ?: 0f
-                        } else if (goneToAod.transitionState.isActive()) {
+                        } else if (goneToAod.transitionState.isTransitioning()) {
                             (goneToAod.value ?: 0f) + burnInModel.translationY
                         } else {
                             burnInModel.translationY + occludedToLockscreen + keyguardTranslationY
