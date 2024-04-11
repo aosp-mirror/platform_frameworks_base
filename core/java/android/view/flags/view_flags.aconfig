@@ -50,3 +50,11 @@ flag {
     description: "Enable default arrow icon when hovering on buttons or clickable widgets."
     bug: "299269803"
 }
+
+flag {
+    name: "enable_invalidate_check_thread"
+    namespace: "toolkit"
+    description: "Enable checkThread call in ViewRootImpl#onDescendentInvalidated"
+    bug: "333752000"
+    is_fixed_read_only: true
+}
