@@ -24,6 +24,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 
 val Kosmos.bouncerInteractor by Fixture {
     BouncerInteractor(
@@ -33,5 +34,6 @@ val Kosmos.bouncerInteractor by Fixture {
         deviceEntryFaceAuthInteractor = deviceEntryFaceAuthInteractor,
         falsingInteractor = falsingInteractor,
         powerInteractor = powerInteractor,
+        sceneInteractor = sceneInteractor,
     )
 }
