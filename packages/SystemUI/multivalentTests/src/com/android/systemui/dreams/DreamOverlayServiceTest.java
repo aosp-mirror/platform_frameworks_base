@@ -55,7 +55,7 @@ import com.android.systemui.complication.ComplicationLayoutEngine;
 import com.android.systemui.dreams.complication.HideComplicationTouchHandler;
 import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
-import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
+import com.android.systemui.dreams.touch.TouchMonitor;
 import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -143,7 +143,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     @Mock
-    DreamOverlayTouchMonitor mDreamOverlayTouchMonitor;
+    TouchMonitor mTouchMonitor;
 
     @Mock
     DreamOverlayStateController mStateController;
@@ -187,8 +187,8 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 .create(any(), any(), any()))
                 .thenReturn(mDreamOverlayComponent);
         when(mAmbientTouchComponentFactory.create(any(), any())).thenReturn(mAmbientTouchComponent);
-        when(mAmbientTouchComponent.getDreamOverlayTouchMonitor())
-                .thenReturn(mDreamOverlayTouchMonitor);
+        when(mAmbientTouchComponent.getTouchMonitor())
+                .thenReturn(mTouchMonitor);
         when(mDreamOverlayContainerViewController.getContainerView())
                 .thenReturn(mDreamOverlayContainerView);
 
@@ -515,7 +515,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         // Verify that new instances of overlay container view controller and overlay touch monitor
         // are created.
         verify(mDreamOverlayComponent).getDreamOverlayContainerViewController();
-        verify(mAmbientTouchComponent).getDreamOverlayTouchMonitor();
+        verify(mAmbientTouchComponent).getTouchMonitor();
     }
 
     @Test

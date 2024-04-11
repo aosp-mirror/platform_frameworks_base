@@ -55,7 +55,7 @@ import javax.inject.Named;
 /**
  * Monitor for tracking touches on the DreamOverlay to bring up the bouncer.
  */
-public class BouncerSwipeTouchHandler implements DreamTouchHandler {
+public class BouncerSwipeTouchHandler implements TouchHandler {
     /**
      * An interface for creating ValueAnimators.
      */

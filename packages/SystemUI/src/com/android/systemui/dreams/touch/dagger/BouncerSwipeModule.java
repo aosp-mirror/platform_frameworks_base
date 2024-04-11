@@ -23,7 +23,7 @@ import android.view.VelocityTracker;
 
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.touch.BouncerSwipeTouchHandler;
-import com.android.systemui.dreams.touch.DreamTouchHandler;
+import com.android.systemui.dreams.touch.TouchHandler;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
@@ -66,7 +66,7 @@ public class BouncerSwipeModule {
      */
     @Provides
     @IntoSet
-    public static DreamTouchHandler providesBouncerSwipeTouchHandler(
+    public static TouchHandler providesBouncerSwipeTouchHandler(
             BouncerSwipeTouchHandler touchHandler) {
         return touchHandler;
     }

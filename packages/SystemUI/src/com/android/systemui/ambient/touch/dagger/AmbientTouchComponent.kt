@@ -17,8 +17,8 @@ package com.android.systemui.ambient.touch.dagger
 
 import androidx.lifecycle.LifecycleOwner
 import com.android.systemui.ambient.dagger.AmbientModule.Companion.TOUCH_HANDLERS
-import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor
-import com.android.systemui.dreams.touch.DreamTouchHandler
+import com.android.systemui.dreams.touch.TouchHandler
+import com.android.systemui.dreams.touch.TouchMonitor
 import com.android.systemui.dreams.touch.dagger.BouncerSwipeModule
 import com.android.systemui.dreams.touch.dagger.ShadeModule
 import dagger.BindsInstance
@@ -38,10 +38,10 @@ interface AmbientTouchComponent {
             @BindsInstance lifecycleOwner: LifecycleOwner,
             @BindsInstance
             @Named(TOUCH_HANDLERS)
-            dreamTouchHandlers: Set<@JvmSuppressWildcards DreamTouchHandler>
+            touchHandlers: Set<@JvmSuppressWildcards TouchHandler>
         ): AmbientTouchComponent
     }
 
-    /** Builds a [DreamOverlayTouchMonitor] */
-    fun getDreamOverlayTouchMonitor(): DreamOverlayTouchMonitor
+    /** Builds a [TouchMonitor] */
+    fun getTouchMonitor(): TouchMonitor
 }

@@ -36,8 +36,8 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-/** {@link DreamTouchHandler} responsible for handling touches to open communal hub. **/
-public class CommunalTouchHandler implements DreamTouchHandler {
+/** {@link TouchHandler} responsible for handling touches to open communal hub. **/
+public class CommunalTouchHandler implements TouchHandler {
     private final int mInitiationWidth;
     private final Optional<CentralSurfaces> mCentralSurfaces;
     private final Lifecycle mLifecycle;

@@ -52,7 +52,7 @@ public class ShadeTouchHandlerTest extends SysuiTestCase {
     ShadeViewController mShadeViewController;
 
     @Mock
-    DreamTouchHandler.TouchSession mTouchSession;
+    TouchHandler.TouchSession mTouchSession;
 
     ShadeTouchHandler mTouchHandler;
 

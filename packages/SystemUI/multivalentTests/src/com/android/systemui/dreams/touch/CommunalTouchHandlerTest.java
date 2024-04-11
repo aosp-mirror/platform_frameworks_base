@@ -54,7 +54,7 @@ public class CommunalTouchHandlerTest extends SysuiTestCase {
     @Mock
     CentralSurfaces mCentralSurfaces;
     @Mock
-    DreamTouchHandler.TouchSession mTouchSession;
+    TouchHandler.TouchSession mTouchSession;
     CommunalTouchHandler mTouchHandler;
     @Mock
     Lifecycle mLifecycle;

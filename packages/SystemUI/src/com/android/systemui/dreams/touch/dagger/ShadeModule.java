@@ -20,8 +20,8 @@ import android.content.res.Resources;
 
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.touch.CommunalTouchHandler;
-import com.android.systemui.dreams.touch.DreamTouchHandler;
 import com.android.systemui.dreams.touch.ShadeTouchHandler;
+import com.android.systemui.dreams.touch.TouchHandler;
 import com.android.systemui.res.R;
 
 import dagger.Binds;
@@ -52,13 +52,13 @@ public abstract class ShadeModule {
      */
     @Binds
     @IntoSet
-    public abstract DreamTouchHandler providesNotificationShadeTouchHandler(
+    public abstract TouchHandler providesNotificationShadeTouchHandler(
             ShadeTouchHandler touchHandler);
 
     /** Provides {@link CommunalTouchHandler}. */
     @Binds
     @IntoSet
-    public abstract DreamTouchHandler bindCommunalTouchHandler(CommunalTouchHandler touchHandler);
+    public abstract TouchHandler bindCommunalTouchHandler(CommunalTouchHandler touchHandler);
 
     /**
      * Provides the height of the gesture area for notification swipe down.

@@ -35,7 +35,7 @@ import javax.inject.Named;
  * {@link ShadeTouchHandler} is responsible for handling swipe down gestures over dream
  * to bring down the shade.
  */
-public class ShadeTouchHandler implements DreamTouchHandler {
+public class ShadeTouchHandler implements TouchHandler {
     private final Optional<CentralSurfaces> mSurfaces;
     private final ShadeViewController mShadeViewController;
     private final int mInitiationHeight;

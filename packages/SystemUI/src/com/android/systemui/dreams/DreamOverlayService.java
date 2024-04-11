@@ -48,7 +48,7 @@ import com.android.systemui.complication.Complication;
 import com.android.systemui.complication.dagger.ComplicationComponent;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
-import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
+import com.android.systemui.dreams.touch.TouchMonitor;
 import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
@@ -105,7 +105,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     private final DreamOverlayLifecycleOwner mLifecycleOwner;
     private final LifecycleRegistry mLifecycleRegistry;
 
-    private DreamOverlayTouchMonitor mDreamOverlayTouchMonitor;
+    private TouchMonitor mTouchMonitor;
 
     private final KeyguardUpdateMonitorCallback mKeyguardCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -244,8 +244,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
         mDreamOverlayContainerViewController =
                 mDreamOverlayComponent.getDreamOverlayContainerViewController();
-        mDreamOverlayTouchMonitor = mAmbientTouchComponent.getDreamOverlayTouchMonitor();
-        mDreamOverlayTouchMonitor.init();
+        mTouchMonitor = mAmbientTouchComponent.getTouchMonitor();
+        mTouchMonitor.init();
 
         mStateController.setShouldShowComplications(shouldShowComplications());
 
@@ -375,7 +375,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mStateController.setEntryAnimationsFinished(false);
 
         mDreamOverlayContainerViewController = null;
-        mDreamOverlayTouchMonitor = null;
+        mTouchMonitor = null;
 
         mWindow = null;
         mStarted = false;

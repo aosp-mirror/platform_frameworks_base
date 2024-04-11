@@ -88,7 +88,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     FlingAnimationUtils mFlingAnimationUtilsClosing;
 
     @Mock
-    DreamTouchHandler.TouchSession mTouchSession;
+    TouchHandler.TouchSession mTouchSession;
 
     BouncerSwipeTouchHandler mTouchHandler;
 
@@ -258,7 +258,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     }
 
     private static void onSessionStartHelper(BouncerSwipeTouchHandler touchHandler,
-            DreamTouchHandler.TouchSession touchSession,
+            TouchHandler.TouchSession touchSession,
             NotificationShadeWindowController notificationShadeWindowController) {
         touchHandler.onSessionStart(touchSession);
         verify(notificationShadeWindowController).setForcePluginOpen(eq(true), any());
@@ -677,8 +677,8 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     @Test
     public void testTouchSessionOnRemovedCalledTwice() {
         mTouchHandler.onSessionStart(mTouchSession);
-        ArgumentCaptor<DreamTouchHandler.TouchSession.Callback> onRemovedCallbackCaptor =
-                ArgumentCaptor.forClass(DreamTouchHandler.TouchSession.Callback.class);
+        ArgumentCaptor<TouchHandler.TouchSession.Callback> onRemovedCallbackCaptor =
+                ArgumentCaptor.forClass(TouchHandler.TouchSession.Callback.class);
         verify(mTouchSession).registerCallback(onRemovedCallbackCaptor.capture());
         onRemovedCallbackCaptor.getValue().onRemoved();
         onRemovedCallbackCaptor.getValue().onRemoved();
