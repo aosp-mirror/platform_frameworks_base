@@ -131,6 +131,8 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     private SelectedUserInteractor mSelectedUserInteractor;
     @Mock
     private BiometricUnlockInteractor mBiometricUnlockInteractor;
+    @Mock
+    private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     private final FakeSystemClock mSystemClock = new FakeSystemClock();
     private BiometricUnlockController mBiometricUnlockController;
 
@@ -167,7 +169,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
                 () -> mSelectedUserInteractor,
                 mBiometricUnlockInteractor,
                 mock(JavaAdapter.class),
-                mock(KeyguardTransitionInteractor.class)
+                mKeyguardTransitionInteractor
         );
         biometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
         biometricUnlockController.addListener(mBiometricUnlockEventsListener);
@@ -361,6 +363,24 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     public void onBiometricAuthenticated_whenFaceOnBouncer_dismissBouncer() {
         when(mUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
         when(mStatusBarKeyguardViewManager.primaryBouncerIsOrWillBeShowing()).thenReturn(true);
+        // the value of isStrongBiometric doesn't matter here since we only care about the returned
+        // value of isUnlockingWithBiometricAllowed()
+        mBiometricUnlockController.onBiometricAuthenticated(UserHandle.USER_CURRENT,
+                BiometricSourceType.FACE, true /* isStrongBiometric */);
+
+        verify(mStatusBarKeyguardViewManager).notifyKeyguardAuthenticated(eq(false));
+        assertThat(mBiometricUnlockController.getMode())
+                .isEqualTo(BiometricUnlockController.MODE_DISMISS_BOUNCER);
+        assertThat(mBiometricUnlockController.getBiometricType())
+                .isEqualTo(BiometricSourceType.FACE);
+    }
+
+    @Test
+    public void onBiometricAuthenticated_whenFaceOnAlternateBouncer_dismissBouncer() {
+        when(mUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.primaryBouncerIsOrWillBeShowing()).thenReturn(false);
+        when(mKeyguardTransitionInteractor.getCurrentState())
+                .thenReturn(KeyguardState.ALTERNATE_BOUNCER);
         // the value of isStrongBiometric doesn't matter here since we only care about the returned
         // value of isUnlockingWithBiometricAllowed()
         mBiometricUnlockController.onBiometricAuthenticated(UserHandle.USER_CURRENT,
