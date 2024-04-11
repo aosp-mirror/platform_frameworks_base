@@ -241,6 +241,7 @@ public abstract class WMShellModule {
                 mainChoreographer,
                 taskOrganizer,
                 displayController,
+                rootTaskDisplayAreaOrganizer,
                 syncQueue,
                 transitions);
     }

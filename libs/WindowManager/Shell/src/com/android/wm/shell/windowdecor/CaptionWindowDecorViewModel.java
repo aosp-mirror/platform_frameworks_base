@@ -30,12 +30,14 @@ import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
+import android.window.DisplayAreaInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.Nullable;
 
 import com.android.wm.shell.R;
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -53,6 +55,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     private final Handler mMainHandler;
     private final Choreographer mMainChoreographer;
     private final DisplayController mDisplayController;
+    private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     private final SyncTransactionQueue mSyncQueue;
     private final Transitions mTransitions;
     private TaskOperations mTaskOperations;
@@ -65,6 +68,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             Choreographer mainChoreographer,
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             SyncTransactionQueue syncQueue,
             Transitions transitions) {
         mContext = context;
@@ -72,6 +76,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         mMainChoreographer = mainChoreographer;
         mTaskOrganizer = taskOrganizer;
         mDisplayController = displayController;
+        mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
         mSyncQueue = syncQueue;
         mTransitions = transitions;
         if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
@@ -231,7 +236,10 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                 mTaskOperations.minimizeTask(mTaskToken);
             } else if (id == R.id.maximize_window) {
                 RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
-                mTaskOperations.maximizeTask(taskInfo);
+                final DisplayAreaInfo rootDisplayAreaInfo =
+                        mRootTaskDisplayAreaOrganizer.getDisplayAreaInfo(taskInfo.displayId);
+                mTaskOperations.maximizeTask(taskInfo,
+                        rootDisplayAreaInfo.configuration.windowConfiguration.getWindowingMode());
             }
         }
 

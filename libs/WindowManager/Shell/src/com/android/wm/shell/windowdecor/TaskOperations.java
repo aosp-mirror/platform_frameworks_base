@@ -91,14 +91,12 @@ class TaskOperations {
         }
     }
 
-    void maximizeTask(RunningTaskInfo taskInfo) {
+    void maximizeTask(RunningTaskInfo taskInfo, int containerWindowingMode) {
         WindowContainerTransaction wct = new WindowContainerTransaction();
         int targetWindowingMode = taskInfo.getWindowingMode() != WINDOWING_MODE_FULLSCREEN
                 ? WINDOWING_MODE_FULLSCREEN : WINDOWING_MODE_FREEFORM;
-        int displayWindowingMode =
-                taskInfo.configuration.windowConfiguration.getDisplayWindowingMode();
         wct.setWindowingMode(taskInfo.token,
-                targetWindowingMode == displayWindowingMode
+                targetWindowingMode == containerWindowingMode
                         ? WINDOWING_MODE_UNDEFINED : targetWindowingMode);
         if (targetWindowingMode == WINDOWING_MODE_FULLSCREEN) {
             wct.setBounds(taskInfo.token, null);
