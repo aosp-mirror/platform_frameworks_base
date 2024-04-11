@@ -912,7 +912,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public void grantInputChannel(int displayId, SurfaceControl surface,
             IBinder clientToken, @Nullable InputTransferToken hostInputTransferToken, int flags,
-            int privateFlags, int type, int inputFeatures, IBinder windowToken,
+            int privateFlags, int inputFeatures, int type, IBinder windowToken,
             InputTransferToken inputTransferToken, String inputHandleName,
             InputChannel outInputChannel) {
         if (hostInputTransferToken == null && !mCanAddInternalSystemWindow) {
@@ -925,7 +925,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         try {
             mService.grantInputChannel(this, mUid, mPid, displayId, surface, clientToken,
                     hostInputTransferToken, flags, mCanAddInternalSystemWindow ? privateFlags : 0,
-                    type, inputFeatures, windowToken, inputTransferToken, inputHandleName,
+                    inputFeatures, type, windowToken, inputTransferToken, inputHandleName,
                     outInputChannel);
         } finally {
             Binder.restoreCallingIdentity(identity);
