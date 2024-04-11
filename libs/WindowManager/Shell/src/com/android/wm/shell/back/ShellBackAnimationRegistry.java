@@ -28,7 +28,7 @@ public class ShellBackAnimationRegistry {
     private static final String TAG = "ShellBackPreview";
 
     private final SparseArray<BackAnimationRunner> mAnimationDefinition = new SparseArray<>();
-    private final ShellBackAnimation mDefaultCrossActivityAnimation;
+    private ShellBackAnimation mDefaultCrossActivityAnimation;
     private final ShellBackAnimation mCustomizeActivityAnimation;
     private final ShellBackAnimation mCrossTaskAnimation;
 
@@ -67,10 +67,18 @@ public class ShellBackAnimationRegistry {
     void registerAnimation(
             @BackNavigationInfo.BackTargetType int type, @NonNull BackAnimationRunner runner) {
         mAnimationDefinition.set(type, runner);
+        // Only happen in test
+        if (BackNavigationInfo.TYPE_CROSS_ACTIVITY == type) {
+            mDefaultCrossActivityAnimation = null;
+        }
     }
 
     void unregisterAnimation(@BackNavigationInfo.BackTargetType int type) {
         mAnimationDefinition.remove(type);
+        // Only happen in test
+        if (BackNavigationInfo.TYPE_CROSS_ACTIVITY == type) {
+            mDefaultCrossActivityAnimation = null;
+        }
     }
 
     /**
@@ -129,9 +137,15 @@ public class ShellBackAnimationRegistry {
     }
 
     void onConfigurationChanged(Configuration newConfig) {
-        mCustomizeActivityAnimation.onConfigurationChanged(newConfig);
-        mDefaultCrossActivityAnimation.onConfigurationChanged(newConfig);
-        mCrossTaskAnimation.onConfigurationChanged(newConfig);
+        if (mCustomizeActivityAnimation != null) {
+            mCustomizeActivityAnimation.onConfigurationChanged(newConfig);
+        }
+        if (mDefaultCrossActivityAnimation != null) {
+            mDefaultCrossActivityAnimation.onConfigurationChanged(newConfig);
+        }
+        if (mCrossTaskAnimation != null) {
+            mCrossTaskAnimation.onConfigurationChanged(newConfig);
+        }
     }
 
     BackAnimationRunner getAnimationRunnerAndInit(BackNavigationInfo backNavigationInfo) {
