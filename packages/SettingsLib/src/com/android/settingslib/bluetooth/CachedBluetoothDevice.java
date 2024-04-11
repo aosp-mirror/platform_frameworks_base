@@ -19,6 +19,7 @@ package com.android.settingslib.bluetooth;
 import static com.android.settingslib.flags.Flags.enableSetPreferredTransportForLeAudioDevice;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.StringRes;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothCsipSetCoordinator;
@@ -37,6 +38,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelUuid;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
@@ -45,6 +47,7 @@ import android.util.LruCache;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.util.ArrayUtils;
@@ -102,6 +105,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     private HearingAidInfo mHearingAidInfo;
     private int mGroupId;
     private Timestamp mBondTimestamp;
+    private LocalBluetoothManager mBluetoothManager;
 
     // Need this since there is no method for getting RSSI
     short mRssi;
@@ -722,6 +726,25 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 .orElse(BluetoothDevice.BATTERY_LEVEL_UNKNOWN);
     }
 
+    /**
+     * Get the lowest battery level from remote device and its member devices if it's greater than
+     * BluetoothDevice.BATTERY_LEVEL_UNKNOWN.
+     *
+     * <p>Android framework should only set mBatteryLevel to valid range [0-100],
+     * BluetoothDevice.BATTERY_LEVEL_BLUETOOTH_OFF, or BluetoothDevice.BATTERY_LEVEL_UNKNOWN, any
+     * other value should be a framework bug. Thus assume here that if value is greater than
+     * BluetoothDevice.BATTERY_LEVEL_UNKNOWN, it must be valid
+     *
+     * @return battery level in String [0-100] or Null if this lower than
+     *     BluetoothDevice.BATTERY_LEVEL_UNKNOWN
+     */
+    @Nullable
+    private String getValidMinBatteryLevelWithMemberDevices() {
+        final int batteryLevel = getMinBatteryLevelWithMemberDevices();
+        return batteryLevel > BluetoothDevice.BATTERY_LEVEL_UNKNOWN
+                ? com.android.settingslib.Utils.formatPercentage(batteryLevel)
+                : null;
+    }
 
     void refresh() {
         ListenableFuture<Void> future = ThreadUtils.getBackgroundExecutor().submit(() -> {
@@ -1194,19 +1217,145 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     /**
-     * Return summary that describes connection state of this device. Summary depends on:
-     * 1. Whether device has battery info
-     * 2. Whether device is in active usage(or in phone call)
+     * Return summary that describes connection state of this device. Summary depends on: 1. Whether
+     * device has battery info 2. Whether device is in active usage(or in phone call) 3. Whether
+     * device is in audio sharing process
      *
      * @param shortSummary {@code true} if need to return short version summary
      */
     public String getConnectionSummary(boolean shortSummary) {
-        CharSequence summary = getConnectionSummary(shortSummary, false /* isTvSummary */,
-                SUMMARY_NO_COLOR_FOR_LOW_BATTERY);
-        if (summary != null) {
-            return summary.toString();
+        CharSequence summary = null;
+        if (BluetoothUtils.isAudioSharingEnabled()) {
+            if (mBluetoothManager == null) {
+                mBluetoothManager = LocalBluetoothManager.getInstance(mContext, null);
+            }
+            if (BluetoothUtils.isBroadcasting(mBluetoothManager)) {
+                summary = getBroadcastConnectionSummary(shortSummary);
+            }
+        }
+        if (summary == null) {
+            summary =
+                    getConnectionSummary(
+                            shortSummary,
+                            false /* isTvSummary */,
+                            SUMMARY_NO_COLOR_FOR_LOW_BATTERY);
+        }
+        return summary != null ? summary.toString() : null;
+    }
+
+    /**
+     * Returns the connection summary of this device during le audio sharing.
+     *
+     * @param shortSummary {@code true} if need to return short version summary
+     */
+    @Nullable
+    private String getBroadcastConnectionSummary(boolean shortSummary) {
+        if (isProfileConnectedFail() && isConnected()) {
+            return mContext.getString(R.string.profile_connect_timeout_subtext);
+        }
+
+        synchronized (mProfileLock) {
+            for (LocalBluetoothProfile profile : getProfiles()) {
+                int connectionStatus = getProfileConnectionState(profile);
+                if (connectionStatus == BluetoothProfile.STATE_CONNECTING
+                        || connectionStatus == BluetoothProfile.STATE_DISCONNECTING) {
+                    return mContext.getString(
+                            BluetoothUtils.getConnectionStateSummary(connectionStatus));
+                }
+            }
+        }
+
+        int leftBattery =
+                BluetoothUtils.getIntMetaData(
+                        mDevice, BluetoothDevice.METADATA_UNTETHERED_LEFT_BATTERY);
+        int rightBattery =
+                BluetoothUtils.getIntMetaData(
+                        mDevice, BluetoothDevice.METADATA_UNTETHERED_RIGHT_BATTERY);
+        String batteryLevelPercentageString = getValidMinBatteryLevelWithMemberDevices();
+
+        if (mBluetoothManager == null) {
+            mBluetoothManager = LocalBluetoothManager.getInstance(mContext, null);
+        }
+        if (BluetoothUtils.hasConnectedBroadcastSource(this, mBluetoothManager)) {
+            // Gets summary for the buds which are in the audio sharing.
+            int groupId = BluetoothUtils.getGroupId(this);
+            if (groupId != BluetoothCsipSetCoordinator.GROUP_ID_INVALID
+                    && groupId
+                            == Settings.Secure.getInt(
+                                    mContext.getContentResolver(),
+                                    "bluetooth_le_broadcast_fallback_active_group_id",
+                                    BluetoothCsipSetCoordinator.GROUP_ID_INVALID)) {
+                // The buds are primary buds
+                return getSummaryWithBatteryInfo(
+                        R.string.bluetooth_active_battery_level_untethered,
+                        R.string.bluetooth_active_battery_level,
+                        R.string.bluetooth_active_no_battery_level,
+                        leftBattery,
+                        rightBattery,
+                        batteryLevelPercentageString,
+                        shortSummary);
+            } else {
+                // The buds are not primary buds
+                return getSummaryWithBatteryInfo(
+                        R.string.bluetooth_active_media_only_battery_level_untethered,
+                        R.string.bluetooth_active_media_only_battery_level,
+                        R.string.bluetooth_active_media_only_no_battery_level,
+                        leftBattery,
+                        rightBattery,
+                        batteryLevelPercentageString,
+                        shortSummary);
+            }
+        } else {
+            // Gets summary for the buds which are not in the audio sharing.
+            if (getProfiles().stream()
+                    .anyMatch(
+                            profile ->
+                                    profile instanceof LeAudioProfile
+                                            && profile.isEnabled(getDevice()))) {
+                // The buds support le audio.
+                if (isConnected()) {
+                    return getSummaryWithBatteryInfo(
+                            R.string.bluetooth_battery_level_untethered_lea_support,
+                            R.string.bluetooth_battery_level_lea_support,
+                            R.string.bluetooth_no_battery_level_lea_support,
+                            leftBattery,
+                            rightBattery,
+                            batteryLevelPercentageString,
+                            shortSummary);
+                } else {
+                    return mContext.getString(R.string.bluetooth_saved_device_lea_support);
+                }
+            }
         }
         return null;
+    }
+
+    /**
+     * Returns the summary with correct format depending the battery info.
+     *
+     * @param untetheredBatteryResId resource id for untethered device with battery info
+     * @param batteryResId resource id for device with single battery info
+     * @param noBatteryResId resource id for device with no battery info
+     * @param shortSummary {@code true} if need to return short version summary
+     */
+    private String getSummaryWithBatteryInfo(
+            @StringRes int untetheredBatteryResId,
+            @StringRes int batteryResId,
+            @StringRes int noBatteryResId,
+            int leftBattery,
+            int rightBattery,
+            String batteryLevelPercentageString,
+            boolean shortSummary) {
+        if (isTwsBatteryAvailable(leftBattery, rightBattery) && !shortSummary) {
+            return mContext.getString(
+                    untetheredBatteryResId,
+                    Utils.formatPercentage(leftBattery),
+                    Utils.formatPercentage(rightBattery));
+        } else if (batteryLevelPercentageString != null && !shortSummary) {
+            return mContext.getString(batteryResId, batteryLevelPercentageString);
+        } else {
+            return mContext.getString(noBatteryResId);
+        }
     }
 
     /**
@@ -1286,18 +1435,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             }
         }
 
-        String batteryLevelPercentageString = null;
-        // Android framework should only set mBatteryLevel to valid range [0-100],
-        // BluetoothDevice.BATTERY_LEVEL_BLUETOOTH_OFF, or BluetoothDevice.BATTERY_LEVEL_UNKNOWN,
-        // any other value should be a framework bug. Thus assume here that if value is greater
-        // than BluetoothDevice.BATTERY_LEVEL_UNKNOWN, it must be valid
-        final int batteryLevel = getMinBatteryLevelWithMemberDevices();
-        if (batteryLevel > BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
-            // TODO: name com.android.settingslib.bluetooth.Utils something different
-            batteryLevelPercentageString =
-                    com.android.settingslib.Utils.formatPercentage(batteryLevel);
-        }
-
+        String batteryLevelPercentageString = getValidMinBatteryLevelWithMemberDevices();
         int stringRes = R.string.bluetooth_pairing;
         //when profile is connected, information would be available
         if (profileConnected) {
@@ -1376,7 +1514,11 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 || stringRes == R.string.bluetooth_active_battery_level_untethered
                 || stringRes == R.string.bluetooth_battery_level_untethered;
         if (isTvSummary && summaryIncludesBatteryLevel && Flags.enableTvMediaOutputDialog()) {
-            return getTvBatterySummary(batteryLevel, leftBattery, rightBattery, lowBatteryColorRes);
+            return getTvBatterySummary(
+                    getMinBatteryLevelWithMemberDevices(),
+                    leftBattery,
+                    rightBattery,
+                    lowBatteryColorRes);
         }
 
         if (isTwsBatteryAvailable(leftBattery, rightBattery)) {
@@ -1792,5 +1934,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     boolean getUnpairing() {
         return mUnpairing;
+    }
+
+    @VisibleForTesting
+    void setLocalBluetoothManager(LocalBluetoothManager bluetoothManager) {
+        mBluetoothManager = bluetoothManager;
     }
 }
