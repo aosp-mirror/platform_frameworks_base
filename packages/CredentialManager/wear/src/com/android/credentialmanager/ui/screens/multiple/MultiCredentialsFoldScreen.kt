@@ -61,7 +61,10 @@ fun MultiCredentialsFoldScreen(
         val credentials = credentialSelectorUiState.sortedEntries
         item {
             var title = stringResource(R.string.choose_sign_in_title)
-            if (credentials.all{ it.credentialType == CredentialType.PASSKEY }) {
+
+            if (credentials.isEmpty()) {
+                title = stringResource(R.string.choose_sign_in_title)
+            } else if (credentials.all{ it.credentialType == CredentialType.PASSKEY }) {
                 title = stringResource(R.string.choose_passkey_title)
             } else if (credentials.all { it.credentialType == CredentialType.PASSWORD }) {
                 title = stringResource(R.string.choose_password_title)
@@ -74,16 +77,16 @@ fun MultiCredentialsFoldScreen(
         }
 
         credentials.forEach { credential: CredentialEntryInfo ->
-                item {
-                    CredentialsScreenChip(
-                        label = credential.userName,
-                        onClick = { selectEntry(credential, false) },
-                        secondaryLabel = credential.credentialTypeDisplayName,
-                        icon = credential.icon,
-                    )
-                    CredentialsScreenChipSpacer()
-                }
+            item {
+                CredentialsScreenChip(
+                    label = credential.userName,
+                    onClick = { selectEntry(credential, false) },
+                    secondaryLabel = credential.credentialTypeDisplayName,
+                    icon = credential.icon,
+                )
+                CredentialsScreenChipSpacer()
             }
+        }
 
         credentialSelectorUiState.authenticationEntryList.forEach { authenticationEntryInfo ->
             item {
@@ -93,10 +96,13 @@ fun MultiCredentialsFoldScreen(
                 CredentialsScreenChipSpacer()
             }
         }
+
         item {
-            Spacer(modifier = Modifier.size(12.dp))
+            Spacer(modifier = Modifier.size(8.dp))
+        }
+
+        item {
             SignInOptionsChip { flowEngine.openSecondaryScreen() }
-            CredentialsScreenChipSpacer()
         }
         item {
             DismissChip { flowEngine.cancel() }

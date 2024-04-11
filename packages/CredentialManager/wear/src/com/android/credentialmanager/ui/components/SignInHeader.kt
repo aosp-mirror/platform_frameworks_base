@@ -56,6 +56,6 @@ fun SignInHeader(
             text = title,
         )
 
-        Spacer(modifier = Modifier.size(12.dp))
+        Spacer(modifier = Modifier.size(8.dp))
     }
 }

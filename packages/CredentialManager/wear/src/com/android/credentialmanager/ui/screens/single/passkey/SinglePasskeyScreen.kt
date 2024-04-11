@@ -61,10 +61,18 @@ fun SinglePasskeyScreen(
             )
         },
         accountContent = {
-            AccountRow(
-                    primaryText = checkNotNull(entry.displayName),
+            val displayName = entry.displayName
+            if (displayName == null ||
+                entry.displayName.equals(entry.userName, ignoreCase = true)) {
+                AccountRow(
+                    primaryText = entry.userName,
+                )
+            } else {
+                AccountRow(
+                    primaryText = displayName,
                     secondaryText = entry.userName,
                 )
+            }
         },
         columnState = columnState,
         modifier = Modifier.padding(horizontal = 10.dp)
