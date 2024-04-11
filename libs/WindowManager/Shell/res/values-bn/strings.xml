@@ -117,4 +117,6 @@
     <string name="close_text" msgid="4986518933445178928">"বন্ধ করুন"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"\'মেনু\' বন্ধ করুন"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"মেনু খুলুন"</string>
+    <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"স্ক্রিন বড় করুন"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"স্ক্রিনে অ্যাপ মানানসই হিসেবে ছোট বড় করুন"</string>
 </resources>

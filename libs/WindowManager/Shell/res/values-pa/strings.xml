@@ -117,4 +117,6 @@
     <string name="close_text" msgid="4986518933445178928">"ਬੰਦ ਕਰੋ"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"ਮੀਨੂ ਬੰਦ ਕਰੋ"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"ਮੀਨੂ ਖੋਲ੍ਹੋ"</string>
+    <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"ਸਕ੍ਰੀਨ ਦਾ ਆਕਾਰ ਵਧਾਓ"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"ਸਕ੍ਰੀਨ ਨੂੰ ਸਨੈਪ ਕਰੋ"</string>
 </resources>
