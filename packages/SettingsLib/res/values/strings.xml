@@ -234,6 +234,8 @@
     <string name="bluetooth_battery_level_untethered_left_lea_support">Connected (supports audio sharing), left <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g></string>
     <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level for the right part of the untethered headset, supports audio sharing. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_battery_level_untethered_right_lea_support">Connected (supports audio sharing), right <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g></string>
+    <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing no battery information, supports audio sharing. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_no_battery_level_lea_support">Connected (supports audio sharing)</string>
     <!-- Connected devices settings. Message when Bluetooth is connected and active for media only but no battery information, showing remote device status. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_active_media_only_no_battery_level">Active (media only)</string>
     <!-- Connected devices settings. Message shown when bluetooth device is disconnected but is a known, previously connected device, supports audio sharing [CHAR LIMIT=NONE] -->
