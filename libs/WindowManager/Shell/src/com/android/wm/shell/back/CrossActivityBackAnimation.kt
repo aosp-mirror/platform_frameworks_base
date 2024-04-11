@@ -87,7 +87,7 @@ class CrossActivityBackAnimation @Inject constructor(
     private val enteringStartOffset =
         context.resources.getDimension(R.dimen.cross_activity_back_entering_start_offset)
 
-    private val gestureInterpolator = Interpolators.STANDARD_DECELERATE
+    private val gestureInterpolator = Interpolators.BACK_GESTURE
     private val postCommitInterpolator = Interpolators.FAST_OUT_SLOW_IN
     private val verticalMoveInterpolator: Interpolator = DecelerateInterpolator()
 
