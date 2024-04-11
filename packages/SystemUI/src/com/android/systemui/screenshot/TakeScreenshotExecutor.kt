@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 interface TakeScreenshotExecutor {
     suspend fun executeScreenshots(
         screenshotRequest: ScreenshotRequest,
-        onSaved: (Uri) -> Unit,
+        onSaved: (Uri?) -> Unit,
         requestCallback: RequestCallback
     )
     fun onCloseSystemDialogsReceived()
@@ -30,7 +30,7 @@ interface TakeScreenshotExecutor {
     fun onDestroy()
     fun executeScreenshotsAsync(
         screenshotRequest: ScreenshotRequest,
-        onSaved: Consumer<Uri>,
+        onSaved: Consumer<Uri?>,
         requestCallback: RequestCallback
     )
 }
@@ -65,7 +65,7 @@ constructor(
      */
     override suspend fun executeScreenshots(
         screenshotRequest: ScreenshotRequest,
-        onSaved: (Uri) -> Unit,
+        onSaved: (Uri?) -> Unit,
         requestCallback: RequestCallback
     ) {
         val displayIds = getDisplaysToScreenshot(screenshotRequest.type)
@@ -86,7 +86,7 @@ constructor(
     /** All logging should be triggered only by this method. */
     private suspend fun dispatchToController(
         rawScreenshotData: ScreenshotData,
-        onSaved: (Uri) -> Unit,
+        onSaved: (Uri?) -> Unit,
         callback: RequestCallback
     ) {
         // Let's wait before logging "screenshot requested", as we should log the processed
@@ -185,7 +185,7 @@ constructor(
     /** For java compatibility only. see [executeScreenshots] */
     override fun executeScreenshotsAsync(
         screenshotRequest: ScreenshotRequest,
-        onSaved: Consumer<Uri>,
+        onSaved: Consumer<Uri?>,
         requestCallback: RequestCallback
     ) {
         mainScope.launch {
