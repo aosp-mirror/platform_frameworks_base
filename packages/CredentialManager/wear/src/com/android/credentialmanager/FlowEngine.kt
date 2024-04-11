@@ -17,6 +17,7 @@
 package com.android.credentialmanager
 
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import androidx.activity.result.IntentSenderRequest
 import androidx.compose.runtime.Composable
 import com.android.credentialmanager.model.EntryInfo
@@ -71,14 +72,14 @@ sealed class CredentialSelectorUiState {
         /** Getting credential UI state when there is only one credential available. */
         data class SingleEntry(val entry: CredentialEntryInfo) : Get()
         /**
-         * Getting credential UI state when there is only one account while with multiple
-         * credentials, with different types(eg, passkey vs password) or providers.
+         * Getting credential UI state on primary screen when there is are multiple accounts.
          */
-        data class SingleEntryPerAccount(
+        data class MultipleEntryPrimaryScreen(
+            val icon: Drawable?,
             val sortedEntries: List<CredentialEntryInfo>,
             val authenticationEntryList: List<AuthenticationEntryInfo>,
             ) : Get()
-        /** Getting credential UI state when there are multiple accounts available. */
+        /** Getting credential UI state on secondary screen when there are multiple accounts available. */
         data class MultipleEntry(
             val accounts: List<PerUserNameEntries>,
             val actionEntryList: List<ActionEntryInfo>,

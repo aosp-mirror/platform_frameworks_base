@@ -48,7 +48,7 @@ import com.android.credentialmanager.ui.components.CredentialsScreenChipSpacer
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
 fun MultiCredentialsFoldScreen(
-    credentialSelectorUiState: CredentialSelectorUiState.Get.SingleEntryPerAccount,
+    credentialSelectorUiState: CredentialSelectorUiState.Get.MultipleEntryPrimaryScreen,
     columnState: ScalingLazyColumnState,
     flowEngine: FlowEngine,
 ) {
@@ -68,7 +68,7 @@ fun MultiCredentialsFoldScreen(
             }
 
             SignInHeader(
-                icon = null,
+                icon = credentialSelectorUiState.icon,
                 title = title,
             )
         }

@@ -65,29 +65,29 @@ class CredentialSelectorUiStateGetMapperTest {
             isLastUnlocked = true
         )
 
-    val passkeyCredentialEntryInfo =
+    private val passkeyCredentialEntryInfo =
         createCredentialEntryInfo(credentialType = CredentialType.PASSKEY, userName = "userName")
 
-    val unknownCredentialEntryInfo =
+    private val unknownCredentialEntryInfo =
         createCredentialEntryInfo(credentialType = CredentialType.UNKNOWN, userName = "userName2")
 
-    val passwordCredentialEntryInfo =
+    private val passwordCredentialEntryInfo =
         createCredentialEntryInfo(credentialType = CredentialType.PASSWORD, userName = "userName")
 
-    val recentlyUsedPasskeyCredential =
+    private val recentlyUsedPasskeyCredential =
         createCredentialEntryInfo(credentialType =
     CredentialType.PASSKEY, lastUsedTimeMillis = 2L, userName = "userName")
 
-    val recentlyUsedPasswordCredential =
+    private val recentlyUsedPasswordCredential =
         createCredentialEntryInfo(credentialType =
     CredentialType.PASSWORD, lastUsedTimeMillis = 2L, userName = "userName")
 
-    val credentialList1 = listOf(
+    private val credentialList1 = listOf(
         passkeyCredentialEntryInfo,
         passwordCredentialEntryInfo
     )
 
-    val credentialList2 = listOf(
+    private val credentialList2 = listOf(
         passkeyCredentialEntryInfo,
         passwordCredentialEntryInfo,
         recentlyUsedPasskeyCredential,
@@ -118,11 +118,12 @@ class CredentialSelectorUiStateGetMapperTest {
                 unknownCredentialEntryInfo)))).toGet(isPrimary = true)
 
         assertThat(getCredentialUiState).isEqualTo(
-            CredentialSelectorUiState.Get.SingleEntryPerAccount(
+            CredentialSelectorUiState.Get.MultipleEntryPrimaryScreen(
                 sortedEntries = listOf(
                     passkeyCredentialEntryInfo, // userName
                     unknownCredentialEntryInfo // userName2
                 ),
+                icon = mDrawable,
                 authenticationEntryList = listOf(authenticationEntryInfo)
             )) // prefer passkey from account 1, then unknown from account 2
     }
