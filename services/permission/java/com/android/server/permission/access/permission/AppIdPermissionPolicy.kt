@@ -81,7 +81,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
 
     override fun MutateStateScope.onUserAdded(userId: Int) {
         newState.externalState.packageStates.forEach { (_, packageState) ->
-            if (Flags.ignoreApexPermissions() && packageState.isApex) {
+            if (packageState.isApex) {
                 return@forEach
             }
             evaluateAllPermissionStatesForPackageAndUser(packageState, userId, null)

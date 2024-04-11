@@ -1445,7 +1445,7 @@ class PermissionService(private val service: AccessCheckingService) :
         val packageStates = packageManagerLocal.withUnfilteredSnapshot().use { it.packageStates }
         service.mutateState {
             packageStates.forEach { (packageName, packageState) ->
-                if (Flags.ignoreApexPermissions() && packageState.isApex) {
+                if (packageState.isApex) {
                     return@forEach
                 }
                 val androidPackage = packageState.androidPackage ?: return@forEach
@@ -1880,7 +1880,7 @@ class PermissionService(private val service: AccessCheckingService) :
         packageManagerLocal.withUnfilteredSnapshot().use { snapshot ->
             service.mutateState {
                 snapshot.packageStates.forEach { (_, packageState) ->
-                    if (Flags.ignoreApexPermissions() && packageState.isApex) {
+                    if (packageState.isApex) {
                         return@forEach
                     }
                     with(policy) { resetRuntimePermissions(packageState.packageName, userId) }
@@ -1925,7 +1925,7 @@ class PermissionService(private val service: AccessCheckingService) :
 
         packageManagerLocal.withUnfilteredSnapshot().use { snapshot ->
             snapshot.packageStates.forEach { (_, packageState) ->
-                if (Flags.ignoreApexPermissions() && packageState.isApex) {
+                if (packageState.isApex) {
                     return@forEach
                 }
                 val androidPackage = packageState.androidPackage ?: return@forEach
@@ -1943,7 +1943,7 @@ class PermissionService(private val service: AccessCheckingService) :
         val permissions = service.getState { with(policy) { getPermissions() } }
         packageManagerLocal.withUnfilteredSnapshot().use { snapshot ->
             snapshot.packageStates.forEach packageStates@{ (_, packageState) ->
-                if (Flags.ignoreApexPermissions() && packageState.isApex) {
+                if (packageState.isApex) {
                     return@packageStates
                 }
                 val androidPackage = packageState.androidPackage ?: return@packageStates
@@ -2072,7 +2072,7 @@ class PermissionService(private val service: AccessCheckingService) :
 
         val appIdPackageNames = MutableIndexedMap<Int, MutableIndexedSet<String>>()
         packageStates.forEach { (_, packageState) ->
-            if (Flags.ignoreApexPermissions() && packageState.isApex) {
+            if (packageState.isApex) {
                 return@forEach
             }
             appIdPackageNames
@@ -2328,7 +2328,7 @@ class PermissionService(private val service: AccessCheckingService) :
         isInstantApp: Boolean,
         oldPackage: AndroidPackage?
     ) {
-        if (Flags.ignoreApexPermissions() && packageState.isApex) {
+        if (packageState.isApex) {
             return
         }
 
@@ -2358,7 +2358,7 @@ class PermissionService(private val service: AccessCheckingService) :
         params: PermissionManagerServiceInternal.PackageInstalledParams,
         userId: Int
     ) {
-        if (Flags.ignoreApexPermissions() && androidPackage.isApex) {
+        if (androidPackage.isApex) {
             return
         }
 
@@ -2414,7 +2414,7 @@ class PermissionService(private val service: AccessCheckingService) :
         sharedUserPkgs: List<AndroidPackage>,
         userId: Int
     ) {
-        if (Flags.ignoreApexPermissions() && packageState.isApex) {
+        if (packageState.isApex) {
             return
         }
 
