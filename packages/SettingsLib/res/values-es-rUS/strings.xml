@@ -106,28 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Activo; solo oído izquierdo"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Activo; solo oído derecho"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Activo; oídos izquierdo y derecho"</string>
-    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
-    <skip />
-    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
-    <skip />
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"Activo (solo para contenido multimedia); <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de batería"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"Activo (solo para contenido multimedia); I: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> de batería; D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> de batería"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"Conectado (admite el uso compartido de audio); <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de batería"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"Conectado (admite el uso compartido de audio); I: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> de batería; D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> de batería"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"Conectado (admite el uso compartido de audio); izquierdo: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"Conectado (admite el uso compartido de audio); derecho: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Activo (solo para contenido multimedia)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Admite el uso compartido de audio"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Activo (solo para contenido multimedia); solo izquierdo"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Activo (solo para contenido multimedia); solo derecho"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Activo (solo para contenido multimedia); izquierdo y derecho"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Audio multimedia"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Llamadas telefónicas"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transferencia de archivos"</string>
@@ -335,7 +324,7 @@
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Si este modo está habilitado, es posible que la dirección MAC del dispositivo cambie cada vez que se conecte a una red que tenga habilitada la aleatorización de MAC."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"De uso medido"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Sin tarifa plana"</string>
-    <string name="select_logd_size_title" msgid="1604578195914595173">"Tamaños de búfer de Logger"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"Tamaños de los búferes de registro"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Selecciona el tamaño del Logger por búfer"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"¿Borrar el almacenamiento persistente del registrador?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Cuando ya no usamos el registrador persistente para monitorear, debemos borrar los datos que almacena el registrador en tu dispositivo."</string>
@@ -411,7 +400,7 @@
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Depurar operaciones de recorte no rectangulares"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Perfil procesamiento HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Habilitar depuración GPU"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permite capas de GPU para apps de depuración"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permite cargar capas de depuración de GPU para apps de depuración"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Habilitar registro detallado"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Incluye otros registros de proveedor específicos del dispositivo en los informes de errores, que podrían contener información privada, consumir más batería o usar más espacio de almacenamiento."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Escala de animación de ventana"</string>
@@ -471,7 +460,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteronomalía (rojo-verde)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalía (rojo-verde)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalía (azul-amarillo)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Corrección de color"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Corrección de colores"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"La corrección de colores puede ser útil cuando quieres hacer lo siguiente:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Ver los colores con mayor precisión&lt;/li&gt; &lt;li&gt;&amp;nbsp;Quitar colores para concentrarte&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Reemplazado por <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>

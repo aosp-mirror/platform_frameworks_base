@@ -106,35 +106,24 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Активно – само лявото"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Активно – само дясното"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Активно – лявото и дясното"</string>
-    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
-    <skip />
-    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
-    <skip />
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"Активно (само за мултимедия), батерия – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"Активно (само за мултимедия), Л: батерия – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Д: батерия – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"Свързано (поддържа споделяне на звука), батерия – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"Свързано (поддържа споделяне на звука), Л: батерия – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Д: батерия – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"Свързано (поддържа споделяне на звука), лява – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"Свързано (поддържа споделяне на звука), дясна – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Активно (само за мултимедия)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Поддържа споделяне на звука"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Активно (само за мултимедия), само лявата"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Активно (само за мултимедия), само дясната"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Активно (само за мултимедия), лявата и дясната"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Мултимедийно аудио"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Телефонни обаждания"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Прехвърляне на файл"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Входно устройство"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Достъп до интернет"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Разреш. на достъпа до контактите и историята на обажд."</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Информацията ще се ползва за съобщения чрез обаждания и др."</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Информацията ще се ползва за обявяване на обажданията и др."</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Споделяне на връзката с интернет"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Текстови съобщения"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Достъп до SIM картата"</string>

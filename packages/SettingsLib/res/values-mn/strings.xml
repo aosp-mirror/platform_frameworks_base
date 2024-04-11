@@ -106,28 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Идэвхтэй, зөвхөн зүүн тал"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Идэвхтэй, зөвхөн баруун тал"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Идэвхтэй, зүүн болон баруун тал"</string>
-    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
-    <skip />
-    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
-    <skip />
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"Идэвхтэй (зөвхөн медиа), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батарей"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"Идэвхтэй (зөвхөн медиа), З: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> батарей, Б: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батарей"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"Холбогдсон (аудио хуваалцахыг дэмждэг), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батарей"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"Холбогдсон (аудио хуваалцахыг дэмждэг), З: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> батарей, Б: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батарей"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"Холбогдсон (аудио хуваалцахыг дэмждэг), зүүн <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"Холбогдсон (аудио хуваалцахыг дэмждэг), баруун <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Идэвхтэй (зөвхөн медиа)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Аудио хуваалцахыг дэмждэг"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Идэвхтэй (зөвхөн медиа), зөвхөн зүүн"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Идэвхтэй (зөвхөн медиа), зөвхөн баруун"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Идэвхтэй (зөвхөн медиа), зүүн болон баруун"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Медиа аудио"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Утасны дуудлага"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Файл дамжуулалт"</string>
@@ -472,7 +461,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Протаномаль (улаан-ногоон)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Тританомаль (цэнхэр-шар)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Өнгө тохируулга"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Өнгө тохируулга нь таныг дараахыг хийхийг хүсэх үед хэрэгтэй байж болно:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Өнгөнүүдийг илүү нарийвчилж харах&lt;/li&gt; &lt;li&gt;&amp;nbsp;Төвлөрөхийн тулд өнгөнүүдийг хасах&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Өнгө засах нь таныг дараахыг хийхийг хүсэх үед хэрэгтэй байж болно:&lt;br/&gt; &lt;ol&gt; &lt;li&gt; Өнгөнүүдийг илүү нарийвчилж харах&lt;/li&gt; &lt;li&gt; Төвлөрөхийн тулд өнгөнүүдийг хасах&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Давхарласан <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> - Батарейг хамгаалахын тулд цэнэглэхийг хүлээлгэсэн"</string>

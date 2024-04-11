@@ -106,28 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktiv, nur links"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktiv, nur rechts"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktiv, links und rechts"</string>
-    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
-    <skip />
-    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
-    <skip />
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"Aktiv (nur Medien), Akku: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"Aktiv (nur Medien), Akku links: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Akku rechts: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"Verbunden (unterstützt Audiofreigabe), Akku: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"Verbunden (unterstützt Audiofreigabe), Akku links: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Akku rechts: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"Verbunden (unterstützt Audiofreigabe), Akku links: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"Verbunden (unterstützt Audiofreigabe), Akku rechts: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Aktiv (nur Medien)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Unterstützt Audiofreigabe"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Aktiv (nur Medien), nur links"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Aktiv (nur Medien), nur rechts"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Aktiv (nur Medien), links und rechts"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Medien-Audio"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonanrufe"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Dateiübertragung"</string>
@@ -472,7 +461,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalie (Rot-Grün-Sehschwäche)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalie (Blau-Gelb-Sehschwäche)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Farbkorrektur"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Die Farbkorrektur kann nützlich sein, wenn du:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Farben noch genauer sehen möchtest&lt;/li&gt; &lt;li&gt;&amp;nbsp;bestimmte Farben entfernen möchtest, um dich besser zu konzentrieren&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Die Farbkorrektur kann nützlich sein, wenn du:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Farben noch genauer sehen möchtest&lt;/li&gt; &lt;li&gt;&amp;nbsp;Bestimmte Farben entfernen möchtest, um dich besser zu konzentrieren&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Außer Kraft gesetzt von \"<xliff:g id="TITLE">%1$s</xliff:g>\""</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> – Ladevorgang zum Schutz des Akkus angehalten"</string>

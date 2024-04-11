@@ -106,28 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"কেৱল বাঁওফালৰটো সক্ৰিয় হৈছে"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"কেৱল সোঁফালৰটো সক্ৰিয় হৈছে"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"বাওঁ আৰু সোঁ দুয়োফালৰ সক্ৰিয় হৈছে"</string>
-    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
-    <skip />
-    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
-    <skip />
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"সক্ৰিয় হৈ আছে (কেৱল মিডিয়া), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> বেটাৰী"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"সক্ৰিয় হৈ আছে (কেৱল মিডিয়া), বাওঁ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> বেটাৰী, সোঁ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> বেটাৰী"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"সংযুক্ত হৈ আছে (অডিঅ’ শ্বেয়াৰিং সমৰ্থন কৰে), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> বেটাৰী"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"সংযুক্ত হৈ আছে (অডিঅ’ শ্বেয়াৰিং সমৰ্থন কৰে), বাওঁ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> বেটাৰী, সোঁ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> বেটাৰী"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"সংযুক্ত হৈ আছে (অডিঅ’ শ্বেয়াৰিং সমৰ্থন কৰে), বাওঁ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"সংযুক্ত হৈ আছে (অডিঅ’ শ্বেয়াৰিং সমৰ্থন কৰে), সোঁ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"সক্ৰিয় হৈ আছে (কেৱল মিডিয়া)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"অডিঅ’ শ্বেয়াৰিং সমৰ্থন কৰে"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"সক্ৰিয় হৈ আছে (কেৱল মিডিয়া), কেৱল বাওঁ"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"সক্ৰিয় হৈ আছে (কেৱল মিডিয়া), কেৱল সোঁ"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"সক্ৰিয় হৈ আছে (কেৱল মিডিয়া), বাওঁ আৰু সোঁ"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"মিডিয়াৰ অডিঅ’"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ফ\'ন কলসমূহ"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ফাইল স্থানান্তৰণ"</string>

@@ -106,35 +106,24 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Ativo, apenas esquerdo"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Ativo, apenas direito"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Ativo, esquerdo e direito"</string>
-    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
-    <skip />
-    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
-    <skip />
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"Ativo (apenas para multimédia), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"Ativo (apenas para multimédia), E: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> de bateria, D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> de bateria"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"Ligado (suporta partilha de áudio), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"Ligado (suporta partilha de áudio), E: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> de bateria, D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> de bateria"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"Ligado (suporta partilha de áudio), esquerdo <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"Ligado (suporta partilha de áudio), direito <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Ativo (apenas para multimédia)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Suporta partilha de áudio"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Ativo (apenas para multimédia), apenas esquerdo"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Ativo (apenas para multimédia), apenas direito"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Ativo (apenas para multimédia), esquerdo e direito"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Áudio de multimédia"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Chamadas telefónicas"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transferência do ficheiro"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Dispositivo de entrada"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Acesso à internet"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Acesso a contactos e histórico de chamadas"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"As informações são usadas para anúncios de chamadas e outros"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"As informações são usadas para anúncios por chamadas e outros"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Partilha da ligação à internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Mensagens de texto"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Acesso ao SIM"</string>
@@ -410,7 +399,7 @@
     <string name="force_msaa_summary" msgid="9070437493586769500">"Ativar o 4x MSAA em aplicações OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Depurar operações de clipe não retangulares"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Renderização HWUI do perfil"</string>
-    <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Ativar cam. depuração GPU"</string>
+    <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Ativar camadas de depuração GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permite carregamento de camadas de depuração de GPU para apps de depuração"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Ativ. registo do fornecedor"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Inclua registos adicionais de fornecedores específicos de dispositivos em relatórios de erros, que podem conter informações privadas, utilizar mais bateria e/ou utilizar mais armazenamento."</string>
@@ -555,7 +544,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmes e lembretes"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permitir alarmes e lembretes"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmes e lembretes"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Permita que esta app defina alarmes e agende outras ações com base no tempo. Esta ação permite que a app seja executada em segundo plano, o que pode utilizar mais bateria.\n\nSe esta autorização estiver desativada, os alarmes existentes e os eventos com base no tempo agendados por esta app não funcionam."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Permita que a app defina alarmes e agende ações com um horário específico. Esta ação permite que a app seja executada em segundo plano, o que pode usar mais bateria.\n\nSe esta autorização estiver desativada, os alarmes existentes e os eventos com base no tempo agendados por esta app não funcionam."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"agendar, alarme, lembrete, relógio"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Ativar"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Ativar o modo Não incomodar"</string>
@@ -595,7 +584,7 @@
     <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Altifalantes internos"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problema ao ligar. Desligue e volte a ligar o dispositivo."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositivo de áudio com fios"</string>
-    <string name="help_label" msgid="3528360748637781274">"Ajuda e comentários"</string>
+    <string name="help_label" msgid="3528360748637781274">"Ajuda e feedback"</string>
     <string name="storage_category" msgid="2287342585424631813">"Armazenamento"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Dados partilhados"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Ver e modificar dados partilhados"</string>

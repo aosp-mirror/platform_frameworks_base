@@ -106,28 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"ใช้งานอยู่ เฉพาะข้างซ้าย"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"ใช้งานอยู่ เฉพาะข้างขวา"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"ใช้งานอยู่ ข้างซ้ายและขวา"</string>
-    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
-    <skip />
-    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
-    <skip />
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"ใช้งานอยู่ (สื่อเท่านั้น), แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"ใช้งานอยู่ (สื่อเท่านั้น), L: แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"เชื่อมต่อแล้ว (รองรับการแชร์เสียง), แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"เชื่อมต่อแล้ว (รองรับการแชร์เสียง), L: แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"เชื่อมต่อแล้ว (รองรับการแชร์เสียง), ซ้าย <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"เชื่อมต่อแล้ว (รองรับการแชร์เสียง), ขวา <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"ใช้งานอยู่ (สื่อเท่านั้น)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"รองรับการแชร์เสียง"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"ใช้งานอยู่ (สื่อเท่านั้น), ซ้ายเท่านั้น"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"ใช้งานอยู่ (สื่อเท่านั้น), ขวาเท่านั้น"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"ใช้งานอยู่ (สื่อเท่านั้น), ซ้ายและขวา"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"เสียงของสื่อ"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"โทรศัพท์"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"การถ่ายโอนไฟล์"</string>
@@ -203,7 +192,7 @@
     <string name="launch_defaults_none" msgid="8049374306261262709">"ไม่ได้ตั้งค่าเริ่มต้น"</string>
     <string name="tts_settings" msgid="8130616705989351312">"การตั้งค่าการอ่านออกเสียงข้อความ"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"เอาต์พุตการอ่านออกเสียงข้อความ"</string>
-    <string name="tts_default_rate_title" msgid="3964187817364304022">"ความเร็วของคำพูด"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"ความเร็วในการพูด"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"ความเร็วในการพูดข้อความ"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"ความสูง-ต่ำของเสียง"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"มีผลต่อโทนเสียงของข้อความสังเคราะห์"</string>
@@ -487,7 +476,7 @@
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"น่าจะใช้งานได้ถึงเวลาประมาณ <xliff:g id="TIME">%1$s</xliff:g> เมื่อดูจากการใช้งานของคุณ"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"น่าจะใช้งานได้ถึงเวลาประมาณ <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"น่าจะใช้งานได้ถึงเวลาประมาณ <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"จนถึง <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"จนถึง <xliff:g id="TIME">%1$s</xliff:g> น."</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"แบตเตอรี่อาจหมดภายใน <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"เหลือน้อยกว่า <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"เหลือน้อยกว่า <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>

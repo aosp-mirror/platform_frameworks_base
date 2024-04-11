@@ -106,28 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"સક્રિય, માત્ર ડાબું"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"સક્રિય, માત્ર જમણું"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"સક્રિય, ડાબું અને જમણું બન્ને"</string>
-    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
-    <skip />
-    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
-    <skip />
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"સક્રિય છે (માત્ર મીડિયા માટે), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> બૅટરી"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"સક્રિય છે (માત્ર મીડિયા માટે), ડાબી બાજુ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> બૅટરી, જમણી બાજુ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> બૅટરી"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"કનેક્ટેડ છે (ઑડિયો શેરિંગને સપોર્ટ કરે છે), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> બૅટરી"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"કનેક્ટેડ છે (ઑડિયો શેરિંગને સપોર્ટ કરે છે), ડાબી બાજુ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> બૅટરી, જમણી બાજુ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> બૅટરી"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"કનેક્ટેડ છે (ઑડિયો શેરિંગને સપોર્ટ કરે છે), ડાબી બાજુ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"કનેક્ટેડ છે (ઑડિયો શેરિંગને સપોર્ટ કરે છે), જમણી બાજુ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"સક્રિય છે (માત્ર મીડિયા માટે)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"ઑડિયો શેરિંગને સપોર્ટ કરે છે"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"સક્રિય છે (માત્ર મીડિયા માટે), માત્ર ડાબી બાજુ"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"સક્રિય છે (માત્ર મીડિયા માટે), માત્ર જમણી બાજુ"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"સક્રિય છે (માત્ર મીડિયા માટે), ડાબી અને જમણી બાજુ"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"મીડિયા ઑડિયો"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ફોન કૉલ"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ફાઇલ સ્થાનાંતરણ"</string>
@@ -335,7 +324,7 @@
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"આ મોડ ચાલુ કરેલો હોય ત્યારે MAC રેન્ડમાઇઝેશન ચાલુ કરેલું હોય તેવા નેટવર્ક સાથે આ ડિવાઇસ કનેક્ટ થશે, ત્યારે દર વખતે તેનું MAC ઍડ્રેસ બદલાય તેવું બની શકે છે."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"મીટર કરેલું"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"મીટર ન કરેલ"</string>
-    <string name="select_logd_size_title" msgid="1604578195914595173">"લોગર બફર કદ"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"લૉગર બફર કદ"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"લૉગ દીઠ લૉગર કદ બફર પસંદ કરો"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"લૉગર નિરંતર સ્ટોરેજ સાફ કરીએ?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"જ્યારે અમે હવે નિરંતર લૉગર સાથે મોનીટર કરતાં નથી, તો તમારા ઉપકરણ પર રહેલો લૉગર ડેટા કાઢી નાખવાની જરૂર છે."</string>
