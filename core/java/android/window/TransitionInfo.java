@@ -538,6 +538,11 @@ public final class TransitionInfo implements Parcelable {
         // If the change has no parent (it is root), then it is independent
         if (change.getParent() == null) return true;
 
+        if (change.getLastParent() != null && !change.getLastParent().equals(change.getParent())) {
+            // If the change has been reparented, then it's independent.
+            return true;
+        }
+
         // non-visibility changes will just be folded into the parent change, so they aren't
         // independent either.
         if (change.getMode() == TRANSIT_CHANGE) return false;
