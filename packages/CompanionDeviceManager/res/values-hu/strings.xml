@@ -54,7 +54,7 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Mikrofon"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Hívásnaplók"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Közeli eszközök"</string>
-    <string name="permission_media_routing_control" msgid="5498639511586715253">"Médiakiment módosítása"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Médiakimenet módosítása"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Fotók és médiatartalmak"</string>
     <string name="permission_notifications" msgid="4099418516590632909">"Értesítések"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Alkalmazások"</string>
