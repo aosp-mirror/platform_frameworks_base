@@ -3655,6 +3655,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // Create immersive rule
         AutomaticZenRule immersive = new AutomaticZenRule.Builder("Immersed", CONDITION_ID)
                 .setType(TYPE_IMMERSIVE)
+                .setZenPolicy(mZenModeHelper.mConfig.toZenPolicy()) // same as the manual rule
                 .build();
         String immersiveId = mZenModeHelper.addAutomaticZenRule(mPkg, immersive, UPDATE_ORIGIN_APP,
                 "reason", CUSTOM_PKG_UID);
@@ -4242,6 +4243,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     public void updateAutomaticZenRule_fromUser_updatesBitmaskAndValue() {
         // Adds a starting rule with empty zen policies and device effects
         AutomaticZenRule azrBase = new AutomaticZenRule.Builder(NAME, CONDITION_ID)
+                .setInterruptionFilter(INTERRUPTION_FILTER_ALARMS)
                 .setZenPolicy(new ZenPolicy.Builder().build())
                 .setDeviceEffects(new ZenDeviceEffects.Builder().build())
                 .build();
@@ -4250,7 +4252,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 azrBase, UPDATE_ORIGIN_APP, "reason", Process.SYSTEM_UID);
         AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(ruleId);
 
-        // Modifies the zen policy and device effects
+        // Modifies the filter, zen policy, and device effects
         ZenPolicy policy = new ZenPolicy.Builder(rule.getZenPolicy())
                 .allowPriorityChannels(false)
                 .build();

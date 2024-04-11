@@ -189,12 +189,16 @@ public class AutomaticZenRuleTest {
 
     @Test
     @EnableFlags(Flags.FLAG_MODES_API)
-    public void builder_defaultTypeUnknown() {
+    public void builder_defaultsAreSensible() {
         AutomaticZenRule rule = new AutomaticZenRule.Builder("name",
                 Uri.parse("conditionId")).build();
 
         assertThat(rule.getType()).isEqualTo(AutomaticZenRule.TYPE_UNKNOWN);
+        assertThat(rule.getInterruptionFilter()).isEqualTo(
+                NotificationManager.INTERRUPTION_FILTER_PRIORITY);
+        assertThat(rule.isEnabled()).isTrue();
     }
+
     @Test
     @EnableFlags(Flags.FLAG_MODES_API)
     public void validate_builderWithValidType_succeeds() throws Exception {
