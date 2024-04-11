@@ -1877,7 +1877,7 @@
     <string name="restr_pin_try_later" msgid="5897719962541636727">"ລອງໃໝ່ອີກຄັ້ງໃນພາຍຫລັງ."</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"ການ​ເບິ່ງ​ເຕັມ​ໜ້າ​ຈໍ"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"ຫາກຕ້ອງການອອກ, ໃຫ້ຮູດຈາກທາງເທິງລົງມາທາງລຸ່ມ."</string>
-    <string name="immersive_cling_positive" msgid="7047498036346489883">"ໄດ້​ແລ້ວ"</string>
+    <string name="immersive_cling_positive" msgid="7047498036346489883">"ເຂົ້າ​ໃຈ​ແລ້ວ"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ໝຸນເພື່ອມຸມມອງທີ່ດີຂຶ້ນ"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"ເປີດ <xliff:g id="NAME">%s</xliff:g> ໃນໂໝດເຕັມຈໍເພື່ອມຸມມອງທີ່ດີຂຶ້ນ"</string>
     <string name="done_label" msgid="7283767013231718521">"ແລ້ວໆ"</string>
@@ -2394,8 +2394,7 @@
     <string name="profile_label_test" msgid="9168641926186071947">"ທົດສອບ"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"ສ່ວນກາງ"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
-    <skip />
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ເນື້ອຫາແອັບຖືກເຊື່ອງໄວ້ຈາກການແບ່ງປັນໜ້າຈໍເພື່ອຄວາມປອດໄພ"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"ເຊື່ອມຕໍ່ກັບດາວທຽມໂດຍອັດຕະໂນມັດ"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"ທ່ານສາມາດສົ່ງ ແລະ ຮັບຂໍ້ຄວາມໂດຍບໍ່ຕ້ອງໃຊ້ເຄືອຂ່າຍມືຖື ຫຼື Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"ເປີດ Messages"</string>

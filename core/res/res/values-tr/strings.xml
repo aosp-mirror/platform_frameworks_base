@@ -1396,8 +1396,8 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Bağlı cihaz şarj ediliyor. Diğer seçenekler için dokunun."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Analog ses aksesuarı algılandı"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Takılan cihaz bu telefonla uyumlu değil. Daha fazla bilgi edinmek için dokunun."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB hata ayıklaması bağlandı"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB hata ayıklamayı kapatmak için dokunun"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB üzerinden hata ayıklama bağlandı"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB üzerinden hata ayıklamayı kapatmak için dokunun"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB hata ayıklamasını devre dışı bırakmak için seçin."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Kablosuz hata ayıklama bağlı"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Kablosuz hata ayıklamayı kapatmak için dokunun"</string>
@@ -2394,8 +2394,7 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Paylaşılan"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
-    <skip />
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Uygulama içerikleri, güvenlik nedeniyle ekran paylaşımında gizlendi"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Uyduya otomatik olarak bağlandı"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Mobil veya kablosuz ağa bağlı olmadan mesaj alıp gönderebilirsiniz"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Mesajlar\'ı aç"</string>

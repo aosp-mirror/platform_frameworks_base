@@ -259,7 +259,7 @@
     <string name="global_action_emergency" msgid="1387617624177105088">"Noodgeval"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Foutverslag"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Beëindig sessie"</string>
-    <string name="global_action_screenshot" msgid="2610053466156478564">"Skermkiekie"</string>
+    <string name="global_action_screenshot" msgid="2610053466156478564">"Skermskoot"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"Foutverslag"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Dit sal inligting oor die huidige toestand van jou toestel insamel om as \'n e-posboodskap te stuur. Dit sal \'n tydjie neem vandat die foutverslag begin is totdat dit reg is om gestuur te word; wees asseblief geduldig."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Interaktiewe verslag"</string>
@@ -1426,7 +1426,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Tik om taal en uitleg te kies"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Wys bo-oor ander programme"</string>
+    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Wys bo-oor ander apps"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> word bo-oor ander programme gewys"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> wys bo-oor ander programme"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"As jy nie wil hê dat <xliff:g id="NAME">%s</xliff:g> hierdie kenmerk gebruik nie, tik om instellings oop te maak en skakel dit af."</string>
@@ -1929,12 +1929,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Bestuur deur <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Aan"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Af"</string>
-    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>-<xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Enige kalender"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> demp sekere klanke"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Daar is \'n interne probleem met jou toestel en dit sal dalk onstabiel wees totdat jy \'n fabriekterugstelling doen."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Daar is \'n interne probleem met jou toestel. Kontak jou vervaardiger vir besonderhede."</string>
@@ -1973,7 +1970,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Ongekategoriseer"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Jy stel die belangrikheid van hierdie kennisgewings."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Dit is belangrik as gevolg van die mense wat betrokke is."</string>
-    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Gepasmaakte programkennisgewing"</string>
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Gepasmaakte appkennisgewing"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Laat <xliff:g id="APP">%1$s</xliff:g> toe om \'n nuwe gebruiker met <xliff:g id="ACCOUNT">%2$s</xliff:g> te skep (\'n gebruiker met hierdie rekening bestaan reeds)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Laat <xliff:g id="APP">%1$s</xliff:g> toe om \'n nuwe gebruiker met <xliff:g id="ACCOUNT">%2$s</xliff:g> te skep?"</string>
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"Voeg gebruiker onder toesig by"</string>
@@ -2179,7 +2176,7 @@
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Kitsinstellings"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Kragdialoog"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Sluitskerm"</string>
-    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Skermkiekie"</string>
+    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Skermskoot"</string>
     <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"Kopstuk haak"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Toeganklikheidkortpad op skerm"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Toeganklikheidkortpadkieser op skerm"</string>
@@ -2397,8 +2394,7 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Toets"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Gemeenskaplik"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
-    <skip />
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Appinhoud is weens sekuriteit van skermdeling verberg"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Outomaties aan satelliet gekoppel"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Jy kan boodskappe stuur en ontvang sonder ’n selfoon- of wi-fi-netwerk"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Maak Boodskappe oop"</string>

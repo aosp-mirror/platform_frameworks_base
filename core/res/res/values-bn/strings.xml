@@ -1743,7 +1743,7 @@
     <string name="color_inversion_feature_name" msgid="2672824491933264951">"কালার ইনভার্সন"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"রঙ সংশোধন করা"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"এক হাতে ব্যবহার করার মোড"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"অতিরিক্ত কম ব্রাইটনেস"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"অতিরিক্ত কম উজ্জ্বলতা"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"হিয়ারিং ডিভাইস"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ভলিউম কী ধরে ছিলেন। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> চালু করা হয়েছে।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ভলিউম কী ধরে ছিলেন। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> বন্ধ করা হয়েছে।"</string>
@@ -2394,8 +2394,7 @@
     <string name="profile_label_test" msgid="9168641926186071947">"পরীক্ষা"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"কমিউনাল"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
-    <skip />
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"নিরাপত্তার জন্য স্ক্রিন শেয়ার করা থেকে লুকানো অ্যাপের কন্টেন্ট"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"স্যাটেলাইটের সাথে অটোমেটিক কানেক্ট করা হয়েছে"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"আপনি কোনও মেবাইল বা ওয়াই-ফাই নেটওয়ার্ক ছাড়াই মেসেজ পাঠাতে ও পেতে পারবেন"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages খুলুন"</string>

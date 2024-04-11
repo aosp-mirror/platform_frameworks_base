@@ -688,7 +688,7 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"ఏదో తప్పు జరిగింది. మళ్లీ ట్రై చేయండి."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"వేలిముద్ర చిహ్నం"</string>
-    <string name="device_unlock_notification_name" msgid="2632928999862915709">"పరికర అన్‌లాక్"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"డివైజ్ అన్‌లాక్"</string>
     <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"అన్‌లాక్ చేయడానికి మరొక మార్గాన్ని ట్రై చేయండి"</string>
     <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"మీ వేళ్లు తడిగా ఉండటం లేక ఇతరత్రా కారణాల వల్ల మీ వేలిముద్రను గుర్తించకపోతే, ఫేస్ అన్‌లాక్‌ను ఉపయోగించండి"</string>
     <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"తగినంత వెలుతురు లేకపోవడం లేక ఇతరత్రా కారణాల వల్ల మీ ఫేస్ గుర్తించబడనప్పుడు, వేలిముద్ర అన్‌లాక్‌ను ఉపయోగించండి"</string>
@@ -995,7 +995,7 @@
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"సరైనది!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"మళ్లీ ట్రై చేయండి"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"మళ్లీ ట్రై చేయండి"</string>
-    <string name="lockscreen_storage_locked" msgid="634993789186443380">"అన్ని లక్షణాలు మరియు డేటా కోసం అన్‌లాక్ చేయండి"</string>
+    <string name="lockscreen_storage_locked" msgid="634993789186443380">"అన్ని ఫీచర్ల కోసం, డేటా కోసం అన్‌లాక్ చేయండి"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"ఫేస్ అన్‌లాక్ ప్రయత్నాల గరిష్ఠ పరిమితిని మించిపోయారు"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"SIM లేదు"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"టాబ్లెట్‌లో SIM లేదు."</string>
@@ -1222,7 +1222,7 @@
     <string name="whichEditApplicationLabel" msgid="1463288652070140285">"ఎడిట్"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"షేర్ చేయండి"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"%1$sతో షేర్ చేయండి"</string>
-    <string name="whichSendApplicationLabel" msgid="7467813004769188515">"షేర్ చేయి"</string>
+    <string name="whichSendApplicationLabel" msgid="7467813004769188515">"షేర్ చేయండి"</string>
     <string name="whichSendToApplication" msgid="77101541959464018">"దీన్ని ఉపయోగించి పంపండి"</string>
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"%1$sని ఉపయోగించి పంపండి"</string>
     <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"పంపండి"</string>
@@ -1416,7 +1416,7 @@
     <string name="share_remote_bugreport_notification_title" msgid="6708897723753334999">"బగ్ రిపోర్ట్‌ను షేర్ చేయాలా?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="3077385149217638550">"బగ్ రిపోర్ట్‌ను షేర్ చేస్తోంది..."</string>
     <string name="share_remote_bugreport_notification_message_finished" msgid="7325635795739260135">"మీ అడ్మిన్ ఈ పరికరం సమస్యకు పరిష్కారాన్ని కనుగొనడంలో సహాయం కోసం బగ్ రిపోర్ట్‌ను రిక్వెస్ట్ చేశారు. యాప్‌లు మరియు డేటా షేర్ చేయబడవచ్చు."</string>
-    <string name="share_remote_bugreport_action" msgid="7630880678785123682">"షేర్ చేయి"</string>
+    <string name="share_remote_bugreport_action" msgid="7630880678785123682">"షేర్ చేయండి"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"తిరస్కరిస్తున్నాను"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ఇన్‌పుట్ పద్ధతిని ఎంచుకోండి"</string>
     <string name="show_ime" msgid="6406112007347443383">"దీన్ని భౌతిక కీబోర్డ్ యాక్టివ్‌గా ఉన్నప్పుడు స్క్రీన్‌పై ఉంచుతుంది"</string>
@@ -2394,8 +2394,7 @@
     <string name="profile_label_test" msgid="9168641926186071947">"పరీక్ష"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"కమ్యూనల్"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
-    <skip />
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"సెక్యూరిటీ కోసం స్క్రీన్ షేర్ నుండి యాప్ కంటెంట్ దాచబడింది"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"శాటిలైట్‌కు ఆటోమేటిక్‌గా కనెక్ట్ చేయబడింది"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"మీరు మొబైల్ లేదా Wi-Fi నెట్‌వర్క్ లేకుండా మెసేజ్‌లను పంపవచ్చు, స్వీకరించవచ్చు"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messagesను తెరవండి"</string>

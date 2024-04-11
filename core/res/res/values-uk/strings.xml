@@ -1185,7 +1185,7 @@
     <string name="deleteText" msgid="4200807474529938112">"Видалити"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Метод введення"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Дії з текстом"</string>
-    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"Рукописне введення не підтримується в цьому полі"</string>
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"У цьому полі не підтримується рукописне введення"</string>
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Рукописне введення не підтримується в полях паролів"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Назад"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Змінити метод введення"</string>
@@ -2396,8 +2396,7 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Тестовий профіль"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Спільний профіль"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
-    <skip />
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"З міркувань безпеки вміст додатка приховано під час показу екрана"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Автоматично підключено до супутника"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Ви можете надсилати й отримувати повідомлення, не використовуючи Wi-Fi або мобільну мережу"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Відкрийте Повідомлення"</string>
