@@ -58,7 +58,8 @@ fun VolumeSlider(
         modifier =
             modifier.clearAndSetSemantics {
                 if (!state.isEnabled) disabled()
-                contentDescription = state.label
+                contentDescription =
+                    state.disabledMessage?.let { "${state.label}, $it" } ?: state.label
 
                 // provide a not animated value to the a11y because it fails to announce the
                 // settled value when it changes rapidly.
