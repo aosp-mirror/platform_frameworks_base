@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume.panel.dagger
 
+import com.android.systemui.volume.dagger.UiEventLoggerStartableModule
 import com.android.systemui.volume.panel.component.anc.AncModule
 import com.android.systemui.volume.panel.component.bottombar.BottomBarModule
 import com.android.systemui.volume.panel.component.captioning.CaptioningModule
@@ -25,6 +26,7 @@ import com.android.systemui.volume.panel.component.volume.VolumeSlidersModule
 import com.android.systemui.volume.panel.dagger.factory.VolumePanelComponentFactory
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import com.android.systemui.volume.panel.domain.DomainModule
+import com.android.systemui.volume.panel.domain.VolumePanelStartable
 import com.android.systemui.volume.panel.domain.interactor.ComponentsInteractor
 import com.android.systemui.volume.panel.ui.UiModule
 import com.android.systemui.volume.panel.ui.composable.ComponentsFactory
@@ -47,6 +49,7 @@ import kotlinx.coroutines.CoroutineScope
             DefaultMultibindsModule::class,
             DomainModule::class,
             UiModule::class,
+            UiEventLoggerStartableModule::class,
             // Components modules
             BottomBarModule::class,
             AncModule::class,
@@ -65,6 +68,8 @@ interface VolumePanelComponent {
     fun componentsFactory(): ComponentsFactory
 
     fun componentsLayoutManager(): ComponentsLayoutManager
+
+    fun volumePanelStartables(): Set<VolumePanelStartable>
 
     @Subcomponent.Factory
     interface Factory : VolumePanelComponentFactory {

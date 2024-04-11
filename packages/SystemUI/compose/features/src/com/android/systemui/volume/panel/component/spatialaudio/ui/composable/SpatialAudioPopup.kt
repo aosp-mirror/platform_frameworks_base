@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.common.ui.compose.toColor
@@ -34,6 +35,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.volume.panel.component.popup.ui.composable.VolumePanelPopup
 import com.android.systemui.volume.panel.component.selector.ui.composable.VolumePanelRadioButtonBar
 import com.android.systemui.volume.panel.component.spatial.ui.viewmodel.SpatialAudioViewModel
+import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import javax.inject.Inject
 
 class SpatialAudioPopup
@@ -41,10 +43,17 @@ class SpatialAudioPopup
 constructor(
     private val viewModel: SpatialAudioViewModel,
     private val volumePanelPopup: VolumePanelPopup,
+    private val uiEventLogger: UiEventLogger,
 ) {
 
     /** Shows a popup with the [expandable] animation. */
     fun show(expandable: Expandable) {
+        uiEventLogger.logWithPosition(
+            VolumePanelUiEvent.VOLUME_PANEL_SPATIAL_AUDIO_POP_UP_SHOWN,
+            0,
+            null,
+            viewModel.spatialAudioButtons.value.indexOfFirst { it.button.isChecked }
+        )
         volumePanelPopup.show(expandable, { Title() }, { Content(it) })
     }
 

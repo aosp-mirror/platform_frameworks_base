@@ -26,6 +26,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.onConfigChanged
 import com.android.systemui.volume.panel.dagger.VolumePanelComponent
 import com.android.systemui.volume.panel.dagger.factory.VolumePanelComponentFactory
+import com.android.systemui.volume.panel.domain.VolumePanelStartable
 import com.android.systemui.volume.panel.domain.interactor.ComponentsInteractor
 import com.android.systemui.volume.panel.ui.composable.ComponentsFactory
 import com.android.systemui.volume.panel.ui.layout.ComponentsLayout
@@ -108,6 +109,10 @@ class VolumePanelViewModel(
                 SharingStarted.Eagerly,
                 replay = 1,
             )
+
+    init {
+        volumePanelComponent.volumePanelStartables().onEach(VolumePanelStartable::start)
+    }
 
     fun dismissPanel() {
         mutablePanelVisibility.update { false }

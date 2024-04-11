@@ -85,6 +85,7 @@ fun ColumnVolumeSliders(
                 onValueChange = { newValue: Float ->
                     sliderViewModel.onValueChanged(sliderState, newValue)
                 },
+                onValueChangeFinished = { sliderViewModel.onValueChangeFinished() },
                 onIconTapped = { sliderViewModel.toggleMuted(sliderState) },
                 sliderColors = sliderColors,
             )
@@ -131,6 +132,7 @@ fun ColumnVolumeSliders(
                                 onValueChange = { newValue: Float ->
                                     sliderViewModel.onValueChanged(sliderState, newValue)
                                 },
+                                onValueChangeFinished = { sliderViewModel.onValueChangeFinished() },
                                 onIconTapped = { sliderViewModel.toggleMuted(sliderState) },
                                 sliderColors = sliderColors,
                             )

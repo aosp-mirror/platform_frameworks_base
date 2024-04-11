@@ -14,71 +14,79 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.component.captioning.ui.viewmodel
+package com.android.systemui.volume.domain.startable
 
+import android.media.AudioManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.uiEventLogger
+import com.android.internal.logging.uiEventLoggerFake
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
-import com.android.systemui.view.accessibility.data.repository.captioningInteractor
-import com.android.systemui.view.accessibility.data.repository.captioningRepository
+import com.android.systemui.volume.audioModeInteractor
+import com.android.systemui.volume.audioRepository
+import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.junit.MockitoJUnit
+import org.mockito.junit.MockitoRule
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@SmallTest
 @RunWith(AndroidJUnit4::class)
-class CaptioningViewModelTest : SysuiTestCase() {
+@SmallTest
+class AudioModeLoggerStartableTest : SysuiTestCase() {
+    @get:Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()
 
     private val kosmos = testKosmos()
 
-    private lateinit var underTest: CaptioningViewModel
+    private lateinit var underTest: AudioModeLoggerStartable
 
     @Before
-    fun setup() {
-        underTest =
-            with(kosmos) {
-                CaptioningViewModel(
-                    context,
-                    captioningInteractor,
-                    testScope.backgroundScope,
+    fun setUp() {
+        with(kosmos) {
+            underTest =
+                AudioModeLoggerStartable(
+                    applicationCoroutineScope,
                     uiEventLogger,
+                    audioModeInteractor
                 )
-            }
+        }
     }
 
     @Test
-    fun captioningDisabled_buttonViewModel_notChecked() {
+    fun audioMode_inCall() {
         with(kosmos) {
             testScope.runTest {
-                captioningRepository.setIsSystemAudioCaptioningEnabled(false)
+                audioRepository.setMode(AudioManager.MODE_IN_CALL)
 
-                val buttonViewModel by collectLastValue(underTest.buttonViewModel)
+                underTest.start()
                 runCurrent()
 
-                assertThat(buttonViewModel!!.isChecked).isFalse()
+                assertThat(uiEventLoggerFake.eventId(0))
+                    .isEqualTo(VolumePanelUiEvent.VOLUME_PANEL_AUDIO_MODE_CHANGE_TO_CALLING.id)
             }
         }
     }
 
     @Test
-    fun captioningDisabled_buttonViewModel_checked() {
+    fun audioMode_notInCall() {
         with(kosmos) {
             testScope.runTest {
-                captioningRepository.setIsSystemAudioCaptioningEnabled(true)
+                audioRepository.setMode(AudioManager.MODE_NORMAL)
 
-                val buttonViewModel by collectLastValue(underTest.buttonViewModel)
+                underTest.start()
                 runCurrent()
 
-                assertThat(buttonViewModel!!.isChecked).isTrue()
+                assertThat(uiEventLoggerFake.eventId(0))
+                    .isEqualTo(VolumePanelUiEvent.VOLUME_PANEL_AUDIO_MODE_CHANGE_TO_NORMAL.id)
             }
         }
     }

@@ -14,18 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel
+package com.android.systemui.volume.panel.domain
 
-import kotlinx.coroutines.flow.StateFlow
-
-/** Controls the behaviour of a volume slider. */
-interface SliderViewModel {
-
-    val slider: StateFlow<SliderState>
-
-    fun onValueChanged(state: SliderState, newValue: Float)
-
-    fun onValueChangeFinished()
-
-    fun toggleMuted(state: SliderState)
+/** Code that needs to be run when Volume Panel is started.. */
+interface VolumePanelStartable {
+    fun start()
 }
