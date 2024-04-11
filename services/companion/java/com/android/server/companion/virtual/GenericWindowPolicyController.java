@@ -302,7 +302,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         if (Flags.interceptIntentsBeforeApplyingPolicy()) {
             if (mIntentListenerCallback != null && intent != null
                     && mIntentListenerCallback.shouldInterceptIntent(intent)) {
-                Slog.d(TAG, "Virtual device intercepting intent");
+                logActivityLaunchBlocked("Virtual device intercepting intent");
                 return false;
             }
             if (!canContainActivity(activityInfo, windowingMode, launchingFromDisplayId,
@@ -318,7 +318,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             }
             if (mIntentListenerCallback != null && intent != null
                     && mIntentListenerCallback.shouldInterceptIntent(intent)) {
-                Slog.d(TAG, "Virtual device intercepting intent");
+                logActivityLaunchBlocked("Virtual device intercepting intent");
                 return false;
             }
         }
@@ -331,15 +331,17 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             boolean isNewTask) {
         // Mirror displays cannot contain activities.
         if (waitAndGetIsMirrorDisplay()) {
-            Slog.d(TAG, "Mirror virtual displays cannot contain activities.");
+            logActivityLaunchBlocked("Mirror virtual displays cannot contain activities.");
             return false;
         }
         if (!isWindowingModeSupported(windowingMode)) {
-            Slog.d(TAG, "Virtual device doesn't support windowing mode " + windowingMode);
+            logActivityLaunchBlocked(
+                    "Virtual device doesn't support windowing mode " + windowingMode);
             return false;
         }
         if ((activityInfo.flags & FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES) == 0) {
-            Slog.d(TAG, "Virtual device requires android:canDisplayOnRemoteDevices=true");
+            logActivityLaunchBlocked(
+                    "Activity requires android:canDisplayOnRemoteDevices=true");
             return false;
         }
         final UserHandle activityUser =
@@ -350,11 +352,11 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             return true;
         }
         if (!activityUser.isSystem() && !mAllowedUsers.contains(activityUser)) {
-            Slog.d(TAG, "Virtual device launch disallowed from user " + activityUser);
+            logActivityLaunchBlocked("Activity launch disallowed from user " + activityUser);
             return false;
         }
         if (!activityMatchesDisplayCategory(activityInfo)) {
-            Slog.d(TAG, "The activity's required display category '"
+            logActivityLaunchBlocked("The activity's required display category '"
                     + activityInfo.requiredDisplayCategory
                     + "' not found on virtual display with the following categories: "
                     + mDisplayCategories);
@@ -363,7 +365,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         synchronized (mGenericWindowPolicyControllerLock) {
             if (!isAllowedByPolicy(mActivityLaunchAllowedByDefault, mActivityPolicyExemptions,
                     activityComponent)) {
-                Slog.d(TAG, "Virtual device launch disallowed by policy: "
+                logActivityLaunchBlocked("Activity launch disallowed by policy: "
                         + activityComponent);
                 return false;
             }
@@ -371,7 +373,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         if (isNewTask && launchingFromDisplayId != DEFAULT_DISPLAY
                 && !isAllowedByPolicy(mCrossTaskNavigationAllowedByDefault,
                         mCrossTaskNavigationExemptions, activityComponent)) {
-            Slog.d(TAG, "Virtual device cross task navigation disallowed by policy: "
+            logActivityLaunchBlocked("Cross task navigation disallowed by policy: "
                     + activityComponent);
             return false;
         }
@@ -380,10 +382,16 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         // based on FLAG_STREAM_PERMISSIONS
         if (mPermissionDialogComponent != null
                 && mPermissionDialogComponent.equals(activityComponent)) {
+            logActivityLaunchBlocked("Permission dialog not allowed on virtual device");
             return false;
         }
 
         return true;
+    }
+
+    private void logActivityLaunchBlocked(String reason) {
+        Slog.d(TAG, "Virtual device activity launch disallowed on display "
+                + waitAndGetDisplayId() + ", reason: " + reason);
     }
 
     @Override
