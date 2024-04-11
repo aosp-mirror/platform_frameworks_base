@@ -144,9 +144,6 @@ interface MobileConnectionRepository {
      */
     val hasPrioritizedNetworkCapabilities: StateFlow<Boolean>
 
-    /** Duration in seconds of the hysteresis to use when losing satellite connection. */
-    val satelliteConnectionHysteresisSeconds: StateFlow<Int>
-
     /**
      * True if this connection is in emergency callback mode.
      *
