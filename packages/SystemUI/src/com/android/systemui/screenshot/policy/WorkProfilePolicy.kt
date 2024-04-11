@@ -41,7 +41,7 @@ constructor(
     override suspend fun check(content: DisplayContentModel): PolicyResult {
         // The systemUI notification shade isn't a work app, skip.
         if (content.systemUiState.shadeExpanded) {
-            return NotMatched(policy = NAME, reason = "Notification shade is expanded")
+            return NotMatched(policy = NAME, reason = SHADE_EXPANDED)
         }
 
         // Find the first non PiP rootTask with a top child task owned by a work user
@@ -54,13 +54,13 @@ constructor(
                 }
                 ?: return NotMatched(
                     policy = NAME,
-                    reason = "The top-most non-PINNED task does not belong to a work profile user"
+                    reason = WORK_TASK_NOT_TOP,
                 )
 
         // If matched, return parameters needed to modify the request.
         return PolicyResult.Matched(
             policy = NAME,
-            reason = "The top-most non-PINNED task ($childTask) belongs to a work profile user",
+            reason = WORK_TASK_IS_TOP,
             CaptureParameters(
                 type = IsolatedTask(taskId = childTask.id, taskBounds = childTask.bounds),
                 component = childTask.componentName ?: rootTask.topActivity,
@@ -70,6 +70,10 @@ constructor(
     }
 
     companion object {
-        val NAME = "WorkProfile"
+        const val NAME = "WorkProfile"
+        const val SHADE_EXPANDED = "Notification shade is expanded"
+        const val WORK_TASK_NOT_TOP =
+            "The top-most non-PINNED task does not belong to a work profile user"
+        const val WORK_TASK_IS_TOP = "The top-most non-PINNED task belongs to a work profile user"
     }
 }

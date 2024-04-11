@@ -39,11 +39,11 @@ constructor(
     override suspend fun check(content: DisplayContentModel): PolicyResult {
         // The systemUI notification shade isn't a private profile app, skip.
         if (content.systemUiState.shadeExpanded) {
-            return NotMatched(policy = NAME, reason = "Notification shade is expanded")
+            return NotMatched(policy = NAME, reason = SHADE_EXPANDED)
         }
 
         // Find the first visible rootTaskInfo with a child task owned by a private user
-        val (rootTask, childTask) =
+        val childTask =
             content.rootTasks
                 .filter { it.isVisible }
                 .firstNotNullOfOrNull { root ->
@@ -52,22 +52,24 @@ constructor(
                         .firstOrNull {
                             profileTypes.getProfileType(it.userId) == ProfileType.PRIVATE
                         }
-                        ?.let { root to it }
                 }
-                ?: return NotMatched(policy = NAME, reason = "No private profile tasks are visible")
+                ?: return NotMatched(policy = NAME, reason = NO_VISIBLE_TASKS)
 
         // If matched, return parameters needed to modify the request.
         return Matched(
             policy = NAME,
-            reason = "At least one private profile task is visible",
+            reason = PRIVATE_TASK_VISIBLE,
             CaptureParameters(
                 type = FullScreen(content.displayId),
-                component = childTask.componentName ?: rootTask.topActivity,
+                component = content.rootTasks.first { it.isVisible }.topActivity,
                 owner = UserHandle.of(childTask.userId),
             )
         )
     }
     companion object {
         const val NAME = "PrivateProfile"
+        const val SHADE_EXPANDED = "Notification shade is expanded"
+        const val NO_VISIBLE_TASKS = "No private profile tasks are visible"
+        const val PRIVATE_TASK_VISIBLE = "At least one private profile task is visible"
     }
 }
