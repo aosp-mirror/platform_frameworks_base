@@ -1545,8 +1545,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 mShadeSurface,
                 mShadeExpansionStateManager,
                 mBiometricUnlockController,
-                mStackScroller,
-                mKeyguardBypassController);
+                mStackScroller);
         mKeyguardStateController.addCallback(mKeyguardStateControllerCallback);
         mKeyguardIndicationController
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);

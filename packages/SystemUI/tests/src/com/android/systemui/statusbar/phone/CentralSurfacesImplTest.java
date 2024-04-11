@@ -568,8 +568,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 any(NotificationPanelViewController.class),
                 any(ShadeExpansionStateManager.class),
                 any(BiometricUnlockController.class),
-                any(ViewGroup.class),
-                any(KeyguardBypassController.class)))
+                any(ViewGroup.class)))
                 .thenReturn(mStatusBarKeyguardViewManager);
 
         when(mKeyguardViewMediator.getViewMediatorCallback()).thenReturn(

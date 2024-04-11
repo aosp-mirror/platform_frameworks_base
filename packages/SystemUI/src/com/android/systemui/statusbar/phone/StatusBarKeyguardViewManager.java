@@ -332,7 +332,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final LatencyTracker mLatencyTracker;
     private final KeyguardSecurityModel mKeyguardSecurityModel;
     private final SelectedUserInteractor mSelectedUserInteractor;
-    @Nullable private KeyguardBypassController mBypassController;
     @Nullable private OccludingAppBiometricUI mOccludingAppBiometricUI;
 
     @Nullable private TaskbarDelegate mTaskbarDelegate;
@@ -440,8 +439,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             ShadeLockscreenInteractor shadeLockscreenInteractor,
             ShadeExpansionStateManager shadeExpansionStateManager,
             BiometricUnlockController biometricUnlockController,
-            View notificationContainer,
-            KeyguardBypassController bypassController) {
+            View notificationContainer) {
         mCentralSurfaces = centralSurfaces;
         mBiometricUnlockController = biometricUnlockController;
 
@@ -452,7 +450,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     shadeExpansionStateManager.addExpansionListener(this);
             onPanelExpansionChanged(currentState);
         }
-        mBypassController = bypassController;
         mNotificationContainer = notificationContainer;
         if (!DeviceEntryUdfpsRefactor.isEnabled()) {
             mKeyguardMessageAreaController = mKeyguardMessageAreaFactory.create(
@@ -973,7 +970,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mKeyguardMessageAreaController.setIsVisible(isShowingAlternateBouncer);
             mKeyguardMessageAreaController.setMessage("");
         }
-        mBypassController.setAltBouncerShowing(isShowingAlternateBouncer);
         mKeyguardUpdateManager.setAlternateBouncerShowing(isShowingAlternateBouncer);
 
         if (updateScrim) {
