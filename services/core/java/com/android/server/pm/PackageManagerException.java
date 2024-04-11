@@ -64,6 +64,7 @@ public class PackageManagerException extends Exception {
     public static final int INTERNAL_ERROR_APEX_NOT_DIRECTORY = -36;
     public static final int INTERNAL_ERROR_APEX_MORE_THAN_ONE_FILE = -37;
     public static final int INTERNAL_ERROR_MISSING_USER = -38;
+    public static final int INTERNAL_ERROR_ARCHIVE_NO_INSTALLER_TITLE = -39;
 
     @IntDef(prefix = { "INTERNAL_ERROR_" }, value = {
             INTERNAL_ERROR_NATIVE_LIBRARY_COPY,
@@ -103,7 +104,8 @@ public class PackageManagerException extends Exception {
             INTERNAL_ERROR_STATIC_SHARED_LIB_OVERLAY_TARGETS,
             INTERNAL_ERROR_APEX_NOT_DIRECTORY,
             INTERNAL_ERROR_APEX_MORE_THAN_ONE_FILE,
-            INTERNAL_ERROR_MISSING_USER
+            INTERNAL_ERROR_MISSING_USER,
+            INTERNAL_ERROR_ARCHIVE_NO_INSTALLER_TITLE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InternalErrorCode {}

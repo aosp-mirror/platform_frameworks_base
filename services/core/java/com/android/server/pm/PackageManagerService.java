@@ -1523,10 +1523,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     void markPackageAsArchivedIfNeeded(PackageSetting pkgSetting,
-                                       ArchivedPackageParcel archivePackage, int[] userIds) {
+            ArchivedPackageParcel archivePackage, SparseArray<String> responsibleInstallerTitles,
+            int[] userIds) {
         if (pkgSetting == null || archivePackage == null
-                || archivePackage.archivedActivities == null || userIds == null
-                || userIds.length == 0) {
+                || archivePackage.archivedActivities == null
+                || responsibleInstallerTitles == null
+                || userIds == null || userIds.length == 0) {
             return;
         }
 
@@ -1552,7 +1554,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
         for (int userId : userIds) {
             var archiveState = mInstallerService.mPackageArchiver.createArchiveState(
-                    archivePackage, userId, responsibleInstallerPackage);
+                    archivePackage, userId, responsibleInstallerPackage,
+                    responsibleInstallerTitles.get(userId));
             if (archiveState != null) {
                 pkgSetting
                     .modifyUserState(userId)

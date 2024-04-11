@@ -48,6 +48,7 @@ import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
 
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
+import static com.android.server.pm.PackageManagerException.INTERNAL_ERROR_ARCHIVE_NO_INSTALLER_TITLE;
 import static com.android.server.pm.PackageManagerService.APP_METADATA_FILE_NAME;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
@@ -1049,6 +1050,20 @@ final class InstallPackageHelper {
                 } catch (PackageManagerException e) {
                     request.setError("Scanning Failed.", e);
                     return;
+                }
+                if (request.isArchived()) {
+                    final SparseArray<String> responsibleInstallerTitles =
+                            PackageArchiver.getResponsibleInstallerTitles(mContext,
+                                    mPm.snapshotComputer(), request.getInstallSource(),
+                                    request.getUserId(), mPm.mUserManager.getUserIds());
+                    if (responsibleInstallerTitles == null
+                            || responsibleInstallerTitles.size() == 0) {
+                        request.setError(PackageManagerException.ofInternalError(
+                                "Failed to obtain the responsible installer info",
+                                INTERNAL_ERROR_ARCHIVE_NO_INSTALLER_TITLE));
+                        return;
+                    }
+                    request.setResponsibleInstallerTitles(responsibleInstallerTitles);
                 }
             }
 
@@ -2226,6 +2241,7 @@ final class InstallPackageHelper {
                 // to figure out which users were changed.
                 mPm.markPackageAsArchivedIfNeeded(ps,
                         installRequest.getArchivedPackage(),
+                        installRequest.getResponsibleInstallerTitles(),
                         installRequest.getNewUsers());
                 mPm.updateSequenceNumberLP(ps, installRequest.getNewUsers());
                 mPm.updateInstantAppInstallerLocked(packageName);
