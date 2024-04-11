@@ -21,6 +21,7 @@ soong_config_module_type {
     config_namespace: "ANDROID",
     bool_variables: [
         "release_binder_death_recipient_weak_from_jni",
+        "release_package_libandroid_runtime_punch_holes",
     ],
     properties: [
         "cflags",
@@ -62,6 +63,9 @@ cc_library_shared_for_libandroid_runtime {
     soong_config_variables: {
         release_binder_death_recipient_weak_from_jni: {
             cflags: ["-DBINDER_DEATH_RECIPIENT_WEAK_FROM_JNI"],
+        },
+        release_package_libandroid_runtime_punch_holes: {
+            cflags: ["-DENABLE_PUNCH_HOLES"],
         },
     },
 
