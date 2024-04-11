@@ -18,6 +18,8 @@ package com.android.systemui.shade;
 
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
 import static com.android.systemui.flags.Flags.TRACKPAD_GESTURE_COMMON;
+import static com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING;
+import static com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
@@ -221,7 +223,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
         mDisableSubpixelTextTransitionListener = new DisableSubpixelTextTransitionListener(mView);
         bouncerViewBinder.bind(mView.findViewById(R.id.keyguard_bouncer_container));
 
-        collectFlow(mView, keyguardTransitionInteractor.getLockscreenToDreamingTransition(),
+        collectFlow(mView, keyguardTransitionInteractor.transition(LOCKSCREEN, DREAMING),
                 mLockscreenToDreamingTransition);
         collectFlow(
                 mView,

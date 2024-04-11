@@ -19,8 +19,6 @@ import android.view.animation.Interpolator
 import com.android.app.animation.Interpolators.LINEAR
 import com.android.keyguard.logging.KeyguardTransitionAnimationLogger
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -35,15 +33,10 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.launch
 
 /**
  * Assists in creating sub-flows for a KeyguardTransition. Call [setup] once for a transition, and
@@ -53,35 +46,9 @@ import kotlinx.coroutines.launch
 class KeyguardTransitionAnimationFlow
 @Inject
 constructor(
-    @Application private val scope: CoroutineScope,
-    @Main private val mainDispatcher: CoroutineDispatcher,
     private val transitionInteractor: KeyguardTransitionInteractor,
     private val logger: KeyguardTransitionAnimationLogger,
 ) {
-    private val transitionMap = mutableMapOf<Edge, MutableSharedFlow<TransitionStep>>()
-
-    init {
-        scope.launch(mainDispatcher) {
-            transitionInteractor.transitions.collect {
-                // FROM->TO
-                transitionMap[Edge(it.from, it.to)]?.emit(it)
-                // FROM->(ANY)
-                transitionMap[Edge(it.from, null)]?.emit(it)
-                // (ANY)->TO
-                transitionMap[Edge(null, it.to)]?.emit(it)
-            }
-        }
-    }
-
-    private fun getOrCreateFlow(edge: Edge): MutableSharedFlow<TransitionStep> {
-        return transitionMap.getOrPut(edge) {
-            MutableSharedFlow<TransitionStep>(
-                extraBufferCapacity = 10,
-                onBufferOverflow = BufferOverflow.DROP_OLDEST
-            )
-        }
-    }
-
     /** Invoke once per transition between FROM->TO states to get access to a shared flow. */
     fun setup(
         duration: Duration,
@@ -185,7 +152,8 @@ constructor(
                 }?.let { onStep(interpolator.getInterpolation(it)) }
             }
 
-            return getOrCreateFlow(edge)
+            return transitionInteractor
+                .getOrCreateFlow(edge)
                 .map { step ->
                     StateToValue(
                             from = step.from,

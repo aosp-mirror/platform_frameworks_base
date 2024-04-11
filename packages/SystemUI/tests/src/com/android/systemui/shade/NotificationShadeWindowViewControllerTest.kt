@@ -43,6 +43,8 @@ import com.android.systemui.flags.Flags.TRACKPAD_GESTURE_FEATURES
 import com.android.systemui.keyevent.domain.interactor.SysUIKeyEventHandler
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
@@ -160,7 +162,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             .thenReturn(keyguardBouncerComponent)
         whenever(keyguardBouncerComponent.securityContainerController)
             .thenReturn(keyguardSecurityContainerController)
-        whenever(keyguardTransitionInteractor.lockscreenToDreamingTransition)
+        whenever(keyguardTransitionInteractor.transition(LOCKSCREEN, DREAMING))
             .thenReturn(emptyFlow<TransitionStep>())
 
         featureFlagsClassic = FakeFeatureFlagsClassic()

@@ -20,19 +20,14 @@ package com.android.systemui.keyguard.domain.interactor
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
-import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
-import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING_LOCKSCREEN_HOSTED
-import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
-import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
-import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.KeyguardState.OFF
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.TransitionInfo
@@ -40,7 +35,6 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.util.kotlin.pairwise
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
@@ -53,6 +47,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -64,7 +59,6 @@ class KeyguardTransitionInteractor
 @Inject
 constructor(
     @Application val scope: CoroutineScope,
-    @Main private val mainDispatcher: CoroutineDispatcher,
     private val keyguardRepository: KeyguardRepository,
     private val repository: KeyguardTransitionRepository,
     private val fromLockscreenTransitionInteractor: dagger.Lazy<FromLockscreenTransitionInteractor>,
@@ -75,14 +69,13 @@ constructor(
         dagger.Lazy<FromAlternateBouncerTransitionInteractor>,
     private val fromDozingTransitionInteractor: dagger.Lazy<FromDozingTransitionInteractor>,
 ) {
-    private val TAG = this::class.simpleName
-
-    private val transitionValueCache = mutableMapOf<KeyguardState, MutableSharedFlow<Float>>()
+    private val transitionMap = mutableMapOf<Edge, MutableSharedFlow<TransitionStep>>()
 
     /**
      * Numerous flows are derived from, or care directly about, the transition value in and out of a
      * single state. This prevent the redundant filters from running.
      */
+    private val transitionValueCache = mutableMapOf<KeyguardState, MutableSharedFlow<Float>>()
     private fun getTransitionValueFlow(state: KeyguardState): MutableSharedFlow<Float> {
         return transitionValueCache.getOrPut(state) {
             MutableSharedFlow<Float>(
@@ -94,6 +87,7 @@ constructor(
         }
     }
 
+    @Deprecated("Not performant - Use something else in this class")
     val transitions = repository.transitions
 
     /**
@@ -106,14 +100,14 @@ constructor(
      * from when we were canceled.
      */
     val startedStepWithPrecedingStep =
-        transitions
+        repository.transitions
             .pairwise()
             .filter { it.newValue.transitionState == TransitionState.STARTED }
             .shareIn(scope, SharingStarted.Eagerly)
 
     init {
         // Collect non-canceled steps and emit transition values.
-        scope.launch(mainDispatcher) {
+        scope.launch {
             repository.transitions
                 .filter { it.transitionState != TransitionState.CANCELED }
                 .collect { step ->
@@ -122,11 +116,22 @@ constructor(
                 }
         }
 
+        scope.launch {
+            repository.transitions.collect {
+                // FROM->TO
+                transitionMap[Edge(it.from, it.to)]?.emit(it)
+                // FROM->(ANY)
+                transitionMap[Edge(it.from, null)]?.emit(it)
+                // (ANY)->TO
+                transitionMap[Edge(null, it.to)]?.emit(it)
+            }
+        }
+
         // If a transition from state A -> B is canceled in favor of a transition from B -> C, we
         // need to ensure we emit transitionValue(A) = 0f, since no further steps will be emitted
         // where the from or to states are A. This would leave transitionValue(A) stuck at an
         // arbitrary non-zero value.
-        scope.launch(mainDispatcher) {
+        scope.launch {
             startedStepWithPrecedingStep.collect { (prevStep, startedStep) ->
                 if (
                     prevStep.transitionState == TransitionState.CANCELED &&
@@ -138,116 +143,42 @@ constructor(
         }
     }
 
-    /** (any)->GONE transition information */
-    val anyStateToGoneTransition: Flow<TransitionStep> =
-        repository.transitions.filter { step -> step.to == GONE }
-
-    /** (any)->AOD transition information */
-    val anyStateToAodTransition: Flow<TransitionStep> =
-        repository.transitions.filter { step -> step.to == AOD }
-
-    /** DREAMING->(any) transition information. */
-    val fromDreamingTransition: Flow<TransitionStep> =
-        repository.transitions.filter { step -> step.from == DREAMING }
-
-    /** LOCKSCREEN->(any) transition information. */
-    val fromLockscreenTransition: Flow<TransitionStep> =
-        repository.transitions.filter { step -> step.from == LOCKSCREEN }
-
-    /** (any)->Lockscreen transition information */
-    val anyStateToLockscreenTransition: Flow<TransitionStep> =
-        repository.transitions.filter { step -> step.to == LOCKSCREEN }
-
-    /** (any)->Occluded transition information */
-    val anyStateToOccludedTransition: Flow<TransitionStep> =
-        repository.transitions.filter { step -> step.to == OCCLUDED }
-
-    /** (any)->PrimaryBouncer transition information */
-    val anyStateToPrimaryBouncerTransition: Flow<TransitionStep> =
-        repository.transitions.filter { step -> step.to == PRIMARY_BOUNCER }
-
-    /** (any)->Dreaming transition information */
-    val anyStateToDreamingTransition: Flow<TransitionStep> =
-        repository.transitions.filter { step -> step.to == DREAMING }
-
-    /** (any)->AlternateBouncer transition information */
-    val anyStateToAlternateBouncerTransition: Flow<TransitionStep> =
-        repository.transitions.filter { step -> step.to == ALTERNATE_BOUNCER }
-
-    /** AOD->LOCKSCREEN transition information. */
-    val aodToLockscreenTransition: Flow<TransitionStep> = repository.transition(AOD, LOCKSCREEN)
-
-    /** DREAMING->LOCKSCREEN transition information. */
-    val dreamingToLockscreenTransition: Flow<TransitionStep> =
-        repository.transition(DREAMING, LOCKSCREEN)
-
-    /** DREAMING_LOCKSCREEN_HOSTED->LOCKSCREEN transition information. */
-    val dreamingLockscreenHostedToLockscreenTransition: Flow<TransitionStep> =
-        repository.transition(DREAMING_LOCKSCREEN_HOSTED, LOCKSCREEN)
-
-    /** GONE->AOD transition information. */
-    val goneToAodTransition: Flow<TransitionStep> = repository.transition(GONE, AOD)
-
-    /** GONE->DREAMING transition information. */
-    val goneToDreamingTransition: Flow<TransitionStep> = repository.transition(GONE, DREAMING)
-
-    /** GONE->DREAMING_LOCKSCREEN_HOSTED transition information. */
-    val goneToDreamingLockscreenHostedTransition: Flow<TransitionStep> =
-        repository.transition(GONE, DREAMING_LOCKSCREEN_HOSTED)
-
-    /** GONE->LOCKSCREEN transition information. */
-    val goneToLockscreenTransition: Flow<TransitionStep> = repository.transition(GONE, LOCKSCREEN)
-
-    /** LOCKSCREEN->AOD transition information. */
-    val lockscreenToAodTransition: Flow<TransitionStep> = repository.transition(LOCKSCREEN, AOD)
-
-    /** LOCKSCREEN->DOZING transition information. */
-    val lockscreenToDozingTransition: Flow<TransitionStep> =
-        repository.transition(LOCKSCREEN, DOZING)
-
-    /** LOCKSCREEN->DREAMING transition information. */
-    val lockscreenToDreamingTransition: Flow<TransitionStep> =
-        repository.transition(LOCKSCREEN, DREAMING)
-
-    /** LOCKSCREEN->DREAMING_LOCKSCREEN_HOSTED transition information. */
-    val lockscreenToDreamingLockscreenHostedTransition: Flow<TransitionStep> =
-        repository.transition(LOCKSCREEN, DREAMING_LOCKSCREEN_HOSTED)
-
-    /** LOCKSCREEN->GLANCEABLE_HUB transition information. */
-    val lockscreenToGlanceableHubTransition: Flow<TransitionStep> =
-        repository.transition(LOCKSCREEN, GLANCEABLE_HUB)
-
-    /** LOCKSCREEN->OCCLUDED transition information. */
-    val lockscreenToOccludedTransition: Flow<TransitionStep> =
-        repository.transition(LOCKSCREEN, OCCLUDED)
-
-    /** GLANCEABLE_HUB->LOCKSCREEN transition information. */
-    val glanceableHubToLockscreenTransition: Flow<TransitionStep> =
-        repository.transition(GLANCEABLE_HUB, LOCKSCREEN)
-
-    /** OCCLUDED->LOCKSCREEN transition information. */
-    val occludedToLockscreenTransition: Flow<TransitionStep> =
-        repository.transition(OCCLUDED, LOCKSCREEN)
-
-    /** PRIMARY_BOUNCER->GONE transition information. */
-    val primaryBouncerToGoneTransition: Flow<TransitionStep> =
-        repository.transition(PRIMARY_BOUNCER, GONE)
-
-    /** OFF->LOCKSCREEN transition information. */
-    val offToLockscreenTransition: Flow<TransitionStep> = repository.transition(OFF, LOCKSCREEN)
-
-    /** DOZING->LOCKSCREEN transition information. */
-    val dozingToLockscreenTransition: Flow<TransitionStep> =
-        repository.transition(DOZING, LOCKSCREEN)
-
-    /** Receive all [TransitionStep] matching a filter of [from]->[to] */
-    fun transition(from: KeyguardState, to: KeyguardState): Flow<TransitionStep> {
-        return repository.transition(from, to)
+    /** Given an [edge], return a SharedFlow to collect only relevant [TransitionStep]. */
+    fun getOrCreateFlow(edge: Edge): MutableSharedFlow<TransitionStep> {
+        return transitionMap.getOrPut(edge) {
+            MutableSharedFlow<TransitionStep>(
+                extraBufferCapacity = 10,
+                onBufferOverflow = BufferOverflow.DROP_OLDEST
+            )
+        }
     }
 
     /**
-     * AOD<->LOCKSCREEN transition information, mapped to dozeAmount range of AOD (1f) <->
-     * Lockscreen (0f).
+     * Receive all [TransitionStep] matching a filter of [from]->[to]. Allow nulls in order to match
+     * any transition, for instance (any)->GONE.
+     */
+    fun transition(from: KeyguardState?, to: KeyguardState?): Flow<TransitionStep> {
+        if (from == null && to == null) {
+            throw IllegalArgumentException("from and to cannot both be null")
+        }
+        return getOrCreateFlow(Edge(from = from, to = to))
+    }
+
+    /**
+     * The amount of transition into or out of the given [KeyguardState].
+     *
+     * The value will be `0` (or close to `0`, due to float point arithmetic) if not in this step or
+     * `1` when fully in the given state.
+     */
+    fun transitionValue(
+        state: KeyguardState,
+    ): Flow<Float> {
+        return getTransitionValueFlow(state)
+    }
+
+    /**
+     * AOD<->* transition information, mapped to dozeAmount range of AOD (1f) <->
+     * * (0f).
      */
     val dozeAmountTransition: Flow<TransitionStep> =
         repository.transitions
@@ -265,13 +196,10 @@ constructor(
     val startedKeyguardTransitionStep: Flow<TransitionStep> =
         repository.transitions.filter { step -> step.transitionState == TransitionState.STARTED }
 
-    /** The last [TransitionStep] with a [TransitionState] of CANCELED */
-    val canceledKeyguardTransitionStep: Flow<TransitionStep> =
-        repository.transitions.filter { step -> step.transitionState == TransitionState.CANCELED }
-
     /** The last [TransitionStep] with a [TransitionState] of FINISHED */
     val finishedKeyguardTransitionStep: Flow<TransitionStep> =
-        repository.transitions.filter { step -> step.transitionState == TransitionState.FINISHED }
+        repository.transitions
+            .filter { step -> step.transitionState == TransitionState.FINISHED }
 
     /** The destination state of the last [TransitionState.STARTED] transition. */
     val startedKeyguardState: SharedFlow<KeyguardState> =
@@ -364,10 +292,6 @@ constructor(
      * case, the smartspace will never be set to alpha = 1f and you'll have a half-faded smartspace
      * during the LS -> GONE transition.
      *
-     * If you need special-case handling for cancellations (such as conditional handling depending
-     * on which [KeyguardState] was canceled) you can collect [canceledKeyguardTransitionStep]
-     * directly.
-     *
      * As a helpful footnote, here's the values of [finishedKeyguardState] and
      * [currentKeyguardState] during a sequence with two cancellations:
      * 1. We're FINISHED in GONE. currentKeyguardState=GONE; finishedKeyguardState=GONE.
@@ -390,7 +314,7 @@ constructor(
                 }
             }
             .distinctUntilChanged()
-            .shareIn(scope, SharingStarted.Eagerly, replay = 1)
+            .stateIn(scope, SharingStarted.Eagerly, KeyguardState.OFF)
 
     /**
      * The [TransitionInfo] of the most recent call to
@@ -420,24 +344,12 @@ constructor(
     /** Whether we've currently STARTED a transition and haven't yet FINISHED it. */
     val isInTransitionToAnyState = isInTransitionWhere({ true }, { true })
 
-    /**
-     * The amount of transition into or out of the given [KeyguardState].
-     *
-     * The value will be `0` (or close to `0`, due to float point arithmetic) if not in this step or
-     * `1` when fully in the given state.
-     */
-    fun transitionValue(
-        state: KeyguardState,
-    ): Flow<Float> {
-        return getTransitionValueFlow(state)
-    }
-
     fun transitionStepsFromState(fromState: KeyguardState): Flow<TransitionStep> {
-        return repository.transitions.filter { step -> step.from == fromState }
+        return getOrCreateFlow(Edge(from = fromState, to = null))
     }
 
     fun transitionStepsToState(toState: KeyguardState): Flow<TransitionStep> {
-        return repository.transitions.filter { step -> step.to == toState }
+        return getOrCreateFlow(Edge(from = null, to = toState))
     }
 
     /**
@@ -464,17 +376,24 @@ constructor(
     fun isInTransitionToState(
         state: KeyguardState,
     ): Flow<Boolean> {
-        return isInTransitionToStateWhere { it == state }
+        return getOrCreateFlow(Edge(from = null, to = state))
+            .mapLatest { it.transitionState.isActive() }
+            .onStart { emit(false) }
+            .distinctUntilChanged()
     }
 
     /**
-     * Whether we're in a transition to a [KeyguardState] that matches the given predicate, but
-     * haven't yet completed it.
+     * Whether we're in a transition to and from the given [KeyguardState]s, but haven't yet
+     * completed it.
      */
-    fun isInTransitionToStateWhere(
-        stateMatcher: (KeyguardState) -> Boolean,
+    fun isInTransition(
+        from: KeyguardState,
+        to: KeyguardState,
     ): Flow<Boolean> {
-        return isInTransitionWhere(fromStatePredicate = { true }, toStatePredicate = stateMatcher)
+        return getOrCreateFlow(Edge(from = from, to = to))
+            .mapLatest { it.transitionState.isActive() }
+            .onStart { emit(false) }
+            .distinctUntilChanged()
     }
 
     /**
@@ -483,12 +402,29 @@ constructor(
     fun isInTransitionFromState(
         state: KeyguardState,
     ): Flow<Boolean> {
-        return isInTransitionFromStateWhere { it == state }
+        return getOrCreateFlow(Edge(from = state, to = null))
+            .mapLatest { it.transitionState.isActive() }
+            .onStart { emit(false) }
+            .distinctUntilChanged()
+    }
+
+    /**
+     * Whether we're in a transition to a [KeyguardState] that matches the given predicate, but
+     * haven't yet completed it.
+     *
+     * If you only care about a single state, instead use the optimized [isInTransitionToState].
+     */
+    fun isInTransitionToStateWhere(
+        stateMatcher: (KeyguardState) -> Boolean,
+    ): Flow<Boolean> {
+        return isInTransitionWhere(fromStatePredicate = { true }, toStatePredicate = stateMatcher)
     }
 
     /**
      * Whether we're in a transition out of a [KeyguardState] that matches the given predicate, but
      * haven't yet completed it.
+     *
+     * If you only care about a single state, instead use the optimized [isInTransitionFromState].
      */
     fun isInTransitionFromStateWhere(
         stateMatcher: (KeyguardState) -> Boolean,
@@ -499,6 +435,9 @@ constructor(
     /**
      * Whether we're in a transition between two [KeyguardState]s that match the given predicates,
      * but haven't yet completed it.
+     *
+     * If you only care about a single state for both from and to, instead use the optimized
+     * [isInTransition].
      */
     fun isInTransitionWhere(
         fromStatePredicate: (KeyguardState) -> Boolean,
@@ -507,6 +446,13 @@ constructor(
         return isInTransitionWhere { from, to -> fromStatePredicate(from) && toStatePredicate(to) }
     }
 
+    /**
+     * Whether we're in a transition between two [KeyguardState]s that match the given predicates,
+     * but haven't yet completed it.
+     *
+     * If you only care about a single state for both from and to, instead use the optimized
+     * [isInTransition].
+     */
     fun isInTransitionWhere(
         fromToStatePredicate: (KeyguardState, KeyguardState) -> Boolean
     ): Flow<Boolean> {

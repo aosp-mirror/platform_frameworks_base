@@ -19,6 +19,9 @@ package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
@@ -77,15 +80,13 @@ constructor(
     @Application coroutineScope: CoroutineScope,
 ) : CollapsedStatusBarViewModel {
     override val isTransitioningFromLockscreenToOccluded: StateFlow<Boolean> =
-        keyguardTransitionInteractor.lockscreenToOccludedTransition
-            .map {
-                it.transitionState == TransitionState.STARTED ||
-                    it.transitionState == TransitionState.RUNNING
-            }
+        keyguardTransitionInteractor
+            .isInTransition(LOCKSCREEN, OCCLUDED)
             .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), initialValue = false)
 
     override val transitionFromLockscreenToDreamStartedEvent: Flow<Unit> =
-        keyguardTransitionInteractor.lockscreenToDreamingTransition
+        keyguardTransitionInteractor
+            .transition(LOCKSCREEN, DREAMING)
             .filter { it.transitionState == TransitionState.STARTED }
             .map {}
 
