@@ -18,7 +18,6 @@ package com.android.systemui.volume.panel.component.spatial.ui.viewmodel
 
 import android.content.Context
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.common.shared.model.Color
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.res.R
@@ -79,26 +78,7 @@ constructor(
                         val isChecked = isEnabled == currentIsEnabled
                         val buttonViewModel: ToggleButtonViewModel =
                             isEnabled.toViewModel(isChecked)
-                        SpatialAudioButtonViewModel(
-                            button = buttonViewModel,
-                            model = isEnabled,
-                            iconColor =
-                                Color.Attribute(
-                                    if (isChecked) {
-                                        com.android.internal.R.attr.materialColorOnPrimaryContainer
-                                    } else {
-                                        com.android.internal.R.attr.materialColorOnSurfaceVariant
-                                    }
-                                ),
-                            labelColor =
-                                Color.Attribute(
-                                    if (isChecked) {
-                                        com.android.internal.R.attr.materialColorOnSurface
-                                    } else {
-                                        com.android.internal.R.attr.materialColorOnSurfaceVariant
-                                    }
-                                ),
-                        )
+                        SpatialAudioButtonViewModel(button = buttonViewModel, model = isEnabled)
                     }
             }
             .stateIn(scope, SharingStarted.Eagerly, emptyList())
