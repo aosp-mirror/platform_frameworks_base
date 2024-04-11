@@ -297,6 +297,7 @@ constructor(
         }
     }
 
-    private val activeContainer: ViewGroup? =
-        if (useSplitShade) splitShadeContainer else singlePaneContainer
+    // This field is only used to log current active container.
+    private val activeContainer: ViewGroup?
+        get() = if (useSplitShade) splitShadeContainer else singlePaneContainer
 }
