@@ -85,13 +85,13 @@ import android.os.ParcelableException;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SELinux;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.ExceptionUtils;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -476,7 +476,7 @@ public class PackageArchiver {
 
     @Nullable
     ArchiveState createArchiveState(@NonNull ArchivedPackageParcel archivedPackage,
-            int userId, String installerPackage) {
+            int userId, String installerPackage, String responsibleInstallerTitle) {
         ApplicationInfo installerInfo = mPm.snapshotComputer().getApplicationInfo(
                 installerPackage, /* flags= */ 0, userId);
         if (installerInfo == null) {
@@ -484,6 +484,11 @@ public class PackageArchiver {
             Slog.e(TAG, "Couldn't find installer " + installerPackage);
             return null;
         }
+        if (responsibleInstallerTitle == null) {
+            Slog.e(TAG, "Couldn't get the title of the installer");
+            return null;
+        }
+
         final int iconSize = mContext.getSystemService(
                 ActivityManager.class).getLauncherLargeIconSize();
 
@@ -508,8 +513,7 @@ public class PackageArchiver {
                 archiveActivityInfos.add(activityInfo);
             }
 
-            return new ArchiveState(archiveActivityInfos,
-                    installerInfo.loadLabel(mContext.getPackageManager()).toString());
+            return new ArchiveState(archiveActivityInfos, responsibleInstallerTitle);
         } catch (IOException e) {
             Slog.e(TAG, "Failed to create archive state", e);
             return null;
@@ -1106,10 +1110,61 @@ public class PackageArchiver {
         return DEFAULT_UNARCHIVE_FOREGROUND_TIMEOUT_MS;
     }
 
+    private static String getResponsibleInstallerPackage(InstallSource installSource) {
+        return TextUtils.isEmpty(installSource.mUpdateOwnerPackageName)
+                ? installSource.mInstallerPackageName
+                : installSource.mUpdateOwnerPackageName;
+    }
+
+    private static String getResponsibleInstallerTitle(Context context, ApplicationInfo appInfo,
+            String responsibleInstallerPackage, int userId)
+            throws PackageManager.NameNotFoundException {
+        final Context userContext = context.createPackageContextAsUser(
+                responsibleInstallerPackage, /* flags= */ 0, new UserHandle(userId));
+        return appInfo.loadLabel(userContext.getPackageManager()).toString();
+    }
+
     static String getResponsibleInstallerPackage(PackageStateInternal ps) {
-        return TextUtils.isEmpty(ps.getInstallSource().mUpdateOwnerPackageName)
-                ? ps.getInstallSource().mInstallerPackageName
-                : ps.getInstallSource().mUpdateOwnerPackageName;
+        return getResponsibleInstallerPackage(ps.getInstallSource());
+    }
+
+    @Nullable
+    static SparseArray<String> getResponsibleInstallerTitles(Context context, Computer snapshot,
+            InstallSource installSource, int requestUserId, int[] allUserIds) {
+        final String responsibleInstallerPackage = getResponsibleInstallerPackage(installSource);
+        final SparseArray<String> responsibleInstallerTitles = new SparseArray<>();
+        try {
+            if (requestUserId != UserHandle.USER_ALL) {
+                final ApplicationInfo responsibleInstallerInfo = snapshot.getApplicationInfo(
+                        responsibleInstallerPackage, /* flags= */ 0, requestUserId);
+                if (responsibleInstallerInfo == null) {
+                    return null;
+                }
+
+                final String title = getResponsibleInstallerTitle(context,
+                        responsibleInstallerInfo, responsibleInstallerPackage, requestUserId);
+                responsibleInstallerTitles.put(requestUserId, title);
+            } else {
+                // Go through all userIds.
+                for (int i = 0; i < allUserIds.length; i++) {
+                    final int userId = allUserIds[i];
+                    final ApplicationInfo responsibleInstallerInfo = snapshot.getApplicationInfo(
+                            responsibleInstallerPackage, /* flags= */ 0, userId);
+                    // Can't get the applicationInfo on the user.
+                    // Maybe the installer isn't installed on the user.
+                    if (responsibleInstallerInfo == null) {
+                        continue;
+                    }
+
+                    final String title = getResponsibleInstallerTitle(context,
+                            responsibleInstallerInfo, responsibleInstallerPackage, userId);
+                    responsibleInstallerTitles.put(userId, title);
+                }
+            }
+        } catch (PackageManager.NameNotFoundException ex) {
+            return null;
+        }
+        return responsibleInstallerTitles;
     }
 
     void notifyUnarchivalListener(int status, String installerPackageName, String appPackageName,
