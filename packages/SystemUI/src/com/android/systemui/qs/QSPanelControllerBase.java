@@ -17,6 +17,7 @@
 package com.android.systemui.qs;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import static com.android.systemui.Flags.quickSettingsVisualHapticsLongpress;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -32,6 +33,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.haptics.qs.QSLongPressEffect;
 import com.android.systemui.media.controls.ui.view.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
@@ -39,7 +41,6 @@ import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileViewImpl;
-import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.animation.DisappearParameters;
@@ -54,6 +55,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import javax.inject.Provider;
 
 /**
  * Controller for QSPanel views.
@@ -88,7 +91,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     private SplitShadeStateController mSplitShadeStateController;
 
-    private final VibratorHelper mVibratorHelper;
+    private final Provider<QSLongPressEffect> mLongPressEffectProvider;
 
     @VisibleForTesting
     protected final QSPanel.OnConfigurationChangedListener mOnConfigurationChangedListener =
@@ -148,7 +151,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             QSLogger qsLogger,
             DumpManager dumpManager,
             SplitShadeStateController splitShadeStateController,
-            VibratorHelper vibratorHelper
+            Provider<QSLongPressEffect> longPressEffectProvider
     ) {
         super(view);
         mHost = host;
@@ -162,7 +165,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mSplitShadeStateController = splitShadeStateController;
         mShouldUseSplitNotificationShade =
                 mSplitShadeStateController.shouldUseSplitNotificationShade(getResources());
-        mVibratorHelper = vibratorHelper;
+        mLongPressEffectProvider = longPressEffectProvider;
     }
 
     @Override
@@ -305,8 +308,14 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     private void addTile(final QSTile tile, boolean collapsedView) {
+        QSLongPressEffect longPressEffect;
+        if (quickSettingsVisualHapticsLongpress()) {
+            longPressEffect = mLongPressEffectProvider.get();
+        } else {
+            longPressEffect = null;
+        }
         final QSTileViewImpl tileView = new QSTileViewImpl(
-                getContext(), collapsedView, mVibratorHelper);
+                getContext(), collapsedView, longPressEffect);
         final TileRecord r = new TileRecord(tile, tileView);
         // TODO(b/250618218): Remove the QSLogger in QSTileViewImpl once we know the root cause of
         // b/250618218.

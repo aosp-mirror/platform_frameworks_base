@@ -106,28 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktívne, iba ľavá strana"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktívne, iba pravá strana"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktívne, ľavá aj pravá strana"</string>
-    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
-    <skip />
-    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
-    <skip />
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"Aktívne (iba médiá), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batérie"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"Aktívne (iba médiá), Ľ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batérie, P: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batérie"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"Pripojené (podporuje zdieľanie zvuku), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batérie"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"Pripojené (podporuje zdieľanie zvuku), Ľ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batérie, P: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batérie"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"Pripojené (podporuje zdieľanie zvuku), ľavá strana: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"Pripojené (podporuje zdieľanie zvuku), pravá strana: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Aktívne (iba médiá)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Podporuje zdieľanie zvuku"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Aktívne (iba médiá), iba ľavá strana"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Aktívne (iba médiá), iba pravá strana"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Aktívne (iba médiá), ľavá aj pravá strana"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Zvuk médií"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonické hovory"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Prenos súborov"</string>
@@ -555,7 +544,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Budíky a pripomenutia"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Povoliť nastavovanie budíkov a pripomenutí"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Budíky a pripomenutia"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Povoľte tejto aplikácii nastavovať budíky a plánovať akcie s časovým obmedzením. Aplikácii to umožní pracovať na pozadí, čo môže zvýšiť spotrebu batérie.\n\nAk je toto povolenie vypnuté, existujúce budíky a udalosti s časovým obmedzením naplánované touto aplikáciu nebudú fungovať."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Povoľte tejto aplikácii nastavovať budíky a plánovať akcie s časovým obmedzením. Aplikácii to umožní pracovať na pozadí, čo môže zvýšiť spotrebu batérie.\n\nAk je toto povolenie vypnuté, existujúce budíky a udalosti s časovým obmedzením naplánované touto aplikáciou nebudú fungovať."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"plán, budík, pripomenutie, hodiny"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Zapnúť"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Zapnite režim bez vyrušení"</string>

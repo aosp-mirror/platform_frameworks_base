@@ -82,7 +82,7 @@ constructor(
     override val isShadeTouchable: Flow<Boolean> =
         combine(
             powerInteractor.isAsleep,
-            keyguardTransitionInteractor.isInTransitionToStateWhere { it == KeyguardState.AOD },
+            keyguardTransitionInteractor.isInTransitionToState(KeyguardState.AOD),
             keyguardRepository.dozeTransitionModel.map { it.to == DozeStateModel.DOZE_PULSING },
         ) { isAsleep, goingToSleep, isPulsing ->
             when {

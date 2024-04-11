@@ -174,6 +174,7 @@ import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.user.domain.interactor.UserSwitcherInteractor;
 import com.android.systemui.util.FakeEventLog;
 import com.android.systemui.util.settings.FakeGlobalSettings;
+import com.android.systemui.util.settings.SystemSettings;
 import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
@@ -554,7 +555,8 @@ public class BubblesTest extends SysuiTestCase {
                         mock(SystemClock.class),
                         mock(UiEventLogger.class),
                         mock(UserTracker.class),
-                        mock(AvalancheProvider.class)
+                        mock(AvalancheProvider.class),
+                        mock(SystemSettings.class)
                         );
         interruptionDecisionProvider.start();
 

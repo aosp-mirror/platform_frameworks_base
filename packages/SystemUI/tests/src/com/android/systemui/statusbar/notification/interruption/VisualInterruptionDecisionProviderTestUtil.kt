@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.EventLog
 import com.android.systemui.util.settings.GlobalSettings
+import com.android.systemui.util.settings.SystemSettings
 import com.android.systemui.util.time.SystemClock
 
 object VisualInterruptionDecisionProviderTestUtil {
@@ -51,7 +52,8 @@ object VisualInterruptionDecisionProviderTestUtil {
         systemClock: SystemClock,
         uiEventLogger: UiEventLogger,
         userTracker: UserTracker,
-        avalancheProvider: AvalancheProvider
+        avalancheProvider: AvalancheProvider,
+        systemSettings: SystemSettings
     ): VisualInterruptionDecisionProvider {
         return if (VisualInterruptionRefactor.isEnabled) {
             VisualInterruptionDecisionProviderImpl(
@@ -70,7 +72,8 @@ object VisualInterruptionDecisionProviderTestUtil {
                 systemClock,
                 uiEventLogger,
                 userTracker,
-                avalancheProvider
+                avalancheProvider,
+                systemSettings
             )
         } else {
             NotificationInterruptStateProviderWrapper(

@@ -106,28 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"फक्त डावे अ‍ॅक्टिव्ह आहे"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"फक्त उजवे अ‍ॅक्टिव्ह आहे"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"डावे आणि उजवे अ‍ॅक्टिव्ह आहे"</string>
-    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
-    <skip />
-    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
-    <skip />
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"अ‍ॅक्टिव्ह आहे (फक्त मीडिया), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बॅटरी"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"ॲक्टिव्ह आहे (फक्त मीडिया), डावे: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> बॅटरी, उजवे: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> बॅटरी"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"कनेक्ट केले आहे (ऑडिओ शेअरिंगला सपोर्ट करते), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बॅटरी"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"कनेक्ट केले आहे (ऑडिओ शेअरिंगला सपोर्ट करते), डावे: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> बॅटरी, उजवे: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> बॅटरी"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"कनेक्ट केले आहे (ऑडिओ शेअरिंगला सपोर्ट करते), डावे <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"कनेक्ट केले आहे (ऑडिओ शेअरिंगला सपोर्ट करते), उजवे <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"अ‍ॅक्टिव्ह आहे (फक्त मीडिया)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"ऑडिओ शेअरिंगला सपोर्ट करते"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"अ‍ॅक्टिव्ह आहे (फक्त मीडिया), फक्त डावे"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"अ‍ॅक्टिव्ह आहे (फक्त मीडिया), फक्त उजवे"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"अ‍ॅक्टिव्ह आहे (फक्त मीडिया), डावे आणि उजवे"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"मीडिया ऑडिओ"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"फोन कॉल"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"फाइल स्थानांतरण"</string>
@@ -537,7 +526,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"सिस्टम भाषा वापरा"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> साठी सेटिंग्ज उघडण्यात अयशस्वी"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"ही इनपुट पद्धत पासवर्ड आणि क्रेडिट कार्ड नंबर यासह, तुम्ही टाइप करता तो सर्व मजकूर संकलित करण्यात सक्षम होऊ शकते. ही <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ॲपवरून येते. ही इनपुट पद्धत वापरायची?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"टीप: रीबूट केल्यानंतर, तुम्ही तुमचा फोन अनलॉक करे पर्यंत हे अ‍ॅप सुरू होऊ शकत नाही"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"टीप: रीबूट केल्यानंतर, तुम्ही तुमचा फोन अनलॉक करेपर्यंत हे अ‍ॅप सुरू होऊ शकत नाही"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS नोंदणी स्थिती"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"नोंदवलेले"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"नोंदवलेले नाही"</string>

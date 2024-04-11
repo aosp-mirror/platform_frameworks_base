@@ -23,7 +23,6 @@ import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.DestroyActivityItem;
 import android.app.servertransaction.PendingTransactionActions;
 import android.app.servertransaction.TransactionExecutor;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
@@ -32,7 +31,6 @@ import android.util.MergedConfiguration;
 import android.view.SurfaceControl;
 import android.window.ActivityWindowInfo;
 import android.window.SplashScreenView.SplashScreenViewParcelable;
-import android.window.WindowContext;
 import android.window.WindowContextInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -89,10 +87,6 @@ public abstract class ClientTransactionHandler {
 
     /** Get activity instance for the token. */
     public abstract Activity getActivity(IBinder token);
-
-    /** Gets the {@link WindowContext} instance for the token. */
-    @Nullable
-    public abstract Context getWindowContext(@NonNull IBinder clientToken);
 
     // Prepare phase related logic and handlers. Methods that inform about about pending changes or
     // do other internal bookkeeping.

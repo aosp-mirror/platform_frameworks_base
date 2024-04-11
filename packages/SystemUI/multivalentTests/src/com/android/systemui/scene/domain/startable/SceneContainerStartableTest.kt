@@ -20,13 +20,11 @@ package com.android.systemui.scene.domain.startable
 
 import android.app.StatusBarManager
 import android.os.PowerManager
-import android.platform.test.annotations.EnableFlags
 import android.view.Display
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
-import com.android.systemui.Flags as AconfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
@@ -40,6 +38,7 @@ import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepositor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
@@ -94,7 +93,7 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@EnableFlags(AconfigFlags.FLAG_SCENE_CONTAINER)
+@EnableSceneContainer
 class SceneContainerStartableTest : SysuiTestCase() {
 
     @Mock private lateinit var windowController: NotificationShadeWindowController
@@ -288,6 +287,38 @@ class SceneContainerStartableTest : SysuiTestCase() {
             )
 
             assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
+        }
+
+    @Test
+    fun switchFromBouncerToQuickSettingsWhenDeviceUnlocked() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+
+            val transitionState =
+                prepareState(
+                    authenticationMethod = AuthenticationMethodModel.Pin,
+                    isDeviceUnlocked = false,
+                    initialSceneKey = Scenes.Lockscreen,
+                )
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            underTest.start()
+            runCurrent()
+
+            sceneInteractor.changeScene(Scenes.QuickSettings, "switching to qs for test")
+            transitionState.value = ObservableTransitionState.Idle(Scenes.QuickSettings)
+            runCurrent()
+            assertThat(currentSceneKey).isEqualTo(Scenes.QuickSettings)
+
+            sceneInteractor.changeScene(Scenes.Bouncer, "switching to bouncer for test")
+            transitionState.value = ObservableTransitionState.Idle(Scenes.Bouncer)
+            runCurrent()
+            assertThat(currentSceneKey).isEqualTo(Scenes.Bouncer)
+
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+
+            assertThat(currentSceneKey).isEqualTo(Scenes.QuickSettings)
         }
 
     @Test

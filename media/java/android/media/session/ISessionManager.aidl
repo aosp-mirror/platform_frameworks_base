@@ -80,4 +80,7 @@ interface ISessionManager {
     boolean hasCustomMediaSessionPolicyProvider(String componentName);
     int getSessionPolicies(in MediaSession.Token token);
     void setSessionPolicies(in MediaSession.Token token, int policies);
+
+    // For testing of temporarily engaged sessions.
+    void expireTempEngagedSessions();
 }

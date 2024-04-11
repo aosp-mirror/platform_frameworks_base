@@ -18,6 +18,7 @@
 
 package com.android.systemui.bouncer.ui.viewmodel
 
+import android.app.admin.devicePolicyManager
 import android.content.applicationContext
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.bouncer.domain.interactor.bouncerActionButtonInteractor
@@ -31,7 +32,6 @@ import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.user.domain.interactor.selectedUserInteractor
 import com.android.systemui.user.ui.viewmodel.userSwitcherViewModel
-import com.android.systemui.util.mockito.mock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.bouncerViewModel by Fixture {
@@ -44,12 +44,12 @@ val Kosmos.bouncerViewModel by Fixture {
         simBouncerInteractor = simBouncerInteractor,
         authenticationInteractor = authenticationInteractor,
         selectedUserInteractor = selectedUserInteractor,
+        devicePolicyManager = devicePolicyManager,
+        bouncerMessageViewModel = bouncerMessageViewModel,
         flags = composeBouncerFlags,
         selectedUser = userSwitcherViewModel.selectedUser,
         users = userSwitcherViewModel.users,
         userSwitcherMenu = userSwitcherViewModel.menu,
         actionButton = bouncerActionButtonInteractor.actionButton,
-        devicePolicyManager = mock(),
-        bouncerMessageViewModel = bouncerMessageViewModel,
     )
 }

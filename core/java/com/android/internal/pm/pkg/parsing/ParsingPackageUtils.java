@@ -1054,8 +1054,7 @@ public class ParsingPackageUtils {
 
         // An Apex package shouldn't have permission declarations
         final boolean isApex = (flags & PARSE_APEX) != 0;
-        if (android.permission.flags.Flags.ignoreApexPermissions()
-                && isApex && !pkg.getPermissions().isEmpty()) {
+        if (isApex && !pkg.getPermissions().isEmpty()) {
             return input.error(
                     INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
                     pkg.getPackageName()

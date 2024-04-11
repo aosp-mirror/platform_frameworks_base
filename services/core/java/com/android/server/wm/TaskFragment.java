@@ -2309,8 +2309,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 // area, i.e. the screen area without the system bars.
                 // The non decor inset are areas that could never be removed in Honeycomb. See
                 // {@link WindowManagerPolicy#getNonDecorInsetsLw}.
-                calculateInsetFrames(mTmpNonDecorBounds, mTmpStableBounds, mTmpFullBounds, di,
-                        false /* useLegacyInsetsForStableBounds */);
+                calculateInsetFrames(mTmpNonDecorBounds, mTmpStableBounds, mTmpFullBounds, di);
             } else {
                 // Apply the given non-decor and stable insets to calculate the corresponding bounds
                 // for screen size of configuration.
@@ -2408,11 +2407,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * @param outNonDecorBounds where to place bounds with non-decor insets applied.
      * @param outStableBounds where to place bounds with stable insets applied.
      * @param bounds the bounds to inset.
-     * @param useLegacyInsetsForStableBounds {@code true} if we need to use the legacy insets frame
-     *                for apps targeting U or before when calculating stable bounds.
      */
     void calculateInsetFrames(Rect outNonDecorBounds, Rect outStableBounds, Rect bounds,
-            DisplayInfo displayInfo, boolean useLegacyInsetsForStableBounds) {
+            DisplayInfo displayInfo) {
         outNonDecorBounds.set(bounds);
         outStableBounds.set(bounds);
         if (mDisplayContent == null) {
@@ -2424,11 +2421,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         final DisplayPolicy.DecorInsets.Info info = policy.getDecorInsetsInfo(
                 displayInfo.rotation, displayInfo.logicalWidth, displayInfo.logicalHeight);
         intersectWithInsetsIfFits(outNonDecorBounds, mTmpBounds, info.mNonDecorInsets);
-        if (!useLegacyInsetsForStableBounds) {
-            intersectWithInsetsIfFits(outStableBounds, mTmpBounds, info.mConfigInsets);
-        } else {
-            intersectWithInsetsIfFits(outStableBounds, mTmpBounds, info.mOverrideConfigInsets);
-        }
+        intersectWithInsetsIfFits(outStableBounds, mTmpBounds, info.mConfigInsets);
     }
 
     /**

@@ -594,7 +594,11 @@ public class StackScrollAlgorithm {
         );
         if (view instanceof FooterView) {
             if (FooterViewRefactor.isEnabled()) {
-                if (((FooterView) view).shouldBeHidden()) {
+                // TODO(b/333445519): shouldBeHidden should reflect whether the shade is closed
+                //  already, so we shouldn't need to use ambientState here. However, currently it
+                //  doesn't get updated quickly enough and can cause the footer to flash when
+                //  closing the shade. As such, we temporarily also check the ambientState directly.
+                if (((FooterView) view).shouldBeHidden() || !ambientState.isShadeExpanded()) {
                     viewState.hidden = true;
                 } else {
                     final float footerEnd = algorithmState.mCurrentExpandedYPosition

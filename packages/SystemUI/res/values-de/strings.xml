@@ -350,6 +350,8 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"Problem aufnehmen"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Aufnahme starten"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Aufnahme beenden"</string>
+    <!-- no translation found for qs_record_issue_bug_report (8229031766918650079) -->
+    <skip />
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Welche Bereiche des Geräts waren betroffen?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Art des Problems auswählen"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Bildschirmaufnahme"</string>
@@ -363,14 +365,10 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Standard"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Mittel"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Hoch"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
-    <skip />
-    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
-    <skip />
-    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
-    <skip />
-    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Hörgeräte"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Hörgeräte"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Neues Gerät koppeln"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Klicken, um neues Gerät zu koppeln"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Blockierung des Gerätemikrofons aufheben?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Blockierung der Gerätekamera aufheben?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Blockierung von Gerätekamera und Gerätemikrofon aufheben?"</string>
@@ -448,10 +446,8 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Entfernen"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Widget hinzufügen"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Fertig"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"Widgets hinzufügen"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Greife schnell auf deine App-Widgets zu, ohne das Tablet entsperren zu müssen."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Beliebige Widgets auf Sperrbildschirm zulassen?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Einstellungen öffnen"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Geschäftliche Apps nicht mehr pausieren?"</string>
@@ -747,7 +743,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Tastaturlayout wechseln"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"oder"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Suchanfrage löschen"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Tastenkombinationen"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Tastenkombinationen"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Tastenkombinationen suchen"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Keine gefunden"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"System"</string>
@@ -772,16 +768,16 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistant öffnen"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Sperrbildschirm"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Notiz machen"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"System-Multitasking"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Splitscreen aktivieren, aktuelle App rechts"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Splitscreen aktivieren, aktuelle App links"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitasking"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Splitscreen mit der aktuellen App auf der rechten Seite nutzen"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Splitscreen mit der aktuellen App auf der linken Seite nutzen"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Vom Splitscreen zum Vollbild wechseln"</string>
-    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Im Splitscreen-Modus rechts oder unten zu einer App wechseln"</string>
-    <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Im Splitscreen-Modus links oder oben zu einer App wechseln"</string>
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Im Splitscreen-Modus zu einer App rechts oder unten wechseln"</string>
+    <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Im Splitscreen-Modus zu einer App links oder oben wechseln"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Im Splitscreen: eine App durch eine andere ersetzen"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Eingabe"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Zur nächsten Sprache wechseln"</string>
-    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Zu vorheriger Sprache wechseln"</string>
+    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Zur vorherigen Sprache wechseln"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"Auf Emoji zugreifen"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Auf Spracheingabe zugreifen"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Apps"</string>
@@ -793,7 +789,7 @@
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Musik"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Kalender"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Rechner"</string>
-    <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Karten"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Bitte nicht stören"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Tastenkombination für Lautstärketasten"</string>
     <string name="battery" msgid="769686279459897127">"Akku"</string>

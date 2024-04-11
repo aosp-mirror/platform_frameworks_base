@@ -115,13 +115,16 @@ class AvalancheController @Inject constructor(
      * Run or ignore Runnable for given HeadsUpEntry. If entry was never shown, ignore and delete
      * all Runnables associated with that entry.
      */
-    fun delete(entry: HeadsUpEntry, runnable: Runnable, label: String) {
+    fun delete(entry: HeadsUpEntry?, runnable: Runnable, label: String) {
         if (!NotificationThrottleHun.isEnabled) {
             runnable.run()
             return
         }
         val fn = "[$label] => AvalancheController.delete " + getKey(entry)
-
+        if (entry == null) {
+            log { "$fn => cannot remove NULL entry" }
+            return
+        }
         if (entry in nextMap) {
             log { "$fn => [remove from next]" }
             if (entry in nextMap) nextMap.remove(entry)

@@ -57,6 +57,7 @@ import com.android.systemui.keyguard.ui.viewmodel.LockscreenToGoneTransitionView
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToPrimaryBouncerTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToAodTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.OccludedToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToLockscreenTransitionViewModel
@@ -121,6 +122,7 @@ constructor(
         LockscreenToPrimaryBouncerTransitionViewModel,
     private val lockscreenToOccludedTransitionViewModel: LockscreenToOccludedTransitionViewModel,
     private val occludedToAodTransitionViewModel: OccludedToAodTransitionViewModel,
+    private val occludedToGoneTransitionViewModel: OccludedToGoneTransitionViewModel,
     private val occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
     private val primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel,
     private val primaryBouncerToLockscreenTransitionViewModel:
@@ -207,9 +209,7 @@ constructor(
                 keyguardTransitionInteractor.finishedKeyguardState.map {
                     statesForConstrainedNotifications.contains(it)
                 },
-                keyguardTransitionInteractor
-                    .isInTransitionWhere { from, to -> from == LOCKSCREEN || to == LOCKSCREEN }
-                    .onStart { emit(false) }
+                keyguardTransitionInteractor.transitionValue(LOCKSCREEN).map { it > 0f },
             ) { constrainedNotificationState, transitioningToOrFromLockscreen ->
                 constrainedNotificationState || transitioningToOrFromLockscreen
             }
@@ -241,11 +241,10 @@ constructor(
                 keyguardTransitionInteractor.finishedKeyguardState.map { state ->
                     state == GLANCEABLE_HUB
                 },
-                keyguardTransitionInteractor
-                    .isInTransitionWhere { from, to ->
-                        from == GLANCEABLE_HUB || to == GLANCEABLE_HUB
-                    }
-                    .onStart { emit(false) }
+                or(
+                    keyguardTransitionInteractor.isInTransitionToState(GLANCEABLE_HUB),
+                    keyguardTransitionInteractor.isInTransitionFromState(GLANCEABLE_HUB),
+                ),
             ) { isOnGlanceableHub, transitioningToOrFromHub ->
                 isOnGlanceableHub || transitioningToOrFromHub
             }
@@ -290,12 +289,10 @@ constructor(
         var aodTransitionIsComplete = true
         return combine(
                 isOnLockscreenWithoutShade,
-                keyguardTransitionInteractor
-                    .isInTransitionWhere(
-                        fromStatePredicate = { it == LOCKSCREEN },
-                        toStatePredicate = { it == AOD }
-                    )
-                    .onStart { emit(false) },
+                keyguardTransitionInteractor.isInTransition(
+                    from = LOCKSCREEN,
+                    to = AOD,
+                ),
                 ::Pair
             )
             .transformWhile { (isOnLockscreenWithoutShade, aodTransitionIsRunning) ->
@@ -477,6 +474,7 @@ constructor(
                 lockscreenToOccludedTransitionViewModel.lockscreenAlpha,
                 lockscreenToPrimaryBouncerTransitionViewModel.lockscreenAlpha,
                 occludedToAodTransitionViewModel.lockscreenAlpha,
+                occludedToGoneTransitionViewModel.notificationAlpha(viewState),
                 occludedToLockscreenTransitionViewModel.lockscreenAlpha,
                 primaryBouncerToGoneTransitionViewModel.notificationAlpha,
                 primaryBouncerToLockscreenTransitionViewModel.lockscreenAlpha,

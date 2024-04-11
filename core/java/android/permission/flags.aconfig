@@ -155,14 +155,3 @@ flag {
     description: "Use runtime permission state to determine appop state"
     bug: "266164193"
 }
-
-flag {
-    name: "ignore_apex_permissions"
-    is_fixed_read_only: true
-    namespace: "permissions"
-    description: "Ignore APEX pacakges for permissions on V+"
-    bug: "301320911"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}

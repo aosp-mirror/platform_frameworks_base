@@ -195,6 +195,9 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
     @Test
     fun animationsEnabled_isTrue_whenStartingToSleepAndControlScreenOff() =
         testComponent.runTest {
+            val animationsEnabled by collectLastValue(underTest.animationsEnabled)
+            assertThat(animationsEnabled).isTrue()
+
             powerRepository.updateWakefulness(
                 rawState = WakefulnessState.STARTING_TO_SLEEP,
                 lastWakeReason = WakeSleepReason.POWER_BUTTON,
@@ -208,7 +211,7 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
                 )
             )
             whenever(dozeParams.shouldControlScreenOff()).thenReturn(true)
-            val animationsEnabled by collectLastValue(underTest.animationsEnabled)
+
             runCurrent()
             assertThat(animationsEnabled).isTrue()
         }

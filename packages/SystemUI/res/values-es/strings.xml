@@ -350,6 +350,8 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"Problema de grabación"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Iniciar"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Detener"</string>
+    <!-- no translation found for qs_record_issue_bug_report (8229031766918650079) -->
+    <skip />
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"¿Qué parte de tu experiencia se ha visto afectada?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Selecciona el tipo de problema"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Grabar pantalla"</string>
@@ -363,14 +365,10 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Estándar"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Medio"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Alto"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
-    <skip />
-    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
-    <skip />
-    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
-    <skip />
-    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Audífonos"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Audífonos"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Emparejar nuevo dispositivo"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Haz clic para emparejar un nuevo dispositivo"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"¿Desbloquear el micrófono del dispositivo?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"¿Desbloquear la cámara del dispositivo?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"¿Desbloquear la cámara y el micrófono del dispositivo?"</string>
@@ -714,8 +712,8 @@
     <string name="keyboard_key_back" msgid="4185420465469481999">"Atrás"</string>
     <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"Flecha hacia arriba"</string>
     <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"Flecha hacia abajo"</string>
-    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"Flecha hacia la izquierda"</string>
-    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"Flecha hacia la derecha"</string>
+    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"Flecha izquierda"</string>
+    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"Flecha derecha"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Centro"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tabulador"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Espacio"</string>
@@ -745,7 +743,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Cambiar diseño del teclado"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"o"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Borrar la consulta de búsqueda"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Combinaciones de teclas"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Combinaciones de teclas"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Buscar combinaciones de teclas"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Ninguna encontrada"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Sistema"</string>
@@ -769,10 +767,10 @@
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Abrir ajustes"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Abrir el Asistente"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Pantalla de bloqueo"</string>
-    <string name="group_system_quick_memo" msgid="3764560265935722903">"Escribe una nota"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Función multitarea del sistema"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Iniciar pantalla dividida con esta aplicación en el lado derecho"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Iniciar pantalla dividida con esta aplicación en el lado izquierdo"</string>
+    <string name="group_system_quick_memo" msgid="3764560265935722903">"Escribir una nota"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitarea"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Usar la pantalla dividida con la aplicación actual a la derecha"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Usar la pantalla dividida con la aplicación actual a la izquierda"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Cambiar de pantalla dividida a pantalla completa"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Cambiar a la app de la derecha o de abajo en pantalla dividida"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Cambiar a la app de la izquierda o de arriba en pantalla dividida"</string>

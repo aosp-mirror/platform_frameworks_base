@@ -30,7 +30,7 @@
     <string name="summary_app_streaming" msgid="295548145144086753">"‏ל-%1$s תהיה גישה לכל מה שרואים או מפעילים בטלפון, כולל אודיו, תמונות, סיסמאות והודעות.&lt;br/&gt;&lt;br/&gt;‎‏ל-%1$s תהיה אפשרות לשדר אפליקציות עד שהגישה להרשאה הזו תוסר."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"שירותים למספר מכשירים"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> מבקשת הרשאה עבור המכשיר <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> כדי לשדר אפליקציות בין המכשירים שלך"</string>
-    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> מבקשת הרשאה למכשיר <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> כדי להציג ולשדר אפליקציות בין המכשירים שלך"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"האפליקציה \'<xliff:g id="APP_NAME">%1$s</xliff:g>\' מבקשת הרשאה למכשיר <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> כדי להציג ולשדר אפליקציות בין המכשירים שלך"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"‏מתן אישור לאפליקציה &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; לגשת למידע הזה מהטלפון שלך"</string>

@@ -290,8 +290,8 @@ public class BatteryStatsImpl extends BatteryStats {
     private KernelMemoryBandwidthStats mKernelMemoryBandwidthStats;
     private final LongSparseArray<SamplingTimer> mKernelMemoryStats = new LongSparseArray<>();
     private int[] mCpuPowerBracketMap;
-    private CpuPowerStatsCollector mCpuPowerStatsCollector;
-    private MobileRadioPowerStatsCollector mMobileRadioPowerStatsCollector;
+    private final CpuPowerStatsCollector mCpuPowerStatsCollector;
+    private final MobileRadioPowerStatsCollector mMobileRadioPowerStatsCollector;
     private final SparseBooleanArray mPowerStatsCollectorEnabled = new SparseBooleanArray();
 
     public LongSparseArray<SamplingTimer> getKernelMemoryStats() {
@@ -1777,7 +1777,7 @@ public class BatteryStatsImpl extends BatteryStats {
         return mMaxLearnedBatteryCapacityUah;
     }
 
-    public class FrameworkStatsLogger {
+    public static class FrameworkStatsLogger {
         public void uidProcessStateChanged(int uid, int state) {
             // TODO(b/155216561): It is possible for isolated uids to be in a higher
             // state than its parent uid. We should track the highest state within the union of host
@@ -1786,25 +1786,24 @@ public class BatteryStatsImpl extends BatteryStats {
                     ActivityManager.processStateAmToProto(state));
         }
 
-        public void wakelockStateChanged(int uid, WorkChain wc, String name, int type,
-                int procState, boolean acquired) {
+        public void wakelockStateChanged(int uid, WorkChain wc, String name,
+                int procState, boolean acquired, int powerManagerWakeLockLevel) {
             int event = acquired
                     ? FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__ACQUIRE
                     : FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__RELEASE;
             if (wc != null) {
                 FrameworkStatsLog.write(FrameworkStatsLog.WAKELOCK_STATE_CHANGED, wc.getUids(),
-                        wc.getTags(), getPowerManagerWakeLockLevel(type), name,
-                        event, procState);
+                        wc.getTags(), powerManagerWakeLockLevel, name, event, procState);
             } else {
-                FrameworkStatsLog.write_non_chained(FrameworkStatsLog.WAKELOCK_STATE_CHANGED,
-                        mapIsolatedUid(uid), null, getPowerManagerWakeLockLevel(type), name,
-                        event, procState);
+                FrameworkStatsLog.write_non_chained(FrameworkStatsLog.WAKELOCK_STATE_CHANGED, uid,
+                        null, powerManagerWakeLockLevel, name, event, procState);
             }
         }
 
-        public void kernelWakeupReported(long deltaUptimeUs) {
-            FrameworkStatsLog.write(FrameworkStatsLog.KERNEL_WAKEUP_REPORTED, mLastWakeupReason,
-                    /* duration_usec */ deltaUptimeUs, mLastWakeupElapsedTimeMs);
+        public void kernelWakeupReported(long deltaUptimeUs, String lastWakeupReason,
+                long lastWakeupElapsedTimeMs) {
+            FrameworkStatsLog.write(FrameworkStatsLog.KERNEL_WAKEUP_REPORTED, lastWakeupReason,
+                    /* duration_usec */ deltaUptimeUs, lastWakeupElapsedTimeMs);
         }
 
         public void gpsScanStateChanged(int uid, WorkChain workChain, boolean stateOn) {
@@ -1867,41 +1866,6 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     private final FrameworkStatsLogger mFrameworkStatsLogger;
-
-    @VisibleForTesting
-    public BatteryStatsImpl(@NonNull BatteryStatsConfig config, Clock clock, File historyDirectory,
-            @NonNull Handler handler,
-            @NonNull PowerStatsUidResolver powerStatsUidResolver,
-            @NonNull FrameworkStatsLogger frameworkStatsLogger,
-            @NonNull BatteryStatsHistory.TraceDelegate traceDelegate,
-            @NonNull BatteryStatsHistory.EventLogger eventLogger) {
-        mBatteryStatsConfig = config;
-        mClock = clock;
-        initKernelStatsReaders();
-        mHandler = handler;
-        mPowerStatsUidResolver = powerStatsUidResolver;
-        mFrameworkStatsLogger = frameworkStatsLogger;
-        mConstants = new Constants(mHandler);
-        mStartClockTimeMs = clock.currentTimeMillis();
-        mDailyFile = null;
-        mMonotonicClock = new MonotonicClock(0, mClock);
-        if (historyDirectory == null) {
-            mCheckinFile = null;
-            mStatsFile = null;
-            mHistory = new BatteryStatsHistory(mConstants.MAX_HISTORY_BUFFER,
-                    mStepDetailsCalculator, mClock, mMonotonicClock, traceDelegate, eventLogger);
-        } else {
-            mCheckinFile = new AtomicFile(new File(historyDirectory, "batterystats-checkin.bin"));
-            mStatsFile = new AtomicFile(new File(historyDirectory, "batterystats.bin"));
-            mHistory = new BatteryStatsHistory(historyDirectory, mConstants.MAX_HISTORY_FILES,
-                    mConstants.MAX_HISTORY_BUFFER, mStepDetailsCalculator, mClock, mMonotonicClock,
-                    traceDelegate, eventLogger);
-        }
-        mPlatformIdleStateCallback = null;
-        mEnergyConsumerRetriever = null;
-        mUserInfoProvider = null;
-        initPowerStatsCollectors();
-    }
 
     private void initKernelStatsReaders() {
         if (!isKernelStatsAvailable()) {
@@ -2005,19 +1969,6 @@ public class BatteryStatsImpl extends BatteryStats {
 
     private final PowerStatsCollectorInjector mPowerStatsCollectorInjector =
             new PowerStatsCollectorInjector();
-
-    @SuppressWarnings("GuardedBy")      // Accessed from constructor only
-    private void initPowerStatsCollectors() {
-        mCpuPowerStatsCollector = new CpuPowerStatsCollector(mPowerStatsCollectorInjector,
-                mBatteryStatsConfig.getPowerStatsThrottlePeriod(
-                        BatteryConsumer.POWER_COMPONENT_CPU));
-        mCpuPowerStatsCollector.addConsumer(this::recordPowerStats);
-
-        mMobileRadioPowerStatsCollector = new MobileRadioPowerStatsCollector(
-                mPowerStatsCollectorInjector, mBatteryStatsConfig.getPowerStatsThrottlePeriod(
-                BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO));
-        mMobileRadioPowerStatsCollector.addConsumer(this::recordPowerStats);
-    }
 
     /**
      * TimeBase observer.
@@ -4975,8 +4926,9 @@ public class BatteryStatsImpl extends BatteryStats {
             Uid uidStats = getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs);
             uidStats.noteStartWakeLocked(pid, name, type, elapsedRealtimeMs);
 
-            mFrameworkStatsLogger.wakelockStateChanged(mapIsolatedUid(uid), wc, name, type,
-                    uidStats.mProcessState, true /* acquired */);
+            mFrameworkStatsLogger.wakelockStateChanged(mapIsolatedUid(uid), wc, name,
+                    uidStats.mProcessState, true /* acquired */,
+                    getPowerManagerWakeLockLevel(type));
         }
     }
 
@@ -5019,8 +4971,9 @@ public class BatteryStatsImpl extends BatteryStats {
             Uid uidStats = getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs);
             uidStats.noteStopWakeLocked(pid, name, type, elapsedRealtimeMs);
 
-            mFrameworkStatsLogger.wakelockStateChanged(mapIsolatedUid(uid), wc, name, type,
-                    uidStats.mProcessState, false /* acquired */);
+            mFrameworkStatsLogger.wakelockStateChanged(mapIsolatedUid(uid), wc, name,
+                    uidStats.mProcessState, false/* acquired */,
+                    getPowerManagerWakeLockLevel(type));
 
             if (mappedUid != uid) {
                 // Decrement the ref count for the isolated uid and delete the mapping if uneeded.
@@ -5036,8 +4989,8 @@ public class BatteryStatsImpl extends BatteryStats {
      * TODO: Delete this. Instead, FrameworkStatsLog.write should be called from
      * PowerManager's Notifier.
      */
-    private int getPowerManagerWakeLockLevel(int battertStatsWakelockType) {
-        switch (battertStatsWakelockType) {
+    private int getPowerManagerWakeLockLevel(int batteryStatsWakelockType) {
+        switch (batteryStatsWakelockType) {
             // PowerManager.PARTIAL_WAKE_LOCK or PROXIMITY_SCREEN_OFF_WAKE_LOCK
             case BatteryStats.WAKE_TYPE_PARTIAL:
                 return PowerManager.PARTIAL_WAKE_LOCK;
@@ -5055,7 +5008,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 return -1;
 
             default:
-                Slog.e(TAG, "Illegal wakelock type in batterystats: " + battertStatsWakelockType);
+                Slog.e(TAG, "Illegal wakelock type in batterystats: " + batteryStatsWakelockType);
                 return -1;
         }
     }
@@ -5257,7 +5210,8 @@ public class BatteryStatsImpl extends BatteryStats {
             long deltaUptimeMs = uptimeMs - mLastWakeupUptimeMs;
             SamplingTimer timer = getWakeupReasonTimerLocked(mLastWakeupReason);
             timer.add(deltaUptimeMs * 1000, 1, elapsedRealtimeMs); // time in in microseconds
-            mFrameworkStatsLogger.kernelWakeupReported(deltaUptimeMs * 1000);
+            mFrameworkStatsLogger.kernelWakeupReported(deltaUptimeMs * 1000, mLastWakeupReason,
+                    mLastWakeupElapsedTimeMs);
             mLastWakeupReason = null;
         }
     }
@@ -11094,11 +11048,27 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public BatteryStatsImpl(@NonNull BatteryStatsConfig config, @NonNull Clock clock,
             @NonNull MonotonicClock monotonicClock, @Nullable File systemDir,
-            @NonNull Handler handler, @Nullable PlatformIdleStateCallback cb,
-            @Nullable EnergyStatsRetriever energyStatsCb,
+            @NonNull Handler handler, @Nullable PlatformIdleStateCallback platformIdleStateCallback,
+            @Nullable EnergyStatsRetriever energyStatsRetriever,
             @NonNull UserInfoProvider userInfoProvider, @NonNull PowerProfile powerProfile,
             @NonNull CpuScalingPolicies cpuScalingPolicies,
             @NonNull PowerStatsUidResolver powerStatsUidResolver) {
+        this(config, clock, monotonicClock, systemDir, handler, platformIdleStateCallback,
+                energyStatsRetriever, userInfoProvider, powerProfile, cpuScalingPolicies,
+                powerStatsUidResolver, new FrameworkStatsLogger(),
+                new BatteryStatsHistory.TraceDelegate(), new BatteryStatsHistory.EventLogger());
+    }
+
+    public BatteryStatsImpl(@NonNull BatteryStatsConfig config, @NonNull Clock clock,
+            @NonNull MonotonicClock monotonicClock, @Nullable File systemDir,
+            @NonNull Handler handler, @Nullable PlatformIdleStateCallback platformIdleStateCallback,
+            @Nullable EnergyStatsRetriever energyStatsRetriever,
+            @NonNull UserInfoProvider userInfoProvider, @NonNull PowerProfile powerProfile,
+            @NonNull CpuScalingPolicies cpuScalingPolicies,
+            @NonNull PowerStatsUidResolver powerStatsUidResolver,
+            @NonNull FrameworkStatsLogger frameworkStatsLogger,
+            @NonNull BatteryStatsHistory.TraceDelegate traceDelegate,
+            @NonNull BatteryStatsHistory.EventLogger eventLogger) {
         mClock = clock;
         initKernelStatsReaders();
 
@@ -11110,25 +11080,34 @@ public class BatteryStatsImpl extends BatteryStats {
         mPowerProfile = powerProfile;
         mCpuScalingPolicies = cpuScalingPolicies;
         mPowerStatsUidResolver = powerStatsUidResolver;
-        mFrameworkStatsLogger = new FrameworkStatsLogger();
+        mFrameworkStatsLogger = frameworkStatsLogger;
 
         initPowerProfile();
 
-        if (systemDir == null) {
-            mStatsFile = null;
-            mCheckinFile = null;
-            mDailyFile = null;
-            mHistory = new BatteryStatsHistory(mConstants.MAX_HISTORY_BUFFER,
-                    mStepDetailsCalculator, mClock, mMonotonicClock);
-        } else {
+        if (systemDir != null) {
             mStatsFile = new AtomicFile(new File(systemDir, "batterystats.bin"));
             mCheckinFile = new AtomicFile(new File(systemDir, "batterystats-checkin.bin"));
             mDailyFile = new AtomicFile(new File(systemDir, "batterystats-daily.xml"));
-            mHistory = new BatteryStatsHistory(systemDir, mConstants.MAX_HISTORY_FILES,
-                    mConstants.MAX_HISTORY_BUFFER, mStepDetailsCalculator, mClock, mMonotonicClock);
+        } else {
+            mStatsFile = null;
+            mCheckinFile = null;
+            mDailyFile = null;
         }
 
-        initPowerStatsCollectors();
+        mHistory = new BatteryStatsHistory(null /* historyBuffer */, systemDir,
+                mConstants.MAX_HISTORY_FILES, mConstants.MAX_HISTORY_BUFFER, mStepDetailsCalculator,
+                mClock, mMonotonicClock, traceDelegate, eventLogger);
+
+        mCpuPowerStatsCollector = new CpuPowerStatsCollector(mPowerStatsCollectorInjector,
+                mBatteryStatsConfig.getPowerStatsThrottlePeriod(
+                        BatteryConsumer.POWER_COMPONENT_CPU));
+        mCpuPowerStatsCollector.addConsumer(this::recordPowerStats);
+
+        mMobileRadioPowerStatsCollector = new MobileRadioPowerStatsCollector(
+                mPowerStatsCollectorInjector, mBatteryStatsConfig.getPowerStatsThrottlePeriod(
+                BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO));
+        mMobileRadioPowerStatsCollector.addConsumer(this::recordPowerStats);
+
         mStartCount++;
         initTimersAndCounters();
         mOnBattery = mOnBatteryInternal = false;
@@ -11138,8 +11117,8 @@ public class BatteryStatsImpl extends BatteryStats {
         mStartPlatformVersion = mEndPlatformVersion = Build.ID;
         initDischarge(realtimeUs);
         updateDailyDeadlineLocked();
-        mPlatformIdleStateCallback = cb;
-        mEnergyConsumerRetriever = energyStatsCb;
+        mPlatformIdleStateCallback = platformIdleStateCallback;
+        mEnergyConsumerRetriever = energyStatsRetriever;
         mUserInfoProvider = userInfoProvider;
 
         mPowerStatsUidResolver.addListener(new PowerStatsUidResolver.Listener() {

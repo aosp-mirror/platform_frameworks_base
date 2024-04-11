@@ -119,7 +119,7 @@
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"แสดงการแตะบนหน้าจอ"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"หยุด"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"แชร์"</string>
-    <string name="screenrecord_save_title" msgid="1886652605520893850">"บันทึกการบันทึกหน้าจอแล้ว"</string>
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"จัดเก็บการบันทึกหน้าจอไว้แล้ว"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"แตะเพื่อดู"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"เกิดข้อผิดพลาดในการบันทึกหน้าจอ"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"เกิดข้อผิดพลาดขณะเริ่มบันทึกหน้าจอ"</string>
@@ -350,6 +350,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"ปัญหาการบันทึก"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"เริ่ม"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"หยุด"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"รายงานข้อบกพร่อง"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"ประสบการณ์การใช้งานอุปกรณ์ส่วนใดที่ได้รับผลกระทบ"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"เลือกประเภทปัญหา"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"บันทึกหน้าจอ"</string>
@@ -363,14 +364,10 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"มาตรฐาน"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"ปานกลาง"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"สูง"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
-    <skip />
-    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
-    <skip />
-    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
-    <skip />
-    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"เครื่องช่วยฟัง"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"เครื่องช่วยฟัง"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"จับคู่อุปกรณ์ใหม่"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"คลิกเพื่อจับคู่อุปกรณ์ใหม่"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"เลิกบล็อกไมโครโฟนของอุปกรณ์ใช่ไหม"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"เลิกบล็อกกล้องของอุปกรณ์ใช่ไหม"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"เลิกบล็อกกล้องและไมโครโฟนของอุปกรณ์ใช่ไหม"</string>
@@ -745,7 +742,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"สลับรูปแบบแป้นพิมพ์"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"หรือ"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"ล้างคำค้นหา"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"แป้นพิมพ์ลัด"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"แป้นพิมพ์ลัด"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"ค้นหาแป้นพิมพ์ลัด"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"ไม่พบแป้นพิมพ์ลัด"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"ระบบ"</string>
@@ -770,9 +767,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"เปิด Assistant"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ล็อกหน้าจอ"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"จดโน้ต"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"การทํางานหลายอย่างพร้อมกันของระบบ"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"เข้าสู่โหมดแยกหน้าจอโดยแอปปัจจุบันอยู่ด้านขวา"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"เข้าสู่โหมดแยกหน้าจอโดยแอปปัจจุบันอยู่ด้านซ้าย"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"การทํางานหลายอย่างพร้อมกัน"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"ใช้โหมดแยกหน้าจอโดยแอปปัจจุบันอยู่ด้านขวา"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"ใช้โหมดแยกหน้าจอโดยแอปปัจจุบันอยู่ด้านซ้าย"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"เปลี่ยนจากโหมดแยกหน้าจอเป็นเต็มหน้าจอ"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"เปลี่ยนไปใช้แอปทางด้านขวาหรือด้านล่างขณะใช้โหมดแยกหน้าจอ"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"เปลี่ยนไปใช้แอปทางด้านซ้ายหรือด้านบนขณะใช้โหมดแยกหน้าจอ"</string>
@@ -1194,7 +1191,7 @@
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{ทำงานอยู่ # แอป}other{ทำงานอยู่ # แอป}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"ข้อมูลใหม่"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"แอปที่ทำงานอยู่"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"แอปเหล่านี้กำลังทำงานแม้ว่าคุณจะไม่ได้ใช้งานอยู่ก็ตาม วิธีนี้ช่วยให้ฟังก์ชันการทำงานของแอปมีประสิทธิภาพมากขึ้น แต่ก็อาจส่งผลต่ออายุการใช้งานแบตเตอรี่ด้วย"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"แอปเหล่านี้กำลังทำงานแม้ว่าคุณจะไม่ได้ใช้งานอยู่ก็ตาม วิธีนี้ช่วยให้ฟังก์ชันการทำงานของแอปมีประสิทธิภาพมากขึ้น แต่ก็อาจส่งผลต่อระยะเวลาการใช้งานแบตเตอรี่ด้วย"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"หยุด"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"หยุดแล้ว"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"เสร็จ"</string>

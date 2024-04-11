@@ -54,34 +54,34 @@ non_updatable_exportable_droidstubs {
             baseline_file: ":non-updatable-lint-baseline.txt",
         },
     },
-    dists: [
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/public/api",
-            dest: "android-non-updatable.txt",
-        },
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/public/api",
-            dest: "android-non-updatable-removed.txt",
-        },
-    ],
     soong_config_variables: {
         release_hidden_api_exportable_stubs: {
             dists: [
                 {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/public/api",
+                    dest: "android-non-updatable.txt",
                     tag: ".exportable.api.txt",
                 },
                 {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/public/api",
+                    dest: "android-non-updatable-removed.txt",
                     tag: ".exportable.removed-api.txt",
                 },
             ],
             conditions_default: {
                 dists: [
                     {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/public/api",
+                        dest: "android-non-updatable.txt",
                         tag: ".api.txt",
                     },
                     {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/public/api",
+                        dest: "android-non-updatable-removed.txt",
                         tag: ".removed-api.txt",
                     },
                 ],
@@ -134,34 +134,34 @@ non_updatable_exportable_droidstubs {
             baseline_file: ":non-updatable-system-lint-baseline.txt",
         },
     },
-    dists: [
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/system/api",
-            dest: "android-non-updatable.txt",
-        },
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/system/api",
-            dest: "android-non-updatable-removed.txt",
-        },
-    ],
     soong_config_variables: {
         release_hidden_api_exportable_stubs: {
             dists: [
                 {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/system/api",
+                    dest: "android-non-updatable.txt",
                     tag: ".exportable.api.txt",
                 },
                 {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/system/api",
+                    dest: "android-non-updatable-removed.txt",
                     tag: ".exportable.removed-api.txt",
                 },
             ],
             conditions_default: {
                 dists: [
                     {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/system/api",
+                        dest: "android-non-updatable.txt",
                         tag: ".api.txt",
                     },
                     {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/system/api",
+                        dest: "android-non-updatable-removed.txt",
                         tag: ".removed-api.txt",
                     },
                 ],
@@ -189,56 +189,58 @@ non_updatable_exportable_droidstubs {
             baseline_file: ":non-updatable-test-lint-baseline.txt",
         },
     },
-    dists: [
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/test/api",
-            dest: "android.txt",
-        },
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/test/api",
-            dest: "removed.txt",
-        },
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/test/api",
-            dest: "android-non-updatable.txt",
-        },
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/test/api",
-            dest: "android-non-updatable-removed.txt",
-        },
-    ],
     soong_config_variables: {
         release_hidden_api_exportable_stubs: {
             dists: [
                 {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/test/api",
+                    dest: "android.txt",
                     tag: ".exportable.api.txt",
                 },
                 {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/test/api",
+                    dest: "removed.txt",
                     tag: ".exportable.removed-api.txt",
                 },
                 {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/test/api",
+                    dest: "android-non-updatable.txt",
                     tag: ".exportable.api.txt",
                 },
                 {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/test/api",
+                    dest: "android-non-updatable-removed.txt",
                     tag: ".exportable.removed-api.txt",
                 },
             ],
             conditions_default: {
                 dists: [
                     {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/test/api",
+                        dest: "android.txt",
                         tag: ".api.txt",
                     },
                     {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/test/api",
+                        dest: "removed.txt",
                         tag: ".removed-api.txt",
                     },
                     {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/test/api",
+                        dest: "android-non-updatable.txt",
                         tag: ".api.txt",
                     },
                     {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/test/api",
+                        dest: "android-non-updatable-removed.txt",
                         tag: ".removed-api.txt",
                     },
                 ],
@@ -271,34 +273,34 @@ non_updatable_exportable_droidstubs {
             baseline_file: ":non-updatable-module-lib-lint-baseline.txt",
         },
     },
-    dists: [
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/module-lib/api",
-            dest: "android-non-updatable.txt",
-        },
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/module-lib/api",
-            dest: "android-non-updatable-removed.txt",
-        },
-    ],
     soong_config_variables: {
         release_hidden_api_exportable_stubs: {
             dists: [
                 {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/module-lib/api",
+                    dest: "android-non-updatable.txt",
                     tag: ".exportable.api.txt",
                 },
                 {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/module-lib/api",
+                    dest: "android-non-updatable-removed.txt",
                     tag: ".exportable.removed-api.txt",
                 },
             ],
             conditions_default: {
                 dists: [
                     {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/module-lib/api",
+                        dest: "android-non-updatable.txt",
                         tag: ".api.txt",
                     },
                     {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/module-lib/api",
+                        dest: "android-non-updatable-removed.txt",
                         tag: ".removed-api.txt",
                     },
                 ],

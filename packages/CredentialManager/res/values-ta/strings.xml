@@ -42,6 +42,12 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸில் உள்நுழைய கடவுச்சாவியை உருவாக்கவா?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸில் உள்நுழைய கடவுச்சொல்லைச் சேமிக்கவா?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கான உள்நுழைவுத் தகவலைச் சேமிக்கவா?"</string>
+    <!-- no translation found for choose_create_single_tap_passkey_title (3872793514041774218) -->
+    <skip />
+    <!-- no translation found for choose_create_single_tap_password_title (5231871886818921622) -->
+    <skip />
+    <!-- no translation found for choose_create_single_tap_sign_in_title (256498714574099587) -->
+    <skip />
     <string name="passkey" msgid="632353688396759522">"கடவுச்சாவி"</string>
     <string name="password" msgid="6738570945182936667">"கடவுச்சொல்"</string>
     <string name="passkeys" msgid="5733880786866559847">"கடவுச்சாவிகள்"</string>

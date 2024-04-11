@@ -91,7 +91,8 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
             StateFlowKt.MutableStateFlow(null);
     private final MutableStateFlow<Set<HeadsUpRowRepository>> mHeadsUpNotificationRows =
             StateFlowKt.MutableStateFlow(new HashSet<>());
-    private final MutableStateFlow<Boolean> mHeadsUpGoingAway = StateFlowKt.MutableStateFlow(false);
+    private final MutableStateFlow<Boolean> mHeadsUpAnimatingAway =
+            StateFlowKt.MutableStateFlow(false);
     private boolean mReleaseOnExpandFinish;
     private boolean mTrackingHeadsUp;
     private final HashSet<String> mSwipedOutKeys = new HashSet<>();
@@ -184,7 +185,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     //  Public methods:
 
     /**
-     * Add a listener to receive callbacks onHeadsUpGoingAway
+     * Add a listener to receive callbacks {@link #setHeadsUpAnimatingAway(boolean)}
      */
     @Override
     public void addHeadsUpPhoneListener(OnHeadsUpPhoneListenerChange listener) {
@@ -264,7 +265,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         if (isExpanded != mIsExpanded) {
             mIsExpanded = isExpanded;
             if (isExpanded) {
-                mHeadsUpGoingAway.setValue(false);
+                mHeadsUpAnimatingAway.setValue(false);
             }
         }
     }
@@ -274,18 +275,13 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
      * animating out. This is used to keep the touchable regions in a reasonable state.
      */
     @Override
-    public void setHeadsUpGoingAway(boolean headsUpGoingAway) {
-        if (headsUpGoingAway != mHeadsUpGoingAway.getValue()) {
+    public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
+        if (headsUpAnimatingAway != mHeadsUpAnimatingAway.getValue()) {
             for (OnHeadsUpPhoneListenerChange listener : mHeadsUpPhoneListeners) {
-                listener.onHeadsUpGoingAwayStateChanged(headsUpGoingAway);
+                listener.onHeadsUpAnimatingAwayStateChanged(headsUpAnimatingAway);
             }
-            mHeadsUpGoingAway.setValue(headsUpGoingAway);
+            mHeadsUpAnimatingAway.setValue(headsUpAnimatingAway);
         }
-    }
-
-    @Override
-    public boolean isHeadsUpGoingAway() {
-        return mHeadsUpGoingAway.getValue();
     }
 
     /**
@@ -504,8 +500,13 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
 
     @Override
     @NonNull
-    public Flow<Boolean> getHeadsUpAnimatingAway() {
-        return mHeadsUpGoingAway;
+    public Flow<Boolean> isHeadsUpAnimatingAway() {
+        return mHeadsUpAnimatingAway;
+    }
+
+    @Override
+    public boolean isHeadsUpAnimatingAwayValue() {
+        return mHeadsUpAnimatingAway.getValue();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////

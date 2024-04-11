@@ -3732,16 +3732,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             return false;
         }
 
-        // If PiP2 flag is on and client-request to enter PiP comes in,
-        // we request a direct transition from Shell to TRANSIT_PIP to get the startWct
-        // with the right entry bounds. So PiP activity isn't moved to a pinned task until after
-        // Shell calls back into Core with the entry bounds passed through.
         if (isPip2ExperimentEnabled()) {
-            final Transition legacyEnterPipTransition = new Transition(TRANSIT_PIP,
+            // If PiP2 flag is on and request to enter PiP comes in,
+            // we request a direct transition TRANSIT_PIP from Shell to get the right entry bounds.
+            // So PiP activity isn't moved to a pinned task until after
+            // Shell calls back into Core with the entry bounds to be applied with startWCT.
+            final Transition enterPipTransition = new Transition(TRANSIT_PIP,
                     0 /* flags */, getTransitionController(), mWindowManager.mSyncEngine);
-            legacyEnterPipTransition.setPipActivity(r);
-            getTransitionController().startCollectOrQueue(legacyEnterPipTransition, (deferred) -> {
-                getTransitionController().requestStartTransition(legacyEnterPipTransition,
+            enterPipTransition.setPipActivity(r);
+            r.mAutoEnteringPip = isAutoEnter;
+            getTransitionController().startCollectOrQueue(enterPipTransition, (deferred) -> {
+                getTransitionController().requestStartTransition(enterPipTransition,
                         r.getTask(), null /* remoteTransition */, null /* displayChange */);
             });
             return true;

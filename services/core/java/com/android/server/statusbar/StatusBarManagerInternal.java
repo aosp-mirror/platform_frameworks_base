@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.UserHandle;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
@@ -248,10 +249,10 @@ public interface StatusBarManagerInternal {
     /**
      * Shows the media output switcher dialog.
      *
-     * @param packageName of the session for which the output switcher is shown.
+     * @param targetPackageName of the session for which the output switcher is shown.
      * @see com.android.internal.statusbar.IStatusBar#showMediaOutputSwitcher
      */
-    void showMediaOutputSwitcher(String packageName);
+    void showMediaOutputSwitcher(String targetPackageName, UserHandle targetUserHandle);
 
     /**
      * Add a tile to the Quick Settings Panel

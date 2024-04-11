@@ -565,6 +565,9 @@ class TransitionController {
         if (isTransientCollect(ar)) {
             return true;
         }
+        for (int i = mWaitingTransitions.size() - 1; i >= 0; --i) {
+            if (mWaitingTransitions.get(i).isTransientLaunch(ar)) return true;
+        }
         for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
             if (mPlayingTransitions.get(i).isTransientLaunch(ar)) return true;
         }

@@ -3194,6 +3194,78 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     @SmallTest
+    public void testAccountsChangedBroadcastMarkedAccountAsVisibleThreeTimes() throws Exception {
+        unlockSystemUser();
+
+        HashMap<String, Integer> visibility = new HashMap<>();
+        visibility.put("testpackage1", AccountManager.VISIBILITY_VISIBLE);
+
+        addAccountRemovedReceiver("testpackage1");
+        mAms.registerAccountListener(
+                new String [] {AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1},
+                "testpackage1");
+        mAms.addAccountExplicitlyWithVisibility(
+                AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS,
+                /* password= */ "p11",
+                /* extras= */ null,
+                visibility,
+                /* callerPackage= */ null);
+
+        updateBroadcastCounters(2);
+        assertEquals(mVisibleAccountsChangedBroadcasts, 1);
+        assertEquals(mLoginAccountsChangedBroadcasts, 1);
+        assertEquals(mAccountRemovedBroadcasts, 0);
+
+        mAms.setAccountVisibility(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS,
+                "testpackage1",
+                AccountManager.VISIBILITY_VISIBLE);
+        mAms.setAccountVisibility(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS,
+                "testpackage1",
+                AccountManager.VISIBILITY_VISIBLE);
+
+        updateBroadcastCounters(2);
+        assertEquals(mVisibleAccountsChangedBroadcasts, 1);
+        assertEquals(mLoginAccountsChangedBroadcasts, 1);
+        assertEquals(mAccountRemovedBroadcasts, 0);
+    }
+
+    @SmallTest
+    public void testAccountsChangedBroadcastChangedVisibilityTwoTimes() throws Exception {
+        unlockSystemUser();
+
+        HashMap<String, Integer> visibility = new HashMap<>();
+        visibility.put("testpackage1", AccountManager.VISIBILITY_VISIBLE);
+
+        addAccountRemovedReceiver("testpackage1");
+        mAms.registerAccountListener(
+                new String [] {AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1},
+                "testpackage1");
+        mAms.addAccountExplicitlyWithVisibility(
+                AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS,
+                /* password= */ "p11",
+                /* extras= */ null,
+                visibility,
+                /* callerPackage= */ null);
+
+        updateBroadcastCounters(2);
+        assertEquals(mVisibleAccountsChangedBroadcasts, 1);
+        assertEquals(mLoginAccountsChangedBroadcasts, 1);
+        assertEquals(mAccountRemovedBroadcasts, 0);
+
+        mAms.setAccountVisibility(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS,
+                "testpackage1",
+                AccountManager.VISIBILITY_NOT_VISIBLE);
+        mAms.setAccountVisibility(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS,
+                "testpackage1",
+                AccountManager.VISIBILITY_VISIBLE);
+
+        updateBroadcastCounters(7);
+        assertEquals(mVisibleAccountsChangedBroadcasts, 3);
+        assertEquals(mLoginAccountsChangedBroadcasts, 3);
+        assertEquals(mAccountRemovedBroadcasts, 1);
+    }
+
+    @SmallTest
     public void testRegisterAccountListenerCredentialsUpdate() throws Exception {
         unlockSystemUser();
         mAms.registerAccountListener(

@@ -119,7 +119,7 @@
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Tampilkan lokasi sentuhan pada layar"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Stop"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Bagikan"</string>
-    <string name="screenrecord_save_title" msgid="1886652605520893850">"Perekaman layar disimpan"</string>
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"Rekaman layar disimpan"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Ketuk untuk melihat"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Terjadi error saat menyimpan rekaman layar"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Terjadi error saat memulai perekaman layar"</string>
@@ -350,6 +350,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"Mencatat Masalah"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Mulai"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Berhenti"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Laporan Bug"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Bagian pengalaman perangkat mana yang terpengaruh?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Pilih jenis masalah"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Perekaman layar"</string>
@@ -363,14 +364,10 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Standar"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Sedang"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Tinggi"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
-    <skip />
-    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
-    <skip />
-    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
-    <skip />
-    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Alat bantu dengar"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Alat bantu dengar"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Sambungkan perangkat baru"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Klik untuk menyambungkan perangkat baru"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Berhenti memblokir mikrofon perangkat?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Berhenti memblokir kamera perangkat?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Berhenti memblokir kamera dan mikrofon perangkat?"</string>
@@ -594,7 +591,7 @@
     <string name="stream_accessibility" msgid="3873610336741987152">"Aksesibilitas"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Dering"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Getar"</string>
-    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Nonaktifkan"</string>
+    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Bisukan"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"Transmisi"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Tidak tersedia - Volume dering dibisukan"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Tidak tersedia - Fitur Jangan Ganggu aktif"</string>
@@ -638,7 +635,7 @@
     <string name="wallet_error_generic" msgid="257704570182963611">"Terjadi error saat mendapatkan kartu Anda, coba lagi nanti"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Setelan layar kunci"</string>
     <string name="qr_code_scanner_title" msgid="1938155688725760702">"Pemindai kode QR"</string>
-    <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Mengupdate"</string>
+    <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Update berlangsung"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Profil kerja"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Mode pesawat"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Anda tidak akan mendengar alarm berikutnya <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -745,8 +742,8 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Ganti tata letak keyboard"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"atau"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Hapus kueri penelusuran"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Pintasan"</string>
-    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Pintasan penelusuran"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Pintasan Keyboard"</string>
+    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Telusuri pintasan"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Tidak ditemukan pintasan"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Sistem"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Input"</string>
@@ -763,16 +760,16 @@
     <string name="group_system_go_back" msgid="2730322046244918816">"Kembali"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Buka layar utama"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Lihat aplikasi terbaru"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Menavigasi maju pada aplikasi terbaru"</string>
-    <string name="group_system_cycle_back" msgid="8194102916946802902">"Menavigasi mundur pada aplikasi terbaru"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Berpindah-pindah aplikasi terbaru ke arah kanan"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Berpindah-pindah aplikasi terbaru ke arah kiri"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Buka daftar aplikasi"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Buka setelan"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Buka Asisten"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Kunci layar"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Buat catatan"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Multitasking sistem"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Masuk ke layar terpisah dengan aplikasi saat ini ke RHS"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Masuk ke layar terpisah dengan aplikasi saat ini ke LHS"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitasking"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Gunakan layar terpisah dengan aplikasi saat ini di sebelah kanan"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Gunakan layar terpisah dengan aplikasi saat ini di sebelah kiri"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Beralih dari layar terpisah ke layar penuh"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Beralih ke aplikasi di bagian kanan atau bawah saat menggunakan layar terpisah"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Beralih ke aplikasi di bagian kiri atau atas saat menggunakan layar terpisah"</string>

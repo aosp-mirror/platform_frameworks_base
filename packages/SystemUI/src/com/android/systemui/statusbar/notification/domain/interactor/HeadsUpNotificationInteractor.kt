@@ -60,7 +60,7 @@ class HeadsUpNotificationInteractor @Inject constructor(repository: HeadsUpRepos
         }
 
     val isHeadsUpOrAnimatingAway: Flow<Boolean> =
-        combine(hasPinnedRows, repository.headsUpAnimatingAway) { hasPinnedRows, animatingAway ->
+        combine(hasPinnedRows, repository.isHeadsUpAnimatingAway) { hasPinnedRows, animatingAway ->
             hasPinnedRows || animatingAway
         }
 

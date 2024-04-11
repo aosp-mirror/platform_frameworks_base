@@ -3701,22 +3701,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mDragResizingChangeReported = true;
         mWindowFrames.clearReportResizeHints();
 
-        // App window resize may trigger Activity#onConfigurationChanged, so we need to update
-        // ActivityWindowInfo as well.
-        final IBinder activityToken;
-        final ActivityWindowInfo activityWindowInfo;
-        if (mLastReportedActivityWindowInfo != null) {
-            activityToken = mActivityRecord.token;
-            activityWindowInfo = mLastReportedActivityWindowInfo;
-        } else {
-            activityToken = null;
-            activityWindowInfo = null;
-        }
-
         final int prevRotation = mLastReportedConfiguration
                 .getMergedConfiguration().windowConfiguration.getRotation();
         fillClientWindowFramesAndConfiguration(mClientWindowFrames, mLastReportedConfiguration,
-                activityWindowInfo, true /* useLatestConfig */, false /* relayoutVisible */);
+                mLastReportedActivityWindowInfo, true /* useLatestConfig */,
+                false /* relayoutVisible */);
         final boolean syncRedraw = shouldSendRedrawForSync();
         final boolean syncWithBuffers = syncRedraw && shouldSyncWithBuffers();
         final boolean reportDraw = syncRedraw || drawPending;
@@ -3740,14 +3729,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                             mLastReportedConfiguration, getCompatInsetsState(), forceRelayout,
                             alwaysConsumeSystemBars, displayId,
                             syncWithBuffers ? mSyncSeqId : -1, isDragResizing,
-                            activityToken, activityWindowInfo));
+                            mLastReportedActivityWindowInfo));
             onResizePostDispatched(drawPending, prevRotation, displayId);
         } else {
             // TODO(b/301870955): cleanup after launch
             try {
                 mClient.resized(mClientWindowFrames, reportDraw, mLastReportedConfiguration,
                         getCompatInsetsState(), forceRelayout, alwaysConsumeSystemBars, displayId,
-                        syncWithBuffers ? mSyncSeqId : -1, isDragResizing, activityWindowInfo);
+                        syncWithBuffers ? mSyncSeqId : -1, isDragResizing,
+                        mLastReportedActivityWindowInfo);
                 onResizePostDispatched(drawPending, prevRotation, displayId);
             } catch (RemoteException e) {
                 // Cancel orientation change of this window to avoid blocking unfreeze display.

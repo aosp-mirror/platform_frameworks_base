@@ -28,6 +28,7 @@ import android.view.ScrollCaptureResponse
 import android.view.View
 import android.view.ViewTreeObserver
 import android.view.WindowInsets
+import android.view.WindowManager
 import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
 import com.android.internal.logging.UiEventLogger
@@ -53,6 +54,7 @@ class ScreenshotShelfViewProxy
 constructor(
     private val logger: UiEventLogger,
     private val viewModel: ScreenshotViewModel,
+    private val windowManager: WindowManager,
     @Assisted private val context: Context,
     @Assisted private val displayId: Int
 ) : ScreenshotViewProxy {
@@ -79,6 +81,16 @@ constructor(
         addPredictiveBackListener { requestDismissal(SCREENSHOT_DISMISSED_OTHER) }
         setOnKeyListener { requestDismissal(SCREENSHOT_DISMISSED_OTHER) }
         debugLog(DEBUG_WINDOW) { "adding OnComputeInternalInsetsListener" }
+        view.viewTreeObserver.addOnComputeInternalInsetsListener { info ->
+            val touchableRegion =
+                view.getTouchRegion(
+                    windowManager.currentWindowMetrics.windowInsets.getInsets(
+                        WindowInsets.Type.systemGestures()
+                    )
+                )
+            info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION)
+            info.touchableRegion.set(touchableRegion)
+        }
         screenshotPreview = view.screenshotPreview
     }
 
@@ -194,6 +206,7 @@ constructor(
             }
         )
     }
+
     private fun setOnKeyListener(onDismissRequested: (ScreenshotEvent) -> Unit) {
         view.setOnKeyListener(
             object : View.OnKeyListener {

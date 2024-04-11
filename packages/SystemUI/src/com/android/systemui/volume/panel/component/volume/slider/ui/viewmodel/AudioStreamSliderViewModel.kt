@@ -18,12 +18,14 @@ package com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel
 
 import android.content.Context
 import android.media.AudioManager
+import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.volume.domain.interactor.AudioVolumeInteractor
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.AudioStreamModel
 import com.android.settingslib.volume.shared.model.RingerMode
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.res.R
+import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -43,6 +45,7 @@ constructor(
     @Assisted private val coroutineScope: CoroutineScope,
     private val context: Context,
     private val audioVolumeInteractor: AudioVolumeInteractor,
+    private val uiEventLogger: UiEventLogger,
 ) : SliderViewModel {
 
     private val audioStream = audioStreamWrapper.audioStream
@@ -69,6 +72,19 @@ constructor(
             AudioStream(AudioManager.STREAM_ALARM) to R.string.stream_alarm_unavailable,
             AudioStream(AudioManager.STREAM_MUSIC) to R.string.stream_media_unavailable,
         )
+    private val uiEventByStream =
+        mapOf(
+            AudioStream(AudioManager.STREAM_MUSIC) to
+                VolumePanelUiEvent.VOLUME_PANEL_MUSIC_SLIDER_TOUCHED,
+            AudioStream(AudioManager.STREAM_VOICE_CALL) to
+                VolumePanelUiEvent.VOLUME_PANEL_VOICE_CALL_SLIDER_TOUCHED,
+            AudioStream(AudioManager.STREAM_RING) to
+                VolumePanelUiEvent.VOLUME_PANEL_RING_SLIDER_TOUCHED,
+            AudioStream(AudioManager.STREAM_NOTIFICATION) to
+                VolumePanelUiEvent.VOLUME_PANEL_NOTIFICATION_SLIDER_TOUCHED,
+            AudioStream(AudioManager.STREAM_ALARM) to
+                VolumePanelUiEvent.VOLUME_PANEL_ALARM_SLIDER_TOUCHED,
+        )
 
     override val slider: StateFlow<SliderState> =
         combine(
@@ -86,6 +102,10 @@ constructor(
         coroutineScope.launch {
             audioVolumeInteractor.setVolume(audioStream, newValue.roundToInt())
         }
+    }
+
+    override fun onValueChangeFinished() {
+        uiEventByStream[audioStream]?.let { uiEventLogger.log(it) }
     }
 
     override fun toggleMuted(state: SliderState) {

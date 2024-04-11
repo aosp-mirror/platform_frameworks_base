@@ -89,7 +89,7 @@ class TestableHeadsUpManager extends BaseHeadsUpManager {
     }
 
     @Override
-    public boolean isHeadsUpGoingAway() {
+    public boolean isHeadsUpAnimatingAwayValue() {
         throw new UnsupportedOperationException();
     }
 
@@ -115,7 +115,7 @@ class TestableHeadsUpManager extends BaseHeadsUpManager {
     }
 
     @Override
-    public void setHeadsUpGoingAway(boolean headsUpGoingAway) {
+    public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
         throw new UnsupportedOperationException();
     }
 

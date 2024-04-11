@@ -21,56 +21,68 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.tracing.coroutines.launch
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.qs.tileimpl.QSTileViewImpl
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.DisposableHandle
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 
-class QSLongPressEffectViewBinder {
-
-    private var handle: DisposableHandle? = null
-    val isBound: Boolean
-        get() = handle != null
-
+// TODO(b/332903800)
+object QSLongPressEffectViewBinder {
     fun bind(
         tile: QSTileViewImpl,
+        qsLongPressEffect: QSLongPressEffect?,
         tileSpec: String?,
-        effect: QSLongPressEffect?,
-    ) {
-        if (effect == null) return
+    ): DisposableHandle? {
+        if (qsLongPressEffect == null) return null
 
-        handle =
-            tile.repeatWhenAttached {
-                repeatOnLifecycle(Lifecycle.State.CREATED) {
-                    effect.scope = this
-                    val tag = "${tileSpec ?: "unknownTileSpec"}#LongPressEffect"
-
-                    launch("$tag#progress") {
-                        effect.effectProgress.collect { progress ->
-                            progress?.let {
-                                if (it == 0f) {
-                                    tile.bringToFront()
-                                }
+        return tile.repeatWhenAttached {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                val tag = "${tileSpec ?: "unknownTileSpec"}#LongPressEffect"
+                // Progress of the effect
+                launch("$tag#progress") {
+                    qsLongPressEffect.effectProgress.collect { progress ->
+                        progress?.let {
+                            if (it == 0f) {
+                                tile.bringToFront()
+                            } else {
                                 tile.updateLongPressEffectProperties(it)
                             }
                         }
                     }
+                }
 
-                    launch("$tag#action") {
-                        effect.actionType.collect { action ->
-                            action?.let {
-                                when (it) {
-                                    QSLongPressEffect.ActionType.CLICK -> tile.performClick()
-                                    QSLongPressEffect.ActionType.LONG_PRESS ->
-                                        tile.performLongClick()
+                // Action to perform
+                launch("$tag#action") {
+                    qsLongPressEffect.actionType.collect { action ->
+                        action?.let {
+                            when (it) {
+                                QSLongPressEffect.ActionType.CLICK -> tile.performClick()
+                                QSLongPressEffect.ActionType.LONG_PRESS -> tile.performLongClick()
+                                QSLongPressEffect.ActionType.RESET_AND_LONG_PRESS -> {
+                                    tile.resetLongPressEffectProperties()
+                                    tile.performLongClick()
                                 }
-                                effect.clearActionType()
                             }
+                            qsLongPressEffect.clearActionType()
                         }
                     }
                 }
-            }
-    }
 
-    fun dispose() {
-        handle?.dispose()
-        handle = null
+                // Tap timeout wait
+                launch("$tag#timeout") {
+                    qsLongPressEffect.shouldWaitForTapTimeout
+                        .filter { it }
+                        .collect {
+                            try {
+                                delay(QSLongPressEffect.PRESSED_TIMEOUT)
+                                qsLongPressEffect.handleTimeoutComplete()
+                            } catch (_: CancellationException) {
+                                qsLongPressEffect.resetEffect()
+                            }
+                        }
+                }
+            }
+        }
     }
 }

@@ -42,6 +42,9 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"<xliff:g id="APP_NAME">%1$s</xliff:g> tətbiqinə daxil olmaq üçün giriş açarı yaradılsın?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"<xliff:g id="APP_NAME">%1$s</xliff:g> tətbiqinə daxil olmaq üçün parol yadda saxlansın?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"<xliff:g id="APP_NAME">%1$s</xliff:g> üçün giriş məlumatları yadda saxlansın?"</string>
+    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"<xliff:g id="APP_NAME">%1$s</xliff:g> üçün giriş açarı yaratmaq məqsədilə ekran kilidi istifadə edilsin?"</string>
+    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"<xliff:g id="APP_NAME">%1$s</xliff:g> üçün parol yaratmaq məqsədilə ekran kilidi istifadə edilsin?"</string>
+    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"<xliff:g id="APP_NAME">%1$s</xliff:g> üçün giriş məlumatını yadda saxlamaq məqsədilə ekran kilidi istifadə edilsin?"</string>
     <string name="passkey" msgid="632353688396759522">"açar"</string>
     <string name="password" msgid="6738570945182936667">"parol"</string>
     <string name="passkeys" msgid="5733880786866559847">"açarlar"</string>

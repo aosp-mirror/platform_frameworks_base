@@ -350,6 +350,8 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"Sorunu Kaydedin"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Başlayın"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Durdurun"</string>
+    <!-- no translation found for qs_record_issue_bug_report (8229031766918650079) -->
+    <skip />
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Cihaz deneyiminiz ne şekilde etkilendi?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Sorun türünü seçin"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Ekran kaydedicisi"</string>
@@ -364,12 +366,9 @@
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Orta"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Yüksek"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"İşitme cihazları"</string>
-    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
-    <skip />
-    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
-    <skip />
-    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"İşitme cihazları"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Yeni cihaz eşle"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Yeni cihaz eşlemek için tıklayın"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Cihaz mikrofonunun engellemesi kaldırılsın mı?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Cihaz kamerasının engellemesi kaldırılsın mı?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Cihaz kamerası ile mikrofonunun engellemesi kaldırılsın mı?"</string>
@@ -744,7 +743,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Klavye düzenini değiştir"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"veya"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Arama sorgusunu temizle"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Kısayollar"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Klavye Kısayolları"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Kısayol araması yapın"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Kısayol bulunamadı"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Sistem"</string>
@@ -769,9 +768,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Asistan\'ı aç"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Kilit ekranı"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Not al"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Sistem çoklu görevi"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Mevcut uygulamayı sağ tarafa alarak bölünmüş ekrana geç"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Mevcut uygulamayı sol tarafa alarak bölünmüş ekrana geç"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Çoklu görev"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Sağdaki mevcut uygulamayla birlikte bölünmüş ekranı kullanın"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Soldaki mevcut uygulamayla birlikte bölünmüş ekranı kullanın"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Bölünmüş ekrandan tam ekrana geç"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Bölünmüş ekran kullanırken sağdaki veya alttaki uygulamaya geçiş yapın"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Bölünmüş ekran kullanırken soldaki veya üstteki uygulamaya geçiş yapın"</string>

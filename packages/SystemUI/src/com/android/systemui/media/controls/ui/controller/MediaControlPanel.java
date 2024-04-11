@@ -748,18 +748,23 @@ public class MediaControlPanel {
                             boolean showOverLockscreen = mKeyguardStateController.isShowing()
                                     && mActivityIntentHelper.wouldPendingShowOverLockscreen(
                                         deviceIntent, mLockscreenUserManager.getCurrentUserId());
-                            if (deviceIntent.isActivity() && !showOverLockscreen) {
-                                mActivityStarter.postStartActivityDismissingKeyguard(deviceIntent);
-                            } else {
-                                try {
-                                    BroadcastOptions options = BroadcastOptions.makeBasic();
-                                    options.setInteractive(true);
-                                    options.setPendingIntentBackgroundActivityStartMode(
+                            if (deviceIntent.isActivity()) {
+                                if (!showOverLockscreen) {
+                                    mActivityStarter.postStartActivityDismissingKeyguard(
+                                            deviceIntent);
+                                } else {
+                                    try {
+                                        BroadcastOptions options = BroadcastOptions.makeBasic();
+                                        options.setInteractive(true);
+                                        options.setPendingIntentBackgroundActivityStartMode(
                                             ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
-                                    deviceIntent.send(options.toBundle());
-                                } catch (PendingIntent.CanceledException e) {
-                                    Log.e(TAG, "Device pending intent was canceled");
+                                        deviceIntent.send(options.toBundle());
+                                    } catch (PendingIntent.CanceledException e) {
+                                        Log.e(TAG, "Device pending intent was canceled");
+                                    }
                                 }
+                            } else {
+                                Log.w(TAG, "Device pending intent is not an activity.");
                             }
                         } else {
                             mMediaOutputDialogManager.createAndShow(mPackageName, true,

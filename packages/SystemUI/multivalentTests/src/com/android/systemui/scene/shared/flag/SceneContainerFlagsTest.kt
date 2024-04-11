@@ -16,11 +16,10 @@
 
 package com.android.systemui.scene.shared.flag
 
-import android.platform.test.annotations.DisableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.Kosmos
 import com.google.common.truth.Truth
@@ -32,7 +31,7 @@ import org.junit.runner.RunWith
 internal class SceneContainerFlagsTest : SysuiTestCase() {
 
     @Test
-    @DisableFlags(FLAG_SCENE_CONTAINER)
+    @DisableSceneContainer
     fun isNotEnabled_withoutAconfigFlags() {
         Truth.assertThat(SceneContainerFlag.isEnabled).isEqualTo(false)
         Truth.assertThat(SceneContainerFlagsImpl().isEnabled()).isEqualTo(false)

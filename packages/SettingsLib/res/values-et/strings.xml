@@ -106,28 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktiivne, ainult vasak"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktiivne, ainult parem"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktiivne, vasak ja parem"</string>
-    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
-    <skip />
-    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
-    <skip />
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"Aktiivne (ainult meedia), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> aku täituvus"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"Aktiivne (ainult meedia), V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> aku täituvus, P: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> aku täituvus"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"Ühendatud (toetab heli jagamist), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> aku täituvus"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"Ühendatud (toetab heli jagamist), V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> aku täituvus, P: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> aku täituvus"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"Ühendatud (toetab heli jagamist), vasak <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"Ühendatud (toetab heli jagamist), parem <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Aktiivne (ainult meedia)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Toetab heli jagamist"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Aktiivne (ainult meedia), ainult vasak"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Aktiivne (ainult meedia), ainult parem"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Aktiivne (ainult meedia), vasak ja parem"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Meediaheli"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonikõned"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Failiedastus"</string>
@@ -505,7 +494,7 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Juhtmevaba laadimine"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Laadimine"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Ei lae"</string>
-    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Ühendatud, kuid ei laadita"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Ühendatud, kuid ei laeta"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Laetud"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Täielikult laetud"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Laadimine on ootele pandud"</string>

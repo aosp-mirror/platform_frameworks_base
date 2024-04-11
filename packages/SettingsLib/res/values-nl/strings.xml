@@ -106,35 +106,24 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Actief, alleen links"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Actief, alleen rechts"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Actief, links en rechts"</string>
-    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
-    <skip />
-    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
-    <skip />
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"Actief (alleen media), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batterij"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"Actief (alleen media), L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batterij, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batterij"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"Verbonden (ondersteunt audio delen), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batterij"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"Verbonden (ondersteunt audio delen), L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batterij, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batterij"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"Verbonden (ondersteunt audio delen), links <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"Verbonden (ondersteunt audio delen), rechts <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Actief (alleen media)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Ondersteunt audio delen"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Actief (alleen media), alleen links"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Actief (alleen media), alleen rechts"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Actief (alleen media), links en rechts"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Media-audio"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefoongesprekken"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Bestandsoverdracht"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Invoerapparaat"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Internettoegang"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Toegang geven tot contacten en gespreksgeschiedenis"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"De informatie wordt onder andere gebruikt voor gespreksaankondigingen"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Deze informatie wordt o.a. gebruikt voor gespreksaankondigingen"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Internetverbinding delen"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Sms-berichten"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Simtoegang"</string>
@@ -472,7 +461,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalie (rood-groen)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalie (blauw-geel)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Kleurcorrectie"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Kleurcorrectie kan handig zijn in de volgende situaties:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Je wilt kleuren nauwkeuriger zien.&lt;/li&gt; &lt;li&gt;&amp;nbsp;Je wilt kleuren verwijderen zodat je je beter kunt focussen.&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Kleurcorrectie kan handig zijn in de volgende situaties:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Je wilt kleuren nauwkeuriger zien.&lt;/li&gt; &lt;li&gt;&amp;nbsp;Je wilt kleuren verwijderen zodat je je beter kunt concentreren.&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Overschreven door <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g>: opladen is in de wacht gezet om de batterij te beschermen"</string>
@@ -553,7 +542,7 @@
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Klaar"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Wekkers en herinneringen"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Wekkers en herinneringen laten instellen"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Instellen van wekkers en herinneringen toestaan"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Wekkers en herinneringen"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Sta toe dat deze app wekkers zet en tijdgevoelige acties plant. De app kan hierdoor op de achtergrond worden uitgevoerd, waardoor je misschien meer batterijlading verbruikt.\n\nAls dit recht uitstaat, werken door deze app geplande bestaande wekkers en tijdgebaseerde afspraken niet."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"plannen, schema, wekker, alarm, herinnering, klok"</string>
@@ -709,7 +698,7 @@
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Standaard"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Scherm aanzetten"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Scherm aanzetten toestaan"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Toestaan dat een app het scherm aanzet. Indien toegestaan, kan de app het scherm op elk moment aanzetten zonder jouw expliciete intentie."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Sta toe dat een app het scherm aanzet. Indien toegestaan, kan de app het scherm op elk moment aanzetten zonder jouw expliciete intentie."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Uitzending van <xliff:g id="APP_NAME">%1$s</xliff:g> stopzetten?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Als je <xliff:g id="SWITCHAPP">%1$s</xliff:g> uitzendt of de uitvoer wijzigt, wordt je huidige uitzending gestopt"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> uitzenden"</string>

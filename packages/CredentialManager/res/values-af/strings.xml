@@ -42,6 +42,9 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Skep toegangsleutel om by <xliff:g id="APP_NAME">%1$s</xliff:g> aan te meld?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"Stoor wagwoord om by <xliff:g id="APP_NAME">%1$s</xliff:g> aan te meld?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Stoor aanmeldinligting vir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"Gebruik jou skermslot om ’n toegangsleutel vir <xliff:g id="APP_NAME">%1$s</xliff:g> te skep?"</string>
+    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"Gebruik jou skermslot om ’n wagwoord vir <xliff:g id="APP_NAME">%1$s</xliff:g> te skep?"</string>
+    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"Gebruik jou skermslot om aanmeldinligting vir <xliff:g id="APP_NAME">%1$s</xliff:g> te stoor?"</string>
     <string name="passkey" msgid="632353688396759522">"toegangsleutel"</string>
     <string name="password" msgid="6738570945182936667">"wagwoord"</string>
     <string name="passkeys" msgid="5733880786866559847">"toegangsleutels"</string>

@@ -196,6 +196,12 @@ public abstract class MediaSessionRecordImpl {
      */
     public abstract boolean isClosed();
 
+    /**
+     * Note: This method is only used for testing purposes If the session is temporary engaged, the
+     * timeout will expire and it will become disengaged.
+     */
+    public abstract void expireTempEngaged();
+
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;

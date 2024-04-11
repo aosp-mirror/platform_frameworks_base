@@ -256,10 +256,15 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         // A copy is necessary here as we are changing the underlying map.  This would cause
         // undefined behavior if we iterated over the key set directly.
         ArraySet<String> keysToRemove = new ArraySet<>(mHeadsUpEntryMap.keySet());
+
+        // Must get waiting keys before calling removeEntry, which clears waiting entries in
+        // AvalancheController
+        List<String> waitingKeysToRemove = mAvalancheController.getWaitingKeys();
+
         for (String key : keysToRemove) {
             removeEntry(key);
         }
-        for (String key : mAvalancheController.getWaitingKeys()) {
+        for (String key : waitingKeysToRemove) {
             removeEntry(key);
         }
     }
@@ -903,8 +908,12 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
                     mLogger.logAutoRemoveCanceled(mEntry, reason);
                 }
             };
-            mAvalancheController.update(this, runnable,
-                    reason + " removeAutoRemovalCallbacks");
+            if (isHeadsUpEntry(this.mEntry.getKey())) {
+                mAvalancheController.update(this, runnable, reason + " cancelAutoRemovalCallbacks");
+            } else {
+                // Just removed
+                runnable.run();
+            }
         }
 
         public void scheduleAutoRemovalCallback(FinishTimeUpdater finishTimeCalculator,

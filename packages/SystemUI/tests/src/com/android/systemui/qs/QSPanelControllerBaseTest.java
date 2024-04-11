@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs;
 
+import static com.android.systemui.Flags.FLAG_QUICK_SETTINGS_VISUAL_HAPTICS_LONGPRESS;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
@@ -33,6 +35,8 @@ import static org.mockito.Mockito.when;
 
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.ContextThemeWrapper;
@@ -45,13 +49,14 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.haptics.qs.QSLongPressEffect;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.media.controls.ui.view.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
-import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 import com.android.systemui.util.animation.DisappearParameters;
 
@@ -66,11 +71,14 @@ import java.io.StringWriter;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Provider;
+
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
 public class QSPanelControllerBaseTest extends SysuiTestCase {
 
+    private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
     @Mock
     private QSPanel mQSPanel;
     @Mock
@@ -101,8 +109,8 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     Configuration mConfiguration;
     @Mock
     Runnable mHorizontalLayoutListener;
-    @Mock
-    VibratorHelper mVibratorHelper;
+    private TestableLongPressEffectProvider mLongPressEffectProvider =
+            new TestableLongPressEffectProvider();
 
     private QSPanelControllerBase<QSPanel> mController;
 
@@ -114,12 +122,23 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
                 DumpManager dumpManager) {
             super(view, host, qsCustomizerController, true, mediaHost, metricsLogger, uiEventLogger,
                     qsLogger, dumpManager, new ResourcesSplitShadeStateController(),
-                    mVibratorHelper);
+                    mLongPressEffectProvider);
         }
 
         @Override
         protected QSTileRevealController createTileRevealController() {
             return mQSTileRevealController;
+        }
+    }
+
+    private class TestableLongPressEffectProvider implements Provider<QSLongPressEffect> {
+
+        private int mEffectsProvided = 0;
+
+        @Override
+        public QSLongPressEffect get() {
+            mEffectsProvided++;
+            return mKosmos.getQsLongPressEffect();
         }
     }
 
@@ -418,6 +437,27 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         mController.setTiles();
         verify(mQSPanel, never()).removeTile(any());
         verify(mQSPanel, never()).addTile(any());
+    }
+
+    @Test
+    @EnableFlags(FLAG_QUICK_SETTINGS_VISUAL_HAPTICS_LONGPRESS)
+    public void setTiles_longPressEffectEnabled_nonNullLongPressEffectsAreProvided() {
+        mLongPressEffectProvider.mEffectsProvided = 0;
+        when(mQSHost.getTiles()).thenReturn(List.of(mQSTile, mOtherTile));
+        mController.setTiles();
+
+        // There is one non-null effect provided for each tile in the host
+        assertThat(mLongPressEffectProvider.mEffectsProvided).isEqualTo(2);
+    }
+
+    @Test
+    @DisableFlags(FLAG_QUICK_SETTINGS_VISUAL_HAPTICS_LONGPRESS)
+    public void setTiles_longPressEffectDisabled_noLongPressEffectsAreProvided() {
+        mLongPressEffectProvider.mEffectsProvided = 0;
+        when(mQSHost.getTiles()).thenReturn(List.of(mQSTile, mOtherTile));
+        mController.setTiles();
+
+        assertThat(mLongPressEffectProvider.mEffectsProvided).isEqualTo(0);
     }
 
     @Test

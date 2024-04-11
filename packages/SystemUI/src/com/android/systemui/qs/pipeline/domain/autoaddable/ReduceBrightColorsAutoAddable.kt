@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.pipeline.domain.autoaddable
 
+import android.view.accessibility.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.ReduceBrightColorsController
 import com.android.systemui.qs.dagger.QSFlagsModule.RBC_AVAILABLE
@@ -58,7 +59,9 @@ constructor(
 
     override val autoAddTracking
         get() =
-            if (available) {
+            if (Flags.a11yQsShortcut()) {
+                AutoAddTracking.Disabled
+            } else if (available) {
                 super.autoAddTracking
             } else {
                 AutoAddTracking.Disabled

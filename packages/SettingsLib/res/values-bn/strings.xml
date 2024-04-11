@@ -106,28 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"শুধুমাত্র বাঁদিকের হিয়ারিং এড অ্যাক্টিভ"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"শুধুমাত্র ডানদিকের হিয়ারিং এড অ্যাক্টিভ"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"বাঁ ও ডানদিকের হিয়ারিং এড, অ্যাক্টিভ"</string>
-    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
-    <skip />
-    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
-    <skip />
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"চালু আছে (শুধুমাত্র মিডিয়া), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ব্যাটারি"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"চালু আছে (শুধুমাত্র মিডিয়া), বাঁদিক: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ব্যাটারি, ডানদিক: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ব্যাটারি"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"কানেক্ট করা আছে (অডিও শেয়ারিংয়ে কাজ করে), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ব্যাটারি"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"কানেক্ট করা আছে (অডিও শেয়ারিংয়ে কাজ করে), বাঁদিক: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ব্যাটারি, ডানদিক: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ব্যাটারি"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"কানেক্ট করা আছে (অডিও শেয়ারিংয়ে কাজ করে), বাঁদিক <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"কানেক্ট করা আছে (অডিও শেয়ারিংয়ে কাজ করে), ডানদিক <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"চালু আছে (শুধুমাত্র মিডিয়া)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"অডিও শেয়ারিংয়ে কাজ করে"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"চালু আছে (শুধুমাত্র মিডিয়া), শুধুমাত্র বাঁদিক"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"চালু আছে (শুধুমাত্র মিডিয়া), শুধুমাত্র ডানদিক"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"চালু আছে (শুধুমাত্র মিডিয়া), বাঁদিক ও ডানদিক"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"মিডিয়া অডিও"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ফোন কল"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ফাইল স্থানান্তর"</string>
@@ -537,7 +526,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"সিস্টেমের ভাষাগুলি ব্যবহার করুন"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> জন্য সেটিংস খুলতে ব্যর্থ হয়েছে"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"এই ইনপুট পদ্ধতিটি হয়ত পাসওয়ার্ড এবং ক্রেডিট কার্ড নম্বর সহ আপনার টাইপ করা সমস্ত টেক্সট সংগ্রহ করতে সক্ষম হতে পারে। এটি <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> অ্যাপ থেকে এসেছে। এই ইনপুট পদ্ধতিটি ব্যবহার করবেন?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"দ্রষ্টব্য: পুনরায় চালু করার পরে, আপনি আপনার ফোন আনলক না করা পর্যন্ত এই অ্যাপটিকে চালু করতে পারবেন না"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"দ্রষ্টব্য: রিবুট করার পরে, আপনি আপনার ফোন আনলক না করা পর্যন্ত এই অ্যাপটিকে চালু করতে পারবেন না"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS রেজিস্ট্রেশনের স্থিতি"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"রেজিস্টার করা"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"রেজিস্টার করা নয়"</string>

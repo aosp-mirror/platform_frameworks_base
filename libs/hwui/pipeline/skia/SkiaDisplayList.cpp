@@ -15,22 +15,18 @@
  */
 
 #include "SkiaDisplayList.h"
-#include "FunctorDrawable.h"
-
-#include "DumpOpsCanvas.h"
-#ifdef __ANDROID__ // Layoutlib does not support SkiaPipeline
-#include "SkiaPipeline.h"
-#else
-#include "DamageAccumulator.h"
-#endif
-#include "TreeInfo.h"
-#include "VectorDrawable.h"
-#ifdef __ANDROID__
-#include "renderthread/CanvasContext.h"
-#endif
 
 #include <SkImagePriv.h>
 #include <SkPathOps.h>
+
+// clang-format off
+#include "FunctorDrawable.h" // Must be included before DumpOpsCanvas.h
+#include "DumpOpsCanvas.h"
+// clang-format on
+#include "SkiaPipeline.h"
+#include "TreeInfo.h"
+#include "VectorDrawable.h"
+#include "renderthread/CanvasContext.h"
 
 namespace android {
 namespace uirenderer {
@@ -101,7 +97,6 @@ bool SkiaDisplayList::prepareListAndChildren(
     // If the prepare tree is triggered by the UI thread and no previous call to
     // pinImages has failed then we must pin all mutable images in the GPU cache
     // until the next UI thread draw.
-#ifdef __ANDROID__ // Layoutlib does not support CanvasContext
     if (info.prepareTextures && !info.canvasContext.pinImages(mMutableImages)) {
         // In the event that pinning failed we prevent future pinImage calls for the
         // remainder of this tree traversal and also unpin any currently pinned images
@@ -110,11 +105,11 @@ bool SkiaDisplayList::prepareListAndChildren(
         info.canvasContext.unpinImages();
     }
 
+#ifdef __ANDROID__
     auto grContext = info.canvasContext.getGrContext();
     for (const auto& bufferData : mMeshBufferData) {
         bufferData->updateBuffers(grContext);
     }
-
 #endif
 
     bool hasBackwardProjectedNodesHere = false;

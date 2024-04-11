@@ -28,11 +28,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.slice.Slice
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.animation.Expandable
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.volume.panel.component.anc.ui.viewmodel.AncViewModel
 import com.android.systemui.volume.panel.component.popup.ui.composable.VolumePanelPopup
+import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import javax.inject.Inject
 
 /** ANC popup up displaying ANC control [Slice]. */
@@ -41,10 +43,12 @@ class AncPopup
 constructor(
     private val volumePanelPopup: VolumePanelPopup,
     private val viewModel: AncViewModel,
+    private val uiEventLogger: UiEventLogger,
 ) {
 
     /** Shows a popup with the [expandable] animation. */
     fun show(expandable: Expandable?) {
+        uiEventLogger.log(VolumePanelUiEvent.VOLUME_PANEL_ANC_POPUP_SHOWN)
         volumePanelPopup.show(expandable, { Title() }, { Content(it) })
     }
 

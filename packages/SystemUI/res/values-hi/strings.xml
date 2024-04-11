@@ -350,6 +350,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"समस्या रिकॉर्ड करें"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"शुरू करें"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"रोकें"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"गड़बड़ी की रिपोर्ट"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"आपके डिवाइस की कौनसी सुविधा पर असर पड़ा था?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"समस्या का टाइप चुनें"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"स्क्रीन रिकॉर्डर"</string>
@@ -363,14 +364,10 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"स्टैंडर्ड"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"सामान्य"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"ज़्यादा"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
-    <skip />
-    <!-- no translation found for quick_settings_hearing_devices_dialog_title (9004774017688484981) -->
-    <skip />
-    <!-- no translation found for quick_settings_pair_hearing_devices (5987105102207447322) -->
-    <skip />
-    <!-- no translation found for accessibility_hearing_device_pair_new_device (8440082580186130090) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"कान की मशीनें"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"कान की मशीनें"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"नया डिवाइस जोड़ें"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"नया डिवाइस जोड़ने के लिए क्लिक करें"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"क्या आपको डिवाइस का माइक्रोफ़ोन अनब्लॉक करना है?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"क्या आपको डिवाइस का कैमरा अनब्लॉक करना है?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"क्या आप डिवाइस का कैमरा और माइक्रोफ़ोन अनब्लॉक करना चाहते हैं?"</string>
@@ -552,7 +549,7 @@
     <string name="legacy_vpn_name" msgid="4174223520162559145">"वीपीएन"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent की वजह से अनलॉक रखा गया है"</string>
     <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"कई बार पुष्टि करने की कोशिश की वजह से, डिवाइस लॉक है"</string>
-    <string name="keyguard_indication_after_adaptive_auth_lock" msgid="2323400645470712787">"डिवाइस लॉक है\nपुष्टि नहीं की जा सकी."</string>
+    <string name="keyguard_indication_after_adaptive_auth_lock" msgid="2323400645470712787">"डिवाइस लॉक हो गया है\nपुष्टि नहीं की जा सकी"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"साउंड सेटिंग"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"ऑडियो-वीडियो से अपने-आप कैप्शन बनना"</string>
@@ -678,7 +675,7 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;स्थिति:&lt;/b&gt; रैंकिंग में नीचे किया गया"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"यह कई तरीकों से दिखती है, जैसे कि लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो के तौर पर और बातचीत वाली सूचनाओं में सबसे ऊपर"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"यह कई तरीकों से दिखती है, जैसे कि बातचीत वाली सूचनाओं में सबसे ऊपर, बबल के तौर पर, और लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो के तौर पर"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"यह कई तरीकों से दिखती है, जैसे कि लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो के तौर पर और बातचीत वाली सूचनाओं में सबसे ऊपर. साथ ही, इसकी वजह से, \'परेशान न करें\' सुविधा में भी रुकावट आती है"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"यह लॉक स्क्रीन पर, बातचीत वाली सूचनाओं में सबसे ऊपर और प्रोफ़ाइल फ़ोटो के साथ दिखती है. साथ ही, यह \'परेशान न करें\' मोड को बायपास कर सकती है."</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"यह कई तरीकों से दिखती है, जैसे कि बातचीत वाली सूचनाओं में सबसे ऊपर, बबल के तौर पर, और लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो के तौर पर. साथ ही, यह \'परेशान न करें\' मोड को बायपास कर सकती है"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> पर बातचीत की सुविधाएं काम नहीं करतीं"</string>
@@ -745,12 +742,12 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"कीबोर्ड लेआउट बदलें"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"या"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"सर्च क्वेरी साफ़ करें"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"शॉर्टकट"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"कीबोर्ड शॉर्टकट"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"शॉर्टकट खोजें"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"कोई शॉर्टकट नहीं मिला"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"सिस्टम"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"इनपुट"</string>
-    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"खुले हुए ऐप्लिकेशन"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"ऐप्लिकेशन खोलने के लिए"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"मौजूदा ऐप्लिकेशन"</string>
     <string name="keyboard_shortcut_a11y_show_search_results" msgid="2865241062981833705">"खोज के नतीजे दिखाए जा रहे हैं"</string>
     <string name="keyboard_shortcut_a11y_filter_system" msgid="7744143131119370483">"सिस्टम के शॉर्टकट दिखाए जा रहे हैं"</string>
@@ -759,8 +756,8 @@
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"मौजूदा ऐप्लिकेशन के लिए शॉर्टकट दिखाए जा रहे हैं"</string>
     <string name="group_system_access_notification_shade" msgid="1619028907006553677">"सूचनाएं देखने के लिए"</string>
     <string name="group_system_full_screenshot" msgid="5742204844232667785">"स्क्रीनशॉट लेने के लिए"</string>
-    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"शॉर्टकट दिखाने के लिए"</string>
-    <string name="group_system_go_back" msgid="2730322046244918816">"वापस पीछे जाने के लिए"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"शॉर्टकट देखने के लिए"</string>
+    <string name="group_system_go_back" msgid="2730322046244918816">"वापस जाने के लिए"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"होम स्क्रीन पर जाने के लिए"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"हाल ही में इस्तेमाल किए गए ऐप्लिकेशन देखने के लिए"</string>
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"हाल ही में इस्तेमाल किए गए ऐप्लिकेशन के अगले पेज पर जाने के लिए"</string>
@@ -768,11 +765,11 @@
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"ऐप्लिकेशन की सूची खोलने के लिए"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"सेटिंग खोलने के लिए"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Google Assistant खोलने के लिए"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"लॉक स्क्रीन"</string>
-    <string name="group_system_quick_memo" msgid="3764560265935722903">"नोट करें"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"सिस्टम मल्टीटास्किंग"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"स्प्लिट स्क्रीन का इस्तेमाल करके, मौजूदा ऐप्लिकेशन को दाईं ओर ले जाएं"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"स्प्लिट स्क्रीन का इस्तेमाल करके, मौजूदा ऐप्लिकेशन को बाईं ओर ले जाएं"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"स्क्रीन लॉक करने के लिए"</string>
+    <string name="group_system_quick_memo" msgid="3764560265935722903">"नोट करने के लिए"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"मल्टीटास्किंग (एक साथ कई काम करना)"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"मौजूदा ऐप्लिकेशन को दाईं ओर दिखाने वाली स्प्लिट स्क्रीन इस्तेमाल करें"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"मौजूदा ऐप्लिकेशन को बाईं ओर दिखाने वाली स्प्लिट स्क्रीन इस्तेमाल करें"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"स्प्लिट स्क्रीन से फ़ुल स्क्रीन मोड पर स्विच करने के लिए"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"स्प्लिट स्क्रीन इस्तेमाल करते समय दाईं ओर या नीचे के ऐप पर स्विच करें"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"स्प्लिट स्क्रीन इस्तेमाल करते समय बाईं ओर या ऊपर के ऐप पर स्विच करें"</string>
@@ -829,7 +826,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"दायां कुंजी कोड"</string>
     <string name="left_icon" msgid="5036278531966897006">"बायां आइकॉन"</string>
     <string name="right_icon" msgid="1103955040645237425">"दायां आइकॉन"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"टाइल जोड़ने के लिए दबाएं और खींचें"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"टाइल जोड़ने के लिए दबाकर खींचे और छोड़ें"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"टाइल का क्रम फिर से बदलने के लिए उन्हें दबाकर रखें और खींचें"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"हटाने के लिए यहां खींचें और छोड़ें"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"आपके पास कम से कम <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> टाइलें होनी चाहिए"</string>
@@ -1123,7 +1120,7 @@
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"बिल्ड नंबर"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"बिल्ड नंबर को क्लिपबोर्ड पर कॉपी किया गया."</string>
     <string name="basic_status" msgid="2315371112182658176">"ऐसी बातचीत जिसमें इंटरैक्शन डेटा मौजूद नहीं है"</string>
-    <string name="select_conversation_title" msgid="6716364118095089519">"बातचीत विजेट"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"बातचीत वाला विजेट"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"किसी बातचीत को होम स्क्रीन पर जोड़ने के लिए, उस बातचीत पर टैप करें"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"हाल ही में हुई बातचीत यहां दिखेंगी"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"अहम बातचीत"</string>
@@ -1286,7 +1283,7 @@
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"डिसप्ले कनेक्ट किया गया"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"माइक्रोफ़ोन और कैमरा"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"हाल ही में इस्तेमाल करने वाला ऐप्लिकेशन"</string>
-    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"हाल में ऐक्सेस करने वाले ऐप"</string>
+    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"हाल में ऐक्सेस करने वाला ऐप"</string>
     <string name="privacy_dialog_done_button" msgid="4504330708531434263">"हो गया"</string>
     <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"बड़ा करें और विकल्प दिखाएं"</string>
     <string name="privacy_dialog_collapse_action" msgid="277419962019466347">"छोटा करें"</string>

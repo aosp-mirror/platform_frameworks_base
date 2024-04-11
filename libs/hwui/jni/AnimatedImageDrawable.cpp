@@ -27,6 +27,8 @@
 #include <hwui/ImageDecoder.h>
 #ifdef __ANDROID__
 #include <utils/Looper.h>
+#else
+#include "utils/MessageHandler.h"
 #endif
 
 #include "ColorFilter.h"
@@ -181,23 +183,6 @@ static void AnimatedImageDrawable_nSetRepeatCount(JNIEnv* env, jobject /*clazz*/
     auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
     drawable->setRepetitionCount(loopCount);
 }
-
-#ifndef __ANDROID__
-struct Message {
-    Message(int w) {}
-};
-
-class MessageHandler : public virtual RefBase {
-protected:
-    virtual ~MessageHandler() override {}
-
-public:
-    /**
-     * Handles a message.
-     */
-    virtual void handleMessage(const Message& message) = 0;
-};
-#endif
 
 class InvokeListener : public MessageHandler {
 public:

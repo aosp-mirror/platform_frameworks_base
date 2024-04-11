@@ -16,10 +16,8 @@
 
 package com.android.systemui.media.controls.ui.viewmodel
 
-import android.app.WallpaperColors
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
@@ -122,7 +120,9 @@ constructor(
             return null
         }
 
-        val scheme = getColorScheme(model.packageName) ?: return null
+        val scheme =
+            MediaArtworkHelper.getColorScheme(applicationContext, model.packageName, TAG)
+                ?: return null
 
         // Capture width & height from views in foreground for artwork scaling in background
         val width =
@@ -301,20 +301,6 @@ constructor(
                 artistName,
                 appName
             )
-        }
-    }
-
-    private fun getColorScheme(packageName: String): ColorScheme? {
-        // Set up recommendation card's header.
-        return try {
-            val packageManager = applicationContext.packageManager
-            val applicationInfo = packageManager.getApplicationInfo(packageName, 0 /* flags */)
-            // Set up media source app's logo.
-            val icon = packageManager.getApplicationIcon(applicationInfo)
-            ColorScheme(WallpaperColors.fromDrawable(icon), darkTheme = true)
-        } catch (e: PackageManager.NameNotFoundException) {
-            Log.w(TAG, "Fail to get media recommendation's app info", e)
-            null
         }
     }
 

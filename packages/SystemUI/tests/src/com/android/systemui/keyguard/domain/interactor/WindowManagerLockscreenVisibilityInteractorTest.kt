@@ -281,6 +281,14 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
             // Oh no, we're still surfaceBehindAnimating=true, but no longer transitioning to GONE.
             transitionRepository.sendTransitionStep(
                 TransitionStep(
+                    transitionState = TransitionState.CANCELED,
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                )
+            )
+            runCurrent()
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
                     transitionState = TransitionState.STARTED,
                     from = KeyguardState.LOCKSCREEN,
                     to = KeyguardState.AOD,

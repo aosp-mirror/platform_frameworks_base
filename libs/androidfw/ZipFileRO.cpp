@@ -310,3 +310,7 @@ bool ZipFileRO::uncompressEntry(ZipEntryRO entry, int fd) const
 
     return true;
 }
+
+const char* ZipFileRO::getZipFileName() {
+    return mFileName;
+}

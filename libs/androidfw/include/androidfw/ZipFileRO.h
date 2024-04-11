@@ -187,6 +187,8 @@ public:
      */
     bool uncompressEntry(ZipEntryRO entry, int fd) const;
 
+    const char* getZipFileName();
+
     ~ZipFileRO();
 
 private:

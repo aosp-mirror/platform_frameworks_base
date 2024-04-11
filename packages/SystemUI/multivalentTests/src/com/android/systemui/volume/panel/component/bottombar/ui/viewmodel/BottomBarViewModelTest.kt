@@ -21,6 +21,8 @@ import android.content.Intent
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.uiEventLogger
+import com.android.internal.logging.uiEventLoggerFake
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
@@ -29,6 +31,7 @@ import com.android.systemui.plugins.activityStarter
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import com.android.systemui.volume.panel.volumePanelViewModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -58,7 +61,10 @@ class BottomBarViewModelTest : SysuiTestCase() {
     private lateinit var underTest: BottomBarViewModel
 
     private fun initUnderTest() {
-        underTest = with(kosmos) { BottomBarViewModel(activityStarter, volumePanelViewModel) }
+        underTest =
+            with(kosmos) {
+                BottomBarViewModel(activityStarter, volumePanelViewModel, uiEventLogger)
+            }
     }
 
     @Test
@@ -96,6 +102,8 @@ class BottomBarViewModelTest : SysuiTestCase() {
                         /* userHandle = */ eq(null),
                     )
                 assertThat(intentCaptor.value.action).isEqualTo(Settings.ACTION_SOUND_SETTINGS)
+                assertThat(uiEventLoggerFake.eventId(0))
+                    .isEqualTo(VolumePanelUiEvent.VOLUME_PANEL_SOUND_SETTINGS_CLICKED.id)
 
                 activityStartedCaptor.value.onActivityStarted(ActivityManager.START_SUCCESS)
                 val volumePanelState by collectLastValue(volumePanelViewModel.volumePanelState)

@@ -337,11 +337,6 @@ object Flags {
             namespace = DeviceConfig.NAMESPACE_WINDOW_MANAGER,
         )
 
-    @Keep
-    @JvmField
-    val WM_CAPTION_ON_SHELL =
-        sysPropBooleanFlag("persist.wm.debug.caption_on_shell", default = true)
-
     // TODO(b/256873975): Tracking Bug
     @JvmField
     @Keep

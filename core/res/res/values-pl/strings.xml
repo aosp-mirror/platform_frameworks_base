@@ -997,7 +997,7 @@
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Poprawnie!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Spróbuj ponownie."</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Spróbuj ponownie."</string>
-    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Odblokowanie wszystkich funkcji i danych"</string>
+    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Odblokuj, by używać wszystkich funkcji i danych"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Przekroczono maksymalną liczbę prób rozpoznania twarzy."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Brak karty SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Brak karty SIM w tablecie."</string>
@@ -1763,7 +1763,7 @@
     <string name="owner_name" msgid="8713560351570795743">"Właściciel"</string>
     <string name="guest_name" msgid="8502103277839834324">"Gość"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Błąd"</string>
-    <string name="error_message_change_not_allowed" msgid="843159705042381454">"Ta zmiana nie jest dozwolona przez administratora"</string>
+    <string name="error_message_change_not_allowed" msgid="843159705042381454">"Ta zmiana nie jest dozwolona przez administratora."</string>
     <string name="app_not_found" msgid="3429506115332341800">"Nie znaleziono aplikacji do obsługi tej akcji"</string>
     <string name="revoke" msgid="5526857743819590458">"Cofnij"</string>
     <string name="mediasize_iso_a0" msgid="7039061159929977973">"ISO A0"</string>
@@ -1905,7 +1905,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Oszczędzanie baterii uruchamia ciemny motyw oraz wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne, pewne funkcje oraz wybrane połączenia sieciowe."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Oszczędzanie baterii uruchamia ciemny motyw oraz wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne, pewne funkcje oraz wybrane połączenia sieciowe."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Włączyć Oszczędzanie danych?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Włączyć oszczędzanie danych?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Włącz"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Przez 1 minutę (do {formattedTime})}few{Przez # minuty (do {formattedTime})}many{Przez # minut (do {formattedTime})}other{Przez # minuty (do {formattedTime})}}"</string>
     <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Przez 1 min (do {formattedTime})}few{Przez # min (do {formattedTime})}many{Przez # min (do {formattedTime})}other{Przez # min (do {formattedTime})}}"</string>
@@ -2396,8 +2396,7 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Testowy"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Wspólny"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <!-- no translation found for screen_not_shared_sensitive_content (7058419185079565001) -->
-    <skip />
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Ze względów bezpieczeństwa zawartość aplikacji jest niewidoczna podczas udostępniania ekranu"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Automatycznie połączono z satelitą"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Możesz wymieniać wiadomości bez dostępu do sieci komórkowej lub Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Otwórz Wiadomości"</string>

@@ -62,15 +62,15 @@ import com.android.systemui.plugins.qs.QSTileView
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSIconViewImpl.QS_ANIM_LENGTH
 import com.android.systemui.res.R
-import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.util.children
+import kotlinx.coroutines.DisposableHandle
 import java.util.Objects
 
 private const val TAG = "QSTileViewImpl"
 open class QSTileViewImpl @JvmOverloads constructor(
     context: Context,
     private val collapsed: Boolean = false,
-    private val vibratorHelper: VibratorHelper? = null,
+    private val longPressEffect: QSLongPressEffect? = null,
 ) : QSTileView(context), HeightOverrideable, LaunchableView {
 
     companion object {
@@ -180,15 +180,13 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private val locInScreen = IntArray(2)
 
     /** Visuo-haptic long-press effects */
-    private var longPressEffect: QSLongPressEffect? = null
-    private val longPressEffectViewBinder = QSLongPressEffectViewBinder()
     private var initialLongPressProperties: QSLongPressProperties? = null
     private var finalLongPressProperties: QSLongPressProperties? = null
     private val colorEvaluator = ArgbEvaluator.getInstance()
-    val hasLongPressEffect: Boolean
-        get() = longPressEffect != null
-    @VisibleForTesting val isLongPressEffectBound: Boolean
-        get() = longPressEffectViewBinder.isBound
+    val isLongPressEffectInitialized: Boolean
+        get() = longPressEffect?.hasInitialized == true
+    @VisibleForTesting
+    var longPressEffectHandle: DisposableHandle? = null
 
     init {
         val typedValue = TypedValue()
@@ -325,6 +323,13 @@ open class QSTileViewImpl @JvmOverloads constructor(
     }
 
     private fun updateHeight() {
+        // TODO(b/332900989): Find a more robust way of resetting the tile if not reset by the
+        //  launch animation.
+        if (scaleX != 1f || scaleY != 1f) {
+            // The launch animation of a long-press effect did not reset the long-press effect so
+            // we must do it here
+            resetLongPressEffectProperties()
+        }
         val actualHeight = if (heightOverride != HeightOverrideable.NO_OVERRIDE) {
             heightOverride
         } else {
@@ -614,25 +619,26 @@ open class QSTileViewImpl @JvmOverloads constructor(
         lastIconTint = icon.getColor(state)
 
         // Long-press effects
-        if (quickSettingsVisualHapticsLongpress()){
-            if (state.handlesLongClick && maybeCreateAndInitializeLongPressEffect()) {
-                // set the valid long-press effect as the touch listener
-                showRippleEffect = false
+        if (state.handlesLongClick &&
+            longPressEffect?.initializeEffect(longPressEffectDuration) == true) {
+            // set the valid long-press effect as the touch listener
+            if (longPressEffectHandle == null) {
+                longPressEffectHandle =
+                    QSLongPressEffectViewBinder.bind(this, longPressEffect, state.spec)
                 setOnTouchListener(longPressEffect)
-                if (!longPressEffectViewBinder.isBound) {
-                    longPressEffectViewBinder.bind(this, state.spec, longPressEffect)
-                }
-            } else {
-                // Long-press effects might have been enabled before but the new state does not
-                // handle a long-press. In this case, we go back to the behaviour of a regular tile
-                // and clean-up the resources
-                longPressEffectViewBinder.dispose()
-                showRippleEffect = isClickable
-                setOnTouchListener(null)
-                longPressEffect = null
-                initialLongPressProperties = null
-                finalLongPressProperties = null
             }
+            showRippleEffect = false
+            initializeLongPressProperties()
+        } else {
+            // Long-press effects might have been enabled before but the new state does not
+            // handle a long-press. In this case, we go back to the behaviour of a regular tile
+            // and clean-up the resources
+            setOnTouchListener(null)
+            longPressEffectHandle?.dispose()
+            longPressEffectHandle = null
+            showRippleEffect = isClickable
+            initialLongPressProperties = null
+            finalLongPressProperties = null
         }
     }
 
@@ -824,7 +830,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private fun interpolateFloat(fraction: Float, start: Float, end: Float): Float =
         start + fraction * (end - start)
 
-    private fun resetLongPressEffectProperties() {
+    fun resetLongPressEffectProperties() {
         scaleY = 1f
         scaleX = 1f
         for (child in children) {
@@ -840,27 +846,6 @@ open class QSTileViewImpl @JvmOverloads constructor(
             getOverlayColorForState(lastState),
         )
         icon.setTint(icon.mIcon as ImageView, lastIconTint)
-    }
-
-    private fun maybeCreateAndInitializeLongPressEffect(): Boolean {
-        // Don't setup the effect if the long-press duration is invalid
-        val effectDuration = longPressEffectDuration
-        if (effectDuration <= 0) {
-            longPressEffect = null
-            return false
-        }
-
-        initializeLongPressProperties()
-        if (longPressEffect == null) {
-            longPressEffect =
-                QSLongPressEffect(
-                    vibratorHelper,
-                    effectDuration,
-                )
-        } else {
-            longPressEffect?.resetWithDuration(effectDuration)
-        }
-        return true
     }
 
     private fun initializeLongPressProperties() {

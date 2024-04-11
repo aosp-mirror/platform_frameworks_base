@@ -29,9 +29,6 @@ import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.BurnInModel
-import com.android.systemui.keyguard.shared.model.TransitionState
-import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
-import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.ui.StateToValue
 import com.android.systemui.res.R
 import javax.inject.Inject
@@ -97,9 +94,9 @@ constructor(
                     occludedToLockscreen,
                     aodToLockscreen ->
                     val translationY =
-                        if (isInTransition(aodToLockscreen.transitionState)) {
+                        if (aodToLockscreen.transitionState.isTransitioning()) {
                             aodToLockscreen.value ?: 0f
-                        } else if (isInTransition(goneToAod.transitionState)) {
+                        } else if (goneToAod.transitionState.isTransitioning()) {
                             (goneToAod.value ?: 0f) + burnInModel.translationY
                         } else {
                             burnInModel.translationY + occludedToLockscreen + keyguardTranslationY
@@ -108,10 +105,6 @@ constructor(
                 }
             }
             .distinctUntilChanged()
-    }
-
-    private fun isInTransition(state: TransitionState): Boolean {
-        return state == STARTED || state == RUNNING
     }
 
     private fun burnIn(

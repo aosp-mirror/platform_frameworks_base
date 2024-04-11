@@ -191,8 +191,9 @@ class FromSplitScreenEnterPipOnUserLeaveHintTest(flicker: LegacyFlickerTest) :
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams() = LegacyFlickerTestFactory.nonRotationTests(
-            supportedRotations = listOf(Rotation.ROTATION_0)
-        )
+        fun getParams() =
+            LegacyFlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(Rotation.ROTATION_0)
+            )
     }
 }

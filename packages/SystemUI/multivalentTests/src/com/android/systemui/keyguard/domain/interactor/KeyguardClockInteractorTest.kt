@@ -16,14 +16,13 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import android.platform.test.annotations.DisableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardClockSwitch.LARGE
 import com.android.keyguard.KeyguardClockSwitch.SMALL
-import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
@@ -66,7 +65,7 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(AConfigFlags.FLAG_SCENE_CONTAINER)
+    @DisableSceneContainer
     fun clockSize_sceneContainerFlagOff_basedOnRepository() =
         testScope.runTest {
             val value by collectLastValue(underTest.clockSize)
@@ -78,7 +77,7 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(AConfigFlags.FLAG_SCENE_CONTAINER)
+    @DisableSceneContainer
     fun clockShouldBeCentered_sceneContainerFlagOff_basedOnRepository() =
         testScope.runTest {
             val value by collectLastValue(underTest.clockShouldBeCentered)
@@ -192,7 +191,7 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
             val value by collectLastValue(underTest.clockShouldBeCentered)
             kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
             kosmos.activeNotificationListRepository.setActiveNotifs(1)
-            kosmos.headsUpNotificationRepository.headsUpAnimatingAway.value = true
+            kosmos.headsUpNotificationRepository.isHeadsUpAnimatingAway.value = true
             kosmos.keyguardRepository.setIsDozing(true)
             assertThat(value).isEqualTo(false)
         }

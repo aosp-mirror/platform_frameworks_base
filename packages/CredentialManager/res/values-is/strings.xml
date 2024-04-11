@@ -42,6 +42,9 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Búa til aðgangslykil til að skrá þig inn á <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"Vista aðgangsorð til að skrá þig inn á <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Viltu vista innskráningarupplýsingar fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"Nota skjálásinn til að búa til aðgangslykil fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"Nota skjálásinn til að búa til aðgangsorð fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"Nota skjálásinn til að vista innskráningarupplýsingar fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"aðgangslykill"</string>
     <string name="password" msgid="6738570945182936667">"aðgangsorð"</string>
     <string name="passkeys" msgid="5733880786866559847">"aðgangslykla"</string>

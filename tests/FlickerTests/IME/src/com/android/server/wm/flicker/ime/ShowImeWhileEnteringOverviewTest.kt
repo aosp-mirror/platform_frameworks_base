@@ -191,7 +191,7 @@ class ShowImeWhileEnteringOverviewTest(flicker: LegacyFlickerTest) : BaseTest(fl
             this.invoke("imeLayerIsVisibleAndAlignAppWidow") {
                 val imeVisibleRegion = it.visibleRegion(ComponentNameMatcher.IME)
                 val appVisibleRegion = it.visibleRegion(imeTestApp)
-                if (imeVisibleRegion.region.isNotEmpty) {
+                if (!imeVisibleRegion.region.isEmpty) {
                     it.isVisible(ComponentNameMatcher.IME)
                     imeVisibleRegion.coversAtMost(appVisibleRegion.region)
                 }

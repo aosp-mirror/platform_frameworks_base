@@ -17,6 +17,7 @@
 package com.android.systemui.volume.panel.component.mediaoutput.ui.viewmodel
 
 import android.content.Context
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Color
 import com.android.systemui.common.shared.model.Icon
@@ -26,6 +27,7 @@ import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputInteractor
 import com.android.systemui.volume.panel.component.mediaoutput.shared.model.SessionWithPlayback
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
+import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -48,6 +50,7 @@ constructor(
     private val actionsInteractor: MediaOutputActionsInteractor,
     private val mediaDeviceSessionInteractor: MediaDeviceSessionInteractor,
     interactor: MediaOutputInteractor,
+    private val uiEventLogger: UiEventLogger,
 ) {
 
     private val sessionWithPlayback: StateFlow<SessionWithPlayback?> =
@@ -126,6 +129,7 @@ constructor(
             )
 
     fun onBarClick(expandable: Expandable) {
+        uiEventLogger.log(VolumePanelUiEvent.VOLUME_PANEL_MEDIA_OUTPUT_CLICKED)
         actionsInteractor.onBarClick(sessionWithPlayback.value, expandable)
     }
 }

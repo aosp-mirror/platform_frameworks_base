@@ -33,6 +33,7 @@ data class MediaControlModel(
     val appName: String?,
     val songName: CharSequence?,
     val artistName: CharSequence?,
+    val showExplicit: Boolean,
     val artwork: Icon?,
     val deviceData: MediaDeviceData?,
     /** [MediaButton] contains [MediaAction] objects which represent specific buttons in the UI */
@@ -43,6 +44,7 @@ data class MediaControlModel(
      * [Notification.MediaStyle.setShowActionsInCompactView].
      */
     val actionsToShowInCollapsed: List<Int>,
+    val isDismissible: Boolean,
     /** Whether player is in resumption state. */
     val isResume: Boolean,
     /** Track seek bar progress (0 - 1) when [isResume] is true. */

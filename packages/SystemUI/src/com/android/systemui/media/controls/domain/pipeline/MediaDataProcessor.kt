@@ -590,7 +590,7 @@ class MediaDataProcessor(
     }
 
     /** Dismiss a media entry. Returns false if the key was not found. */
-    fun dismissMediaData(key: String, delay: Long): Boolean {
+    fun dismissMediaData(key: String, delayMs: Long): Boolean {
         val existed = mediaDataRepository.mediaEntries.value[key] != null
         backgroundExecutor.execute {
             mediaDataRepository.mediaEntries.value[key]?.let { mediaData ->
@@ -602,8 +602,19 @@ class MediaDataProcessor(
                 }
             }
         }
-        foregroundExecutor.executeDelayed({ removeEntry(key) }, delay)
+        foregroundExecutor.executeDelayed({ removeEntry(key) }, delayMs)
         return existed
+    }
+
+    /** Dismiss a media entry. Returns false if the corresponding key was not found. */
+    fun dismissMediaData(instanceId: InstanceId, delayMs: Long): Boolean {
+        val mediaEntries = mediaDataRepository.mediaEntries.value
+        val filteredEntries = mediaEntries.filter { (_, data) -> data.instanceId == instanceId }
+        return if (filteredEntries.isNotEmpty()) {
+            dismissMediaData(filteredEntries.keys.first(), delayMs)
+        } else {
+            false
+        }
     }
 
     /**

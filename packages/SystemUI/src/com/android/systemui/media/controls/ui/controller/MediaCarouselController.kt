@@ -46,6 +46,8 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
@@ -600,7 +602,8 @@ constructor(
     @VisibleForTesting
     internal fun listenForAnyStateToGoneKeyguardTransition(scope: CoroutineScope): Job {
         return scope.launch {
-            keyguardTransitionInteractor.anyStateToGoneTransition
+            keyguardTransitionInteractor
+                .transition(to = GONE)
                 .filter { it.transitionState == TransitionState.FINISHED }
                 .collect {
                     showMediaCarousel()
@@ -612,7 +615,8 @@ constructor(
     @VisibleForTesting
     internal fun listenForAnyStateToLockscreenTransition(scope: CoroutineScope): Job {
         return scope.launch {
-            keyguardTransitionInteractor.anyStateToLockscreenTransition
+            keyguardTransitionInteractor
+                .transition(to = LOCKSCREEN)
                 .filter { it.transitionState == TransitionState.FINISHED }
                 .collect {
                     if (!allowMediaPlayerOnLockScreen) {

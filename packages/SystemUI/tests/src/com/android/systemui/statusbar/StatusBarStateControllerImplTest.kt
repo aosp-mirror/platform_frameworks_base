@@ -19,12 +19,10 @@
 package com.android.systemui.statusbar
 
 import android.animation.ObjectAnimator
-import android.platform.test.annotations.DisableFlags
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
-import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
@@ -35,6 +33,7 @@ import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
+import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.jank.interactionJankMonitor
@@ -187,7 +186,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(FLAG_SCENE_CONTAINER)
+    @DisableSceneContainer
     fun testChangeState_logged() {
         TestableLooper.get(this).runWithLooper {
             underTest.state = StatusBarState.KEYGUARD
@@ -214,7 +213,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(FLAG_SCENE_CONTAINER)
+    @DisableSceneContainer
     fun testSetState_appliesState_sameStateButDifferentUpcomingState() {
         underTest.state = StatusBarState.SHADE
         underTest.setUpcomingState(StatusBarState.KEYGUARD)
@@ -227,7 +226,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(FLAG_SCENE_CONTAINER)
+    @DisableSceneContainer
     fun testSetState_appliesState_differentStateEqualToUpcomingState() {
         underTest.state = StatusBarState.SHADE
         underTest.setUpcomingState(StatusBarState.KEYGUARD)
@@ -239,7 +238,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(FLAG_SCENE_CONTAINER)
+    @DisableSceneContainer
     fun testSetState_doesNotApplyState_currentAndUpcomingStatesSame() {
         underTest.state = StatusBarState.SHADE
         underTest.setUpcomingState(StatusBarState.SHADE)

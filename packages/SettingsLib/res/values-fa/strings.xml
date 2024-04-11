@@ -106,28 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"فعال، فقط چپ"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"فعال، فقط راست"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"فعال، چپ و راست"</string>
-    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
-    <skip />
-    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
-    <skip />
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"فعال (فقط رسانه)، <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> باتری"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"فعال (فقط رسانه)، چپ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> باتری، راست: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> باتری"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"متصل (از اشتراک صدا پشتیبانی می‌کند)، <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> باتری"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"متصل (از اشتراک صدا پشتیبانی می‌کند)، چپ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> باتری، راست: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> باتری"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"متصل (از اشتراک صدا پشتیبانی می‌کند)، چپ<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"متصل (از اشتراک صدا پشتیبانی می‌کند)، راست <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"فعال (فقط رسانه)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"از اشتراک صدا پشتیبانی می‌کند"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"فعال (فقط رسانه)، فقط چپ"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"فعال (فقط رسانه)، فقط راست"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"فعال (فقط رسانه)، چپ و راست"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"رسانه صوتی"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"تماس‌های تلفنی"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"انتقال فایل"</string>

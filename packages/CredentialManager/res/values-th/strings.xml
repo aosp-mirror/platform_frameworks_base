@@ -42,6 +42,9 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"สร้างพาสคีย์เพื่อลงชื่อเข้าใช้ <xliff:g id="APP_NAME">%1$s</xliff:g> ไหม"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"บันทึกรหัสผ่านเพื่อลงชื่อเข้าใช้ <xliff:g id="APP_NAME">%1$s</xliff:g> ไหม"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"บันทึกข้อมูลการลงชื่อเข้าใช้สำหรับ <xliff:g id="APP_NAME">%1$s</xliff:g> ไหม"</string>
+    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"ต้องการใช้ฟีเจอร์ล็อกหน้าจอเพื่อสร้างพาสคีย์สำหรับ <xliff:g id="APP_NAME">%1$s</xliff:g> ใช่ไหม"</string>
+    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"ต้องการใช้ฟีเจอร์ล็อกหน้าจอเพื่อสร้างรหัสผ่านสำหรับ <xliff:g id="APP_NAME">%1$s</xliff:g> ใช่ไหม"</string>
+    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"ต้องการใช้ฟีเจอร์ล็อกหน้าจอเพื่อบันทึกข้อมูลการลงชื่อเข้าใช้สำหรับ <xliff:g id="APP_NAME">%1$s</xliff:g> ใช่ไหม"</string>
     <string name="passkey" msgid="632353688396759522">"พาสคีย์"</string>
     <string name="password" msgid="6738570945182936667">"รหัสผ่าน"</string>
     <string name="passkeys" msgid="5733880786866559847">"พาสคีย์"</string>

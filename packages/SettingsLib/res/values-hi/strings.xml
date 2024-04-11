@@ -106,28 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"सिर्फ़ बाईं तरफ़ वाला चालू है"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"सिर्फ़ दाईं तरफ़ वाला चालू है"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"बाईं और दाईं तरफ़ वाला चालू है"</string>
-    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
-    <skip />
-    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
-    <skip />
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"चालू है (सिर्फ़ मीडिया के लिए), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बैटरी"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"चालू है (सिर्फ़ मीडिया के लिए), बायां हेडसेट: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> बैटरी, दायां हेडसेट: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> बैटरी"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"कनेक्ट हो गया (ऑडियो शेयर करने की सुविधा काम करती है), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बैटरी"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"कनेक्ट हो गया (ऑडियो शेयर करने की सुविधा काम करती है), बायां हेडसेट: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> बैटरी, दायां हेडसेट: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> बैटरी"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"कनेक्ट हो गया (ऑडियो शेयर करने की सुविधा काम करती है), बायां हेडसेट<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"कनेक्ट हो गया (ऑडियो शेयर करने की सुविधा काम करती है), दायां हेडसेट <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"चालू है (सिर्फ़ मीडिया के लिए)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"ऑडियो शेयर करने की सुविधा काम करती है"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"चालू है (सिर्फ़ मीडिया के लिए), सिर्फ़ बाएं कान की मशीन"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"चालू है (सिर्फ़ मीडिया के लिए), सिर्फ़ दाएं कान की मशीन"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"चालू है (सिर्फ़ मीडिया के लिए), बाएं और दाएं कान की मशीन"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"मीडिया ऑडियो"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"फ़ोन कॉल"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"फ़ाइल स्थानांतरण"</string>
@@ -537,7 +526,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"सिस्टम की भाषाओं का इस्तेमाल करें"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> के लिए सेटिंग खोलने में विफल रहा"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"इनपुट का यह तरीका, आपके पासवर्ड और क्रेडिट कार्ड नंबर जैसे निजी डेटा के साथ-साथ उस सभी डेटा को इकट्ठा कर सकता है जिसे आप लिखते हैं. यह <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ऐप्लिकेशन से आता है. इनपुट के इस तरीके का इस्तेमाल करें?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"नोट: पुनः बूट करने के बाद, यह ऐप्लिकेशन तब तक शुरू नहीं हो सकता है जब तक कि आप अपना फ़ोन अनलॉक ना कर लें"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"ध्यान दें: डिवाइस को फिर से चालू करने पर, यह ऐप्लिकेशन तब तक शुरू नहीं होगा, जब तक आप अपना फ़ोन अनलॉक न कर लें"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS रजिस्ट्रेशन की स्थिति"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"रजिस्टर है"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"रजिस्टर नहीं है"</string>
@@ -616,7 +605,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"प्रतिबंधित प्रोफ़ाइल"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"नया उपयोगकर्ता जोड़ें?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"नए उपयोगकर्ता जोड़कर इस डिवाइस को दूसरे लोगों के साथ शेयर किया जा सकता है. हर उपयोगकर्ता के पास अपनी जगह होती है, जिसमें वे ऐप्लिकेशन, वॉलपेपर, और दूसरी चीज़ों में मनमुताबिक बदलाव कर सकते हैं. उपयोगकर्ता, वाई-फ़ाई जैसी डिवाइस सेटिंग में भी बदलाव कर सकते हैं. इसका असर हर किसी पर पड़ता है.\n\nजब किसी नए उपयोगकर्ता को जोड़ा जाता है, तो उसे अपनी जगह सेट अप करनी होती है.\n\nकोई भी उपयोगकर्ता, दूसरे सभी उपयोगकर्ताओं के लिए ऐप्लिकेशन अपडेट कर सकता है. ऐसा भी हो सकता है कि सुलभता सेटिंग और सेवाएं नए उपयोगकर्ता को ट्रांसफ़र न हो पाएं."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"कोई नया उपयोगकर्ता जोड़ने पर, उसे अपनी जगह सेट करनी होती है.\n\nकोई भी उपयोगकर्ता, बाकी सभी उपयोगकर्ताओं के लिए ऐप्लिकेशन अपडेट कर सकता है."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"जब किसी नए उपयोगकर्ता को जोड़ा जाता है, तो उस व्यक्ति को डिवाइस में अपनी जगह सेट करनी होती है.\n\nकोई भी उपयोगकर्ता, बाकी सभी उपयोगकर्ताओं के लिए ऐप्लिकेशन अपडेट कर सकता है."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"क्या इस व्यक्ति को एडमिन बनाना है?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"एडमिन के पास अन्य लोगों के मुकाबले खास अधिकार होते हैं. एडमिन के पास ये अधिकार होते हैं: सभी लोगों को मैनेज करना, इस डिवाइस को अपडेट या रीसेट करना, सेटिंग में बदलाव करना, इंस्टॉल किए गए सभी ऐप्लिकेशन देखना, और अन्य लोगों को एडमिन के खास अधिकार देना या उन्हें वापस लेना."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"एडमिन बनाएं"</string>
@@ -638,7 +627,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"नया उपयोगकर्ता जोड़ा नहीं जा सका"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"नया मेहमान खाता नहीं बनाया जा सका"</string>
     <string name="user_nickname" msgid="262624187455825083">"निकनेम"</string>
-    <string name="edit_user_info_message" msgid="6677556031419002895">"आपकी चुनी गई फ़ोटो और नाम, उन सभी लोगों को दिखेगा जो इस डिवाइस का इस्तेमाल करते हैं."</string>
+    <string name="edit_user_info_message" msgid="6677556031419002895">"आपका नाम और चुनी गई फ़ोटो, इस डिवाइस का इस्तेमाल करने वाले हर व्यक्ति को दिखेगी."</string>
     <string name="user_add_user" msgid="7876449291500212468">"उपयोगकर्ता जोड़ें"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"मेहमान जोड़ें"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"मेहमान को हटाएं"</string>

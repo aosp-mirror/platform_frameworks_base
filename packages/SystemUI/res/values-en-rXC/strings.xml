@@ -350,6 +350,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‏‎‏‎‏‎‏‎‎‎‏‏‏‏‏‎‏‏‎‎‏‏‏‎‎‏‏‏‎‏‏‎‏‏‎‏‎‏‏‏‎‎‎‎‎‏‏‎‏‏‏‏‎‎‎‏‏‎Record Issue‎‏‎‎‏‎"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‎‏‎‏‎‏‏‎‏‎‎‏‏‏‏‏‎‎‏‏‎‎‏‎‏‎‎‏‏‏‏‏‎‏‎‎‎‏‎‎‎‏‏‏‏‎‎‏‎‎‏‎‎‏‎‎‎‎‎Start‎‏‎‎‏‎"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‏‎‎‎‎‎‎‏‏‎‏‎‎‏‎‏‎‎‎‎‏‎‎‎‎‎‎‎‏‎‏‏‎‎‏‎‎‎‎‏‎‎‏‏‎‎‎‏‏‏‏‎‎‎‎‎‏‎Stop‎‏‎‎‏‎"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‎‎‎‏‏‎‎‏‏‎‏‏‎‎‏‎‎‏‏‎‎‏‎‏‎‏‏‏‏‎‎‎‎‏‎‎‏‎‏‏‏‎‏‎‏‏‎‎‎‏‏‎‏‏‏‏‏‎Bug Report‎‏‎‎‏‎"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‏‏‎‎‏‏‎‏‏‎‎‎‎‎‎‎‏‎‏‏‏‎‏‏‏‎‎‎‏‎‎‎‎‏‏‎‎‎‏‎‏‏‏‎‎‎‎‏‏‏‎‎‎‏‏‎‎‏‎What part of your device experience was affected?‎‏‎‎‏‎"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‏‎‎‎‏‎‎‎‏‏‎‎‎‎‏‏‏‏‎‎‏‎‎‎‎‎‎‏‎‏‎‎‏‎‎‏‎‎‏‏‏‎‏‏‎‎‎‏‎‎‏‎‎‏‎‏‏‎Select issue type‎‏‎‎‏‎"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‎‏‏‎‎‎‎‏‏‏‎‏‎‏‎‎‏‎‎‏‏‎‎‏‎‎‎‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‏‏‏‏‏‏‎‏‎‏‏‎‏‎‎Screen record‎‏‎‎‏‎"</string>
@@ -741,7 +742,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‎‏‎‎‏‏‏‎‎‎‎‎‏‎‏‎‎‎‎‎‏‏‎‏‎‏‎‏‎‎‎‎‎‏‎‏‎‏‎‏‎‎‎‎‎‏‏‎‎‏‎‏‎‎‎‏‏‎‎Switch keyboard layout‎‏‎‎‏‎"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‏‏‎‏‎‏‎‎‎‏‎‏‏‏‎‏‎‎‎‏‎‎‏‎‎‏‎‎‎‏‎‎‏‏‎‎‎‎‎‏‏‎‎‎‎‎‎‏‏‎‎‏‎‎‏‎‎‎or‎‏‎‎‏‎"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‎‎‎‎‎‎‏‏‎‎‎‏‏‏‎‏‎‎‏‏‏‏‎‎‏‏‏‎‎‎‏‎‏‏‎‎‏‏‎‏‏‎‏‎‎‏‏‏‏‏‎‎‎‎‎‎‏‎Clear search query‎‏‎‎‏‎"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‎‎‎‎‎‏‎‏‏‏‎‎‏‎‎‎‏‏‏‎‏‏‏‎‎‏‎‏‏‏‏‏‎‎‎‎‎‏‎‏‎‎‎‎‏‏‏‎‎‎‎‎‏‏‏‎‏‎Shortcuts‎‏‎‎‏‎"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‏‎‏‎‎‏‎‎‎‎‏‎‏‏‏‏‏‏‎‏‏‎‎‏‎‎‎‏‎‏‎‏‏‎‏‏‎‎‎‏‏‎‏‏‏‎‏‎‎‏‏‏‎‎‎‏‎‎Keyboard Shortcuts‎‏‎‎‏‎"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‏‏‎‎‎‎‎‏‏‎‏‎‎‎‏‏‎‎‎‎‏‎‏‎‎‏‎‎‎‎‏‏‏‎‏‎‎‏‎‎‏‎‏‎‏‏‎‏‏‏‏‏‎‏‏‎‏‎‎Search shortcuts‎‏‎‎‏‎"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‎‏‎‏‎‎‎‏‏‎‎‎‎‎‏‏‏‎‎‏‏‎‏‏‎‏‎‎‎‏‏‎‏‏‏‏‏‏‏‎‏‎‎‏‏‏‏‏‎‏‏‏‎‏‏‎‏‎No shortcuts found‎‏‎‎‏‎"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‏‎‏‎‎‏‎‎‎‎‎‏‎‏‎‎‎‏‎‎‎‏‏‏‎‎‎‎‎‎‏‎‏‎‎‎‏‎‎‏‏‏‏‏‏‎‏‎System‎‏‎‎‏‎"</string>
@@ -766,9 +767,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‎‎‎‎‎‏‏‏‏‎‏‎‏‎‏‎‎‏‏‏‏‏‎‎‏‎‎‏‏‏‏‏‎‏‎‎‎‎‏‎‏‎‏‎‏‎‎‏‎‎‏‏‎‏‏‏‎‎Open assistant‎‏‎‎‏‎"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‎‎‏‎‎‏‎‏‏‎‎‏‎‎‏‎‏‎‏‎‎‏‏‏‏‎‏‎‏‎‏‎‎‎‏‏‏‏‎‎‏‏‏‎‎‏‏‏‏‎‏‏‏‏‏‎Lock screen‎‏‎‎‏‎"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‎‎‏‏‏‏‎‎‏‏‏‎‏‏‏‎‎‏‎‏‎‏‎‏‎‎‏‏‎‎‎‎‏‏‎‎‏‏‎‎‏‎‏‏‏‎Take a note‎‏‎‎‏‎"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‎‏‏‎‎‏‎‎‎‎‏‏‏‎‏‏‏‏‎‏‏‏‎‎‏‎‏‎‎‎‏‏‎‏‎‏‎‎‎‏‎‏‏‏‏‎‏‏‏‎‎‎‎‎‎‎‏‎System multitasking‎‏‎‎‏‎"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‎‎‎‎‏‎‎‎‎‎‏‎‏‎‏‏‏‎‎‏‎‏‏‎‏‎‏‎‎‏‎‏‏‏‏‎‏‏‎‎‎‏‎‏‎‎‎‏‎‏‎‎‎‎‎‎‏‎Enter split screen with current app to RHS‎‏‎‎‏‎"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‎‏‏‎‎‏‏‎‏‎‏‏‏‏‎‎‎‏‏‎‏‏‏‎‏‎‎‎‏‎‎‎‏‎‏‏‎‎‎‏‎‎‎‏‏‎‎‏‏‏‏‎‎‏‎‏‎‎Enter split screen with current app to LHS‎‏‎‎‏‎"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‎‎‏‎‏‏‎‎‏‎‏‎‏‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‏‏‎‏‎‏‏‎‎‏‏‏‎‏‎‏‎‏‏‎‏‎‏‎‎‏‏‎‎Multitasking‎‏‎‎‏‎"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‏‏‎‏‏‏‏‎‎‏‎‎‏‎‏‎‏‏‎‎‏‎‎‎‏‏‎‏‏‏‏‎‎‎‏‏‏‎‎‏‎‎‎‏‎‏‎‎‏‎‏‎‎‏‎‎Use split screen with current app on the right‎‏‎‎‏‎"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‎‏‎‎‏‏‏‎‏‎‏‎‎‏‎‏‎‏‏‎‏‏‏‎‎‏‎‏‎‎‎‎‏‏‎‎‎‎‏‎‎‏‏‎‎‏‎‏‏‏‎‏‎‏‏‏‏‎Use split screen with current app on the left‎‏‎‎‏‎"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‎‎‏‎‏‎‏‎‎‏‏‏‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‎‏‏‎‏‎‏‎‏‏‏‎‎‎‎‎‎‎‎‎‏‏‏‏‏‏‎‎‏‎‎Switch from split screen to full screen‎‏‎‎‏‎"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‏‎‏‎‎‎‏‎‏‎‏‎‏‏‏‏‎‏‏‏‏‎‎‎‏‏‏‎‏‏‏‏‎‎‏‎‏‎‎‏‎‏‏‏‎‎‎‎‎‎‏‏‎‏‏‎‎‎Switch to app on right or below while using split screen‎‏‎‎‏‎"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‏‏‏‏‎‏‎‎‏‏‎‏‏‎‏‏‏‎‏‏‎‎‎‎‏‏‏‏‎‏‎‏‏‏‎‏‏‎‏‎‎‎‏‏‎‎‎‏‏‎‏‏‏‎‏‏‎‎Switch to app on left or above while using split screen‎‏‎‎‏‎"</string>

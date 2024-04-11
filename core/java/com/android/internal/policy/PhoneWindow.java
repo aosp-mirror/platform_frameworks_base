@@ -363,8 +363,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private boolean mIsStartingWindow;
     private int mTheme = -1;
 
-    private int mDecorCaptionShade = DECOR_CAPTION_SHADE_AUTO;
-
     private boolean mUseDecorContext = false;
 
     /** @see ViewRootImpl#mActivityConfigCallback */
@@ -4048,14 +4046,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setDecorCaptionShade(int decorCaptionShade) {
-        mDecorCaptionShade = decorCaptionShade;
-        if (mDecor != null) {
-            mDecor.updateDecorCaptionShade();
-        }
-    }
-
-    int getDecorCaptionShade() {
-        return mDecorCaptionShade;
+        // TODO(b/328668781): Make proper treatment to this public API per the outcome of the bug.
     }
 
     @Override

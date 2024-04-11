@@ -40,11 +40,11 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArraySet;
-import android.util.IndentingPrintWriter;
 import android.util.MutableInt;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.broadcastradio.RadioEventLogger;
 import com.android.server.broadcastradio.RadioServiceUserController;
 import com.android.server.utils.Slogf;
 
@@ -453,7 +453,7 @@ final class RadioModule {
         return BitmapFactory.decodeByteArray(rawImage, 0, rawImage.length);
     }
 
-    void dumpInfo(IndentingPrintWriter pw) {
+    void dumpInfo(android.util.IndentingPrintWriter pw) {
         pw.printf("RadioModule\n");
         pw.increaseIndent();
         pw.printf("BroadcastRadioService: %s\n", mService);

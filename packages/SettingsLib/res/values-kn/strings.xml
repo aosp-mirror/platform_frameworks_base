@@ -106,28 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"ಎಡಕಿವಿಯ ಸಾಧನ ಮಾತ್ರ ಸಕ್ರಿಯವಾಗಿದೆ"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"ಬಲಕಿವಿಯ ಸಾಧನ ಮಾತ್ರ ಸಕ್ರಿಯವಾಗಿದೆ"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"ಎಡ ಮತ್ತು ಬಲಕಿವಿಯ ಸಾಧನಗಳು ಸಕ್ರಿಯವಾಗಿವೆ"</string>
-    <!-- no translation found for bluetooth_active_media_only_battery_level (1164678961213251365) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (1345174295097854560) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_lea_support (8580950145907305436) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (8534816721698743015) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (6605320955858788855) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (5717356160322149355) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_media_only_no_battery_level (71106861912593126) -->
-    <skip />
-    <!-- no translation found for bluetooth_saved_device_lea_support (7231323139968285768) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_active (1632152540901488645) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_right_active (3854140683042617230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_media_only_left_and_right_active (1299913413062528417) -->
-    <skip />
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"ಸಕ್ರಿಯವಾಗಿದೆ (ಮೀಡಿಯಾ ಮಾತ್ರ), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ಬ್ಯಾಟರಿ ಮಟ್ಟ"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"ಸಕ್ರಿಯವಾಗಿದೆ (ಮೀಡಿಯಾ ಮಾತ್ರ), L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ಬ್ಯಾಟರಿ ಮಟ್ಟ, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ಬ್ಯಾಟರಿ ಮಟ್ಟ"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"ಕನೆಕ್ಟ್‌ ಆಗಿದೆ (ಆಡಿಯೋ ಹಂಚಿಕೊಳ್ಳುವಿಕೆಯನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ಬ್ಯಾಟರಿ ಮಟ್ಟ"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"ಕನೆಕ್ಟ್‌ ಆಗಿದೆ (ಆಡಿಯೋ ಹಂಚಿಕೊಳ್ಳುವಿಕೆಯನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ), L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ಬ್ಯಾಟರಿ ಮಟ್ಟ, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ಬ್ಯಾಟರಿ ಮಟ್ಟ"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"ಕನೆಕ್ಟ್‌ ಆಗಿದೆ (ಆಡಿಯೋ ಹಂಚಿಕೊಳ್ಳುವಿಕೆಯನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ), ಎಡ ಭಾಗದ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"ಕನೆಕ್ಟ್‌ ಆಗಿದೆ (ಆಡಿಯೋ ಹಂಚಿಕೊಳ್ಳುವಿಕೆಯನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ), ಬಲ ಭಾಗದ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"ಸಕ್ರಿಯವಾಗಿದೆ (ಮೀಡಿಯಾ ಮಾತ್ರ)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"ಆಡಿಯೋ ಹಂಚಿಕೊಳ್ಳುವಿಕೆಯನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"ಸಕ್ರಿಯವಾಗಿದೆ (ಮೀಡಿಯಾ ಮಾತ್ರ), ಎಡ ಭಾಗದ ಮಾತ್ರ"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"ಸಕ್ರಿಯವಾಗಿದೆ (ಮೀಡಿಯಾ ಮಾತ್ರ), ಬಲ ಭಾಗದ ಮಾತ್ರ"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"ಸಕ್ರಿಯವಾಗಿದೆ (ಮೀಡಿಯಾ ಮಾತ್ರ), ಎಡ ಮತ್ತು ಬಲ ಭಾಗದ"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"ಮಾಧ್ಯಮ ಆಡಿಯೋ"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ಫೋನ್ ಕರೆಗಳು"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ಫೈಲ್ ವರ್ಗಾವಣೆ"</string>
@@ -333,7 +322,7 @@
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi ಲಾಗಿಂಗ್ ಮಟ್ಟನ್ನು ಹೆಚ್ಚಿಸಿ, Wi‑Fi ಆಯ್ಕೆಯಲ್ಲಿ ಪ್ರತಿಯೊಂದು SSID RSSI ತೋರಿಸಿ"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ಬ್ಯಾಟರಿ ಹೆಚ್ಚು ಬಾಳಿಕೆ ಬರುವಂತೆ ಮಾಡುತ್ತದೆ ಮತ್ತು ನೆಟ್‌ವರ್ಕ್‌ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ಸುಧಾರಿಸುತ್ತದೆ"</string>
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"ಈ ಮೋಡ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ, MAC ಯಾದೃಚ್ಛಿಕರಣವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಕನೆಕ್ಟ್ ಮಾಡಿದಾಗ ಈ ಸಾಧನದ MAC ವಿಳಾಸವು ಪ್ರತಿ ಬಾರಿಯೂ ಬದಲಾಗಬಹುದು."</string>
-    <string name="wifi_metered_label" msgid="8737187690304098638">"ಮೀಟರ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="wifi_metered_label" msgid="8737187690304098638">"ಮೀಟರ್ಡ್ ನೆಟ್‌ವರ್ಕ್"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"ಮೀಟರ್ ಮಾಡಲಾಗಿಲ್ಲ"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ಲಾಗರ್ ಬಫರ್ ಗಾತ್ರಗಳು"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"ಪ್ರತಿ ಲಾಗ್ ಬಫರ್‌ಗೆ ಲಾಗರ್ ಗಾತ್ರಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
@@ -487,7 +476,7 @@
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"ನಿಮ್ಮ ಬಳಕೆ ಆಧರಿಸಿ <xliff:g id="TIME">%1$s</xliff:g> ವರೆಗೆ ರನ್ ಆಗಲಿದೆ"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"<xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>) ಸಮಯದವರೆಗೆ ರನ್ ಆಗಲಿದೆ"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"<xliff:g id="TIME">%1$s</xliff:g> ಸಮಯದವರೆಗೆ ರನ್ ಆಗಲಿದೆ"</string>
-    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> ರವರೆಗೆ"</string>
+    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> ವರೆಗೆ ಇರುತ್ತದೆ"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"<xliff:g id="TIME">%1$s</xliff:g> ಗಳಲ್ಲಿ ಬ್ಯಾಟರಿ ಮುಕ್ತಾಯವಾಗಬಹುದು"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ಕ್ಕಿಂತ ಕಡಿಮೆ ಸಮಯ ಉಳಿದಿದೆ"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ಕ್ಕಿಂತ ಕಡಿಮೆ ಸಮಯ ಉಳಿದಿದೆ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -537,7 +526,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"ಸಿಸ್ಟಂ ಭಾಷೆಗಳನ್ನು ಬಳಸಿ"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> ಗಾಗಿ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಲು ವಿಫಲವಾಗಿದೆ"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"ವೈಯಕ್ತಿಕ ಡೇಟಾಗಳಾದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಮತ್ತು ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಸಂಖ್ಯೆಗಳನ್ನು ಒಳಗೊಂಡಂತೆ ನೀವು ಟೈಪ್ ಮಾಡುವ ಎಲ್ಲ ಪಠ್ಯವನ್ನು ಸಂಗ್ರಹಿಸಲು ಈ ಇನ್‌ಪುಟ್ ವಿಧಾನಕ್ಕೆ ಸಾಧ್ಯವಾಗಬಹುದು. ಇದು <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ ಬರುತ್ತದೆ. ಈ ಇನ್‌ಪುಟ್ ವಿಧಾನವನ್ನು ಬಳಸುವುದೇ?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"ಗಮನಿಸಿ: ರೀಬೂಟ್ ನಂತರ, ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನೀವು ಅನ್‌ಲಾಕ್ ಮಾಡುವ ತನಕ ಈ ಆಪ್ ಪ್ರಾರಂಭಗೊಳ್ಳುವುದಿಲ್ಲ"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"ಗಮನಿಸಿ: ರೀಬೂಟ್ ನಂತರ, ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನೀವು ಅನ್‌ಲಾಕ್ ಮಾಡುವ ತನಕ ಈ ಆ್ಯಪ್ ಪ್ರಾರಂಭಗೊಳ್ಳುವುದಿಲ್ಲ"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS ನೋಂದಣಿ ಸ್ಥಿತಿ"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"ನೋಂದಾಯಿಸಲಾಗಿದೆ"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"ನೋಂದಾಯಿಸಲಾಗಿಲ್ಲ"</string>

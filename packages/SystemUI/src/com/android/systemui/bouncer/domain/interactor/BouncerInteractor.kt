@@ -16,6 +16,7 @@
 
 package com.android.systemui.bouncer.domain.interactor
 
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.domain.interactor.AuthenticationResult
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Sim
@@ -26,6 +27,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
@@ -47,6 +50,7 @@ constructor(
     private val deviceEntryFaceAuthInteractor: DeviceEntryFaceAuthInteractor,
     private val falsingInteractor: FalsingInteractor,
     private val powerInteractor: PowerInteractor,
+    sceneInteractor: SceneInteractor,
 ) {
     private val _onIncorrectBouncerInput = MutableSharedFlow<Unit>()
     val onIncorrectBouncerInput: SharedFlow<Unit> = _onIncorrectBouncerInput
@@ -79,6 +83,10 @@ constructor(
                 !successfullyAuthenticated && authenticationInteractor.lockoutEndTimestamp != null
             }
             .map {}
+
+    /** The scene to show when bouncer is dismissed. */
+    val dismissDestination: Flow<SceneKey> =
+        sceneInteractor.previousScene.map { it ?: Scenes.Lockscreen }
 
     /** Notifies that the user has places down a pointer, not necessarily dragging just yet. */
     fun onDown() {

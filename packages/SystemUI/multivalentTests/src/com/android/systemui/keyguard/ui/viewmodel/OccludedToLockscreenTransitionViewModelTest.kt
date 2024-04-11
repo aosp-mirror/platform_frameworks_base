@@ -49,9 +49,7 @@ class OccludedToLockscreenTransitionViewModelTest : SysuiTestCase() {
     val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
     val fingerprintPropertyRepository = kosmos.fingerprintPropertyRepository
     val configurationRepository = kosmos.fakeConfigurationRepository
-    val underTest by lazy {
-        kosmos.occludedToLockscreenTransitionViewModel
-    }
+    val underTest by lazy { kosmos.occludedToLockscreenTransitionViewModel }
 
     @Test
     fun lockscreenFadeIn() =
@@ -162,25 +160,6 @@ class OccludedToLockscreenTransitionViewModelTest : SysuiTestCase() {
             keyguardTransitionRepository.sendTransitionStep(step(1f))
 
             values.forEach { assertThat(it).isEqualTo(1f) }
-        }
-
-    @Test
-    fun deviceEntryBackgroundView_noUdfpsEnrolled_noUpdates() =
-        testScope.runTest {
-            fingerprintPropertyRepository.supportsRearFps()
-            biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
-            val values by collectValues(underTest.deviceEntryBackgroundViewAlpha)
-
-            keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
-            keyguardTransitionRepository.sendTransitionStep(step(0.1f))
-            keyguardTransitionRepository.sendTransitionStep(step(0.3f))
-            keyguardTransitionRepository.sendTransitionStep(step(0.4f))
-            keyguardTransitionRepository.sendTransitionStep(step(0.5f))
-            keyguardTransitionRepository.sendTransitionStep(step(0.6f))
-            keyguardTransitionRepository.sendTransitionStep(step(0.8f))
-            keyguardTransitionRepository.sendTransitionStep(step(1f))
-
-            assertThat(values).isEmpty() // no updates
         }
 
     private fun step(

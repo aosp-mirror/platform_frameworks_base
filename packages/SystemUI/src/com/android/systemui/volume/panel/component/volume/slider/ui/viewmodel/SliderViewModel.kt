@@ -25,5 +25,7 @@ interface SliderViewModel {
 
     fun onValueChanged(state: SliderState, newValue: Float)
 
+    fun onValueChangeFinished()
+
     fun toggleMuted(state: SliderState)
 }

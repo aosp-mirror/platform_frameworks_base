@@ -62,6 +62,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -69,10 +70,12 @@ import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
@@ -246,6 +249,12 @@ constructor(
 
     private fun handleDeviceUnlockStatus() {
         applicationScope.launch {
+            // Track the previous scene (sans Bouncer), so that we know where to go when the device
+            // is unlocked whilst on the bouncer.
+            val previousScene =
+                sceneInteractor.previousScene
+                    .filterNot { it == Scenes.Bouncer }
+                    .stateIn(this, SharingStarted.Eagerly, initialValue = null)
             deviceUnlockedInteractor.deviceUnlockStatus
                 .mapNotNull { deviceUnlockStatus ->
                     val renderedScenes =
@@ -273,8 +282,15 @@ constructor(
 
                     when {
                         isOnBouncer ->
-                            // When the device becomes unlocked in Bouncer, go to Gone.
-                            Scenes.Gone to "device was unlocked in Bouncer scene"
+                            // When the device becomes unlocked in Bouncer, go to previous scene,
+                            // or Gone.
+                            if (previousScene.value == Scenes.Lockscreen) {
+                                Scenes.Gone to "device was unlocked in Bouncer scene"
+                            } else {
+                                val prevScene = previousScene.value
+                                (prevScene ?: Scenes.Gone) to
+                                    "device was unlocked in Bouncer scene, from sceneKey=$prevScene"
+                            }
                         isOnLockscreen ->
                             // The lockscreen should be dismissed automatically in 2 scenarios:
                             // 1. When face auth bypass is enabled and authentication happens while

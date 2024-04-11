@@ -51,6 +51,7 @@ import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.Sl
 fun VolumeSlider(
     state: SliderState,
     onValueChange: (newValue: Float) -> Unit,
+    onValueChangeFinished: (() -> Unit)? = null,
     onIconTapped: () -> Unit,
     modifier: Modifier = Modifier,
     sliderColors: PlatformSliderColors,
@@ -85,6 +86,7 @@ fun VolumeSlider(
         value = value,
         valueRange = state.valueRange,
         onValueChange = onValueChange,
+        onValueChangeFinished = onValueChangeFinished,
         enabled = state.isEnabled,
         icon = {
             state.icon?.let {

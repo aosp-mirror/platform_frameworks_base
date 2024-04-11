@@ -25,9 +25,7 @@ import static android.view.InsetsSource.FLAG_ANIMATE_RESIZING;
 import static android.view.InsetsSource.ID_IME;
 import static android.view.InsetsSourceConsumer.ShowResult.IME_SHOW_DELAYED;
 import static android.view.InsetsSourceConsumer.ShowResult.SHOW_IMMEDIATELY;
-import static android.view.ViewRootImpl.CAPTION_ON_SHELL;
 import static android.view.WindowInsets.Type.all;
-import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.defaultVisible;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.navigationBars;
@@ -49,7 +47,6 @@ import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -802,48 +799,6 @@ public class InsetsControllerTest {
             assertEquals(message, ANIMATION_TYPE_NONE, mController.getAnimationType(type));
         });
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-    }
-
-    @Test
-    public void testCaptionInsetsStateAssemble() {
-        if (CAPTION_ON_SHELL) {
-            // For this case, the test is covered by WindowContainerInsetsSourceProviderTest, This
-            // test can be removed after the caption is moved to shell completely.
-            return;
-        }
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            final Rect frame = new Rect(0, 0, 100, 300);
-            final int captionBarHeight = 100;
-            final InsetsState state = mController.getState();
-            mController.onFrameChanged(frame);
-            mController.setCaptionInsetsHeight(captionBarHeight);
-            // The caption bar insets height should be the same as the caption bar height.
-            assertEquals(captionBarHeight, state.calculateInsets(frame, captionBar(), false).top);
-            // Test update to remove the caption bar
-            mController.setCaptionInsetsHeight(0);
-            // The caption bar source should not be there at all, because we don't add empty
-            // caption to the state from the server.
-            for (int i = state.sourceSize() - 1; i >= 0; i--) {
-                assertNotEquals(captionBar(), state.sourceAt(i).getType());
-            }
-        });
-    }
-
-    @Test
-    public void testNotifyCaptionInsetsOnlyChange() {
-        if (CAPTION_ON_SHELL) {
-            // For this case, the test is covered by WindowContainerInsetsSourceProviderTest, This
-            // test can be removed after the caption is moved to shell completely.
-            return;
-        }
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            reset(mTestHost);
-            mController.setCaptionInsetsHeight(100);
-            verify(mTestHost).notifyInsetsChanged();
-            reset(mTestHost);
-            mController.setCaptionInsetsHeight(0);
-            verify(mTestHost).notifyInsetsChanged();
-        });
     }
 
     @Test

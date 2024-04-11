@@ -22,7 +22,6 @@ import static android.view.InsetsControllerProto.CONTROL;
 import static android.view.InsetsControllerProto.STATE;
 import static android.view.InsetsSource.ID_IME;
 import static android.view.InsetsSource.ID_IME_CAPTION_BAR;
-import static android.view.ViewRootImpl.CAPTION_ON_SHELL;
 import static android.view.WindowInsets.Type.FIRST;
 import static android.view.WindowInsets.Type.LAST;
 import static android.view.WindowInsets.Type.all;
@@ -685,9 +684,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
                 @Override
                 public void onIdNotFoundInState2(int index1, InsetsSource source1) {
-                    if (!CAPTION_ON_SHELL && source1.getType() == captionBar()) {
-                        return;
-                    }
                     if (source1.getId() == ID_IME_CAPTION_BAR) {
                         return;
                     }
@@ -848,15 +844,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     public boolean onStateChanged(InsetsState state) {
-        boolean stateChanged = false;
-        if (!CAPTION_ON_SHELL) {
-            stateChanged = !mState.equals(state, true /* excludesCaptionBar */,
-                    false /* excludesInvisibleIme */)
-                    || captionInsetsUnchanged();
-        } else {
-            stateChanged = !mState.equals(state, false /* excludesCaptionBar */,
-                    false /* excludesInvisibleIme */);
-        }
+        boolean stateChanged = !mState.equals(state, false /* excludesCaptionBar */,
+                false /* excludesInvisibleIme */);
         if (!stateChanged && mLastDispatchedState.equals(state)) {
             return false;
         }
@@ -922,21 +911,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (cancelledUserAnimationTypes[0] != 0) {
             mHandler.post(() -> show(cancelledUserAnimationTypes[0]));
         }
-    }
-
-    private boolean captionInsetsUnchanged() {
-        if (CAPTION_ON_SHELL) {
-            return false;
-        }
-        final InsetsSource source = mState.peekSource(ID_CAPTION_BAR);
-        if (source == null && mCaptionInsetsHeight == 0) {
-            return false;
-        }
-        if (source != null && mCaptionInsetsHeight == source.getFrame().height()) {
-            return false;
-        }
-
-        return true;
     }
 
     /**
@@ -1886,24 +1860,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     public @Appearance int getAppearanceControlled() {
         return mAppearanceControlled;
-    }
-
-    @Override
-    public void setCaptionInsetsHeight(int height) {
-        // This method is to be removed once the caption is moved to the shell.
-        if (CAPTION_ON_SHELL) {
-            return;
-        }
-        if (mCaptionInsetsHeight != height) {
-            mCaptionInsetsHeight = height;
-            if (mCaptionInsetsHeight != 0) {
-                mState.getOrCreateSource(ID_CAPTION_BAR, captionBar()).setFrame(
-                        mFrame.left, mFrame.top, mFrame.right, mFrame.top + mCaptionInsetsHeight);
-            } else {
-                mState.removeSource(ID_CAPTION_BAR);
-            }
-            mHost.notifyInsetsChanged();
-        }
     }
 
     @Override

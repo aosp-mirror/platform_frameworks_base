@@ -43,6 +43,7 @@ import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.view.flags.Flags.toolkitFrameRateBySizeReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateDefaultNormalReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateSmallUsesPercentReadOnly;
+import static android.view.flags.Flags.toolkitFrameRateVelocityMappingReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateViewEnablingReadOnly;
 import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
@@ -2443,6 +2444,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             toolkitFrameRateSmallUsesPercentReadOnly();
     private static final boolean sToolkitFrameRateViewEnablingReadOnlyFlagValue =
             toolkitFrameRateViewEnablingReadOnly();
+    private static boolean sToolkitFrameRateVelocityMappingReadOnlyFlagValue =
+            toolkitFrameRateVelocityMappingReadOnly();
 
     // Used to set frame rate compatibility.
     @Surface.FrameRateCompatibility int mFrameRateCompatibility =
@@ -5738,6 +5741,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * A threshold value to determine the frame rate category of the View based on the size.
      */
     private static final float FRAME_RATE_SIZE_PERCENTAGE_THRESHOLD = 0.07f;
+
+    private static final float MAX_FRAME_RATE = 140;
 
     private static final int INFREQUENT_UPDATE_INTERVAL_MILLIS = 100;
     private static final int INFREQUENT_UPDATE_COUNTS = 2;
@@ -20824,12 +20829,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return;
         }
 
-        // For VRR to vote the preferred frame rate
-        if (sToolkitSetFrameRateReadOnlyFlagValue
-                && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
-            votePreferredFrameRate();
-        }
-
         // Reset content capture caches
         mPrivateFlags4 &= ~PFLAG4_CONTENT_CAPTURE_IMPORTANCE_MASK;
         mContentCaptureSessionCached = false;
@@ -20932,11 +20931,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     protected void damageInParent() {
         if (mParent != null && mAttachInfo != null) {
-            // For VRR to vote the preferred frame rate
-            if (sToolkitSetFrameRateReadOnlyFlagValue
-                    && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
-                votePreferredFrameRate();
-            }
             mParent.onDescendantInvalidated(this, this);
         }
     }
@@ -23624,11 +23618,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return renderNode;
         }
 
-        mPrivateFlags4 = (mPrivateFlags4 & ~PFLAG4_HAS_MOVED) | PFLAG4_HAS_DRAWN;
+        // For VRR to vote the preferred frame rate
         if (sToolkitSetFrameRateReadOnlyFlagValue
                 && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
+            votePreferredFrameRate();
             updateInfrequentCount();
         }
+
+        mPrivateFlags4 = (mPrivateFlags4 & ~PFLAG4_HAS_MOVED) | PFLAG4_HAS_DRAWN;
 
         if ((mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == 0
                 || !renderNode.hasDisplayList()
@@ -23694,6 +23691,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
             mPrivateFlags &= ~PFLAG_DIRTY_MASK;
         }
+
+        mFrameContentVelocity = -1;
         return renderNode;
     }
 
@@ -24791,8 +24790,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void draw(@NonNull Canvas canvas) {
         final int privateFlags = mPrivateFlags;
         mPrivateFlags = (privateFlags & ~PFLAG_DIRTY_MASK) | PFLAG_DRAWN;
-
-        mFrameContentVelocity = -1;
 
         /*
          * Draw traversal performs several drawing steps which must be executed
@@ -33888,32 +33885,42 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return mLastFrameRateCategory;
     }
 
-    private void votePreferredFrameRate() {
+    /**
+     * Used to vote the preferred frame rate and frame rate category to ViewRootImpl
+     *
+     * @hide
+     */
+    protected void votePreferredFrameRate() {
         // use toolkitSetFrameRate flag to gate the change
         ViewRootImpl viewRootImpl = getViewRootImpl();
         int width = mRight - mLeft;
         int height = mBottom - mTop;
-        float alpha = mTransformationInfo != null ? mTransformationInfo.mAlpha : 1;
-        int visibility = mViewFlags & VISIBILITY_MASK;
 
-        if (viewRootImpl != null && (width != 0 && height != 0)
-                && alpha != 0 && visibility == View.VISIBLE
-        ) {
+        if (viewRootImpl != null && (width != 0 && height != 0)) {
             if (mAttachInfo.mViewVelocityApi) {
                 float velocity = mFrameContentVelocity;
                 int mask = PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN;
-                if (velocity < 0f && (mPrivateFlags4 & mask) == mask) {
+                float frameRate = 0;
+
+                if (velocity < 0f
+                        && (mPrivateFlags4 & mask) == mask
+                        && mParent instanceof View
+                        && ((View) mParent).mFrameContentVelocity <= 0
+                ) {
                     // This current calculation is very simple. If something on the screen moved,
                     // then it votes for the highest velocity. If it doesn't move, then return 0.
                     velocity = Float.POSITIVE_INFINITY;
+                    frameRate = MAX_FRAME_RATE;
                 }
                 if (velocity > 0f) {
-                    float frameRate = convertVelocityToFrameRate(velocity);
+                    if (sToolkitFrameRateVelocityMappingReadOnlyFlagValue) {
+                        frameRate = convertVelocityToFrameRate(velocity);
+                    }
                     viewRootImpl.votePreferredFrameRate(frameRate, FRAME_RATE_COMPATIBILITY_GTE);
                     return;
                 }
             }
-            if (!willNotDraw()) {
+            if (!willNotDraw() && isDirty()) {
                 if (sToolkitMetricsForFrameRateDecisionFlagValue) {
                     float sizePercentage = width * height / mAttachInfo.mDisplayPixelCount;
                     viewRootImpl.recordViewPercentage(sizePercentage);
@@ -33962,7 +33969,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         float density = mAttachInfo.mDensity;
         float velocityDps = velocityPps / density;
         // Choose a frame rate in increments of 10fps
-        return Math.min(140f, 60f + (10f * (float) Math.floor(velocityDps / 300f)));
+        return Math.min(MAX_FRAME_RATE, 60f + (10f * (float) Math.floor(velocityDps / 300f)));
     }
 
     /**
