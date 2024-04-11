@@ -5401,4 +5401,6 @@
 
   <!-- Frame rate compatibility value for Wallpaper -->
   <java-symbol type="integer" name="config_wallpaperFrameRateCompatibility" />
+
+  <java-symbol type="integer" name="config_defaultMinEmergencyGestureTapDurationMillis" />
 </resources>

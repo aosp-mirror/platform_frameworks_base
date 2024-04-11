@@ -7015,4 +7015,9 @@
     <!-- Frame rate compatibility value for Wallpaper
          FRAME_RATE_COMPATIBILITY_MIN (102) is used by default for lower power consumption -->
     <integer name="config_wallpaperFrameRateCompatibility">102</integer>
+
+    <!-- Min time in milliseconds to complete an emergency gesture for it count.
+         If the gesture is completed faster than this, we assume it's not performed by human and the
+         event gets ignored. -->
+    <integer name="config_defaultMinEmergencyGestureTapDurationMillis">200</integer>
 </resources>

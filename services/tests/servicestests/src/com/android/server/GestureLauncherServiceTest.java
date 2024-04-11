@@ -17,7 +17,6 @@
 package com.android.server;
 
 import static com.android.server.GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS;
-import static com.android.server.GestureLauncherService.EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -1449,7 +1448,7 @@ public class GestureLauncherServiceTest {
         long emergencyGestureTapDetectionMinTimeMs = Settings.Global.getInt(
                 mContext.getContentResolver(),
                 Settings.Global.EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS,
-                EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS);
+                200);
         assertTrue(intercepted);
         if (tapIntervalMs * 4 > emergencyGestureTapDetectionMinTimeMs) {
             assertTrue(outLaunched.value);
