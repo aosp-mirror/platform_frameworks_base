@@ -534,11 +534,16 @@ public class BluetoothUtils {
     /** Returns if the le audio sharing is enabled. */
     public static boolean isAudioSharingEnabled() {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        return Flags.enableLeAudioSharing()
-                && adapter.isLeAudioBroadcastSourceSupported()
-                        == BluetoothStatusCodes.FEATURE_SUPPORTED
-                && adapter.isLeAudioBroadcastAssistantSupported()
-                        == BluetoothStatusCodes.FEATURE_SUPPORTED;
+        try {
+            return Flags.enableLeAudioSharing()
+                    && adapter.isLeAudioBroadcastSourceSupported()
+                            == BluetoothStatusCodes.FEATURE_SUPPORTED
+                    && adapter.isLeAudioBroadcastAssistantSupported()
+                            == BluetoothStatusCodes.FEATURE_SUPPORTED;
+        } catch (IllegalStateException e) {
+            Log.d(TAG, "LE state is on, but there is no bluetooth service.", e);
+            return false;
+        }
     }
 
     /** Returns if the broadcast is on-going. */
