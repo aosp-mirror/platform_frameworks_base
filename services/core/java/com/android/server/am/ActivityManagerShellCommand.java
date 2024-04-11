@@ -96,6 +96,7 @@ import android.opengl.GLES10;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.IProgressListener;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallback;
@@ -124,6 +125,8 @@ import com.android.server.LocalServices;
 import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.am.nano.Capabilities;
 import com.android.server.am.nano.Capability;
+import com.android.server.am.nano.FrameworkCapability;
+import com.android.server.am.nano.VMCapability;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.Slogf;
@@ -442,6 +445,22 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 capabilities.values[i] = cap;
             }
 
+            String[] vmCapabilities = Debug.getVmFeatureList();
+            capabilities.vmCapabilities = new VMCapability[vmCapabilities.length];
+            for (int i = 0; i < vmCapabilities.length; i++) {
+                VMCapability cap = new VMCapability();
+                cap.name = vmCapabilities[i];
+                capabilities.vmCapabilities[i] = cap;
+            }
+
+            String[] fmCapabilities = Debug.getFeatureList();
+            capabilities.frameworkCapabilities = new FrameworkCapability[fmCapabilities.length];
+            for (int i = 0; i < fmCapabilities.length; i++) {
+                FrameworkCapability cap = new FrameworkCapability();
+                cap.name = fmCapabilities[i];
+                capabilities.frameworkCapabilities[i] = cap;
+            }
+
             try {
                 getRawOutputStream().write(Capabilities.toByteArray(capabilities));
             } catch (IOException e) {
@@ -451,9 +470,15 @@ final class ActivityManagerShellCommand extends ShellCommand {
         } else {
             // Unfortunately we don't have protobuf text format capabilities here.
             // Fallback to line separated list instead for text parser.
-            pw.println("Format: 1");
+            pw.println("Format: 2");
             for (String capability : CAPABILITIES) {
                 pw.println(capability);
+            }
+            for (String capability : Debug.getVmFeatureList()) {
+                pw.println("vm:" + capability);
+            }
+            for (String capability : Debug.getFeatureList()) {
+                pw.println("framework:" + capability);
             }
         }
         return 0;
