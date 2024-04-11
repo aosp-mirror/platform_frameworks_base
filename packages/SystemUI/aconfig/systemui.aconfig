@@ -746,6 +746,16 @@ flag {
 }
 
 flag {
+  name: "remove_dream_overlay_hide_on_touch"
+  namespace: "systemui"
+  description: "Removes logic to hide the dream overlay on user interaction, as it conflicts with various transitions"
+  bug: "329091030"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "keyboard_docking_indicator"
     namespace: "systemui"
     description: "Glow bar indicator reveals upon keyboard docking."
