@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.android.credentialmanager.CredentialSelectorViewModel
 import com.android.credentialmanager.R
+import com.android.credentialmanager.common.BiometricError
 import com.android.credentialmanager.common.BiometricFlowType
 import com.android.credentialmanager.common.BiometricPromptState
 import com.android.credentialmanager.common.ProviderActivityState
@@ -223,7 +224,11 @@ internal fun BiometricSelectionPage(
     requestDisplayInfo: RequestDisplayInfo,
     providerInfoList: List<ProviderInfo>,
     providerDisplayInfo: ProviderDisplayInfo,
-    onBiometricEntrySelected: (EntryInfo, BiometricPrompt.AuthenticationResult?) -> Unit,
+    onBiometricEntrySelected: (
+        EntryInfo,
+        BiometricPrompt.AuthenticationResult?,
+        BiometricError?
+    ) -> Unit,
     fallbackToOriginalFlow: (BiometricFlowType) -> Unit,
     getBiometricPromptState: () -> BiometricPromptState,
     onBiometricPromptStateChange: (BiometricPromptState) -> Unit,

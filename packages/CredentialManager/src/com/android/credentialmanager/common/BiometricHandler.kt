@@ -76,6 +76,7 @@ data class BiometricDisplayInfo(
  */
 data class BiometricState(
     val biometricResult: BiometricResult? = null,
+    val biometricError: BiometricError? = null,
     val biometricStatus: BiometricPromptState = BiometricPromptState.INACTIVE
 )
 
@@ -92,7 +93,7 @@ data class BiometricResult(
  */
 data class BiometricError(
     val errorCode: Int,
-    val errString: CharSequence? = null
+    val errorMessage: CharSequence? = null
 )
 
 /**
@@ -113,7 +114,7 @@ fun runBiometricFlowForGet(
     biometricEntry: EntryInfo,
     context: Context,
     openMoreOptionsPage: () -> Unit,
-    sendDataToProvider: (EntryInfo, BiometricPrompt.AuthenticationResult) -> Unit,
+    sendDataToProvider: (EntryInfo, BiometricPrompt.AuthenticationResult?, BiometricError?) -> Unit,
     onCancelFlowAndFinish: () -> Unit,
     onIllegalStateAndFinish: (String) -> Unit,
     getBiometricPromptState: () -> BiometricPromptState,
@@ -158,7 +159,7 @@ fun runBiometricFlowForCreate(
     biometricEntry: EntryInfo,
     context: Context,
     openMoreOptionsPage: () -> Unit,
-    sendDataToProvider: (EntryInfo, BiometricPrompt.AuthenticationResult) -> Unit,
+    sendDataToProvider: (EntryInfo, BiometricPrompt.AuthenticationResult?, BiometricError?) -> Unit,
     onCancelFlowAndFinish: () -> Unit,
     onIllegalStateAndFinish: (String) -> Unit,
     getBiometricPromptState: () -> BiometricPromptState,
@@ -285,7 +286,7 @@ private fun removeDeviceCredential(requestAllowedAuthenticators: Int): Int {
  * Sets up the biometric authentication callback.
  */
 private fun setupBiometricAuthenticationCallback(
-    sendDataToProvider: (EntryInfo, BiometricPrompt.AuthenticationResult) -> Unit,
+    sendDataToProvider: (EntryInfo, BiometricPrompt.AuthenticationResult?, BiometricError?) -> Unit,
     selectedEntry: EntryInfo,
     onCancelFlowAndFinish: () -> Unit,
     onIllegalStateAndFinish: (String) -> Unit,
@@ -301,7 +302,7 @@ private fun setupBiometricAuthenticationCallback(
                 try {
                     if (authResult != null) {
                         onBiometricPromptStateChange(BiometricPromptState.COMPLETE)
-                        sendDataToProvider(selectedEntry, authResult)
+                        sendDataToProvider(selectedEntry, authResult, /*authError=*/null)
                     } else {
                         onIllegalStateAndFinish("The biometric flow succeeded but unexpectedly " +
                                 "returned a null value.")
@@ -326,8 +327,10 @@ private fun setupBiometricAuthenticationCallback(
                     // into the selector, parity applies to the selector's cancellation instead
                     // of the provider's biometric prompt cancellation.
                     onCancelFlowAndFinish()
+                } else {
+                    sendDataToProvider(selectedEntry, /*authResult=*/null, /*authError=*/
+                        BiometricError(errorCode, errString))
                 }
-                // TODO(b/333445772) : Propagate to provider
             }
 
             override fun onAuthenticationFailed() {
