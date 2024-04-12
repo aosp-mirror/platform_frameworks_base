@@ -70,6 +70,7 @@ import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
+import static android.permission.flags.Flags.runtimePermissionAppopsMappingEnabled;
 
 import static com.android.server.appop.AppOpsService.ModeCallback.ALL_OPS;
 
@@ -2683,6 +2684,15 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    /**
+     * When querying the mode these should always be allowed and the checking service might not
+     * have information on them.
+     */
+    private static boolean isOpAllowedForUid(int uid) {
+        return runtimePermissionAppopsMappingEnabled()
+                && (uid == Process.ROOT_UID || uid == Process.SYSTEM_UID);
+    }
+
     @Override
     public int checkOperationRaw(int code, int uid, String packageName,
             @Nullable String attributionTag) {
@@ -2757,6 +2767,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (isOpRestrictedLocked(uid, code, packageName, attributionTag, virtualDeviceId,
                     pvr.bypass, true)) {
                 return AppOpsManager.MODE_IGNORED;
+            }
+            if (isOpAllowedForUid(uid)) {
+                return MODE_ALLOWED;
             }
             code = AppOpsManager.opToSwitch(code);
             UidState uidState = getUidStateLocked(uid, false);
@@ -3072,9 +3085,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag,
                         packageName);
             }
-            // If there is a non-default per UID policy (we set UID op mode only if
-            // non-default) it takes over, otherwise use the per package policy.
-            if (mAppOpsCheckingService.getUidMode(
+            if (isOpAllowedForUid(uid)) {
+                // Op is always allowed for the UID, do nothing.
+
+                // If there is a non-default per UID policy (we set UID op mode only if
+                // non-default) it takes over, otherwise use the per package policy.
+            } else if (mAppOpsCheckingService.getUidMode(
                             uidState.uid, getPersistentId(virtualDeviceId), switchCode)
                     != AppOpsManager.opToDefaultMode(switchCode)) {
                 final int uidMode =
@@ -3666,10 +3682,13 @@ public class AppOpsService extends IAppOpsService.Stub {
             isRestricted = isOpRestrictedLocked(uid, code, packageName, attributionTag,
                     virtualDeviceId, pvr.bypass, false);
             final int switchCode = AppOpsManager.opToSwitch(code);
-            // If there is a non-default per UID policy (we set UID op mode only if
-            // non-default) it takes over, otherwise use the per package policy.
-            if (mAppOpsCheckingService.getUidMode(
-                            uidState.uid, getPersistentId(virtualDeviceId), switchCode)
+            if (isOpAllowedForUid(uid)) {
+                // Op is always allowed for the UID, do nothing.
+
+                // If there is a non-default per UID policy (we set UID op mode only if
+                // non-default) it takes over, otherwise use the per package policy.
+            } else if (mAppOpsCheckingService.getUidMode(
+                    uidState.uid, getPersistentId(virtualDeviceId), switchCode)
                     != AppOpsManager.opToDefaultMode(switchCode)) {
                 final int uidMode =
                         uidState.evalMode(
