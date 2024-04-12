@@ -295,11 +295,11 @@ public class SpatializerHelper {
             // could have been called another time after boot in case of audioserver restart
             addCompatibleAudioDevice(
                     new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_SPEAKER, ""),
-                            false /*forceEnable*/);
+                            false /*forceEnable*/, false /*forceInit*/);
             // not force-enabling as this device might already be in the device list
             addCompatibleAudioDevice(
                     new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE, ""),
-                            false /*forceEnable*/);
+                            false /*forceEnable*/, false /*forceInit*/);
         } catch (RemoteException e) {
             resetCapabilities();
         } finally {
@@ -526,7 +526,7 @@ public class SpatializerHelper {
     }
 
     synchronized void addCompatibleAudioDevice(@NonNull AudioDeviceAttributes ada) {
-        addCompatibleAudioDevice(ada, true /*forceEnable*/);
+        addCompatibleAudioDevice(ada, true /*forceEnable*/, false /*forceInit*/);
     }
 
     /**
@@ -540,7 +540,7 @@ public class SpatializerHelper {
      */
     @GuardedBy("this")
     private void addCompatibleAudioDevice(@NonNull AudioDeviceAttributes ada,
-            boolean forceEnable) {
+            boolean forceEnable, boolean forceInit) {
         if (!isDeviceCompatibleWithSpatializationModes(ada)) {
             return;
         }
@@ -548,6 +548,9 @@ public class SpatializerHelper {
         final AdiDeviceState deviceState = findSACompatibleDeviceStateForAudioDeviceAttributes(ada);
         AdiDeviceState updatedDevice = null; // non-null on update.
         if (deviceState != null) {
+            if (forceInit) {
+                initSAState(deviceState);
+            }
             if (forceEnable && !deviceState.isSAEnabled()) {
                 updatedDevice = deviceState;
                 updatedDevice.setSAEnabled(true);
@@ -756,10 +759,10 @@ public class SpatializerHelper {
         }
     }
 
-    synchronized void refreshDevice(@NonNull AudioDeviceAttributes ada) {
+    synchronized void refreshDevice(@NonNull AudioDeviceAttributes ada, boolean initState) {
         final AdiDeviceState deviceState = findSACompatibleDeviceStateForAudioDeviceAttributes(ada);
         if (isAvailableForAdiDeviceState(deviceState)) {
-            addCompatibleAudioDevice(ada, /*forceEnable=*/deviceState.isSAEnabled());
+            addCompatibleAudioDevice(ada, /*forceEnable=*/deviceState.isSAEnabled(), initState);
             setHeadTrackerEnabled(deviceState.isHeadTrackerEnabled(), ada);
         } else {
             removeCompatibleAudioDevice(ada);
