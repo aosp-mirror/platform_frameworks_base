@@ -159,6 +159,8 @@ public class BubbleData {
                     bubbleBarUpdate.bubbleKeysInOrder.add(bubbles.get(i).getKey());
                 }
             }
+            bubbleBarUpdate.showOverflowChanged = showOverflowChanged;
+            bubbleBarUpdate.showOverflow = !overflowBubbles.isEmpty();
             return bubbleBarUpdate;
         }
 
