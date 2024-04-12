@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/statfs.h>
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
@@ -285,6 +286,25 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
         unlink(localTmpFileName);
         return INSTALL_FAILED_CONTAINER_ERROR;
     }
+
+#ifdef ENABLE_PUNCH_HOLES
+    // punch extracted elf files as well. This will fail where compression is on (like f2fs) but it
+    // will be useful for ext4 based systems
+    struct statfs64 fsInfo;
+    int result = statfs64(localFileName, &fsInfo);
+    if (result < 0) {
+        ALOGW("Failed to stat file :%s", localFileName);
+    }
+
+    if (result == 0 && fsInfo.f_type == EXT4_SUPER_MAGIC) {
+        ALOGD("Punching extracted elf file %s on fs:%" PRIu64 "", fileName,
+              static_cast<uint64_t>(fsInfo.f_type));
+        if (!punchHolesInElf64(localFileName, 0)) {
+            ALOGW("Failed to punch extracted elf file :%s from apk : %s", fileName,
+                  zipFile->getZipFileName());
+        }
+    }
+#endif // ENABLE_PUNCH_HOLES
 
     ALOGV("Successfully moved %s to %s\n", localTmpFileName, localFileName);
 
