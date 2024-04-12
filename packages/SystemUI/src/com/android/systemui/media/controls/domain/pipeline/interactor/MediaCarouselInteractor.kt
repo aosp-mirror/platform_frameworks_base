@@ -34,6 +34,7 @@ import com.android.systemui.media.controls.domain.pipeline.MediaDeviceManager
 import com.android.systemui.media.controls.domain.pipeline.MediaSessionBasedFilter
 import com.android.systemui.media.controls.domain.pipeline.MediaTimeoutListener
 import com.android.systemui.media.controls.domain.resume.MediaResumeListener
+import com.android.systemui.media.controls.shared.model.MediaCommonModel
 import com.android.systemui.media.controls.shared.model.MediaDataLoadingModel
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaLoadingModel
 import com.android.systemui.media.controls.util.MediaFlags
@@ -46,6 +47,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
@@ -119,6 +121,10 @@ constructor(
     /** The most recent change to loaded media recommendations. */
     val recommendationsLoadingState: Flow<SmartspaceMediaLoadingModel> =
         mediaFilterRepository.recommendationsLoadingState
+
+    /** The most recent sorted set for user media instances */
+    val sortedMedia: Flow<List<MediaCommonModel>> =
+        mediaFilterRepository.sortedMedia.map { it.values.toList() }
 
     override fun start() {
         if (!mediaFlags.isMediaControlsRefactorEnabled()) {

@@ -101,7 +101,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
         MediaPlayerData.clear()
         whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(false)
         testScope = TestScope()
-        repository = MediaFilterRepository()
+        repository = MediaFilterRepository(FakeSystemClock())
         mediaDataFilter =
             MediaDataFilterImpl(
                 context,
