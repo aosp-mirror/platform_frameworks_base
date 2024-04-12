@@ -2951,7 +2951,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     void onDisplayChanged(DisplayContent dc) {
         super.onDisplayChanged(dc);
         updateSystemGestureExclusionLimit();
-        updateKeepClearAreas();
     }
 
     void updateSystemGestureExclusionLimit() {
@@ -4030,7 +4029,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         adjustForImeIfNeeded();
-        updateKeepClearAreas();
 
         // We may need to schedule some toast windows to be removed. The toasts for an app that
         // does not have input focus are removed within a timeout to prevent apps to redress
@@ -6151,6 +6149,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     Region touchableRegion = Region.obtain();
                     w.getEffectiveTouchableRegion(touchableRegion);
                     RegionUtils.forEachRect(touchableRegion, rect -> outUnrestricted.add(rect));
+                    touchableRegion.recycle();
                 }
             }
 
