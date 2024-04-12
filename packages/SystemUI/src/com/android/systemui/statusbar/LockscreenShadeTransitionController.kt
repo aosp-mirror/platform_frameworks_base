@@ -959,7 +959,7 @@ class DragDownHelper(
         anim.start()
     }
 
-    private fun stopDragging() {
+    fun stopDragging() {
         if (startingChild != null) {
             cancelChildExpansion(startingChild!!)
             startingChild = null
