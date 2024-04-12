@@ -1745,4 +1745,7 @@
     <string name="feminine">Feminine</string>
     <!-- List entry in developer settings to set the grammatical gender to Masculine [CHAR LIMIT=30]-->
     <string name="masculine">Masculine</string>
+
+    <!-- The name of the screen for seeing and installing system updates. [CHAR LIMIT=40]-->
+    <string name="system_update_settings_list_item_title">System Updates</string>
 </resources>

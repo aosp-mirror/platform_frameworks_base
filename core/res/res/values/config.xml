@@ -3656,6 +3656,7 @@
          "emergency" = Launch emergency dialer
          "lockdown" = Lock down device until the user authenticates
          "logout" =  Logout the current user
+         "system_update" = Launch System Update screen
          -->
     <string-array translatable="false" name="config_globalActionsList">
         <item>emergency</item>
