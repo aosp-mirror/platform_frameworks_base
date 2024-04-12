@@ -1923,6 +1923,11 @@ public class DisplayPolicy {
              */
             final Rect mOverrideConfigInsets = new Rect();
 
+            /**
+             * Override value of mNonDecorInsets for app compatibility purpose.
+             */
+            final Rect mOverrideNonDecorInsets = new Rect();
+
             /** The display frame available after excluding {@link #mNonDecorInsets}. */
             final Rect mNonDecorFrame = new Rect();
 
@@ -1937,6 +1942,11 @@ public class DisplayPolicy {
              * Override value of mConfigFrame for app compatibility purpose.
              */
             final Rect mOverrideConfigFrame = new Rect();
+
+            /**
+             * Override value of mNonDecorFrame for app compatibility purpose.
+             */
+            final Rect mOverrideNonDecorFrame = new Rect();
 
             private boolean mNeedUpdate = true;
 
@@ -1957,17 +1967,26 @@ public class DisplayPolicy {
                         ? configInsets
                         : insetsState.calculateInsets(displayFrame,
                                 dc.mWmService.mOverrideConfigTypes, true /* ignoreVisibility */);
+                final Insets overrideDecorInsets = dc.mWmService.mDecorTypes
+                        == dc.mWmService.mOverrideDecorTypes
+                        ? decor
+                        : insetsState.calculateInsets(displayFrame,
+                                dc.mWmService.mOverrideDecorTypes, true /* ignoreVisibility */);
                 mNonDecorInsets.set(decor.left, decor.top, decor.right, decor.bottom);
                 mConfigInsets.set(configInsets.left, configInsets.top, configInsets.right,
                         configInsets.bottom);
                 mOverrideConfigInsets.set(overrideConfigInsets.left, overrideConfigInsets.top,
                         overrideConfigInsets.right, overrideConfigInsets.bottom);
+                mOverrideNonDecorInsets.set(overrideDecorInsets.left, overrideDecorInsets.top,
+                        overrideDecorInsets.right, overrideDecorInsets.bottom);
                 mNonDecorFrame.set(displayFrame);
                 mNonDecorFrame.inset(mNonDecorInsets);
                 mConfigFrame.set(displayFrame);
                 mConfigFrame.inset(mConfigInsets);
                 mOverrideConfigFrame.set(displayFrame);
                 mOverrideConfigFrame.inset(mOverrideConfigInsets);
+                mOverrideNonDecorFrame.set(displayFrame);
+                mOverrideNonDecorFrame.inset(mOverrideNonDecorInsets);
                 mNeedUpdate = false;
                 return insetsState;
             }
@@ -1976,9 +1995,11 @@ public class DisplayPolicy {
                 mNonDecorInsets.set(other.mNonDecorInsets);
                 mConfigInsets.set(other.mConfigInsets);
                 mOverrideConfigInsets.set(other.mOverrideConfigInsets);
+                mOverrideNonDecorInsets.set(other.mOverrideNonDecorInsets);
                 mNonDecorFrame.set(other.mNonDecorFrame);
                 mConfigFrame.set(other.mConfigFrame);
                 mOverrideConfigFrame.set(other.mOverrideConfigFrame);
+                mOverrideNonDecorFrame.set(other.mOverrideNonDecorFrame);
                 mNeedUpdate = false;
             }
 
