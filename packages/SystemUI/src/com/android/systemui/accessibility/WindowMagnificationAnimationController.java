@@ -72,6 +72,7 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
     private boolean mEndAnimationCanceled = false;
     @MagnificationState
     private int mState = STATE_DISABLED;
+    private Runnable mOnAnimationEndRunnable;
 
     WindowMagnificationAnimationController(@UiContext Context context) {
         this(context, newValueAnimator(context.getResources()));
@@ -303,12 +304,7 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
             return;
         }
 
-        // If the animation is playing backwards, mStartSpec will be the final spec we would
-        // like to reach.
-        AnimationSpec spec = isReverse ? mStartSpec : mEndSpec;
-        mController.updateWindowMagnificationInternal(
-                spec.mScale, spec.mCenterX, spec.mCenterY,
-                mMagnificationFrameOffsetRatioX, mMagnificationFrameOffsetRatioY);
+        mOnAnimationEndRunnable.run();
 
         if (mState == STATE_DISABLING) {
             mController.deleteWindowMagnification();
@@ -331,6 +327,10 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
 
     @Override
     public void onAnimationRepeat(Animator animation) {
+    }
+
+    void setOnAnimationEndRunnable(Runnable runnable) {
+        mOnAnimationEndRunnable = runnable;
     }
 
     private void sendAnimationCallback(boolean success) {
