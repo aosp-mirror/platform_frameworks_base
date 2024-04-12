@@ -436,7 +436,7 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
         // overlay.
         mContentInsets.set(mBaseContentInsets);
         mInnerInsets = mBaseInnerInsets;
-        if (!mOverlayMode && !stable) {
+        if (!mOverlayMode && !stable && hasContentOnApplyWindowInsetsListener()) {
             mContentInsets.top += topInset;
             mContentInsets.bottom += bottomInset;
             // Content view has been shrunk, shrink all insets to match.
