@@ -59,9 +59,10 @@ constructor(
                 combine(
                     interactor.isSatelliteAllowed,
                     interactor.isDeviceProvisioned,
+                    interactor.isWifiActive,
                     airplaneModeRepository.isAirplaneMode
-                ) { isSatelliteAllowed, isDeviceProvisioned, isAirplaneMode ->
-                    isSatelliteAllowed && isDeviceProvisioned && !isAirplaneMode
+                ) { isSatelliteAllowed, isDeviceProvisioned, isWifiActive, isAirplaneMode ->
+                    isSatelliteAllowed && isDeviceProvisioned && !isWifiActive && !isAirplaneMode
                 }
             }
         }
