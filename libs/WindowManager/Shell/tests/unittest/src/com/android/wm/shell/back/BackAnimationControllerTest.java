@@ -596,6 +596,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
 
         // Set up the monitoring objects.
         doNothing().when(runner).onAnimationStart(anyInt(), any(), any(), any(), any());
+        doReturn(false).when(animationRunner).shouldMonitorCUJ(any());
         doReturn(runner).when(animationRunner).getRunner();
         doReturn(callback).when(animationRunner).getCallback();
 
