@@ -106,7 +106,7 @@ fun ColumnVolumeSliders(
             }
         }
         transition.AnimatedVisibility(
-            visible = { it },
+            visible = { it || !isExpandable },
             enter =
                 expandVertically(animationSpec = tween(durationMillis = EXPAND_DURATION_MILLIS)),
             exit =
@@ -121,7 +121,7 @@ fun ColumnVolumeSliders(
                         val sliderState by sliderViewModel.slider.collectAsState()
                         transition.AnimatedVisibility(
                             modifier = Modifier.padding(top = 16.dp),
-                            visible = { it },
+                            visible = { it || !isExpandable },
                             enter = enterTransition(index = index, totalCount = viewModels.size),
                             exit = exitTransition(index = index, totalCount = viewModels.size)
                         ) {
