@@ -22,9 +22,9 @@ import android.graphics.drawable.Drawable
 /** Models UI state for media guts menu */
 data class GutsViewModel(
     val gutsText: CharSequence,
-    @ColorInt val textColor: Int,
-    @ColorInt val buttonBackgroundColor: Int,
-    @ColorInt val buttonTextColor: Int,
+    @ColorInt val textPrimaryColor: Int,
+    @ColorInt val accentPrimaryColor: Int,
+    @ColorInt val surfaceColor: Int,
     val isDismissEnabled: Boolean = true,
     val onDismissClicked: () -> Unit,
     val cancelTextBackground: Drawable?,
