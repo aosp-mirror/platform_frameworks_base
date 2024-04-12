@@ -132,6 +132,13 @@ public final class CredentialManager {
             "enable_credential_description_api";
 
     /**
+     * @hide
+     */
+    @Hide
+    public static final String EXTRA_AUTOFILL_RESULT_RECEIVER =
+            "android.credentials.AUTOFILL_RESULT_RECEIVER";
+
+    /**
      * @hide instantiated by ContextImpl.
      */
     public CredentialManager(Context context, ICredentialManager service) {

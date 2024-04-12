@@ -100,7 +100,6 @@ class CredentialSelectorUiStateGetMapperTest {
         val getCredentialUiState = Request.Get(
             token = null,
             resultReceiver = null,
-            finalResponseReceiver = null,
             providerInfos = listOf(createProviderInfo(credentialList1))).toGet(isPrimary = true)
 
         assertThat(getCredentialUiState).isEqualTo(
@@ -113,7 +112,6 @@ class CredentialSelectorUiStateGetMapperTest {
         val getCredentialUiState = Request.Get(
             token = null,
             resultReceiver = null,
-            finalResponseReceiver = null,
             providerInfos = listOf(createProviderInfo(listOf(passkeyCredentialEntryInfo,
                 unknownCredentialEntryInfo)))).toGet(isPrimary = true)
 
@@ -132,7 +130,6 @@ class CredentialSelectorUiStateGetMapperTest {
         val getCredentialUiState = Request.Get(
             token = null,
             resultReceiver = null,
-            finalResponseReceiver = null,
             providerInfos = listOf(createProviderInfo(credentialList1))).toGet(isPrimary = false)
 
         assertThat(getCredentialUiState).isEqualTo(
@@ -151,7 +148,6 @@ class CredentialSelectorUiStateGetMapperTest {
         val getCredentialUiState = Request.Get(
             token = null,
             resultReceiver = null,
-            finalResponseReceiver = null,
             providerInfos = listOf(createProviderInfo(credentialList1),
                 createProviderInfo(credentialList2))).toGet(isPrimary = false)
 
