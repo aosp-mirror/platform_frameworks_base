@@ -20,13 +20,17 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.verify;
 
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.os.Looper;
+import android.platform.test.annotations.EnableFlags;
 import android.service.dreams.DreamService;
+import android.service.dreams.Flags;
+import android.service.dreams.IDreamOverlayCallback;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
@@ -142,5 +146,21 @@ public class DreamServiceTest {
                 .setShouldShowComplications(true)
                 .build();
         assertTrue(environment.advance(TestDreamEnvironment.DREAM_STATE_WOKEN));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_DREAM_WAKE_REDIRECT)
+    public void testRedirect() throws Exception {
+        TestDreamEnvironment environment = new TestDreamEnvironment.Builder(mTestableLooper)
+                .setDreamOverlayPresent(true)
+                .setShouldShowComplications(true)
+                .build();
+
+        environment.advance(TestDreamEnvironment.DREAM_STATE_STARTED);
+        final IDreamOverlayCallback overlayCallback = environment.getDreamOverlayCallback();
+        overlayCallback.onRedirectWake(true);
+        environment.resetClientInvocations();
+        environment.advance(TestDreamEnvironment.DREAM_STATE_WOKEN);
+        verify(environment.getDreamOverlayClient()).onWakeRequested();
     }
 }

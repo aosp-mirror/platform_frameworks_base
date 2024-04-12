@@ -21,6 +21,14 @@ flag {
 }
 
 flag {
+  name: "dream_wake_redirect"
+  namespace: "systemui"
+  description: "This flag enables using a host to handle displaying a dream's overlay rather than "
+      "relying on the dream's window"
+  bug: "334083490"
+}
+
+flag {
   name: "dream_tracks_focus"
   namespace: "communal"
   description: "This flag enables the ability for dreams to track whether or not they have focus"

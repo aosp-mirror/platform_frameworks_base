@@ -18,6 +18,7 @@ android_test {
         "mockito-target-minus-junit4",
         "services.core",
         "mockingservicestests-utils-mockito",
+        "platform-test-annotations",
         "servicestests-utils",
         "testables",
     ],

@@ -281,6 +281,8 @@ public class DreamService extends Service implements Window.Callback {
 
     private Integer mTrackingConfirmKey = null;
 
+    private boolean mRedirectWake;
+
     private final Injector mInjector;
 
     /**
@@ -1117,6 +1119,11 @@ public class DreamService extends Service implements Window.Callback {
                 // Simply finish dream when exit is requested.
                 mHandler.post(() -> finish());
             }
+
+            @Override
+            public void onRedirectWake(boolean redirect) {
+                mRedirectWake = redirect;
+            }
         };
 
         super.onCreate();
@@ -1281,6 +1288,18 @@ public class DreamService extends Service implements Window.Callback {
         if (mDebug) {
             Slog.v(mTag, "wakeUp(): fromSystem=" + fromSystem + ", mWaking=" + mWaking
                     + ", mFinished=" + mFinished);
+        }
+
+        if (!fromSystem && mOverlayConnection != null && mRedirectWake) {
+            mOverlayConnection.addConsumer(overlay -> {
+                try {
+                    overlay.onWakeRequested();
+                } catch (RemoteException e) {
+                    Log.e(mTag, "could not inform overlay of dream wakeup:" + e);
+                }
+            });
+
+            return;
         }
 
         if (!mWaking && !mFinished) {
