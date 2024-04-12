@@ -3779,17 +3779,25 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 EventLogTags.writeWmEnterPip(r.mUserId, System.identityHashCode(r),
                         r.shortComponentName, Boolean.toString(isAutoEnter));
-                r.setPictureInPictureParams(params);
-                r.mAutoEnteringPip = isAutoEnter;
-                mRootWindowContainer.moveActivityToPinnedRootTask(r,
-                        null /* launchIntoPipHostActivity */, "enterPictureInPictureMode",
-                        transition);
-                // Continue the pausing process after entering pip.
-                if (r.isState(PAUSING) && r.mPauseSchedulePendingForPip) {
-                    r.getTask().schedulePauseActivity(r, false /* userLeaving */,
-                            false /* pauseImmediately */, true /* autoEnteringPip */, "auto-pip");
+
+                // Ensure the ClientTransactionItems are bundled for this operation.
+                deferWindowLayout();
+                try {
+                    r.setPictureInPictureParams(params);
+                    r.mAutoEnteringPip = isAutoEnter;
+                    mRootWindowContainer.moveActivityToPinnedRootTask(r,
+                            null /* launchIntoPipHostActivity */, "enterPictureInPictureMode",
+                            transition);
+                    // Continue the pausing process after entering pip.
+                    if (r.isState(PAUSING) && r.mPauseSchedulePendingForPip) {
+                        r.getTask().schedulePauseActivity(r, false /* userLeaving */,
+                                false /* pauseImmediately */, true /* autoEnteringPip */,
+                                "auto-pip");
+                    }
+                    r.mAutoEnteringPip = false;
+                } finally {
+                    continueWindowLayout();
                 }
-                r.mAutoEnteringPip = false;
             }
         };
 

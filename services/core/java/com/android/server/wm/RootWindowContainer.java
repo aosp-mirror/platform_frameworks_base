@@ -2378,6 +2378,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             return false;
         }
 
+        return resumeFocusedTasksTopActivitiesUnchecked(targetRootTask, target, targetOptions,
+                deferPause);
+    }
+
+    @VisibleForTesting
+    boolean resumeFocusedTasksTopActivitiesUnchecked(
+            Task targetRootTask, ActivityRecord target, ActivityOptions targetOptions,
+            boolean deferPause) {
         boolean result = false;
         if (targetRootTask != null && (targetRootTask.isTopRootTaskInDisplayArea()
                 || getTopDisplayFocusedRootTask() == targetRootTask)) {
