@@ -19,14 +19,19 @@ package com.android.wm.shell.windowdecor;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.content.pm.PackageManager.FEATURE_PC;
+import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 
 import android.app.ActivityManager.RunningTaskInfo;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.provider.Settings;
 import android.util.SparseArray;
 import android.view.Choreographer;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -163,10 +168,33 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     }
 
     private boolean shouldShowWindowDecor(RunningTaskInfo taskInfo) {
-        return taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM
-                || (taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD
-                && taskInfo.configuration.windowConfiguration.getDisplayWindowingMode()
-                == WINDOWING_MODE_FREEFORM);
+        if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
+            return true;
+        }
+        if (taskInfo.getActivityType() != ACTIVITY_TYPE_STANDARD) {
+            return false;
+        }
+        final DisplayAreaInfo rootDisplayAreaInfo =
+                mRootTaskDisplayAreaOrganizer.getDisplayAreaInfo(taskInfo.displayId);
+        if (rootDisplayAreaInfo != null) {
+            return rootDisplayAreaInfo.configuration.windowConfiguration.getWindowingMode()
+                    == WINDOWING_MODE_FREEFORM;
+        }
+
+        // It is possible that the rootDisplayAreaInfo is null when a task appears soon enough after
+        // a new display shows up, because TDA may appear after task appears in WM shell. Instead of
+        // fixing the synchronization issues, let's use other signals to "guess" the answer. It is
+        // OK in this context because no other captions other than the legacy developer option
+        // freeform and Kingyo/CF PC may use this class. WM shell should have full control over the
+        // condition where captions should show up in all new cases such as desktop mode, for which
+        // we should use different window decor view models. Ultimately Kingyo/CF PC may need to
+        // spin up their own window decor view model when they start to care about multiple
+        // displays.
+        if (isPc()) {
+            return true;
+        }
+        return taskInfo.displayId != Display.DEFAULT_DISPLAY
+                && forcesDesktopModeOnExternalDisplays();
     }
 
     private void createWindowDecoration(
@@ -312,5 +340,18 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             }
             return true;
         }
+    }
+
+    /**
+     * Returns if this device is a PC.
+     */
+    private boolean isPc() {
+        return mContext.getPackageManager().hasSystemFeature(FEATURE_PC);
+    }
+
+    private boolean forcesDesktopModeOnExternalDisplays() {
+        final ContentResolver resolver = mContext.getContentResolver();
+        return Settings.Global.getInt(resolver,
+                DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS, 0) != 0;
     }
 }
