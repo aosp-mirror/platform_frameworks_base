@@ -66,8 +66,8 @@ class ToggleButtonComponent(
                 val colors =
                     if (viewModel.isChecked) {
                         ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                         )
                     } else {
                         ButtonDefaults.buttonColors(

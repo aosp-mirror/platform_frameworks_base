@@ -30,9 +30,11 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -119,6 +121,7 @@ fun VolumePanelRadioButtonBar(
             ) {
                 for (itemIndex in items.indices) {
                     val item = items[itemIndex]
+                    val isSelected = itemIndex == scope.selectedIndex
                     Row(
                         modifier =
                             Modifier.height(48.dp)
@@ -126,7 +129,7 @@ fun VolumePanelRadioButtonBar(
                                 .semantics {
                                     item.contentDescription?.let { contentDescription = it }
                                     role = Role.Switch
-                                    selected = itemIndex == scope.selectedIndex
+                                    selected = isSelected
                                 }
                                 .clickable(
                                     interactionSource = null,
@@ -137,7 +140,11 @@ fun VolumePanelRadioButtonBar(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         if (item.icon !== Empty) {
-                            with(items[itemIndex]) { icon() }
+                            CompositionLocalProvider(
+                                LocalContentColor provides colors.getIconColor(isSelected)
+                            ) {
+                                with(items[itemIndex]) { icon() }
+                            }
                         }
                     }
                 }
@@ -163,7 +170,10 @@ fun VolumePanelRadioButtonBar(
                     ) {
                         val item = items[itemIndex]
                         if (item.icon !== Empty) {
-                            with(items[itemIndex]) { label() }
+                            val textColor = colors.getLabelColor(itemIndex == scope.selectedIndex)
+                            CompositionLocalProvider(LocalContentColor provides textColor) {
+                                with(items[itemIndex]) { label() }
+                            }
                         }
                     }
                 }
@@ -265,7 +275,21 @@ data class VolumePanelRadioButtonBarColors(
     val indicatorColor: Color,
     /** Color of the indicator background. */
     val indicatorBackgroundColor: Color,
+    /** Color of the icon. */
+    val iconColor: Color,
+    /** Color of the icon when it's selected. */
+    val selectedIconColor: Color,
+    /** Color of the label. */
+    val labelColor: Color,
+    /** Color of the label when it's selected. */
+    val selectedLabelColor: Color,
 )
+
+private fun VolumePanelRadioButtonBarColors.getIconColor(selected: Boolean): Color =
+    if (selected) selectedIconColor else iconColor
+
+private fun VolumePanelRadioButtonBarColors.getLabelColor(selected: Boolean): Color =
+    if (selected) selectedLabelColor else labelColor
 
 object VolumePanelRadioButtonBarDefaults {
 
@@ -283,12 +307,20 @@ object VolumePanelRadioButtonBarDefaults {
      */
     @Composable
     fun defaultColors(
-        indicatorColor: Color = MaterialTheme.colorScheme.primaryContainer,
+        indicatorColor: Color = MaterialTheme.colorScheme.tertiaryContainer,
         indicatorBackgroundColor: Color = MaterialTheme.colorScheme.surface,
+        iconColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+        selectedIconColor: Color = MaterialTheme.colorScheme.onTertiaryContainer,
+        labelColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+        selectedLabelColor: Color = MaterialTheme.colorScheme.onSurface,
     ): VolumePanelRadioButtonBarColors =
         VolumePanelRadioButtonBarColors(
             indicatorColor = indicatorColor,
             indicatorBackgroundColor = indicatorBackgroundColor,
+            iconColor = iconColor,
+            selectedIconColor = selectedIconColor,
+            labelColor = labelColor,
+            selectedLabelColor = selectedLabelColor,
         )
 }
 
