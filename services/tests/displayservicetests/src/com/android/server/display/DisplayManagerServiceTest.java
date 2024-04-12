@@ -1708,7 +1708,6 @@ public class DisplayManagerServiceTest {
      * {@link VirtualDisplayConfig.Builder#setSurface(Surface)}
      */
     @Test
-    @FlakyTest(bugId = 127687569)
     public void testCreateVirtualDisplay_setSurface() throws Exception {
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         registerDefaultDisplays(displayManager);
