@@ -29,6 +29,7 @@ import static org.junit.Assert.assertThat;
 import android.content.Context;
 import android.graphics.Insets;
 import android.graphics.Rect;
+import android.platform.test.annotations.Presubmit;
 import android.view.DisplayCutout;
 import android.view.View;
 import android.view.View.OnApplyWindowInsetsListener;
@@ -49,6 +50,7 @@ import java.lang.reflect.Field;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@Presubmit
 public class ActionBarOverlayLayoutTest {
 
     private static final Insets TOP_INSET_5 = Insets.of(0, 5, 0, 0);
@@ -168,9 +170,16 @@ public class ActionBarOverlayLayoutTest {
     }
 
     private WindowInsets insetsWith(Insets content, DisplayCutout cutout) {
-        return new WindowInsets(WindowInsets.createCompatTypeMap(content.toRect()), null, null,
-                false, 0, 0, cutout, null, null, null, WindowInsets.Type.systemBars(), false,
-                null, null, 0, 0);
+        final Insets cutoutInsets = cutout != null
+                ? Insets.of(cutout.getSafeInsets())
+                : Insets.NONE;
+        return new WindowInsets.Builder()
+                .setSystemWindowInsets(content)
+                .setDisplayCutout(cutout)
+                .setInsets(WindowInsets.Type.displayCutout(), cutoutInsets)
+                .setInsetsIgnoringVisibility(WindowInsets.Type.displayCutout(), cutoutInsets)
+                .setVisible(WindowInsets.Type.displayCutout(), true)
+                .build();
     }
 
     private ViewGroup createViewGroupWithId(int id) {
