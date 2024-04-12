@@ -130,7 +130,6 @@ import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
@@ -4179,13 +4178,8 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
-    @Ignore // TODO(b/330888878): fix test in main
-    public void testPortraitCloseToSquareDisplayWithTaskbar_notLetterboxed() {
-        if (Flags.insetsDecoupledConfiguration()) {
-            // TODO (b/151861875): Re-enable it. This is disabled temporarily because the config
-            //  bounds no longer contains display cutout.
-            return;
-        }
+    @DisableCompatChanges({ActivityInfo.INSETS_DECOUPLED_CONFIGURATION_ENFORCED})
+    public void testPortraitCloseToSquareDisplayWithTaskbar_letterboxed() {
         // Set up portrait close to square display
         setUpDisplaySizeWithApp(2200, 2280);
         final DisplayContent display = mActivity.mDisplayContent;
@@ -4198,16 +4192,21 @@ public class SizeCompatTests extends WindowTestsBase {
                         .setInsetsSize(Insets.of(0, 0, 0, 150))
         };
         display.getDisplayPolicy().addWindowLw(navbar, navbar.mAttrs);
-        assertTrue(navbar.providesDisplayDecorInsets()
-                && display.getDisplayPolicy().updateDecorInsetsInfo());
+        assertTrue(display.getDisplayPolicy().updateDecorInsetsInfo());
         display.sendNewConfiguration();
 
-        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(mTask)
+                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
+                .setComponent(ComponentName.createRelative(mContext,
+                        SizeCompatTests.class.getName()))
+                .setUid(android.os.Process.myUid())
+                .build();
 
-        // Activity is fullscreen even though orientation is not respected with insets, because
-        // the display still matches or is less than the activity aspect ratio
-        assertEquals(display.getBounds(), mActivity.getBounds());
-        assertFalse(mActivity.isLetterboxedForFixedOrientationAndAspectRatio());
+        final Rect bounds = activity.getBounds();
+        // Activity should be letterboxed and should have portrait app bounds
+        assertTrue(activity.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertTrue(bounds.height() > bounds.width());
     }
 
     @Test
@@ -4229,6 +4228,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // can be aligned inside parentAppBounds
         assertEquals(mActivity.getBounds(), new Rect(0, 0, 1000, 2200));
     }
+
     @Test
     public void testApplyAspectRatio_activityCannotAlignWithParentAppVertical() {
         if (Flags.insetsDecoupledConfiguration()) {

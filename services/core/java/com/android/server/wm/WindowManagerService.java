@@ -570,6 +570,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final int mOverrideConfigTypes;
 
+    final int mOverrideDecorTypes;
+
     final boolean mLimitedAlphaCompositing;
     final int mMaxUiWidth;
 
@@ -1255,10 +1257,13 @@ public class WindowManagerService extends IWindowManager.Stub
         if (isScreenSizeDecoupledFromStatusBarAndCutout && !mFlags.mInsetsDecoupledConfiguration) {
             // If the global new behavior is not there, but the partial decouple flag is on.
             mOverrideConfigTypes = 0;
+            mOverrideDecorTypes = 0;
         } else {
             mOverrideConfigTypes =
                     WindowInsets.Type.displayCutout() | WindowInsets.Type.statusBars()
                             | WindowInsets.Type.navigationBars();
+            mOverrideDecorTypes = WindowInsets.Type.displayCutout()
+                    | WindowInsets.Type.navigationBars();
         }
 
         mLetterboxConfiguration = new LetterboxConfiguration(

@@ -833,8 +833,11 @@ public class TaskTests extends WindowTestsBase {
         final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task).build();
         final ActivityRecord.CompatDisplayInsets compatInsets =
                 new ActivityRecord.CompatDisplayInsets(
-                        display, activity, /* fixedOrientationBounds= */ null);
-        task.computeConfigResourceOverrides(inOutConfig, parentConfig, compatInsets);
+                        display, activity, /* letterboxedContainerBounds */ null,
+                        /* useOverrideInsets */ false);
+        final TaskFragment.ConfigOverrideHint overrideHint = new TaskFragment.ConfigOverrideHint();
+        overrideHint.mTmpCompatInsets = compatInsets;
+        task.computeConfigResourceOverrides(inOutConfig, parentConfig, overrideHint);
 
         assertEquals(largerLandscapeBounds, inOutConfig.windowConfiguration.getAppBounds());
         final float density = parentConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
