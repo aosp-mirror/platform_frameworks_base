@@ -25,6 +25,8 @@ import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_RE
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP;
 
+import static com.android.server.wm.testing.Assert.assertThrows;
+
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -36,6 +38,8 @@ import android.content.Context;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.server.wm.testing.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -287,5 +291,57 @@ public class LetterboxConfigurationTest {
         verify(mLetterboxConfigurationPersister).setLetterboxPositionForVerticalReachability(
                 false /* forTabletopMode */,
                 LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP);
+    }
+
+    @Test
+    public void test_setLetterboxHorizontalPositionMultiplier_validValues() {
+        assertThrows(IllegalArgumentException.class,
+                () -> mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(-1));
+        assertThrows(IllegalArgumentException.class,
+                () -> mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(2));
+
+        // Does not throw an exception for values [0,1].
+        mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(0);
+        mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(0.5f);
+        mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(1);
+    }
+
+    @Test
+    public void test_setLetterboxVerticalPositionMultiplier_validValues() {
+        assertThrows(IllegalArgumentException.class,
+                () -> mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(-1));
+        assertThrows(IllegalArgumentException.class,
+                () -> mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(2));
+
+        // Does not throw an exception for values [0,1].
+        mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(0);
+        mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(0.5f);
+        mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(1);
+    }
+
+    @Test
+    public void test_setLetterboxBookModePositionMultiplier_validValues() {
+        assertThrows(IllegalArgumentException.class,
+                () -> mLetterboxConfiguration.setLetterboxBookModePositionMultiplier(-1));
+        assertThrows(IllegalArgumentException.class,
+                () -> mLetterboxConfiguration.setLetterboxBookModePositionMultiplier(2));
+
+        // Does not throw an exception for values [0,1].
+        mLetterboxConfiguration.setLetterboxBookModePositionMultiplier(0);
+        mLetterboxConfiguration.setLetterboxBookModePositionMultiplier(0.5f);
+        mLetterboxConfiguration.setLetterboxBookModePositionMultiplier(1);
+    }
+
+    @Test
+    public void test_setLetterboxTabletopModePositionMultiplier_validValues() {
+        assertThrows(IllegalArgumentException.class,
+                () -> mLetterboxConfiguration.setLetterboxTabletopModePositionMultiplier(-1));
+        assertThrows(IllegalArgumentException.class,
+                () -> mLetterboxConfiguration.setLetterboxTabletopModePositionMultiplier(2));
+
+        // Does not throw an exception for values [0,1].
+        mLetterboxConfiguration.setLetterboxTabletopModePositionMultiplier(0);
+        mLetterboxConfiguration.setLetterboxTabletopModePositionMultiplier(0.5f);
+        mLetterboxConfiguration.setLetterboxTabletopModePositionMultiplier(1);
     }
 }

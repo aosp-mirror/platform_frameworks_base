@@ -4143,31 +4143,6 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
-    public void testUpdateResolvedBoundsHorizontalPosition_invalidMultiplier_defaultToCenter() {
-        // Display configured as (2800, 1400).
-
-        // Below 0.0.
-        assertHorizontalPositionForDifferentDisplayConfigsForPortraitActivity(
-                /* letterboxHorizontalPositionMultiplier */ -1.0f,
-                // At launch.
-                /* fixedOrientationLetterbox */ new Rect(1050, 0, 1750, 1400),
-                // After 90 degree rotation.
-                /* sizeCompatUnscaled */ new Rect(350, 0, 1050, 1400),
-                // After the display is resized to (700, 1400).
-                /* sizeCompatScaled */ new Rect(525, 0, 875, 700));
-
-        // Above 1.0
-        assertHorizontalPositionForDifferentDisplayConfigsForPortraitActivity(
-                /* letterboxHorizontalPositionMultiplier */ 2.0f,
-                // At launch.
-                /* fixedOrientationLetterbox */ new Rect(1050, 0, 1750, 1400),
-                // After 90 degree rotation.
-                /* sizeCompatUnscaled */ new Rect(350, 0, 1050, 1400),
-                // After the display is resized to (700, 1400).
-                /* sizeCompatScaled */ new Rect(525, 0, 875, 700));
-    }
-
-    @Test
     public void testUpdateResolvedBoundsHorizontalPosition_right() {
         // Display configured as (2800, 1400).
         assertHorizontalPositionForDifferentDisplayConfigsForPortraitActivity(
@@ -4389,31 +4364,6 @@ public class SizeCompatTests extends WindowTestsBase {
         // Display configured as (1400, 2800).
         assertVerticalPositionForDifferentDisplayConfigsForLandscapeActivity(
                 /* letterboxVerticalPositionMultiplier */ 0.5f,
-                // At launch.
-                /* fixedOrientationLetterbox */ new Rect(0, 1050, 1400, 1750),
-                // After 90 degree rotation.
-                /* sizeCompatUnscaled */ new Rect(700, 350, 2100, 1050),
-                // After the display is resized to (1400, 700).
-                /* sizeCompatScaled */ new Rect(0, 525, 700, 875));
-    }
-
-    @Test
-    public void testUpdateResolvedBoundsVerticalPosition_invalidMultiplier_defaultToCenter() {
-        // Display configured as (1400, 2800).
-
-        // Below 0.0.
-        assertVerticalPositionForDifferentDisplayConfigsForLandscapeActivity(
-                /* letterboxVerticalPositionMultiplier */ -1.0f,
-                // At launch.
-                /* fixedOrientationLetterbox */ new Rect(0, 1050, 1400, 1750),
-                // After 90 degree rotation.
-                /* sizeCompatUnscaled */ new Rect(700, 350, 2100, 1050),
-                // After the display is resized to (1400, 700).
-                /* sizeCompatScaled */ new Rect(0, 525, 700, 875));
-
-        // Above 1.0
-        assertVerticalPositionForDifferentDisplayConfigsForLandscapeActivity(
-                /* letterboxVerticalPositionMultiplier */ 2.0f,
                 // At launch.
                 /* fixedOrientationLetterbox */ new Rect(0, 1050, 1400, 1750),
                 // After 90 degree rotation.

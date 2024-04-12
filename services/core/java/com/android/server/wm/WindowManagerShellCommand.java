@@ -848,7 +848,12 @@ public class WindowManagerShellCommand extends ShellCommand {
             return -1;
         }
         synchronized (mInternal.mGlobalLock) {
-            mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(multiplier);
+            try {
+                mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(multiplier);
+            } catch (IllegalArgumentException  e) {
+                getErrPrintWriter().println("Error: invalid multiplier value " + e);
+                return -1;
+            }
         }
         return 0;
     }
@@ -867,7 +872,12 @@ public class WindowManagerShellCommand extends ShellCommand {
             return -1;
         }
         synchronized (mInternal.mGlobalLock) {
-            mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(multiplier);
+            try {
+                mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(multiplier);
+            } catch (IllegalArgumentException  e) {
+                getErrPrintWriter().println("Error: invalid multiplier value " + e);
+                return -1;
+            }
         }
         return 0;
     }
