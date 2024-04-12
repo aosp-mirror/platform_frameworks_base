@@ -80,6 +80,7 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
@@ -229,6 +230,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                 wifiRepository,
                 fullConnectionFactory,
                 updateMonitor,
+                mock(),
             )
 
         testScope.runCurrent()
@@ -529,6 +531,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    @Ignore("b/333912012")
     fun testConnectionCache_clearsInvalidSubscriptions() =
         testScope.runTest {
             collectLastValue(underTest.subscriptions)
@@ -553,6 +556,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    @Ignore("b/333912012")
     fun testConnectionCache_clearsInvalidSubscriptions_includingCarrierMerged() =
         testScope.runTest {
             collectLastValue(underTest.subscriptions)
@@ -581,6 +585,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
     /** Regression test for b/261706421 */
     @Test
+    @Ignore("b/333912012")
     fun testConnectionsCache_clearMultipleSubscriptionsAtOnce_doesNotThrow() =
         testScope.runTest {
             collectLastValue(underTest.subscriptions)
@@ -601,6 +606,54 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             getSubscriptionCallback().onSubscriptionsChanged()
 
             assertThat(underTest.getSubIdRepoCache()).isEmpty()
+        }
+
+    @Test
+    fun testConnectionsCache_keepsReposCached() =
+        testScope.runTest {
+            // Collect subscriptions to start the job
+            collectLastValue(underTest.subscriptions)
+
+            whenever(subscriptionManager.completeActiveSubscriptionInfoList)
+                .thenReturn(listOf(SUB_1))
+            getSubscriptionCallback().onSubscriptionsChanged()
+
+            val repo1_1 = underTest.getRepoForSubId(SUB_1_ID)
+
+            // All subscriptions disappear
+            whenever(subscriptionManager.completeActiveSubscriptionInfoList).thenReturn(listOf())
+            getSubscriptionCallback().onSubscriptionsChanged()
+
+            // Sub1 comes back
+            whenever(subscriptionManager.completeActiveSubscriptionInfoList)
+                .thenReturn(listOf(SUB_1))
+            getSubscriptionCallback().onSubscriptionsChanged()
+
+            val repo1_2 = underTest.getRepoForSubId(SUB_1_ID)
+
+            assertThat(repo1_1).isSameInstanceAs(repo1_2)
+        }
+
+    @Test
+    fun testConnectionsCache_doesNotDropReferencesThatHaveBeenRealized() =
+        testScope.runTest {
+            // Collect subscriptions to start the job
+            collectLastValue(underTest.subscriptions)
+
+            whenever(subscriptionManager.completeActiveSubscriptionInfoList)
+                .thenReturn(listOf(SUB_1))
+            getSubscriptionCallback().onSubscriptionsChanged()
+
+            // Client grabs a reference to a repository, but doesn't keep it around
+            underTest.getRepoForSubId(SUB_1_ID)
+
+            // All subscriptions disappear
+            whenever(subscriptionManager.completeActiveSubscriptionInfoList).thenReturn(listOf())
+            getSubscriptionCallback().onSubscriptionsChanged()
+
+            val repo1 = underTest.getRepoForSubId(SUB_1_ID)
+
+            assertThat(repo1).isNotNull()
         }
 
     @Test
@@ -1063,7 +1116,8 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                     airplaneModeRepository,
                     wifiRepository,
                     fullConnectionFactory,
-                    updateMonitor
+                    updateMonitor,
+                    mock(),
                 )
 
             val latest by collectLastValue(underTest.defaultDataSubRatConfig)
