@@ -1368,28 +1368,32 @@ public class BubbleController implements ConfigurationChangeListener,
         }
 
         String appBubbleKey = Bubble.getAppBubbleKeyForApp(intent.getPackage(), user);
-        Log.i(TAG, "showOrHideAppBubble, key= " + appBubbleKey + " stackVisibility= "
-                + (mStackView != null ? mStackView.getVisibility() : " null ")
-                + " statusBarShade=" + mIsStatusBarShade);
         PackageManager packageManager = getPackageManagerForUser(mContext, user.getIdentifier());
-        if (!isResizableActivity(intent, packageManager, appBubbleKey)) return;
+        if (!isResizableActivity(intent, packageManager, appBubbleKey)) return; // logs errors
 
         Bubble existingAppBubble = mBubbleData.getBubbleInStackWithKey(appBubbleKey);
+        ProtoLog.d(WM_SHELL_BUBBLES,
+                "showOrHideAppBubble, key=%s existingAppBubble=%s stackVisibility=%s "
+                        + "statusBarShade=%s",
+                appBubbleKey, existingAppBubble,
+                (mStackView != null ? mStackView.getVisibility() : "null"),
+                mIsStatusBarShade);
+
         if (existingAppBubble != null) {
             BubbleViewProvider selectedBubble = mBubbleData.getSelectedBubble();
             if (isStackExpanded()) {
                 if (selectedBubble != null && appBubbleKey.equals(selectedBubble.getKey())) {
+                    ProtoLog.d(WM_SHELL_BUBBLES, "collapseStack for %s", appBubbleKey);
                     // App bubble is expanded, lets collapse
-                    Log.i(TAG, "  showOrHideAppBubble, selected bubble is app bubble, collapsing");
                     collapseStack();
                 } else {
+                    ProtoLog.d(WM_SHELL_BUBBLES, "setSelected for %s", appBubbleKey);
                     // App bubble is not selected, select it
-                    Log.i(TAG, "  showOrHideAppBubble, expanded, selecting existing app bubble");
                     mBubbleData.setSelectedBubble(existingAppBubble);
                 }
             } else {
+                ProtoLog.d(WM_SHELL_BUBBLES, "setSelectedBubbleAndExpandStack %s", appBubbleKey);
                 // App bubble is not selected, select it & expand
-                Log.i(TAG, "  showOrHideAppBubble, expand and select existing app bubble");
                 mBubbleData.setSelectedBubbleAndExpandStack(existingAppBubble);
             }
         } else {
@@ -1397,13 +1401,12 @@ public class BubbleController implements ConfigurationChangeListener,
             Bubble b = mBubbleData.getOverflowBubbleWithKey(appBubbleKey);
             if (b != null) {
                 // It's in the overflow, so remove it & reinflate
-                Log.i(TAG, "  showOrHideAppBubble, expanding app bubble from overflow");
                 mBubbleData.removeOverflowBubble(b);
             } else {
                 // App bubble does not exist, lets add and expand it
-                Log.i(TAG, "  showOrHideAppBubble, creating and expanding app bubble");
                 b = Bubble.createAppBubble(intent, user, icon, mMainExecutor);
             }
+            ProtoLog.d(WM_SHELL_BUBBLES, "inflateAndAdd %s", appBubbleKey);
             b.setShouldAutoExpand(true);
             inflateAndAdd(b, /* suppressFlyout= */ true, /* showInShade= */ false);
         }
