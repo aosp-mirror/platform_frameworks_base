@@ -64,8 +64,6 @@ class FakeMobileConnectionRepository(
 
     override val hasPrioritizedNetworkCapabilities = MutableStateFlow(false)
 
-    override val satelliteConnectionHysteresisSeconds = MutableStateFlow(0)
-
     private var isInEcmMode: Boolean = false
 
     override suspend fun isInEcmMode(): Boolean = isInEcmMode

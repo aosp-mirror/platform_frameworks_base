@@ -351,15 +351,6 @@ class FullMobileConnectionRepository(
                 activeRepo.value.hasPrioritizedNetworkCapabilities.value,
             )
 
-    override val satelliteConnectionHysteresisSeconds =
-        activeRepo
-            .flatMapLatest { it.satelliteConnectionHysteresisSeconds }
-            .stateIn(
-                scope,
-                SharingStarted.WhileSubscribed(),
-                activeRepo.value.satelliteConnectionHysteresisSeconds.value
-            )
-
     override suspend fun isInEcmMode(): Boolean = activeRepo.value.isInEcmMode()
 
     fun dump(pw: PrintWriter) {
