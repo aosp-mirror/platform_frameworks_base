@@ -2886,6 +2886,10 @@ static void extractMemoryFromContext(
         jint offset,
         jint size,
         sp<hardware::HidlMemory> *memory) {
+    if ((offset + size) > context->capacity()) {
+        ALOGW("extractMemoryFromContext: offset + size provided exceed capacity");
+        return;
+    }
     *memory = context->toHidlMemory();
     if (*memory == nullptr) {
         if (!context->mBlock) {
@@ -2893,23 +2897,26 @@ static void extractMemoryFromContext(
             return;
         }
         ALOGD("extractMemoryFromContext: realloc & copying from C2Block to IMemory (cap=%zu)",
-              context->capacity());
+                context->capacity());
         if (!obtain(context, context->capacity(),
                     context->mCodecNames, true /* secure */)) {
             ALOGW("extractMemoryFromContext: failed to obtain secure block");
             return;
         }
-        C2WriteView view = context->mBlock->map().get();
-        if (view.error() != C2_OK) {
-            ALOGW("extractMemoryFromContext: failed to map C2Block (%d)", view.error());
-            return;
-        }
-        uint8_t *memoryPtr = static_cast<uint8_t *>(context->mMemory->unsecurePointer());
-        memcpy(memoryPtr + offset, view.base() + offset, size);
-        context->mBlock.reset();
-        context->mReadWriteMapping.reset();
         *memory = context->toHidlMemory();
     }
+    if (context->mBlock == nullptr || context->mReadWriteMapping == nullptr) {
+        ALOGW("extractMemoryFromContext: Cannot extract memory as C2Block is not created/mapped");
+        return;
+    }
+    if (context->mReadWriteMapping->error() != C2_OK) {
+        ALOGW("extractMemoryFromContext: failed to map C2Block (%d)",
+                context->mReadWriteMapping->error());
+        return;
+    }
+    // We are proceeding to extract memory from C2Block
+    uint8_t *memoryPtr = static_cast<uint8_t *>(context->mMemory->unsecurePointer());
+    memcpy(memoryPtr + offset, context->mReadWriteMapping->base() + offset, size);
 }
 
 static void extractBufferFromContext(
