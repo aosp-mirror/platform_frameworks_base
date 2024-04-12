@@ -15,6 +15,9 @@
  */
 package com.android.server.notification;
 
+import static android.app.Flags.restrictAudioAttributesAlarm;
+import static android.app.Flags.restrictAudioAttributesCall;
+import static android.app.Flags.restrictAudioAttributesMedia;
 import static android.app.Flags.sortSectionByTime;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.text.TextUtils.formatSimple;
@@ -27,6 +30,7 @@ import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.compat.IPlatformCompat;
 import com.android.tools.r8.keepanno.annotations.KeepItemKind;
 import com.android.tools.r8.keepanno.annotations.KeepTarget;
 import com.android.tools.r8.keepanno.annotations.UsesReflection;
@@ -56,7 +60,8 @@ public class RankingHelper {
                         methodName = "<init>")
             })
     public RankingHelper(Context context, RankingHandler rankingHandler, RankingConfig config,
-            ZenModeHelper zenHelper, NotificationUsageStats usageStats, String[] extractorNames) {
+            ZenModeHelper zenHelper, NotificationUsageStats usageStats, String[] extractorNames,
+            IPlatformCompat platformCompat) {
         mContext = context;
         mRankingHandler = rankingHandler;
         if (sortSectionByTime()) {
@@ -75,6 +80,10 @@ public class RankingHelper {
                 extractor.initialize(mContext, usageStats);
                 extractor.setConfig(config);
                 extractor.setZenHelper(zenHelper);
+                if (restrictAudioAttributesAlarm() || restrictAudioAttributesMedia()
+                        || restrictAudioAttributesCall()) {
+                    extractor.setCompatChangeLogger(platformCompat);
+                }
                 mSignalExtractors[i] = extractor;
             } catch (ClassNotFoundException e) {
                 Slog.w(TAG, "Couldn't find extractor " + extractorNames[i] + ".", e);

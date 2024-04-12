@@ -26,14 +26,18 @@ import static android.media.AudioAttributes.USAGE_NOTIFICATION;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
 import static android.media.AudioAttributes.USAGE_UNKNOWN;
 import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
+import static com.android.server.notification.NotificationChannelExtractor.RESTRICT_AUDIO_ATTRIBUTES;
 import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Flags;
@@ -43,12 +47,14 @@ import android.app.PendingIntent;
 import android.app.Person;
 import android.media.AudioAttributes;
 import android.net.Uri;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 
+import com.android.internal.compat.IPlatformCompat;
 import com.android.server.UiServiceTestCase;
 
 import org.junit.Before;
@@ -60,6 +66,8 @@ import org.mockito.MockitoAnnotations;
 public class NotificationChannelExtractorTest extends UiServiceTestCase {
 
     @Mock RankingConfig mConfig;
+    @Mock
+    IPlatformCompat mPlatformCompat;
 
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
@@ -73,6 +81,7 @@ public class NotificationChannelExtractorTest extends UiServiceTestCase {
         mExtractor = new NotificationChannelExtractor();
         mExtractor.setConfig(mConfig);
         mExtractor.initialize(mContext, null);
+        mExtractor.setCompatChangeLogger(mPlatformCompat);
     }
 
     private NotificationRecord getRecord(NotificationChannel channel, Notification n) {
@@ -82,7 +91,7 @@ public class NotificationChannelExtractorTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testExtractsUpdatedConversationChannel() {
+    public void testExtractsUpdatedConversationChannel() throws RemoteException {
         NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_LOW);
         final Notification n = new Notification.Builder(getContext())
                 .setContentTitle("foo")
@@ -101,7 +110,7 @@ public class NotificationChannelExtractorTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testInvalidShortcutFlagEnabled_looksUpCorrectNonChannel() {
+    public void testInvalidShortcutFlagEnabled_looksUpCorrectNonChannel() throws RemoteException {
         NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_LOW);
         final Notification n = new Notification.Builder(getContext())
                 .setContentTitle("foo")
@@ -122,7 +131,7 @@ public class NotificationChannelExtractorTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testInvalidShortcutFlagDisabled_looksUpCorrectChannel() {
+    public void testInvalidShortcutFlagDisabled_looksUpCorrectChannel() throws RemoteException {
         NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_LOW);
         final Notification n = new Notification.Builder(getContext())
                 .setContentTitle("foo")
@@ -143,7 +152,7 @@ public class NotificationChannelExtractorTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags(Flags.FLAG_RESTRICT_AUDIO_ATTRIBUTES_CALL)
-    public void testAudioAttributes_callStyleCanUseCallUsage() {
+    public void testAudioAttributes_callStyleCanUseCallUsage() throws RemoteException {
         NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
         channel.setSound(Uri.EMPTY, new AudioAttributes.Builder()
                 .setUsage(USAGE_NOTIFICATION_RINGTONE)
@@ -162,11 +171,12 @@ public class NotificationChannelExtractorTest extends UiServiceTestCase {
         assertThat(mExtractor.process(r)).isNull();
         assertThat(r.getAudioAttributes().getUsage()).isEqualTo(USAGE_NOTIFICATION_RINGTONE);
         assertThat(r.getChannel()).isEqualTo(channel);
+        verify(mPlatformCompat, never()).reportChangeByUid(anyLong(), anyInt());
     }
 
     @Test
     @EnableFlags(Flags.FLAG_RESTRICT_AUDIO_ATTRIBUTES_CALL)
-    public void testAudioAttributes_nonCallStyleCannotUseCallUsage() {
+    public void testAudioAttributes_nonCallStyleCannotUseCallUsage() throws RemoteException {
         NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
         channel.setSound(Uri.EMPTY, new AudioAttributes.Builder()
                 .setUsage(USAGE_NOTIFICATION_RINGTONE)
@@ -180,13 +190,14 @@ public class NotificationChannelExtractorTest extends UiServiceTestCase {
         assertThat(mExtractor.process(r)).isNull();
         // instance updated
         assertThat(r.getAudioAttributes().getUsage()).isEqualTo(USAGE_NOTIFICATION);
+        verify(mPlatformCompat).reportChangeByUid(RESTRICT_AUDIO_ATTRIBUTES, r.getUid());
         // in-memory channel unchanged
         assertThat(channel.getAudioAttributes().getUsage()).isEqualTo(USAGE_NOTIFICATION_RINGTONE);
     }
 
     @Test
     @EnableFlags(Flags.FLAG_RESTRICT_AUDIO_ATTRIBUTES_ALARM)
-    public void testAudioAttributes_alarmCategoryCanUseAlarmUsage() {
+    public void testAudioAttributes_alarmCategoryCanUseAlarmUsage() throws RemoteException {
         NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
         channel.setSound(Uri.EMPTY, new AudioAttributes.Builder()
                 .setUsage(USAGE_ALARM)
@@ -201,11 +212,12 @@ public class NotificationChannelExtractorTest extends UiServiceTestCase {
         assertThat(mExtractor.process(r)).isNull();
         assertThat(r.getAudioAttributes().getUsage()).isEqualTo(USAGE_ALARM);
         assertThat(r.getChannel()).isEqualTo(channel);
+        verify(mPlatformCompat, never()).reportChangeByUid(anyLong(), anyInt());
     }
 
     @Test
     @EnableFlags(Flags.FLAG_RESTRICT_AUDIO_ATTRIBUTES_ALARM)
-    public void testAudioAttributes_nonAlarmCategoryCannotUseAlarmUsage() {
+    public void testAudioAttributes_nonAlarmCategoryCannotUseAlarmUsage() throws RemoteException {
         NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
         channel.setSound(Uri.EMPTY, new AudioAttributes.Builder()
                 .setUsage(USAGE_ALARM)
@@ -219,13 +231,14 @@ public class NotificationChannelExtractorTest extends UiServiceTestCase {
         assertThat(mExtractor.process(r)).isNull();
         // instance updated
         assertThat(r.getAudioAttributes().getUsage()).isEqualTo(USAGE_NOTIFICATION);
+        verify(mPlatformCompat).reportChangeByUid(RESTRICT_AUDIO_ATTRIBUTES, r.getUid());
         // in-memory channel unchanged
         assertThat(channel.getAudioAttributes().getUsage()).isEqualTo(USAGE_ALARM);
     }
 
     @Test
     @EnableFlags(Flags.FLAG_RESTRICT_AUDIO_ATTRIBUTES_MEDIA)
-    public void testAudioAttributes_noMediaUsage() {
+    public void testAudioAttributes_noMediaUsage() throws RemoteException {
         NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
         channel.setSound(Uri.EMPTY, new AudioAttributes.Builder()
                 .setUsage(USAGE_MEDIA)
@@ -239,13 +252,14 @@ public class NotificationChannelExtractorTest extends UiServiceTestCase {
         assertThat(mExtractor.process(r)).isNull();
         // instance updated
         assertThat(r.getAudioAttributes().getUsage()).isEqualTo(USAGE_NOTIFICATION);
+        verify(mPlatformCompat).reportChangeByUid(RESTRICT_AUDIO_ATTRIBUTES, r.getUid());
         // in-memory channel unchanged
         assertThat(channel.getAudioAttributes().getUsage()).isEqualTo(USAGE_MEDIA);
     }
 
     @Test
     @EnableFlags(Flags.FLAG_RESTRICT_AUDIO_ATTRIBUTES_MEDIA)
-    public void testAudioAttributes_noUnknownUsage() {
+    public void testAudioAttributes_noUnknownUsage() throws RemoteException {
         NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
         channel.setSound(Uri.EMPTY, new AudioAttributes.Builder()
                 .setUsage(USAGE_UNKNOWN)
@@ -259,6 +273,7 @@ public class NotificationChannelExtractorTest extends UiServiceTestCase {
         assertThat(mExtractor.process(r)).isNull();
         // instance updated
         assertThat(r.getAudioAttributes().getUsage()).isEqualTo(USAGE_NOTIFICATION);
+        verify(mPlatformCompat).reportChangeByUid(RESTRICT_AUDIO_ATTRIBUTES, r.getUid());
         // in-memory channel unchanged
         assertThat(channel.getAudioAttributes().getUsage()).isEqualTo(USAGE_UNKNOWN);
     }
