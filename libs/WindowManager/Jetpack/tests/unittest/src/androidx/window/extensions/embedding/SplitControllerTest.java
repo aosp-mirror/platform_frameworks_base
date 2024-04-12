@@ -227,13 +227,13 @@ public class SplitControllerTest {
 
         // When the activity is not finishing, do not clear the record.
         doReturn(false).when(mActivity).isFinishing();
-        mSplitController.onActivityDestroyed(mActivity);
+        mSplitController.onActivityDestroyed(mTransaction, mActivity);
 
         assertTrue(tf.hasActivity(mActivity.getActivityToken()));
 
         // Clear the record when the activity is finishing and destroyed.
         doReturn(true).when(mActivity).isFinishing();
-        mSplitController.onActivityDestroyed(mActivity);
+        mSplitController.onActivityDestroyed(mTransaction, mActivity);
 
         assertFalse(tf.hasActivity(mActivity.getActivityToken()));
     }
@@ -612,7 +612,7 @@ public class SplitControllerTest {
 
         assertFalse(result);
         verify(mSplitController, never()).newContainer(any(), any(), any(), anyInt(), any(),
-                anyString(), any());
+                anyString(), any(), anyBoolean());
     }
 
     @Test
@@ -775,7 +775,7 @@ public class SplitControllerTest {
 
         assertTrue(result);
         verify(mSplitController, never()).newContainer(any(), any(), any(), anyInt(), any(),
-                anyString(), any());
+                anyString(), any(), anyBoolean());
         verify(mSplitController, never()).registerSplit(any(), any(), any(), any(), any(), any());
     }
 
@@ -818,7 +818,7 @@ public class SplitControllerTest {
 
         assertTrue(result);
         verify(mSplitController, never()).newContainer(any(), any(), any(), anyInt(), any(),
-                anyString(), any());
+                anyString(), any(), anyBoolean());
         verify(mSplitController, never()).registerSplit(any(), any(), any(), any(), any(), any());
     }
 
