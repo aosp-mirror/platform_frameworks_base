@@ -21,6 +21,7 @@ import android.graphics.Insets
 import android.graphics.Rect
 import android.graphics.Region
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -30,6 +31,7 @@ import com.android.systemui.screenshot.FloatingWindowUtil
 class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
     ConstraintLayout(context, attrs) {
     lateinit var screenshotPreview: ImageView
+    var onTouchInterceptListener: ((MotionEvent) -> Boolean)? = null
 
     private val displayMetrics = context.resources.displayMetrics
     private val tmpRect = Rect()
@@ -82,5 +84,12 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
 
     companion object {
         private const val TOUCH_PADDING_DP = 12f
+    }
+
+    override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+        if (onTouchInterceptListener?.invoke(ev) == true) {
+            return true
+        }
+        return super.onInterceptTouchEvent(ev)
     }
 }
