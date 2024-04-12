@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dreams.touch.dagger;
+package com.android.systemui.ambient.touch.dagger;
 
 import android.content.res.Resources;
 
+import com.android.systemui.ambient.touch.ShadeTouchHandler;
+import com.android.systemui.ambient.touch.TouchHandler;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.dreams.touch.CommunalTouchHandler;
-import com.android.systemui.dreams.touch.DreamTouchHandler;
-import com.android.systemui.dreams.touch.ShadeTouchHandler;
 import com.android.systemui.res.R;
 
 import dagger.Binds;
@@ -43,22 +42,13 @@ public abstract class ShadeModule {
     public static final String NOTIFICATION_SHADE_GESTURE_INITIATION_HEIGHT =
             "notification_shade_gesture_initiation_height";
 
-    /** Width of swipe gesture edge to show communal hub. */
-    public static final String COMMUNAL_GESTURE_INITIATION_WIDTH =
-            "communal_gesture_initiation_width";
-
     /**
      * Provides {@link ShadeTouchHandler} to handle notification swipe down over dream.
      */
     @Binds
     @IntoSet
-    public abstract DreamTouchHandler providesNotificationShadeTouchHandler(
+    public abstract TouchHandler providesNotificationShadeTouchHandler(
             ShadeTouchHandler touchHandler);
-
-    /** Provides {@link CommunalTouchHandler}. */
-    @Binds
-    @IntoSet
-    public abstract DreamTouchHandler bindCommunalTouchHandler(CommunalTouchHandler touchHandler);
 
     /**
      * Provides the height of the gesture area for notification swipe down.
@@ -69,12 +59,4 @@ public abstract class ShadeModule {
         return resources.getDimensionPixelSize(R.dimen.dream_overlay_status_bar_height);
     }
 
-    /**
-     * Provides the width of the gesture area for swiping open communal hub.
-     */
-    @Provides
-    @Named(COMMUNAL_GESTURE_INITIATION_WIDTH)
-    public static int providesCommunalGestureInitiationWidth(@Main Resources resources) {
-        return resources.getDimensionPixelSize(R.dimen.communal_gesture_initiation_width);
-    }
 }

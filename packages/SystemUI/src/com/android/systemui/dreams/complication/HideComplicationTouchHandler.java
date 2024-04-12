@@ -26,11 +26,11 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
+import com.android.systemui.ambient.touch.TouchHandler;
+import com.android.systemui.ambient.touch.TouchMonitor;
 import com.android.systemui.complication.Complication;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayStateController;
-import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
-import com.android.systemui.dreams.touch.DreamTouchHandler;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -47,12 +47,12 @@ import javax.inject.Named;
  * {@link HideComplicationTouchHandler} is responsible for hiding the overlay complications from
  * visibility whenever there is touch interactions outside the overlay. The overlay interaction
  * scope includes touches to the complication plus any touch entry region for gestures as specified
- * to the {@link DreamOverlayTouchMonitor}.
+ * to the {@link TouchMonitor}.
  *
- * This {@link DreamTouchHandler} is also responsible for fading in the complications at the end
- * of the {@link com.android.systemui.dreams.touch.DreamTouchHandler.TouchSession}.
+ * This {@link TouchHandler} is also responsible for fading in the complications at the end
+ * of the {@link TouchHandler.TouchSession}.
  */
-public class HideComplicationTouchHandler implements DreamTouchHandler {
+public class HideComplicationTouchHandler implements TouchHandler {
     private static final String TAG = "HideComplicationHandler";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 

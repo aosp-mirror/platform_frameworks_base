@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.dreams.touch;
+package com.android.systemui.ambient.touch;
 
 
 import static com.google.common.truth.Truth.assertThat;
@@ -52,7 +52,7 @@ public class ShadeTouchHandlerTest extends SysuiTestCase {
     ShadeViewController mShadeViewController;
 
     @Mock
-    DreamTouchHandler.TouchSession mTouchSession;
+    TouchHandler.TouchSession mTouchSession;
 
     ShadeTouchHandler mTouchHandler;
 

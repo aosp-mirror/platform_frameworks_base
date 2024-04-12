@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dreams.touch;
+package com.android.systemui.ambient.touch;
 
-import static com.android.systemui.dreams.touch.dagger.ShadeModule.NOTIFICATION_SHADE_GESTURE_INITIATION_HEIGHT;
+import static com.android.systemui.ambient.touch.dagger.ShadeModule.NOTIFICATION_SHADE_GESTURE_INITIATION_HEIGHT;
 
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -35,7 +35,7 @@ import javax.inject.Named;
  * {@link ShadeTouchHandler} is responsible for handling swipe down gestures over dream
  * to bring down the shade.
  */
-public class ShadeTouchHandler implements DreamTouchHandler {
+public class ShadeTouchHandler implements TouchHandler {
     private final Optional<CentralSurfaces> mSurfaces;
     private final ShadeViewController mShadeViewController;
     private final int mInitiationHeight;

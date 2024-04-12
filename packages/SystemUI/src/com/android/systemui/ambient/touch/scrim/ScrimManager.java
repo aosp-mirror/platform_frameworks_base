@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dreams.touch.scrim;
+package com.android.systemui.ambient.touch.scrim;
 
-import static com.android.systemui.dreams.touch.scrim.dagger.ScrimModule.BOUNCERLESS_SCRIM_CONTROLLER;
-import static com.android.systemui.dreams.touch.scrim.dagger.ScrimModule.BOUNCER_SCRIM_CONTROLLER;
+import static com.android.systemui.ambient.touch.scrim.dagger.ScrimModule.BOUNCERLESS_SCRIM_CONTROLLER;
+import static com.android.systemui.ambient.touch.scrim.dagger.ScrimModule.BOUNCER_SCRIM_CONTROLLER;
 
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.policy.KeyguardStateController;

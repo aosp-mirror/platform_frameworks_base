@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dreams.touch;
+package com.android.systemui.ambient.touch;
 
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
@@ -37,10 +37,10 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 
+import com.android.systemui.ambient.touch.dagger.InputSessionComponent;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.dreams.touch.dagger.InputSessionComponent;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.util.display.DisplayHelper;
 
@@ -58,12 +58,12 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 /**
- * {@link DreamOverlayTouchMonitor} is responsible for monitoring touches and gestures over the
+ * {@link TouchMonitor} is responsible for monitoring touches and gestures over the
  * dream overlay and redirecting them to a set of listeners. This monitor is in charge of figuring
  * out when listeners are eligible for receiving touches and filtering the listener pool if
  * touches are consumed.
  */
-public class DreamOverlayTouchMonitor {
+public class TouchMonitor {
     // This executor is used to protect {@code mActiveTouchSessions} from being modified
     // concurrently. Any operation that adds or removes values should use this executor.
     public String TAG = "DreamOverlayTouchMonitor";
@@ -83,11 +83,10 @@ public class DreamOverlayTouchMonitor {
             };
 
 
-
     /**
      * Adds a new {@link TouchSessionImpl} to participate in receiving future touches and gestures.
      */
-    private ListenableFuture<DreamTouchHandler.TouchSession> push(
+    private ListenableFuture<TouchHandler.TouchSession> push(
             TouchSessionImpl touchSessionImpl) {
         return CallbackToFutureAdapter.getFuture(completer -> {
             mMainExecutor.execute(() -> {
@@ -110,7 +109,7 @@ public class DreamOverlayTouchMonitor {
     /**
      * Removes a {@link TouchSessionImpl} from receiving further updates.
      */
-    private ListenableFuture<DreamTouchHandler.TouchSession> pop(
+    private ListenableFuture<TouchHandler.TouchSession> pop(
             TouchSessionImpl touchSessionImpl) {
         return CallbackToFutureAdapter.getFuture(completer -> {
             mMainExecutor.execute(() -> {
@@ -140,11 +139,11 @@ public class DreamOverlayTouchMonitor {
     }
 
     /**
-     * {@link TouchSessionImpl} implements {@link DreamTouchHandler.TouchSession} for
-     * {@link DreamOverlayTouchMonitor}. It enables the monitor to access the associated listeners
+     * {@link TouchSessionImpl} implements {@link TouchHandler.TouchSession} for
+     * {@link TouchMonitor}. It enables the monitor to access the associated listeners
      * and provides the associated client with access to the monitor.
      */
-    private static class TouchSessionImpl implements DreamTouchHandler.TouchSession {
+    private static class TouchSessionImpl implements TouchHandler.TouchSession {
         private final HashSet<InputChannelCompat.InputEventListener> mEventListeners =
                 new HashSet<>();
         private final HashSet<GestureDetector.OnGestureListener> mGestureListeners =
@@ -152,10 +151,10 @@ public class DreamOverlayTouchMonitor {
         private final HashSet<Callback> mCallbacks = new HashSet<>();
 
         private final TouchSessionImpl mPredecessor;
-        private final DreamOverlayTouchMonitor mTouchMonitor;
+        private final TouchMonitor mTouchMonitor;
         private final Rect mBounds;
 
-        TouchSessionImpl(DreamOverlayTouchMonitor touchMonitor, Rect bounds,
+        TouchSessionImpl(TouchMonitor touchMonitor, Rect bounds,
                 TouchSessionImpl predecessor) {
             mPredecessor = predecessor;
             mTouchMonitor = touchMonitor;
@@ -179,12 +178,12 @@ public class DreamOverlayTouchMonitor {
         }
 
         @Override
-        public ListenableFuture<DreamTouchHandler.TouchSession> push() {
+        public ListenableFuture<TouchHandler.TouchSession> push() {
             return mTouchMonitor.push(this);
         }
 
         @Override
-        public ListenableFuture<DreamTouchHandler.TouchSession> pop() {
+        public ListenableFuture<TouchHandler.TouchSession> pop() {
             return mTouchMonitor.pop(this);
         }
 
@@ -275,10 +274,10 @@ public class DreamOverlayTouchMonitor {
             });
         }
         mCurrentInputSession = mInputSessionFactory.create(
-                "dreamOverlay",
-                mInputEventListener,
-                mOnGestureListener,
-                true)
+                        "dreamOverlay",
+                        mInputEventListener,
+                        mOnGestureListener,
+                        true)
                 .getInputSession();
     }
 
@@ -323,21 +322,21 @@ public class DreamOverlayTouchMonitor {
 
 
     private final HashSet<TouchSessionImpl> mActiveTouchSessions = new HashSet<>();
-    private final Collection<DreamTouchHandler> mHandlers;
+    private final Collection<TouchHandler> mHandlers;
     private final DisplayHelper mDisplayHelper;
 
     private boolean mStopMonitoringPending;
 
     private InputChannelCompat.InputEventListener mInputEventListener =
             new InputChannelCompat.InputEventListener() {
-        @Override
-        public void onInputEvent(InputEvent ev) {
-            // No Active sessions are receiving touches. Create sessions for each listener
-            if (mActiveTouchSessions.isEmpty()) {
-                final HashMap<DreamTouchHandler, DreamTouchHandler.TouchSession> sessionMap =
-                        new HashMap<>();
+                @Override
+                public void onInputEvent(InputEvent ev) {
+                    // No Active sessions are receiving touches. Create sessions for each listener
+                    if (mActiveTouchSessions.isEmpty()) {
+                        final HashMap<TouchHandler, TouchHandler.TouchSession> sessionMap =
+                                new HashMap<>();
 
-                for (DreamTouchHandler handler : mHandlers) {
+                        for (TouchHandler handler : mHandlers) {
                             if (!handler.isEnabled()) {
                                 continue;
                             }
@@ -349,46 +348,49 @@ public class DreamOverlayTouchMonitor {
                                 exclusionRect = getCurrentExclusionRect();
                             }
                             handler.getTouchInitiationRegion(
-                                            maxBounds, initiationRegion, exclusionRect);
+                                    maxBounds, initiationRegion, exclusionRect);
 
-                    if (!initiationRegion.isEmpty()) {
-                        // Initiation regions require a motion event to determine pointer location
-                        // within the region.
-                        if (!(ev instanceof MotionEvent)) {
-                            continue;
+                            if (!initiationRegion.isEmpty()) {
+                                // Initiation regions require a motion event to determine pointer
+                                // location
+                                // within the region.
+                                if (!(ev instanceof MotionEvent)) {
+                                    continue;
+                                }
+
+                                final MotionEvent motionEvent = (MotionEvent) ev;
+
+                                // If the touch event is outside the region, then ignore.
+                                if (!initiationRegion.contains(Math.round(motionEvent.getX()),
+                                        Math.round(motionEvent.getY()))) {
+                                    continue;
+                                }
+                            }
+
+                            final TouchSessionImpl sessionStack = new TouchSessionImpl(
+                                    TouchMonitor.this, maxBounds, null);
+                            mActiveTouchSessions.add(sessionStack);
+                            sessionMap.put(handler, sessionStack);
                         }
 
-                        final MotionEvent motionEvent = (MotionEvent) ev;
-
-                        // If the touch event is outside the region, then ignore.
-                        if (!initiationRegion.contains(Math.round(motionEvent.getX()),
-                                Math.round(motionEvent.getY()))) {
-                            continue;
-                        }
+                        // Informing handlers of new sessions is delayed until we have all
+                        // created so the
+                        // final session is correct.
+                        sessionMap.forEach((dreamTouchHandler, touchSession)
+                                -> dreamTouchHandler.onSessionStart(touchSession));
                     }
 
-                    final TouchSessionImpl sessionStack = new TouchSessionImpl(
-                            DreamOverlayTouchMonitor.this, maxBounds, null);
-                    mActiveTouchSessions.add(sessionStack);
-                    sessionMap.put(handler, sessionStack);
+                    // Find active sessions and invoke on InputEvent.
+                    mActiveTouchSessions.stream()
+                            .map(touchSessionStack -> touchSessionStack.getEventListeners())
+                            .flatMap(Collection::stream)
+                            .forEach(inputEventListener -> inputEventListener.onInputEvent(ev));
                 }
 
-                // Informing handlers of new sessions is delayed until we have all created so the
-                // final session is correct.
-                sessionMap.forEach((dreamTouchHandler, touchSession)
-                        -> dreamTouchHandler.onSessionStart(touchSession));
-            }
-
-            // Find active sessions and invoke on InputEvent.
-            mActiveTouchSessions.stream()
-                    .map(touchSessionStack -> touchSessionStack.getEventListeners())
-                    .flatMap(Collection::stream)
-                    .forEach(inputEventListener -> inputEventListener.onInputEvent(ev));
-        }
-                    private Rect getCurrentExclusionRect() {
-                        return mExclusionRect;
-                    }
-    };
+                private Rect getCurrentExclusionRect() {
+                    return mExclusionRect;
+                }
+            };
 
     /**
      * The {@link Evaluator} interface allows for callers to inspect a listener from the
@@ -401,71 +403,75 @@ public class DreamOverlayTouchMonitor {
 
     private GestureDetector.OnGestureListener mOnGestureListener =
             new GestureDetector.OnGestureListener() {
-        private boolean evaluate(Evaluator evaluator) {
-            final Set<TouchSessionImpl> consumingSessions = new HashSet<>();
+                private boolean evaluate(Evaluator evaluator) {
+                    final Set<TouchSessionImpl> consumingSessions = new HashSet<>();
 
-            // When a gesture is consumed, it is assumed that all touches for the current session
-            // should be directed only to those TouchSessions until those sessions are popped. All
-            // non-participating sessions are removed from receiving further updates with
-            // {@link DreamOverlayTouchMonitor#isolate}.
-            final boolean eventConsumed = mActiveTouchSessions.stream()
-                    .map(touchSession -> {
-                        boolean consume = touchSession.getGestureListeners()
-                                .stream()
-                                .map(listener -> evaluator.evaluate(listener))
-                                .anyMatch(consumed -> consumed);
+                    // When a gesture is consumed, it is assumed that all touches for the current
+                    // session
+                    // should be directed only to those TouchSessions until those sessions are
+                    // popped. All
+                    // non-participating sessions are removed from receiving further updates with
+                    // {@link DreamOverlayTouchMonitor#isolate}.
+                    final boolean eventConsumed = mActiveTouchSessions.stream()
+                            .map(touchSession -> {
+                                boolean consume = touchSession.getGestureListeners()
+                                        .stream()
+                                        .map(listener -> evaluator.evaluate(listener))
+                                        .anyMatch(consumed -> consumed);
 
-                        if (consume) {
-                            consumingSessions.add(touchSession);
-                        }
-                        return consume;
-                    }).anyMatch(consumed -> consumed);
+                                if (consume) {
+                                    consumingSessions.add(touchSession);
+                                }
+                                return consume;
+                            }).anyMatch(consumed -> consumed);
 
-            if (eventConsumed) {
-                DreamOverlayTouchMonitor.this.isolate(consumingSessions);
-            }
+                    if (eventConsumed) {
+                        TouchMonitor.this.isolate(consumingSessions);
+                    }
 
-            return eventConsumed;
-        }
+                    return eventConsumed;
+                }
 
-        // This method is called for gesture events that cannot be consumed.
-        private void observe(Consumer<GestureDetector.OnGestureListener> consumer) {
-            mActiveTouchSessions.stream()
-                    .map(touchSession -> touchSession.getGestureListeners())
-                    .flatMap(Collection::stream)
-                    .forEach(listener -> consumer.accept(listener));
-        }
+                // This method is called for gesture events that cannot be consumed.
+                private void observe(Consumer<GestureDetector.OnGestureListener> consumer) {
+                    mActiveTouchSessions.stream()
+                            .map(touchSession -> touchSession.getGestureListeners())
+                            .flatMap(Collection::stream)
+                            .forEach(listener -> consumer.accept(listener));
+                }
 
-        @Override
-        public boolean onDown(MotionEvent e) {
-            return evaluate(listener -> listener.onDown(e));
-        }
+                @Override
+                public boolean onDown(MotionEvent e) {
+                    return evaluate(listener -> listener.onDown(e));
+                }
 
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            return evaluate(listener -> listener.onFling(e1, e2, velocityX, velocityY));
-        }
+                @Override
+                public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+                        float velocityY) {
+                    return evaluate(listener -> listener.onFling(e1, e2, velocityX, velocityY));
+                }
 
-        @Override
-        public void onLongPress(MotionEvent e) {
-            observe(listener -> listener.onLongPress(e));
-        }
+                @Override
+                public void onLongPress(MotionEvent e) {
+                    observe(listener -> listener.onLongPress(e));
+                }
 
-        @Override
-        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            return evaluate(listener -> listener.onScroll(e1, e2, distanceX, distanceY));
-        }
+                @Override
+                public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
+                        float distanceY) {
+                    return evaluate(listener -> listener.onScroll(e1, e2, distanceX, distanceY));
+                }
 
-        @Override
-        public void onShowPress(MotionEvent e) {
-            observe(listener -> listener.onShowPress(e));
-        }
+                @Override
+                public void onShowPress(MotionEvent e) {
+                    observe(listener -> listener.onShowPress(e));
+                }
 
-        @Override
-        public boolean onSingleTapUp(MotionEvent e) {
-            return evaluate(listener -> listener.onSingleTapUp(e));
-        }
-    };
+                @Override
+                public boolean onSingleTapUp(MotionEvent e) {
+                    return evaluate(listener -> listener.onSingleTapUp(e));
+                }
+            };
 
     private InputSessionComponent.Factory mInputSessionFactory;
     private InputSession mCurrentInputSession;
@@ -474,25 +480,27 @@ public class DreamOverlayTouchMonitor {
 
 
     /**
-     * Designated constructor for {@link DreamOverlayTouchMonitor}
-     * @param executor This executor will be used for maintaining the active listener list to avoid
-     *                 concurrent modification.
-     * @param lifecycle {@link DreamOverlayTouchMonitor} will listen to this lifecycle to determine
-     *                                                  whether touch monitoring should be active.
+     * Designated constructor for {@link TouchMonitor}
+     *
+     * @param executor            This executor will be used for maintaining the active listener
+     *                            list to avoid
+     *                            concurrent modification.
+     * @param lifecycle           {@link TouchMonitor} will listen to this lifecycle to determine
+     *                            whether touch monitoring should be active.
      * @param inputSessionFactory This factory will generate the {@link InputSession} requested by
      *                            the monitor. Each session should be unique and valid when
      *                            returned.
-     * @param handlers This set represents the {@link DreamTouchHandler} instances that will
-     *                 participate in touch handling.
+     * @param handlers            This set represents the {@link TouchHandler} instances that will
+     *                            participate in touch handling.
      */
     @Inject
-    public DreamOverlayTouchMonitor(
+    public TouchMonitor(
             @Main Executor executor,
             @Background Executor backgroundExecutor,
             Lifecycle lifecycle,
             InputSessionComponent.Factory inputSessionFactory,
             DisplayHelper displayHelper,
-            Set<DreamTouchHandler> handlers,
+            Set<TouchHandler> handlers,
             IWindowManager windowManagerService,
             @DisplayId int displayId) {
         mDisplayId = displayId;

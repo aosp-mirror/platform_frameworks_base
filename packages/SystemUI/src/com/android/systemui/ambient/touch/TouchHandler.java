@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dreams.touch;
+package com.android.systemui.ambient.touch;
 
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -25,24 +25,30 @@ import com.android.systemui.shared.system.InputChannelCompat;
 import com.google.common.util.concurrent.ListenableFuture;
 
 /**
- * The {@link DreamTouchHandler} interface provides a way for dream overlay components to observe
+ * The {@link TouchHandler} interface provides a way for dream overlay components to observe
  * touch events and gestures with the ability to intercept the latter. Touch interaction sequences
  * are abstracted as sessions. A session represents the time of first
- * {@code android.view.MotionEvent.ACTION_DOWN} event to the last {@link DreamTouchHandler}
+ * {@code android.view.MotionEvent.ACTION_DOWN} event to the last {@link TouchHandler}
  * stopping interception of gestures. If no gesture is intercepted, the session continues
- * indefinitely. {@link DreamTouchHandler} have the ability to create a stack of sessions, which
+ * indefinitely. {@link TouchHandler} have the ability to create a stack of sessions, which
  * allows for motion logic to be captured in modal states.
  */
-public interface DreamTouchHandler {
+public interface TouchHandler {
     /**
-     * A touch session captures the interaction surface of a {@link DreamTouchHandler}. Clients
+     * A touch session captures the interaction surface of a {@link TouchHandler}. Clients
      * register listeners as desired to participate in motion/gesture callbacks.
      */
     interface TouchSession {
         interface Callback {
+            /**
+             * Invoked when the session has been removed.
+             */
             void onRemoved();
         }
 
+        /**
+         * Registers a callback to be notified when there are updates to the {@link TouchSession}.
+         */
         void registerCallback(Callback callback);
 
         /**
