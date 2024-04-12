@@ -53,6 +53,7 @@ public abstract class PowerStatsCollector {
     private static final int MILLIVOLTS_PER_VOLT = 1000;
     private static final long POWER_STATS_ENERGY_CONSUMERS_TIMEOUT = 20000;
     private final Handler mHandler;
+    protected final PowerStatsUidResolver mUidResolver;
     protected final Clock mClock;
     private final long mThrottlePeriodMs;
     private final Runnable mCollectAndDeliverStats = this::collectAndDeliverStats;
@@ -63,9 +64,25 @@ public abstract class PowerStatsCollector {
     @SuppressWarnings("unchecked")
     private volatile List<Consumer<PowerStats>> mConsumerList = Collections.emptyList();
 
-    public PowerStatsCollector(Handler handler, long throttlePeriodMs, Clock clock) {
+    public PowerStatsCollector(Handler handler, long throttlePeriodMs,
+            PowerStatsUidResolver uidResolver, Clock clock) {
         mHandler = handler;
         mThrottlePeriodMs = throttlePeriodMs;
+        mUidResolver = uidResolver;
+        mUidResolver.addListener(new PowerStatsUidResolver.Listener() {
+            @Override
+            public void onIsolatedUidAdded(int isolatedUid, int parentUid) {
+            }
+
+            @Override
+            public void onBeforeIsolatedUidRemoved(int isolatedUid, int parentUid) {
+            }
+
+            @Override
+            public void onAfterIsolatedUidRemoved(int isolatedUid, int parentUid) {
+                mHandler.post(()->onUidRemoved(isolatedUid));
+            }
+        });
         mClock = clock;
     }
 
@@ -201,6 +218,9 @@ public abstract class PowerStatsCollector {
         ConditionVariable done = new ConditionVariable();
         mHandler.post(done::open);
         done.block();
+    }
+
+    protected void onUidRemoved(int uid) {
     }
 
     /** Calculate charge consumption (in microcoulombs) from a given energy and voltage */

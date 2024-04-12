@@ -67,11 +67,10 @@ public class CpuPowerStatsCollectorTest {
     private static final int UID_2 = 99;
     private final MockClock mMockClock = new MockClock();
     private final HandlerThread mHandlerThread = new HandlerThread("test");
+    private final PowerStatsUidResolver mUidResolver = new PowerStatsUidResolver();
     private Handler mHandler;
     private PowerStats mCollectedStats;
     private PowerProfile mPowerProfile = new PowerProfile();
-    @Mock
-    private PowerStatsUidResolver mUidResolver;
     @Mock
     private CpuPowerStatsCollector.KernelCpuStatsReader mMockKernelCpuStatsReader;
     @Mock
@@ -144,15 +143,8 @@ public class CpuPowerStatsCollectorTest {
         mHandlerThread.start();
         mHandler = mHandlerThread.getThreadHandler();
         when(mMockKernelCpuStatsReader.isSupportedFeature()).thenReturn(true);
-        when(mUidResolver.mapUid(anyInt())).thenAnswer(invocation -> {
-            int uid = invocation.getArgument(0);
-            if (uid == ISOLATED_UID) {
-                return UID_2;
-            } else {
-                return uid;
-            }
-        });
         when(mConsumedEnergyRetriever.getEnergyConsumerIds(anyInt())).thenReturn(new int[0]);
+        mUidResolver.noteIsolatedUidAdded(ISOLATED_UID, UID_2);
     }
 
     @Test
@@ -268,8 +260,7 @@ public class CpuPowerStatsCollectorTest {
         mockEnergyConsumers();
 
         CpuPowerStatsCollector collector = createCollector(8, 0);
-        CpuPowerStatsLayout layout =
-                new CpuPowerStatsLayout();
+        CpuPowerStatsLayout layout = new CpuPowerStatsLayout();
         layout.fromExtras(collector.getPowerStatsDescriptor().extras);
 
         mockKernelCpuStats(new long[]{1111, 2222, 3333},
@@ -331,6 +322,45 @@ public class CpuPowerStatsCollectorTest {
                 .isEqualTo(45);
         assertThat(layout.getUidTimeByPowerBracket(mCollectedStats.uidStats.get(UID_2), 1))
                 .isEqualTo(78);
+    }
+
+    @Test
+    public void isolatedUidReuse() {
+        mockCpuScalingPolicies(1);
+        mockPowerProfile();
+        mockEnergyConsumers();
+
+        CpuPowerStatsCollector collector = createCollector(8, 0);
+        CpuPowerStatsLayout layout = new CpuPowerStatsLayout();
+        layout.fromExtras(collector.getPowerStatsDescriptor().extras);
+
+        mockKernelCpuStats(new long[]{1111, 2222, 3333},
+                new SparseArray<>() {{
+                    put(UID_2, new long[]{100, 150});
+                    put(ISOLATED_UID, new long[]{10000, 20000});
+                }}, 0, 1234);
+
+        mMockClock.uptime = 1000;
+        collector.forceSchedule();
+        waitForIdle();
+
+        mUidResolver.noteIsolatedUidRemoved(ISOLATED_UID, UID_2);
+        mUidResolver.noteIsolatedUidAdded(ISOLATED_UID, UID_2);
+
+        mockKernelCpuStats(new long[]{5555, 4444, 3333},
+                new SparseArray<>() {{
+                    put(UID_2, new long[]{100, 150});
+                    put(ISOLATED_UID, new long[]{245, 528});
+                }}, 1234, 3421);
+
+        mMockClock.uptime = 2000;
+        collector.forceSchedule();
+        waitForIdle();
+
+        assertThat(layout.getUidTimeByPowerBracket(mCollectedStats.uidStats.get(UID_2), 0))
+                .isEqualTo(245);
+        assertThat(layout.getUidTimeByPowerBracket(mCollectedStats.uidStats.get(UID_2), 1))
+                .isEqualTo(528);
     }
 
     private void mockCpuScalingPolicies(int clusterCount) {
