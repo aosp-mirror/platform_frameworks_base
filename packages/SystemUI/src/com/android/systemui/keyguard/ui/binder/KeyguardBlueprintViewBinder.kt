@@ -38,6 +38,7 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
+import com.android.systemui.shared.R as sharedR
 import javax.inject.Inject
 import kotlin.math.max
 
@@ -217,15 +218,21 @@ constructor(
         if (!DEBUG || currentClock == null) return
         val smallClockViewId = R.id.lockscreen_clock_view
         val largeClockViewId = currentClock.largeClock.layout.views[0].id
+        val smartspaceDateId = sharedR.id.date_smartspace_view
         Log.i(
             TAG,
             "applyCsToSmallClock: vis=${cs.getVisibility(smallClockViewId)} " +
-                "alpha=${cs.getConstraint(smallClockViewId).propertySet}"
+                "alpha=${cs.getConstraint(smallClockViewId).propertySet.alpha}"
         )
         Log.i(
             TAG,
             "applyCsToLargeClock: vis=${cs.getVisibility(largeClockViewId)} " +
-                "alpha=${cs.getConstraint(largeClockViewId).propertySet}"
+                "alpha=${cs.getConstraint(largeClockViewId).propertySet.alpha}"
+        )
+        Log.i(
+            TAG,
+            "applyCsToSmartspaceDate: vis=${cs.getVisibility(smartspaceDateId)} " +
+                "alpha=${cs.getConstraint(smartspaceDateId).propertySet.alpha}"
         )
     }
 }
