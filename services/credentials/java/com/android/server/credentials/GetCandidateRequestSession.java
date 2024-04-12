@@ -26,6 +26,7 @@ import android.credentials.CredentialManager;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.GetCandidateCredentialsException;
 import android.credentials.GetCandidateCredentialsResponse;
+import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialRequest;
 import android.credentials.GetCredentialResponse;
 import android.credentials.IGetCandidateCredentialsCallback;
@@ -159,24 +160,26 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
     public void onFinalErrorReceived(ComponentName componentName, String errorType,
             String message) {
         Slog.d(TAG, "onFinalErrorReceived");
+        if (GetCredentialException.TYPE_USER_CANCELED.equals(errorType)) {
+            Slog.d(TAG, "User canceled but session is not being terminated");
+            return;
+        }
         respondToFinalReceiverWithFailureAndFinish(errorType, message);
     }
 
     @Override
     public void onUiCancellation(boolean isUserCancellation) {
-        String exception = GetCandidateCredentialsException.TYPE_USER_CANCELED;
-        String message = "User cancelled the selector";
-        if (!isUserCancellation) {
-            exception = GetCandidateCredentialsException.TYPE_INTERRUPTED;
-            message = "The UI was interrupted - please try again.";
-        }
-        mRequestSessionMetric.collectFrameworkException(exception);
-        respondToFinalReceiverWithFailureAndFinish(exception, message);
+        Slog.d(TAG, "User canceled but session is not being terminated");
     }
 
     private void respondToFinalReceiverWithFailureAndFinish(
             String exception, String message
     ) {
+        if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
+            Slog.w(TAG, "Request has already been completed. This is strange.");
+            return;
+        }
+
         if (mAutofillCallback != null) {
             Bundle resultData = new Bundle();
             resultData.putStringArray(
@@ -221,6 +224,19 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
     public void onFinalResponseReceived(ComponentName componentName,
             GetCredentialResponse response) {
         Slog.d(TAG, "onFinalResponseReceived");
+        if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
+            Slog.w(TAG, "Request has already been completed. This is strange.");
+            return;
+        }
+        respondToFinalReceiverWithResponseAndFinish(response);
+    }
+
+    private void respondToFinalReceiverWithResponseAndFinish(GetCredentialResponse response) {
+        if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
+            Slog.w(TAG, "Request has already been completed. This is strange.");
+            return;
+        }
+
         if (this.mAutofillCallback != null) {
             Slog.d(TAG, "onFinalResponseReceived sending through final receiver");
             Bundle resultData = new Bundle();
