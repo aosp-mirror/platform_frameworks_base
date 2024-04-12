@@ -197,6 +197,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.ArrayMap;
@@ -288,6 +289,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     static final int FORCE_SCALING_MODE_DISABLED = 1;
 
     static final float INVALID_DPI = 0.0f;
+
+    private final boolean mVisibleBackgroundUserEnabled =
+            UserManager.isVisibleBackgroundUsersEnabled();
 
     @IntDef(prefix = { "FORCE_SCALING_MODE_" }, value = {
             FORCE_SCALING_MODE_AUTO,
@@ -2698,11 +2702,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * Returns true if the specified UID has access to this display.
      */
     boolean hasAccess(int uid) {
-        int userId = UserHandle.getUserId(uid);
-        boolean isUserVisibleOnDisplay = mWmService.mUmInternal.isUserVisible(
-                userId, mDisplayId);
-        return mDisplay.hasAccess(uid)
-                && (userId == UserHandle.USER_SYSTEM || isUserVisibleOnDisplay);
+        if (!mDisplay.hasAccess(uid)) {
+            return false;
+        }
+        if (!mVisibleBackgroundUserEnabled) {
+            return true;
+        }
+        final int userId = UserHandle.getUserId(uid);
+        return userId == UserHandle.USER_SYSTEM
+                || mWmService.mUmInternal.isUserVisible(userId, mDisplayId);
     }
 
     boolean isPrivate() {

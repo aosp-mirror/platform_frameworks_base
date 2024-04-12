@@ -68,6 +68,7 @@ import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.StrictMode;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.util.Log;
 import android.view.DisplayInfo;
@@ -194,6 +195,7 @@ public class SystemServicesTestRule implements TestRule {
         mMockitoSession = mockitoSession()
                 .mockStatic(LocalServices.class, spyStubOnly)
                 .mockStatic(DeviceConfig.class, spyStubOnly)
+                .mockStatic(UserManager.class, spyStubOnly)
                 .mockStatic(SurfaceControl.class, mockStubOnly)
                 .mockStatic(DisplayControl.class, mockStubOnly)
                 .mockStatic(LockGuard.class, mockStubOnly)
