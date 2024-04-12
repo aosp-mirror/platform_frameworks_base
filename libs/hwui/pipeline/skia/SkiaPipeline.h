@@ -18,7 +18,6 @@
 
 #include <SkColorSpace.h>
 #include <SkDocument.h>
-#include <SkMultiPictureDocument.h>
 #include <SkSurface.h>
 
 #include "Lighting.h"
