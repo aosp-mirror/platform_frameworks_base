@@ -1665,6 +1665,21 @@ public final class PermissionManager {
     }
 
     /**
+     * Gets the number of currently registered attribution sources for a particular UID. This should
+     * only be used for testing purposes.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.UPDATE_APP_OPS_STATS)
+    public int getNumRegisteredAttributionSourcesForTest(int uid) {
+        try {
+            return mPermissionManager.getNumRegisteredAttributionSources(uid);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return -1;
+    }
+
+    /**
      * Revoke the POST_NOTIFICATIONS permission, without killing the app. This method must ONLY BE
      * USED in CTS or local tests.
      *
