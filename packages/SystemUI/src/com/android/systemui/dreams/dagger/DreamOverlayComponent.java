@@ -22,6 +22,8 @@ import androidx.lifecycle.LifecycleOwner;
 
 import com.android.systemui.complication.ComplicationHostViewController;
 import com.android.systemui.dreams.DreamOverlayContainerViewController;
+import com.android.systemui.dreams.touch.CommunalTouchHandler;
+import com.android.systemui.dreams.touch.dagger.CommunalTouchModule;
 import com.android.systemui.touch.TouchInsetManager;
 
 import dagger.BindsInstance;
@@ -37,6 +39,7 @@ import javax.inject.Scope;
  */
 @Subcomponent(modules = {
         DreamOverlayModule.class,
+        CommunalTouchModule.class
 })
 @DreamOverlayComponent.DreamOverlayScope
 public interface DreamOverlayComponent {
@@ -57,4 +60,7 @@ public interface DreamOverlayComponent {
 
     /** Builds a {@link DreamOverlayContainerViewController}. */
     DreamOverlayContainerViewController getDreamOverlayContainerViewController();
+
+    /** Builds communal touch handler */
+    CommunalTouchHandler getCommunalTouchHandler();
 }

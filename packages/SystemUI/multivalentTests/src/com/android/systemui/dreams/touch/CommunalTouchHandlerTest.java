@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.ambient.touch;
+package com.android.systemui.dreams.touch;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -31,6 +31,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.ambient.touch.TouchHandler;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.statusbar.phone.CentralSurfaces;

@@ -201,7 +201,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
                 mComplicationComponent.getComplicationHostViewController(), touchInsetManager);
         mAmbientTouchComponent = ambientTouchComponentFactory.create(lifecycleOwner,
                 new HashSet<>(Arrays.asList(
-                        mDreamComplicationComponent.getHideComplicationTouchHandler())));
+                        mDreamComplicationComponent.getHideComplicationTouchHandler(),
+                        mDreamOverlayComponent.getCommunalTouchHandler())));
         mLifecycleOwner = lifecycleOwner;
         mLifecycleRegistry = mLifecycleOwner.getRegistry();
 
