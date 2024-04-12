@@ -2153,9 +2153,12 @@ public final class AppRestrictionController {
             mRestrictionSettings.update(pkgName, uid, level, reason, subReason);
         }
 
-        if (!allowUpdateBucket || curBucket == STANDBY_BUCKET_EXEMPTED) {
+        if (!android.app.Flags.appRestrictionsApi()
+                && (!allowUpdateBucket || curBucket == STANDBY_BUCKET_EXEMPTED)) {
             return;
         }
+
+        boolean doItNow = true;
         if (level >= RESTRICTION_LEVEL_RESTRICTED_BUCKET
                 && curLevel < RESTRICTION_LEVEL_RESTRICTED_BUCKET) {
             // Moving the app standby bucket to restricted in the meanwhile.
@@ -2168,7 +2171,6 @@ public final class AppRestrictionController {
                     && (mConstantsObserver.mBgAutoRestrictedBucket
                     || level == RESTRICTION_LEVEL_RESTRICTED_BUCKET)) {
                 // restrict the app if it hasn't done so.
-                boolean doIt = true;
                 synchronized (mSettingsLock) {
                     final int index = mActiveUids.indexOfKey(uid, pkgName);
                     if (index >= 0) {
@@ -2182,14 +2184,16 @@ public final class AppRestrictionController {
                             logAppBackgroundRestrictionInfo(pkgName, uid, curLevel, level,
                                     localTrackerInfo, localReason);
                         });
-                        doIt = false;
+                        doItNow = false;
                     }
                 }
-                if (doIt) {
+                if (doItNow) {
                     appStandbyInternal.restrictApp(pkgName, UserHandle.getUserId(uid),
                             reason, subReason);
-                    logAppBackgroundRestrictionInfo(pkgName, uid, curLevel, level, trackerInfo,
-                            reason);
+                    if (!android.app.Flags.appRestrictionsApi()) {
+                        logAppBackgroundRestrictionInfo(pkgName, uid, curLevel, level, trackerInfo,
+                                reason);
+                    }
                 }
             }
         } else if (curLevel >= RESTRICTION_LEVEL_RESTRICTED_BUCKET
@@ -2204,6 +2208,13 @@ public final class AppRestrictionController {
             appStandbyInternal.maybeUnrestrictApp(pkgName, UserHandle.getUserId(uid),
                     prevReason & REASON_MAIN_MASK, prevReason & REASON_SUB_MASK,
                     reason, subReason);
+            if (!android.app.Flags.appRestrictionsApi()) {
+                logAppBackgroundRestrictionInfo(pkgName, uid, curLevel, level, trackerInfo,
+                        reason);
+            }
+        }
+
+        if (doItNow && android.app.Flags.appRestrictionsApi()) {
             logAppBackgroundRestrictionInfo(pkgName, uid, curLevel, level, trackerInfo,
                     reason);
         }
