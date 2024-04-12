@@ -497,19 +497,6 @@ public class BubbleData {
     }
 
     /**
-     * Explicitly removes a bubble from the overflow, if it exists.
-     *
-     * @param bubble the bubble to remove.
-     */
-    public void removeOverflowBubble(Bubble bubble) {
-        if (bubble == null) return;
-        if (mOverflowBubbles.remove(bubble)) {
-            mStateChange.removedOverflowBubble = bubble;
-            dispatchPendingChanges();
-        }
-    }
-
-    /**
      * Adds a group key indicating that the summary for this group should be suppressed.
      *
      * @param groupKey the group key of the group whose summary should be suppressed.
