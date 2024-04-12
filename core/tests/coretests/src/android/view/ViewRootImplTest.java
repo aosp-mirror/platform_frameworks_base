@@ -22,6 +22,7 @@ import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY;
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
+import static android.view.Surface.FRAME_RATE_CATEGORY_DEFAULT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
@@ -495,13 +496,13 @@ public class ViewRootImplTest {
     @UiThreadTest
     @Test
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
-            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_getDefaultValues() {
         ViewRootImpl viewRootImpl = new ViewRootImpl(sContext,
                 sContext.getDisplayNoVerify());
-        assertEquals(viewRootImpl.getLastPreferredFrameRateCategory(),
-                FRAME_RATE_CATEGORY_NO_PREFERENCE);
-        assertEquals(viewRootImpl.getLastPreferredFrameRate(), 0, 0.1);
+        assertEquals(FRAME_RATE_CATEGORY_DEFAULT,
+                viewRootImpl.getLastPreferredFrameRateCategory());
+        assertEquals(0, viewRootImpl.getLastPreferredFrameRate(), 0.1);
     }
 
     /**
@@ -513,7 +514,7 @@ public class ViewRootImplTest {
     @Test
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
             FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY,
-            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_visibility_bySize() throws Throwable {
         mView = new View(sContext);
         attachViewToWindow(mView);
@@ -538,7 +539,7 @@ public class ViewRootImplTest {
         sInstrumentation.waitForIdleSync();
 
         sInstrumentation.runOnMainSync(() -> {
-            assertEquals(mViewRootImpl.getIsFrameRateBoosting(), true);
+            assertTrue(mViewRootImpl.getIsFrameRateBoosting());
         });
     }
 
@@ -550,7 +551,7 @@ public class ViewRootImplTest {
     @Test
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
             FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY,
-            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_smallSize_bySize() throws Throwable {
         mView = new View(sContext);
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
@@ -568,8 +569,8 @@ public class ViewRootImplTest {
         waitForFrameRateCategoryToSettle(mView);
         sInstrumentation.runOnMainSync(() -> {
             mView.invalidate();
-            runAfterDraw(() -> assertEquals(mViewRootImpl.getLastPreferredFrameRateCategory(),
-                    FRAME_RATE_CATEGORY_LOW));
+            runAfterDraw(() -> assertEquals(FRAME_RATE_CATEGORY_LOW,
+                    mViewRootImpl.getLastPreferredFrameRateCategory()));
         });
         waitForAfterDraw();
     }
@@ -582,7 +583,7 @@ public class ViewRootImplTest {
     @Test
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
             FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY,
-            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_normalSize_bySize() throws Throwable {
         mView = new View(sContext);
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
@@ -655,7 +656,7 @@ public class ViewRootImplTest {
         sInstrumentation.waitForIdleSync();
 
         sInstrumentation.runOnMainSync(() -> {
-            assertEquals(mViewRootImpl.getIsFrameRateBoosting(), true);
+            assertTrue(mViewRootImpl.getIsFrameRateBoosting());
         });
 
         waitForFrameRateCategoryToSettle(mView);
@@ -750,14 +751,14 @@ public class ViewRootImplTest {
      */
     @Test
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
-            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateCategory_aggregate() {
         View mView1 = new View(sContext);
         attachViewToWindow(mView1);
         ViewRootImpl viewRootImpl = mView1.getViewRootImpl();
         sInstrumentation.runOnMainSync(() -> {
-            assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
-                    FRAME_RATE_CATEGORY_NO_PREFERENCE);
+            assertEquals(FRAME_RATE_CATEGORY_DEFAULT,
+                    viewRootImpl.getPreferredFrameRateCategory());
         });
 
         // reset the frame rate category counts
@@ -771,20 +772,20 @@ public class ViewRootImplTest {
 
         sInstrumentation.runOnMainSync(() -> {
             viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_LOW, 0, null);
-            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_LOW);
+            assertEquals(FRAME_RATE_CATEGORY_LOW, viewRootImpl.getPreferredFrameRateCategory());
             viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_NORMAL, 0, null);
-            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_NORMAL);
+            assertEquals(FRAME_RATE_CATEGORY_NORMAL, viewRootImpl.getPreferredFrameRateCategory());
             viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_HIGH_HINT, 0, null);
-            assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
-                    FRAME_RATE_CATEGORY_HIGH_HINT);
+            assertEquals(FRAME_RATE_CATEGORY_HIGH_HINT,
+                    viewRootImpl.getPreferredFrameRateCategory());
             viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_HIGH, 0, null);
-            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
+            assertEquals(FRAME_RATE_CATEGORY_HIGH, viewRootImpl.getPreferredFrameRateCategory());
             viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_HIGH_HINT, 0, null);
-            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
+            assertEquals(FRAME_RATE_CATEGORY_HIGH, viewRootImpl.getPreferredFrameRateCategory());
             viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_NORMAL, 0, null);
-            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
+            assertEquals(FRAME_RATE_CATEGORY_HIGH, viewRootImpl.getPreferredFrameRateCategory());
             viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_LOW, 0, null);
-            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
+            assertEquals(FRAME_RATE_CATEGORY_HIGH, viewRootImpl.getPreferredFrameRateCategory());
         });
     }
 
@@ -796,54 +797,54 @@ public class ViewRootImplTest {
      */
     @Test
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
-            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRate_aggregate() {
         mView = new View(sContext);
         attachViewToWindow(mView);
         mViewRootImpl = mView.getViewRootImpl();
         sInstrumentation.runOnMainSync(() -> {
-            assertEquals(mViewRootImpl.getPreferredFrameRate(), 0, 0.1);
+            assertEquals(0, mViewRootImpl.getPreferredFrameRate(), 0.1);
             assertEquals(mViewRootImpl.getFrameRateCompatibility(),
                     FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
-            assertEquals(mViewRootImpl.isFrameRateConflicted(), false);
+            assertEquals(false, mViewRootImpl.isFrameRateConflicted());
             mViewRootImpl.votePreferredFrameRate(24, FRAME_RATE_COMPATIBILITY_GTE);
-            assertEquals(mViewRootImpl.getPreferredFrameRate(), 24, 0.1);
-            assertEquals(mViewRootImpl.getFrameRateCompatibility(),
-                    FRAME_RATE_COMPATIBILITY_GTE);
-            assertEquals(mViewRootImpl.isFrameRateConflicted(), false);
+            assertEquals(24, mViewRootImpl.getPreferredFrameRate(), 0.1);
+            assertEquals(FRAME_RATE_COMPATIBILITY_GTE,
+                    mViewRootImpl.getFrameRateCompatibility());
+            assertEquals(false, mViewRootImpl.isFrameRateConflicted());
             mViewRootImpl.votePreferredFrameRate(30, FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
-            assertEquals(mViewRootImpl.getPreferredFrameRate(), 30, 0.1);
+            assertEquals(30, mViewRootImpl.getPreferredFrameRate(), 0.1);
             // If there is a conflict, then set compatibility to
             // FRAME_RATE_COMPATIBILITY_FIXED_SOURCE
-            assertEquals(mViewRootImpl.getFrameRateCompatibility(),
-                    FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
+            assertEquals(FRAME_RATE_COMPATIBILITY_FIXED_SOURCE,
+                    mViewRootImpl.getFrameRateCompatibility());
             // Should be true since there is a conflict between 24 and 30.
-            assertEquals(mViewRootImpl.isFrameRateConflicted(), true);
+            assertTrue(mViewRootImpl.isFrameRateConflicted());
             mView.invalidate();
         });
         sInstrumentation.waitForIdleSync();
 
         sInstrumentation.runOnMainSync(() -> {
-            assertEquals(mViewRootImpl.isFrameRateConflicted(), false);
+            assertEquals(false, mViewRootImpl.isFrameRateConflicted());
             mViewRootImpl.votePreferredFrameRate(60, FRAME_RATE_COMPATIBILITY_GTE);
-            assertEquals(mViewRootImpl.getPreferredFrameRate(), 60, 0.1);
-            assertEquals(mViewRootImpl.getFrameRateCompatibility(),
-                    FRAME_RATE_COMPATIBILITY_GTE);
+            assertEquals(60, mViewRootImpl.getPreferredFrameRate(), 0.1);
+            assertEquals(FRAME_RATE_COMPATIBILITY_GTE,
+                    mViewRootImpl.getFrameRateCompatibility());
             assertEquals(mViewRootImpl.isFrameRateConflicted(), false);
             mViewRootImpl.votePreferredFrameRate(120, FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
-            assertEquals(mViewRootImpl.getPreferredFrameRate(), 120, 0.1);
-            assertEquals(mViewRootImpl.getFrameRateCompatibility(),
-                    FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
+            assertEquals(120, mViewRootImpl.getPreferredFrameRate(), 0.1);
+            assertEquals(FRAME_RATE_COMPATIBILITY_FIXED_SOURCE,
+                    mViewRootImpl.getFrameRateCompatibility());
             // Should be false since 60 is a divisor of 120.
-            assertEquals(mViewRootImpl.isFrameRateConflicted(), false);
+            assertEquals(false, mViewRootImpl.isFrameRateConflicted());
             mViewRootImpl.votePreferredFrameRate(60, FRAME_RATE_COMPATIBILITY_GTE);
-            assertEquals(mViewRootImpl.getPreferredFrameRate(), 120, 0.1);
+            assertEquals(120, mViewRootImpl.getPreferredFrameRate(), 0.1);
             // compatibility should be remained the same (FRAME_RATE_COMPATIBILITY_FIXED_SOURCE)
             // since the frame rate 60 is smaller than 120.
-            assertEquals(mViewRootImpl.getFrameRateCompatibility(),
-                    FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
+            assertEquals(FRAME_RATE_COMPATIBILITY_FIXED_SOURCE,
+                    mViewRootImpl.getFrameRateCompatibility());
             // Should be false since 60 is a divisor of 120.
-            assertEquals(mViewRootImpl.isFrameRateConflicted(), false);
+            assertEquals(false, mViewRootImpl.isFrameRateConflicted());
 
         });
     }
@@ -864,8 +865,8 @@ public class ViewRootImplTest {
 
         mViewRootImpl = mView.getViewRootImpl();
         sInstrumentation.runOnMainSync(() -> {
-            assertEquals(mViewRootImpl.getPreferredFrameRateCategory(),
-                    FRAME_RATE_CATEGORY_NO_PREFERENCE);
+            assertEquals(FRAME_RATE_CATEGORY_DEFAULT,
+                    mViewRootImpl.getPreferredFrameRateCategory());
         });
 
         // reset the frame rate category counts
@@ -882,22 +883,22 @@ public class ViewRootImplTest {
         sInstrumentation.runOnMainSync(() -> {
             mView.setRequestedFrameRate(mView.REQUESTED_FRAME_RATE_CATEGORY_LOW);
             mView.invalidate();
-            runAfterDraw(() -> assertEquals(mViewRootImpl.getLastPreferredFrameRateCategory(),
-                    FRAME_RATE_CATEGORY_LOW));
+            runAfterDraw(() -> assertEquals(FRAME_RATE_CATEGORY_LOW,
+                    mViewRootImpl.getLastPreferredFrameRateCategory()));
         });
         waitForAfterDraw();
         sInstrumentation.runOnMainSync(() -> {
             mView.setRequestedFrameRate(mView.REQUESTED_FRAME_RATE_CATEGORY_NORMAL);
             mView.invalidate();
-            runAfterDraw(() -> assertEquals(mViewRootImpl.getLastPreferredFrameRateCategory(),
-                    FRAME_RATE_CATEGORY_NORMAL));
+            runAfterDraw(() -> assertEquals(FRAME_RATE_CATEGORY_NORMAL,
+                    mViewRootImpl.getLastPreferredFrameRateCategory()));
         });
         waitForAfterDraw();
         sInstrumentation.runOnMainSync(() -> {
             mView.setRequestedFrameRate(mView.REQUESTED_FRAME_RATE_CATEGORY_HIGH);
             mView.invalidate();
-            runAfterDraw(() -> assertEquals(mViewRootImpl.getLastPreferredFrameRateCategory(),
-                    FRAME_RATE_CATEGORY_HIGH));
+            runAfterDraw(() -> assertEquals(FRAME_RATE_CATEGORY_HIGH,
+                    mViewRootImpl.getLastPreferredFrameRateCategory()));
         });
         waitForAfterDraw();
     }
@@ -928,21 +929,26 @@ public class ViewRootImplTest {
         waitForFrameRateCategoryToSettle(mView);
 
         sInstrumentation.runOnMainSync(() -> {
-            assertEquals(mViewRootImpl.getPreferredFrameRate(), 0, 0.1);
+            assertEquals(0, mViewRootImpl.getPreferredFrameRate(), 0.1);
             mView.setFrameContentVelocity(100);
             mView.invalidate();
-            runAfterDraw(() -> assertTrue(mViewRootImpl.getLastPreferredFrameRate() > 0));
+            if (toolkitFrameRateVelocityMappingReadOnly()) {
+                runAfterDraw(() -> assertTrue(mViewRootImpl.getLastPreferredFrameRate() > 0));
+            } else {
+                runAfterDraw(() -> assertEquals(FRAME_RATE_CATEGORY_HIGH,
+                        mViewRootImpl.getLastPreferredFrameRateCategory()));
+            }
         });
         waitForAfterDraw();
         sInstrumentation.waitForIdleSync();
         if (toolkitFrameRateVelocityMappingReadOnly()) {
-            assertEquals(mViewRootImpl.getLastPreferredFrameRateCategory(),
-                    FRAME_RATE_CATEGORY_HIGH);
+            assertEquals(FRAME_RATE_CATEGORY_HIGH,
+                    mViewRootImpl.getLastPreferredFrameRateCategory());
             assertTrue(mViewRootImpl.getLastPreferredFrameRate() >= 60f);
         } else {
-            assertEquals(mViewRootImpl.getLastPreferredFrameRateCategory(),
-                    FRAME_RATE_CATEGORY_HIGH);
-            assertEquals(mViewRootImpl.getLastPreferredFrameRate(), 0, 0.1);
+            assertEquals(FRAME_RATE_CATEGORY_HIGH,
+                    mViewRootImpl.getLastPreferredFrameRateCategory());
+            assertEquals(0, mViewRootImpl.getLastPreferredFrameRate(), 0.1);
         }
     }
 
@@ -951,7 +957,7 @@ public class ViewRootImplTest {
      */
     @Test
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
-            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_insetsAnimation() {
         mView = new View(sContext);
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
@@ -977,8 +983,8 @@ public class ViewRootImplTest {
         sInstrumentation.waitForIdleSync();
 
         sInstrumentation.runOnMainSync(() -> {
-            assertEquals(viewRootImpl.getLastPreferredFrameRateCategory(),
-                    FRAME_RATE_CATEGORY_HIGH);
+            assertEquals(FRAME_RATE_CATEGORY_HIGH,
+                    viewRootImpl.getLastPreferredFrameRateCategory());
         });
     }
 
@@ -988,7 +994,7 @@ public class ViewRootImplTest {
      */
     @Test
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
-            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_frameRateBoostOnTouch() {
         mView = new View(sContext);
         attachViewToWindow(mView);
@@ -996,7 +1002,7 @@ public class ViewRootImplTest {
 
         ViewRootImpl viewRootImpl = mView.getViewRootImpl();
         final WindowManager.LayoutParams attrs = viewRootImpl.mWindowAttributes;
-        assertEquals(attrs.getFrameRateBoostOnTouchEnabled(), true);
+        assertEquals(true, attrs.getFrameRateBoostOnTouchEnabled());
         assertEquals(viewRootImpl.getFrameRateBoostOnTouchEnabled(),
                 attrs.getFrameRateBoostOnTouchEnabled());
 
@@ -1008,7 +1014,7 @@ public class ViewRootImplTest {
 
         sInstrumentation.runOnMainSync(() -> {
             final WindowManager.LayoutParams newAttrs = viewRootImpl.mWindowAttributes;
-            assertEquals(newAttrs.getFrameRateBoostOnTouchEnabled(), false);
+            assertEquals(false, newAttrs.getFrameRateBoostOnTouchEnabled());
             assertEquals(viewRootImpl.getFrameRateBoostOnTouchEnabled(),
                     newAttrs.getFrameRateBoostOnTouchEnabled());
         });
@@ -1021,7 +1027,7 @@ public class ViewRootImplTest {
      */
     @Test
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
-            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_voteFrameRateTimeOut() throws InterruptedException {
         final long delay = 200L;
 
@@ -1031,27 +1037,27 @@ public class ViewRootImplTest {
         ViewRootImpl viewRootImpl = mView.getViewRootImpl();
 
         sInstrumentation.runOnMainSync(() -> {
-            assertEquals(viewRootImpl.getPreferredFrameRate(), 0, 0.1);
-            assertEquals(viewRootImpl.getFrameRateCompatibility(),
-                    FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
-            assertEquals(viewRootImpl.isFrameRateConflicted(), false);
+            assertEquals(0, viewRootImpl.getPreferredFrameRate(), 0.1);
+            assertEquals(FRAME_RATE_COMPATIBILITY_FIXED_SOURCE,
+                    viewRootImpl.getFrameRateCompatibility());
+            assertEquals(false, viewRootImpl.isFrameRateConflicted());
             viewRootImpl.votePreferredFrameRate(24, FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
-            assertEquals(viewRootImpl.getPreferredFrameRate(), 24, 0.1);
-            assertEquals(viewRootImpl.getFrameRateCompatibility(),
-                    FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
-            assertEquals(viewRootImpl.isFrameRateConflicted(), false);
+            assertEquals(24, viewRootImpl.getPreferredFrameRate(), 0.1);
+            assertEquals(FRAME_RATE_COMPATIBILITY_FIXED_SOURCE,
+                    viewRootImpl.getFrameRateCompatibility());
+            assertEquals(false, viewRootImpl.isFrameRateConflicted());
             mView.invalidate();
-            assertEquals(viewRootImpl.getPreferredFrameRate(), 24, 0.1);
-            assertEquals(viewRootImpl.getFrameRateCompatibility(),
-                    FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
-            assertEquals(viewRootImpl.isFrameRateConflicted(), false);
+            assertEquals(24, viewRootImpl.getPreferredFrameRate(), 0.1);
+            assertEquals(FRAME_RATE_COMPATIBILITY_FIXED_SOURCE,
+                    viewRootImpl.getFrameRateCompatibility());
+            assertEquals(false, viewRootImpl.isFrameRateConflicted());
         });
 
         Thread.sleep(delay);
-        assertEquals(viewRootImpl.getPreferredFrameRate(), 0, 0.1);
-        assertEquals(viewRootImpl.getFrameRateCompatibility(),
-                FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
-        assertEquals(viewRootImpl.isFrameRateConflicted(), false);
+        assertEquals(0, viewRootImpl.getPreferredFrameRate(), 0.1);
+        assertEquals(FRAME_RATE_COMPATIBILITY_FIXED_SOURCE,
+                viewRootImpl.getFrameRateCompatibility());
+        assertEquals(false, viewRootImpl.isFrameRateConflicted());
     }
 
     /**
@@ -1070,15 +1076,16 @@ public class ViewRootImplTest {
         mViewRootImpl = mView.getViewRootImpl();
         waitForFrameRateCategoryToSettle(mView);
         sInstrumentation.runOnMainSync(() -> {
-            assertEquals(mViewRootImpl.getPreferredFrameRateCategory(),
-                    FRAME_RATE_CATEGORY_NO_PREFERENCE);
+            assertEquals(FRAME_RATE_CATEGORY_DEFAULT,
+                    mViewRootImpl.getPreferredFrameRateCategory());
 
             mView.setRequestedFrameRate(frameRate);
             mView.invalidate();
             runAfterDraw(() -> {
-                assertEquals(mViewRootImpl.getLastPreferredFrameRateCategory(),
-                        FRAME_RATE_CATEGORY_NO_PREFERENCE);
-                assertEquals(mViewRootImpl.getLastPreferredFrameRate(), frameRate, 0.1);
+                int expected = toolkitFrameRateDefaultNormalReadOnly()
+                        ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
+                assertEquals(expected, mViewRootImpl.getLastPreferredFrameRateCategory());
+                assertEquals(frameRate, mViewRootImpl.getLastPreferredFrameRate(), 0.1);
             });
         });
         waitForAfterDraw();
@@ -1095,8 +1102,8 @@ public class ViewRootImplTest {
         sInstrumentation.runOnMainSync(() -> {
             mView.setRequestedFrameRate(mView.REQUESTED_FRAME_RATE_CATEGORY_LOW);
             mView.invalidate();
-            runAfterDraw(() -> assertEquals(mViewRootImpl.getLastPreferredFrameRateCategory(),
-                    FRAME_RATE_CATEGORY_LOW));
+            runAfterDraw(() -> assertEquals(FRAME_RATE_CATEGORY_LOW,
+                    mViewRootImpl.getLastPreferredFrameRateCategory()));
         });
         waitForAfterDraw();
     }
@@ -1157,16 +1164,16 @@ public class ViewRootImplTest {
         sInstrumentation.runOnMainSync(() -> {
             mView.setRequestedFrameRate(mView.REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE);
             mView.invalidate();
-            runAfterDraw(() -> assertEquals(mViewRootImpl.getLastPreferredFrameRateCategory(),
-                    FRAME_RATE_CATEGORY_NO_PREFERENCE));
+            runAfterDraw(() -> assertEquals(FRAME_RATE_CATEGORY_NO_PREFERENCE,
+                    mViewRootImpl.getLastPreferredFrameRateCategory()));
         });
         waitForAfterDraw();
         Thread.sleep(delay);
         sInstrumentation.runOnMainSync(() -> {
             mView.setRequestedFrameRate(mView.REQUESTED_FRAME_RATE_CATEGORY_DEFAULT);
             mView.invalidate();
-            runAfterDraw(() -> assertEquals(mViewRootImpl.getLastPreferredFrameRateCategory(),
-                    FRAME_RATE_CATEGORY_NO_PREFERENCE));
+            runAfterDraw(() -> assertEquals(FRAME_RATE_CATEGORY_NO_PREFERENCE,
+                    mViewRootImpl.getLastPreferredFrameRateCategory()));
         });
         waitForAfterDraw();
 
@@ -1175,8 +1182,8 @@ public class ViewRootImplTest {
         sInstrumentation.runOnMainSync(() -> {
             mView.setRequestedFrameRate(mView.REQUESTED_FRAME_RATE_CATEGORY_DEFAULT);
             mView.invalidate();
-            runAfterDraw(() -> assertEquals(mViewRootImpl.getLastPreferredFrameRateCategory(),
-                    FRAME_RATE_CATEGORY_NORMAL));
+            runAfterDraw(() -> assertEquals(FRAME_RATE_CATEGORY_NORMAL,
+                    mViewRootImpl.getLastPreferredFrameRateCategory()));
         });
         waitForAfterDraw();
     }
@@ -1186,7 +1193,7 @@ public class ViewRootImplTest {
      */
     @Test
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
-            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void votePreferredFrameRate_isFrameRatePowerSavingsBalanced() {
         mView = new View(sContext);
         attachViewToWindow(mView);
@@ -1206,7 +1213,7 @@ public class ViewRootImplTest {
 
         sInstrumentation.runOnMainSync(() -> {
             final WindowManager.LayoutParams newAttrs = viewRoot.mWindowAttributes;
-            assertEquals(newAttrs.isFrameRatePowerSavingsBalanced(), false);
+            assertEquals(false, newAttrs.isFrameRatePowerSavingsBalanced());
             assertEquals(viewRoot.isFrameRatePowerSavingsBalanced(),
                     newAttrs.isFrameRatePowerSavingsBalanced());
         });
@@ -1243,8 +1250,8 @@ public class ViewRootImplTest {
         waitForFrameRateCategoryToSettle(mView);
 
         sInstrumentation.runOnMainSync(() -> {
-            assertEquals(mViewRootImpl.getPreferredFrameRateCategory(),
-                    FRAME_RATE_CATEGORY_NO_PREFERENCE);
+            assertEquals(FRAME_RATE_CATEGORY_DEFAULT,
+                    mViewRootImpl.getPreferredFrameRateCategory());
             mView.invalidate();
             int expected = toolkitFrameRateDefaultNormalReadOnly()
                     ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
@@ -1269,8 +1276,8 @@ public class ViewRootImplTest {
         sInstrumentation.runOnMainSync(() -> {
             mView.setRequestedFrameRate(mView.REQUESTED_FRAME_RATE_CATEGORY_DEFAULT);
             mView.invalidate();
-            runAfterDraw(() -> assertEquals(mViewRootImpl.getLastPreferredFrameRateCategory(),
-                    FRAME_RATE_CATEGORY_NORMAL));
+            runAfterDraw(() -> assertEquals(FRAME_RATE_CATEGORY_NORMAL,
+                    mViewRootImpl.getLastPreferredFrameRateCategory()));
         });
         waitForAfterDraw();
     }
