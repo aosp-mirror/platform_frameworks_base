@@ -361,7 +361,7 @@ public class ShortcutService extends IShortcutService.Stub {
     private CompressFormat mIconPersistFormat;
     private int mIconPersistQuality;
 
-    private int mSaveDelayMillis;
+    int mSaveDelayMillis;
 
     private final IPackageManager mIPackageManager;
     private final PackageManagerInternal mPackageManagerInternal;
@@ -2253,11 +2253,11 @@ public class ShortcutService extends IShortcutService.Stub {
                 List<ShortcutInfo> changedShortcuts = new ArrayList<>();
                 List<ShortcutInfo> removedShortcuts = null;
 
+                final ShortcutPackage ps;
                 synchronized (mLock) {
                     throwIfUserLockedL(userId);
 
-                    final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName,
-                            userId);
+                    ps = getPackageShortcutsForPublisherLocked(packageName, userId);
 
                     ps.ensureNotImmutable(shortcut.getId(), /*ignoreInvisible=*/ true);
                     fillInDefaultActivity(Arrays.asList(shortcut));
@@ -2295,7 +2295,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
                 packageShortcutsChanged(packageName, userId, changedShortcuts, removedShortcuts);
 
-                reportShortcutUsedInternal(packageName, shortcut.getId(), userId);
+                ps.reportShortcutUsed(mUsageStatsManagerInternal, shortcut.getId());
 
                 verifyStates();
 
@@ -2874,11 +2874,11 @@ public class ShortcutService extends IShortcutService.Stub {
                             shortcutId, packageName, userId));
                 }
 
+                final ShortcutPackage ps;
                 synchronized (mLock) {
                     throwIfUserLockedL(userId);
 
-                    final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName,
-                            userId);
+                    ps = getPackageShortcutsForPublisherLocked(packageName, userId);
 
                     if (ps.findShortcutById(shortcutId) == null) {
                         Log.w(TAG, String.format(
@@ -2889,22 +2889,13 @@ public class ShortcutService extends IShortcutService.Stub {
                     }
                 }
 
-                reportShortcutUsedInternal(packageName, shortcutId, userId);
+                ps.reportShortcutUsed(mUsageStatsManagerInternal, shortcutId);
                 ret.complete(true);
             } catch (Exception e) {
                 ret.completeExceptionally(e);
             }
         });
         return ret;
-    }
-
-    private void reportShortcutUsedInternal(String packageName, String shortcutId, int userId) {
-        final long token = injectClearCallingIdentity();
-        try {
-            mUsageStatsManagerInternal.reportShortcutUsage(packageName, shortcutId, userId);
-        } finally {
-            injectRestoreCallingIdentity(token);
-        }
     }
 
     @Override
