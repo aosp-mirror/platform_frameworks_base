@@ -687,9 +687,9 @@
     <!-- QuickSettings: Bluetooth auto on tomorrow [CHAR LIMIT=NONE]-->
     <string name="turn_on_bluetooth_auto_tomorrow">Automatically turn on again tomorrow</string>
     <!-- QuickSettings: Bluetooth auto on info text when disabled [CHAR LIMIT=NONE]-->
-    <string name="turn_on_bluetooth_auto_info_disabled">Features like Quick Share, Find My Device, and device location use Bluetooth</string>
+    <string name="turn_on_bluetooth_auto_info_disabled">Features like Quick Share and Find My Device use Bluetooth</string>
     <!-- QuickSettings: Bluetooth auto on info text when enabled [CHAR LIMIT=NONE]-->
-    <string name="turn_on_bluetooth_auto_info_enabled">Bluetooth will turn on tomorrow at 5 AM</string>
+    <string name="turn_on_bluetooth_auto_info_enabled">Bluetooth will turn on tomorrow morning</string>
 
     <!-- QuickSettings: Bluetooth secondary label for the battery level of a connected device [CHAR LIMIT=20]-->
     <string name="quick_settings_bluetooth_secondary_label_battery_level"><xliff:g id="battery_level_as_percentage">%s</xliff:g> battery</string>
