@@ -103,9 +103,9 @@ public class Surface implements Parcelable {
             long nativeObject, float frameRate, int compatibility, int changeFrameRateStrategy);
     private static native void nativeDestroy(long nativeObject);
 
-    // 5MB is a wild guess for what the average surface should be. On most new phones, a full-screen
-    // surface is about 9MB... but not all surfaces are screen size. This should be a nice balance.
-    private static final long SURFACE_NATIVE_ALLOCATION_SIZE_BYTES = 5_000_000;
+    // 5KB is a balanced guess, since these are still pretty heavyweight objects, but if we make
+    // this too big, it can overwhelm the GC.
+    private static final long SURFACE_NATIVE_ALLOCATION_SIZE_BYTES = 5_000;
 
     public static final @android.annotation.NonNull Parcelable.Creator<Surface> CREATOR =
             new Parcelable.Creator<Surface>() {
