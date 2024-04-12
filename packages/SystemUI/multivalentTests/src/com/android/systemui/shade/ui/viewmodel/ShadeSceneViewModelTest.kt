@@ -55,6 +55,8 @@ import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsVi
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.testKosmos
+import com.android.systemui.unfold.domain.interactor.unfoldTransitionInteractor
+import com.android.systemui.unfold.fakeUnfoldTransitionProgressProvider
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -134,6 +136,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
                 footerActionsViewModelFactory = kosmos.footerActionsViewModelFactory,
                 footerActionsController = kosmos.footerActionsController,
                 sceneInteractor = kosmos.sceneInteractor,
+                unfoldTransitionInteractor = kosmos.unfoldTransitionInteractor,
             )
     }
 
@@ -296,5 +299,27 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
 
             shadeRepository.setShadeMode(ShadeMode.Split)
             assertThat(shadeMode).isEqualTo(ShadeMode.Split)
+        }
+
+    @Test
+    fun unfoldTransitionProgress() =
+        testScope.runTest {
+            val unfoldProvider = kosmos.fakeUnfoldTransitionProgressProvider
+            val progress by collectLastValue(underTest.unfoldTransitionProgress)
+
+            unfoldProvider.onTransitionStarted()
+            assertThat(progress).isEqualTo(1f)
+
+            repeat(10) { repetition ->
+                val transitionProgress = 0.1f * (repetition + 1)
+                unfoldProvider.onTransitionProgress(transitionProgress)
+                assertThat(progress).isEqualTo(transitionProgress)
+            }
+
+            unfoldProvider.onTransitionFinishing()
+            assertThat(progress).isEqualTo(1f)
+
+            unfoldProvider.onTransitionFinished()
+            assertThat(progress).isEqualTo(1f)
         }
 }

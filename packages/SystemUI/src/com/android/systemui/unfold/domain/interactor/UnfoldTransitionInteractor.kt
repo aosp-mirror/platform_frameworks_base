@@ -17,10 +17,14 @@ package com.android.systemui.unfold.domain.interactor
 
 import com.android.systemui.unfold.data.repository.UnfoldTransitionRepository
 import com.android.systemui.unfold.data.repository.UnfoldTransitionStatus.TransitionFinished
+import com.android.systemui.unfold.data.repository.UnfoldTransitionStatus.TransitionInProgress
 import com.android.systemui.unfold.data.repository.UnfoldTransitionStatus.TransitionStarted
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 
 /**
  * Contains business-logic related to fold-unfold transitions while interacting with
@@ -29,6 +33,8 @@ import kotlinx.coroutines.flow.first
 interface UnfoldTransitionInteractor {
     /** Returns availability of fold/unfold transitions on the device */
     val isAvailable: Boolean
+
+    val unfoldProgress: Flow<Float>
 
     /** Suspends and waits for a fold/unfold transition to finish */
     suspend fun waitForTransitionFinish()
@@ -43,6 +49,11 @@ constructor(private val repository: UnfoldTransitionRepository) : UnfoldTransiti
 
     override val isAvailable: Boolean
         get() = repository.isAvailable
+
+    override val unfoldProgress: Flow<Float> =
+        repository.transitionStatus
+            .map { (it as? TransitionInProgress)?.progress ?: 1f }
+            .distinctUntilChanged()
 
     override suspend fun waitForTransitionFinish() {
         repository.transitionStatus.filter { it is TransitionFinished }.first()

@@ -15,9 +15,11 @@
  */
 package com.android.systemui.unfold.data.repository
 
+import androidx.annotation.FloatRange
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.unfold.data.repository.UnfoldTransitionStatus.TransitionFinished
+import com.android.systemui.unfold.data.repository.UnfoldTransitionStatus.TransitionInProgress
 import com.android.systemui.unfold.data.repository.UnfoldTransitionStatus.TransitionStarted
 import com.android.systemui.util.kotlin.getOrNull
 import java.util.Optional
@@ -42,6 +44,10 @@ interface UnfoldTransitionRepository {
 sealed class UnfoldTransitionStatus {
     /** Status that is sent when fold or unfold transition is in started state */
     data object TransitionStarted : UnfoldTransitionStatus()
+    /** Status that is sent while fold or unfold transition is in progress */
+    data class TransitionInProgress(
+        @FloatRange(from = 0.0, to = 1.0) val progress: Float,
+    ) : UnfoldTransitionStatus()
     /** Status that is sent when fold or unfold transition is finished */
     data object TransitionFinished : UnfoldTransitionStatus()
 }
@@ -64,6 +70,10 @@ constructor(
                     object : UnfoldTransitionProgressProvider.TransitionProgressListener {
                         override fun onTransitionStarted() {
                             trySend(TransitionStarted)
+                        }
+
+                        override fun onTransitionProgress(progress: Float) {
+                            trySend(TransitionInProgress(progress))
                         }
 
                         override fun onTransitionFinished() {
