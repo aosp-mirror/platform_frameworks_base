@@ -47,7 +47,7 @@
         android:layout_marginBottom="@dimen/bluetooth_dialog_layout_margin"
         android:ellipsize="end"
         android:gravity="center_vertical|center_horizontal"
-        android:maxLines="1"
+        android:maxLines="2"
         android:text="@string/quick_settings_bluetooth_tile_subtitle"
         android:textAppearance="@style/TextAppearance.Dialog.Body.Message"
         app:layout_constraintEnd_toEndOf="parent"
