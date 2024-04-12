@@ -76,6 +76,8 @@ public class FaceDownDetector implements SensorEventListener {
     private static final boolean DEFAULT_FEATURE_ENABLED = true;
 
     private boolean mIsEnabled;
+    // Defaults to true, we only want to disable if this is specifically requested.
+    private boolean mEnabledOverride = true;
 
     private int mSensorMaxLatencyMicros;
 
@@ -240,6 +242,7 @@ public class FaceDownDetector implements SensorEventListener {
         pw.println("  mZAccelerationThreshold=" + mZAccelerationThreshold);
         pw.println("  mAccelerationThreshold=" + mAccelerationThreshold);
         pw.println("  mTimeThreshold=" + mTimeThreshold);
+        pw.println("  mEnabledOverride=" + mEnabledOverride);
     }
 
     @Override
@@ -336,10 +339,9 @@ public class FaceDownDetector implements SensorEventListener {
     }
 
     private boolean isEnabled() {
-        return DeviceConfig.getBoolean(NAMESPACE_ATTENTION_MANAGER_SERVICE, KEY_FEATURE_ENABLED,
-                DEFAULT_FEATURE_ENABLED)
-                && mContext.getResources().getBoolean(
-                        com.android.internal.R.bool.config_flipToScreenOffEnabled);
+        return mEnabledOverride && DeviceConfig.getBoolean(NAMESPACE_ATTENTION_MANAGER_SERVICE,
+                KEY_FEATURE_ENABLED, DEFAULT_FEATURE_ENABLED) && mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_flipToScreenOffEnabled);
     }
 
     private float getAccelerationThreshold() {
@@ -447,6 +449,15 @@ public class FaceDownDetector implements SensorEventListener {
                 + "\nmZAccelerationThreshold=" + mZAccelerationThreshold
                 + "\nmTimeThreshold=" + mTimeThreshold
                 + "\nmIsEnabled=" + mIsEnabled);
+    }
+
+    /**
+     * Allows detector to be enabled & disabled.
+     * @param enabled whether to enable detector.
+     */
+    public void setEnabledOverride(boolean enabled) {
+        mEnabledOverride = enabled;
+        mIsEnabled = isEnabled();
     }
 
     /**
