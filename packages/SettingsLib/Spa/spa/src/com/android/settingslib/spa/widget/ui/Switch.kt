@@ -21,8 +21,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
+import com.android.settingslib.spa.framework.compose.contentDescription
 import com.android.settingslib.spa.framework.util.wrapOnSwitchWithLog
 
 @Composable
@@ -37,9 +36,7 @@ internal fun SettingsSwitch(
         Switch(
             checked = checked,
             onCheckedChange = wrapOnSwitchWithLog(onCheckedChange),
-            modifier = if (contentDescription != null) Modifier.semantics {
-                this.contentDescription = contentDescription
-            } else Modifier,
+            modifier = Modifier.contentDescription(contentDescription),
             enabled = changeable(),
             interactionSource = interactionSource,
         )
