@@ -80,6 +80,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.wm.shell.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.bubbles.BubblesNavBarMotionEventHandler.MotionEventListener;
@@ -863,6 +864,7 @@ public class BubbleStackView extends FrameLayout
         }
     };
 
+    private boolean mShowingOverflow;
     private BubbleOverflow mBubbleOverflow;
     private StackEducationView mStackEduView;
     private StackEducationView.Manager mStackEducationViewManager;
@@ -992,18 +994,12 @@ public class BubbleStackView extends FrameLayout
 
         mBubbleOverflow = mBubbleData.getOverflow();
 
-        resetOverflowView();
-        mBubbleContainer.addView(mBubbleOverflow.getIconView(),
-                mBubbleContainer.getChildCount() /* index */,
-                new FrameLayout.LayoutParams(mPositioner.getBubbleSize(),
-                        mPositioner.getBubbleSize()));
-        updateOverflow();
-        mBubbleOverflow.getIconView().setOnClickListener((View v) -> {
-            mBubbleData.setShowingOverflow(true);
-            mBubbleData.setSelectedBubble(mBubbleOverflow);
-            mBubbleData.setExpanded(true);
-        });
-
+        if (Flags.enableOptionalBubbleOverflow()) {
+            showOverflow(mBubbleData.hasOverflowBubbles());
+        } else {
+            mShowingOverflow = true; // if the flags not on this is always true
+            setUpOverflow();
+        }
         mScrim = new View(getContext());
         mScrim.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
         mScrim.setBackgroundDrawable(new ColorDrawable(
@@ -1219,6 +1215,19 @@ public class BubbleStackView extends FrameLayout
             mBubbleContainer.animate().translationX(0).start();
         }
     };
+
+    private void setUpOverflow() {
+        resetOverflowView();
+        mBubbleContainer.addView(mBubbleOverflow.getIconView(),
+                mBubbleContainer.getChildCount() /* index */,
+                new FrameLayout.LayoutParams(mBubbleSize, mBubbleSize));
+        updateOverflow();
+        mBubbleOverflow.getIconView().setOnClickListener((View v) -> {
+            mBubbleData.setShowingOverflow(true);
+            mBubbleData.setSelectedBubble(mBubbleOverflow);
+            mBubbleData.setExpanded(true);
+        });
+    }
 
     private void setUpDismissView() {
         if (mDismissView != null) {
@@ -1458,22 +1467,54 @@ public class BubbleStackView extends FrameLayout
                 b.getExpandedView().updateFontSize();
             }
         }
-        if (mBubbleOverflow != null && mBubbleOverflow.getExpandedView() != null) {
+        if (mShowingOverflow && mBubbleOverflow != null
+                && mBubbleOverflow.getExpandedView() != null) {
             mBubbleOverflow.getExpandedView().updateFontSize();
         }
     }
 
     void updateLocale() {
-        if (mBubbleOverflow != null && mBubbleOverflow.getExpandedView() != null) {
+        if (mShowingOverflow && mBubbleOverflow != null
+                && mBubbleOverflow.getExpandedView() != null) {
             mBubbleOverflow.getExpandedView().updateLocale();
         }
     }
 
     private void updateOverflow() {
         mBubbleOverflow.update();
-        mBubbleContainer.reorderView(mBubbleOverflow.getIconView(),
-                mBubbleContainer.getChildCount() - 1 /* index */);
+        if (mShowingOverflow) {
+            mBubbleContainer.reorderView(mBubbleOverflow.getIconView(),
+                    mBubbleContainer.getChildCount() - 1 /* index */);
+        }
         updateOverflowVisibility();
+    }
+
+    private void updateOverflowVisibility() {
+        mBubbleOverflow.setVisible(mShowingOverflow
+                && (mIsExpanded || mBubbleData.isShowingOverflow())
+                ? VISIBLE
+                : GONE);
+    }
+
+    private void updateOverflowDotVisibility(boolean expanding) {
+        if (mShowingOverflow && mBubbleOverflow.showDot()) {
+            mBubbleOverflow.getIconView().animateDotScale(expanding ? 1 : 0f, () -> {
+                mBubbleOverflow.setVisible(expanding ? VISIBLE : GONE);
+            });
+        }
+    }
+
+    /**  Sets whether the overflow should be visible or not. */
+    public void showOverflow(boolean showOverflow) {
+        if (!Flags.enableOptionalBubbleOverflow()) return;
+        if (mShowingOverflow != showOverflow) {
+            mShowingOverflow = showOverflow;
+            if (showOverflow) {
+                setUpOverflow();
+            } else if (mBubbleOverflow != null) {
+                resetOverflowView();
+            }
+        }
     }
 
     /**
@@ -1535,7 +1576,10 @@ public class BubbleStackView extends FrameLayout
                 b.getExpandedView().updateDimensions();
             }
         }
-        mBubbleOverflow.getIconView().setLayoutParams(new LayoutParams(mBubbleSize, mBubbleSize));
+        if (mShowingOverflow) {
+            mBubbleOverflow.getIconView().setLayoutParams(
+                    new LayoutParams(mBubbleSize, mBubbleSize));
+        }
         mExpandedAnimationController.updateResources();
         mStackAnimationController.updateResources();
         mDismissView.updateResources();
@@ -1699,7 +1743,7 @@ public class BubbleStackView extends FrameLayout
                     bubble.getIconView().setContentDescription(getResources().getString(
                             R.string.bubble_content_description_single, titleStr, appName));
                 } else {
-                    final int moreCount = mBubbleContainer.getChildCount() - 1;
+                    final int moreCount = getBubbleCount();
                     bubble.getIconView().setContentDescription(getResources().getString(
                             R.string.bubble_content_description_stack,
                             titleStr, appName, moreCount));
@@ -1752,7 +1796,8 @@ public class BubbleStackView extends FrameLayout
 
             View bubbleOverflowIconView =
                     mBubbleOverflow != null ? mBubbleOverflow.getIconView() : null;
-            if (bubbleOverflowIconView != null && !mBubbleData.getBubbles().isEmpty()) {
+            if (mShowingOverflow && bubbleOverflowIconView != null
+                    && !mBubbleData.getBubbles().isEmpty()) {
                 Bubble lastBubble =
                         mBubbleData.getBubbles().get(mBubbleData.getBubbles().size() - 1);
                 View lastBubbleIconView = lastBubble.getIconView();
@@ -1925,20 +1970,6 @@ public class BubbleStackView extends FrameLayout
             logBubbleEvent(bubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
         } else {
             Log.w(TAG, "was asked to remove Bubble, but didn't find the view! " + bubble);
-        }
-    }
-
-    private void updateOverflowVisibility() {
-        mBubbleOverflow.setVisible((mIsExpanded || mBubbleData.isShowingOverflow())
-                ? VISIBLE
-                : GONE);
-    }
-
-    private void updateOverflowDotVisibility(boolean expanding) {
-        if (mBubbleOverflow.showDot()) {
-            mBubbleOverflow.getIconView().animateDotScale(expanding ? 1 : 0f, () -> {
-                mBubbleOverflow.setVisible(expanding ? VISIBLE : GONE);
-            });
         }
     }
 
@@ -3428,8 +3459,9 @@ public class BubbleStackView extends FrameLayout
      * @return the number of bubbles in the stack view.
      */
     public int getBubbleCount() {
-        // Subtract 1 for the overflow button that is always in the bubble container.
-        return mBubbleContainer.getChildCount() - 1;
+        final int childCount = mBubbleContainer.getChildCount();
+        // Subtract 1 for the overflow button if it's showing.
+        return mShowingOverflow ? childCount - 1 : childCount;
     }
 
     /**

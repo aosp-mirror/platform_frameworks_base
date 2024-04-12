@@ -87,6 +87,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.launcher3.icons.BubbleIconFactory;
+import com.android.wm.shell.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
@@ -1858,7 +1859,11 @@ public class BubbleController implements ConfigurationChangeListener,
 
         @Override
         public void bubbleOverflowChanged(boolean hasBubbles) {
-            // TODO (b/334175587): tell stack view to hide / show the overflow
+            if (Flags.enableOptionalBubbleOverflow()) {
+                if (mStackView != null) {
+                    mStackView.showOverflow(hasBubbles);
+                }
+            }
         }
     };
 
