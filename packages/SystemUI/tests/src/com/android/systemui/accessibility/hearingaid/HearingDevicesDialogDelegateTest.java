@@ -39,8 +39,10 @@ import androidx.test.filters.SmallTest;
 import com.android.settingslib.bluetooth.BluetoothEventManager;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
+import com.android.settingslib.bluetooth.HapClientProfile;
 import com.android.settingslib.bluetooth.LocalBluetoothAdapter;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
+import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.bluetooth.qsdialog.DeviceItem;
@@ -88,6 +90,10 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
     @Mock
     private LocalBluetoothAdapter mLocalBluetoothAdapter;
     @Mock
+    private LocalBluetoothProfileManager mProfileManager;
+    @Mock
+    private HapClientProfile mHapClientProfile;
+    @Mock
     private CachedBluetoothDeviceManager mCachedDeviceManager;
     @Mock
     private BluetoothEventManager mBluetoothEventManager;
@@ -106,6 +112,8 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
     public void setUp() {
         mTestableLooper = TestableLooper.get(this);
         when(mLocalBluetoothManager.getBluetoothAdapter()).thenReturn(mLocalBluetoothAdapter);
+        when(mLocalBluetoothManager.getProfileManager()).thenReturn(mProfileManager);
+        when(mProfileManager.getHapClientProfile()).thenReturn(mHapClientProfile);
         when(mLocalBluetoothAdapter.isEnabled()).thenReturn(true);
         when(mLocalBluetoothManager.getCachedDeviceManager()).thenReturn(mCachedDeviceManager);
         when(mCachedDeviceManager.getCachedDevicesCopy()).thenReturn(mDevices);
@@ -163,6 +171,7 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
 
     private void setUpPairNewDeviceDialog() {
         mDialogDelegate = new HearingDevicesDialogDelegate(
+                mContext,
                 true,
                 mSystemUIDialogFactory,
                 mActivityStarter,
@@ -185,6 +194,7 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
 
     private void setUpDeviceListDialog() {
         mDialogDelegate = new HearingDevicesDialogDelegate(
+                mContext,
                 false,
                 mSystemUIDialogFactory,
                 mActivityStarter,
