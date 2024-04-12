@@ -287,4 +287,11 @@ public class ShortcutHelper {
             }
         }
     }
+
+    void destroy() {
+        if (mLauncherAppsCallbackRegistered) {
+            mLauncherAppsService.unregisterCallback(mLauncherAppsCallback);
+            mLauncherAppsCallbackRegistered = false;
+        }
+    }
 }
