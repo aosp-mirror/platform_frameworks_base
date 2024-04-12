@@ -19,6 +19,8 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
@@ -1021,6 +1023,58 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         // The top TaskFragment should remain on top.
         assertEquals(task.mChildren.indexOf(taskFragment) + 1,
                 task.mChildren.indexOf(mTaskFragment));
+    }
+
+    @Test
+    public void testApplyTransaction_createTaskFragment_overrideOrientation_systemOrganizer() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_TASK_FRAGMENT_SYSTEM_ORGANIZER_FLAG);
+        mController.unregisterOrganizer(mIOrganizer);
+        registerTaskFragmentOrganizer(mIOrganizer, true /* isSystemOrganizer */);
+
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord activity = createActivityRecord(task);
+        final int uid = Binder.getCallingUid();
+        activity.info.applicationInfo.uid = uid;
+        activity.getTask().effectiveUid = uid;
+        final IBinder fragmentToken = new Binder();
+
+        // Create a TaskFragment with OverrideOrientation set.
+        final TaskFragmentCreationParams params = new TaskFragmentCreationParams.Builder(
+                mOrganizerToken, fragmentToken, activity.token)
+                .setOverrideOrientation(SCREEN_ORIENTATION_BEHIND)
+                .build();
+        mTransaction.setTaskFragmentOrganizer(mIOrganizer);
+        mTransaction.createTaskFragment(params);
+        assertApplyTransactionAllowed(mTransaction);
+
+        // TaskFragment override orientation should be set for a system organizer.
+        final TaskFragment taskFragment = mWindowOrganizerController.getTaskFragment(fragmentToken);
+        assertNotNull(taskFragment);
+        assertEquals(SCREEN_ORIENTATION_BEHIND, taskFragment.getOverrideOrientation());
+    }
+
+    @Test
+    public void testApplyTransaction_createTaskFragment_overrideOrientation_nonSystemOrganizer() {
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord activity = createActivityRecord(task);
+        final int uid = Binder.getCallingUid();
+        activity.info.applicationInfo.uid = uid;
+        activity.getTask().effectiveUid = uid;
+        final IBinder fragmentToken = new Binder();
+
+        // Create a TaskFragment with OverrideOrientation set.
+        final TaskFragmentCreationParams params = new TaskFragmentCreationParams.Builder(
+                mOrganizerToken, fragmentToken, activity.token)
+                .setOverrideOrientation(SCREEN_ORIENTATION_BEHIND)
+                .build();
+        mTransaction.setTaskFragmentOrganizer(mIOrganizer);
+        mTransaction.createTaskFragment(params);
+        assertApplyTransactionAllowed(mTransaction);
+
+        // TaskFragment override orientation is ignored for a non-system organizer.
+        final TaskFragment taskFragment = mWindowOrganizerController.getTaskFragment(fragmentToken);
+        assertNotNull(taskFragment);
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, taskFragment.getOverrideOrientation());
     }
 
     @Test

@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
@@ -749,6 +750,21 @@ public class TaskFragmentTest extends WindowTestsBase {
         assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, tf0.getOrientation(SCREEN_ORIENTATION_UNSET));
         assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, tf1.getOrientation(SCREEN_ORIENTATION_UNSET));
         assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, task.getOrientation(SCREEN_ORIENTATION_UNSET));
+    }
+
+    @Test
+    public void testGetOrientation_reportOverrideOrientation() {
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment tf = createTaskFragmentWithActivity(task);
+        final ActivityRecord activity = tf.getTopMostActivity();
+        tf.setOverrideOrientation(SCREEN_ORIENTATION_BEHIND);
+
+        // Should report the override orientation
+        assertEquals(SCREEN_ORIENTATION_BEHIND, tf.getOrientation(SCREEN_ORIENTATION_UNSET));
+
+        // Should report the override orientation even if the activity requests a different value
+        activity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        assertEquals(SCREEN_ORIENTATION_BEHIND, tf.getOrientation(SCREEN_ORIENTATION_UNSET));
     }
 
     @Test
