@@ -248,6 +248,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             Process.ROOT_UID,
             Process.PHONE_UID,
             Process.BLUETOOTH_UID,
+            Process.AUDIOSERVER_UID,
             Process.NFC_UID,
             Process.NETWORK_STACK_UID,
             Process.SHELL_UID};
