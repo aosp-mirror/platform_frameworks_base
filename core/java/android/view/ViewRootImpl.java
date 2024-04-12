@@ -27,6 +27,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.DragEvent.ACTION_DRAG_LOCATION;
 import static android.view.InputDevice.SOURCE_CLASS_NONE;
 import static android.view.InsetsSource.ID_IME;
+import static android.view.Surface.FRAME_RATE_CATEGORY_DEFAULT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
@@ -1049,10 +1050,10 @@ public final class ViewRootImpl implements ViewParent,
 
     // The preferred frame rate category of the view that
     // could be updated on a frame-by-frame basis.
-    private int mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
+    private int mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_DEFAULT;
     // The preferred frame rate category of the last frame that
     // could be used to lower frame rate after touch boost
-    private int mLastPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
+    private int mLastPreferredFrameRateCategory = FRAME_RATE_CATEGORY_DEFAULT;
     // The preferred frame rate of the view that is mainly used for
     // touch boosting, view velocity handling, and TextureView.
     private float mPreferredFrameRate = 0;
@@ -4225,10 +4226,11 @@ public final class ViewRootImpl implements ViewParent,
                 ? mFrameRateCategoryNormalCount - 1 : mFrameRateCategoryNormalCount;
         mFrameRateCategoryLowCount = mFrameRateCategoryLowCount > 0
                 ? mFrameRateCategoryLowCount - 1 : mFrameRateCategoryLowCount;
-        mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
+        mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_DEFAULT;
         mPreferredFrameRate = -1;
         mFrameRateCompatibility = FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
         mIsFrameRateConflicted = false;
+        mFrameRateCategoryChangeReason = FRAME_RATE_CATEGORY_REASON_UNKNOWN;
     }
 
     private void createSyncIfNeeded() {
@@ -12501,7 +12503,7 @@ public final class ViewRootImpl implements ViewParent,
                 && sToolkitFrameRateVelocityMappingReadOnlyFlagValue)) {
             return;
         }
-        int categoryFromConflictedFrameRates = FRAME_RATE_CATEGORY_NO_PREFERENCE;
+        int categoryFromConflictedFrameRates = FRAME_RATE_CATEGORY_DEFAULT;
         if (mIsFrameRateConflicted) {
             categoryFromConflictedFrameRates = mPreferredFrameRate > 60
                     ? FRAME_RATE_CATEGORY_HIGH : FRAME_RATE_CATEGORY_NORMAL;
@@ -12531,7 +12533,8 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         try {
-            if (mLastPreferredFrameRateCategory != frameRateCategory) {
+            if (frameRateCategory != FRAME_RATE_CATEGORY_DEFAULT
+                    && mLastPreferredFrameRateCategory != frameRateCategory) {
                 if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
                     String reason = reasonToString(mFrameRateCategoryChangeReason);
                     String sourceView = mFrameRateCategoryView == null ? "-"
@@ -12671,6 +12674,9 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         int oldCategory = mPreferredFrameRateCategory;
+        // For View that votes NO_PREFERENCE
+        mPreferredFrameRateCategory = frameRateCategory;
+
         if (mFrameRateCategoryHighCount > 0) {
             mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_HIGH;
         } else if (mFrameRateCategoryHighHintCount > 0) {
