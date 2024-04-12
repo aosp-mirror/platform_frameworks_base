@@ -39,10 +39,10 @@ import androidx.test.filters.SmallTest;
 import com.android.dream.lowlight.LowLightTransitionCoordinator;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.ambient.touch.scrim.BouncerlessScrimController;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
 import com.android.systemui.complication.ComplicationHostViewController;
-import com.android.systemui.dreams.touch.scrim.BouncerlessScrimController;
 import com.android.systemui.statusbar.BlurUtils;
 
 import org.junit.Before;

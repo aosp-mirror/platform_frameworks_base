@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dreams.touch;
+package com.android.systemui.ambient.touch;
 
-import static com.android.systemui.dreams.touch.dagger.ShadeModule.COMMUNAL_GESTURE_INITIATION_WIDTH;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.graphics.Rect;
@@ -27,6 +26,7 @@ import android.view.MotionEvent;
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.Lifecycle;
 
+import com.android.systemui.ambient.touch.dagger.ShadeModule;
 import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
@@ -53,7 +53,7 @@ public class CommunalTouchHandler implements TouchHandler {
     @Inject
     public CommunalTouchHandler(
             Optional<CentralSurfaces> centralSurfaces,
-            @Named(COMMUNAL_GESTURE_INITIATION_WIDTH) int initiationWidth,
+            @Named(ShadeModule.COMMUNAL_GESTURE_INITIATION_WIDTH) int initiationWidth,
             CommunalInteractor communalInteractor,
             Lifecycle lifecycle) {
         mInitiationWidth = initiationWidth;

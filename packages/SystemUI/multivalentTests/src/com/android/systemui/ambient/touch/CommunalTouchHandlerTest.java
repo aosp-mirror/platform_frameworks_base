@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dreams.touch;
+package com.android.systemui.ambient.touch;
 
 import static com.google.common.truth.Truth.assertThat;
 

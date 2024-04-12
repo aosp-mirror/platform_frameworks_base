@@ -17,7 +17,7 @@
 package com.android.systemui.ambient.dagger
 
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
-import com.android.systemui.dreams.touch.dagger.InputSessionComponent
+import com.android.systemui.ambient.touch.dagger.InputSessionComponent
 import dagger.Module
 
 @Module(subcomponents = [AmbientTouchComponent::class, InputSessionComponent::class])

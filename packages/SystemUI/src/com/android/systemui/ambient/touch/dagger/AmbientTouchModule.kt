@@ -18,7 +18,7 @@ package com.android.systemui.ambient.touch.dagger
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.android.systemui.ambient.dagger.AmbientModule
-import com.android.systemui.dreams.touch.TouchHandler
+import com.android.systemui.ambient.touch.TouchHandler
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ElementsIntoSet

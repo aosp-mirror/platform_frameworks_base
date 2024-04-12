@@ -17,10 +17,8 @@ package com.android.systemui.ambient.touch.dagger
 
 import androidx.lifecycle.LifecycleOwner
 import com.android.systemui.ambient.dagger.AmbientModule.Companion.TOUCH_HANDLERS
-import com.android.systemui.dreams.touch.TouchHandler
-import com.android.systemui.dreams.touch.TouchMonitor
-import com.android.systemui.dreams.touch.dagger.BouncerSwipeModule
-import com.android.systemui.dreams.touch.dagger.ShadeModule
+import com.android.systemui.ambient.touch.TouchHandler
+import com.android.systemui.ambient.touch.TouchMonitor
 import dagger.BindsInstance
 import dagger.Subcomponent
 import javax.inject.Named

@@ -26,11 +26,11 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
+import com.android.systemui.ambient.touch.TouchHandler;
+import com.android.systemui.ambient.touch.TouchMonitor;
 import com.android.systemui.complication.Complication;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayStateController;
-import com.android.systemui.dreams.touch.TouchHandler;
-import com.android.systemui.dreams.touch.TouchMonitor;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;

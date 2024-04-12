@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dreams.touch;
-
-import static com.android.systemui.dreams.touch.dagger.BouncerSwipeModule.SWIPE_TO_BOUNCER_FLING_ANIMATION_UTILS_CLOSING;
-import static com.android.systemui.dreams.touch.dagger.BouncerSwipeModule.SWIPE_TO_BOUNCER_FLING_ANIMATION_UTILS_OPENING;
-import static com.android.systemui.dreams.touch.dagger.BouncerSwipeModule.SWIPE_TO_BOUNCER_START_REGION;
-import static com.android.systemui.dreams.touch.dagger.BouncerSwipeModule.MIN_BOUNCER_ZONE_SCREEN_PERCENTAGE;
+package com.android.systemui.ambient.touch;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -38,9 +33,10 @@ import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Flags;
+import com.android.systemui.ambient.touch.dagger.BouncerSwipeModule;
+import com.android.systemui.ambient.touch.scrim.ScrimController;
+import com.android.systemui.ambient.touch.scrim.ScrimManager;
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
-import com.android.systemui.dreams.touch.scrim.ScrimController;
-import com.android.systemui.dreams.touch.scrim.ScrimManager;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -226,12 +222,12 @@ public class BouncerSwipeTouchHandler implements TouchHandler {
             VelocityTrackerFactory velocityTrackerFactory,
             LockPatternUtils lockPatternUtils,
             UserTracker userTracker,
-            @Named(SWIPE_TO_BOUNCER_FLING_ANIMATION_UTILS_OPENING)
+            @Named(BouncerSwipeModule.SWIPE_TO_BOUNCER_FLING_ANIMATION_UTILS_OPENING)
                     FlingAnimationUtils flingAnimationUtils,
-            @Named(SWIPE_TO_BOUNCER_FLING_ANIMATION_UTILS_CLOSING)
+            @Named(BouncerSwipeModule.SWIPE_TO_BOUNCER_FLING_ANIMATION_UTILS_CLOSING)
                     FlingAnimationUtils flingAnimationUtilsClosing,
-            @Named(SWIPE_TO_BOUNCER_START_REGION) float swipeRegionPercentage,
-            @Named(MIN_BOUNCER_ZONE_SCREEN_PERCENTAGE) float minRegionPercentage,
+            @Named(BouncerSwipeModule.SWIPE_TO_BOUNCER_START_REGION) float swipeRegionPercentage,
+            @Named(BouncerSwipeModule.MIN_BOUNCER_ZONE_SCREEN_PERCENTAGE) float minRegionPercentage,
             UiEventLogger uiEventLogger) {
         mCentralSurfaces = centralSurfaces;
         mScrimManager = scrimManager;

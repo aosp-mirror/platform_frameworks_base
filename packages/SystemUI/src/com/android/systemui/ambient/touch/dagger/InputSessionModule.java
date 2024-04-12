@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dreams.touch.dagger;
+package com.android.systemui.ambient.touch.dagger;
 
 import static com.android.systemui.ambient.touch.dagger.AmbientTouchModule.INPUT_SESSION_NAME;
 
