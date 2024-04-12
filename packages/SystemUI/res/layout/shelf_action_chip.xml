@@ -14,33 +14,27 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<com.android.systemui.screenshot.OverlayActionChip
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
-    android:id="@+id/overlay_action_chip"
     android:theme="@style/FloatingOverlay"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_gravity="center"
+    android:orientation="horizontal"
+    android:paddingVertical="@dimen/overlay_action_chip_padding_vertical"
     android:gravity="center"
-    android:alpha="0.0">
-    <LinearLayout
+    android:background="@drawable/shelf_action_chip_background"
+    >
+    <ImageView
+        android:id="@+id/overlay_action_chip_icon"
+        android:tint="?androidprv:attr/materialColorOnSecondary"
+        android:layout_width="@dimen/overlay_action_chip_icon_size"
+        android:layout_height="@dimen/overlay_action_chip_icon_size"/>
+    <TextView
+        android:id="@+id/overlay_action_chip_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingVertical="@dimen/overlay_action_chip_padding_vertical"
-        android:background="@drawable/shelf_action_chip_background"
-        android:gravity="center">
-        <ImageView
-            android:id="@+id/overlay_action_chip_icon"
-            android:tint="?androidprv:attr/materialColorOnSecondary"
-            android:layout_width="@dimen/overlay_action_chip_icon_size"
-            android:layout_height="@dimen/overlay_action_chip_icon_size"/>
-        <TextView
-            android:id="@+id/overlay_action_chip_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
-            android:textSize="@dimen/overlay_action_chip_text_size"
-            android:textColor="?androidprv:attr/materialColorOnSecondary"/>
-    </LinearLayout>
-</com.android.systemui.screenshot.OverlayActionChip>
+        android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+        android:textSize="@dimen/overlay_action_chip_text_size"
+        android:textColor="?androidprv:attr/materialColorOnSecondary"/>
+</LinearLayout>
