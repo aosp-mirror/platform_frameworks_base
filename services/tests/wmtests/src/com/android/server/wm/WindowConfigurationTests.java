@@ -16,9 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
@@ -207,43 +205,6 @@ public class WindowConfigurationTests extends WindowTestsBase {
     }
 
     /** Ensure the window always has a caption in Freeform window mode or display mode. */
-    @Test
-    public void testCaptionShownForFreeformWindowingMode() {
-        final WindowConfiguration config = new WindowConfiguration();
-        config.setActivityType(ACTIVITY_TYPE_STANDARD);
-        config.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        config.setDisplayWindowingMode(WINDOWING_MODE_FULLSCREEN);
-        assertTrue(config.hasWindowDecorCaption());
-
-        config.setDisplayWindowingMode(WINDOWING_MODE_FREEFORM);
-        assertTrue(config.hasWindowDecorCaption());
-
-        config.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-        assertTrue(config.hasWindowDecorCaption());
-
-        config.setDisplayWindowingMode(WINDOWING_MODE_FULLSCREEN);
-        assertFalse(config.hasWindowDecorCaption());
-    }
-
-    /** Caption should not show for non-standard activity window. */
-    @Test
-    public void testCaptionNotShownForNonStandardActivityType() {
-        final WindowConfiguration config = new WindowConfiguration();
-        config.setActivityType(ACTIVITY_TYPE_HOME);
-        config.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        config.setDisplayWindowingMode(WINDOWING_MODE_FREEFORM);
-        assertFalse(config.hasWindowDecorCaption());
-
-        config.setActivityType(ACTIVITY_TYPE_ASSISTANT);
-        assertFalse(config.hasWindowDecorCaption());
-
-        config.setActivityType(ACTIVITY_TYPE_RECENTS);
-        assertFalse(config.hasWindowDecorCaption());
-
-        config.setActivityType(ACTIVITY_TYPE_STANDARD);
-        assertTrue(config.hasWindowDecorCaption());
-    }
-
     @Test
     public void testMaskedSetTo() {
         final WindowConfiguration config = new WindowConfiguration();
