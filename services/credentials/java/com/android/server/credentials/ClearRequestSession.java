@@ -28,7 +28,6 @@ import android.credentials.selection.ProviderData;
 import android.credentials.selection.RequestInfo;
 import android.os.CancellationSignal;
 import android.os.RemoteException;
-import android.os.ResultReceiver;
 import android.service.credentials.CallingAppInfo;
 import android.util.Slog;
 
@@ -151,7 +150,7 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
     }
 
     @Override
-    public void onUiCancellation(boolean isUserCancellation, ResultReceiver resultReceiver) {
+    public void onUiCancellation(boolean isUserCancellation) {
         // Not needed since UI is not involved
     }
 
