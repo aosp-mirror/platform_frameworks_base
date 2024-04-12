@@ -37,7 +37,7 @@ public class ThirdPartyVerificationFactory
             return null;
         }
 
-        String url = XmlUtils.getStringAttr(ele, XmlUtils.HR_ATTR_URL);
+        String url = XmlUtils.getStringAttr(ele, XmlUtils.HR_ATTR_URL, true);
         return new ThirdPartyVerification(url);
     }
 
@@ -45,6 +45,13 @@ public class ThirdPartyVerificationFactory
     @Override
     public ThirdPartyVerification createFromOdElements(List<Element> elements)
             throws MalformedXmlException {
-        return null;
+        Element ele = XmlUtils.getSingleElement(elements);
+        if (ele == null) {
+            AslgenUtil.logI("No ThirdPartyVerification found in od format.");
+            return null;
+        }
+
+        String url = XmlUtils.getOdStringEle(ele, XmlUtils.OD_NAME_URL, true);
+        return new ThirdPartyVerification(url);
     }
 }

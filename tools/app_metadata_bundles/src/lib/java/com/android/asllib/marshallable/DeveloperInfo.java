@@ -143,6 +143,31 @@ public class DeveloperInfo implements AslMarshallable {
     /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
     @Override
     public List<Element> toHrDomElements(Document doc) {
-        return List.of();
+        Element developerInfoEle = doc.createElement(XmlUtils.HR_TAG_DEVELOPER_INFO);
+        if (mName != null) {
+            developerInfoEle.setAttribute(XmlUtils.HR_ATTR_NAME, mName);
+        }
+        if (mEmail != null) {
+            developerInfoEle.setAttribute(XmlUtils.HR_ATTR_EMAIL, mEmail);
+        }
+        if (mAddress != null) {
+            developerInfoEle.setAttribute(XmlUtils.HR_ATTR_ADDRESS, mAddress);
+        }
+        if (mCountryRegion != null) {
+            developerInfoEle.setAttribute(XmlUtils.HR_ATTR_COUNTRY_REGION, mCountryRegion);
+        }
+        if (mDeveloperRelationship != null) {
+            developerInfoEle.setAttribute(
+                    XmlUtils.HR_ATTR_DEVELOPER_RELATIONSHIP, mDeveloperRelationship.toString());
+        }
+        if (mWebsite != null) {
+            developerInfoEle.setAttribute(XmlUtils.HR_ATTR_WEBSITE, mWebsite);
+        }
+        if (mAppDeveloperRegistryId != null) {
+            developerInfoEle.setAttribute(
+                    XmlUtils.HR_ATTR_APP_DEVELOPER_REGISTRY_ID, mAppDeveloperRegistryId);
+        }
+
+        return XmlUtils.listOf(developerInfoEle);
     }
 }

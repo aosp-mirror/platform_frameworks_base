@@ -38,6 +38,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -96,6 +97,19 @@ public class TestUtils {
         transformer.transform(domSource, streamResult);
 
         return outStream.toString(StandardCharsets.UTF_8);
+    }
+
+    /** Removes on-device style child with the corresponding name */
+    public static void removeOdChildEleWithName(Element ele, String childNameName) {
+        Optional<Element> childEle =
+                XmlUtils.asElementList(ele.getChildNodes()).stream()
+                        .filter(e -> e.getAttribute(XmlUtils.OD_ATTR_NAME).equals(childNameName))
+                        .findFirst();
+        if (childEle.isEmpty()) {
+            throw new IllegalStateException(
+                    String.format("%s was not found in %s", childNameName, ele.getTagName()));
+        }
+        ele.removeChild(childEle.get());
     }
 
     /**

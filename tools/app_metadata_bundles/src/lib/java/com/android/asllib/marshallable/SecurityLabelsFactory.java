@@ -46,6 +46,15 @@ public class SecurityLabelsFactory implements AslMarshallableFactory<SecurityLab
     @Override
     public SecurityLabels createFromOdElements(List<Element> elements)
             throws MalformedXmlException {
-        return null;
+        Element ele = XmlUtils.getSingleElement(elements);
+        if (ele == null) {
+            AslgenUtil.logI("No SecurityLabels found in od format.");
+            return null;
+        }
+        Boolean isDataDeletable =
+                XmlUtils.getOdBoolEle(ele, XmlUtils.OD_NAME_IS_DATA_DELETABLE, false);
+        Boolean isDataEncrypted =
+                XmlUtils.getOdBoolEle(ele, XmlUtils.OD_NAME_IS_DATA_ENCRYPTED, false);
+        return new SecurityLabels(isDataDeletable, isDataEncrypted);
     }
 }

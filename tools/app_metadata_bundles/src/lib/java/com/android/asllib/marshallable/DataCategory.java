@@ -63,6 +63,8 @@ public class DataCategory implements AslMarshallable {
     /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
     @Override
     public List<Element> toHrDomElements(Document doc) {
-        return List.of();
+        throw new IllegalStateException(
+                "Turning DataCategory or DataType into human-readable DOM elements requires"
+                        + " visibility into parent elements. The logic resides in DataLabels.");
     }
 }

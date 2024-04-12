@@ -34,15 +34,15 @@ public class DeveloperInfoFactory implements AslMarshallableFactory<DeveloperInf
             AslgenUtil.logI("No DeveloperInfo found in hr format.");
             return null;
         }
-        String name = XmlUtils.getStringAttr(developerInfoEle, XmlUtils.HR_ATTR_NAME);
-        String email = XmlUtils.getStringAttr(developerInfoEle, XmlUtils.HR_ATTR_EMAIL);
-        String address = XmlUtils.getStringAttr(developerInfoEle, XmlUtils.HR_ATTR_ADDRESS);
+        String name = XmlUtils.getStringAttr(developerInfoEle, XmlUtils.HR_ATTR_NAME, true);
+        String email = XmlUtils.getStringAttr(developerInfoEle, XmlUtils.HR_ATTR_EMAIL, true);
+        String address = XmlUtils.getStringAttr(developerInfoEle, XmlUtils.HR_ATTR_ADDRESS, true);
         String countryRegion =
-                XmlUtils.getStringAttr(developerInfoEle, XmlUtils.HR_ATTR_COUNTRY_REGION);
+                XmlUtils.getStringAttr(developerInfoEle, XmlUtils.HR_ATTR_COUNTRY_REGION, true);
         DeveloperInfo.DeveloperRelationship developerRelationship =
                 DeveloperInfo.DeveloperRelationship.forString(
                         XmlUtils.getStringAttr(
-                                developerInfoEle, XmlUtils.HR_ATTR_DEVELOPER_RELATIONSHIP));
+                                developerInfoEle, XmlUtils.HR_ATTR_DEVELOPER_RELATIONSHIP, true));
         String website = XmlUtils.getStringAttr(developerInfoEle, XmlUtils.HR_ATTR_WEBSITE, false);
         String appDeveloperRegistryId =
                 XmlUtils.getStringAttr(
@@ -61,6 +61,36 @@ public class DeveloperInfoFactory implements AslMarshallableFactory<DeveloperInf
     /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
     @Override
     public DeveloperInfo createFromOdElements(List<Element> elements) throws MalformedXmlException {
-        return null;
+        Element developerInfoEle = XmlUtils.getSingleElement(elements);
+        if (developerInfoEle == null) {
+            AslgenUtil.logI("No DeveloperInfo found in od format.");
+            return null;
+        }
+        String name = XmlUtils.getOdStringEle(developerInfoEle, XmlUtils.OD_NAME_NAME, true);
+        String email = XmlUtils.getOdStringEle(developerInfoEle, XmlUtils.OD_NAME_EMAIL, true);
+        String address = XmlUtils.getOdStringEle(developerInfoEle, XmlUtils.OD_NAME_ADDRESS, true);
+        String countryRegion =
+                XmlUtils.getOdStringEle(developerInfoEle, XmlUtils.OD_NAME_COUNTRY_REGION, true);
+        DeveloperInfo.DeveloperRelationship developerRelationship =
+                DeveloperInfo.DeveloperRelationship.forValue(
+                        (int)
+                                (long)
+                                        XmlUtils.getOdLongEle(
+                                                developerInfoEle,
+                                                XmlUtils.OD_NAME_DEVELOPER_RELATIONSHIP,
+                                                true));
+        String website = XmlUtils.getOdStringEle(developerInfoEle, XmlUtils.OD_NAME_WEBSITE, false);
+        String appDeveloperRegistryId =
+                XmlUtils.getOdStringEle(
+                        developerInfoEle, XmlUtils.OD_NAME_APP_DEVELOPER_REGISTRY_ID, false);
+
+        return new DeveloperInfo(
+                name,
+                email,
+                address,
+                countryRegion,
+                developerRelationship,
+                website,
+                appDeveloperRegistryId);
     }
 }

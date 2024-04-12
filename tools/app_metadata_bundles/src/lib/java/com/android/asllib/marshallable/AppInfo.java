@@ -146,6 +146,55 @@ public class AppInfo implements AslMarshallable {
     /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
     @Override
     public List<Element> toHrDomElements(Document doc) {
-        return List.of();
+        Element appInfoEle = doc.createElement(XmlUtils.HR_TAG_APP_INFO);
+        if (this.mTitle != null) {
+            appInfoEle.setAttribute(XmlUtils.HR_ATTR_TITLE, this.mTitle);
+        }
+        if (this.mDescription != null) {
+            appInfoEle.setAttribute(XmlUtils.HR_ATTR_DESCRIPTION, this.mDescription);
+        }
+        if (this.mContainsAds != null) {
+            appInfoEle.setAttribute(
+                    XmlUtils.HR_ATTR_CONTAINS_ADS, String.valueOf(this.mContainsAds));
+        }
+        if (this.mObeyAps != null) {
+            appInfoEle.setAttribute(XmlUtils.HR_ATTR_OBEY_APS, String.valueOf(this.mObeyAps));
+        }
+        if (this.mAdsFingerprinting != null) {
+            appInfoEle.setAttribute(
+                    XmlUtils.HR_ATTR_ADS_FINGERPRINTING, String.valueOf(this.mAdsFingerprinting));
+        }
+        if (this.mSecurityFingerprinting != null) {
+            appInfoEle.setAttribute(
+                    XmlUtils.HR_ATTR_SECURITY_FINGERPRINTING,
+                    String.valueOf(this.mSecurityFingerprinting));
+        }
+        if (this.mPrivacyPolicy != null) {
+            appInfoEle.setAttribute(XmlUtils.HR_ATTR_PRIVACY_POLICY, this.mPrivacyPolicy);
+        }
+        if (this.mSecurityEndpoints != null) {
+            appInfoEle.setAttribute(
+                    XmlUtils.HR_ATTR_SECURITY_ENDPOINTS, String.join("|", this.mSecurityEndpoints));
+        }
+        if (this.mFirstPartyEndpoints != null) {
+            appInfoEle.setAttribute(
+                    XmlUtils.HR_ATTR_FIRST_PARTY_ENDPOINTS,
+                    String.join("|", this.mFirstPartyEndpoints));
+        }
+        if (this.mServiceProviderEndpoints != null) {
+            appInfoEle.setAttribute(
+                    XmlUtils.HR_ATTR_SERVICE_PROVIDER_ENDPOINTS,
+                    String.join("|", this.mServiceProviderEndpoints));
+        }
+        if (this.mCategory != null) {
+            appInfoEle.setAttribute(XmlUtils.HR_ATTR_CATEGORY, this.mCategory);
+        }
+        if (this.mEmail != null) {
+            appInfoEle.setAttribute(XmlUtils.HR_ATTR_EMAIL, this.mEmail);
+        }
+        if (this.mWebsite != null) {
+            appInfoEle.setAttribute(XmlUtils.HR_ATTR_WEBSITE, this.mWebsite);
+        }
+        return XmlUtils.listOf(appInfoEle);
     }
 }

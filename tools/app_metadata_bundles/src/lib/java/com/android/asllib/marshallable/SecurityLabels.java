@@ -54,6 +54,13 @@ public class SecurityLabels implements AslMarshallable {
     /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
     @Override
     public List<Element> toHrDomElements(Document doc) {
-        return List.of();
+        Element ele = doc.createElement(XmlUtils.HR_TAG_SECURITY_LABELS);
+        if (mIsDataDeletable != null) {
+            ele.setAttribute(XmlUtils.HR_ATTR_IS_DATA_DELETABLE, String.valueOf(mIsDataDeletable));
+        }
+        if (mIsDataEncrypted != null) {
+            ele.setAttribute(XmlUtils.HR_ATTR_IS_DATA_ENCRYPTED, String.valueOf(mIsDataEncrypted));
+        }
+        return XmlUtils.listOf(ele);
     }
 }

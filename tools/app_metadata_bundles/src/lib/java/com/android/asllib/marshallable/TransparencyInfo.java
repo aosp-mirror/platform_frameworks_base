@@ -61,6 +61,13 @@ public class TransparencyInfo implements AslMarshallable {
     /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
     @Override
     public List<Element> toHrDomElements(Document doc) {
-        return List.of();
+        Element transparencyInfoEle = doc.createElement(XmlUtils.HR_TAG_TRANSPARENCY_INFO);
+        if (mDeveloperInfo != null) {
+            XmlUtils.appendChildren(transparencyInfoEle, mDeveloperInfo.toHrDomElements(doc));
+        }
+        if (mAppInfo != null) {
+            XmlUtils.appendChildren(transparencyInfoEle, mAppInfo.toHrDomElements(doc));
+        }
+        return XmlUtils.listOf(transparencyInfoEle);
     }
 }

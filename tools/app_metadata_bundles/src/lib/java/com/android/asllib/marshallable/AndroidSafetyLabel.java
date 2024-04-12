@@ -65,6 +65,17 @@ public class AndroidSafetyLabel implements AslMarshallable {
     /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
     @Override
     public List<Element> toHrDomElements(Document doc) {
-        return List.of();
+        Element aslEle = doc.createElement(XmlUtils.HR_TAG_APP_METADATA_BUNDLES);
+        aslEle.setAttribute(XmlUtils.HR_ATTR_VERSION, String.valueOf(mVersion));
+        if (mSafetyLabels != null) {
+            XmlUtils.appendChildren(aslEle, mSafetyLabels.toHrDomElements(doc));
+        }
+        if (mSystemAppSafetyLabel != null) {
+            XmlUtils.appendChildren(aslEle, mSystemAppSafetyLabel.toHrDomElements(doc));
+        }
+        if (mTransparencyInfo != null) {
+            XmlUtils.appendChildren(aslEle, mTransparencyInfo.toHrDomElements(doc));
+        }
+        return XmlUtils.listOf(aslEle);
     }
 }
