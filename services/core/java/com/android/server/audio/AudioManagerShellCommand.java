@@ -16,6 +16,11 @@
 
 package com.android.server.audio;
 
+import static android.media.AudioManager.ADJUST_LOWER;
+import static android.media.AudioManager.ADJUST_MUTE;
+import static android.media.AudioManager.ADJUST_RAISE;
+import static android.media.AudioManager.ADJUST_UNMUTE;
+
 import android.content.Context;
 import android.media.AudioManager;
 import android.os.ShellCommand;
@@ -59,6 +64,12 @@ class AudioManagerShellCommand extends ShellCommand {
                 return adjMute();
             case "adj-unmute":
                 return adjUnmute();
+            case "adj-volume":
+                return adjVolume();
+            case "set-group-volume":
+                return setGroupVolume();
+            case "adj-group-volume":
+                return adjGroupVolume();
         }
         return 0;
     }
@@ -90,6 +101,12 @@ class AudioManagerShellCommand extends ShellCommand {
         pw.println("    mutes the STREAM_TYPE");
         pw.println("  adj-unmute STREAM_TYPE");
         pw.println("    unmutes the STREAM_TYPE");
+        pw.println("  adj-volume STREAM_TYPE <RAISE|LOWER|MUTE|UNMUTE>");
+        pw.println("    Adjusts the STREAM_TYPE volume given the specified direction");
+        pw.println("  set-group-volume GROUP_ID VOLUME_INDEX");
+        pw.println("    Sets the volume for GROUP_ID to VOLUME_INDEX");
+        pw.println("  adj-group-volume GROUP_ID <RAISE|LOWER|MUTE|UNMUTE>");
+        pw.println("    Adjusts the group volume for GROUP_ID given the specified direction");
     }
 
     private int setSurroundFormatEnabled() {
@@ -260,15 +277,48 @@ class AudioManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int adjVolume() {
+        final Context context = mService.mContext;
+        final AudioManager am = context.getSystemService(AudioManager.class);
+        final int stream = readIntArg();
+        final int direction = readDirectionArg();
+        getOutPrintWriter().println("calling AudioManager.adjustStreamVolume("
+                + stream + ", " + direction + ", 0)");
+        am.adjustStreamVolume(stream, direction, 0);
+        return 0;
+    }
+
+    private int setGroupVolume() {
+        final Context context = mService.mContext;
+        final AudioManager am = context.getSystemService(AudioManager.class);
+        final int groupId = readIntArg();
+        final int index = readIntArg();
+        getOutPrintWriter().println("calling AudioManager.setVolumeGroupVolumeIndex("
+                + groupId + ", " + index + ", 0)");
+        am.setVolumeGroupVolumeIndex(groupId, index, 0);
+        return 0;
+    }
+
+    private int adjGroupVolume() {
+        final Context context = mService.mContext;
+        final AudioManager am = context.getSystemService(AudioManager.class);
+        final int groupId = readIntArg();
+        final int direction = readDirectionArg();
+        getOutPrintWriter().println("calling AudioManager.adjustVolumeGroupVolume("
+                + groupId + ", " + direction + ", 0)");
+        am.adjustVolumeGroupVolume(groupId, direction, 0);
+        return 0;
+    }
+
     private int readIntArg() throws IllegalArgumentException {
-        String argText = getNextArg();
+        final String argText = getNextArg();
 
         if (argText == null) {
             getErrPrintWriter().println("Error: no argument provided");
             throw new IllegalArgumentException("No argument provided");
         }
 
-        int argIntVal = Integer.MIN_VALUE;
+        int argIntVal;
         try {
             argIntVal = Integer.parseInt(argText);
         } catch (NumberFormatException e) {
@@ -277,5 +327,22 @@ class AudioManagerShellCommand extends ShellCommand {
         }
 
         return argIntVal;
+    }
+
+    private int readDirectionArg() throws IllegalArgumentException {
+        final String argText = getNextArg();
+
+        if (argText == null) {
+            getErrPrintWriter().println("Error: no argument provided");
+            throw new IllegalArgumentException("No argument provided");
+        }
+
+        return switch (argText) {
+            case "RAISE" -> ADJUST_RAISE;
+            case "LOWER" -> ADJUST_LOWER;
+            case "MUTE" -> ADJUST_MUTE;
+            case "UNMUTE" -> ADJUST_UNMUTE;
+            default -> throw new IllegalArgumentException("Wrong direction argument: " + argText);
+        };
     }
 }
