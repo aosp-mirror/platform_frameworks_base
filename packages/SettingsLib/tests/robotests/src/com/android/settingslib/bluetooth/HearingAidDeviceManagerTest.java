@@ -72,14 +72,18 @@ public class HearingAidDeviceManagerTest {
     @Rule
     public MockitoRule mMockitoRule = MockitoJUnit.rule();
 
-    private final static long HISYNCID1 = 10;
-    private final static long HISYNCID2 = 11;
-    private final static String DEVICE_NAME_1 = "TestName_1";
-    private final static String DEVICE_NAME_2 = "TestName_2";
-    private final static String DEVICE_ALIAS_1 = "TestAlias_1";
-    private final static String DEVICE_ALIAS_2 = "TestAlias_2";
-    private final static String DEVICE_ADDRESS_1 = "AA:BB:CC:DD:EE:11";
-    private final static String DEVICE_ADDRESS_2 = "AA:BB:CC:DD:EE:22";
+    private static final long HISYNCID1 = 10;
+    private static final long HISYNCID2 = 11;
+    private static final int GROUP_ID_1 = 20;
+    private static final int GROUP_ID_2 = 21;
+    private static final int PRESET_INDEX_1 = 1;
+    private static final int PRESET_INDEX_2 = 2;
+    private static final String DEVICE_NAME_1 = "TestName_1";
+    private static final String DEVICE_NAME_2 = "TestName_2";
+    private static final String DEVICE_ALIAS_1 = "TestAlias_1";
+    private static final String DEVICE_ALIAS_2 = "TestAlias_2";
+    private static final String DEVICE_ADDRESS_1 = "AA:BB:CC:DD:EE:11";
+    private static final String DEVICE_ADDRESS_2 = "AA:BB:CC:DD:EE:22";
     private final BluetoothClass DEVICE_CLASS =
             createBtClass(BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE);
     private final Context mContext = ApplicationProvider.getApplicationContext();
@@ -706,14 +710,73 @@ public class HearingAidDeviceManagerTest {
     }
 
     @Test
-    public void findMainDevice() {
+    public void findMainDevice_sameHiSyncId() {
         when(mCachedDevice1.getHiSyncId()).thenReturn(HISYNCID1);
         when(mCachedDevice2.getHiSyncId()).thenReturn(HISYNCID1);
         mCachedDeviceManager.mCachedDevices.add(mCachedDevice1);
         mCachedDevice1.setSubDevice(mCachedDevice2);
 
-        assertThat(mHearingAidDeviceManager.findMainDevice(mCachedDevice2)).
-                isEqualTo(mCachedDevice1);
+        assertThat(mHearingAidDeviceManager.findMainDevice(mCachedDevice2)).isEqualTo(
+                mCachedDevice1);
+    }
+
+    @Test
+    public void findMainDevice_sameGroupId() {
+        when(mCachedDevice1.getGroupId()).thenReturn(GROUP_ID_1);
+        when(mCachedDevice2.getGroupId()).thenReturn(GROUP_ID_2);
+        mCachedDeviceManager.mCachedDevices.add(mCachedDevice1);
+        mCachedDevice1.addMemberDevice(mCachedDevice2);
+
+        assertThat(mHearingAidDeviceManager.findMainDevice(mCachedDevice2)).isEqualTo(
+                mCachedDevice1);
+    }
+
+    @Test
+    public void syncDeviceWithinSet_synchronized_differentPresetIndex_shouldNotSync() {
+        when(mHapClientProfile.getActivePresetIndex(mDevice1)).thenReturn(PRESET_INDEX_1);
+        when(mHapClientProfile.getActivePresetIndex(mDevice2)).thenReturn(PRESET_INDEX_2);
+        when(mHapClientProfile.supportsSynchronizedPresets(mDevice1)).thenReturn(true);
+        when(mHapClientProfile.supportsSynchronizedPresets(mDevice2)).thenReturn(true);
+        when(mCachedDevice1.getGroupId()).thenReturn(GROUP_ID_1);
+        when(mCachedDevice2.getGroupId()).thenReturn(GROUP_ID_2);
+        mCachedDeviceManager.mCachedDevices.add(mCachedDevice1);
+        mCachedDevice1.addMemberDevice(mCachedDevice2);
+
+        mHearingAidDeviceManager.syncDeviceIfNeeded(mCachedDevice1);
+
+        verify(mHapClientProfile, never()).selectPreset(any(), anyInt());
+    }
+
+    @Test
+    public void syncDeviceWithinSet_unsynchronized_samePresetIndex_shouldNotSync() {
+        when(mHapClientProfile.getActivePresetIndex(mDevice1)).thenReturn(PRESET_INDEX_1);
+        when(mHapClientProfile.getActivePresetIndex(mDevice2)).thenReturn(PRESET_INDEX_1);
+        when(mHapClientProfile.supportsSynchronizedPresets(mDevice1)).thenReturn(false);
+        when(mHapClientProfile.supportsSynchronizedPresets(mDevice2)).thenReturn(false);
+        when(mCachedDevice1.getGroupId()).thenReturn(GROUP_ID_1);
+        when(mCachedDevice2.getGroupId()).thenReturn(GROUP_ID_2);
+        mCachedDeviceManager.mCachedDevices.add(mCachedDevice1);
+        mCachedDevice1.addMemberDevice(mCachedDevice2);
+
+        mHearingAidDeviceManager.syncDeviceIfNeeded(mCachedDevice1);
+
+        verify(mHapClientProfile, never()).selectPreset(any(), anyInt());
+    }
+
+    @Test
+    public void syncDeviceWithinSet_unsynchronized_differentPresetIndex_shouldSync() {
+        when(mHapClientProfile.getActivePresetIndex(mDevice1)).thenReturn(PRESET_INDEX_1);
+        when(mHapClientProfile.getActivePresetIndex(mDevice2)).thenReturn(PRESET_INDEX_2);
+        when(mHapClientProfile.supportsSynchronizedPresets(mDevice1)).thenReturn(false);
+        when(mHapClientProfile.supportsSynchronizedPresets(mDevice2)).thenReturn(false);
+        when(mCachedDevice1.getGroupId()).thenReturn(GROUP_ID_1);
+        when(mCachedDevice2.getGroupId()).thenReturn(GROUP_ID_2);
+        mCachedDeviceManager.mCachedDevices.add(mCachedDevice1);
+        mCachedDevice1.addMemberDevice(mCachedDevice2);
+
+        mHearingAidDeviceManager.syncDeviceIfNeeded(mCachedDevice2);
+
+        verify(mHapClientProfile).selectPreset(mDevice2, PRESET_INDEX_1);
     }
 
     private HearingAidInfo getLeftAshaHearingAidInfo(long hiSyncId) {

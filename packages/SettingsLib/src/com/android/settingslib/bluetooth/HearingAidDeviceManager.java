@@ -15,6 +15,8 @@
  */
 package com.android.settingslib.bluetooth;
 
+import android.bluetooth.BluetoothCsipSetCoordinator;
+import android.bluetooth.BluetoothHapClient;
 import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothLeAudio;
 import android.bluetooth.BluetoothProfile;
@@ -106,6 +108,10 @@ public class HearingAidDeviceManager {
 
     private boolean isValidHiSyncId(long hiSyncId) {
         return hiSyncId != BluetoothHearingAid.HI_SYNC_ID_INVALID;
+    }
+
+    private boolean isValidGroupId(int groupId) {
+        return groupId != BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
     }
 
     private CachedBluetoothDevice getCachedDevice(long hiSyncId) {
@@ -258,6 +264,27 @@ public class HearingAidDeviceManager {
         }
     }
 
+    void syncDeviceIfNeeded(CachedBluetoothDevice device) {
+        final LocalBluetoothProfileManager profileManager = mBtManager.getProfileManager();
+        final HapClientProfile hap = profileManager.getHapClientProfile();
+        // Sync preset if device doesn't support synchronization on the remote side
+        if (hap != null && !hap.supportsSynchronizedPresets(device.getDevice())) {
+            final CachedBluetoothDevice mainDevice = findMainDevice(device);
+            if (mainDevice != null) {
+                int mainPresetIndex = hap.getActivePresetIndex(mainDevice.getDevice());
+                int presetIndex = hap.getActivePresetIndex(device.getDevice());
+                if (mainPresetIndex != BluetoothHapClient.PRESET_INDEX_UNAVAILABLE
+                        && mainPresetIndex != presetIndex) {
+                    if (DEBUG) {
+                        Log.d(TAG, "syncing preset from " + presetIndex + "->"
+                                + mainPresetIndex + ", device=" + device);
+                    }
+                    hap.selectPreset(device.getDevice(), mainPresetIndex);
+                }
+            }
+        }
+    }
+
     private void setAudioRoutingConfig(CachedBluetoothDevice device) {
         AudioDeviceAttributes hearingDeviceAttributes =
                 mRoutingHelper.getMatchedHearingDeviceAttributes(device);
@@ -326,7 +353,19 @@ public class HearingAidDeviceManager {
     }
 
     CachedBluetoothDevice findMainDevice(CachedBluetoothDevice device) {
+        if (device == null || mCachedDevices == null) {
+            return null;
+        }
+
         for (CachedBluetoothDevice cachedDevice : mCachedDevices) {
+            if (isValidGroupId(cachedDevice.getGroupId())) {
+                Set<CachedBluetoothDevice> memberSet = cachedDevice.getMemberDevice();
+                for (CachedBluetoothDevice memberDevice : memberSet) {
+                    if (memberDevice != null && memberDevice.equals(device)) {
+                        return cachedDevice;
+                    }
+                }
+            }
             if (isValidHiSyncId(cachedDevice.getHiSyncId())) {
                 CachedBluetoothDevice subDevice = cachedDevice.getSubDevice();
                 if (subDevice != null && subDevice.equals(device)) {
