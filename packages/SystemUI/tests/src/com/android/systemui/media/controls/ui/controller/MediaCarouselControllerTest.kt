@@ -34,9 +34,9 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.domain.pipeline.EMPTY_SMARTSPACE_MEDIA_DATA
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
@@ -60,7 +60,9 @@ import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.GlobalSettings
+import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.time.FakeSystemClock
 import java.util.Locale
 import javax.inject.Provider
@@ -68,6 +70,7 @@ import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -116,8 +119,8 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var pageIndicator: PageIndicator
     @Mock lateinit var mediaFlags: MediaFlags
     @Mock lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
-    @Mock lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock lateinit var globalSettings: GlobalSettings
+    private lateinit var secureSettings: SecureSettings
     private val transitionRepository = kosmos.fakeKeyguardTransitionRepository
     @Captor lateinit var listener: ArgumentCaptor<MediaDataManager.Listener>
     @Captor
@@ -129,13 +132,16 @@ class MediaCarouselControllerTest : SysuiTestCase() {
 
     private val clock = FakeSystemClock()
     private lateinit var bgExecutor: FakeExecutor
+    private lateinit var testDispatcher: TestDispatcher
     private lateinit var mediaCarouselController: MediaCarouselController
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+        secureSettings = FakeSettings()
         context.resources.configuration.setLocales(LocaleList(Locale.US, Locale.UK))
         bgExecutor = FakeExecutor(clock)
+        testDispatcher = UnconfinedTestDispatcher()
         mediaCarouselController =
             MediaCarouselController(
                 context,
@@ -146,6 +152,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 clock,
                 executor,
                 bgExecutor,
+                testDispatcher,
                 mediaDataManager,
                 configurationController,
                 falsingManager,
@@ -155,7 +162,8 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 mediaFlags,
                 keyguardUpdateMonitor,
                 kosmos.keyguardTransitionInteractor,
-                globalSettings
+                globalSettings,
+                secureSettings,
             )
         verify(configurationController).addCallback(capture(configListener))
         verify(mediaDataManager).addListener(capture(listener))
@@ -810,7 +818,9 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @ExperimentalCoroutinesApi
     @Test
     fun testKeyguardGone_showMediaCarousel() =
-        runTest(UnconfinedTestDispatcher()) {
+        kosmos.testScope.runTest {
+            var updatedVisibility = false
+            mediaCarouselController.updateHostVisibility = { updatedVisibility = true }
             mediaCarouselController.mediaCarousel = mediaCarousel
 
             val job = mediaCarouselController.listenForAnyStateToGoneKeyguardTransition(this)
@@ -821,9 +831,63 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             )
 
             verify(mediaCarousel).visibility = View.VISIBLE
+            assertEquals(true, updatedVisibility)
+            assertEquals(false, mediaCarouselController.isLockedAndHidden())
 
             job.cancel()
         }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun keyguardShowing_notAllowedOnLockscreen_updateVisibility() {
+        kosmos.testScope.runTest {
+            var updatedVisibility = false
+            mediaCarouselController.updateHostVisibility = { updatedVisibility = true }
+            mediaCarouselController.mediaCarousel = mediaCarousel
+
+            val settingsJob = mediaCarouselController.listenForLockscreenSettingChanges(this)
+            secureSettings.putBool(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, false)
+
+            val keyguardJob = mediaCarouselController.listenForAnyStateToLockscreenTransition(this)
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.GONE,
+                to = KeyguardState.LOCKSCREEN,
+                this
+            )
+
+            assertEquals(true, updatedVisibility)
+            assertEquals(true, mediaCarouselController.isLockedAndHidden())
+
+            settingsJob.cancel()
+            keyguardJob.cancel()
+        }
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun keyguardShowing_allowedOnLockscreen_updateVisibility() {
+        kosmos.testScope.runTest {
+            var updatedVisibility = false
+            mediaCarouselController.updateHostVisibility = { updatedVisibility = true }
+            mediaCarouselController.mediaCarousel = mediaCarousel
+
+            val settingsJob = mediaCarouselController.listenForLockscreenSettingChanges(this)
+            secureSettings.putBool(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, true)
+
+            val keyguardJob = mediaCarouselController.listenForAnyStateToLockscreenTransition(this)
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.GONE,
+                to = KeyguardState.LOCKSCREEN,
+                this
+            )
+
+            assertEquals(true, updatedVisibility)
+            assertEquals(false, mediaCarouselController.isLockedAndHidden())
+
+            settingsJob.cancel()
+            keyguardJob.cancel()
+        }
+    }
 
     @Test
     fun testInvisibleToUserAndExpanded_playersNotListening() {
