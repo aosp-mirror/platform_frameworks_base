@@ -154,6 +154,12 @@ android_app {
         "android.test.runner",
         "org.apache.http.legacy",
     ],
+    uses_libs: [
+        "android.test.runner",
+    ],
+    optional_uses_libs: [
+        "org.apache.http.legacy",
+    ],
     sdk_version: "core_platform",
 }
 
