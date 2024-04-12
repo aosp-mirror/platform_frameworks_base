@@ -772,6 +772,9 @@ public class GestureLauncherServiceTest {
 
     @Test
     public void testInterceptPowerKeyDown_triggerEmergency_fiveFastTaps_gestureIgnored() {
+        when(mResources.getInteger(
+                com.android.internal.R.integer.config_defaultMinEmergencyGestureTapDurationMillis))
+                .thenReturn(200);
         // Trigger emergency by tapping button 5 times
         long eventTime = triggerEmergencyGesture(/* tapIntervalMs= */ 1);
 
