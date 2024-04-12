@@ -241,8 +241,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 mShadeLockscreenInteractor,
                 new ShadeExpansionStateManager(),
                 mBiometricUnlockController,
-                mNotificationContainer,
-                mBypassController);
+                mNotificationContainer);
         mStatusBarKeyguardViewManager.show(null);
         ArgumentCaptor<PrimaryBouncerExpansionCallback> callbackArgumentCaptor =
                 ArgumentCaptor.forClass(PrimaryBouncerExpansionCallback.class);

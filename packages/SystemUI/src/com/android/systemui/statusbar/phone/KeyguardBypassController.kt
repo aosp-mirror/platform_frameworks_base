@@ -17,8 +17,8 @@
 package com.android.systemui.statusbar.phone
 
 import android.annotation.IntDef
-import android.content.Context
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.hardware.biometrics.BiometricSourceType
 import android.provider.Settings
 import androidx.annotation.VisibleForTesting
@@ -26,7 +26,10 @@ import com.android.app.tracing.ListenersTracing.forEachTraced
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
 import com.android.systemui.shade.data.repository.ShadeRepository
@@ -46,12 +49,20 @@ import java.io.PrintWriter
 import javax.inject.Inject
 
 @SysUISingleton
-open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassController {
+class KeyguardBypassController @Inject constructor(
+        @Main resources: Resources,
+        packageManager: PackageManager,
+        @Application applicationScope: CoroutineScope,
+        tunerService: TunerService,
+        private val statusBarStateController: StatusBarStateController,
+        lockscreenUserManager: NotificationLockscreenUserManager,
+        private val keyguardStateController: KeyguardStateController,
+        private val shadeRepository: ShadeRepository,
+        devicePostureController: DevicePostureController,
+        private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
+        dumpManager: DumpManager
+) : Dumpable, StackScrollAlgorithm.BypassController {
 
-    private val mKeyguardStateController: KeyguardStateController
-    private val statusBarStateController: StatusBarStateController
-    private val shadeRepository: ShadeRepository
-    private val devicePostureController: DevicePostureController
     @BypassOverride private val bypassOverride: Int
     private var hasFaceFeature: Boolean
     @DevicePostureInt private val configFaceAuthSupportedPosture: Int
@@ -99,7 +110,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
                 FACE_UNLOCK_BYPASS_NEVER -> false
                 else -> field
             }
-            return enabled && mKeyguardStateController.isFaceEnrolledAndEnabled &&
+            return enabled && keyguardStateController.isFaceEnrolledAndEnabled &&
                     isPostureAllowedForFaceAuth()
         }
         private set(value) {
@@ -108,70 +119,44 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
         }
 
     var bouncerShowing: Boolean = false
-    var altBouncerShowing: Boolean = false
     var launchingAffordance: Boolean = false
     var qsExpanded = false
 
-    @Inject
-    constructor(
-        context: Context,
-        @Application applicationScope: CoroutineScope,
-        tunerService: TunerService,
-        statusBarStateController: StatusBarStateController,
-        lockscreenUserManager: NotificationLockscreenUserManager,
-        keyguardStateController: KeyguardStateController,
-        shadeRepository: ShadeRepository,
-        devicePostureController: DevicePostureController,
-        dumpManager: DumpManager
-    ) {
-        this.mKeyguardStateController = keyguardStateController
-        this.statusBarStateController = statusBarStateController
-        this.shadeRepository = shadeRepository
-        this.devicePostureController = devicePostureController
-
-        bypassOverride = context.resources.getInteger(R.integer.config_face_unlock_bypass_override)
+    init {
+        bypassOverride = resources.getInteger(R.integer.config_face_unlock_bypass_override)
         configFaceAuthSupportedPosture =
-            context.resources.getInteger(R.integer.config_face_auth_supported_posture)
-
-        hasFaceFeature = context.packageManager.hasSystemFeature(PackageManager.FEATURE_FACE)
-        if (!hasFaceFeature) {
-            return
-        }
-
-
-        if (configFaceAuthSupportedPosture != DEVICE_POSTURE_UNKNOWN) {
-            devicePostureController.addCallback { posture ->
-                if (postureState != posture) {
-                    postureState = posture
-                    notifyListeners()
+            resources.getInteger(R.integer.config_face_auth_supported_posture)
+        hasFaceFeature = packageManager.hasSystemFeature(PackageManager.FEATURE_FACE)
+        if (hasFaceFeature) {
+            if (configFaceAuthSupportedPosture != DEVICE_POSTURE_UNKNOWN) {
+                devicePostureController.addCallback { posture ->
+                    if (postureState != posture) {
+                        postureState = posture
+                        notifyListeners()
+                    }
                 }
             }
-        }
-
-        dumpManager.registerNormalDumpable("KeyguardBypassController", this)
-        statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
-            override fun onStateChanged(newState: Int) {
-                if (newState != StatusBarState.KEYGUARD) {
-                    pendingUnlock = null
-                }
-            }
-        })
-
-        listenForQsExpandedChange(applicationScope)
-
-        val dismissByDefault = if (context.resources.getBoolean(
-                com.android.internal.R.bool.config_faceAuthDismissesKeyguard)) 1 else 0
-
-        tunerService.addTunable({ key, _ ->
-            bypassEnabled = tunerService.getValue(key, dismissByDefault) != 0
-        }, Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD)
-
-        lockscreenUserManager.addUserChangedListener(
-            object : NotificationLockscreenUserManager.UserChangedListener {
-                override fun onUserChanged(userId: Int) {
-                    pendingUnlock = null
+            dumpManager.registerNormalDumpable("KeyguardBypassController", this)
+            statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
+                override fun onStateChanged(newState: Int) {
+                    if (newState != StatusBarState.KEYGUARD) {
+                        pendingUnlock = null
+                    }
                 }
             })
+            listenForQsExpandedChange(applicationScope)
+            val dismissByDefault = if (resources.getBoolean(
+                            com.android.internal.R.bool.config_faceAuthDismissesKeyguard)) 1 else 0
+            tunerService.addTunable({ key, _ ->
+                bypassEnabled = tunerService.getValue(key, dismissByDefault) != 0
+            }, Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD)
+            lockscreenUserManager.addUserChangedListener(
+                    object : NotificationLockscreenUserManager.UserChangedListener {
+                        override fun onUserChanged(userId: Int) {
+                            pendingUnlock = null
+                        }
+                    })
+        }
     }
 
     @VisibleForTesting
@@ -228,7 +213,8 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
         if (bypassEnabled) {
             return when {
                 bouncerShowing -> true
-                altBouncerShowing -> true
+                keyguardTransitionInteractor.getCurrentState() == KeyguardState.ALTERNATE_BOUNCER ->
+                    true
                 statusBarStateController.state != StatusBarState.KEYGUARD -> false
                 launchingAffordance -> false
                 isPulseExpanding || qsExpanded -> false
@@ -260,7 +246,8 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
         pw.println("  bypassEnabled: $bypassEnabled")
         pw.println("  canBypass: ${canBypass()}")
         pw.println("  bouncerShowing: $bouncerShowing")
-        pw.println("  altBouncerShowing: $altBouncerShowing")
+        pw.println("  altBouncerShowing:" +
+            " ${keyguardTransitionInteractor.getCurrentState() == KeyguardState.ALTERNATE_BOUNCER}")
         pw.println("  isPulseExpanding: $isPulseExpanding")
         pw.println("  launchingAffordance: $launchingAffordance")
         pw.println("  qSExpanded: $qsExpanded")
@@ -273,7 +260,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
         val start = listeners.isEmpty()
         listeners.add(listener)
         if (start) {
-            mKeyguardStateController.addCallback(faceAuthEnabledChangedCallback)
+            keyguardStateController.addCallback(faceAuthEnabledChangedCallback)
         }
     }
 
@@ -284,7 +271,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
     fun unregisterOnBypassStateChangedListener(listener: OnBypassStateChangedListener) {
         listeners.remove(listener)
         if (listeners.isEmpty()) {
-            mKeyguardStateController.removeCallback(faceAuthEnabledChangedCallback)
+            keyguardStateController.removeCallback(faceAuthEnabledChangedCallback)
         }
     }
 

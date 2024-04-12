@@ -24,6 +24,8 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
@@ -72,6 +74,7 @@ class KeyguardBypassControllerTest : SysuiTestCase() {
     @Mock private lateinit var statusBarStateController: StatusBarStateController
     @Mock private lateinit var lockscreenUserManager: NotificationLockscreenUserManager
     @Mock private lateinit var keyguardStateController: KeyguardStateController
+    @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock private lateinit var devicePostureController: DevicePostureController
     @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var packageManager: PackageManager
@@ -138,7 +141,8 @@ class KeyguardBypassControllerTest : SysuiTestCase() {
     private fun initKeyguardBypassController() {
         keyguardBypassController =
             KeyguardBypassController(
-                context,
+                context.resources,
+                context.packageManager,
                 testScope.backgroundScope,
                 tunerService,
                 statusBarStateController,
@@ -146,7 +150,8 @@ class KeyguardBypassControllerTest : SysuiTestCase() {
                 keyguardStateController,
                 shadeRepository,
                 devicePostureController,
-                dumpManager
+                keyguardTransitionInteractor,
+                dumpManager,
             )
     }
 
@@ -301,5 +306,27 @@ class KeyguardBypassControllerTest : SysuiTestCase() {
 
             job.cancel()
         }
+    }
+
+    @Test
+    fun canBypass_bypassDisabled() {
+        context.orCreateTestableResources.addOverride(
+            R.integer.config_face_unlock_bypass_override,
+            2 /* FACE_UNLOCK_BYPASS_NEVER */
+        )
+        initKeyguardBypassController()
+        assertThat(keyguardBypassController.canBypass()).isFalse()
+    }
+
+    @Test
+    fun canBypass_bypassEnabled_alternateBouncerShowing() {
+        context.orCreateTestableResources.addOverride(
+            R.integer.config_face_unlock_bypass_override,
+            1 /* FACE_UNLOCK_BYPASS_ALWAYS */
+        )
+        initKeyguardBypassController()
+        whenever(keyguardTransitionInteractor.getCurrentState())
+            .thenReturn(KeyguardState.ALTERNATE_BOUNCER)
+        assertThat(keyguardBypassController.canBypass()).isTrue()
     }
 }

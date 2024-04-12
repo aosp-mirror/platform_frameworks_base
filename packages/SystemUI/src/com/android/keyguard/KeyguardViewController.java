@@ -189,6 +189,5 @@ public interface KeyguardViewController {
             ShadeLockscreenInteractor shadeLockscreenInteractor,
             @Nullable ShadeExpansionStateManager shadeExpansionStateManager,
             BiometricUnlockController biometricUnlockController,
-            View notificationContainer,
-            KeyguardBypassController bypassController);
+            View notificationContainer);
 }
