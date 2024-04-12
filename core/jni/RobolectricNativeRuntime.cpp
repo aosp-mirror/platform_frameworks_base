@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <android/graphics/jni_runtime.h>
+#include <locale.h>
 #include <sys/stat.h>
 #include <unicode/putil.h>
 #include <unicode/udata.h>
@@ -214,5 +215,10 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
     }
     env->ReleaseStringUTFChars(stringPath, icuPath);
     env->ReleaseStringUTFChars(stringLanguageTag, languageTag);
+
+    // Use minimal "C" locale for number format to ensure correct parsing of floats when using
+    // strtof (e.g. in PathParser).
+    setlocale(LC_NUMERIC, "C");
+
     return JNI_VERSION_1_6;
 }
