@@ -17,9 +17,7 @@
 package com.android.systemui.haptics.qs
 
 import android.animation.ValueAnimator
-import android.annotation.SuppressLint
 import android.os.VibrationEffect
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.animation.AccelerateDecelerateInterpolator
@@ -27,18 +25,14 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.animation.doOnCancel
 import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
-import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.statusbar.VibratorHelper
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 
 /**
  * A class that handles the long press visuo-haptic effect for a QS tile.
@@ -55,34 +49,32 @@ class QSLongPressEffect
 @Inject
 constructor(
     private val vibratorHelper: VibratorHelper?,
-    val keyguardInteractor: KeyguardInteractor,
-    @Background bgScope: CoroutineScope,
-) : View.OnTouchListener {
+    keyguardInteractor: KeyguardInteractor,
+) {
 
     private var effectDuration = 0
 
     /** Current state */
     private var _state = MutableStateFlow(State.IDLE)
-    val state = _state.stateIn(bgScope, SharingStarted.Lazily, State.IDLE)
+    val state = _state.asStateFlow()
 
     /** Flows for view control and action */
     private val _effectProgress = MutableStateFlow<Float?>(null)
-    val effectProgress = _effectProgress.stateIn(bgScope, SharingStarted.Lazily, null)
+    val effectProgress = _effectProgress.asStateFlow()
 
     // Actions to perform
     private val _postedActionType = MutableStateFlow<ActionType?>(null)
-    val actionType: StateFlow<ActionType?> =
+    val actionType: Flow<ActionType?> =
         combine(
-                _postedActionType,
-                keyguardInteractor.isKeyguardDismissible,
-            ) { action, isDismissible ->
-                if (!isDismissible && action == ActionType.LONG_PRESS) {
-                    ActionType.RESET_AND_LONG_PRESS
-                } else {
-                    action
-                }
+            _postedActionType,
+            keyguardInteractor.isKeyguardDismissible,
+        ) { action, isDismissible ->
+            if (!isDismissible && action == ActionType.LONG_PRESS) {
+                ActionType.RESET_AND_LONG_PRESS
+            } else {
+                action
             }
-            .stateIn(bgScope, SharingStarted.Lazily, null)
+        }
 
     // Should a tap timeout countdown begin
     val shouldWaitForTapTimeout: Flow<Boolean> = state.map { it == State.TIMEOUT_WAIT }
@@ -129,23 +121,7 @@ constructor(
         }
     }
 
-    /**
-     * Handle relevant touch events for the operation of a Tile.
-     *
-     * A click action is performed following the relevant logic that originates from the
-     * [MotionEvent.ACTION_UP] event depending on the current state.
-     */
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onTouch(view: View?, event: MotionEvent?): Boolean {
-        when (event?.actionMasked) {
-            MotionEvent.ACTION_DOWN -> handleActionDown()
-            MotionEvent.ACTION_UP -> handleActionUp()
-            MotionEvent.ACTION_CANCEL -> handleActionCancel()
-        }
-        return true
-    }
-
-    private fun handleActionDown() {
+    fun handleActionDown() {
         when (_state.value) {
             State.IDLE -> {
                 setState(State.TIMEOUT_WAIT)
@@ -155,7 +131,7 @@ constructor(
         }
     }
 
-    private fun handleActionUp() {
+    fun handleActionUp() {
         when (_state.value) {
             State.TIMEOUT_WAIT -> {
                 _postedActionType.value = ActionType.CLICK
@@ -169,7 +145,7 @@ constructor(
         }
     }
 
-    private fun handleActionCancel() {
+    fun handleActionCancel() {
         when (_state.value) {
             State.TIMEOUT_WAIT -> {
                 setState(State.IDLE)

@@ -18,9 +18,6 @@ package com.android.systemui.haptics.qs
 
 import android.os.VibrationEffect
 import android.testing.TestableLooper.RunWithLooper
-import android.view.MotionEvent
-import android.view.View
-import androidx.test.core.view.MotionEventBuilder
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -29,18 +26,15 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.haptics.vibratorHelper
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
-import com.android.systemui.kosmos.backgroundCoroutineContext
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 
@@ -50,7 +44,6 @@ import org.mockito.junit.MockitoRule
 class QSLongPressEffectTest : SysuiTestCase() {
 
     @Rule @JvmField val mMockitoRule: MockitoRule = MockitoJUnit.rule()
-    @Mock private lateinit var testView: View
     @get:Rule val animatorTestRule = AnimatorTestRule(this)
     private val kosmos = testKosmos()
     private val vibratorHelper = kosmos.vibratorHelper
@@ -73,7 +66,6 @@ class QSLongPressEffectTest : SysuiTestCase() {
             QSLongPressEffect(
                 vibratorHelper,
                 kosmos.keyguardInteractor,
-                CoroutineScope(kosmos.backgroundCoroutineContext),
             )
         longPressEffect.initializeEffect(effectDuration)
     }
@@ -133,8 +125,7 @@ class QSLongPressEffectTest : SysuiTestCase() {
     @Test
     fun onActionDown_whileIdle_startsWait() = testWithScope {
         // GIVEN an action down event occurs
-        val downEvent = buildMotionEvent(MotionEvent.ACTION_DOWN)
-        longPressEffect.onTouch(testView, downEvent)
+        longPressEffect.handleActionDown()
 
         // THEN the effect moves to the TIMEOUT_WAIT state
         val state by collectLastValue(longPressEffect.state)
@@ -144,8 +135,7 @@ class QSLongPressEffectTest : SysuiTestCase() {
     @Test
     fun onActionCancel_whileWaiting_goesIdle() = testWhileWaiting {
         // GIVEN an action cancel occurs
-        val cancelEvent = buildMotionEvent(MotionEvent.ACTION_CANCEL)
-        longPressEffect.onTouch(testView, cancelEvent)
+        longPressEffect.handleActionCancel()
 
         // THEN the effect goes back to idle and does not start
         val state by collectLastValue(longPressEffect.state)
@@ -159,8 +149,7 @@ class QSLongPressEffectTest : SysuiTestCase() {
         val action by collectLastValue(longPressEffect.actionType)
 
         // GIVEN an action up occurs
-        val upEvent = buildMotionEvent(MotionEvent.ACTION_UP)
-        longPressEffect.onTouch(testView, upEvent)
+        longPressEffect.handleActionUp()
 
         // THEN the action to invoke is the click action and the effect does not start
         assertThat(action).isEqualTo(QSLongPressEffect.ActionType.CLICK)
@@ -182,8 +171,7 @@ class QSLongPressEffectTest : SysuiTestCase() {
         animatorTestRule.advanceTimeBy(effectDuration / 2L)
 
         // WHEN an action up occurs
-        val upEvent = buildMotionEvent(MotionEvent.ACTION_UP)
-        longPressEffect.onTouch(testView, upEvent)
+        longPressEffect.handleActionUp()
 
         // THEN the effect gets reversed at 50% progress
         assertEffectReverses(0.5f)
@@ -195,8 +183,7 @@ class QSLongPressEffectTest : SysuiTestCase() {
         animatorTestRule.advanceTimeBy(effectDuration / 2L)
 
         // WHEN an action cancel occurs
-        val cancelEvent = buildMotionEvent(MotionEvent.ACTION_CANCEL)
-        longPressEffect.onTouch(testView, cancelEvent)
+        longPressEffect.handleActionCancel()
 
         // THEN the effect gets reversed at 50% progress
         assertEffectReverses(0.5f)
@@ -230,12 +217,10 @@ class QSLongPressEffectTest : SysuiTestCase() {
         animatorTestRule.advanceTimeBy(effectDuration / 2L)
 
         // GIVEN an action cancel occurs and the effect gets reversed
-        val cancelEvent = buildMotionEvent(MotionEvent.ACTION_CANCEL)
-        longPressEffect.onTouch(testView, cancelEvent)
+        longPressEffect.handleActionCancel()
 
         // GIVEN an action down occurs
-        val downEvent = buildMotionEvent(MotionEvent.ACTION_DOWN)
-        longPressEffect.onTouch(testView, downEvent)
+        longPressEffect.handleActionDown()
 
         // THEN the effect resets
         assertEffectResets()
@@ -247,8 +232,7 @@ class QSLongPressEffectTest : SysuiTestCase() {
         animatorTestRule.advanceTimeBy(effectDuration / 2L)
 
         // GIVEN an action cancel occurs and the effect gets reversed
-        val cancelEvent = buildMotionEvent(MotionEvent.ACTION_CANCEL)
-        longPressEffect.onTouch(testView, cancelEvent)
+        longPressEffect.handleActionCancel()
 
         // GIVEN that the animation completes after a sufficient amount of time
         animatorTestRule.advanceTimeBy(effectDuration.toLong())
@@ -257,9 +241,6 @@ class QSLongPressEffectTest : SysuiTestCase() {
         val state by collectLastValue(longPressEffect.state)
         assertThat(state).isEqualTo(QSLongPressEffect.State.IDLE)
     }
-
-    private fun buildMotionEvent(action: Int): MotionEvent =
-        MotionEventBuilder.newBuilder().setAction(action).build()
 
     private fun testWithScope(test: suspend TestScope.() -> Unit) =
         with(kosmos) { testScope.runTest { test() } }

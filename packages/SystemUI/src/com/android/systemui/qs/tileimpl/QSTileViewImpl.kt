@@ -185,8 +185,9 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private val colorEvaluator = ArgbEvaluator.getInstance()
     val isLongPressEffectInitialized: Boolean
         get() = longPressEffect?.hasInitialized == true
-    @VisibleForTesting
-    var longPressEffectHandle: DisposableHandle? = null
+    private var longPressEffectHandle: DisposableHandle? = null
+    val isLongPressEffectBound: Boolean
+        get() = longPressEffectHandle != null
 
     init {
         val typedValue = TypedValue()
@@ -621,11 +622,14 @@ open class QSTileViewImpl @JvmOverloads constructor(
         // Long-press effects
         if (state.handlesLongClick &&
             longPressEffect?.initializeEffect(longPressEffectDuration) == true) {
-            // set the valid long-press effect as the touch listener
-            if (longPressEffectHandle == null) {
+            // bind the long-press effect and set it as the touch listener
+            if (!isLongPressEffectBound) {
                 longPressEffectHandle =
-                    QSLongPressEffectViewBinder.bind(this, longPressEffect, state.spec)
-                setOnTouchListener(longPressEffect)
+                    QSLongPressEffectViewBinder.bind(
+                        this,
+                        longPressEffect,
+                        state.spec,
+                    )
             }
             showRippleEffect = false
             initializeLongPressProperties()
@@ -634,8 +638,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
             // handle a long-press. In this case, we go back to the behaviour of a regular tile
             // and clean-up the resources
             setOnTouchListener(null)
-            longPressEffectHandle?.dispose()
-            longPressEffectHandle = null
+            unbindLongPressEffect()
             showRippleEffect = isClickable
             initialLongPressProperties = null
             finalLongPressProperties = null
@@ -825,6 +828,11 @@ open class QSTileViewImpl @JvmOverloads constructor(
             child.scaleY = 1f / newScaleY
         }
         changeCornerRadius(newRadius)
+    }
+
+    private fun unbindLongPressEffect() {
+        longPressEffectHandle?.dispose()
+        longPressEffectHandle = null
     }
 
     private fun interpolateFloat(fraction: Float, start: Float, end: Float): Float =

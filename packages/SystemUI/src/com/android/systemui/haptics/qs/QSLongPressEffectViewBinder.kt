@@ -16,6 +16,8 @@
 
 package com.android.systemui.haptics.qs
 
+import android.annotation.SuppressLint
+import android.view.MotionEvent
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.tracing.coroutines.launch
@@ -25,10 +27,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.launch
 
-// TODO(b/332903800)
 object QSLongPressEffectViewBinder {
+
     fun bind(
         tile: QSTileViewImpl,
         qsLongPressEffect: QSLongPressEffect?,
@@ -36,11 +37,13 @@ object QSLongPressEffectViewBinder {
     ): DisposableHandle? {
         if (qsLongPressEffect == null) return null
 
+        // Set the touch listener as the long-press effect
+        setTouchListener(tile, qsLongPressEffect)
+
         return tile.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                val tag = "${tileSpec ?: "unknownTileSpec"}#LongPressEffect"
                 // Progress of the effect
-                launch("$tag#progress") {
+                launch({ "${tileSpec ?: "unknownTileSpec"}#LongPressEffect#progress" }) {
                     qsLongPressEffect.effectProgress.collect { progress ->
                         progress?.let {
                             if (it == 0f) {
@@ -53,7 +56,7 @@ object QSLongPressEffectViewBinder {
                 }
 
                 // Action to perform
-                launch("$tag#action") {
+                launch({ "${tileSpec ?: "unknownTileSpec"}#LongPressEffect#action" }) {
                     qsLongPressEffect.actionType.collect { action ->
                         action?.let {
                             when (it) {
@@ -70,7 +73,7 @@ object QSLongPressEffectViewBinder {
                 }
 
                 // Tap timeout wait
-                launch("$tag#timeout") {
+                launch({ "${tileSpec ?: "unknownTileSpec"}#LongPressEffect#timeout" }) {
                     qsLongPressEffect.shouldWaitForTapTimeout
                         .filter { it }
                         .collect {
@@ -83,6 +86,18 @@ object QSLongPressEffectViewBinder {
                         }
                 }
             }
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setTouchListener(tile: QSTileViewImpl, longPressEffect: QSLongPressEffect?) {
+        tile.setOnTouchListener { _, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> longPressEffect?.handleActionDown()
+                MotionEvent.ACTION_UP -> longPressEffect?.handleActionUp()
+                MotionEvent.ACTION_CANCEL -> longPressEffect?.handleActionCancel()
+            }
+            true
         }
     }
 }
