@@ -70,13 +70,13 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
 
     @Override
     public void onBackStarted(@NonNull BackEvent backEvent) {
-        if (isAdjustResize()) {
+        if (!isBackAnimationAllowed()) {
             // There is no good solution for a predictive back animation if the app uses
             // adjustResize, since we can't relayout the whole app for every frame. We also don't
             // want to reveal any black areas behind the IME. Therefore let's not play any animation
             // in that case for now.
             Log.d(TAG, "onBackStarted -> not playing predictive back animation due to softinput"
-                    + " mode adjustResize");
+                    + " mode adjustResize AND no animation callback registered");
             return;
         }
         if (isHideAnimationInProgress()) {
@@ -128,13 +128,13 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
 
     @Override
     public void onBackCancelled() {
-        if (isAdjustResize()) return;
+        if (!isBackAnimationAllowed()) return;
         startPostCommitAnim(/*hideIme*/ false);
     }
 
     @Override
     public void onBackInvoked() {
-        if (isAdjustResize()) {
+        if (!isBackAnimationAllowed()) {
             mInsetsController.hide(ime());
             return;
         }
@@ -252,9 +252,12 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
         }
     }
 
-    private boolean isAdjustResize() {
+    private boolean isBackAnimationAllowed() {
+        // back animation is allowed in all cases except when softInputMode is adjust_resize AND
+        // there is no app-registered WindowInsetsAnimationCallback.
         return (mViewRoot.mWindowAttributes.softInputMode & SOFT_INPUT_MASK_ADJUST)
-                == SOFT_INPUT_ADJUST_RESIZE;
+                != SOFT_INPUT_ADJUST_RESIZE
+                || (mViewRoot.mView != null && mViewRoot.mView.hasWindowInsetsAnimationCallback());
     }
 
     private boolean isAdjustPan() {
