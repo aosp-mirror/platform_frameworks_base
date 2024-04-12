@@ -49,7 +49,6 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
     private static final long ENERGY_UNSPECIFIED = -1;
     private static final int DEFAULT_CPU_POWER_BRACKETS = 3;
     private static final int DEFAULT_CPU_POWER_BRACKETS_PER_ENERGY_CONSUMER = 2;
-    private static final long POWER_STATS_ENERGY_CONSUMERS_TIMEOUT = 20000;
 
     interface Injector {
         Handler getHandler();
@@ -76,7 +75,6 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
     private CpuScalingPolicies mCpuScalingPolicies;
     private PowerProfile mPowerProfile;
     private KernelCpuStatsReader mKernelCpuStatsReader;
-    private PowerStatsUidResolver mUidResolver;
     private ConsumedEnergyRetriever mConsumedEnergyRetriever;
     private IntSupplier mVoltageSupplier;
     private int mDefaultCpuPowerBrackets;
@@ -97,7 +95,8 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
     private long[] mLastConsumedEnergyUws;
 
     public CpuPowerStatsCollector(Injector injector, long throttlePeriodMs) {
-        super(injector.getHandler(), throttlePeriodMs, injector.getClock());
+        super(injector.getHandler(), throttlePeriodMs, injector.getUidResolver(),
+                injector.getClock());
         mInjector = injector;
     }
 
@@ -113,7 +112,6 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
         mCpuScalingPolicies = mInjector.getCpuScalingPolicies();
         mPowerProfile = mInjector.getPowerProfile();
         mKernelCpuStatsReader = mInjector.getKernelCpuStatsReader();
-        mUidResolver = mInjector.getUidResolver();
         mConsumedEnergyRetriever = mInjector.getConsumedEnergyRetriever();
         mVoltageSupplier = mInjector.getVoltageSupplier();
         mDefaultCpuPowerBrackets = mInjector.getDefaultCpuPowerBrackets();
@@ -421,7 +419,8 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
 
         boolean nonzero = false;
         for (int bracket = powerBracketCount - 1; bracket >= 0; bracket--) {
-            long delta = timeByPowerBracket[bracket] - uidStats.timeByPowerBracket[bracket];
+            long delta = Math.max(0,
+                    timeByPowerBracket[bracket] - uidStats.timeByPowerBracket[bracket]);
             if (delta != 0) {
                 nonzero = true;
             }
@@ -445,6 +444,12 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
                 }
             }
         }
+    }
+
+    @Override
+    protected void onUidRemoved(int uid) {
+        super.onUidRemoved(uid);
+        mUidStats.remove(uid);
     }
 
     /**
