@@ -25,14 +25,14 @@ import com.android.systemui.controls.controller.ControlInfo
  * This model is used to show controls separated by zones.
  *
  * The model will sort the controls and zones in the following manner:
- *  * The zones will be sorted in a first seen basis
- *  * The controls in each zone will be sorted in a first seen basis.
+ * * The zones will be sorted in a first seen basis
+ * * The controls in each zone will be sorted in a first seen basis.
  *
- *  The controls passed should belong to the same structure, as an instance of this model will be
- *  created for each structure.
+ * The controls passed should belong to the same structure, as an instance of this model will be
+ * created for each structure.
  *
- *  The list of favorite ids can contain ids for controls not passed to this model. Those will be
- *  filtered out.
+ * The list of favorite ids can contain ids for controls not passed to this model. Those will be
+ * filtered out.
  *
  * @property controls List of controls as returned by loading
  * @property initialFavoriteIds sorted ids of favorite controls.
@@ -43,7 +43,7 @@ class AllModel(
     private val controls: List<ControlStatus>,
     initialFavoriteIds: List<String>,
     private val emptyZoneString: CharSequence,
-    private val controlsModelCallback: ControlsModel.ControlsModelCallback
+    private val controlsModelCallback: ControlsModel.ControlsModelCallback,
 ) : ControlsModel {
 
     private var modified = false
@@ -51,12 +51,11 @@ class AllModel(
     override val moveHelper = null
 
     override val favorites: List<ControlInfo>
-        get() = favoriteIds.mapNotNull { id ->
-            val control = controls.firstOrNull { it.control.controlId == id }?.control
-            control?.let {
-                ControlInfo.fromControl(it)
+        get() =
+            favoriteIds.mapNotNull { id ->
+                val control = controls.firstOrNull { it.control.controlId == id }?.control
+                control?.let { ControlInfo.fromControl(it) }
             }
-        }
 
     private val favoriteIds = run {
         val ids = controls.mapTo(HashSet()) { it.control.controlId }
@@ -66,15 +65,17 @@ class AllModel(
     override val elements: List<ElementWrapper> = createWrappers(controls)
 
     override fun changeFavoriteStatus(controlId: String, favorite: Boolean) {
-        val toChange = elements.firstOrNull {
-            it is ControlStatusWrapper && it.controlStatus.control.controlId == controlId
-        } as ControlStatusWrapper?
+        val toChange =
+            elements.firstOrNull {
+                it is ControlStatusWrapper && it.controlStatus.control.controlId == controlId
+            } as ControlStatusWrapper?
         if (favorite == toChange?.controlStatus?.favorite) return
-        val changed: Boolean = if (favorite) {
-            favoriteIds.add(controlId)
-        } else {
-            favoriteIds.remove(controlId)
-        }
+        val changed: Boolean =
+            if (favorite) {
+                favoriteIds.add(controlId)
+            } else {
+                favoriteIds.remove(controlId)
+            }
         if (changed) {
             if (!modified) {
                 modified = true
@@ -82,15 +83,14 @@ class AllModel(
             }
             controlsModelCallback.onChange()
         }
-        toChange?.let {
-            it.controlStatus.favorite = favorite
-        }
+        toChange?.let { it.controlStatus.favorite = favorite }
     }
 
     private fun createWrappers(list: List<ControlStatus>): List<ElementWrapper> {
-        val map = list.groupByTo(OrderedMap(ArrayMap<CharSequence, MutableList<ControlStatus>>())) {
-            it.control.zone ?: ""
-        }
+        val map =
+            list.groupByTo(OrderedMap(ArrayMap<CharSequence, MutableList<ControlStatus>>())) {
+                it.control.zone ?: ""
+            }
         val output = mutableListOf<ElementWrapper>()
         var emptyZoneValues: Sequence<ControlStatusWrapper>? = null
         for (zoneName in map.orderedKeys) {
