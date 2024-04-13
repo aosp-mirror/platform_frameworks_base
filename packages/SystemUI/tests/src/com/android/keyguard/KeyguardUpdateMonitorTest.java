@@ -19,6 +19,7 @@ package com.android.keyguard;
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT_PERMANENT;
 import static android.hardware.biometrics.SensorProperties.STRENGTH_CONVENIENCE;
@@ -82,7 +83,6 @@ import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
-import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -2266,8 +2266,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private void faceAuthLockOut() {
         when(mFaceAuthInteractor.isLockedOut()).thenReturn(true);
         mFaceAuthenticationListener.getValue().onAuthenticationStatusChanged(
-                new ErrorFaceAuthenticationStatus(FaceManager.FACE_ERROR_LOCKOUT_PERMANENT, "",
-                        0L));
+                new ErrorFaceAuthenticationStatus(FACE_ERROR_LOCKOUT_PERMANENT, "", 0L));
     }
 
     private void statusBarShadeIsNotLocked() {

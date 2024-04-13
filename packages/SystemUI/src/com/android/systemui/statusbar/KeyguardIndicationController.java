@@ -21,6 +21,7 @@ import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.KEYGUARD_MANAGEMENT_DISCLOSURE;
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.KEYGUARD_NAMED_MANAGEMENT_DISCLOSURE;
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_TIMEOUT;
 import static android.hardware.biometrics.BiometricSourceType.FACE;
 import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 import static android.view.View.GONE;
@@ -60,7 +61,6 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.hardware.biometrics.BiometricSourceType;
-import android.hardware.face.FaceManager;
 import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.Looper;
@@ -1404,7 +1404,7 @@ public class KeyguardIndicationController {
                 mKeyguardLogger.logBiometricMessage("KIC suppressingFaceError", msgId, errString);
                 return;
             }
-            if (msgId == FaceManager.FACE_ERROR_TIMEOUT) {
+            if (msgId == FACE_ERROR_TIMEOUT) {
                 handleFaceAuthTimeoutError(deferredFaceMessage);
             } else if (mIndicationHelper.isFaceLockoutErrorMsg(msgId)) {
                 handleFaceLockoutError(errString);
