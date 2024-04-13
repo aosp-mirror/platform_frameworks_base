@@ -1135,8 +1135,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 if (!isCurrentUser) {
                     return;
                 }
-                mSettings = queryInputMethodServicesInternal(mContext, userId,
-                        newAdditionalSubtypeMap, DirectBootAwareness.AUTO);
+                mSettings = newSettings;
                 postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */);
 
                 boolean changed = false;
