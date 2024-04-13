@@ -43,15 +43,12 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.DurationUnit
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -178,6 +175,22 @@ class MobileIconInteractorTest : SysuiTestCase() {
             assertThat(latest).isEqualTo(4)
 
             job.cancel()
+        }
+
+    @Test
+    fun inflateSignalStrength_arbitrarilyAddsOneToTheReportedLevel() =
+        testScope.runTest {
+            connectionRepository.inflateSignalStrength.value = false
+            val latest by collectLastValue(underTest.signalLevelIcon)
+
+            connectionRepository.primaryLevel.value = 4
+            assertThat(latest!!.level).isEqualTo(4)
+
+            connectionRepository.inflateSignalStrength.value = true
+            connectionRepository.primaryLevel.value = 4
+
+            // when INFLATE_SIGNAL_STRENGTH is true, we add 1 to the reported signal level
+            assertThat(latest!!.level).isEqualTo(5)
         }
 
     @Test
@@ -676,32 +689,6 @@ class MobileIconInteractorTest : SysuiTestCase() {
             connectionRepository.isNonTerrestrial.value = true
 
             assertThat(latest).isInstanceOf(SignalIconModel.Satellite::class.java)
-        }
-
-    @EnableFlags(com.android.internal.telephony.flags.Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
-    @Test
-    fun satBasedIcon_hasHysteresisWhenDisabled() =
-        testScope.runTest {
-            val latest by collectLastValue(underTest.signalLevelIcon)
-
-            val hysteresisDuration = 5.seconds
-            connectionRepository.satelliteConnectionHysteresisSeconds.value =
-                hysteresisDuration.toInt(DurationUnit.SECONDS)
-
-            connectionRepository.isNonTerrestrial.value = true
-
-            assertThat(latest).isInstanceOf(SignalIconModel.Satellite::class.java)
-
-            // Disable satellite
-            connectionRepository.isNonTerrestrial.value = false
-
-            // Satellite icon should still be visible
-            assertThat(latest).isInstanceOf(SignalIconModel.Satellite::class.java)
-
-            // Wait for the icon to change
-            advanceTimeBy(hysteresisDuration)
-
-            assertThat(latest).isInstanceOf(SignalIconModel.Cellular::class.java)
         }
 
     private fun createInteractor(

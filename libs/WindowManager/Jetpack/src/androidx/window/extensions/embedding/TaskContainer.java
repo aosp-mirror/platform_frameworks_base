@@ -211,10 +211,19 @@ class TaskContainer {
         return mContainers.isEmpty() && mFinishedContainer.isEmpty();
     }
 
-    /** Called when the activity is destroyed. */
-    void onActivityDestroyed(@NonNull IBinder activityToken) {
+    /** Called when the activity {@link Activity#isFinishing()} and paused. */
+    void onFinishingActivityPaused(@NonNull WindowContainerTransaction wct,
+                                   @NonNull IBinder activityToken) {
         for (TaskFragmentContainer container : mContainers) {
-            container.onActivityDestroyed(activityToken);
+            container.onFinishingActivityPaused(wct, activityToken);
+        }
+    }
+
+    /** Called when the activity is destroyed. */
+    void onActivityDestroyed(@NonNull WindowContainerTransaction wct,
+                             @NonNull IBinder activityToken) {
+        for (TaskFragmentContainer container : mContainers) {
+            container.onActivityDestroyed(wct, activityToken);
         }
     }
 

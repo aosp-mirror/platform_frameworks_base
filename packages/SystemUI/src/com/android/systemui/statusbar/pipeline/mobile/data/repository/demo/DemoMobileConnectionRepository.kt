@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.model.F
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -66,6 +67,17 @@ class DemoMobileConnectionRepository(
                 _carrierId.value,
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), _carrierId.value)
+
+    private val _inflateSignalStrength: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    override val inflateSignalStrength =
+        _inflateSignalStrength
+            .logDiffsForTable(
+                tableLogBuffer,
+                columnPrefix = "",
+                columnName = "inflate",
+                _inflateSignalStrength.value
+            )
+            .stateIn(scope, SharingStarted.WhileSubscribed(), _inflateSignalStrength.value)
 
     private val _isEmergencyOnly = MutableStateFlow(false)
     override val isEmergencyOnly =
@@ -191,7 +203,16 @@ class DemoMobileConnectionRepository(
             .logDiffsForTable(tableLogBuffer, columnPrefix = "", _resolvedNetworkType.value)
             .stateIn(scope, SharingStarted.WhileSubscribed(), _resolvedNetworkType.value)
 
-    override val numberOfLevels = MutableStateFlow(MobileConnectionRepository.DEFAULT_NUM_LEVELS)
+    override val numberOfLevels =
+        _inflateSignalStrength
+            .map { shouldInflate ->
+                if (shouldInflate) {
+                    DEFAULT_NUM_LEVELS + 1
+                } else {
+                    DEFAULT_NUM_LEVELS
+                }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), DEFAULT_NUM_LEVELS)
 
     override val dataEnabled = MutableStateFlow(true)
 
@@ -205,8 +226,6 @@ class DemoMobileConnectionRepository(
     override val isAllowedDuringAirplaneMode = MutableStateFlow(false)
 
     override val hasPrioritizedNetworkCapabilities = MutableStateFlow(false)
-
-    override val satelliteConnectionHysteresisSeconds = MutableStateFlow(0)
 
     override suspend fun isInEcmMode(): Boolean = false
 
@@ -226,8 +245,7 @@ class DemoMobileConnectionRepository(
 
         _carrierId.value = event.carrierId ?: INVALID_SUBSCRIPTION_ID
 
-        numberOfLevels.value =
-            if (event.inflateStrength) DEFAULT_NUM_LEVELS + 1 else DEFAULT_NUM_LEVELS
+        _inflateSignalStrength.value = event.inflateStrength
 
         cdmaRoaming.value = event.roaming
         _isRoaming.value = event.roaming
@@ -258,7 +276,6 @@ class DemoMobileConnectionRepository(
         carrierName.value = NetworkNameModel.SubscriptionDerived(CARRIER_MERGED_NAME)
         // TODO(b/276943904): is carrierId a thing with carrier merged networks?
         _carrierId.value = INVALID_SUBSCRIPTION_ID
-        numberOfLevels.value = event.numberOfLevels
         cdmaRoaming.value = false
         _primaryLevel.value = event.level
         _cdmaLevel.value = event.level

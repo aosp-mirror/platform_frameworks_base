@@ -35,9 +35,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.ambient.touch.TouchHandler;
 import com.android.systemui.complication.Complication;
 import com.android.systemui.dreams.DreamOverlayStateController;
-import com.android.systemui.dreams.touch.DreamTouchHandler;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.touch.TouchInsetManager;
@@ -74,7 +74,7 @@ public class HideComplicationTouchHandlerTest extends SysuiTestCase {
     MotionEvent mMotionEvent;
 
     @Mock
-    DreamTouchHandler.TouchSession mSession;
+    TouchHandler.TouchSession mSession;
 
     @Mock
     DreamOverlayStateController mStateController;

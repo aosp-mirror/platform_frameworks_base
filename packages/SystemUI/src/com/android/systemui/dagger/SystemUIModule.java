@@ -32,6 +32,7 @@ import com.android.systemui.CameraProtectionModule;
 import com.android.systemui.SystemUISecondaryUserService;
 import com.android.systemui.accessibility.AccessibilityModule;
 import com.android.systemui.accessibility.data.repository.AccessibilityRepositoryModule;
+import com.android.systemui.ambient.dagger.AmbientModule;
 import com.android.systemui.appops.dagger.AppOpsModule;
 import com.android.systemui.assist.AssistModule;
 import com.android.systemui.authentication.AuthenticationModule;
@@ -162,13 +163,13 @@ import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
 
+import kotlinx.coroutines.CoroutineScope;
+
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import javax.inject.Named;
-
-import kotlinx.coroutines.CoroutineScope;
 
 /**
  * A dagger module for injecting components of System UI that are required by System UI.
@@ -183,6 +184,7 @@ import kotlinx.coroutines.CoroutineScope;
 @Module(includes = {
         AccessibilityModule.class,
         AccessibilityRepositoryModule.class,
+        AmbientModule.class,
         AppOpsModule.class,
         AssistModule.class,
         AuthenticationModule.class,

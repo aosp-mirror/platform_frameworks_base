@@ -1243,7 +1243,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mock(WindowManagerOcclusionManager.class));
         mViewMediator.start();
 
-        mViewMediator.registerCentralSurfaces(mCentralSurfaces, null, null, null, null, null);
+        mViewMediator.registerCentralSurfaces(mCentralSurfaces, null, null, null, null);
     }
 
     private void captureKeyguardStateControllerCallback() {

@@ -25,6 +25,7 @@ import android.content.res.Resources;
 
 import com.android.dream.lowlight.dagger.LowLightDreamModule;
 import com.android.settingslib.dream.DreamBackend;
+import com.android.systemui.ambient.touch.scrim.dagger.ScrimModule;
 import com.android.systemui.complication.dagger.RegisteredComplicationsModule;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -34,7 +35,6 @@ import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
 import com.android.systemui.dreams.homecontrols.DreamActivityProvider;
 import com.android.systemui.dreams.homecontrols.DreamActivityProviderImpl;
 import com.android.systemui.dreams.homecontrols.HomeControlsDreamService;
-import com.android.systemui.dreams.touch.scrim.dagger.ScrimModule;
 import com.android.systemui.res.R;
 import com.android.systemui.touch.TouchInsetManager;
 

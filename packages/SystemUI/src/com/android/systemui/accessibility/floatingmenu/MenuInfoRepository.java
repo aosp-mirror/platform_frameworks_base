@@ -244,11 +244,13 @@ class MenuInfoRepository {
                 mSecureSettings.getUriFor(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS),
                 /* notifyForDescendants */ false, mMenuTargetFeaturesContentObserver,
                 UserHandle.USER_CURRENT);
-        mSecureSettings.registerContentObserverForUser(
-                mSecureSettings.getUriFor(ENABLED_ACCESSIBILITY_SERVICES),
-                /* notifyForDescendants */ false,
-                mMenuTargetFeaturesContentObserver,
-                UserHandle.USER_CURRENT);
+        if (!com.android.systemui.Flags.floatingMenuNarrowTargetContentObserver()) {
+            mSecureSettings.registerContentObserverForUser(
+                    mSecureSettings.getUriFor(ENABLED_ACCESSIBILITY_SERVICES),
+                    /* notifyForDescendants */ false,
+                    mMenuTargetFeaturesContentObserver,
+                    UserHandle.USER_CURRENT);
+        }
         mSecureSettings.registerContentObserverForUser(
                 mSecureSettings.getUriFor(Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE),
                 /* notifyForDescendants */ false, mMenuSizeContentObserver,
@@ -263,8 +265,10 @@ class MenuInfoRepository {
                 UserHandle.USER_CURRENT);
         mContext.registerComponentCallbacks(mComponentCallbacks);
 
-        mAccessibilityManager.addAccessibilityServicesStateChangeListener(
-                mA11yServicesStateChangeListener);
+        if (!com.android.systemui.Flags.floatingMenuNarrowTargetContentObserver()) {
+            mAccessibilityManager.addAccessibilityServicesStateChangeListener(
+                    mA11yServicesStateChangeListener);
+        }
     }
 
     void unregisterObserversAndCallbacks() {
@@ -273,8 +277,10 @@ class MenuInfoRepository {
         mContext.getContentResolver().unregisterContentObserver(mMenuFadeOutContentObserver);
         mContext.unregisterComponentCallbacks(mComponentCallbacks);
 
-        mAccessibilityManager.removeAccessibilityServicesStateChangeListener(
-                mA11yServicesStateChangeListener);
+        if (!com.android.systemui.Flags.floatingMenuNarrowTargetContentObserver()) {
+            mAccessibilityManager.removeAccessibilityServicesStateChangeListener(
+                    mA11yServicesStateChangeListener);
+        }
     }
 
     interface OnSettingsContentsChanged {

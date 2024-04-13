@@ -4437,8 +4437,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         final boolean clearPendingIntentsForStoppedApp = (android.content.pm.Flags.stayStopped()
                 && packageStateStopped);
         if (packageName == null || uninstalling || clearPendingIntentsForStoppedApp) {
+            final int cancelReason;
+            if (packageName == null) {
+                cancelReason = PendingIntentRecord.CANCEL_REASON_USER_STOPPED;
+            } else if (uninstalling) {
+                cancelReason = PendingIntentRecord.CANCEL_REASON_OWNER_UNINSTALLED;
+            } else {
+                cancelReason = PendingIntentRecord.CANCEL_REASON_OWNER_FORCE_STOPPED;
+            }
             didSomething |= mPendingIntentController.removePendingIntentsForPackage(
-                    packageName, userId, appId, doit);
+                    packageName, userId, appId, doit, cancelReason);
         }
 
         if (doit) {
@@ -10167,7 +10175,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         final int callingUid = Binder.getCallingUid();
-        mProcessList.getAppStartInfoTracker().addStartInfoCompleteListener(listener, callingUid);
+        mUserController.handleIncomingUser(Binder.getCallingPid(), callingUid, userId, true,
+                ALLOW_NON_FULL, "addApplicationStartInfoCompleteListener", null);
+
+        mProcessList.getAppStartInfoTracker().addStartInfoCompleteListener(listener,
+                UserHandle.getUid(userId, UserHandle.getAppId(callingUid)));
     }
 
 
@@ -10182,13 +10194,30 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         final int callingUid = Binder.getCallingUid();
-        mProcessList.getAppStartInfoTracker().removeStartInfoCompleteListener(listener, callingUid,
-                true);
+        mUserController.handleIncomingUser(Binder.getCallingPid(), callingUid, userId, true,
+                ALLOW_NON_FULL, "removeApplicationStartInfoCompleteListener", null);
+
+        mProcessList.getAppStartInfoTracker().removeStartInfoCompleteListener(listener,
+                UserHandle.getUid(userId, UserHandle.getAppId(callingUid)), true);
     }
 
     @Override
     public void addStartInfoTimestamp(int key, long timestampNs, int userId) {
         enforceNotIsolatedCaller("addStartInfoTimestamp");
+
+        // For the simplification, we don't support USER_ALL nor USER_CURRENT here.
+        if (userId == UserHandle.USER_ALL || userId == UserHandle.USER_CURRENT) {
+            throw new IllegalArgumentException("Unsupported userId");
+        }
+
+        final int callingUid = Binder.getCallingUid();
+        mUserController.handleIncomingUser(Binder.getCallingPid(), callingUid, userId, true,
+                ALLOW_NON_FULL, "addStartInfoTimestamp", null);
+
+        final String packageName = Settings.getPackageNameForUid(mContext, callingUid);
+
+        mProcessList.getAppStartInfoTracker().addTimestampToStart(packageName,
+                UserHandle.getUid(userId, UserHandle.getAppId(callingUid)), timestampNs, key);
     }
 
     @Override

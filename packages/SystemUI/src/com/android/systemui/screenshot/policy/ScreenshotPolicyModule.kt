@@ -19,7 +19,7 @@ package com.android.systemui.screenshot.policy
 import android.content.ComponentName
 import android.content.Context
 import android.os.Process
-import com.android.systemui.Flags.screenshotPrivateProfile
+import com.android.systemui.Flags.screenshotPrivateProfileBehaviorFix
 import com.android.systemui.SystemUIService
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -72,7 +72,7 @@ interface ScreenshotPolicyModule {
             displayContentRepoProvider: Provider<DisplayContentRepository>,
             policyListProvider: Provider<List<CapturePolicy>>,
         ): ScreenshotRequestProcessor {
-            return if (screenshotPrivateProfile()) {
+            return if (screenshotPrivateProfileBehaviorFix()) {
                 PolicyRequestProcessor(
                     background = background,
                     capture = imageCapture,

@@ -320,6 +320,63 @@ public class XmlUtils {
         return b;
     }
 
+    /** Gets an on-device Long attribute. */
+    public static Long getOdLongEle(Element ele, String nameName, boolean required)
+            throws MalformedXmlException {
+        List<Element> longEles =
+                XmlUtils.getChildrenByTagName(ele, XmlUtils.OD_TAG_LONG).stream()
+                        .filter(e -> e.getAttribute(XmlUtils.OD_ATTR_NAME).equals(nameName))
+                        .toList();
+        if (longEles.size() > 1) {
+            throw new MalformedXmlException(
+                    String.format("Found more than one %s in %s.", nameName, ele.getTagName()));
+        }
+        if (longEles.isEmpty()) {
+            if (required) {
+                throw new MalformedXmlException(
+                        String.format("Found no %s in %s.", nameName, ele.getTagName()));
+            }
+            return null;
+        }
+        Element longEle = longEles.get(0);
+        Long l = null;
+        try {
+            l = Long.parseLong(longEle.getAttribute(XmlUtils.OD_ATTR_VALUE));
+        } catch (NumberFormatException e) {
+            throw new MalformedXmlException(
+                    String.format(
+                            "%s in %s was not formatted as long", nameName, ele.getTagName()));
+        }
+        return l;
+    }
+
+    /** Gets an on-device String attribute. */
+    public static String getOdStringEle(Element ele, String nameName, boolean required)
+            throws MalformedXmlException {
+        List<Element> eles =
+                XmlUtils.getChildrenByTagName(ele, XmlUtils.OD_TAG_STRING).stream()
+                        .filter(e -> e.getAttribute(XmlUtils.OD_ATTR_NAME).equals(nameName))
+                        .toList();
+        if (eles.size() > 1) {
+            throw new MalformedXmlException(
+                    String.format("Found more than one %s in %s.", nameName, ele.getTagName()));
+        }
+        if (eles.isEmpty()) {
+            if (required) {
+                throw new MalformedXmlException(
+                        String.format("Found no %s in %s.", nameName, ele.getTagName()));
+            }
+            return null;
+        }
+        String str = eles.get(0).getAttribute(XmlUtils.OD_ATTR_VALUE);
+        if (XmlUtils.isNullOrEmpty(str) && required) {
+            throw new MalformedXmlException(
+                    String.format(
+                            "%s in %s was empty or missing value", nameName, ele.getTagName()));
+        }
+        return str;
+    }
+
     /** Gets a OD Pbundle Element attribute with the specified name. */
     public static Element getOdPbundleWithName(Element ele, String nameName, boolean required)
             throws MalformedXmlException {
@@ -379,7 +436,7 @@ public class XmlUtils {
                 throw new MalformedXmlException(
                         String.format("Found no %s in %s.", nameName, ele.getTagName()));
             }
-            return List.of();
+            return null;
         }
         Element intArrayEle = intArrayEles.get(0);
         List<Element> itemEles = XmlUtils.getChildrenByTagName(intArrayEle, XmlUtils.OD_TAG_ITEM);
@@ -388,6 +445,33 @@ public class XmlUtils {
             ints.add(Integer.parseInt(XmlUtils.getStringAttr(itemEle, XmlUtils.OD_ATTR_VALUE)));
         }
         return ints;
+    }
+
+    /** Gets on-device style String array. */
+    public static List<String> getOdStringArray(Element ele, String nameName, boolean required)
+            throws MalformedXmlException {
+        List<Element> arrayEles =
+                XmlUtils.getChildrenByTagName(ele, XmlUtils.OD_TAG_STRING_ARRAY).stream()
+                        .filter(e -> e.getAttribute(XmlUtils.OD_ATTR_NAME).equals(nameName))
+                        .toList();
+        if (arrayEles.size() > 1) {
+            throw new MalformedXmlException(
+                    String.format("Found more than one %s in %s.", nameName, ele.getTagName()));
+        }
+        if (arrayEles.isEmpty()) {
+            if (required) {
+                throw new MalformedXmlException(
+                        String.format("Found no %s in %s.", nameName, ele.getTagName()));
+            }
+            return null;
+        }
+        Element arrayEle = arrayEles.get(0);
+        List<Element> itemEles = XmlUtils.getChildrenByTagName(arrayEle, XmlUtils.OD_TAG_ITEM);
+        List<String> strs = new ArrayList<String>();
+        for (Element itemEle : itemEles) {
+            strs.add(XmlUtils.getStringAttr(itemEle, XmlUtils.OD_ATTR_VALUE, true));
+        }
+        return strs;
     }
 
     /**

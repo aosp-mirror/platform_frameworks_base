@@ -260,6 +260,11 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mContext = context;
         mHandler = handler;
         mAnimationController = animationController;
+        mAnimationController.setOnAnimationEndRunnable(() -> {
+            if (Flags.createWindowlessWindowMagnifier()) {
+                notifySourceBoundsChanged();
+            }
+        });
         mAnimationController.setWindowMagnificationController(this);
         mWindowMagnifierCallback = callback;
         mSysUiState = sysUiState;
@@ -1051,9 +1056,13 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
             // Notify source bounds change when the magnifier is not animating.
             if (!mAnimationController.isAnimating()) {
-                mWindowMagnifierCallback.onSourceBoundsChanged(mDisplayId, mSourceBounds);
+                notifySourceBoundsChanged();
             }
         }
+    }
+
+    private void notifySourceBoundsChanged() {
+        mWindowMagnifierCallback.onSourceBoundsChanged(mDisplayId, mSourceBounds);
     }
 
     /**

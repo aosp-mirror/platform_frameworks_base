@@ -29,7 +29,7 @@ import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavHostState
 import com.android.credentialmanager.CredentialSelectorUiState
-import com.android.credentialmanager.CredentialSelectorUiState.Get.SingleEntryPerAccount
+import com.android.credentialmanager.CredentialSelectorUiState.Get.MultipleEntryPrimaryScreen
 import com.android.credentialmanager.CredentialSelectorUiState.Get.SingleEntry
 import com.android.credentialmanager.CredentialSelectorUiState.Get.MultipleEntry
 import com.android.credentialmanager.FlowEngine
@@ -95,7 +95,7 @@ fun WearApp(
 
         scrollable(Screen.MultipleCredentialsScreenFold.route) {
             MultiCredentialsFoldScreen(
-                credentialSelectorUiState = (remember { uiState } as SingleEntryPerAccount),
+                credentialSelectorUiState = (remember { uiState } as MultipleEntryPrimaryScreen),
                 columnState = it.columnState,
                 flowEngine = flowEngine,
             )
@@ -124,7 +124,6 @@ fun WearApp(
                 handleGetNavigation(
                     navController = navController,
                     state = state,
-                    onCloseApp = onCloseApp,
                     selectEntry = selectEntry
                 )
             }
@@ -147,7 +146,6 @@ fun WearApp(
 private fun handleGetNavigation(
     navController: NavController,
     state: CredentialSelectorUiState.Get,
-    onCloseApp: () -> Unit,
     selectEntry: (entry: EntryInfo, isAutoSelected: Boolean) -> Unit,
 ) {
     when (state) {
@@ -169,7 +167,7 @@ private fun handleGetNavigation(
             }
         }
 
-            is SingleEntryPerAccount -> {
+            is MultipleEntryPrimaryScreen -> {
                 navController.navigateToMultipleCredentialsFoldScreen()
             }
 

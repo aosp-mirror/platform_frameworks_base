@@ -678,6 +678,8 @@
     <string name="turn_on_bluetooth">Use Bluetooth</string>
     <!-- QuickSettings: Bluetooth dialog device connected default summary [CHAR LIMIT=NONE]-->
     <string name="quick_settings_bluetooth_device_connected">Connected</string>
+    <!-- QuickSettings: Bluetooth dialog device in audio sharing default summary [CHAR LIMIT=50]-->
+    <string name="quick_settings_bluetooth_device_audio_sharing">Audio Sharing</string>
     <!-- QuickSettings: Bluetooth dialog device saved default summary [CHAR LIMIT=NONE]-->
     <string name="quick_settings_bluetooth_device_saved">Saved</string>
     <!-- QuickSettings: Accessibility label to disconnect a device [CHAR LIMIT=NONE]-->
@@ -687,9 +689,13 @@
     <!-- QuickSettings: Bluetooth auto on tomorrow [CHAR LIMIT=NONE]-->
     <string name="turn_on_bluetooth_auto_tomorrow">Automatically turn on again tomorrow</string>
     <!-- QuickSettings: Bluetooth auto on info text when disabled [CHAR LIMIT=NONE]-->
-    <string name="turn_on_bluetooth_auto_info_disabled">Features like Quick Share, Find My Device, and device location use Bluetooth</string>
+    <string name="turn_on_bluetooth_auto_info_disabled">Features like Quick Share and Find My Device use Bluetooth</string>
     <!-- QuickSettings: Bluetooth auto on info text when enabled [CHAR LIMIT=NONE]-->
-    <string name="turn_on_bluetooth_auto_info_enabled">Bluetooth will turn on tomorrow at 5 AM</string>
+    <string name="turn_on_bluetooth_auto_info_enabled">Bluetooth will turn on tomorrow morning</string>
+    <!-- QuickSettings: Bluetooth dialog audio sharing button text [CHAR LIMIT=50]-->
+    <string name="quick_settings_bluetooth_audio_sharing_button">Audio Sharing</string>
+    <!-- QuickSettings: Bluetooth dialog audio sharing button text when sharing audio [CHAR LIMIT=50]-->
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing">Sharing Audio</string>
 
     <!-- QuickSettings: Bluetooth secondary label for the battery level of a connected device [CHAR LIMIT=20]-->
     <string name="quick_settings_bluetooth_secondary_label_battery_level"><xliff:g id="battery_level_as_percentage">%s</xliff:g> battery</string>

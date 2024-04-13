@@ -69,10 +69,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.UserHandle;
-import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
@@ -144,8 +143,7 @@ public class AccessibilityManagerServiceTest {
             ApplicationProvider.getApplicationContext());
 
     @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            DeviceFlagsValueProvider.createCheckFlagsRule();
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private static final int ACTION_ID = 20;
     private static final String LABEL = "label";
@@ -624,7 +622,7 @@ public class AccessibilityManagerServiceTest {
 
     @SmallTest
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
+    @EnableFlags(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
     public void testOnClientChange_magnificationTwoFingerTripleTapEnabled_requestConnection() {
         when(mProxyManager.canRetrieveInteractiveWindowsLocked()).thenReturn(false);
 
@@ -642,7 +640,7 @@ public class AccessibilityManagerServiceTest {
 
     @SmallTest
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
+    @EnableFlags(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
     public void testOnClientChange_magnificationTwoFingerTripleTapDisabled_requestDisconnection() {
         when(mProxyManager.canRetrieveInteractiveWindowsLocked()).thenReturn(false);
 
@@ -704,7 +702,7 @@ public class AccessibilityManagerServiceTest {
 
     @SmallTest
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
+    @EnableFlags(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
     public void onClientChange_magnificationTwoFingerTripleTapDisabled_removeMagnificationButton() {
         final AccessibilityUserState userState = mA11yms.mUserStates.get(
                 mA11yms.getCurrentUserIdLocked());
@@ -720,7 +718,7 @@ public class AccessibilityManagerServiceTest {
 
     @SmallTest
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
+    @EnableFlags(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
     public void onClientChange_magnificationTwoFingerTripleTapEnabled_keepMagnificationButton() {
         final AccessibilityUserState userState = mA11yms.mUserStates.get(
                 mA11yms.getCurrentUserIdLocked());
@@ -772,7 +770,7 @@ public class AccessibilityManagerServiceTest {
 
     @SmallTest
     @Test
-    @RequiresFlagsDisabled(com.android.systemui.Flags.FLAG_HEARING_AIDS_QS_TILE_DIALOG)
+    @DisableFlags(com.android.systemui.Flags.FLAG_HEARING_AIDS_QS_TILE_DIALOG)
     public void testPerformAccessibilityShortcut_hearingAids_startActivityWithExpectedComponent() {
         final AccessibilityUserState userState = mA11yms.mUserStates.get(
                 mA11yms.getCurrentUserIdLocked());
@@ -790,7 +788,7 @@ public class AccessibilityManagerServiceTest {
 
     @SmallTest
     @Test
-    @RequiresFlagsEnabled(com.android.systemui.Flags.FLAG_HEARING_AIDS_QS_TILE_DIALOG)
+    @EnableFlags(com.android.systemui.Flags.FLAG_HEARING_AIDS_QS_TILE_DIALOG)
     public void testPerformAccessibilityShortcut_hearingAids_sendExpectedBroadcast() {
         final AccessibilityUserState userState = mA11yms.mUserStates.get(
                 mA11yms.getCurrentUserIdLocked());
@@ -949,7 +947,7 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_SKIP_ACCESSIBILITY_WARNING_DIALOG_FOR_TRUSTED_SERVICES)
+    @EnableFlags(FLAG_SKIP_ACCESSIBILITY_WARNING_DIALOG_FOR_TRUSTED_SERVICES)
     public void testIsAccessibilityServiceWarningRequired_notRequiredIfAllowlisted() {
         mockManageAccessibilityGranted(mTestableContext);
         final AccessibilityServiceInfo info_a = mockAccessibilityServiceInfo(
@@ -1005,6 +1003,33 @@ public class AccessibilityManagerServiceTest {
         assertThat(ShortcutUtils.isComponentIdExistingInSettings(
                 mTestableContext, UserShortcutType.SOFTWARE, target
         )).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_HARDWARE_SHORTCUT_DISABLES_WARNING)
+    public void enableHardwareShortcutsForTargets_shortcutDialogSetting_isShown() {
+        Settings.Secure.putInt(
+                mTestableContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
+                AccessibilityShortcutController.DialogStatus.NOT_SHOWN
+        );
+
+        mockManageAccessibilityGranted(mTestableContext);
+        setupShortcutTargetServices();
+        String target = TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString();
+
+        mA11yms.enableShortcutsForTargets(
+                /* enable= */ true,
+                UserShortcutType.HARDWARE,
+                List.of(target),
+                mA11yms.getCurrentUserIdLocked());
+        mTestableLooper.processAllMessages();
+
+        assertThat(Settings.Secure.getInt(
+                mTestableContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
+                AccessibilityShortcutController.DialogStatus.NOT_SHOWN))
+                .isEqualTo(AccessibilityShortcutController.DialogStatus.SHOWN);
     }
 
     @Test
@@ -1341,7 +1366,7 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
+    @EnableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
     public void notifyQuickSettingsTilesChanged_statusBarServiceNotGranted_throwsException() {
         mTestableContext.getTestablePermissions().setPermission(
                 Manifest.permission.STATUS_BAR_SERVICE, PackageManager.PERMISSION_DENIED);
@@ -1355,7 +1380,7 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
+    @EnableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
     public void notifyQuickSettingsTilesChanged_manageAccessibilityNotGranted_throwsException() {
         mockStatusBarServiceGranted(mTestableContext);
         mTestableContext.getTestablePermissions().setPermission(
@@ -1369,7 +1394,7 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
+    @EnableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
     public void notifyQuickSettingsTilesChanged_qsTileChanges_updateA11yTilesInQsPanel() {
         mockStatusBarServiceGranted(mTestableContext);
         mockManageAccessibilityGranted(mTestableContext);
@@ -1389,7 +1414,7 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
+    @EnableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
     public void notifyQuickSettingsTilesChanged_sameQsTiles_noUpdateToA11yTilesInQsPanel() {
         notifyQuickSettingsTilesChanged_qsTileChanges_updateA11yTilesInQsPanel();
         List<ComponentName> tiles =
@@ -1406,7 +1431,7 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
+    @EnableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
     public void notifyQuickSettingsTilesChanged_serviceWarningRequired_qsShortcutRemainDisabled() {
         mockStatusBarServiceGranted(mTestableContext);
         mockManageAccessibilityGranted(mTestableContext);
@@ -1424,7 +1449,7 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
+    @EnableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
     public void notifyQuickSettingsTilesChanged_serviceWarningNotRequired_qsShortcutEnabled() {
         mockStatusBarServiceGranted(mTestableContext);
         mockManageAccessibilityGranted(mTestableContext);
@@ -1446,7 +1471,7 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
+    @EnableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
     public void notifyQuickSettingsTilesChanged_addFrameworkTile_qsShortcutEnabled() {
         mockStatusBarServiceGranted(mTestableContext);
         mockManageAccessibilityGranted(mTestableContext);
@@ -1469,7 +1494,7 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
+    @EnableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
     public void notifyQuickSettingsTilesChanged_removeFrameworkTile_qsShortcutDisabled() {
         notifyQuickSettingsTilesChanged_addFrameworkTile_qsShortcutEnabled();
         Set<ComponentName> qsTiles = mA11yms.getCurrentUserState().getA11yQsTilesInQsPanel();
@@ -1487,7 +1512,7 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
+    @EnableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
     public void restoreAccessibilityQsTargets_a11yQsTargetsRestored() {
         String daltonizerTile =
                 AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME.flattenToString();
@@ -1510,7 +1535,7 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsDisabled(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
+    @DisableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
     public void restoreAccessibilityQsTargets_a11yQsTargetsNotRestored() {
         String daltonizerTile =
                 AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME.flattenToString();

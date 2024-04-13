@@ -28,6 +28,7 @@ import com.android.systemui.media.dagger.MediaModule;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.ReduceBrightColorsController;
+import com.android.systemui.qs.ReduceBrightColorsControllerImpl;
 import com.android.systemui.qs.external.QSExternalModule;
 import com.android.systemui.qs.panels.dagger.PanelsModule;
 import com.android.systemui.qs.pipeline.dagger.QSPipelineModule;
@@ -118,4 +119,11 @@ public interface QSModule {
 
     @Binds
     QSSceneAdapter bindsQsSceneInteractor(QSSceneAdapterImpl impl);
+
+    /**
+     * Dims the screen
+     */
+    @Binds
+    ReduceBrightColorsController bindReduceBrightColorsController(
+            ReduceBrightColorsControllerImpl impl);
 }

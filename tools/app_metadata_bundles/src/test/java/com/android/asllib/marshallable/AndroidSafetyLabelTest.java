@@ -22,7 +22,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.w3c.dom.Document;
 
 @RunWith(JUnit4.class)
 public class AndroidSafetyLabelTest {
@@ -38,12 +37,9 @@ public class AndroidSafetyLabelTest {
             "with-system-app-safety-label.xml";
     private static final String WITH_TRANSPARENCY_INFO_FILE_NAME = "with-transparency-info.xml";
 
-    private Document mDoc = null;
-
     @Before
     public void setUp() throws Exception {
         System.out.println("set up.");
-        mDoc = TestUtils.document();
     }
 
     /** Test for android safety label missing version. */
@@ -51,6 +47,7 @@ public class AndroidSafetyLabelTest {
     public void testAndroidSafetyLabelMissingVersion() throws Exception {
         System.out.println("starting testAndroidSafetyLabelMissingVersion.");
         hrToOdExpectException(MISSING_VERSION_FILE_NAME);
+        odToHrExpectException(MISSING_VERSION_FILE_NAME);
     }
 
     /** Test for android safety label valid empty. */
@@ -58,6 +55,7 @@ public class AndroidSafetyLabelTest {
     public void testAndroidSafetyLabelValidEmptyFile() throws Exception {
         System.out.println("starting testAndroidSafetyLabelValidEmptyFile.");
         testHrToOdAndroidSafetyLabel(VALID_EMPTY_FILE_NAME);
+        testOdToHrAndroidSafetyLabel(VALID_EMPTY_FILE_NAME);
     }
 
     /** Test for android safety label with safety labels. */
@@ -65,6 +63,7 @@ public class AndroidSafetyLabelTest {
     public void testAndroidSafetyLabelWithSafetyLabels() throws Exception {
         System.out.println("starting testAndroidSafetyLabelWithSafetyLabels.");
         testHrToOdAndroidSafetyLabel(WITH_SAFETY_LABELS_FILE_NAME);
+        testOdToHrAndroidSafetyLabel(WITH_SAFETY_LABELS_FILE_NAME);
     }
 
     /** Test for android safety label with system app safety label. */
@@ -72,6 +71,7 @@ public class AndroidSafetyLabelTest {
     public void testAndroidSafetyLabelWithSystemAppSafetyLabel() throws Exception {
         System.out.println("starting testAndroidSafetyLabelWithSystemAppSafetyLabel.");
         testHrToOdAndroidSafetyLabel(WITH_SYSTEM_APP_SAFETY_LABEL_FILE_NAME);
+        testOdToHrAndroidSafetyLabel(WITH_SYSTEM_APP_SAFETY_LABEL_FILE_NAME);
     }
 
     /** Test for android safety label with transparency info. */
@@ -79,6 +79,7 @@ public class AndroidSafetyLabelTest {
     public void testAndroidSafetyLabelWithTransparencyInfo() throws Exception {
         System.out.println("starting testAndroidSafetyLabelWithTransparencyInfo.");
         testHrToOdAndroidSafetyLabel(WITH_TRANSPARENCY_INFO_FILE_NAME);
+        testOdToHrAndroidSafetyLabel(WITH_TRANSPARENCY_INFO_FILE_NAME);
     }
 
     private void hrToOdExpectException(String fileName) {
@@ -86,12 +87,26 @@ public class AndroidSafetyLabelTest {
                 new AndroidSafetyLabelFactory(), ANDROID_SAFETY_LABEL_HR_PATH, fileName);
     }
 
+    private void odToHrExpectException(String fileName) {
+        TestUtils.odToHrExpectException(
+                new AndroidSafetyLabelFactory(), ANDROID_SAFETY_LABEL_OD_PATH, fileName);
+    }
+
     private void testHrToOdAndroidSafetyLabel(String fileName) throws Exception {
         TestUtils.testHrToOd(
-                mDoc,
+                TestUtils.document(),
                 new AndroidSafetyLabelFactory(),
                 ANDROID_SAFETY_LABEL_HR_PATH,
                 ANDROID_SAFETY_LABEL_OD_PATH,
+                fileName);
+    }
+
+    private void testOdToHrAndroidSafetyLabel(String fileName) throws Exception {
+        TestUtils.testOdToHr(
+                TestUtils.document(),
+                new AndroidSafetyLabelFactory(),
+                ANDROID_SAFETY_LABEL_OD_PATH,
+                ANDROID_SAFETY_LABEL_HR_PATH,
                 fileName);
     }
 }

@@ -16,6 +16,7 @@ android_app {
     platform_apis: true,
     certificate: "platform",
     libs: ["org.apache.http.legacy"],
+    optional_uses_libs: ["org.apache.http.legacy"],
     optimize: {
         enabled: false,
     },

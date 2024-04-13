@@ -36,8 +36,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
-            android:focusable="true"
-            android:accessibilityTraversalBefore="@android:id/edit"
+            android:focusable="false"
+            android:importantForAccessibility="yes"
             android:clipToPadding="false"
             android:clipChildren="false">
 

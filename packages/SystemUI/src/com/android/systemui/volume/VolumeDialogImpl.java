@@ -137,12 +137,12 @@ import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.volume.domain.interactor.VolumePanelNavigationInteractor;
 import com.android.systemui.volume.ui.navigation.VolumeNavigator;
 
-import dagger.Lazy;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+
+import dagger.Lazy;
 
 /**
  * Visual presentation of the volume dialog.
@@ -166,6 +166,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
 
     private static final int DRAWER_ANIMATION_DURATION_SHORT = 175;
     private static final int DRAWER_ANIMATION_DURATION = 250;
+    private static final int DISPLAY_RANGE_MULTIPLIER = 100;
 
     /** Shows volume dialog show animation. */
     private static final String TYPE_SHOW = "show";
@@ -826,12 +827,14 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         writer.print("  mSilentMode: "); writer.println(mSilentMode);
     }
 
-    private static int getImpliedLevel(SeekBar seekBar, int progress) {
-        final int m = seekBar.getMax();
-        final int n = m / 100 - 1;
-        final int level = progress == 0 ? 0
-                : progress == m ? (m / 100) : (1 + (int) ((progress / (float) m) * n));
-        return level;
+    private static int getVolumeFromProgress(StreamState state, SeekBar seekBar, int progress) {
+        return (int) Util.translateToRange(progress, seekBar.getMin(), seekBar.getMax(),
+                state.levelMin, state.levelMax);
+    }
+
+    private static int getProgressFromVolume(StreamState state, SeekBar seekBar, int volume) {
+        return (int) Util.translateToRange(volume, state.levelMin, state.levelMax, seekBar.getMin(),
+                seekBar.getMax());
     }
 
     @SuppressLint("InflateParams")
@@ -854,6 +857,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         addSliderHapticsToRow(row);
         row.slider.setOnSeekBarChangeListener(new VolumeSeekBarChangeListener(row));
         row.number = row.view.findViewById(R.id.volume_number);
+        row.slider.setAccessibilityDelegate(
+                new VolumeDialogSeekBarAccessibilityDelegate(DISPLAY_RANGE_MULTIPLIER));
 
         row.anim = null;
 
@@ -1916,12 +1921,12 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 : false;
 
         // update slider max
-        final int max = ss.levelMax * 100;
+        final int max = ss.levelMax * DISPLAY_RANGE_MULTIPLIER;
         if (max != row.slider.getMax()) {
             row.slider.setMax(max);
         }
         // update slider min
-        final int min = ss.levelMin * 100;
+        final int min = ss.levelMin * DISPLAY_RANGE_MULTIPLIER;
         if (min != row.slider.getMin()) {
             row.slider.setMin(min);
         }
@@ -2069,7 +2074,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             return;  // don't update if user is sliding
         }
         final int progress = row.slider.getProgress();
-        final int level = getImpliedLevel(row.slider, progress);
+        final int level = getVolumeFromProgress(row.ss, row.slider, progress);
         final boolean rowVisible = row.view.getVisibility() == VISIBLE;
         final boolean inGracePeriod = (SystemClock.uptimeMillis() - row.userAttempt)
                 < USER_ATTEMPT_GRACE_PERIOD;
@@ -2085,7 +2090,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 return;  // don't clamp if visible
             }
         }
-        final int newProgress = vlevel * 100;
+        final int newProgress = getProgressFromVolume(row.ss, row.slider, vlevel);
         if (progress != newProgress) {
             if (mShowing && rowVisible) {
                 // animate!
@@ -2530,13 +2535,13 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                     + " onProgressChanged " + progress + " fromUser=" + fromUser);
             if (!fromUser) return;
             if (mRow.ss.levelMin > 0) {
-                final int minProgress = mRow.ss.levelMin * 100;
+                final int minProgress = getProgressFromVolume(mRow.ss, seekBar, mRow.ss.levelMin);
                 if (progress < minProgress) {
                     seekBar.setProgress(minProgress);
                     progress = minProgress;
                 }
             }
-            final int userLevel = getImpliedLevel(seekBar, progress);
+            final int userLevel = getVolumeFromProgress(mRow.ss, seekBar, progress);
             if (mRow.ss.level != userLevel || mRow.ss.muted && userLevel > 0) {
                 mRow.userAttempt = SystemClock.uptimeMillis();
                 if (mRow.requestedLevel != userLevel) {
@@ -2569,7 +2574,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             }
             mRow.tracking = false;
             mRow.userAttempt = SystemClock.uptimeMillis();
-            final int userLevel = getImpliedLevel(seekBar, seekBar.getProgress());
+            final int userLevel = getVolumeFromProgress(mRow.ss, seekBar, seekBar.getProgress());
             Events.writeEvent(Events.EVENT_TOUCH_LEVEL_DONE, mRow.stream, userLevel);
             if (mRow.ss.level != userLevel) {
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(H.RECHECK, mRow),

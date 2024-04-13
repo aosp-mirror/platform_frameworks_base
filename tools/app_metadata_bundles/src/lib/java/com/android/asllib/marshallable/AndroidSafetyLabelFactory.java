@@ -56,10 +56,32 @@ public class AndroidSafetyLabelFactory implements AslMarshallableFactory<Android
                 version, systemAppSafetyLabel, safetyLabels, transparencyInfo);
     }
 
-    /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
+    /** Creates an {@link AndroidSafetyLabel} from on-device DOM elements */
     @Override
     public AndroidSafetyLabel createFromOdElements(List<Element> elements)
             throws MalformedXmlException {
-        return null;
+        Element bundleEle = XmlUtils.getSingleElement(elements);
+        Long version = XmlUtils.getOdLongEle(bundleEle, XmlUtils.OD_NAME_VERSION, true);
+
+        Element safetyLabelsEle =
+                XmlUtils.getOdPbundleWithName(bundleEle, XmlUtils.OD_NAME_SAFETY_LABELS, false);
+        SafetyLabels safetyLabels =
+                new SafetyLabelsFactory().createFromOdElements(XmlUtils.listOf(safetyLabelsEle));
+
+        Element systemAppSafetyLabelEle =
+                XmlUtils.getOdPbundleWithName(
+                        bundleEle, XmlUtils.OD_NAME_SYSTEM_APP_SAFETY_LABEL, false);
+        SystemAppSafetyLabel systemAppSafetyLabel =
+                new SystemAppSafetyLabelFactory()
+                        .createFromOdElements(XmlUtils.listOf(systemAppSafetyLabelEle));
+
+        Element transparencyInfoEle =
+                XmlUtils.getOdPbundleWithName(bundleEle, XmlUtils.OD_NAME_TRANSPARENCY_INFO, false);
+        TransparencyInfo transparencyInfo =
+                new TransparencyInfoFactory()
+                        .createFromOdElements(XmlUtils.listOf(transparencyInfoEle));
+
+        return new AndroidSafetyLabel(
+                version, systemAppSafetyLabel, safetyLabels, transparencyInfo);
     }
 }

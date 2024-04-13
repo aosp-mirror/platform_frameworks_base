@@ -1458,14 +1458,10 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
         @Override
         public IBinder getBinderForSetQueue() throws RemoteException {
             return new ParcelableListBinder<QueueItem>(
+                    QueueItem.class,
                     (list) -> {
-                        // Checking list items are instanceof QueueItem to validate against
-                        // malicious apps calling it directly via reflection with non compilable
-                        // items. See b/317048338 for more details
-                        List<QueueItem> sanitizedQueue =
-                                list.stream().filter(it -> it instanceof QueueItem).toList();
                         synchronized (mLock) {
-                            mQueue = sanitizedQueue;
+                            mQueue = list;
                         }
                         mHandler.post(MessageHandler.MSG_UPDATE_QUEUE);
                     });

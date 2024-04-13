@@ -244,6 +244,10 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * {@link android.app.admin.DevicePolicyManager#isProfileOwnerApp}. You will generally handle
      * this in {@link DeviceAdminReceiver#onProfileProvisioningComplete}.
      *
+     * <p>The intent for this action may include the following extras:
+     * <ul>
+     *     <li>{@link DevicePolicyManager#EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}
+     *
      * @see DevicePolicyManager#ACTION_PROVISIONING_SUCCESSFUL
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
@@ -800,6 +804,9 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * completed, along with this callback the activity intent
      * {@link DevicePolicyManager#ACTION_PROVISIONING_SUCCESSFUL} will also be sent to the same
      * application.
+     *
+     * <p>The {@code Intent} may include any of the extras specified for
+     * {@link #ACTION_PROFILE_PROVISIONING_COMPLETE}.
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.

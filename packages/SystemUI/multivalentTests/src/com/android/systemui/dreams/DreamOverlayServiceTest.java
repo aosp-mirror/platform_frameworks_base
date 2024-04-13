@@ -50,11 +50,12 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.ambient.touch.TouchMonitor;
+import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent;
 import com.android.systemui.complication.ComplicationLayoutEngine;
 import com.android.systemui.dreams.complication.HideComplicationTouchHandler;
 import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
-import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
 import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -127,6 +128,12 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     DreamOverlayComponent mDreamOverlayComponent;
 
     @Mock
+    AmbientTouchComponent.Factory mAmbientTouchComponentFactory;
+
+    @Mock
+    AmbientTouchComponent mAmbientTouchComponent;
+
+    @Mock
     DreamOverlayContainerView mDreamOverlayContainerView;
 
     @Mock
@@ -136,7 +143,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     @Mock
-    DreamOverlayTouchMonitor mDreamOverlayTouchMonitor;
+    TouchMonitor mTouchMonitor;
 
     @Mock
     DreamOverlayStateController mStateController;
@@ -166,8 +173,6 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 .thenReturn(mDreamOverlayContainerViewController);
         when(mLifecycleOwner.getRegistry())
                 .thenReturn(mLifecycleRegistry);
-        when(mDreamOverlayComponent.getDreamOverlayTouchMonitor())
-                .thenReturn(mDreamOverlayTouchMonitor);
         when(mComplicationComponentFactory
                 .create(any(), any(), any(), any()))
                 .thenReturn(mComplicationComponent);
@@ -179,8 +184,11 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 .create(any(), any()))
                 .thenReturn(mDreamComplicationComponent);
         when(mDreamOverlayComponentFactory
-                .create(any(), any(), any(), any()))
+                .create(any(), any(), any()))
                 .thenReturn(mDreamOverlayComponent);
+        when(mAmbientTouchComponentFactory.create(any(), any())).thenReturn(mAmbientTouchComponent);
+        when(mAmbientTouchComponent.getTouchMonitor())
+                .thenReturn(mTouchMonitor);
         when(mDreamOverlayContainerViewController.getContainerView())
                 .thenReturn(mDreamOverlayContainerView);
 
@@ -193,6 +201,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 mComplicationComponentFactory,
                 mDreamComplicationComponentFactory,
                 mDreamOverlayComponentFactory,
+                mAmbientTouchComponentFactory,
                 mStateController,
                 mKeyguardUpdateMonitor,
                 mUiEventLogger,
@@ -486,6 +495,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         assertThat(mService.shouldShowComplications()).isFalse();
 
         clearInvocations(mDreamOverlayComponent);
+        clearInvocations(mAmbientTouchComponent);
         clearInvocations(mWindowManager);
 
         // New dream starting with dream complications showing. Note that when a new dream is
@@ -505,7 +515,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         // Verify that new instances of overlay container view controller and overlay touch monitor
         // are created.
         verify(mDreamOverlayComponent).getDreamOverlayContainerViewController();
-        verify(mDreamOverlayComponent).getDreamOverlayTouchMonitor();
+        verify(mAmbientTouchComponent).getTouchMonitor();
     }
 
     @Test

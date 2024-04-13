@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.back;
 
-import static android.window.BackNavigationInfo.KEY_TRIGGER_BACK;
+import static android.window.BackNavigationInfo.KEY_NAVIGATION_FINISHED;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -596,6 +596,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
 
         // Set up the monitoring objects.
         doNothing().when(runner).onAnimationStart(anyInt(), any(), any(), any(), any());
+        doReturn(false).when(animationRunner).shouldMonitorCUJ(any());
         doReturn(runner).when(animationRunner).getRunner();
         doReturn(callback).when(animationRunner).getCallback();
 
@@ -677,7 +678,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         @Override
         public void onResult(@Nullable Bundle result) {
             mBackNavigationDone = true;
-            mTriggerBack = result.getBoolean(KEY_TRIGGER_BACK);
+            mTriggerBack = result.getBoolean(KEY_NAVIGATION_FINISHED);
         }
     }
 }

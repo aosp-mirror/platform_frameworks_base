@@ -44,6 +44,9 @@ interface MobileConnectionRepository {
     /** The carrierId for this connection. See [TelephonyManager.getSimCarrierId] */
     val carrierId: StateFlow<Int>
 
+    /** Reflects the value from the carrier config INFLATE_SIGNAL_STRENGTH for this connection */
+    val inflateSignalStrength: StateFlow<Boolean>
+
     /**
      * The table log buffer created for this connection. Will have the name "MobileConnectionLog
      * [subId]"
@@ -140,9 +143,6 @@ interface MobileConnectionRepository {
      * network slice
      */
     val hasPrioritizedNetworkCapabilities: StateFlow<Boolean>
-
-    /** Duration in seconds of the hysteresis to use when losing satellite connection. */
-    val satelliteConnectionHysteresisSeconds: StateFlow<Int>
 
     /**
      * True if this connection is in emergency callback mode.

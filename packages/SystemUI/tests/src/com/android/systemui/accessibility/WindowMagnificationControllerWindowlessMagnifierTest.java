@@ -46,6 +46,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
@@ -459,6 +460,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
         final float targetCenterX = sourceBoundsCaptor.getValue().exactCenterX() + 10;
         final float targetCenterY = sourceBoundsCaptor.getValue().exactCenterY() + 10;
 
+        reset(mWindowMagnifierCallback);
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.moveWindowMagnifierToPosition(
                     targetCenterX, targetCenterY, mAnimationCallback);
@@ -491,6 +493,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
         final float centerX = sourceBoundsCaptor.getValue().exactCenterX();
         final float centerY = sourceBoundsCaptor.getValue().exactCenterY();
 
+        reset(mWindowMagnifierCallback);
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.moveWindowMagnifierToPosition(
                     centerX + 10, centerY + 10, mAnimationCallback);

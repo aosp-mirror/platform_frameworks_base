@@ -32,6 +32,16 @@ flag {
 }
 
 flag {
+    name: "floating_menu_narrow_target_content_observer"
+    namespace: "accessibility"
+    description: "stops the FAB from monitoring enabled services to trigger target content changes."
+    bug: "331740049"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "floating_menu_overlaps_nav_bars_flag"
     namespace: "accessibility"
     description: "Adjusts bounds to allow the floating menu to render on top of navigation bars."

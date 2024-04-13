@@ -407,15 +407,16 @@ private fun ShadeCarrierGroup(
             AndroidView(
                 factory = { context ->
                     ModernShadeCarrierGroupMobileView.constructAndBind(
-                        context = context,
-                        logger = viewModel.mobileIconsViewModel.logger,
-                        slot = "mobile_carrier_shade_group",
-                        viewModel =
-                            (viewModel.mobileIconsViewModel.viewModelForSub(
-                                subId,
-                                StatusBarLocation.SHADE_CARRIER_GROUP
-                            ) as ShadeCarrierGroupMobileIconViewModel),
-                    )
+                            context = context,
+                            logger = viewModel.mobileIconsViewModel.logger,
+                            slot = "mobile_carrier_shade_group",
+                            viewModel =
+                                (viewModel.mobileIconsViewModel.viewModelForSub(
+                                    subId,
+                                    StatusBarLocation.SHADE_CARRIER_GROUP
+                                ) as ShadeCarrierGroupMobileIconViewModel),
+                        )
+                        .also { it.setOnClickListener { viewModel.onShadeCarrierGroupClicked() } }
                 },
             )
         }

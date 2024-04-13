@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static com.android.internal.R.integer.config_defaultMinEmergencyGestureTapDurationMillis;
+
 import android.app.ActivityManager;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
@@ -70,12 +72,6 @@ public class GestureLauncherService extends SystemService {
      */
     @VisibleForTesting static final long CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS = 300;
 
-    /**
-     * Min time in milliseconds to complete the emergency gesture for it count. If the gesture is
-     * completed faster than this, we assume it's not performed by human and the
-     * event gets ignored.
-     */
-    @VisibleForTesting static final int EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS = 200;
 
     /**
      * Interval in milliseconds in which the power button must be depressed in succession to be
@@ -570,7 +566,8 @@ public class GestureLauncherService extends SystemService {
                     long emergencyGestureTapDetectionMinTimeMs = Settings.Global.getInt(
                             mContext.getContentResolver(),
                             Settings.Global.EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS,
-                            EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS);
+                            mContext.getResources().getInteger(
+                                    config_defaultMinEmergencyGestureTapDurationMillis));
                     if (emergencyGestureSpentTime <= emergencyGestureTapDetectionMinTimeMs) {
                         Slog.i(TAG, "Emergency gesture detected but it's too fast. Gesture time: "
                                 + emergencyGestureSpentTime + " ms");

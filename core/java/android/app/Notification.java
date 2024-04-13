@@ -2583,6 +2583,7 @@ public class Notification implements Parcelable
         this.when = System.currentTimeMillis();
         if (updateRankingTime()) {
             creationTime = when;
+            extras.putBoolean(EXTRA_SHOW_WHEN, true);
         } else {
             this.creationTime = System.currentTimeMillis();
         }
@@ -2598,6 +2599,7 @@ public class Notification implements Parcelable
     {
         if (updateRankingTime()) {
             creationTime = when;
+            extras.putBoolean(EXTRA_SHOW_WHEN, true);
         }
         new Builder(context)
                 .setWhen(when)
@@ -2630,6 +2632,7 @@ public class Notification implements Parcelable
         this.when = when;
         if (updateRankingTime()) {
             creationTime = when;
+            extras.putBoolean(EXTRA_SHOW_WHEN, true);
         } else {
             this.creationTime = System.currentTimeMillis();
         }
@@ -4382,14 +4385,16 @@ public class Notification implements Parcelable
         /**
          * Add a timestamp pertaining to the notification (usually the time the event occurred).
          *
-         * For apps targeting {@link android.os.Build.VERSION_CODES#N} and above, this time is not
-         * shown anymore by default and must be opted into by using
-         * {@link android.app.Notification.Builder#setShowWhen(boolean)}
-         *
          * @see Notification#when
          */
         @NonNull
         public Builder setWhen(long when) {
+            if (updateRankingTime()) {
+                // don't show a timestamp that's decades old
+                if (mN.extras.getBoolean(EXTRA_SHOW_WHEN, true) && when == 0) {
+                    return this;
+                }
+            }
             mN.when = when;
             return this;
         }
@@ -4397,8 +4402,6 @@ public class Notification implements Parcelable
         /**
          * Control whether the timestamp set with {@link #setWhen(long) setWhen} is shown
          * in the content view.
-         * For apps targeting {@link android.os.Build.VERSION_CODES#N} and above, this defaults to
-         * {@code false}. For earlier apps, the default is {@code true}.
          */
         @NonNull
         public Builder setShowWhen(boolean show) {

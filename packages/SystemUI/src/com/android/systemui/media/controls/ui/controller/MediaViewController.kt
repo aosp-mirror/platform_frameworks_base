@@ -69,6 +69,7 @@ constructor(
     /** A listener when the current dimensions of the player change */
     lateinit var sizeChangedListener: () -> Unit
     lateinit var configurationChangeListener: () -> Unit
+    lateinit var recsConfigurationChangeListener: (MediaViewController, TransitionLayout) -> Unit
     private var firstRefresh: Boolean = true
     @VisibleForTesting private var transitionLayout: TransitionLayout? = null
     private val layoutController = TransitionLayoutController()
@@ -160,7 +161,17 @@ constructor(
                             )
                         )
                     }
-                    if (this@MediaViewController::configurationChangeListener.isInitialized) {
+                    if (mediaFlags.isMediaControlsRefactorEnabled()) {
+                        if (
+                            this@MediaViewController::recsConfigurationChangeListener.isInitialized
+                        ) {
+                            transitionLayout?.let {
+                                recsConfigurationChangeListener.invoke(this@MediaViewController, it)
+                            }
+                        }
+                    } else if (
+                        this@MediaViewController::configurationChangeListener.isInitialized
+                    ) {
                         configurationChangeListener.invoke()
                         refreshState()
                     }

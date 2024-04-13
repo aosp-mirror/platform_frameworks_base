@@ -135,8 +135,11 @@ class PinBouncerViewModel(
 
         onIntentionalUserInput()
 
-        mutablePinInput.value = pinInput.append(input)
-        tryAuthenticate(useAutoConfirm = true)
+        val maxInputLength = hintedPinLength.value ?: Int.MAX_VALUE
+        if (pinInput.getPin().size < maxInputLength) {
+            mutablePinInput.value = pinInput.append(input)
+            tryAuthenticate(useAutoConfirm = true)
+        }
     }
 
     /** Notifies that the user clicked the backspace button. */

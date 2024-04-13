@@ -226,7 +226,7 @@ class InputController {
         token.unlinkToDeath(inputDeviceDescriptor.getDeathRecipient(), /* flags= */ 0);
         mNativeWrapper.closeUinput(inputDeviceDescriptor.getNativePointer());
         String phys = inputDeviceDescriptor.getPhys();
-        InputManagerGlobal.getInstance().removeUniqueIdAssociation(phys);
+        InputManagerGlobal.getInstance().removeUniqueIdAssociationByDescriptor(phys);
         // Type associations are added in the case of navigation touchpads. Those should be removed
         // once the input device gets closed.
         if (inputDeviceDescriptor.getType() == InputDeviceDescriptor.TYPE_NAVIGATION_TOUCHPAD) {
@@ -319,9 +319,9 @@ class InputController {
         return formatSimple("virtual%s:%d", type, sNextPhysId.getAndIncrement());
     }
 
-    private void setUniqueIdAssociation(int displayId, String phys) {
+    private void setUniqueIdAssociationByPort(int displayId, String phys) {
         final String displayUniqueId = mDisplayManagerInternal.getDisplayInfo(displayId).uniqueId;
-        InputManagerGlobal.getInstance().addUniqueIdAssociation(phys, displayUniqueId);
+        InputManagerGlobal.getInstance().addUniqueIdAssociationByPort(phys, displayUniqueId);
     }
 
     boolean sendDpadKeyEvent(@NonNull IBinder token, @NonNull VirtualKeyEvent event) {
@@ -809,7 +809,7 @@ class InputController {
 
         final int inputDeviceId;
 
-        setUniqueIdAssociation(displayId, phys);
+        setUniqueIdAssociationByPort(displayId, phys);
         try (WaitForDevice waiter = new WaitForDevice(deviceName, vendorId, productId, displayId)) {
             ptr = deviceOpener.get();
             // See INVALID_PTR in libs/input/VirtualInputDevice.cpp.
@@ -835,7 +835,7 @@ class InputController {
                 throw e;
             }
         } catch (DeviceCreationException e) {
-            InputManagerGlobal.getInstance().removeUniqueIdAssociation(phys);
+            InputManagerGlobal.getInstance().removeUniqueIdAssociationByPort(phys);
             throw e;
         }
 

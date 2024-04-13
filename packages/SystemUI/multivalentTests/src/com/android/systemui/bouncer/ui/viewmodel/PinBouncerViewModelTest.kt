@@ -389,6 +389,61 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             assertThat(isAnimationEnabled).isTrue()
         }
 
+    @Test
+    fun onPinButtonClicked_whenInputSameLengthAsHintedPin_ignoresClick() =
+        testScope.runTest {
+            val pin by collectLastValue(underTest.pinInput.map { it.getPin() })
+            kosmos.fakeAuthenticationRepository.setAutoConfirmFeatureEnabled(true)
+            val hintedPinLength by collectLastValue(underTest.hintedPinLength)
+            assertThat(hintedPinLength).isEqualTo(FakeAuthenticationRepository.HINTING_PIN_LENGTH)
+            lockDeviceAndOpenPinBouncer()
+
+            repeat(FakeAuthenticationRepository.HINTING_PIN_LENGTH - 1) { repetition ->
+                underTest.onPinButtonClicked(repetition + 1)
+                runCurrent()
+            }
+            kosmos.fakeAuthenticationRepository.pauseCredentialChecking()
+            // If credential checking were not paused, this would check the credentials and succeed.
+            underTest.onPinButtonClicked(FakeAuthenticationRepository.HINTING_PIN_LENGTH)
+            runCurrent()
+
+            // This one should be ignored because the user has already entered a number of digits
+            // that's equal to the length of the hinting PIN length. It should result in a PIN
+            // that's exactly the same length as the hinting PIN length.
+            underTest.onPinButtonClicked(FakeAuthenticationRepository.HINTING_PIN_LENGTH + 1)
+            runCurrent()
+
+            assertThat(pin)
+                .isEqualTo(
+                    buildList {
+                        repeat(FakeAuthenticationRepository.HINTING_PIN_LENGTH) { index ->
+                            add(index + 1)
+                        }
+                    }
+                )
+
+            kosmos.fakeAuthenticationRepository.unpauseCredentialChecking()
+            runCurrent()
+            assertThat(pin).isEmpty()
+        }
+
+    @Test
+    fun onPinButtonClicked_whenPinNotHinted_doesNotIgnoreClick() =
+        testScope.runTest {
+            val pin by collectLastValue(underTest.pinInput.map { it.getPin() })
+            kosmos.fakeAuthenticationRepository.setAutoConfirmFeatureEnabled(false)
+            val hintedPinLength by collectLastValue(underTest.hintedPinLength)
+            assertThat(hintedPinLength).isNull()
+            lockDeviceAndOpenPinBouncer()
+
+            repeat(FakeAuthenticationRepository.HINTING_PIN_LENGTH + 1) { repetition ->
+                underTest.onPinButtonClicked(repetition + 1)
+                runCurrent()
+            }
+
+            assertThat(pin).hasSize(FakeAuthenticationRepository.HINTING_PIN_LENGTH + 1)
+        }
+
     private fun TestScope.switchToScene(toScene: SceneKey) {
         val currentScene by collectLastValue(sceneInteractor.currentScene)
         val bouncerHidden = currentScene == Scenes.Bouncer && toScene != Scenes.Bouncer

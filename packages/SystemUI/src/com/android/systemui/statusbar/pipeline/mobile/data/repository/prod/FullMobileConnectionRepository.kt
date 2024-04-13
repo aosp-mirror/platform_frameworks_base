@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 
+import android.util.IndentingPrintWriter
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.table.TableLogBuffer
@@ -24,6 +25,7 @@ import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
+import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -291,6 +293,21 @@ class FullMobileConnectionRepository(
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.dataEnabled.value)
 
+    override val inflateSignalStrength =
+        activeRepo
+            .flatMapLatest { it.inflateSignalStrength }
+            .logDiffsForTable(
+                tableLogBuffer,
+                columnPrefix = "",
+                columnName = "inflate",
+                initialValue = activeRepo.value.inflateSignalStrength.value,
+            )
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                activeRepo.value.inflateSignalStrength.value
+            )
+
     override val numberOfLevels =
         activeRepo
             .flatMapLatest { it.numberOfLevels }
@@ -334,16 +351,28 @@ class FullMobileConnectionRepository(
                 activeRepo.value.hasPrioritizedNetworkCapabilities.value,
             )
 
-    override val satelliteConnectionHysteresisSeconds =
-        activeRepo
-            .flatMapLatest { it.satelliteConnectionHysteresisSeconds }
-            .stateIn(
-                scope,
-                SharingStarted.WhileSubscribed(),
-                activeRepo.value.satelliteConnectionHysteresisSeconds.value
-            )
-
     override suspend fun isInEcmMode(): Boolean = activeRepo.value.isInEcmMode()
+
+    fun dump(pw: PrintWriter) {
+        val ipw = IndentingPrintWriter(pw, "  ")
+
+        ipw.println("MobileConnectionRepository[$subId]")
+        ipw.increaseIndent()
+
+        ipw.println("carrierMerged=${_isCarrierMerged.value}")
+
+        ipw.print("Type (cellular or carrier merged): ")
+        when (activeRepo.value) {
+            is CarrierMergedConnectionRepository -> ipw.println("Carrier merged")
+            is MobileConnectionRepositoryImpl -> ipw.println("Cellular")
+        }
+
+        ipw.increaseIndent()
+        ipw.println("Provider: ${activeRepo.value}")
+        ipw.decreaseIndent()
+
+        ipw.decreaseIndent()
+    }
 
     class Factory
     @Inject

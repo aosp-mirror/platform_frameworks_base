@@ -22,7 +22,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.w3c.dom.Document;
 
 @RunWith(JUnit4.class)
 public class SafetyLabelsTest {
@@ -36,12 +35,9 @@ public class SafetyLabelsTest {
     private static final String WITH_THIRD_PARTY_VERIFICATION_FILE_NAME =
             "with-third-party-verification.xml";
 
-    private Document mDoc = null;
-
     @Before
     public void setUp() throws Exception {
         System.out.println("set up.");
-        mDoc = TestUtils.document();
     }
 
     /** Test for safety labels missing version. */
@@ -49,6 +45,7 @@ public class SafetyLabelsTest {
     public void testSafetyLabelsMissingVersion() throws Exception {
         System.out.println("starting testSafetyLabelsMissingVersion.");
         hrToOdExpectException(MISSING_VERSION_FILE_NAME);
+        odToHrExpectException(MISSING_VERSION_FILE_NAME);
     }
 
     /** Test for safety labels valid empty. */
@@ -56,6 +53,7 @@ public class SafetyLabelsTest {
     public void testSafetyLabelsValidEmptyFile() throws Exception {
         System.out.println("starting testSafetyLabelsValidEmptyFile.");
         testHrToOdSafetyLabels(VALID_EMPTY_FILE_NAME);
+        testOdToHrSafetyLabels(VALID_EMPTY_FILE_NAME);
     }
 
     /** Test for safety labels with data labels. */
@@ -63,6 +61,7 @@ public class SafetyLabelsTest {
     public void testSafetyLabelsWithDataLabels() throws Exception {
         System.out.println("starting testSafetyLabelsWithDataLabels.");
         testHrToOdSafetyLabels(WITH_DATA_LABELS_FILE_NAME);
+        testOdToHrSafetyLabels(WITH_DATA_LABELS_FILE_NAME);
     }
 
     /** Test for safety labels with security labels. */
@@ -70,6 +69,7 @@ public class SafetyLabelsTest {
     public void testSafetyLabelsWithSecurityLabels() throws Exception {
         System.out.println("starting testSafetyLabelsWithSecurityLabels.");
         testHrToOdSafetyLabels(WITH_SECURITY_LABELS_FILE_NAME);
+        testOdToHrSafetyLabels(WITH_SECURITY_LABELS_FILE_NAME);
     }
 
     /** Test for safety labels with third party verification. */
@@ -77,18 +77,32 @@ public class SafetyLabelsTest {
     public void testSafetyLabelsWithThirdPartyVerification() throws Exception {
         System.out.println("starting testSafetyLabelsWithThirdPartyVerification.");
         testHrToOdSafetyLabels(WITH_THIRD_PARTY_VERIFICATION_FILE_NAME);
+        testOdToHrSafetyLabels(WITH_THIRD_PARTY_VERIFICATION_FILE_NAME);
     }
 
     private void hrToOdExpectException(String fileName) {
         TestUtils.hrToOdExpectException(new SafetyLabelsFactory(), SAFETY_LABELS_HR_PATH, fileName);
     }
 
+    private void odToHrExpectException(String fileName) {
+        TestUtils.odToHrExpectException(new SafetyLabelsFactory(), SAFETY_LABELS_OD_PATH, fileName);
+    }
+
     private void testHrToOdSafetyLabels(String fileName) throws Exception {
         TestUtils.testHrToOd(
-                mDoc,
+                TestUtils.document(),
                 new SafetyLabelsFactory(),
                 SAFETY_LABELS_HR_PATH,
                 SAFETY_LABELS_OD_PATH,
+                fileName);
+    }
+
+    private void testOdToHrSafetyLabels(String fileName) throws Exception {
+        TestUtils.testOdToHr(
+                TestUtils.document(),
+                new SafetyLabelsFactory(),
+                SAFETY_LABELS_OD_PATH,
+                SAFETY_LABELS_HR_PATH,
                 fileName);
     }
 }

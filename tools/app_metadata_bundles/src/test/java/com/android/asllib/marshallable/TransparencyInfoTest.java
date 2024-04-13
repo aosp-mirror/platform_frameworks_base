@@ -22,7 +22,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.w3c.dom.Document;
 
 @RunWith(JUnit4.class)
 public class TransparencyInfoTest {
@@ -35,12 +34,9 @@ public class TransparencyInfoTest {
     private static final String WITH_DEVELOPER_INFO_FILE_NAME = "with-developer-info.xml";
     private static final String WITH_APP_INFO_FILE_NAME = "with-app-info.xml";
 
-    private Document mDoc = null;
-
     @Before
     public void setUp() throws Exception {
         System.out.println("set up.");
-        mDoc = TestUtils.document();
     }
 
     /** Test for transparency info valid empty. */
@@ -48,6 +44,7 @@ public class TransparencyInfoTest {
     public void testTransparencyInfoValidEmptyFile() throws Exception {
         System.out.println("starting testTransparencyInfoValidEmptyFile.");
         testHrToOdTransparencyInfo(VALID_EMPTY_FILE_NAME);
+        testOdToHrTransparencyInfo(VALID_EMPTY_FILE_NAME);
     }
 
     /** Test for transparency info with developer info. */
@@ -55,6 +52,7 @@ public class TransparencyInfoTest {
     public void testTransparencyInfoWithDeveloperInfo() throws Exception {
         System.out.println("starting testTransparencyInfoWithDeveloperInfo.");
         testHrToOdTransparencyInfo(WITH_DEVELOPER_INFO_FILE_NAME);
+        testOdToHrTransparencyInfo(WITH_DEVELOPER_INFO_FILE_NAME);
     }
 
     /** Test for transparency info with app info. */
@@ -62,14 +60,24 @@ public class TransparencyInfoTest {
     public void testTransparencyInfoWithAppInfo() throws Exception {
         System.out.println("starting testTransparencyInfoWithAppInfo.");
         testHrToOdTransparencyInfo(WITH_APP_INFO_FILE_NAME);
+        testOdToHrTransparencyInfo(WITH_APP_INFO_FILE_NAME);
     }
 
     private void testHrToOdTransparencyInfo(String fileName) throws Exception {
         TestUtils.testHrToOd(
-                mDoc,
+                TestUtils.document(),
                 new TransparencyInfoFactory(),
                 TRANSPARENCY_INFO_HR_PATH,
                 TRANSPARENCY_INFO_OD_PATH,
+                fileName);
+    }
+
+    private void testOdToHrTransparencyInfo(String fileName) throws Exception {
+        TestUtils.testOdToHr(
+                TestUtils.document(),
+                new TransparencyInfoFactory(),
+                TRANSPARENCY_INFO_OD_PATH,
+                TRANSPARENCY_INFO_HR_PATH,
                 fileName);
     }
 }

@@ -477,9 +477,8 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         });
 
         // Verify the method is called in
-        // {@link ValueAnimator.AnimatorUpdateListener#onAnimationUpdate} once and
-        // {@link Animator.AnimatorListener#onAnimationEnd} once in {@link ValueAnimator#end()}
-        verify(mSpyController, times(2)).updateWindowMagnificationInternal(
+        // {@link ValueAnimator.AnimatorUpdateListener#onAnimationUpdate} once
+        verify(mSpyController).updateWindowMagnificationInternal(
                 mScaleCaptor.capture(),
                 mCenterXCaptor.capture(), mCenterYCaptor.capture(),
                 mOffsetXCaptor.capture(), mOffsetYCaptor.capture());
@@ -594,10 +593,10 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         final float expectedY = (int) (windowBounds.exactCenterY() + expectedOffset
                 - defaultMagnificationWindowSize / 2);
 
-        // This is called 5 times when (1) first creating WindowlessMirrorWindow (2) SurfaceView is
+        // This is called 4 times when (1) first creating WindowlessMirrorWindow (2) SurfaceView is
         // created and we place the mirrored content as a child of the SurfaceView
-        // (3) the animation starts (4) the animation updates (5) the animation ends
-        verify(mTransaction, times(5))
+        // (3) the animation starts (4) the animation updates
+        verify(mTransaction, times(4))
                 .setPosition(any(SurfaceControl.class), eq(expectedX), eq(expectedY));
     }
 
@@ -788,9 +787,8 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         waitForIdleSync();
 
         // Verify the method is called in
-        // {@link ValueAnimator.AnimatorUpdateListener#onAnimationUpdate} once and
-        // {@link Animator.AnimatorListener#onAnimationEnd} once in {@link ValueAnimator#end()}
-        verify(mSpyController, times(2)).updateWindowMagnificationInternal(
+        // {@link ValueAnimator.AnimatorUpdateListener#onAnimationUpdate} once
+        verify(mSpyController).updateWindowMagnificationInternal(
                 mScaleCaptor.capture(),
                 mCenterXCaptor.capture(), mCenterYCaptor.capture(),
                 mOffsetXCaptor.capture(), mOffsetYCaptor.capture());
@@ -832,10 +830,8 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         deleteWindowMagnificationAndWaitAnimating(mWaitAnimationDuration, mAnimationCallback2);
 
         // Verify the method is called in
-        // {@link ValueAnimator.AnimatorUpdateListener#onAnimationUpdate} once and
-        // {@link Animator.AnimatorListener#onAnimationEnd} once when running the animation at
-        // the final duration time.
-        verify(mSpyController, times(2)).updateWindowMagnificationInternal(
+        // {@link ValueAnimator.AnimatorUpdateListener#onAnimationUpdate} once
+        verify(mSpyController).updateWindowMagnificationInternal(
                 mScaleCaptor.capture(),
                 mCenterXCaptor.capture(), mCenterYCaptor.capture(),
                 mOffsetXCaptor.capture(), mOffsetYCaptor.capture());

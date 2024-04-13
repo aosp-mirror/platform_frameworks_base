@@ -135,7 +135,7 @@ public class AccessibilityShortcutController {
             DialogStatus.SHOWN,
     })
     /** Denotes the user shortcut type. */
-    @interface DialogStatus {
+    public @interface DialogStatus {
         int NOT_SHOWN = 0;
         int SHOWN  = 1;
     }

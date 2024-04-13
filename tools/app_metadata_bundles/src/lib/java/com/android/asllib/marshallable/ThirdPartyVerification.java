@@ -44,6 +44,8 @@ public class ThirdPartyVerification implements AslMarshallable {
     /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
     @Override
     public List<Element> toHrDomElements(Document doc) {
-        return List.of();
+        Element ele = doc.createElement(XmlUtils.HR_TAG_THIRD_PARTY_VERIFICATION);
+        ele.setAttribute(XmlUtils.HR_ATTR_URL, mUrl);
+        return XmlUtils.listOf(ele);
     }
 }

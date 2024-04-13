@@ -165,10 +165,17 @@ interface IInputManager {
     // static association for the cleared input port will be restored.
     void removePortAssociation(in String inputPort);
 
-    // Add a runtime association between the input device and display.
-    void addUniqueIdAssociation(in String inputPort, in String displayUniqueId);
-    // Remove the runtime association between the input device and display.
-    void removeUniqueIdAssociation(in String inputPort);
+    // Add a runtime association between the input device and display, using device's descriptor.
+    void addUniqueIdAssociationByDescriptor(in String inputDeviceDescriptor,
+            in String displayUniqueId);
+    // Remove the runtime association between the input device and display, using device's
+    // descriptor.
+    void removeUniqueIdAssociationByDescriptor(in String inputDeviceDescriptor);
+
+    // Add a runtime association between the input device and display, using device's port.
+    void addUniqueIdAssociationByPort(in String inputPort, in String displayUniqueId);
+    // Remove the runtime association between the input device and display, using device's port.
+    void removeUniqueIdAssociationByPort(in String inputPort);
 
     InputSensorInfo[] getSensorList(int deviceId);
 

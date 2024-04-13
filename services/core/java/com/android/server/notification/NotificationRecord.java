@@ -79,6 +79,7 @@ import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -600,8 +601,7 @@ public final class NotificationRecord {
         pw.println(prefix + "headsUpContentView="
                 + formatRemoteViews(notification.headsUpContentView));
         pw.println(prefix + String.format("color=0x%08x", notification.color));
-        pw.println(prefix + "timeout="
-                + TimeUtils.formatForLogging(notification.getTimeoutAfter()));
+        pw.println(prefix + "timeout=" + Duration.ofMillis(notification.getTimeoutAfter()));
         if (notification.actions != null && notification.actions.length > 0) {
             pw.println(prefix + "actions={");
             final int N = notification.actions.length;

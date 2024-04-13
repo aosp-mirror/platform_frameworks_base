@@ -43,11 +43,12 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.PhoneWindow;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.ambient.touch.TouchMonitor;
+import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent;
 import com.android.systemui.complication.Complication;
 import com.android.systemui.complication.dagger.ComplicationComponent;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
-import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
 import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
@@ -94,6 +95,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
     private final ComplicationComponent mComplicationComponent;
 
+    private final AmbientTouchComponent mAmbientTouchComponent;
+
     private final com.android.systemui.dreams.complication.dagger.ComplicationComponent
             mDreamComplicationComponent;
 
@@ -102,7 +105,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     private final DreamOverlayLifecycleOwner mLifecycleOwner;
     private final LifecycleRegistry mLifecycleRegistry;
 
-    private DreamOverlayTouchMonitor mDreamOverlayTouchMonitor;
+    private TouchMonitor mTouchMonitor;
 
     private final KeyguardUpdateMonitorCallback mKeyguardCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -162,6 +165,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             com.android.systemui.dreams.complication.dagger.ComplicationComponent.Factory
                     dreamComplicationComponentFactory,
             DreamOverlayComponent.Factory dreamOverlayComponentFactory,
+            AmbientTouchComponent.Factory ambientTouchComponentFactory,
             DreamOverlayStateController stateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             UiEventLogger uiEventLogger,
@@ -194,9 +198,11 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mDreamComplicationComponent = dreamComplicationComponentFactory.create(
                 mComplicationComponent.getVisibilityController(), touchInsetManager);
         mDreamOverlayComponent = dreamOverlayComponentFactory.create(lifecycleOwner,
-                mComplicationComponent.getComplicationHostViewController(), touchInsetManager,
+                mComplicationComponent.getComplicationHostViewController(), touchInsetManager);
+        mAmbientTouchComponent = ambientTouchComponentFactory.create(lifecycleOwner,
                 new HashSet<>(Arrays.asList(
-                        mDreamComplicationComponent.getHideComplicationTouchHandler())));
+                        mDreamComplicationComponent.getHideComplicationTouchHandler(),
+                        mDreamOverlayComponent.getCommunalTouchHandler())));
         mLifecycleOwner = lifecycleOwner;
         mLifecycleRegistry = mLifecycleOwner.getRegistry();
 
@@ -239,8 +245,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
         mDreamOverlayContainerViewController =
                 mDreamOverlayComponent.getDreamOverlayContainerViewController();
-        mDreamOverlayTouchMonitor = mDreamOverlayComponent.getDreamOverlayTouchMonitor();
-        mDreamOverlayTouchMonitor.init();
+        mTouchMonitor = mAmbientTouchComponent.getTouchMonitor();
+        mTouchMonitor.init();
 
         mStateController.setShouldShowComplications(shouldShowComplications());
 
@@ -370,7 +376,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mStateController.setEntryAnimationsFinished(false);
 
         mDreamOverlayContainerViewController = null;
-        mDreamOverlayTouchMonitor = null;
+        mTouchMonitor = null;
 
         mWindow = null;
         mStarted = false;

@@ -23,7 +23,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.w3c.dom.Document;
 
 import java.nio.file.Paths;
 import java.util.List;
@@ -35,10 +34,10 @@ public class SecurityLabelsTest {
 
     public static final List<String> OPTIONAL_FIELD_NAMES =
             List.of("isDataDeletable", "isDataEncrypted");
+    public static final List<String> OPTIONAL_FIELD_NAMES_OD =
+            List.of("is_data_deletable", "is_data_encrypted");
 
     private static final String ALL_FIELDS_VALID_FILE_NAME = "all-fields-valid.xml";
-
-    private Document mDoc = null;
 
     /** Logic for setting up tests (empty if not yet needed). */
     public static void main(String[] params) throws Exception {}
@@ -46,7 +45,6 @@ public class SecurityLabelsTest {
     @Before
     public void setUp() throws Exception {
         System.out.println("set up.");
-        mDoc = TestUtils.document();
     }
 
     /** Test for all fields valid. */
@@ -54,6 +52,7 @@ public class SecurityLabelsTest {
     public void testAllFieldsValid() throws Exception {
         System.out.println("starting testAllFieldsValid.");
         testHrToOdSecurityLabels(ALL_FIELDS_VALID_FILE_NAME);
+        testOdToHrSecurityLabels(ALL_FIELDS_VALID_FILE_NAME);
     }
 
     /** Tests missing optional fields passes. */
@@ -65,16 +64,33 @@ public class SecurityLabelsTest {
                             Paths.get(SECURITY_LABELS_HR_PATH, ALL_FIELDS_VALID_FILE_NAME));
             ele.get(0).removeAttribute(optField);
             SecurityLabels securityLabels = new SecurityLabelsFactory().createFromHrElements(ele);
-            securityLabels.toOdDomElements(mDoc);
+            securityLabels.toOdDomElements(TestUtils.document());
+        }
+        for (String optField : OPTIONAL_FIELD_NAMES_OD) {
+            var ele =
+                    TestUtils.getElementsFromResource(
+                            Paths.get(SECURITY_LABELS_OD_PATH, ALL_FIELDS_VALID_FILE_NAME));
+            TestUtils.removeOdChildEleWithName(ele.get(0), optField);
+            SecurityLabels securityLabels = new SecurityLabelsFactory().createFromOdElements(ele);
+            securityLabels.toHrDomElements(TestUtils.document());
         }
     }
 
     private void testHrToOdSecurityLabels(String fileName) throws Exception {
         TestUtils.testHrToOd(
-                mDoc,
+                TestUtils.document(),
                 new SecurityLabelsFactory(),
                 SECURITY_LABELS_HR_PATH,
                 SECURITY_LABELS_OD_PATH,
+                fileName);
+    }
+
+    private void testOdToHrSecurityLabels(String fileName) throws Exception {
+        TestUtils.testOdToHr(
+                TestUtils.document(),
+                new SecurityLabelsFactory(),
+                SECURITY_LABELS_OD_PATH,
+                SECURITY_LABELS_HR_PATH,
                 fileName);
     }
 }

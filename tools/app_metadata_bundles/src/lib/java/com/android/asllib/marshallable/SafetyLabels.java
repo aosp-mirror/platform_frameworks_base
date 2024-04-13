@@ -74,6 +74,18 @@ public class SafetyLabels implements AslMarshallable {
     /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
     @Override
     public List<Element> toHrDomElements(Document doc) {
-        return List.of();
+        Element safetyLabelsEle = doc.createElement(XmlUtils.HR_TAG_SAFETY_LABELS);
+        safetyLabelsEle.setAttribute(XmlUtils.HR_ATTR_VERSION, String.valueOf(mVersion));
+
+        if (mDataLabels != null) {
+            XmlUtils.appendChildren(safetyLabelsEle, mDataLabels.toHrDomElements(doc));
+        }
+        if (mSecurityLabels != null) {
+            XmlUtils.appendChildren(safetyLabelsEle, mSecurityLabels.toHrDomElements(doc));
+        }
+        if (mThirdPartyVerification != null) {
+            XmlUtils.appendChildren(safetyLabelsEle, mThirdPartyVerification.toHrDomElements(doc));
+        }
+        return XmlUtils.listOf(safetyLabelsEle);
     }
 }

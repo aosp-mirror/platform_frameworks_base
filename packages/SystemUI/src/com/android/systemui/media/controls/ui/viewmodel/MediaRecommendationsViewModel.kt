@@ -213,9 +213,9 @@ constructor(
         return GutsViewModel(
             gutsText =
                 applicationContext.getString(R.string.controls_media_close_session, model.appName),
-            textColor = textPrimaryFromScheme(scheme),
-            buttonBackgroundColor = accentPrimaryFromScheme(scheme),
-            buttonTextColor = surfaceFromScheme(scheme),
+            textPrimaryColor = textPrimaryFromScheme(scheme),
+            accentPrimaryColor = accentPrimaryFromScheme(scheme),
+            surfaceColor = surfaceFromScheme(scheme),
             onDismissClicked = {
                 onMediaRecommendationsDismissed(
                     model.key,

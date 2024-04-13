@@ -56,18 +56,35 @@ public class AslgenTests {
 
             InputStream hrStream =
                     getClass().getClassLoader().getResourceAsStream(hrPath.toString());
-            String hrContents = new String(hrStream.readAllBytes(), StandardCharsets.UTF_8);
+            String hrContents =
+                    TestUtils.getFormattedXml(
+                            new String(hrStream.readAllBytes(), StandardCharsets.UTF_8), false);
             InputStream odStream =
                     getClass().getClassLoader().getResourceAsStream(odPath.toString());
-            String odContents = new String(odStream.readAllBytes(), StandardCharsets.UTF_8);
-            AndroidSafetyLabel asl =
+            String odContents =
+                    TestUtils.getFormattedXml(
+                            new String(odStream.readAllBytes(), StandardCharsets.UTF_8), false);
+            AndroidSafetyLabel aslFromHr =
                     AslConverter.readFromString(hrContents, AslConverter.Format.HUMAN_READABLE);
-            String out = AslConverter.getXmlAsString(asl, AslConverter.Format.ON_DEVICE);
-            System.out.println("out: " + out);
+            String aslToOdStr =
+                    TestUtils.getFormattedXml(
+                            AslConverter.getXmlAsString(aslFromHr, AslConverter.Format.ON_DEVICE),
+                            false);
+            AndroidSafetyLabel aslFromOd =
+                    AslConverter.readFromString(odContents, AslConverter.Format.ON_DEVICE);
+            String aslToHrStr =
+                    TestUtils.getFormattedXml(
+                            AslConverter.getXmlAsString(
+                                    aslFromOd, AslConverter.Format.HUMAN_READABLE),
+                            false);
 
-            assertEquals(
-                    TestUtils.getFormattedXml(out, false),
-                    TestUtils.getFormattedXml(odContents, false));
+            System.out.println("od expected: " + odContents);
+            System.out.println("asl to od: " + aslToOdStr);
+            assertEquals(odContents, aslToOdStr);
+
+            System.out.println("hr expected: " + hrContents);
+            System.out.println("asl to hr: " + aslToHrStr);
+            assertEquals(hrContents, aslToHrStr);
         }
     }
 }

@@ -15,13 +15,13 @@
  */
 package com.android.systemui.volume;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import android.media.MediaMetadata;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-
-import junit.framework.Assert;
 
 import org.junit.Test;
 
@@ -30,11 +30,59 @@ public class UtilTest extends SysuiTestCase {
 
     @Test
     public void testMediaMetadataToString_null() {
-        Assert.assertEquals(null, Util.mediaMetadataToString(null));
+        assertThat(Util.mediaMetadataToString(null)).isNull();
     }
 
     @Test
     public void testMediaMetadataToString_notNull() {
-        Assert.assertNotNull(Util.mediaMetadataToString(new MediaMetadata.Builder().build()));
+        assertThat(Util.mediaMetadataToString(new MediaMetadata.Builder().build())).isNotNull();
+    }
+
+    @Test
+    public void translateToRange_translatesStartToStart() {
+        assertThat(
+                (int) Util.translateToRange(
+                        /* value= */ 0,
+                        /* valueRangeStart= */ 0,
+                        /* valueRangeEnd= */ 7,
+                        /* targetRangeStart= */ 0,
+                        /* targetRangeEnd= */700)
+        ).isEqualTo(0);
+    }
+
+    @Test
+    public void translateToRange_translatesValueToValue() {
+        assertThat(
+                (int) Util.translateToRange(
+                        /* value= */ 4,
+                        /* valueRangeStart= */ 0,
+                        /* valueRangeEnd= */ 7,
+                        /* targetRangeStart= */ 0,
+                        /* targetRangeEnd= */700)
+        ).isEqualTo(400);
+    }
+
+    @Test
+    public void translateToRange_translatesEndToEnd() {
+        assertThat(
+                (int) Util.translateToRange(
+                        /* value= */ 7,
+                        /* valueRangeStart= */ 0,
+                        /* valueRangeEnd= */ 7,
+                        /* targetRangeStart= */ 0,
+                        /* targetRangeEnd= */700)
+        ).isEqualTo(700);
+    }
+
+    @Test
+    public void translateToRange_returnsStartForEmptyRange() {
+        assertThat(
+                (int) Util.translateToRange(
+                        /* value= */ 7,
+                        /* valueRangeStart= */ 7,
+                        /* valueRangeEnd= */ 7,
+                        /* targetRangeStart= */ 700,
+                        /* targetRangeEnd= */700)
+        ).isEqualTo(700);
     }
 }
