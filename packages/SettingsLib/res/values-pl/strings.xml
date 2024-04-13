@@ -307,7 +307,7 @@
     <string name="wifi_metered_label" msgid="8737187690304098638">"Użycie danych jest mierzone"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Użycie danych nie jest mierzone"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Rozmiary bufora rejestratora"</string>
-    <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Wybierz rozmiary Rejestratora/bufor dziennika"</string>
+    <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Wybierz rozmiary Rejestratora na bufor dziennika"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Wyczyścić pamięć trwałych dzienników?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Po zakończeniu monitorowania przy użyciu trwale zapisywanych dzienników musimy usunąć ich dane zapisane na urządzeniu."</string>
     <string name="select_logpersist_title" msgid="447071974007104196">"Zapisuj trwale dane dzienników na urządzeniu"</string>

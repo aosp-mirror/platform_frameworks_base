@@ -566,7 +566,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Predefinição"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automática"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Sem som ou vibração"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Sem som ou vibração e aparece na parte inferior na secção de conversas."</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Sem som ou vibração e aparece na parte inferior na secção de conversas"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"Pode tocar ou vibrar com base nas definições do dispositivo"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Pode tocar ou vibrar com base nas definições do dispositivo. As conversas da app <xliff:g id="APP_NAME">%1$s</xliff:g> aparecem como um balão por predefinição."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Faça com que o sistema determine se esta notificação deve emitir um som ou uma vibração"</string>
@@ -689,7 +689,7 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"Abrir as definições"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"Auscultadores ligados"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Auscultadores com microfone integrado ligados"</string>
-    <string name="data_saver" msgid="3484013368530820763">"Poup. dados"</string>
+    <string name="data_saver" msgid="3484013368530820763">"Poupança de dados"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Poupança de dados ativada"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"Ativado"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Desativado"</string>
