@@ -39,7 +39,7 @@ android_test {
     static_libs: [
         "WindowManager-Shell",
         "junit",
-        "flag-junit-base",
+        "flag-junit",
         "androidx.test.runner",
         "androidx.test.rules",
         "androidx.test.ext.junit",
@@ -55,6 +55,9 @@ android_test {
         "platform-test-annotations",
         "servicestests-utils",
         "com_android_wm_shell_flags_lib",
+        "guava-android-testlib",
+        "com.android.window.flags.window-aconfig-java",
+        "platform-test-annotations",
     ],
 
     libs: [
