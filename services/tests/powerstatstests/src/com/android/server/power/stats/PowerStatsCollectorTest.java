@@ -66,8 +66,7 @@ public class PowerStatsCollectorTest {
     public void setup() {
         mHandlerThread.start();
         mHandler = mHandlerThread.getThreadHandler();
-        mCollector = new PowerStatsCollector(mHandler,
-                60000,
+        mCollector = new PowerStatsCollector(mHandler, 60000, mock(PowerStatsUidResolver.class),
                 mMockClock) {
             @Override
             protected PowerStats collectStats() {

@@ -89,7 +89,6 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
 
     private PowerStats mPowerStats;
     private long[] mDeviceStats;
-    private PowerStatsUidResolver mPowerStatsUidResolver;
     private volatile TelephonyManager mTelephonyManager;
     private LongSupplier mCallDurationSupplier;
     private LongSupplier mScanDurationSupplier;
@@ -106,7 +105,8 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
     private long mLastScanDuration;
 
     public MobileRadioPowerStatsCollector(Injector injector, long throttlePeriodMs) {
-        super(injector.getHandler(), throttlePeriodMs, injector.getClock());
+        super(injector.getHandler(), throttlePeriodMs, injector.getUidResolver(),
+                injector.getClock());
         mInjector = injector;
     }
 
@@ -130,7 +130,6 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
             return false;
         }
 
-        mPowerStatsUidResolver = mInjector.getUidResolver();
         mConsumedEnergyRetriever = mInjector.getConsumedEnergyRetriever();
         mVoltageSupplier = mInjector.getVoltageSupplier();
 
@@ -310,7 +309,7 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
                 continue;
             }
 
-            int uid = mPowerStatsUidResolver.mapUid(uidDelta.getUid());
+            int uid = mUidResolver.mapUid(uidDelta.getUid());
             long[] stats = mPowerStats.uidStats.get(uid);
             if (stats == null) {
                 stats = new long[mLayout.getUidStatsArrayLength()];
