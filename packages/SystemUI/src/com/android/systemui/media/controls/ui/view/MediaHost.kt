@@ -23,7 +23,6 @@ import android.view.View.OnAttachStateChangeListener
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
-import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.controller.MediaHostStatesManager
 import com.android.systemui.media.controls.ui.controller.MediaLocation
@@ -34,12 +33,12 @@ import com.android.systemui.util.animation.UniqueObjectHostView
 import java.util.Objects
 import javax.inject.Inject
 
-class MediaHost(
+class MediaHost
+constructor(
     private val state: MediaHostStateHolder,
     private val mediaHierarchyManager: MediaHierarchyManager,
     private val mediaDataManager: MediaDataManager,
-    private val mediaHostStatesManager: MediaHostStatesManager,
-    private val mediaCarouselController: MediaCarouselController,
+    private val mediaHostStatesManager: MediaHostStatesManager
 ) : MediaHostState by state {
     lateinit var hostView: UniqueObjectHostView
     var location: Int = -1
@@ -203,9 +202,7 @@ class MediaHost(
      */
     fun updateViewVisibility() {
         state.visible =
-            if (mediaCarouselController.isLockedAndHidden()) {
-                false
-            } else if (showsOnlyActiveMedia) {
+            if (showsOnlyActiveMedia) {
                 mediaDataManager.hasActiveMediaOrRecommendation()
             } else {
                 mediaDataManager.hasAnyMediaOrRecommendation()
