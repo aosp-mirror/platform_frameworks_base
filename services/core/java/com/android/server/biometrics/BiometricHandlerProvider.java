@@ -21,7 +21,6 @@ import static android.os.Process.THREAD_PRIORITY_DISPLAY;
 
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Looper;
 
 /**
  * This class provides the handler to process biometric operations.
@@ -76,11 +75,8 @@ public class BiometricHandlerProvider {
     }
 
     private Handler getNewHandler(String tag, int priority) {
-        if (Flags.deHidl()) {
-            HandlerThread handlerThread = new HandlerThread(tag, priority);
-            handlerThread.start();
-            return new Handler(handlerThread.getLooper());
-        }
-        return new Handler(Looper.getMainLooper());
+        HandlerThread handlerThread = new HandlerThread(tag, priority);
+        handlerThread.start();
+        return new Handler(handlerThread.getLooper());
     }
 }

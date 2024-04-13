@@ -20,7 +20,6 @@ import static android.adaptiveauth.Flags.reportBiometricAuthAttempts;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.SensorPrivacyManager;
@@ -39,7 +38,6 @@ import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
@@ -70,8 +68,6 @@ public class FaceAuthenticationClient
     private final UsageStats mUsageStats;
     @NonNull
     private final AuthSessionCoordinator mAuthSessionCoordinator;
-    @Nullable
-    private final NotificationManager mNotificationManager;
     private final int[] mBiometricPromptIgnoreList;
     private final int[] mBiometricPromptIgnoreListVendor;
     private final int[] mKeyguardIgnoreList;
@@ -123,7 +119,6 @@ public class FaceAuthenticationClient
                 biometricStrength);
         setRequestId(requestId);
         mUsageStats = usageStats;
-        mNotificationManager = context.getSystemService(NotificationManager.class);
         mSensorPrivacyManager = sensorPrivacyManager;
         mAuthSessionCoordinator = biometricContext.getAuthSessionCoordinator();
         mAuthenticationStateListeners = authenticationStateListeners;
@@ -163,11 +158,7 @@ public class FaceAuthenticationClient
                         0 /* vendorCode */);
                 mCallback.onClientFinished(this, false /* success */);
             } else {
-                if (Flags.deHidl()) {
-                    startAuthenticate();
-                } else {
-                    mCancellationSignal = doAuthenticate();
-                }
+                doAuthenticate();
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting auth", e);
@@ -176,27 +167,7 @@ public class FaceAuthenticationClient
         }
     }
 
-    private ICancellationSignal doAuthenticate() throws RemoteException {
-        final AidlSession session = getFreshDaemon();
-
-        if (session.hasContextMethods()) {
-            final OperationContextExt opContext = getOperationContext();
-            final ICancellationSignal cancel = session.getSession().authenticateWithContext(
-                    mOperationId, opContext.toAidlContext(getOptions()));
-            getBiometricContext().subscribe(opContext, ctx -> {
-                try {
-                    session.getSession().onContextChanged(ctx);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Unable to notify context changed", e);
-                }
-            });
-            return cancel;
-        } else {
-            return session.getSession().authenticate(mOperationId);
-        }
-    }
-
-    private void startAuthenticate() throws RemoteException {
+    private void doAuthenticate() throws RemoteException {
         final AidlSession session = getFreshDaemon();
 
         if (session.hasContextMethods()) {

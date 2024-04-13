@@ -186,7 +186,7 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
                 mLockoutTracker,
                 mLockoutResetDispatcher,
                 mAuthSessionCoordinator,
-                () -> {}, mAidlResponseHandlerCallback);
+                mAidlResponseHandlerCallback);
     }
 
     @VisibleForTesting IBiometricsFingerprint getIBiometricsFingerprint() {

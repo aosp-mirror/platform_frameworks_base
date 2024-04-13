@@ -19,9 +19,9 @@ package com.android.server.biometrics.sensors;
 import static com.android.server.biometrics.sensors.BiometricSchedulerOperation.STATE_STARTED;
 
 import android.annotation.IntDef;
-import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.WorkerThread;
 import android.content.Context;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -38,7 +38,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.modules.expresslog.Counter;
 import com.android.server.biometrics.BiometricSchedulerProto;
 import com.android.server.biometrics.BiometricsProto;
-import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
 import java.io.PrintWriter;
@@ -65,9 +64,8 @@ import java.util.function.Supplier;
  * @param <T> Hal instance for starting the user.
  * @param <U> Session associated with the current user id.
  *
- * TODO: (b/304604965) Update thread annotation when FLAGS_DE_HIDL is removed.
  */
-@MainThread
+@WorkerThread
 public class BiometricScheduler<T, U> {
 
     private static final String TAG = "BiometricScheduler";
@@ -176,7 +174,7 @@ public class BiometricScheduler<T, U> {
                     Slog.w(TAG, "operation is already null or different (reset?): "
                             + mCurrentOperation);
                 }
-                startNextOperationIfIdle();
+                checkCurrentUserAndStartNextOperation();
             });
         }
     }
@@ -219,7 +217,7 @@ public class BiometricScheduler<T, U> {
                 mRecentOperations.add(mCurrentOperation.getProtoEnum());
                 mCurrentOperation = null;
                 mTotalOperationsHandled++;
-                startNextOperationIfIdle();
+                checkCurrentUserAndStartNextOperation();
             });
         }
     };
@@ -304,15 +302,7 @@ public class BiometricScheduler<T, U> {
         return mInternalCallback;
     }
 
-    protected void startNextOperationIfIdle() {
-        if (Flags.deHidl()) {
-            startNextOperation();
-        } else {
-            startNextOperationIfIdleLegacy();
-        }
-    }
-
-    protected void startNextOperation() {
+    protected void checkCurrentUserAndStartNextOperation() {
         if (mCurrentOperation != null) {
             Slog.v(TAG, "Not idle, current operation: " + mCurrentOperation);
             return;
@@ -326,7 +316,7 @@ public class BiometricScheduler<T, U> {
         final int nextUserId = mPendingOperations.getFirst().getTargetUserId();
 
         if (nextUserId == currentUserId || mPendingOperations.getFirst().isStartUserOperation()) {
-            startNextOperationIfIdleLegacy();
+            startNextOperationIfIdle();
         } else if (currentUserId == UserHandle.USER_NULL && mUserSwitchProvider != null) {
             final BaseClientMonitor startClient =
                     mUserSwitchProvider.getStartUserClient(nextUserId);
@@ -357,7 +347,7 @@ public class BiometricScheduler<T, U> {
         }
     }
 
-    protected void startNextOperationIfIdleLegacy() {
+    protected void startNextOperationIfIdle() {
         if (mCurrentOperation != null) {
             Slog.v(TAG, "Not idle, current operation: " + mCurrentOperation);
             return;
@@ -422,7 +412,7 @@ public class BiometricScheduler<T, U> {
                 // run these. A single request from the manager layer to the service layer may
                 // actually be multiple operations (i.e. updateActiveUser + authenticate).
                 mCurrentOperation = null;
-                startNextOperationIfIdle();
+                checkCurrentUserAndStartNextOperation();
             }
         } else {
             try {
@@ -459,7 +449,7 @@ public class BiometricScheduler<T, U> {
         } else {
             Slog.e(TAG, "[Unable To Start] Prepared client: " + mCurrentOperation);
             mCurrentOperation = null;
-            startNextOperationIfIdle();
+            checkCurrentUserAndStartNextOperation();
         }
     }
 
@@ -504,7 +494,7 @@ public class BiometricScheduler<T, U> {
             Slog.d(TAG, "[Cancelling Interruptable]: " + mCurrentOperation);
             mCurrentOperation.cancel(mHandler, mInternalCallback);
         } else {
-            startNextOperationIfIdle();
+            checkCurrentUserAndStartNextOperation();
         }
     }
 
