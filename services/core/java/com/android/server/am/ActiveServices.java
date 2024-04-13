@@ -3583,11 +3583,9 @@ public final class ActiveServices {
                     Slog.d(TAG_SERVICE, "[STALE] Short FGS timed out: " + sr
                             + " " + sr.getShortFgsTimedEventDescription(nowUptime));
                 }
-                mShortFGSAnrTimer.discard(sr);
                 return;
             }
             Slog.e(TAG_SERVICE, "Short FGS timed out: " + sr);
-            mShortFGSAnrTimer.accept(sr);
             traceInstant("short FGS timeout: ", sr);
 
             logFGSStateChangeLocked(sr,
@@ -3667,8 +3665,10 @@ public final class ActiveServices {
                     Slog.d(TAG_SERVICE, "[STALE] Short FGS ANR'ed: " + sr
                             + " " + sr.getShortFgsTimedEventDescription(nowUptime));
                 }
+                mShortFGSAnrTimer.discard(sr);
                 return;
             }
+            mShortFGSAnrTimer.accept(sr);
 
             final String message = "Short FGS ANR'ed: " + sr;
             if (DEBUG_SHORT_SERVICE) {
@@ -7328,7 +7328,6 @@ public final class ActiveServices {
                     mActiveServiceAnrTimer.discard(proc);
                     return;
                 }
-                mActiveServiceAnrTimer.accept(proc);
                 final long now = SystemClock.uptimeMillis();
                 final long maxTime =  now
                         - (psr.shouldExecServicesFg()
@@ -7347,6 +7346,7 @@ public final class ActiveServices {
                     }
                 }
                 if (timeout != null && mAm.mProcessList.isInLruListLOSP(proc)) {
+                    mActiveServiceAnrTimer.accept(proc);
                     Slog.w(TAG, "Timeout executing service: " + timeout);
                     StringWriter sw = new StringWriter();
                     PrintWriter pw = new FastPrintWriter(sw, false, 1024);
@@ -7361,6 +7361,7 @@ public final class ActiveServices {
                     timeoutRecord = TimeoutRecord.forServiceExec(timeout.shortInstanceName,
                             waitedMillis);
                 } else {
+                    mActiveServiceAnrTimer.discard(proc);
                     final long delay = psr.shouldExecServicesFg()
                                        ? (nextTime + mAm.mConstants.SERVICE_TIMEOUT) :
                                        (nextTime + mAm.mConstants.SERVICE_BACKGROUND_TIMEOUT)
@@ -7395,13 +7396,14 @@ public final class ActiveServices {
                     return;
                 }
 
-                mServiceFGAnrTimer.accept(r);
                 app = r.app;
                 if (app != null && app.isDebugging()) {
                     // The app's being debugged; let it ride
                     mServiceFGAnrTimer.discard(r);
                     return;
                 }
+
+                mServiceFGAnrTimer.accept(r);
 
                 if (DEBUG_BACKGROUND_CHECK) {
                     Slog.i(TAG, "Service foreground-required timeout for " + r);
