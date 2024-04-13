@@ -126,7 +126,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
      * @param infos the list of enabled and installed services.
      */
     @Override
-    public void setInstalledAndEnabledServices(List<AccessibilityServiceInfo> infos) {
+    public void setInstalledAndEnabledServices(@NonNull List<AccessibilityServiceInfo> infos) {
         final long identity = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
@@ -216,9 +216,11 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     @Override
+    @NonNull
     public List<AccessibilityServiceInfo> getInstalledAndEnabledServices() {
         synchronized (mLock) {
-            return mInstalledAndEnabledServices;
+            return mInstalledAndEnabledServices != null
+                    ? mInstalledAndEnabledServices : Collections.emptyList();
         }
     }
 

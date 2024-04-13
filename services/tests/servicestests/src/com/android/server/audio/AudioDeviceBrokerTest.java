@@ -24,6 +24,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
@@ -315,7 +316,7 @@ public class AudioDeviceBrokerTest {
                                 mFakeBtDevice.getAddress()));
                 verify(mMockAudioService,
                         timeout(MAX_MESSAGE_HANDLING_DELAY_MS).times(0)).onUpdatedAdiDeviceState(
-                        eq(devState));
+                        eq(devState), anyBoolean());
             }
 
             // metadata set
@@ -326,7 +327,7 @@ public class AudioDeviceBrokerTest {
                                 mFakeBtDevice.getAddress()));
                 verify(mMockAudioService,
                         timeout(MAX_MESSAGE_HANDLING_DELAY_MS)).onUpdatedAdiDeviceState(
-                        any());
+                        any(), anyBoolean());
             }
         } finally {
             // reset the metadata device type
@@ -354,7 +355,7 @@ public class AudioDeviceBrokerTest {
         verify(mMockAudioService,
                 timeout(MAX_MESSAGE_HANDLING_DELAY_MS).atLeast(1)).onUpdatedAdiDeviceState(
                 ArgumentMatchers.argThat(devState -> devState.getAudioDeviceCategory()
-                        == AudioManager.AUDIO_DEVICE_CATEGORY_OTHER));
+                        == AudioManager.AUDIO_DEVICE_CATEGORY_OTHER), anyBoolean());
     }
 
     private void doTestConnectionDisconnectionReconnection(int delayAfterDisconnection,

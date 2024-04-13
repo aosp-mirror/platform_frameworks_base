@@ -16,19 +16,11 @@
 
 package com.android.systemui.screenshot.ui.viewmodel
 
-data class ActionButtonViewModel(
-    val appearance: ActionButtonAppearance,
-    val id: Int,
-    val onClicked: (() -> Unit)?,
-) {
-    companion object {
-        private var nextId = 0
+import android.graphics.drawable.Drawable
 
-        private fun getId() = nextId.also { nextId += 1 }
-
-        fun withNextId(
-            appearance: ActionButtonAppearance,
-            onClicked: (() -> Unit)?
-        ): ActionButtonViewModel = ActionButtonViewModel(appearance, getId(), onClicked)
-    }
-}
+/** Data describing how an action should be shown to the user. */
+data class ActionButtonAppearance(
+    val icon: Drawable?,
+    val label: CharSequence?,
+    val description: CharSequence,
+)

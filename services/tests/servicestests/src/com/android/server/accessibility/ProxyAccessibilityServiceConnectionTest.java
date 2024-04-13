@@ -24,6 +24,13 @@ import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_REQUEST
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityTrace;
 import android.content.ComponentName;
@@ -32,13 +39,6 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Handler;
 import android.view.accessibility.AccessibilityEvent;
-
-import static com.google.common.truth.Truth.assertThat;
-
-import static org.junit.Assert.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.android.server.wm.WindowManagerInternal;
 
@@ -225,12 +225,17 @@ public class ProxyAccessibilityServiceConnectionTest {
     }
 
     @Test
-    public void testDisableSelf_setIllegalOperationExceptionThrown_() {
+    public void testDisableSelf_setIllegalOperationExceptionThrown() {
         UnsupportedOperationException thrown =
                 assertThrows(
                         UnsupportedOperationException.class,
                         () -> mProxyConnection.disableSelf());
 
         assertThat(thrown).hasMessageThat().contains("disableSelf is not supported");
+    }
+
+    @Test
+    public void getInstalledAndEnabledServices_noServices_returnEmpty() {
+        assertThat(mProxyConnection.getInstalledAndEnabledServices()).isEmpty();
     }
 }

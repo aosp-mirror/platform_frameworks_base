@@ -17,6 +17,7 @@
 package com.android.systemui.screenshot.ui.viewmodel
 
 import android.graphics.Bitmap
+import android.util.Log
 import android.view.accessibility.AccessibilityManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,21 +40,43 @@ class ScreenshotViewModel(private val accessibilityManager: AccessibilityManager
         _previewAction.value = onClick
     }
 
-    fun addAction(action: ActionButtonViewModel) {
+    fun addAction(actionAppearance: ActionButtonAppearance, onClicked: (() -> Unit)): Int {
         val actionList = _actions.value.toMutableList()
+        val action = ActionButtonViewModel.withNextId(actionAppearance, onClicked)
         actionList.add(action)
         _actions.value = actionList
+        return action.id
     }
 
-    fun addActions(actions: List<ActionButtonViewModel>) {
+    fun updateActionAppearance(actionId: Int, appearance: ActionButtonAppearance) {
         val actionList = _actions.value.toMutableList()
-        actionList.addAll(actions)
-        _actions.value = actionList
+        val index = actionList.indexOfFirst { it.id == actionId }
+        if (index >= 0) {
+            actionList[index] =
+                ActionButtonViewModel(appearance, actionId, actionList[index].onClicked)
+            _actions.value = actionList
+        } else {
+            Log.w(TAG, "Attempted to update unknown action id $actionId")
+        }
+    }
+
+    fun removeAction(actionId: Int) {
+        val actionList = _actions.value.toMutableList()
+        if (actionList.removeIf { it.id == actionId }) {
+            // Update if something was removed.
+            _actions.value = actionList
+        } else {
+            Log.w(TAG, "Attempted to remove unknown action id $actionId")
+        }
     }
 
     fun reset() {
         _preview.value = null
         _previewAction.value = null
         _actions.value = listOf()
+    }
+
+    companion object {
+        const val TAG = "ScreenshotViewModel"
     }
 }

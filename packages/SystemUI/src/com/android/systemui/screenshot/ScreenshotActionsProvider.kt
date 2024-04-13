@@ -28,8 +28,7 @@ import com.android.systemui.screenshot.ActionIntentCreator.createShareWithSubjec
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_EDIT_TAPPED
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_PREVIEW_TAPPED
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_SHARE_TAPPED
-import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_SMART_ACTION_TAPPED
-import com.android.systemui.screenshot.ui.viewmodel.ActionButtonViewModel
+import com.android.systemui.screenshot.ui.viewmodel.ActionButtonAppearance
 import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -59,7 +58,6 @@ class DefaultScreenshotActionsProvider
 constructor(
     private val context: Context,
     private val viewModel: ScreenshotViewModel,
-    private val smartActionsProvider: SmartActionsProvider,
     private val uiEventLogger: UiEventLogger,
     @Assisted val request: ScreenshotData,
     @Assisted val requestId: String,
@@ -81,81 +79,52 @@ constructor(
             }
         }
         viewModel.addAction(
-            ActionButtonViewModel(
+            ActionButtonAppearance(
                 AppCompatResources.getDrawable(context, R.drawable.ic_screenshot_edit),
                 context.resources.getString(R.string.screenshot_edit_label),
                 context.resources.getString(R.string.screenshot_edit_description),
-            ) {
-                debugLog(LogConfig.DEBUG_ACTIONS) { "Edit tapped" }
-                uiEventLogger.log(SCREENSHOT_EDIT_TAPPED, 0, request.packageNameString)
-                onDeferrableActionTapped { result ->
-                    actionExecutor.startSharedTransition(
-                        createEdit(result.uri, context),
-                        result.user,
-                        true
-                    )
-                }
+            )
+        ) {
+            debugLog(LogConfig.DEBUG_ACTIONS) { "Edit tapped" }
+            uiEventLogger.log(SCREENSHOT_EDIT_TAPPED, 0, request.packageNameString)
+            onDeferrableActionTapped { result ->
+                actionExecutor.startSharedTransition(
+                    createEdit(result.uri, context),
+                    result.user,
+                    true
+                )
             }
-        )
+        }
+
         viewModel.addAction(
-            ActionButtonViewModel(
+            ActionButtonAppearance(
                 AppCompatResources.getDrawable(context, R.drawable.ic_screenshot_share),
                 context.resources.getString(R.string.screenshot_share_label),
                 context.resources.getString(R.string.screenshot_share_description),
-            ) {
-                debugLog(LogConfig.DEBUG_ACTIONS) { "Share tapped" }
-                uiEventLogger.log(SCREENSHOT_SHARE_TAPPED, 0, request.packageNameString)
-                onDeferrableActionTapped { result ->
-                    actionExecutor.startSharedTransition(
-                        createShareWithSubject(result.uri, result.subject),
-                        result.user,
-                        false
-                    )
-                }
-            }
-        )
-        smartActionsProvider.requestQuickShare(request, requestId) { quickShare ->
-            if (!quickShare.actionIntent.isImmutable) {
-                viewModel.addAction(
-                    ActionButtonViewModel(
-                        quickShare.getIcon().loadDrawable(context),
-                        quickShare.title,
-                        quickShare.title
-                    ) {
-                        debugLog(LogConfig.DEBUG_ACTIONS) { "Quickshare tapped" }
-                        onDeferrableActionTapped { result ->
-                            uiEventLogger.log(
-                                SCREENSHOT_SMART_ACTION_TAPPED,
-                                0,
-                                request.packageNameString
-                            )
-                            val pendingIntentWithUri =
-                                smartActionsProvider.wrapIntent(
-                                    quickShare,
-                                    result.uri,
-                                    result.subject,
-                                    requestId
-                                )
-                            actionExecutor.sendPendingIntent(pendingIntentWithUri)
-                        }
-                    }
+            )
+        ) {
+            debugLog(LogConfig.DEBUG_ACTIONS) { "Share tapped" }
+            uiEventLogger.log(SCREENSHOT_SHARE_TAPPED, 0, request.packageNameString)
+            onDeferrableActionTapped { result ->
+                actionExecutor.startSharedTransition(
+                    createShareWithSubject(result.uri, result.subject),
+                    result.user,
+                    false
                 )
-            } else {
-                Log.w(TAG, "Received immutable quick share pending intent; ignoring")
             }
         }
     }
 
     override fun onScrollChipReady(onClick: Runnable) {
         viewModel.addAction(
-            ActionButtonViewModel(
+            ActionButtonAppearance(
                 AppCompatResources.getDrawable(context, R.drawable.ic_screenshot_scroll),
                 context.resources.getString(R.string.screenshot_scroll_label),
                 context.resources.getString(R.string.screenshot_scroll_label),
-            ) {
-                onClick.run()
-            }
-        )
+            )
+        ) {
+            onClick.run()
+        }
     }
 
     override fun setCompletedScreenshot(result: ScreenshotSavedResult) {
@@ -165,15 +134,6 @@ constructor(
         }
         this.result = result
         pendingAction?.invoke(result)
-        smartActionsProvider.requestSmartActions(request, requestId, result) { smartActions ->
-            viewModel.addActions(
-                smartActions.map {
-                    ActionButtonViewModel(it.getIcon().loadDrawable(context), it.title, it.title) {
-                        actionExecutor.sendPendingIntent(it.actionIntent)
-                    }
-                }
-            )
-        }
     }
 
     private fun onDeferrableActionTapped(onResult: (ScreenshotSavedResult) -> Unit) {
