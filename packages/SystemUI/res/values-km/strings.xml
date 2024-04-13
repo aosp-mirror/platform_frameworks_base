@@ -650,7 +650,7 @@
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"កម្មវិធីបច្ចុប្បន្ន"</string>
     <string name="group_system_access_notification_shade" msgid="7116898151485382275">"ចូលប្រើប្រាស់ផ្ទាំងជូនដំណឹង"</string>
     <string name="group_system_full_screenshot" msgid="7389040853798023211">"ថតរូបថតអេក្រង់ពេញ"</string>
-    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"ចូលប្រើប្រាស់បញ្ជីប្រព័ន្ធ/ផ្លូវកាត់​កម្មវិធី"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"ចូលប្រើប្រាស់បញ្ជីផ្លូវកាត់​កម្មវិធី/ប្រព័ន្ធ"</string>
     <string name="group_system_go_back" msgid="8838454003680364227">"ថយក្រោយ៖ ត្រឡប់ទៅស្ថានភាពពីមុនវិញ (ប៊ូតុងថយក្រោយ)"</string>
     <string name="group_system_access_home_screen" msgid="1857344316928441909">"ចូលប្រើប្រាស់អេក្រង់ដើម"</string>
     <string name="group_system_overview_open_apps" msgid="6897128761003265350">"ទិដ្ឋភាពរួមអំពីកម្មវិធីដែលបើក"</string>
@@ -662,7 +662,7 @@
     <string name="group_system_access_google_assistant" msgid="1186152943161483864">"ចូលប្រើប្រាស់ Google Assistant"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ចាក់​សោ​អេក្រង់"</string>
     <string name="group_system_quick_memo" msgid="2914234890158583919">"ទាញកម្មវិធីកំណត់ចំណាំឡើងលើ ដើម្បីប្រើកំណត់ហេតុរហ័ស"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"ការដំណើរការបានច្រើននៃប្រព័ន្ធ"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"ការដំណើរការច្រើនរបស់ប្រព័ន្ធ"</string>
     <string name="system_multitasking_rhs" msgid="6593269428880305699">"ចូលក្នុងមុខងារ​បំបែកអេក្រង់ដោយប្រើកម្មវិធីបច្ចុប្បន្ននៅចំហៀងខាងស្ដាំ"</string>
     <string name="system_multitasking_lhs" msgid="8839380725557952846">"ចូលក្នុងមុខងារ​បំបែកអេក្រង់ដោយប្រើកម្មវិធីបច្ចុប្បន្ននៅចំហៀងខាងឆ្វេង"</string>
     <string name="system_multitasking_full_screen" msgid="1962084334200006297">"ប្ដូរពីមុខងារ​បំបែកអេក្រង់ទៅជាអេក្រង់ពេញ"</string>

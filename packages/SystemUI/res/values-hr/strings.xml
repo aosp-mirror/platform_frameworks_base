@@ -114,7 +114,7 @@
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Prikaz dodira na zaslonu"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Zaustavi"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Dijeli"</string>
-    <string name="screenrecord_save_title" msgid="1886652605520893850">"Snimanje zaslona spremljeno"</string>
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"Snimanje zaslona je spremljeno"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Dodirnite za prikaz"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Pogreška prilikom spremanja snimke zaslona"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Pogreška prilikom pokretanja snimanja zaslona"</string>
@@ -665,7 +665,7 @@
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Obavljanje više zadataka sustava"</string>
     <string name="system_multitasking_rhs" msgid="6593269428880305699">"Otvorite podijeljeni zaslon s trenutačnom aplikacijom s desne strane"</string>
     <string name="system_multitasking_lhs" msgid="8839380725557952846">"Otvorite podijeljeni zaslon s trenutačnom aplikacijom s lijeve strane"</string>
-    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Prijelaz s podijeljenog zaslona na cijeli zaslon"</string>
+    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Prelazak s podijeljenog zaslona na cijeli zaslon"</string>
     <string name="system_multitasking_replace" msgid="844285282472557186">"Tijekom podijeljenog zaslona: zamijenite aplikaciju drugom"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Unos"</string>
     <string name="input_switch_input_language_next" msgid="3394291576873633793">"Prebacivanje jezika unosa (sljedeći jezik)"</string>
