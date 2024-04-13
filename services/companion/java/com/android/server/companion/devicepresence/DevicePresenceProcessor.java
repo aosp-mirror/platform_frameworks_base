@@ -56,6 +56,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.CollectionUtils;
 import com.android.server.companion.association.AssociationStore;
 
 import java.io.PrintWriter;
@@ -1031,6 +1032,9 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
     public void sendDevicePresenceEventOnUnlocked(int userId) {
         final List<DevicePresenceEvent> deviceEvents = getPendingDevicePresenceEventsByUserId(
                 userId);
+        if (CollectionUtils.isEmpty(deviceEvents)) {
+            return;
+        }
         final List<ObservableUuid> observableUuids =
                 mObservableUuidStore.getObservableUuidsForUser(userId);
         // Notify and bind the app after the phone is unlocked.
@@ -1068,7 +1072,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
             }
         }
 
-        clearPendingDevicePresenceEventsByUserId(userId);
+        removePendingDevicePresenceEventsByUserId(userId);
     }
 
     private List<DevicePresenceEvent> getPendingDevicePresenceEventsByUserId(int userId) {
@@ -1077,9 +1081,11 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
         }
     }
 
-    private void clearPendingDevicePresenceEventsByUserId(int userId) {
+    private void removePendingDevicePresenceEventsByUserId(int userId) {
         synchronized (mPendingDevicePresenceEvents) {
-            mPendingDevicePresenceEvents.get(userId).clear();
+            if (mPendingDevicePresenceEvents.contains(userId)) {
+                mPendingDevicePresenceEvents.remove(userId);
+            }
         }
     }
 
