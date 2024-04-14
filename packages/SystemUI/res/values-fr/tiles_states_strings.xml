@@ -88,8 +88,8 @@
   </string-array>
   <string-array name="tile_states_color_correction">
     <item msgid="2840507878437297682">"Indisponible"</item>
-    <item msgid="1909756493418256167">"Désactivé"</item>
-    <item msgid="4531508423703413340">"Activé"</item>
+    <item msgid="1909756493418256167">"Désactivée"</item>
+    <item msgid="4531508423703413340">"Activée"</item>
   </string-array>
   <string-array name="tile_states_inversion">
     <item msgid="3638187931191394628">"Indisponible"</item>

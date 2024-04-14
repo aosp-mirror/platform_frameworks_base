@@ -875,7 +875,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Nhấn để mở bộ tính năng hỗ trợ tiếp cận. Tuỳ chỉnh/thay thế nút này trong phần Cài đặt.\n\n"<annotation id="link">"Xem chế độ cài đặt"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Di chuyển nút sang cạnh để ẩn nút tạm thời"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Huỷ"</string>
-    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Đã xoá phím tắt dành cho <xliff:g id="FEATURE_NAME">%s</xliff:g>"</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Đã xoá lối tắt cho <xliff:g id="FEATURE_NAME">%s</xliff:g>"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{Đã xoá # lối tắt}other{Đã xoá # lối tắt}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Chuyển lên trên cùng bên trái"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Chuyển lên trên cùng bên phải"</string>

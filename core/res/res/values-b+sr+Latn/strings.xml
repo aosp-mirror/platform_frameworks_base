@@ -1196,7 +1196,7 @@
     <string name="whichEditApplicationLabel" msgid="1463288652070140285">"Izmeni"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"Delite"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"Delite pomoću aplikacije %1$s"</string>
-    <string name="whichSendApplicationLabel" msgid="7467813004769188515">"Deli"</string>
+    <string name="whichSendApplicationLabel" msgid="7467813004769188515">"Deljenje"</string>
     <string name="whichSendToApplication" msgid="77101541959464018">"Pošaljite pomoću:"</string>
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"Pošaljite pomoću: %1$s"</string>
     <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"Pošalji"</string>

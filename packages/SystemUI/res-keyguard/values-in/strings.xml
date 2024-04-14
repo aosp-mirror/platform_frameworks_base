@@ -84,10 +84,10 @@
     <string name="kg_face_locked_out" msgid="2751559491287575">"Tidak dapat membuka kunci dengan wajah. Terlalu banyak upaya gagal."</string>
     <string name="kg_fp_locked_out" msgid="6228277682396768830">"Tidak dapat membuka kunci dengan sidik jari. Terlalu banyak upaya gagal."</string>
     <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"Perangkat tepercaya tidak tersedia"</string>
-    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Terlalu banyak upaya dengan PIN yang salah"</string>
-    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Terlalu banyak upaya dengan pola yang salah"</string>
-    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Terlalu banyak upaya dengan sandi yang salah"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Coba lagi dalam # detik.}other{Coba lagi dalam # detik.}}"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Terlalu banyak pemakaian PIN yang salah"</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Terlalu banyak pemakaian pola yang salah"</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Terlalu banyak pemakaian sandi yang salah"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Coba lagi setelah # detik.}other{Coba lagi setelah # detik.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Masukkan PIN SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Masukkan PIN SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Nonaktifkan eSIM untuk menggunakan perangkat tanpa layanan seluler."</string>
@@ -112,9 +112,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Pola diperlukan setelah perangkat dimulai ulang"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"PIN diperlukan setelah perangkat dimulai ulang"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Sandi diperlukan setelah perangkat dimulai ulang"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Untuk keamanan tambahan, gunakan pola"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Untuk keamanan tambahan, gunakan PIN"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Untuk keamanan tambahan, gunakan sandi"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Agar lebih aman, gunakan pola"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Agar lebih aman, gunakan PIN"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Agar lebih aman, gunakan sandi"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Perangkat dikunci oleh admin"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Perangkat dikunci secara manual"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Tidak dikenali"</string>
