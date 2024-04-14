@@ -76,7 +76,6 @@ import android.hardware.keymaster.HardwareAuthenticatorType;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
@@ -90,7 +89,6 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.WindowManager;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
@@ -246,14 +244,8 @@ public class BiometricServiceTest {
         when(mInjector.getGateKeeperService()).thenReturn(mGateKeeperService);
         when(mInjector.getNotificationLogger()).thenReturn(mNotificationLogger);
         when(mGateKeeperService.getSecureUserId(anyInt())).thenReturn(42L);
-
-        if (com.android.server.biometrics.Flags.deHidl()) {
-            when(mBiometricHandlerProvider.getBiometricCallbackHandler()).thenReturn(
-                    new Handler(TestableLooper.get(this).getLooper()));
-        } else {
-            when(mBiometricHandlerProvider.getBiometricCallbackHandler()).thenReturn(
-                    new Handler(Looper.getMainLooper()));
-        }
+        when(mBiometricHandlerProvider.getBiometricCallbackHandler()).thenReturn(
+                new Handler(TestableLooper.get(this).getLooper()));
 
         final String[] config = {
                 "0:2:15",  // ID0:Fingerprint:Strong
@@ -2037,11 +2029,7 @@ public class BiometricServiceTest {
     }
 
     private void waitForIdle() {
-        if (com.android.server.biometrics.Flags.deHidl()) {
-            TestableLooper.get(this).processAllMessages();
-        } else {
-            InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-        }
+        TestableLooper.get(this).processAllMessages();
     }
 
     private byte[] generateRandomHAT() {

@@ -51,7 +51,6 @@ import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.os.Binder;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
@@ -64,7 +63,6 @@ import com.android.internal.R;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
 import com.android.server.LocalServices;
-import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.sensors.fingerprint.aidl.FingerprintProvider;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
@@ -90,8 +88,6 @@ public class FingerprintServiceTest {
     private static final int ID_VIRTUAL = 6;
     private static final String NAME_DEFAULT = "default";
     private static final String NAME_VIRTUAL = "virtual";
-    private static final List<FingerprintSensorPropertiesInternal> HIDL_AUTHENTICATORS =
-            List.of();
     private static final String OP_PACKAGE_NAME = "FingerprintServiceTest/SystemUi";
 
     @Rule
@@ -185,7 +181,7 @@ public class FingerprintServiceTest {
 
     private void initServiceWithAndWait(String... aidlInstances) throws Exception {
         initServiceWith(aidlInstances);
-        mService.mServiceWrapper.registerAuthenticators(HIDL_AUTHENTICATORS);
+        mService.mServiceWrapper.registerAuthenticators(mFingerprintSensorConfigurations);
         waitForRegistration();
     }
 
@@ -193,18 +189,7 @@ public class FingerprintServiceTest {
     public void registerAuthenticators_defaultOnly() throws Exception {
         initServiceWith(NAME_DEFAULT, NAME_VIRTUAL);
 
-        mService.mServiceWrapper.registerAuthenticators(HIDL_AUTHENTICATORS);
-        waitForRegistration();
-
-        verify(mIBiometricService).registerAuthenticator(eq(ID_DEFAULT), anyInt(), anyInt(), any());
-    }
-
-    @Test
-    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
-    public void registerAuthenticatorsLegacy_defaultOnly() throws Exception {
-        initServiceWith(NAME_DEFAULT, NAME_VIRTUAL);
-
-        mService.mServiceWrapper.registerAuthenticatorsLegacy(mFingerprintSensorConfigurations);
+        mService.mServiceWrapper.registerAuthenticators(mFingerprintSensorConfigurations);
         waitForRegistration();
 
         verify(mIBiometricService).registerAuthenticator(eq(ID_DEFAULT), anyInt(), anyInt(), any());
@@ -216,7 +201,7 @@ public class FingerprintServiceTest {
         Settings.Secure.putInt(mSettingsRule.mockContentResolver(mContext),
                 Settings.Secure.BIOMETRIC_VIRTUAL_ENABLED, 1);
 
-        mService.mServiceWrapper.registerAuthenticators(HIDL_AUTHENTICATORS);
+        mService.mServiceWrapper.registerAuthenticators(mFingerprintSensorConfigurations);
         waitForRegistration();
 
         verify(mIBiometricService).registerAuthenticator(eq(ID_VIRTUAL), anyInt(), anyInt(), any());
@@ -228,20 +213,7 @@ public class FingerprintServiceTest {
         Settings.Secure.putInt(mSettingsRule.mockContentResolver(mContext),
                 Settings.Secure.BIOMETRIC_FINGERPRINT_VIRTUAL_ENABLED, 1);
 
-        mService.mServiceWrapper.registerAuthenticators(HIDL_AUTHENTICATORS);
-        waitForRegistration();
-
-        verify(mIBiometricService).registerAuthenticator(eq(ID_VIRTUAL), anyInt(), anyInt(), any());
-    }
-
-    @Test
-    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
-    public void registerAuthenticatorsLegacy_virtualOnly() throws Exception {
-        initServiceWith(NAME_DEFAULT, NAME_VIRTUAL);
-        Settings.Secure.putInt(mSettingsRule.mockContentResolver(mContext),
-                Settings.Secure.BIOMETRIC_VIRTUAL_ENABLED, 1);
-
-        mService.mServiceWrapper.registerAuthenticatorsLegacy(mFingerprintSensorConfigurations);
+        mService.mServiceWrapper.registerAuthenticators(mFingerprintSensorConfigurations);
         waitForRegistration();
 
         verify(mIBiometricService).registerAuthenticator(eq(ID_VIRTUAL), anyInt(), anyInt(), any());
@@ -249,23 +221,12 @@ public class FingerprintServiceTest {
 
     @Test
     public void registerAuthenticators_virtualAlwaysWhenNoOther() throws Exception {
-        initServiceWith(NAME_VIRTUAL);
-
-        mService.mServiceWrapper.registerAuthenticators(HIDL_AUTHENTICATORS);
-        waitForRegistration();
-
-        verify(mIBiometricService).registerAuthenticator(eq(ID_VIRTUAL), anyInt(), anyInt(), any());
-    }
-
-    @Test
-    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
-    public void registerAuthenticatorsLegacy_virtualAlwaysWhenNoOther() throws Exception {
         mFingerprintSensorConfigurations =
                 new FingerprintSensorConfigurations(true);
         mFingerprintSensorConfigurations.addAidlSensors(new String[]{NAME_VIRTUAL});
         initServiceWith(NAME_VIRTUAL);
 
-        mService.mServiceWrapper.registerAuthenticatorsLegacy(mFingerprintSensorConfigurations);
+        mService.mServiceWrapper.registerAuthenticators(mFingerprintSensorConfigurations);
         waitForRegistration();
 
         verify(mIBiometricService).registerAuthenticator(eq(ID_VIRTUAL), anyInt(), anyInt(), any());

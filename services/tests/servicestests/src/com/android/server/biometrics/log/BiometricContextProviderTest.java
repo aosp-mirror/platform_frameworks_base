@@ -87,8 +87,12 @@ public class BiometricContextProviderTest {
     private ISessionListener mSessionListener;
     @Mock
     private WindowManager mWindowManager;
+    @Mock
+    private Consumer<OperationContext> mStartHalConsumer;
 
-    private OperationContextExt mOpContext = new OperationContextExt(true);
+    private final FingerprintAuthenticateOptions mAuthenticateOptions =
+            new FingerprintAuthenticateOptions.Builder().build();
+    private final OperationContextExt mOpContext = new OperationContextExt(true);
     private IBiometricContextListener mListener;
     private BiometricContextProvider mProvider;
 
@@ -200,11 +204,11 @@ public class BiometricContextProviderTest {
         final List<Integer> actual = new ArrayList<>();
         final List<Integer> expected = List.of(FoldState.FULLY_CLOSED, FoldState.FULLY_OPENED,
                 FoldState.UNKNOWN, FoldState.HALF_OPENED);
-        mProvider.subscribe(mOpContext, ctx -> {
+        mProvider.subscribe(mOpContext, mStartHalConsumer, ctx -> {
             assertThat(ctx).isSameInstanceAs(mOpContext.toAidlContext());
             assertThat(mProvider.getFoldState()).isEqualTo(ctx.foldState);
             actual.add(ctx.foldState);
-        });
+        }, mAuthenticateOptions);
 
         for (int v : expected) {
             mListener.onFoldChanged(v);
@@ -228,11 +232,11 @@ public class BiometricContextProviderTest {
                 AuthenticateOptions.DISPLAY_STATE_NO_UI,
                 AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN);
 
-        mProvider.subscribe(mOpContext, ctx -> {
+        mProvider.subscribe(mOpContext, mStartHalConsumer, ctx -> {
             assertThat(ctx).isSameInstanceAs(mOpContext.toAidlContext());
             assertThat(mProvider.getDisplayState()).isEqualTo(ctx.displayState);
             actual.add(ctx.displayState);
-        });
+        }, mAuthenticateOptions);
 
         for (int v : expected) {
             mListener.onDisplayStateChanged(v);
@@ -250,11 +254,11 @@ public class BiometricContextProviderTest {
     public void testSubscribesToAod() throws RemoteException {
         final List<Boolean> actual = new ArrayList<>();
 
-        mProvider.subscribe(mOpContext, ctx -> {
+        mProvider.subscribe(mOpContext, mStartHalConsumer, ctx -> {
             assertThat(ctx).isSameInstanceAs(mOpContext.toAidlContext());
             assertThat(mProvider.isAod()).isEqualTo(ctx.isAod);
             actual.add(ctx.isAod);
-        });
+        }, mAuthenticateOptions);
 
         for (int v : List.of(
                 AuthenticateOptions.DISPLAY_STATE_AOD,
@@ -273,10 +277,10 @@ public class BiometricContextProviderTest {
     public void testSubscribesToAwake() throws RemoteException {
         final List<Boolean> actual = new ArrayList<>();
 
-        mProvider.subscribe(mOpContext, ctx -> {
+        mProvider.subscribe(mOpContext, mStartHalConsumer, ctx -> {
             assertThat(ctx).isSameInstanceAs(mOpContext.toAidlContext());
             actual.add(mProvider.isAwake());
-        });
+        }, mAuthenticateOptions);
 
         for (int v : List.of(
                 AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN,
@@ -295,14 +299,15 @@ public class BiometricContextProviderTest {
     public void testSubscribesWithDifferentState() throws RemoteException {
         final Consumer<OperationContext> nonEmptyConsumer = mock(Consumer.class);
         mListener.onDisplayStateChanged(AuthenticateOptions.DISPLAY_STATE_AOD);
-        mProvider.subscribe(mOpContext, nonEmptyConsumer);
-        verify(nonEmptyConsumer).accept(same(mOpContext.toAidlContext()));
+        mProvider.subscribe(mOpContext, mStartHalConsumer, nonEmptyConsumer, mAuthenticateOptions);
+
+        assertThat(mOpContext.getDisplayState()).isEqualTo(AuthenticateOptions.DISPLAY_STATE_AOD);
     }
 
     @Test
     public void testUnsubscribes() throws RemoteException {
         final Consumer<OperationContext> emptyConsumer = mock(Consumer.class);
-        mProvider.subscribe(mOpContext, emptyConsumer);
+        mProvider.subscribe(mOpContext, mStartHalConsumer, emptyConsumer, mAuthenticateOptions);
         mProvider.unsubscribe(mOpContext);
 
         mListener.onDisplayStateChanged(AuthenticateOptions.DISPLAY_STATE_AOD);
@@ -311,7 +316,7 @@ public class BiometricContextProviderTest {
         mListener.onDisplayStateChanged(AuthenticateOptions.DISPLAY_STATE_UNKNOWN);
 
         final Consumer<OperationContext> nonEmptyConsumer = mock(Consumer.class);
-        mProvider.subscribe(mOpContext, nonEmptyConsumer);
+        mProvider.subscribe(mOpContext, mStartHalConsumer, nonEmptyConsumer, mAuthenticateOptions);
         mListener.onDisplayStateChanged(AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN);
         mProvider.unsubscribe(mOpContext);
         mListener.onDisplayStateChanged(AuthenticateOptions.DISPLAY_STATE_NO_UI);

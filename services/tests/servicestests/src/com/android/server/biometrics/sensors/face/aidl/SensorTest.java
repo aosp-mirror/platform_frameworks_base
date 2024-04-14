@@ -41,7 +41,6 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
@@ -50,7 +49,6 @@ import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
-import com.android.server.biometrics.sensors.UserAwareBiometricScheduler;
 import com.android.server.biometrics.sensors.UserSwitchProvider;
 
 import org.junit.Before;
@@ -75,11 +73,7 @@ public class SensorTest {
     @Mock
     private ISession mSession;
     @Mock
-    private UserAwareBiometricScheduler.UserSwitchCallback mUserSwitchCallback;
-    @Mock
     private UserSwitchProvider<IFace, ISession> mUserSwitchProvider;
-    @Mock
-    private AidlResponseHandler.HardwareUnavailableCallback mHardwareUnavailableCallback;
     @Mock
     private LockoutResetDispatcher mLockoutResetDispatcher;
     @Mock
@@ -94,6 +88,8 @@ public class SensorTest {
     private BaseClientMonitor mClientMonitor;
     @Mock
     private AidlSession mCurrentSession;
+    @Mock
+    private AidlResponseHandler.AidlResponseHandlerCallback mAidlResponseHandlerCallback;
 
     private final TestLooper mLooper = new TestLooper();
     private final LockoutCache mLockoutCache = new LockoutCache();
@@ -108,27 +104,17 @@ public class SensorTest {
         when(mContext.getSystemService(Context.BIOMETRIC_SERVICE)).thenReturn(mBiometricService);
         when(mBiometricContext.getAuthSessionCoordinator()).thenReturn(mAuthSessionCoordinator);
 
-        if (Flags.deHidl()) {
-            mScheduler = new BiometricScheduler<>(
-                    new Handler(mLooper.getLooper()),
-                    BiometricScheduler.SENSOR_TYPE_FACE,
-                    null /* gestureAvailabilityDispatcher */,
-                    mBiometricService,
-                    2 /* recentOperationsLimit */,
-                    () -> USER_ID,
-                    mUserSwitchProvider);
-        } else {
-            mScheduler = new UserAwareBiometricScheduler<>(TAG,
-                    new Handler(mLooper.getLooper()),
-                    BiometricScheduler.SENSOR_TYPE_FACE,
-                    null /* gestureAvailabilityDispatcher */,
-                    mBiometricService,
-                    () -> USER_ID,
-                    mUserSwitchCallback);
-        }
+        mScheduler = new BiometricScheduler<>(
+                new Handler(mLooper.getLooper()),
+                BiometricScheduler.SENSOR_TYPE_FACE,
+                null /* gestureAvailabilityDispatcher */,
+                mBiometricService,
+                2 /* recentOperationsLimit */,
+                () -> USER_ID,
+                mUserSwitchProvider);
         mHalCallback = new AidlResponseHandler(mContext, mScheduler, SENSOR_ID, USER_ID,
                 mLockoutCache, mLockoutResetDispatcher, mAuthSessionCoordinator,
-                mHardwareUnavailableCallback);
+                mAidlResponseHandlerCallback);
     }
 
     @Test
