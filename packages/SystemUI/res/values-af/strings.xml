@@ -68,7 +68,7 @@
     <string name="usb_port_enabled" msgid="531823867664717018">"USB-poort is geaktiveer om laaiers en bykomstighede te bespeur"</string>
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Aktiveer USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Kom meer te wete"</string>
-    <string name="global_action_screenshot" msgid="2760267567509131654">"Skermkiekie"</string>
+    <string name="global_action_screenshot" msgid="2760267567509131654">"Skermskoot"</string>
     <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Hou Ontsluit is gedeaktiveer"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"het \'n prent gestuur"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Stoor tans skermkiekie..."</string>
@@ -781,11 +781,11 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"Opletberigte"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Battery"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Skermkiekies"</string>
-    <string name="notification_channel_instant" msgid="7556135423486752680">"Kitsprogramme"</string>
+    <string name="notification_channel_instant" msgid="7556135423486752680">"Kitsapps"</string>
     <string name="notification_channel_setup" msgid="7660580986090760350">"Opstelling"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Berging"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Wenke"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"Kitsprogramme"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"Kitsapps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> loop tans"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Program is oopgemaak sonder dat dit geïnstalleer is."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Program is oopgemaak sonder dat dit geïnstalleer is. Tik om meer te wete te kom."</string>
@@ -1070,8 +1070,8 @@
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Kies gebruiker"</string>
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# app is aktief}other{# apps is aktief}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nuwe inligting"</string>
-    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktiewe programme"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Hierdie programme is aktief en werk, selfs wanneer jy hulle nie gebruik nie. Dit verbeter hul funksies, maar beïnvloed dalk ook batterylewe."</string>
+    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktiewe apps"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Hierdie apps is aktief en werk, selfs wanneer jy hulle nie gebruik nie. Dit verbeter hul funksies, maar beïnvloed dalk ook batterylewe."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Stop"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Gestop"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Klaar"</string>

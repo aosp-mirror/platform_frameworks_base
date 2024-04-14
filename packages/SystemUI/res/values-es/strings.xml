@@ -663,8 +663,8 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Pantalla de bloqueo"</string>
     <string name="group_system_quick_memo" msgid="2914234890158583919">"Abrir la aplicación de notas para tomar una nota rápida"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Función multitarea del sistema"</string>
-    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Iniciar pantalla dividida con esta aplicación en el lado derecho"</string>
-    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Iniciar pantalla dividida con esta aplicación en el lado izquierdo"</string>
+    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Iniciar pantalla dividida con la aplicación actual en el lado derecho"</string>
+    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Iniciar pantalla dividida con la aplicación actual en el lado izquierdo"</string>
     <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Cambiar de pantalla dividida a pantalla completa"</string>
     <string name="system_multitasking_replace" msgid="844285282472557186">"Con pantalla dividida: reemplazar una aplicación por otra"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Entrada"</string>
