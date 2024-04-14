@@ -1732,7 +1732,7 @@
     <string name="owner_name" msgid="8713560351570795743">"मालक"</string>
     <string name="guest_name" msgid="8502103277839834324">"अतिथी"</string>
     <string name="error_message_title" msgid="4082495589294631966">"एरर"</string>
-    <string name="error_message_change_not_allowed" msgid="843159705042381454">"या बदलास आपल्या प्रशासकाद्वारे अनुमती नाही"</string>
+    <string name="error_message_change_not_allowed" msgid="843159705042381454">"या बदलासाठी तुमच्या अ‍ॅडमिनची अनुमती नाही"</string>
     <string name="app_not_found" msgid="3429506115332341800">"ही क्रिया हाताळण्यासाठी कोणताही ॲप्लिकेशन आढळला नाही"</string>
     <string name="revoke" msgid="5526857743819590458">"मागे घ्‍या"</string>
     <string name="mediasize_iso_a0" msgid="7039061159929977973">"ISO A0"</string>

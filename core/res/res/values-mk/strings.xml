@@ -1080,7 +1080,7 @@
     <string name="menu_sym_shortcut_label" msgid="4037566049061218776">"копче Sym+"</string>
     <string name="menu_function_shortcut_label" msgid="2367112760987662566">"копче Function+"</string>
     <string name="menu_space_shortcut_label" msgid="5949311515646872071">"празен простор"</string>
-    <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"внеси"</string>
+    <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"избриши"</string>
     <string name="search_go" msgid="2141477624421347086">"Пребарај"</string>
     <string name="search_hint" msgid="455364685740251925">"Пребарување…"</string>
@@ -1647,7 +1647,7 @@
     <string name="kg_wrong_password" msgid="2384677900494439426">"Погрешна лозинка"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"Погрешен PIN"</string>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Употреби ја својата шема"</string>
-    <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Внеси PIN на SIM картичка"</string>
+    <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Внесете PIN за SIM-картичката"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"Впишете PIN"</string>
     <string name="kg_password_instructions" msgid="7179782578809398050">"Внеси лозинка"</string>
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM картичката е сега оневозможена. Внесете ПУК код за да продолжите. Контактирајте го операторот за детали."</string>

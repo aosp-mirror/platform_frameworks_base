@@ -790,7 +790,7 @@
     <string name="instant_apps_message" msgid="6112428971833011754">"Додаток відкрито без встановлення."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Додаток відкрито без встановлення. Торкніться, щоб дізнатися більше."</string>
     <string name="app_info" msgid="5153758994129963243">"Про додаток"</string>
-    <string name="go_to_web" msgid="636673528981366511">"Веб-переглядач"</string>
+    <string name="go_to_web" msgid="636673528981366511">"Вебпереглядач"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Мобільний трафік"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
