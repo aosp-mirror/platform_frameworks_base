@@ -59,7 +59,7 @@
     <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"अहिलेको भाषा राख्नुहोस्"</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"यस नेटवर्कमा वायरलेस डिबगिङ सेवा प्रयोग गर्न दिने हो?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"नेटवर्कको नाम (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi ठेगाना (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
-    <string name="wifi_debugging_always" msgid="2968383799517975155">"यस नेटवर्कमा सधैँ अनुमति दिइयोस्"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"यस नेटवर्कमा सधैँ अनुमति दिनुहोस्"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"अनुमति दिनुहोस्"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"वायरलेस डिबगिङ सेवालाई अनुमति दिइएको छैन"</string>
     <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"हालैमा यस डिभाइसमा साइन इन भएका प्रयोगकर्ताले USB डिबगिङ सक्रिय गर्न सक्दैनन्। यो सुविधा प्रयोग गर्न कृपया खाताका एड्मिनका रूपमा साइन इन गर्नुहोस्।"</string>
@@ -103,7 +103,7 @@
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"तपाईंले रेकर्ड गर्दै गर्दा Android ले तपाईंको स्क्रिनमा देखिने वा डिभाइसमा प्ले गरिने सबै कुरा हेर्न तथा प्रयोग गर्न सक्छ। त्यसैले पासवर्ड, भुक्तानीसम्बन्धी विवरण, म्यासेज, फोटो र अडियो तथा भिडियो जस्ता कुरा हेर्दा वा प्ले गर्दा सावधानी अपनाउनुहोला।"</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"तपाईंले कुनै एप रेकर्ड गर्दै गर्दा Android ले उक्त एपमा देखाइने वा प्ले गरिने सबै कुरा हेर्न तथा प्रयोग गर्न सक्छ। त्यसैले पासवर्ड, भुक्तानीसम्बन्धी विवरण, म्यासेज, फोटो र अडियो तथा भिडियो जस्ता कुरा हेर्दा वा प्ले गर्दा सावधानी अपनाउनुहोला।"</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"रेकर्ड गर्न थाल्नुहोस्"</string>
-    <string name="screenrecord_audio_label" msgid="6183558856175159629">"अडियो रेकर्ड गरियोस्"</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"अडियो रेकर्ड गर्नुहोस्"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"डिभाइसको अडियो"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"तपाईंको डिभाइसका सङ्गीत, कल र रिङटोन जस्ता साउन्ड"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"माइक्रोफोन"</string>
@@ -111,7 +111,7 @@
     <string name="screenrecord_continue" msgid="4055347133700593164">"सुरु गर्नुहोस्"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"स्क्रिन रेकर्ड गरिँदै छ"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"स्क्रिन र अडियो रेकर्ड गरिँदै छ"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"स्पर्श गरिएका स्थानहरू देखाइयोस्"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"स्पर्श गरिएका स्थानहरू देखाउनुहोस्"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"रोक्नुहोस्"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"सेयर गर्नुहोस्"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"स्क्रिन रेकर्डिङ सेभ गरियो"</string>
@@ -243,7 +243,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"अडियो"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"हेडसेट"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"इनपुट"</string>
-    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"श्रवण यन्त्रहरू"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"हियरिङ डिभाइसहरू"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"सक्रिय गर्दै…"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"अटो रोटेट"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"स्क्रिन स्वतःघुम्ने"</string>
@@ -531,7 +531,7 @@
     <string name="status_bar_alarm" msgid="87160847643623352">"अलार्म"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"फोनमार्फत अझ छिटो र थप सुरक्षित तरिकाले खरिद गर्न भुक्तानी विधि सेटअप गर्नुहोस्"</string>
-    <string name="wallet_app_button_label" msgid="7123784239111190992">"सबै देखाइयोस्"</string>
+    <string name="wallet_app_button_label" msgid="7123784239111190992">"सबै देखाउनुहोस्"</string>
     <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"खोल्न ट्याप गर्नुहोस्"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"अपडेट गरिँदै छ"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"यो वालेट प्रयोग गर्न डिभाइस अनलक गर्नुहोस्"</string>
@@ -657,7 +657,7 @@
     <string name="group_system_cycle_forward" msgid="9202444850838205990">"हालसालै खोलिएका एपहरू हेर्नुहोस् (अगाडि)"</string>
     <string name="group_system_cycle_back" msgid="5163464503638229131">"हालसालै खोलिएका एपहरू हेर्नुहोस् (पछाडि)"</string>
     <string name="group_system_access_all_apps_search" msgid="488070738028991753">"सबै एप र खोज (अर्थात्, Search/लन्चर) को सूची हेर्नुहोस्"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"टास्कबार लुकाइयोस् र (पुनः) देखाइयोस्"</string>
+    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"टास्कबार लुकाउनुहोस् र (पुनः) देखाउनुहोस्"</string>
     <string name="group_system_access_system_settings" msgid="7961639365383008053">"सिस्टमका सेटिङमा जानुहोस्"</string>
     <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Google सहायक प्रयोग गर्नुहोस्"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"स्क्रिन लक गर्नुहोस्"</string>
