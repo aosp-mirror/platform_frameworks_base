@@ -19,6 +19,7 @@ package com.android.wm.shell.recents;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.content.pm.PackageManager.FEATURE_PC;
 
+import static com.android.window.flags.Flags.enableDesktopWindowingTaskbarRunningApps;
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_RECENT_TASKS;
 
@@ -26,7 +27,6 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
-import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -86,7 +86,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
     private final ActivityTaskManager mActivityTaskManager;
     private RecentsTransitionHandler mTransitionHandler = null;
     private IRecentTasksListener mListener;
-    private final boolean mIsDesktopMode;
+    private final boolean mPcFeatureEnabled;
 
     // Mapping of split task ids, mappings are symmetrical (ie. if t1 is the taskid of a task in a
     // pair, then mSplitTasks[t1] = t2, and mSplitTasks[t2] = t1)
@@ -133,7 +133,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
         mShellController = shellController;
         mShellCommandHandler = shellCommandHandler;
         mActivityTaskManager = activityTaskManager;
-        mIsDesktopMode = mContext.getPackageManager().hasSystemFeature(FEATURE_PC);
+        mPcFeatureEnabled = mContext.getPackageManager().hasSystemFeature(FEATURE_PC);
         mTaskStackListener = taskStackListener;
         mDesktopModeTaskRepository = desktopModeTaskRepository;
         mMainExecutor = mainExecutor;
@@ -252,8 +252,10 @@ public class RecentTasksController implements TaskStackListenerCallback,
         notifyRunningTaskVanished(taskInfo);
     }
 
-    public void onTaskWindowingModeChanged(TaskInfo taskInfo) {
+    /** Notify listeners that the windowing mode of the given Task was updated. */
+    public void onTaskWindowingModeChanged(ActivityManager.RunningTaskInfo taskInfo) {
         notifyRecentTasksChanged();
+        notifyRunningTaskChanged(taskInfo);
     }
 
     @Override
@@ -278,7 +280,9 @@ public class RecentTasksController implements TaskStackListenerCallback,
      * Notify the running task listener that a task appeared on desktop environment.
      */
     private void notifyRunningTaskAppeared(ActivityManager.RunningTaskInfo taskInfo) {
-        if (mListener == null || !mIsDesktopMode || taskInfo.realActivity == null) {
+        if (mListener == null
+                || !shouldEnableRunningTasksForDesktopMode()
+                || taskInfo.realActivity == null) {
             return;
         }
         try {
@@ -292,7 +296,9 @@ public class RecentTasksController implements TaskStackListenerCallback,
      * Notify the running task listener that a task was removed on desktop environment.
      */
     private void notifyRunningTaskVanished(ActivityManager.RunningTaskInfo taskInfo) {
-        if (mListener == null || !mIsDesktopMode || taskInfo.realActivity == null) {
+        if (mListener == null
+                || !shouldEnableRunningTasksForDesktopMode()
+                || taskInfo.realActivity == null) {
             return;
         }
         try {
@@ -300,6 +306,27 @@ public class RecentTasksController implements TaskStackListenerCallback,
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed call onRunningTaskVanished", e);
         }
+    }
+
+    /**
+     * Notify the running task listener that a task was changed on desktop environment.
+     */
+    private void notifyRunningTaskChanged(ActivityManager.RunningTaskInfo taskInfo) {
+        if (mListener == null
+                || !shouldEnableRunningTasksForDesktopMode()
+                || taskInfo.realActivity == null) {
+            return;
+        }
+        try {
+            mListener.onRunningTaskChanged(taskInfo);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed call onRunningTaskChanged", e);
+        }
+    }
+
+    private boolean shouldEnableRunningTasksForDesktopMode() {
+        return mPcFeatureEnabled
+                || (DesktopModeStatus.isEnabled() && enableDesktopWindowingTaskbarRunningApps());
     }
 
     @VisibleForTesting
@@ -475,6 +502,11 @@ public class RecentTasksController implements TaskStackListenerCallback,
             @Override
             public void onRunningTaskVanished(ActivityManager.RunningTaskInfo taskInfo) {
                 mListener.call(l -> l.onRunningTaskVanished(taskInfo));
+            }
+
+            @Override
+            public void onRunningTaskChanged(ActivityManager.RunningTaskInfo taskInfo) {
+                mListener.call(l -> l.onRunningTaskChanged(taskInfo));
             }
         };
 
