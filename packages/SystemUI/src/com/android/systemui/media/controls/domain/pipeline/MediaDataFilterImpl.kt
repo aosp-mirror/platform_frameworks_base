@@ -186,7 +186,7 @@ constructor(
             smartspaceMediaData.packageName,
             smartspaceMediaData.instanceId
         )
-        mediaFilterRepository.setRecommedationsLoadingState(
+        mediaFilterRepository.setRecommendationsLoadingState(
             SmartspaceMediaLoadingModel.Loaded(key, shouldPrioritizeMutable)
         )
     }
@@ -224,7 +224,7 @@ constructor(
                 )
             )
         }
-        mediaFilterRepository.setRecommedationsLoadingState(
+        mediaFilterRepository.setRecommendationsLoadingState(
             SmartspaceMediaLoadingModel.Removed(key, immediately)
         )
     }

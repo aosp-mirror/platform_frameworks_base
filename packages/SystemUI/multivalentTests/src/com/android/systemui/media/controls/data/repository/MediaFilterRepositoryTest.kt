@@ -25,6 +25,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.MediaTestHelper
+import com.android.systemui.media.controls.shared.model.MediaCommonModel
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.MediaDataLoadingModel
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
@@ -172,12 +173,147 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
             val recommendationsLoadingModel =
                 SmartspaceMediaLoadingModel.Loaded(KEY_MEDIA_SMARTSPACE)
 
-            underTest.setRecommedationsLoadingState(recommendationsLoadingModel)
+            underTest.setRecommendationsLoadingState(recommendationsLoadingModel)
 
             assertThat(recommendationsLoadingState).isEqualTo(recommendationsLoadingModel)
         }
 
+    @Test
+    fun addMediaControlPlayingThenRemote() =
+        testScope.runTest {
+            val sortedMedia by collectLastValue(underTest.sortedMedia)
+            val playingInstanceId = InstanceId.fakeInstanceId(123)
+            val remoteInstanceId = InstanceId.fakeInstanceId(321)
+            val playingData = createMediaData("app1", true, LOCAL, false, playingInstanceId)
+            val remoteData = createMediaData("app2", true, REMOTE, false, remoteInstanceId)
+
+            underTest.addSelectedUserMediaEntry(playingData)
+            underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(playingInstanceId))
+            underTest.addSelectedUserMediaEntry(remoteData)
+            underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(remoteInstanceId))
+
+            assertThat(sortedMedia?.size).isEqualTo(2)
+            assertThat(sortedMedia?.values)
+                .containsExactly(
+                    MediaCommonModel.MediaControl(playingInstanceId),
+                    MediaCommonModel.MediaControl(remoteInstanceId)
+                )
+        }
+
+    @Test
+    fun switchMediaControlsPlaying() =
+        testScope.runTest {
+            val sortedMedia by collectLastValue(underTest.sortedMedia)
+            val playingInstanceId1 = InstanceId.fakeInstanceId(123)
+            val playingInstanceId2 = InstanceId.fakeInstanceId(321)
+            var playingData1 = createMediaData("app1", true, LOCAL, false, playingInstanceId1)
+            var playingData2 = createMediaData("app2", false, LOCAL, false, playingInstanceId2)
+
+            underTest.addSelectedUserMediaEntry(playingData1)
+            underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(playingInstanceId1))
+            underTest.addSelectedUserMediaEntry(playingData2)
+            underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(playingInstanceId2))
+
+            assertThat(sortedMedia?.size).isEqualTo(2)
+            assertThat(sortedMedia?.values)
+                .containsExactly(
+                    MediaCommonModel.MediaControl(playingInstanceId1),
+                    MediaCommonModel.MediaControl(playingInstanceId2)
+                )
+                .inOrder()
+
+            playingData1 = createMediaData("app1", false, LOCAL, false, playingInstanceId1)
+            playingData2 = createMediaData("app2", true, LOCAL, false, playingInstanceId2)
+
+            underTest.addSelectedUserMediaEntry(playingData1)
+            underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(playingInstanceId1))
+            underTest.addSelectedUserMediaEntry(playingData2)
+            underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(playingInstanceId2))
+
+            assertThat(sortedMedia?.size).isEqualTo(2)
+            assertThat(sortedMedia?.values)
+                .containsExactly(
+                    MediaCommonModel.MediaControl(playingInstanceId2),
+                    MediaCommonModel.MediaControl(playingInstanceId1)
+                )
+                .inOrder()
+        }
+
+    @Test
+    fun fullOrderTest() =
+        testScope.runTest {
+            val sortedMedia by collectLastValue(underTest.sortedMedia)
+            val instanceId1 = InstanceId.fakeInstanceId(123)
+            val instanceId2 = InstanceId.fakeInstanceId(456)
+            val instanceId3 = InstanceId.fakeInstanceId(321)
+            val instanceId4 = InstanceId.fakeInstanceId(654)
+            val instanceId5 = InstanceId.fakeInstanceId(124)
+            val playingAndLocalData = createMediaData("app1", true, LOCAL, false, instanceId1)
+            val playingAndRemoteData = createMediaData("app2", true, REMOTE, false, instanceId2)
+            val stoppedAndLocalData = createMediaData("app3", false, LOCAL, false, instanceId3)
+            val stoppedAndRemoteData = createMediaData("app4", false, REMOTE, false, instanceId4)
+            val canResumeData = createMediaData("app5", false, LOCAL, true, instanceId5)
+
+            val icon = Icon.createWithResource(context, R.drawable.ic_media_play)
+            val mediaRecommendations =
+                SmartspaceMediaData(
+                    targetId = KEY_MEDIA_SMARTSPACE,
+                    isActive = true,
+                    recommendations = MediaTestHelper.getValidRecommendationList(icon),
+                )
+
+            underTest.addSelectedUserMediaEntry(stoppedAndLocalData)
+            underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(instanceId3))
+
+            underTest.addSelectedUserMediaEntry(stoppedAndRemoteData)
+            underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(instanceId4))
+
+            underTest.addSelectedUserMediaEntry(canResumeData)
+            underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(instanceId5))
+
+            underTest.addSelectedUserMediaEntry(playingAndLocalData)
+            underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(instanceId1))
+
+            underTest.addSelectedUserMediaEntry(playingAndRemoteData)
+            underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(instanceId2))
+
+            underTest.setRecommendation(mediaRecommendations)
+            underTest.setRecommendationsLoadingState(
+                SmartspaceMediaLoadingModel.Loaded(KEY_MEDIA_SMARTSPACE, true)
+            )
+
+            assertThat(sortedMedia?.size).isEqualTo(6)
+            assertThat(sortedMedia?.values)
+                .containsExactly(
+                    MediaCommonModel.MediaControl(instanceId1),
+                    MediaCommonModel.MediaControl(instanceId2),
+                    MediaCommonModel.MediaRecommendations(KEY_MEDIA_SMARTSPACE),
+                    MediaCommonModel.MediaControl(instanceId4),
+                    MediaCommonModel.MediaControl(instanceId3),
+                    MediaCommonModel.MediaControl(instanceId5),
+                )
+                .inOrder()
+        }
+
+    private fun createMediaData(
+        app: String,
+        playing: Boolean,
+        playbackLocation: Int,
+        isResume: Boolean,
+        instanceId: InstanceId,
+    ): MediaData {
+        return MediaData(
+            playbackLocation = playbackLocation,
+            resumption = isResume,
+            notificationKey = "key: $app",
+            isPlaying = playing,
+            instanceId = instanceId
+        )
+    }
+
     companion object {
+        private const val LOCAL = MediaData.PLAYBACK_LOCAL
+        private const val REMOTE = MediaData.PLAYBACK_CAST_LOCAL
         private const val KEY = "KEY"
         private const val KEY_MEDIA_SMARTSPACE = "MEDIA_SMARTSPACE_ID"
     }

@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.controls.data.repository
+package com.android.systemui.media.controls.shared.model
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.util.time.systemClock
+import com.android.internal.logging.InstanceId
 
-val Kosmos.mediaFilterRepository by Kosmos.Fixture { MediaFilterRepository(systemClock) }
+/** Models any type of media. */
+sealed class MediaCommonModel {
+    data class MediaControl(val instanceId: InstanceId) : MediaCommonModel()
+
+    data class MediaRecommendations(val key: String) : MediaCommonModel()
+}
