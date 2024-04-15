@@ -65,7 +65,9 @@ object ScreenshotShelfViewBinder {
                     }
                     launch {
                         viewModel.actions.collect { actions ->
-                            if (actions.isNotEmpty()) {
+                            val visibleActions = actions.filter { it.visible }
+
+                            if (visibleActions.isNotEmpty()) {
                                 view
                                     .requireViewById<View>(R.id.actions_container_background)
                                     .visibility = View.VISIBLE
@@ -75,7 +77,7 @@ object ScreenshotShelfViewBinder {
                             // any new actions and update any that are already there.
                             // This assumes that actions can never change order and that each action
                             // ID is unique.
-                            val newIds = actions.map { it.id }
+                            val newIds = visibleActions.map { it.id }
 
                             for (view in actionsContainer.children.toList()) {
                                 if (view.tag !in newIds) {
@@ -83,7 +85,7 @@ object ScreenshotShelfViewBinder {
                                 }
                             }
 
-                            for ((index, action) in actions.withIndex()) {
+                            for ((index, action) in visibleActions.withIndex()) {
                                 val currentView: View? = actionsContainer.getChildAt(index)
                                 if (action.id == currentView?.tag) {
                                     // Same ID, update the display
