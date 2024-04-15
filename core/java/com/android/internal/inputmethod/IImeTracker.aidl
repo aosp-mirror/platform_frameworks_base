@@ -64,18 +64,26 @@ interface IImeTracker {
     oneway void onCancelled(in ImeTracker.Token statsToken, int phase);
 
     /**
-     * Called when the IME show request is successful.
+     * Called when the show IME request is successful.
      *
      * @param statsToken the token tracking the current IME request.
      */
     oneway void onShown(in ImeTracker.Token statsToken);
 
     /**
-     * Called when the IME hide request is successful.
+     * Called when the hide IME request is successful.
      *
      * @param statsToken the token tracking the current IME request.
      */
     oneway void onHidden(in ImeTracker.Token statsToken);
+
+    /**
+     * Called when the user-controlled IME request was dispatched to the requesting app. The
+     * user animation can take an undetermined amount of time, so it shouldn't be tracked.
+     *
+     * @param statsToken the token tracking the current IME request.
+     */
+    oneway void onDispatched(in ImeTracker.Token statsToken);
 
     /**
      * Checks whether there are any pending IME visibility requests.

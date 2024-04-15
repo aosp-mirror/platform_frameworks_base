@@ -1235,10 +1235,13 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     mHost.getInputMethodManager(), null /* icProto */);
         }
 
+        final var statsToken = ImeTracker.forLogging().onStart(ImeTracker.TYPE_USER,
+                ImeTracker.ORIGIN_CLIENT, SoftInputShowHideReason.CONTROL_WINDOW_INSETS_ANIMATION,
+                mHost.isHandlingPointerEvent() /* fromUser */);
         controlAnimationUnchecked(types, cancellationSignal, listener, mFrame, fromIme, durationMs,
                 interpolator, animationType,
                 getLayoutInsetsDuringAnimationMode(types, fromPredictiveBack),
-                false /* useInsetsAnimationThread */, null /* statsToken */);
+                false /* useInsetsAnimationThread */, statsToken);
     }
 
     private void controlAnimationUnchecked(@InsetsType int types,
@@ -1540,7 +1543,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             return;
         }
         final ImeTracker.Token statsToken = runner.getStatsToken();
-        if (shown) {
+        if (runner.getAnimationType() == ANIMATION_TYPE_USER) {
+            ImeTracker.forLogging().onUserFinished(statsToken, shown);
+        } else if (shown) {
             ImeTracker.forLogging().onProgress(statsToken,
                     ImeTracker.PHASE_CLIENT_ANIMATION_FINISHED_SHOW);
             ImeTracker.forLogging().onShown(statsToken);
@@ -1808,6 +1813,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.pendingAnim", 0);
             mHost.dispatchWindowInsetsAnimationStart(animation, bounds);
             mStartingAnimation = true;
+            if (runner.getAnimationType() == ANIMATION_TYPE_USER) {
+                ImeTracker.forLogging().onDispatched(runner.getStatsToken());
+            }
             runner.setReadyDispatched(true);
             listener.onReady(runner, types);
             mStartingAnimation = false;

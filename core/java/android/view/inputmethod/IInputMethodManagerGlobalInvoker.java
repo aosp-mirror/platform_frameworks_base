@@ -754,6 +754,19 @@ final class IInputMethodManagerGlobalInvoker {
         }
     }
 
+    /** @see com.android.server.inputmethod.ImeTrackerService#onDispatched */
+    static void onDispatched(@NonNull ImeTracker.Token statsToken) {
+        final IImeTracker service = getImeTrackerService();
+        if (service == null) {
+            return;
+        }
+        try {
+            service.onDispatched(statsToken);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /** @see com.android.server.inputmethod.ImeTrackerService#hasPendingImeVisibilityRequests */
     @AnyThread
     @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)

@@ -88,6 +88,7 @@ import java.lang.annotation.Retention;
         SoftInputShowHideReason.HIDE_SOFT_INPUT_REQUEST_HIDE_WITH_CONTROL,
         SoftInputShowHideReason.SHOW_SOFT_INPUT_IME_TOGGLE_SOFT_INPUT,
         SoftInputShowHideReason.SHOW_SOFT_INPUT_IMM_DEPRECATION,
+        SoftInputShowHideReason.CONTROL_WINDOW_INSETS_ANIMATION,
 })
 public @interface SoftInputShowHideReason {
     /** Default, undefined reason. */
@@ -397,4 +398,10 @@ public @interface SoftInputShowHideReason {
      * {@link InputMethodManager#showSoftInputFromInputMethod(IBinder, int)}.
      */
     int SHOW_SOFT_INPUT_IMM_DEPRECATION = ImeProtoEnums.REASON_SHOW_SOFT_INPUT_IMM_DEPRECATION;
+
+    /**
+     * Show / Hide soft input by application-controlled animation in
+     * {@link android.view.InsetsController#controlWindowInsetsAnimation}.
+     */
+    int CONTROL_WINDOW_INSETS_ANIMATION = ImeProtoEnums.REASON_CONTROL_WINDOW_INSETS_ANIMATION;
 }
