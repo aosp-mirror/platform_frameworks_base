@@ -66,6 +66,7 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.credentials.metrics.ApiName;
 import com.android.server.credentials.metrics.ApiStatus;
@@ -1166,30 +1167,23 @@ public final class CredentialManagerService
                 settingsWrapper.getStringForUser(
                         Settings.Secure.AUTOFILL_SERVICE, UserHandle.myUserId());
 
-        // If there is an autofill provider and it is the placeholder indicating
+        // If there is an autofill provider and it is the credential autofill service indicating
         // that the currently selected primary provider does not support autofill
-        // then we should wipe the setting to keep it in sync.
-        if (autofillProvider != null && primaryProviders.isEmpty()) {
-            if (autofillProvider.equals(AUTOFILL_PLACEHOLDER_VALUE)) {
+        // then we should keep as is
+        String credentialAutofillService = settingsWrapper.mContext.getResources().getString(
+                R.string.config_defaultCredentialManagerAutofillService);
+        if (autofillProvider != null && primaryProviders.isEmpty() && !TextUtils.equals(
+                autofillProvider, credentialAutofillService)) {
+            // If the existing autofill provider is from the app being removed
+            // then erase the autofill service setting.
+            ComponentName cn = ComponentName.unflattenFromString(autofillProvider);
+            if (cn != null && cn.getPackageName().equals(packageName)) {
                 if (!settingsWrapper.putStringForUser(
                         Settings.Secure.AUTOFILL_SERVICE,
                         "",
                         UserHandle.myUserId(),
                         /* overrideableByRestore= */ true)) {
                     Slog.e(TAG, "Failed to remove autofill package: " + packageName);
-                }
-            } else {
-                // If the existing autofill provider is from the app being removed
-                // then erase the autofill service setting.
-                ComponentName cn = ComponentName.unflattenFromString(autofillProvider);
-                if (cn != null && cn.getPackageName().equals(packageName)) {
-                    if (!settingsWrapper.putStringForUser(
-                            Settings.Secure.AUTOFILL_SERVICE,
-                            "",
-                            UserHandle.myUserId(),
-                            /* overrideableByRestore= */ true)) {
-                        Slog.e(TAG, "Failed to remove autofill package: " + packageName);
-                    }
                 }
             }
         }
