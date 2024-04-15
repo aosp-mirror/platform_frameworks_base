@@ -55,7 +55,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.FakePowerRepository
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.data.repository.FakeShadeRepository
@@ -87,8 +86,8 @@ import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -135,7 +134,6 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
         val keyguardTransitionRepository = FakeKeyguardTransitionRepository()
         val featureFlags = FakeFeatureFlagsClassic()
         val shadeRepository = FakeShadeRepository()
-        val sceneContainerFlags = FakeSceneContainerFlags()
         val configurationRepository = FakeConfigurationRepository()
         val keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor
         fromLockscreenTransitionInteractor = kosmos.fromLockscreenTransitionInteractor
@@ -146,7 +144,6 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
                 keyguardRepository,
                 FakeCommandQueue(),
                 powerInteractor,
-                sceneContainerFlags,
                 FakeKeyguardBouncerRepository(),
                 ConfigurationInteractor(configurationRepository),
                 shadeRepository,

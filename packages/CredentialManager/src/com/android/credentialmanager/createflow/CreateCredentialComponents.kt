@@ -46,6 +46,7 @@ import androidx.core.graphics.drawable.toBitmap
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.credentialmanager.CredentialSelectorViewModel
 import com.android.credentialmanager.R
+import com.android.credentialmanager.common.BiometricError
 import com.android.credentialmanager.common.BiometricFlowType
 import com.android.credentialmanager.common.BiometricPromptState
 import com.android.credentialmanager.model.EntryInfo
@@ -581,7 +582,11 @@ internal fun BiometricSelectionPage(
     onMoreOptionSelected: () -> Unit,
     requestDisplayInfo: RequestDisplayInfo,
     enabledProviderInfo: EnabledProviderInfo,
-    onBiometricEntrySelected: (EntryInfo, BiometricPrompt.AuthenticationResult) -> Unit,
+    onBiometricEntrySelected: (
+        EntryInfo,
+        BiometricPrompt.AuthenticationResult?,
+        BiometricError?
+    ) -> Unit,
     onCancelFlowAndFinish: () -> Unit,
     onIllegalScreenStateAndFinish: (String) -> Unit,
     fallbackToOriginalFlow: (BiometricFlowType) -> Unit,

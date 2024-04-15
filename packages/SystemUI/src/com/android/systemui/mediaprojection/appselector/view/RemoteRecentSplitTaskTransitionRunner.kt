@@ -27,8 +27,8 @@ import android.os.RemoteException
 import android.util.Log
 import android.view.SurfaceControl
 import android.view.animation.DecelerateInterpolator
-import android.window.IRemoteTransition
 import android.window.IRemoteTransitionFinishedCallback
+import android.window.RemoteTransitionStub
 import android.window.TransitionInfo
 import android.window.WindowContainerToken
 import com.android.app.viewcapture.ViewCapture
@@ -41,7 +41,7 @@ class RemoteRecentSplitTaskTransitionRunner(
     private val viewPosition: IntArray,
     private val screenBounds: Rect,
     private val handleResult: () -> Unit,
-) : IRemoteTransition.Stub() {
+) : RemoteTransitionStub() {
     override fun startAnimation(
         transition: IBinder?,
         info: TransitionInfo?,
@@ -113,14 +113,6 @@ class RemoteRecentSplitTaskTransitionRunner(
             launchAnimation.start()
         }
     }
-
-    override fun mergeAnimation(
-        transition: IBinder?,
-        info: TransitionInfo?,
-        t: SurfaceControl.Transaction?,
-        mergeTarget: IBinder?,
-        finishedCallback: IRemoteTransitionFinishedCallback?
-    ) {}
 
     @Throws(RemoteException::class)
     override fun onTransitionConsumed(transition: IBinder, aborted: Boolean) {

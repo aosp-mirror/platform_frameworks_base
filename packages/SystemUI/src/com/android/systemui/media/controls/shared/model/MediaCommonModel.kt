@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene.shared.flag
+package com.android.systemui.media.controls.shared.model
 
-import com.android.systemui.kosmos.Kosmos
+import com.android.internal.logging.InstanceId
 
-var Kosmos.fakeSceneContainerFlags by Kosmos.Fixture { FakeSceneContainerFlags() }
-val Kosmos.sceneContainerFlags by Kosmos.Fixture<SceneContainerFlags> { fakeSceneContainerFlags }
+/** Models any type of media. */
+sealed class MediaCommonModel {
+    data class MediaControl(val instanceId: InstanceId) : MediaCommonModel()
+
+    data class MediaRecommendations(val key: String) : MediaCommonModel()
+}

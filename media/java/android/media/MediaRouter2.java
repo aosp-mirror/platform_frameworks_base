@@ -2713,7 +2713,7 @@ public final class MediaRouter2 {
 
             List<RoutingSessionInfo> sessionInfos = getRoutingSessions();
             RoutingSessionInfo targetSession = sessionInfos.get(sessionInfos.size() - 1);
-            transfer(targetSession, route, Process.myUserHandle(), mContext.getPackageName());
+            transfer(targetSession, route, mClientUser, mContext.getPackageName());
         }
 
         @Override

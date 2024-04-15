@@ -858,10 +858,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         // as it likely will change.
                         relevantDecor.updateHoverAndPressStatus(ev);
                         mDesktopTasksController.onDragPositioningEndThroughStatusBar(
-                                new PointF(ev.getRawX(), ev.getRawY()),
-                                relevantDecor.mTaskInfo,
-                                calculateFreeformBounds(ev.getDisplayId(),
-                                        DesktopTasksController.DESKTOP_MODE_INITIAL_BOUNDS_SCALE));
+                                new PointF(ev.getRawX(), ev.getRawY()), relevantDecor.mTaskInfo);
                         mMoveToDesktopAnimator = null;
                         return;
                     } else {
@@ -911,23 +908,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 mMoveToDesktopAnimator = null;
             }
         }
-    }
-
-    /**
-     * Gets bounds of a scaled window centered relative to the screen bounds
-     * @param scale the amount to scale to relative to the Screen Bounds
-     */
-    private Rect calculateFreeformBounds(int displayId, float scale) {
-        // TODO(b/319819547): Account for app constraints so apps do not become letterboxed
-        final DisplayLayout displayLayout = mDisplayController.getDisplayLayout(displayId);
-        final int screenWidth = displayLayout.width();
-        final int screenHeight = displayLayout.height();
-
-        final float adjustmentPercentage = (1f - scale) / 2;
-        return new Rect((int) (screenWidth * adjustmentPercentage),
-                (int) (screenHeight * adjustmentPercentage),
-                (int) (screenWidth * (adjustmentPercentage + scale)),
-                (int) (screenHeight * (adjustmentPercentage + scale)));
     }
 
     @Nullable

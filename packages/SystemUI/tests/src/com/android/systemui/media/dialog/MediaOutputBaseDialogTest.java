@@ -123,11 +123,22 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
         mMediaControllers.add(mMediaController);
         when(mMediaSessionManager.getActiveSessions(any())).thenReturn(mMediaControllers);
 
-        mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
-                mMediaSessionManager, mLocalBluetoothManager, mStarter,
-                mNotifCollection, mDialogTransitionAnimator,
-                mNearbyMediaDevicesManager, mAudioManager, mPowerExemptionManager,
-                mKeyguardManager, mFlags, mUserTracker);
+        mMediaOutputController =
+                new MediaOutputController(
+                        mContext,
+                        TEST_PACKAGE,
+                        mContext.getUser(),
+                        mMediaSessionManager,
+                        mLocalBluetoothManager,
+                        mStarter,
+                        mNotifCollection,
+                        mDialogTransitionAnimator,
+                        mNearbyMediaDevicesManager,
+                        mAudioManager,
+                        mPowerExemptionManager,
+                        mKeyguardManager,
+                        mFlags,
+                        mUserTracker);
 
         // Using a fake package will cause routing operations to fail, so we intercept
         // scanning-related operations.

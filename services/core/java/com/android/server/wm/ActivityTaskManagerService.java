@@ -390,6 +390,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     final VisibleActivityProcessTracker mVisibleActivityProcessTracker;
 
+    /** The starting activities which are waiting for their processes to attach. */
+    final ArrayList<ActivityRecord> mStartingProcessActivities = new ArrayList<>();
+
     /* Global service lock used by the package the owns this service. */
     final WindowManagerGlobalLock mGlobalLock = new WindowManagerGlobalLock();
     /**
@@ -4331,6 +4334,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (mDemoteTopAppReasons != 0) {
                 pw.println("  mDemoteTopAppReasons=" + mDemoteTopAppReasons);
             }
+            if (!mStartingProcessActivities.isEmpty()) {
+                pw.println("  mStartingProcessActivities=" + mStartingProcessActivities);
+            }
         }
 
         if (!printedAnything) {
@@ -5178,6 +5184,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     void startProcessAsync(ActivityRecord activity, boolean knownToBeDead, boolean isTop,
             String hostingType) {
+        if (!mStartingProcessActivities.contains(activity)) {
+            mStartingProcessActivities.add(activity);
+        } else if (mProcessNames.get(
+                activity.processName, activity.info.applicationInfo.uid) != null) {
+            // The process is already starting. Wait for it to attach.
+            return;
+        }
         try {
             if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "dispatchingStartProcess:"
@@ -6174,7 +6187,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void onProcessRemoved(String name, int uid) {
             synchronized (mGlobalLockWithoutBoost) {
-                mProcessNames.remove(name, uid);
+                final WindowProcessController proc = mProcessNames.remove(name, uid);
+                if (proc != null && !mStartingProcessActivities.isEmpty()) {
+                    for (int i = mStartingProcessActivities.size() - 1; i >= 0; i--) {
+                        final ActivityRecord r = mStartingProcessActivities.get(i);
+                        if (uid == r.info.applicationInfo.uid && name.equals(r.processName)) {
+                            Slog.w(TAG, proc + " is removed with pending start " + r);
+                            mStartingProcessActivities.remove(i);
+                            // If visible, finish it to avoid getting stuck on screen.
+                            if (r.isVisibleRequested()) {
+                                r.finishIfPossible("starting-proc-removed", false /* oomAdj */);
+                            }
+                        }
+                    }
+                }
             }
         }
 

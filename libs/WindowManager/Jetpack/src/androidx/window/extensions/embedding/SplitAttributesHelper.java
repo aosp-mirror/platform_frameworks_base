@@ -20,6 +20,7 @@ import android.content.res.Configuration;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.window.extensions.embedding.SplitAttributes.SplitType.ExpandContainersSplitType;
 
 /** Helper functions for {@link SplitAttributes} */
 class SplitAttributesHelper {
@@ -42,5 +43,18 @@ class SplitAttributesHelper {
                 throw new IllegalArgumentException(
                         "Invalid layout direction:" + splitAttributes.getLayoutDirection());
         }
+    }
+
+    /**
+     * Returns whether the {@link SplitAttributes} is an {@link ExpandContainersSplitType} and it
+     * should show a draggable handle that allows the user to drag and restore it into a split.
+     * This state is a result of user dragging the divider to fully expand the secondary container.
+     */
+    static boolean isDraggableExpandType(@NonNull SplitAttributes splitAttributes) {
+        final DividerAttributes dividerAttributes = splitAttributes.getDividerAttributes();
+        return splitAttributes.getSplitType() instanceof ExpandContainersSplitType
+                && dividerAttributes != null
+                && dividerAttributes.getDividerType() == DividerAttributes.DIVIDER_TYPE_DRAGGABLE;
+
     }
 }

@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.view.WindowInsets
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
@@ -31,7 +30,6 @@ class SceneWindowRootView(
         viewModel: SceneContainerViewModel,
         containerConfig: SceneContainerConfig,
         sharedNotificationContainer: SharedNotificationContainer,
-        flags: SceneContainerFlags,
         scenes: Set<Scene>,
         layoutInsetController: LayoutInsetsController,
         sceneDataSourceDelegator: SceneDataSourceDelegator,
@@ -44,7 +42,6 @@ class SceneWindowRootView(
             windowInsets = windowInsets,
             containerConfig = containerConfig,
             sharedNotificationContainer = sharedNotificationContainer,
-            flags = flags,
             scenes = scenes,
             onVisibilityChangedInternal = { isVisible ->
                 super.setVisibility(if (isVisible) View.VISIBLE else View.INVISIBLE)

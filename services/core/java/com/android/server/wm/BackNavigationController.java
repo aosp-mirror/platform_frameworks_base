@@ -811,6 +811,13 @@ class BackNavigationController {
         return mAnimationHandler.isTarget(wc, wc.isVisibleRequested() /* open */);
     }
 
+    boolean shouldPauseTouch(WindowContainer wc) {
+        // Once the close transition is ready, it means the onBackInvoked callback has invoked, and
+        // app is ready to trigger next transition, no matter what it will be.
+        return mAnimationHandler.mComposed && mWaitTransitionFinish == null
+                && mAnimationHandler.isTarget(wc, wc.isVisibleRequested() /* open */);
+    }
+
     /**
      * Cleanup animation, this can either happen when legacy transition ready, or when the Shell
      * transition finish.

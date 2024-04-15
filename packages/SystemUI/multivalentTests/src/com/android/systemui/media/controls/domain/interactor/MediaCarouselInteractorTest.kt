@@ -33,6 +33,7 @@ import com.android.systemui.media.controls.domain.pipeline.MediaDataFilterImpl
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.media.controls.domain.pipeline.interactor.mediaCarouselInteractor
 import com.android.systemui.media.controls.domain.pipeline.mediaDataFilter
+import com.android.systemui.media.controls.shared.model.MediaCommonModel
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.MediaDataLoadingModel
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
@@ -94,22 +95,29 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
                 collectLastValue(underTest.hasActiveMediaOrRecommendation)
             val hasActiveMedia by collectLastValue(underTest.hasActiveMedia)
             val hasAnyMedia by collectLastValue(underTest.hasAnyMedia)
+            val sortedMedia by collectLastValue(underTest.sortedMedia)
 
             val userMedia = MediaData(active = false)
             val instanceId = userMedia.instanceId
 
             mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
+            mediaFilterRepository.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(instanceId))
 
             assertThat(hasActiveMediaOrRecommendation).isFalse()
             assertThat(hasActiveMedia).isFalse()
             assertThat(hasAnyMedia).isTrue()
+            assertThat(sortedMedia).containsExactly(MediaCommonModel.MediaControl(instanceId))
 
             assertThat(mediaFilterRepository.removeSelectedUserMediaEntry(instanceId, userMedia))
                 .isTrue()
+            mediaFilterRepository.addMediaDataLoadingState(
+                MediaDataLoadingModel.Removed(instanceId)
+            )
 
             assertThat(hasActiveMediaOrRecommendation).isFalse()
             assertThat(hasActiveMedia).isFalse()
             assertThat(hasAnyMedia).isFalse()
+            assertThat(sortedMedia).isEmpty()
         }
 
     @Test
@@ -119,6 +127,7 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
                 collectLastValue(underTest.hasActiveMediaOrRecommendation)
             val hasAnyMediaOrRecommendation by
                 collectLastValue(underTest.hasAnyMediaOrRecommendation)
+            val sortedMedia by collectLastValue(underTest.sortedMedia)
             kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
 
             val icon = Icon.createWithResource(context, R.drawable.ic_media_play)
@@ -131,14 +140,28 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
             val userMedia = MediaData(active = false)
 
             mediaFilterRepository.setRecommendation(userMediaRecommendation)
+            mediaFilterRepository.setRecommendationsLoadingState(
+                SmartspaceMediaLoadingModel.Loaded(KEY_MEDIA_SMARTSPACE, true)
+            )
 
             assertThat(hasActiveMediaOrRecommendation).isTrue()
             assertThat(hasAnyMediaOrRecommendation).isTrue()
+            assertThat(sortedMedia)
+                .containsExactly(MediaCommonModel.MediaRecommendations(KEY_MEDIA_SMARTSPACE))
 
             mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
+            mediaFilterRepository.addMediaDataLoadingState(
+                MediaDataLoadingModel.Loaded(userMedia.instanceId)
+            )
 
             assertThat(hasActiveMediaOrRecommendation).isTrue()
             assertThat(hasAnyMediaOrRecommendation).isTrue()
+            assertThat(sortedMedia)
+                .containsExactly(
+                    MediaCommonModel.MediaRecommendations(KEY_MEDIA_SMARTSPACE),
+                    MediaCommonModel.MediaControl(userMedia.instanceId)
+                )
+                .inOrder()
         }
 
     @Test

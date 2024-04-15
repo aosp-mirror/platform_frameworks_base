@@ -30,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.android.credentialmanager.common.BiometricError
 import com.android.credentialmanager.common.BiometricFlowType
 import com.android.credentialmanager.common.BiometricPromptState
 import com.android.credentialmanager.common.BiometricResult
@@ -128,13 +129,22 @@ class CredentialSelectorViewModel(
             uiState = uiState.copy(providerActivityState = ProviderActivityState.PENDING)
             val entryIntent = entry.fillInIntent
             entryIntent?.putExtra(Constants.IS_AUTO_SELECTED_KEY, uiState.isAutoSelectFlow)
-            if (biometricState.biometricResult != null) {
+            if (biometricState.biometricResult != null || biometricState.biometricError != null) {
                 if (uiState.isAutoSelectFlow) {
                     Log.w(Constants.LOG_TAG, "Unexpected biometric result exists when " +
                             "autoSelect is preferred.")
                 }
-                entryIntent?.putExtra(Constants.BIOMETRIC_AUTH_TYPE,
-                    biometricState.biometricResult.biometricAuthenticationResult.authenticationType)
+                // TODO(b/333445754) : Decide whether to propagate info on prompt launch
+                if (biometricState.biometricResult != null) {
+                    entryIntent?.putExtra(Constants.BIOMETRIC_AUTH_RESULT,
+                        biometricState.biometricResult.biometricAuthenticationResult
+                            .authenticationType)
+                } else if (biometricState.biometricError != null){
+                    entryIntent?.putExtra(Constants.BIOMETRIC_AUTH_ERROR_CODE,
+                        biometricState.biometricError.errorCode)
+                    entryIntent?.putExtra(Constants.BIOMETRIC_AUTH_ERROR_MESSAGE,
+                        biometricState.biometricError.errorMessage)
+                }
             }
             val intentSenderRequest = IntentSenderRequest.Builder(pendingIntent)
                 .setFillInIntent(entryIntent).build()
@@ -219,7 +229,8 @@ class CredentialSelectorViewModel(
     /**************************************************************************/
     fun getFlowOnEntrySelected(
         entry: EntryInfo,
-        authResult: BiometricPrompt.AuthenticationResult? = null
+        authResult: BiometricPrompt.AuthenticationResult? = null,
+        authError: BiometricError? = null,
     ) {
         Log.d(Constants.LOG_TAG, "credential selected: {provider=${entry.providerId}" +
             ", key=${entry.entryKey}, subkey=${entry.entrySubkey}}")
@@ -227,10 +238,11 @@ class CredentialSelectorViewModel(
             uiState.copy(
                 selectedEntry = entry,
                 providerActivityState = ProviderActivityState.READY_TO_LAUNCH,
-                biometricState = if (authResult == null) uiState.biometricState else uiState
+                biometricState = if (authResult == null && authError == null)
+                    uiState.biometricState else if (authResult != null) uiState
                     .biometricState.copy(biometricResult = BiometricResult(
-                            biometricAuthenticationResult = authResult)
-                )
+                            biometricAuthenticationResult = authResult)) else uiState
+                    .biometricState.copy(biometricError = authError)
             )
         } else {
             credManRepo.onOptionSelected(entry.providerId, entry.entryKey, entry.entrySubkey)
@@ -350,7 +362,8 @@ class CredentialSelectorViewModel(
 
     fun createFlowOnEntrySelected(
         selectedEntry: EntryInfo,
-        authResult: AuthenticationResult? = null
+        authResult: AuthenticationResult? = null,
+        authError: BiometricError? = null,
     ) {
         val providerId = selectedEntry.providerId
         val entryKey = selectedEntry.entryKey
@@ -362,9 +375,11 @@ class CredentialSelectorViewModel(
             uiState = uiState.copy(
                 selectedEntry = selectedEntry,
                 providerActivityState = ProviderActivityState.READY_TO_LAUNCH,
-                biometricState = if (authResult == null) uiState.biometricState else uiState
+                biometricState = if (authResult == null && authError == null)
+                    uiState.biometricState else if (authResult != null) uiState
                     .biometricState.copy(biometricResult = BiometricResult(
-                        biometricAuthenticationResult = authResult))
+                        biometricAuthenticationResult = authResult)) else uiState
+                    .biometricState.copy(biometricError = authError)
             )
         } else {
             credManRepo.onOptionSelected(

@@ -25,7 +25,7 @@ import android.media.MediaRouter2Manager;
 import android.media.RouteDiscoveryPreference;
 import android.media.RouteListingPreference;
 import android.media.RoutingSessionInfo;
-import android.os.Process;
+import android.os.UserHandle;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
@@ -70,15 +70,16 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
     /* package */ RouterInfoMediaManager(
             Context context,
             @NonNull String packageName,
+            @NonNull UserHandle userHandle,
             LocalBluetoothManager localBluetoothManager)
             throws PackageNotAvailableException {
-        super(context, packageName, localBluetoothManager);
+        super(context, packageName, userHandle, localBluetoothManager);
 
         MediaRouter2 router = null;
 
         if (Flags.enableCrossUserRoutingInMediaRouter2()) {
             try {
-                router = MediaRouter2.getInstance(context, packageName, Process.myUserHandle());
+                router = MediaRouter2.getInstance(context, packageName, userHandle);
             } catch (IllegalArgumentException ex) {
                 // Do nothing
             }

@@ -4479,6 +4479,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         getDisplayContent().mOpeningApps.remove(this);
         getDisplayContent().mUnknownAppVisibilityController.appRemovedOrHidden(this);
         mWmService.mSnapshotController.onAppRemoved(this);
+        mAtmService.mStartingProcessActivities.remove(this);
 
         mTaskSupervisor.getActivityMetricsLogger().notifyActivityRemoved(this);
         mTaskSupervisor.mStoppingActivities.remove(this);
@@ -6221,6 +6222,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     boolean shouldBeVisible() {
+        return shouldBeVisible(false /* ignoringKeyguard */);
+    }
+
+    boolean shouldBeVisible(boolean ignoringKeyguard) {
         final Task task = getTask();
         if (task == null) {
             return false;
@@ -6228,7 +6233,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final boolean behindOccludedContainer = !task.shouldBeVisible(null /* starting */)
                 || task.getOccludingActivityAbove(this) != null;
-        return shouldBeVisible(behindOccludedContainer, false /* ignoringKeyguard */);
+        return shouldBeVisible(behindOccludedContainer, ignoringKeyguard);
     }
 
     void makeVisibleIfNeeded(ActivityRecord starting, boolean reportToClient) {
@@ -10510,8 +10515,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!getTurnScreenOnFlag()) {
             return false;
         }
-        final Task rootTask = getRootTask();
-        return mCurrentLaunchCanTurnScreenOn && rootTask != null
+        return mCurrentLaunchCanTurnScreenOn
                 && mTaskSupervisor.getKeyguardController().checkKeyguardVisibility(this);
     }
 

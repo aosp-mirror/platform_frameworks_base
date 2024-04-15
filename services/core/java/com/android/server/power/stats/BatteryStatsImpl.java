@@ -4885,7 +4885,6 @@ public class BatteryStatsImpl extends BatteryStats {
         if (type == WAKE_TYPE_PARTIAL) {
             // Only care about partial wake locks, since full wake locks
             // will be canceled when the user puts the screen to sleep.
-            aggregateLastWakeupUptimeLocked(elapsedRealtimeMs, uptimeMs);
             if (historyName == null) {
                 historyName = name;
             }
@@ -5205,20 +5204,14 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @GuardedBy("this")
-    void aggregateLastWakeupUptimeLocked(long elapsedRealtimeMs, long uptimeMs) {
+    public void noteWakeupReasonLocked(String reason, long elapsedRealtimeMs, long uptimeMs) {
         if (mLastWakeupReason != null) {
             long deltaUptimeMs = uptimeMs - mLastWakeupUptimeMs;
             SamplingTimer timer = getWakeupReasonTimerLocked(mLastWakeupReason);
             timer.add(deltaUptimeMs * 1000, 1, elapsedRealtimeMs); // time in in microseconds
             mFrameworkStatsLogger.kernelWakeupReported(deltaUptimeMs * 1000, mLastWakeupReason,
                     mLastWakeupElapsedTimeMs);
-            mLastWakeupReason = null;
         }
-    }
-
-    @GuardedBy("this")
-    public void noteWakeupReasonLocked(String reason, long elapsedRealtimeMs, long uptimeMs) {
-        aggregateLastWakeupUptimeLocked(elapsedRealtimeMs, uptimeMs);
         mHistory.recordWakeupEvent(elapsedRealtimeMs, uptimeMs, reason);
         mLastWakeupReason = reason;
         mLastWakeupUptimeMs = uptimeMs;

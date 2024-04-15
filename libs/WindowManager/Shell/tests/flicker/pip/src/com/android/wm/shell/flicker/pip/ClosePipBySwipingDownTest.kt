@@ -31,7 +31,7 @@ import org.junit.runners.Parameterized
 /**
  * Test closing a pip window by swiping it to the bottom-center of the screen
  *
- * To run this test: `atest WMShellFlickerTests:ExitPipWithSwipeDownTest`
+ * To run this test: `atest WMShellFlickerTestsPip1:ClosePipBySwipingDownTest`
  *
  * Actions:
  * ```

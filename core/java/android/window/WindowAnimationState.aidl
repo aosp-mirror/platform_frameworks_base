@@ -14,9 +14,23 @@
  * limitations under the License.
  */
 
-package com.android.systemui.bouncer.shared.flag
+package android.window;
 
-import com.android.systemui.kosmos.Kosmos
+import android.graphics.PointF;
+import android.graphics.RectF;
 
-var Kosmos.fakeComposeBouncerFlags by Kosmos.Fixture { FakeComposeBouncerFlags() }
-val Kosmos.composeBouncerFlags by Kosmos.Fixture<ComposeBouncerFlags> { fakeComposeBouncerFlags }
+/**
+ * Properties of a window animation at a given point in time.
+ *
+ * {@hide}
+ */
+parcelable WindowAnimationState {
+    long timestamp;
+    RectF bounds;
+    float scale;
+    float topLeftRadius;
+    float topRightRadius;
+    float bottomRightRadius;
+    float bottomLeftRadius;
+    PointF velocityPxPerMs;
+}

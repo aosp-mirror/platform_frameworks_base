@@ -32,6 +32,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFingerprintAuthInteractor
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
@@ -40,7 +41,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -87,7 +87,6 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
     @Before
     fun setup() {
         mSetFlagsRule.enableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
-        kosmos.fakeSceneContainerFlags.enabled = false
 
         primaryBouncerInteractor =
             PrimaryBouncerInteractor(
@@ -127,7 +126,6 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 mContext,
                 deviceEntryFingerprintAuthRepository,
-                kosmos.fakeSceneContainerFlags,
                 kosmos.sceneInteractor,
                 primaryBouncerInteractor,
                 alternateBouncerInteractor,
@@ -168,15 +166,14 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableSceneContainer
     fun updatesShowIndicatorForDeviceEntry_onBouncerSceneActive() =
         testScope.runTest {
-            kosmos.fakeSceneContainerFlags.enabled = true
             underTest =
                 DeviceEntrySideFpsOverlayInteractor(
                     testScope.backgroundScope,
                     mContext,
                     deviceEntryFingerprintAuthRepository,
-                    kosmos.fakeSceneContainerFlags,
                     kosmos.sceneInteractor,
                     primaryBouncerInteractor,
                     alternateBouncerInteractor,
@@ -196,15 +193,14 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableSceneContainer
     fun updatesShowIndicatorForDeviceEntry_onBouncerSceneInactive() =
         testScope.runTest {
-            kosmos.fakeSceneContainerFlags.enabled = true
             underTest =
                 DeviceEntrySideFpsOverlayInteractor(
                     testScope.backgroundScope,
                     mContext,
                     deviceEntryFingerprintAuthRepository,
-                    kosmos.fakeSceneContainerFlags,
                     kosmos.sceneInteractor,
                     primaryBouncerInteractor,
                     alternateBouncerInteractor,

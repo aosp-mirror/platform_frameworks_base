@@ -37,4 +37,9 @@ oneway interface IRecentTasksListener {
      * Called when a running task vanishes.
      */
     void onRunningTaskVanished(in RunningTaskInfo taskInfo);
+
+    /**
+     * Called when a running task changes.
+     */
+    void onRunningTaskChanged(in RunningTaskInfo taskInfo);
 }

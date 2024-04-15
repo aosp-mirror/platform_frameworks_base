@@ -20,9 +20,9 @@ package com.android.systemui.statusbar.phone;
 import static android.app.StatusBarManager.DISABLE2_SYSTEM_ICONS;
 import static android.app.StatusBarManager.DISABLE_SYSTEM_INFO;
 
+import static com.android.systemui.Flags.FLAG_UPDATE_USER_SWITCHER_BACKGROUND;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
-import static com.android.systemui.Flags.FLAG_UPDATE_USER_SWITCHER_BACKGROUND;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -172,7 +172,6 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mKeyguardRepository,
                 mCommandQueue,
                 PowerInteractorFactory.create().getPowerInteractor(),
-                mKosmos.getSceneContainerFlags(),
                 new FakeKeyguardBouncerRepository(),
                 new ConfigurationInteractor(new FakeConfigurationRepository()),
                 new FakeShadeRepository(),

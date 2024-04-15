@@ -124,6 +124,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private static final String ALLOWLIST_REASON = "mediaoutput:remote_transfer";
 
     private final String mPackageName;
+    private final UserHandle mUserHandle;
     private final Context mContext;
     private final MediaSessionManager mMediaSessionManager;
     private final LocalBluetoothManager mLocalBluetoothManager;
@@ -177,6 +178,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     public MediaOutputController(
             Context context,
             @Assisted String packageName,
+            @Assisted @Nullable UserHandle userHandle,
             MediaSessionManager mediaSessionManager,
             @Nullable LocalBluetoothManager lbm,
             ActivityStarter starter,
@@ -190,6 +192,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             UserTracker userTracker) {
         mContext = context;
         mPackageName = packageName;
+        mUserHandle = userHandle;
         mMediaSessionManager = mediaSessionManager;
         mLocalBluetoothManager = lbm;
         mActivityStarter = starter;
@@ -199,7 +202,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mKeyGuardManager = keyGuardManager;
         mFeatureFlags = featureFlags;
         mUserTracker = userTracker;
-        InfoMediaManager imm = InfoMediaManager.createInstance(mContext, packageName, lbm);
+        InfoMediaManager imm =
+                InfoMediaManager.createInstance(mContext, packageName, userHandle, lbm);
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, packageName);
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
         mDialogTransitionAnimator = dialogTransitionAnimator;
@@ -231,7 +235,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     @AssistedFactory
     public interface Factory {
         /** Construct a MediaOutputController */
-        MediaOutputController create(String packageName);
+        MediaOutputController create(String packageName, UserHandle userHandle);
     }
 
     protected void start(@NonNull Callback cb) {
@@ -946,11 +950,22 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     void launchMediaOutputBroadcastDialog(View mediaOutputDialog, BroadcastSender broadcastSender) {
-        MediaOutputController controller = new MediaOutputController(mContext, mPackageName,
-                mMediaSessionManager, mLocalBluetoothManager, mActivityStarter,
-                mNotifCollection, mDialogTransitionAnimator, mNearbyMediaDevicesManager,
-                mAudioManager, mPowerExemptionManager, mKeyGuardManager, mFeatureFlags,
-                mUserTracker);
+        MediaOutputController controller =
+                new MediaOutputController(
+                        mContext,
+                        mPackageName,
+                        mUserHandle,
+                        mMediaSessionManager,
+                        mLocalBluetoothManager,
+                        mActivityStarter,
+                        mNotifCollection,
+                        mDialogTransitionAnimator,
+                        mNearbyMediaDevicesManager,
+                        mAudioManager,
+                        mPowerExemptionManager,
+                        mKeyGuardManager,
+                        mFeatureFlags,
+                        mUserTracker);
         MediaOutputBroadcastDialog dialog = new MediaOutputBroadcastDialog(mContext, true,
                 broadcastSender, controller);
         dialog.show();

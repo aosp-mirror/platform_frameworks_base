@@ -44,7 +44,7 @@ import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.statusbar.CommandQueue
@@ -84,7 +84,6 @@ constructor(
     private val repository: KeyguardRepository,
     private val commandQueue: CommandQueue,
     powerInteractor: PowerInteractor,
-    sceneContainerFlags: SceneContainerFlags,
     bouncerRepository: KeyguardBouncerRepository,
     configurationInteractor: ConfigurationInteractor,
     shadeRepository: ShadeRepository,
@@ -331,7 +330,7 @@ constructor(
 
     /** Whether to animate the next doze mode transition. */
     val animateDozingTransitions: Flow<Boolean> by lazy {
-        if (sceneContainerFlags.isEnabled()) {
+        if (SceneContainerFlag.isEnabled) {
             sceneInteractorProvider
                 .get()
                 .transitioningTo

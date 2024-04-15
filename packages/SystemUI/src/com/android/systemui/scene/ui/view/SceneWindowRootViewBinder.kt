@@ -39,7 +39,7 @@ import com.android.systemui.common.ui.compose.windowinsets.DisplayCutout
 import com.android.systemui.common.ui.compose.windowinsets.ScreenDecorProvider
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
@@ -63,7 +63,6 @@ object SceneWindowRootViewBinder {
         windowInsets: StateFlow<WindowInsets?>,
         containerConfig: SceneContainerConfig,
         sharedNotificationContainer: SharedNotificationContainer,
-        flags: SceneContainerFlags,
         scenes: Set<Scene>,
         onVisibilityChangedInternal: (isVisible: Boolean) -> Unit,
         dataSourceDelegator: SceneDataSourceDelegator,
@@ -115,7 +114,7 @@ object SceneWindowRootViewBinder {
                     //  the SceneContainerView. This SharedNotificationContainer should contain NSSL
                     //  due to the NotificationStackScrollLayoutSection (legacy) or
                     //  NotificationSection (scene container) moving it there.
-                    if (flags.isEnabled()) {
+                    if (SceneContainerFlag.isEnabled) {
                         (sharedNotificationContainer.parent as? ViewGroup)?.removeView(
                             sharedNotificationContainer
                         )

@@ -18,7 +18,7 @@ package com.android.systemui.bouncer.shared.flag
 
 import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import dagger.Module
 import dagger.Provides
 
@@ -42,11 +42,10 @@ interface ComposeBouncerFlags {
     fun isOnlyComposeBouncerEnabled(): Boolean
 }
 
-class ComposeBouncerFlagsImpl(private val sceneContainerFlags: SceneContainerFlags) :
-    ComposeBouncerFlags {
+class ComposeBouncerFlagsImpl() : ComposeBouncerFlags {
 
     override fun isComposeBouncerOrSceneContainerEnabled(): Boolean {
-        return sceneContainerFlags.isEnabled() || Flags.composeBouncer()
+        return SceneContainerFlag.isEnabled || Flags.composeBouncer()
     }
 
     @Deprecated(
@@ -55,7 +54,7 @@ class ComposeBouncerFlagsImpl(private val sceneContainerFlags: SceneContainerFla
         replaceWith = ReplaceWith("isComposeBouncerOrSceneContainerEnabled()")
     )
     override fun isOnlyComposeBouncerEnabled(): Boolean {
-        return !sceneContainerFlags.isEnabled() && Flags.composeBouncer()
+        return !SceneContainerFlag.isEnabled && Flags.composeBouncer()
     }
 }
 
@@ -63,7 +62,7 @@ class ComposeBouncerFlagsImpl(private val sceneContainerFlags: SceneContainerFla
 object ComposeBouncerFlagsModule {
     @Provides
     @SysUISingleton
-    fun impl(sceneContainerFlags: SceneContainerFlags): ComposeBouncerFlags {
-        return ComposeBouncerFlagsImpl(sceneContainerFlags)
+    fun impl(): ComposeBouncerFlags {
+        return ComposeBouncerFlagsImpl()
     }
 }

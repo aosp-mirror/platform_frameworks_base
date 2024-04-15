@@ -22,7 +22,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
@@ -43,7 +43,6 @@ constructor(
     dumpManager: DumpManager,
     private val interactor: NotificationStackAppearanceInteractor,
     shadeInteractor: ShadeInteractor,
-    flags: SceneContainerFlags,
     featureFlags: FeatureFlagsClassic,
     private val keyguardInteractor: KeyguardInteractor,
 ) : FlowDumperImpl(dumpManager) {
@@ -51,7 +50,7 @@ constructor(
     val isVisualDebuggingEnabled: Boolean = featureFlags.isEnabled(Flags.NSSL_DEBUG_LINES)
 
     /** DEBUG: whether the debug logging should be output. */
-    val isDebugLoggingEnabled: Boolean = flags.isEnabled()
+    val isDebugLoggingEnabled: Boolean = SceneContainerFlag.isEnabled
 
     /** Notifies that the bounds of the notification scrim have changed. */
     fun onScrimBoundsChanged(bounds: ShadeScrimBounds?) {

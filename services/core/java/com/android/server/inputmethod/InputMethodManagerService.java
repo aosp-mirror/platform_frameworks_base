@@ -1135,8 +1135,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 if (!isCurrentUser) {
                     return;
                 }
-                mSettings = queryInputMethodServicesInternal(mContext, userId,
-                        newAdditionalSubtypeMap, DirectBootAwareness.AUTO);
+                mSettings = newSettings;
                 postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */);
 
                 boolean changed = false;
@@ -1540,9 +1539,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         // and user switch would not happen at that time.
         resetCurrentMethodAndClientLocked(UnbindReason.SWITCH_USER);
 
-        final InputMethodSettings newSettings = queryInputMethodServicesInternal(mContext,
-                newUserId, AdditionalSubtypeMapRepository.get(newUserId), DirectBootAwareness.AUTO);
-        InputMethodSettingsRepository.put(newUserId, newSettings);
+        final InputMethodSettings newSettings = InputMethodSettingsRepository.get(newUserId);
         mSettings = newSettings;
         postInputMethodSettingUpdatedLocked(initialUserSwitch /* resetDefaultEnabledIme */);
         if (TextUtils.isEmpty(mSettings.getSelectedInputMethod())) {

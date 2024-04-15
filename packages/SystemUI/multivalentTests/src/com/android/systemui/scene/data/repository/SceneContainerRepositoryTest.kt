@@ -23,10 +23,10 @@ import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -39,9 +39,10 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableSceneContainer
 class SceneContainerRepositoryTest : SysuiTestCase() {
 
-    private val kosmos = testKosmos().apply { fakeSceneContainerFlags.enabled = true }
+    private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
 
     @Test

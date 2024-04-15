@@ -74,7 +74,7 @@ import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -131,7 +131,6 @@ public class LegacyLockIconViewController implements Dumpable, LockIconViewContr
     @NonNull private final KeyguardInteractor mKeyguardInteractor;
     @NonNull private final View.AccessibilityDelegate mAccessibilityDelegate;
     @NonNull private final Lazy<DeviceEntryInteractor> mDeviceEntryInteractor;
-    @NonNull private final SceneContainerFlags mSceneContainerFlags;
 
     // Tracks the velocity of a touch to help filter out the touches that move too fast.
     private VelocityTracker mVelocityTracker;
@@ -208,8 +207,7 @@ public class LegacyLockIconViewController implements Dumpable, LockIconViewContr
             @NonNull FeatureFlags featureFlags,
             PrimaryBouncerInteractor primaryBouncerInteractor,
             Context context,
-            Lazy<DeviceEntryInteractor> deviceEntryInteractor,
-            SceneContainerFlags sceneContainerFlags
+            Lazy<DeviceEntryInteractor> deviceEntryInteractor
     ) {
         mStatusBarStateController = statusBarStateController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -236,7 +234,6 @@ public class LegacyLockIconViewController implements Dumpable, LockIconViewContr
         mResources = resources;
         mContext = context;
         mDeviceEntryInteractor = deviceEntryInteractor;
-        mSceneContainerFlags = sceneContainerFlags;
 
         mAccessibilityDelegate = new View.AccessibilityDelegate() {
             private final AccessibilityNodeInfo.AccessibilityAction mAccessibilityAuthenticateHint =
@@ -746,7 +743,7 @@ public class LegacyLockIconViewController implements Dumpable, LockIconViewContr
         // play device entry haptic (consistent with UDFPS controller longpress)
         vibrateOnLongPress();
 
-        if (mSceneContainerFlags.isEnabled()) {
+        if (SceneContainerFlag.isEnabled()) {
             mDeviceEntryInteractor.get().attemptDeviceEntry();
         } else {
             mKeyguardViewController.showPrimaryBouncer(/* scrim */ true);

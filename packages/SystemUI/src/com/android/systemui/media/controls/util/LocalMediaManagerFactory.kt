@@ -31,8 +31,9 @@ constructor(
 ) {
     /** Creates a [LocalMediaManager] for the given package. */
     fun create(packageName: String?): LocalMediaManager {
-        return InfoMediaManager.createInstance(context, packageName, localBluetoothManager).run {
-            LocalMediaManager(context, localBluetoothManager, this, packageName)
-        }
+        // TODO: b/321969740 - Populate the userHandle parameter in InfoMediaManager. The user
+        // handle is necessary to disambiguate the same package running on different users.
+        return InfoMediaManager.createInstance(context, packageName, null, localBluetoothManager)
+            .run { LocalMediaManager(context, localBluetoothManager, this, packageName) }
     }
 }

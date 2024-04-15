@@ -62,7 +62,6 @@ import com.android.systemui.qs.QSFragmentLegacy;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.data.repository.SceneContainerRepository;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags;
 import com.android.systemui.scene.shared.logger.SceneLogger;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
@@ -208,14 +207,12 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
                 mock(SceneLogger.class),
                 mKosmos.getDeviceUnlockedInteractor());
 
-        FakeSceneContainerFlags sceneContainerFlags = new FakeSceneContainerFlags();
         KeyguardTransitionInteractor keyguardTransitionInteractor =
                 mKosmos.getKeyguardTransitionInteractor();
         KeyguardInteractor keyguardInteractor = new KeyguardInteractor(
                 mKeyguardRepository,
                 new FakeCommandQueue(),
                 powerInteractor,
-                sceneContainerFlags,
                 new FakeKeyguardBouncerRepository(),
                 new ConfigurationInteractor(configurationRepository),
                 mShadeRepository,

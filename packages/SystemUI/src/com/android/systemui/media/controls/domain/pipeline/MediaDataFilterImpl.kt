@@ -69,7 +69,7 @@ constructor(
     private val mediaFlags: MediaFlags,
     private val mediaFilterRepository: MediaFilterRepository,
 ) : MediaDataManager.Listener {
-    lateinit var mediaDataManager: MediaDataManager
+    lateinit var mediaDataProcessor: MediaDataProcessor
 
     // Ensure the field (and associated reference) isn't removed during optimization.
     @KeepForWeakReference
@@ -186,7 +186,7 @@ constructor(
             smartspaceMediaData.packageName,
             smartspaceMediaData.instanceId
         )
-        mediaFilterRepository.setRecommedationsLoadingState(
+        mediaFilterRepository.setRecommendationsLoadingState(
             SmartspaceMediaLoadingModel.Loaded(key, shouldPrioritizeMutable)
         )
     }
@@ -224,7 +224,7 @@ constructor(
                 )
             )
         }
-        mediaFilterRepository.setRecommedationsLoadingState(
+        mediaFilterRepository.setRecommendationsLoadingState(
             SmartspaceMediaLoadingModel.Removed(key, immediately)
         )
     }
@@ -279,7 +279,7 @@ constructor(
         mediaEntries.forEach { (key, data) ->
             if (mediaFilterRepository.selectedUserEntries.value.containsKey(data.instanceId)) {
                 // Force updates to listeners, needed for re-activated card
-                mediaDataManager.setInactive(key, timedOut = true, forceUpdate = true)
+                mediaDataProcessor.setInactive(key, timedOut = true, forceUpdate = true)
             }
         }
         val smartspaceMediaData = mediaFilterRepository.smartspaceMediaData.value
@@ -301,7 +301,7 @@ constructor(
 
             if (mediaFlags.isPersistentSsCardEnabled()) {
                 mediaFilterRepository.setRecommendation(smartspaceMediaData.copy(isActive = false))
-                mediaDataManager.setRecommendationInactive(smartspaceMediaData.targetId)
+                mediaDataProcessor.setRecommendationInactive(smartspaceMediaData.targetId)
             } else {
                 mediaFilterRepository.setRecommendation(
                     EMPTY_SMARTSPACE_MEDIA_DATA.copy(
@@ -309,7 +309,7 @@ constructor(
                         instanceId = smartspaceMediaData.instanceId,
                     )
                 )
-                mediaDataManager.dismissSmartspaceRecommendation(
+                mediaDataProcessor.dismissSmartspaceRecommendation(
                     smartspaceMediaData.targetId,
                     delay = 0L,
                 )

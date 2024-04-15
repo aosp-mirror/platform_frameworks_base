@@ -33,7 +33,7 @@ import org.junit.runners.Parameterized
 /**
  * Test expanding a pip window by double-clicking it
  *
- * To run this test: `atest WMShellFlickerTests:ExpandPipOnDoubleClickTest`
+ * To run this test: `atest WMShellFlickerTestsPip2:ExpandPipOnDoubleClickTest`
  *
  * Actions:
  * ```

@@ -31,7 +31,7 @@ import com.android.systemui.deviceentry.data.repository.FaceWakeUpTriggersConfig
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.SystemUIDeviceEntryFaceAuthInteractor
 import com.android.systemui.scene.SceneContainerFrameworkModule
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneDataSource
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
@@ -104,11 +104,10 @@ interface SysUITestModule {
 
         @Provides
         fun provideBaseShadeInteractor(
-            sceneContainerFlags: SceneContainerFlags,
             sceneContainerOn: Provider<ShadeInteractorSceneContainerImpl>,
             sceneContainerOff: Provider<ShadeInteractorLegacyImpl>
         ): BaseShadeInteractor {
-            return if (sceneContainerFlags.isEnabled()) {
+            return if (SceneContainerFlag.isEnabled) {
                 sceneContainerOn.get()
             } else {
                 sceneContainerOff.get()
