@@ -20,6 +20,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.hardware.biometrics.BiometricManager
 import android.hardware.biometrics.BiometricPrompt
+import android.hardware.biometrics.CryptoObject
 import android.os.CancellationSignal
 import android.util.Log
 import androidx.core.content.ContextCompat.getMainExecutor
@@ -221,11 +222,22 @@ private fun runBiometricFlow(
     val executor = getMainExecutor(context)
 
     try {
-        biometricPrompt.authenticate(cancellationSignal, executor, callback)
+        val cryptoOpId = getCryptoOpId(biometricDisplayInfo)
+        if (cryptoOpId != null) {
+            biometricPrompt.authenticate(
+                    BiometricPrompt.CryptoObject(cryptoOpId.toLong()),
+                    cancellationSignal, executor, callback)
+        } else {
+            biometricPrompt.authenticate(cancellationSignal, executor, callback)
+        }
     } catch (e: IllegalArgumentException) {
         Log.w(TAG, "Calling the biometric prompt API failed with: /n${e.localizedMessage}\n")
         onBiometricFailureFallback(biometricFlowType)
     }
+}
+
+private fun getCryptoOpId(biometricDisplayInfo: BiometricDisplayInfo): Int? {
+    return biometricDisplayInfo.biometricRequestInfo.opId
 }
 
 /**
