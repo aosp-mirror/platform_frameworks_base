@@ -47,7 +47,7 @@
         android:layout_height="wrap_content"
         android:fillViewport="true"
         android:fadeScrollbars="false"
-        android:paddingBottom="36dp"
+        android:paddingBottom="24dp"
         android:paddingHorizontal="24dp"
         android:paddingTop="24dp"
         app:layout_constrainedHeight="true"

@@ -230,9 +230,13 @@ public class AuthContainerView extends LinearLayout
         @Override
         public void onUseDeviceCredential() {
             mConfig.mCallback.onDeviceCredentialPressed(getRequestId());
-            mHandler.postDelayed(() -> {
+            if (constraintBp()) {
                 addCredentialView(false /* animatePanel */, true /* animateContents */);
-            }, mConfig.mSkipAnimation ? 0 : ANIMATE_CREDENTIAL_START_DELAY_MS);
+            } else {
+                mHandler.postDelayed(() -> {
+                    addCredentialView(false /* animatePanel */, true /* animateContents */);
+                }, mConfig.mSkipAnimation ? 0 : ANIMATE_CREDENTIAL_START_DELAY_MS);
+            }
 
             // TODO(b/313469218): Remove Config
             mConfig.mPromptInfo.setAuthenticators(Authenticators.DEVICE_CREDENTIAL);

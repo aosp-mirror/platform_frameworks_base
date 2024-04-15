@@ -66,10 +66,9 @@ constructor(
      */
     val activeAuthType: Flow<AuthType> =
         combine(
-            promptViewModel.size,
             promptViewModel.modalities.distinctUntilChanged(),
             promptViewModel.faceMode.distinctUntilChanged()
-        ) { _, modalities, faceMode ->
+        ) { modalities, faceMode ->
             if (modalities.hasFaceAndFingerprint && !faceMode) {
                 AuthType.Coex
             } else if (modalities.hasFaceOnly || faceMode) {
@@ -100,68 +99,6 @@ constructor(
                     params.logicalDisplayWidth - rotatedBounds.right,
                     params.logicalDisplayHeight - rotatedBounds.bottom
                 )
-            }
-            .distinctUntilChanged()
-
-    val iconPosition: Flow<Rect> =
-        combine(
-                udfpsSensorBounds,
-                promptViewModel.size,
-                promptViewModel.position,
-                promptViewModel.modalities
-            ) { sensorBounds, size, position, modalities ->
-                when (position) {
-                    PromptPosition.Bottom ->
-                        if (size.isSmall) {
-                            Rect(0, 0, 0, promptViewModel.portraitSmallBottomPadding)
-                        } else if (size.isMedium && modalities.hasUdfps) {
-                            Rect(0, 0, 0, sensorBounds.bottom)
-                        } else if (size.isMedium) {
-                            Rect(0, 0, 0, promptViewModel.portraitMediumBottomPadding)
-                        } else {
-                            // Large screen
-                            Rect(0, 0, 0, promptViewModel.portraitLargeScreenBottomPadding)
-                        }
-                    PromptPosition.Right ->
-                        if (size.isSmall || modalities.hasFaceOnly) {
-                            Rect(
-                                0,
-                                0,
-                                promptViewModel.landscapeSmallHorizontalPadding,
-                                promptViewModel.landscapeSmallBottomPadding
-                            )
-                        } else if (size.isMedium && modalities.hasUdfps) {
-                            Rect(0, 0, sensorBounds.right, sensorBounds.bottom)
-                        } else {
-                            // SFPS
-                            Rect(
-                                0,
-                                0,
-                                promptViewModel.landscapeMediumHorizontalPadding,
-                                promptViewModel.landscapeMediumBottomPadding
-                            )
-                        }
-                    PromptPosition.Left ->
-                        if (size.isSmall || modalities.hasFaceOnly) {
-                            Rect(
-                                promptViewModel.landscapeSmallHorizontalPadding,
-                                0,
-                                0,
-                                promptViewModel.landscapeSmallBottomPadding
-                            )
-                        } else if (size.isMedium && modalities.hasUdfps) {
-                            Rect(sensorBounds.left, 0, 0, sensorBounds.bottom)
-                        } else {
-                            // SFPS
-                            Rect(
-                                promptViewModel.landscapeMediumHorizontalPadding,
-                                0,
-                                0,
-                                promptViewModel.landscapeMediumBottomPadding
-                            )
-                        }
-                    PromptPosition.Top -> Rect()
-                }
             }
             .distinctUntilChanged()
 
@@ -215,8 +152,8 @@ constructor(
         combine(
             promptViewModel.position,
             activeAuthType,
-            promptViewModel.fingerprintSensorWidth,
-            promptViewModel.fingerprintSensorHeight,
+            promptViewModel.legacyFingerprintSensorWidth,
+            promptViewModel.legacyFingerprintSensorHeight,
         ) { _, activeAuthType, fingerprintSensorWidth, fingerprintSensorHeight ->
             if (activeAuthType == AuthType.Face) {
                 Pair(promptViewModel.faceIconWidth, promptViewModel.faceIconHeight)
