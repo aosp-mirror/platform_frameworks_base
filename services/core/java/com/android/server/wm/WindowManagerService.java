@@ -2446,6 +2446,9 @@ public class WindowManagerService extends IWindowManager.Stub
             ProtoLog.i(WM_DEBUG_SCREEN_ON,
                     "Relayout %s: oldVis=%d newVis=%d. %s", win, oldVisibility,
                             viewVisibility, new RuntimeException().fillInStackTrace());
+            if (becameVisible) {
+                onWindowVisible(win);
+            }
 
             win.setDisplayLayoutNeeded();
             win.mGivenInsetsPending = (flags & WindowManagerGlobal.RELAYOUT_INSETS_PENDING) != 0;
@@ -10168,7 +10171,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * Called to notify WMS that the specified window has become visible. This shows a Toast if the
      * window is deemed to hold sensitive content.
      */
-    void onWindowVisible(@NonNull WindowState w) {
+    private void onWindowVisible(@NonNull WindowState w) {
         showToastIfBlockingScreenCapture(w);
     }
 
