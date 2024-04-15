@@ -160,6 +160,14 @@ constructor(
         mediaDataFilter.mediaDataProcessor = mediaDataProcessor
     }
 
+    override fun addListener(listener: MediaDataManager.Listener) {
+        mediaDataFilter.addListener(listener)
+    }
+
+    override fun removeListener(listener: MediaDataManager.Listener) {
+        mediaDataFilter.removeListener(listener)
+    }
+
     override fun setInactive(key: String, timedOut: Boolean, forceUpdate: Boolean) = unsupported
 
     override fun onNotificationAdded(key: String, sbn: StatusBarNotification) {
