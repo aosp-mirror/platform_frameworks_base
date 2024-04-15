@@ -2042,10 +2042,17 @@
          provider services. -->
     <string name="config_secondaryLocationTimeZoneProviderPackageName" translatable="false"></string>
 
+    <!-- Whether the telephony time zone detection feature is enabled. Setting this to false means
+         the feature cannot be used. Setting this to true means the feature will be enabled on the
+         device if FEATURE_TELEPHONY
+         (@see https: //developer.android.com/reference/android/content/pm/PackageManager#FEATURE_TELEPHONY)
+         is also supported. -->
+    <bool name="config_enableTelephonyTimeZoneDetection" translatable="false">true</bool>
+
     <!-- Whether the time zone detection logic supports fall back from geolocation suggestions to
          telephony suggestions temporarily in certain circumstances. Reduces time zone detection
          latency during some scenarios like air travel. Only useful when both geolocation and
-         telephony time zone detection are supported on a device.
+         telephony time zone detection are supported and enabled on a device.
          See com.android.server.timezonedetector.TimeZoneDetectorStrategy for more information. -->
     <bool name="config_supportTelephonyTimeZoneFallback" translatable="false">true</bool>
 
