@@ -78,7 +78,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
 
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var broadcastSender: BroadcastSender
-    @Mock private lateinit var mediaDataManager: MediaDataManager
+    @Mock private lateinit var mediaDataProcessor: MediaDataProcessor
     @Mock private lateinit var lockscreenUserManager: NotificationLockscreenUserManager
     @Mock private lateinit var executor: Executor
     @Mock private lateinit var smartspaceData: SmartspaceMediaData
@@ -114,7 +114,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
                 mediaFlags,
                 repository,
             )
-        mediaDataFilter.mediaDataManager = mediaDataManager
+        mediaDataFilter.mediaDataProcessor = mediaDataProcessor
 
         // Start all tests as main user
         setUser(USER_MAIN)
@@ -481,7 +481,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
         mediaDataFilter.onMediaDataLoaded(KEY, null, dataMain)
         mediaDataFilter.onSwipeToDismiss()
 
-        verify(mediaDataManager).setInactive(eq(KEY), eq(true), eq(true))
+        verify(mediaDataProcessor).setInactive(eq(KEY), eq(true), eq(true))
     }
 
     @Test
@@ -846,8 +846,8 @@ class MediaDataFilterImplTest : SysuiTestCase() {
         mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, data)
         mediaDataFilter.onSwipeToDismiss()
 
-        verify(mediaDataManager).setRecommendationInactive(eq(SMARTSPACE_KEY))
-        verify(mediaDataManager, never())
+        verify(mediaDataProcessor).setRecommendationInactive(eq(SMARTSPACE_KEY))
+        verify(mediaDataProcessor, never())
             .dismissSmartspaceRecommendation(eq(SMARTSPACE_KEY), anyLong())
     }
 
