@@ -38,6 +38,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
@@ -50,19 +51,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.TransitionState
 import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.battery.BatteryMeterViewController
+import com.android.systemui.common.ui.compose.windowinsets.LocalRawScreenHeight
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.notifications.ui.composable.NotificationScrollingStack
 import com.android.systemui.qs.footer.ui.compose.FooterActionsWithAnimatedVisibility
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsSceneViewModel
 import com.android.systemui.res.R
@@ -72,10 +77,12 @@ import com.android.systemui.shade.ui.composable.CollapsedShadeHeader
 import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
 import com.android.systemui.shade.ui.composable.Shade
 import com.android.systemui.shade.ui.composable.ShadeHeader
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import javax.inject.Inject
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -87,6 +94,7 @@ class QuickSettingsScene
 constructor(
     @Application private val applicationScope: CoroutineScope,
     private val viewModel: QuickSettingsSceneViewModel,
+    private val notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
     private val statusBarIconController: StatusBarIconController,
@@ -106,6 +114,7 @@ constructor(
     ) {
         QuickSettingsScene(
             viewModel = viewModel,
+            notificationsPlaceholderViewModel = notificationsPlaceholderViewModel,
             createTintedIconManager = tintedIconManagerFactory::create,
             createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
             statusBarIconController = statusBarIconController,
@@ -117,6 +126,7 @@ constructor(
 @Composable
 private fun SceneScope.QuickSettingsScene(
     viewModel: QuickSettingsSceneViewModel,
+    notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
     statusBarIconController: StatusBarIconController,
@@ -135,8 +145,17 @@ private fun SceneScope.QuickSettingsScene(
     )
 
     // TODO(b/280887232): implement the real UI.
-    Box(modifier = modifier.fillMaxSize().graphicsLayer { alpha = contentAlpha }) {
+    Box(
+        modifier =
+            modifier.fillMaxSize().graphicsLayer {
+                // Render the scene to an offscreen buffer so that BlendMode.DstOut only clears this
+                // scene (and not the one under it) during a scene transition.
+                compositingStrategy = CompositingStrategy.Offscreen
+                alpha = contentAlpha
+            }
+    ) {
         val isCustomizing by viewModel.qsSceneAdapter.isCustomizing.collectAsState()
+        val screenHeight = LocalRawScreenHeight.current
 
         BackHandler(
             enabled = isCustomizing,
@@ -273,5 +292,11 @@ private fun SceneScope.QuickSettingsScene(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
             )
         }
+        NotificationScrollingStack(
+            viewModel = notificationsPlaceholderViewModel,
+            maxScrimTop = { screenHeight },
+            modifier =
+                Modifier.fillMaxWidth().offset { IntOffset(x = 0, y = screenHeight.roundToInt()) },
+        )
     }
 }

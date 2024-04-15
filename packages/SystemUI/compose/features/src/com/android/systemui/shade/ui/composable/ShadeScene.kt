@@ -47,6 +47,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layout
@@ -200,13 +201,15 @@ private fun SceneScope.SingleShade(
         animateSceneFloatAsState(value = 1f, key = QuickSettings.SharedValues.TilesSquishiness)
     val isClickable by viewModel.isClickable.collectAsState()
 
-    Box(
-        modifier =
-            modifier
-                .element(Shade.Elements.BackgroundScrim)
-                .background(colorResource(R.color.shade_scrim_background_dark)),
-    )
-    Box {
+    // Render the scene to an offscreen buffer so that BlendMode.DstOut only clears this scene
+    // (and not the one under it) during a scene transition.
+    Box(modifier = modifier.graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)) {
+        Box(
+            modifier =
+                Modifier.fillMaxSize()
+                    .element(Shade.Elements.BackgroundScrim)
+                    .background(colorResource(R.color.shade_scrim_background_dark)),
+        )
         Layout(
             contents =
                 listOf(
