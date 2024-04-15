@@ -68,6 +68,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.shared.DesktopModeStatus;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 import com.android.wm.shell.windowdecor.viewholder.AppHandleViewHolder;
 import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
@@ -650,7 +651,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     /**
      * Create and display handle menu window.
      */
-    void createHandleMenu() {
+    void createHandleMenu(SplitScreenController splitScreenController) {
         loadAppInfoIfNeeded();
         mHandleMenu = new HandleMenu.Builder(this)
                 .setAppIcon(mAppIconBitmap)
@@ -660,6 +661,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 .setLayoutId(mRelayoutParams.mLayoutResId)
                 .setWindowingButtonsVisible(DesktopModeStatus.canEnterDesktopMode(mContext))
                 .setCaptionHeight(mResult.mCaptionHeight)
+                .setDisplayController(mDisplayController)
+                .setSplitScreenController(splitScreenController)
                 .build();
         mWindowDecorViewHolder.onHandleMenuOpened();
         mHandleMenu.show();
@@ -815,9 +818,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         // We want handle to remain pressed if the pointer moves outside of it during a drag.
         handle.setPressed((inHandle && action == ACTION_DOWN)
                 || (handle.isPressed() && action != ACTION_UP && action != ACTION_CANCEL));
-        if (isHandleMenuActive()) {
+        if (isHandleMenuActive() && !isMenuAboveStatusBar()) {
             mHandleMenu.checkMotionEvent(ev);
         }
+    }
+
+    private boolean isMenuAboveStatusBar() {
+        return Flags.enableAdditionalWindowsAboveStatusBar() && !mTaskInfo.isFreeform();
     }
 
     private boolean pointInView(View v, float x, float y) {
@@ -866,6 +873,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 getCaptionHeight(mTaskInfo.getWindowingMode())));
         exclusionRegion.translate(mPositionInParent.x, mPositionInParent.y);
         return exclusionRegion;
+    }
+
+    int getCaptionX() {
+        return mResult.mCaptionX;
     }
 
     @Override
