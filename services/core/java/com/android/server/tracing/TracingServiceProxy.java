@@ -119,8 +119,13 @@ public class TracingServiceProxy extends SystemService {
     }
 
     @Override
-    public void onStart() {
-        publishBinderService(TRACING_SERVICE_PROXY_BINDER_NAME, mTracingServiceProxy);
+    public void onStart() {}
+
+    @Override
+    public void onBootPhase(int phase) {
+        if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
+            publishBinderService(TRACING_SERVICE_PROXY_BINDER_NAME, mTracingServiceProxy);
+        }
     }
 
     private void notifyTraceur(boolean sessionStolen) {
