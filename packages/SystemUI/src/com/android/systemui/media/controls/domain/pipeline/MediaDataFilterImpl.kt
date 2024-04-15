@@ -69,6 +69,10 @@ constructor(
     private val mediaFlags: MediaFlags,
     private val mediaFilterRepository: MediaFilterRepository,
 ) : MediaDataManager.Listener {
+    /** Non-UI listeners to media changes. */
+    private val _listeners: MutableSet<MediaDataProcessor.Listener> = mutableSetOf()
+    val listeners: Set<MediaDataProcessor.Listener>
+        get() = _listeners.toSet()
     lateinit var mediaDataProcessor: MediaDataProcessor
 
     // Ensure the field (and associated reference) isn't removed during optimization.
@@ -113,6 +117,9 @@ constructor(
         mediaFilterRepository.addMediaDataLoadingState(
             MediaDataLoadingModel.Loaded(data.instanceId)
         )
+
+        // Notify listeners
+        listeners.forEach { it.onMediaDataLoaded(key, oldKey, data) }
     }
 
     override fun onSmartspaceMediaDataLoaded(
@@ -171,6 +178,20 @@ constructor(
                 mediaFilterRepository.addMediaDataLoadingState(
                     MediaDataLoadingModel.Loaded(lastActiveId)
                 )
+                listeners.forEach { listener ->
+                    getKey(lastActiveId)?.let { lastActiveKey ->
+                        listener.onMediaDataLoaded(
+                            lastActiveKey,
+                            lastActiveKey,
+                            mediaData,
+                            receivedSmartspaceCardLatency =
+                                (systemClock.currentTimeMillis() -
+                                        data.headphoneConnectionTimeMillis)
+                                    .toInt(),
+                            isSsReactivated = true
+                        )
+                    }
+                }
             }
         } else if (data.isActive) {
             // Mark to prioritize Smartspace card if no recent media.
@@ -189,6 +210,7 @@ constructor(
         mediaFilterRepository.setRecommendationsLoadingState(
             SmartspaceMediaLoadingModel.Loaded(key, shouldPrioritizeMutable)
         )
+        listeners.forEach { it.onSmartspaceMediaDataLoaded(key, data, shouldPrioritizeMutable) }
     }
 
     override fun onMediaDataRemoved(key: String) {
@@ -198,6 +220,8 @@ constructor(
                 mediaFilterRepository.addMediaDataLoadingState(
                     MediaDataLoadingModel.Removed(instanceId)
                 )
+                // Only notify listeners if something actually changed
+                listeners.forEach { it.onMediaDataRemoved(key) }
             }
         }
     }
@@ -212,6 +236,11 @@ constructor(
                 mediaFilterRepository.addMediaDataLoadingState(
                     MediaDataLoadingModel.Loaded(lastActiveId, immediately)
                 )
+                listeners.forEach { listener ->
+                    getKey(lastActiveId)?.let { lastActiveKey ->
+                        listener.onMediaDataLoaded(lastActiveKey, lastActiveKey, it, immediately)
+                    }
+                }
             }
         }
 
@@ -227,6 +256,7 @@ constructor(
         mediaFilterRepository.setRecommendationsLoadingState(
             SmartspaceMediaLoadingModel.Removed(key, immediately)
         )
+        listeners.forEach { it.onSmartspaceMediaDataRemoved(key, immediately) }
     }
 
     @VisibleForTesting
@@ -240,6 +270,7 @@ constructor(
                 mediaFilterRepository.addMediaDataLoadingState(
                     MediaDataLoadingModel.Removed(data.instanceId)
                 )
+                listeners.forEach { listener -> listener.onMediaDataRemoved(key) }
             }
         }
     }
@@ -247,6 +278,7 @@ constructor(
     @VisibleForTesting
     internal fun handleUserSwitched() {
         // If the user changes, remove all current MediaData objects.
+        val listenersCopy = listeners
         val keyCopy = mediaFilterRepository.selectedUserEntries.value.keys.toMutableList()
         // Clear the list first and update loading state to remove media from UI.
         mediaFilterRepository.clearSelectedUserMedia()
@@ -255,6 +287,9 @@ constructor(
             mediaFilterRepository.addMediaDataLoadingState(
                 MediaDataLoadingModel.Removed(instanceId)
             )
+            getKey(instanceId)?.let {
+                listenersCopy.forEach { listener -> listener.onMediaDataRemoved(it) }
+            }
         }
 
         mediaFilterRepository.allUserEntries.value.forEach { (key, data) ->
@@ -268,6 +303,7 @@ constructor(
                 mediaFilterRepository.addMediaDataLoadingState(
                     MediaDataLoadingModel.Loaded(data.instanceId)
                 )
+                listenersCopy.forEach { listener -> listener.onMediaDataLoaded(key, null, data) }
             }
         }
     }
@@ -317,6 +353,12 @@ constructor(
         }
     }
 
+    /** Add a listener for filtered [MediaData] changes */
+    fun addListener(listener: MediaDataProcessor.Listener) = _listeners.add(listener)
+
+    /** Remove a listener that was registered with addListener */
+    fun removeListener(listener: MediaDataProcessor.Listener) = _listeners.remove(listener)
+
     /**
      * Return the time since last active for the most-recent media.
      *
@@ -334,6 +376,16 @@ constructor(
         val now = systemClock.elapsedRealtime()
         val lastActiveInstanceId = sortedEntries.lastKey() // most recently active
         return sortedEntries[lastActiveInstanceId]?.let { now - it.lastActive } ?: Long.MAX_VALUE
+    }
+
+    private fun getKey(instanceId: InstanceId): String? {
+        val allEntries = mediaFilterRepository.allUserEntries.value
+        val filteredEntries = allEntries.filter { (_, data) -> data.instanceId == instanceId }
+        return if (filteredEntries.isNotEmpty()) {
+            filteredEntries.keys.first()
+        } else {
+            null
+        }
     }
 
     companion object {
