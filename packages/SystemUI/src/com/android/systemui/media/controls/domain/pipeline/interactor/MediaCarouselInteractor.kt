@@ -37,6 +37,7 @@ import com.android.systemui.media.controls.domain.resume.MediaResumeListener
 import com.android.systemui.media.controls.shared.model.MediaCommonModel
 import com.android.systemui.media.controls.shared.model.MediaDataLoadingModel
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaLoadingModel
+import com.android.systemui.media.controls.util.MediaControlsRefactorFlag
 import com.android.systemui.media.controls.util.MediaFlags
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -156,12 +157,10 @@ constructor(
             mediaDataProcessor.onSessionDestroyed(key)
         }
         mediaResumeListener.setManager(this)
-        mediaDataFilter.mediaDataManager = this
+        mediaDataFilter.mediaDataProcessor = mediaDataProcessor
     }
 
-    override fun setInactive(key: String, timedOut: Boolean, forceUpdate: Boolean) {
-        mediaDataProcessor.setInactive(key, timedOut, forceUpdate)
-    }
+    override fun setInactive(key: String, timedOut: Boolean, forceUpdate: Boolean) = unsupported
 
     override fun onNotificationAdded(key: String, sbn: StatusBarNotification) {
         mediaDataProcessor.onNotificationAdded(key, sbn)
@@ -207,9 +206,7 @@ constructor(
         return mediaDataProcessor.dismissSmartspaceRecommendation(key, delay)
     }
 
-    override fun setRecommendationInactive(key: String) {
-        mediaDataProcessor.setRecommendationInactive(key)
-    }
+    override fun setRecommendationInactive(key: String) = unsupported
 
     override fun onNotificationRemoved(key: String) {
         mediaDataProcessor.onNotificationRemoved(key)
@@ -239,5 +236,13 @@ constructor(
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         mediaDeviceManager.dump(pw)
+    }
+
+    companion object {
+        val unsupported: Nothing
+            get() =
+                error(
+                    "Code path not supported when ${MediaControlsRefactorFlag.FLAG_NAME} is enabled"
+                )
     }
 }
