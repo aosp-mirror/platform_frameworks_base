@@ -571,7 +571,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
                 // THEN the view layout is never updated
                 verify(windowManager, never()).updateViewLayout(any(), any())
 
-                // CLEANUPL we hide to end the job that listens for the finishedGoingToSleep signal
+                // CLEANUP we hide to end the job that listens for the finishedGoingToSleep signal
                 controllerOverlay.hide()
             }
         }
@@ -595,7 +595,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
                 controllerOverlay.updateOverlayParams(overlayParams)
 
                 // THEN the view layout is updated
-                verify(windowManager, never()).updateViewLayout(any(), any())
+                verify(windowManager).updateViewLayout(any(), any())
             }
         }
 }
