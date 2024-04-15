@@ -170,6 +170,10 @@ public class FileIntegrityService extends SystemService {
         @Override
         public int setupFsverity(android.os.IInstalld.IFsveritySetupAuthToken authToken,
                 String filePath, String packageName) throws RemoteException {
+            getContext().enforceCallingPermission(android.Manifest.permission.SETUP_FSVERITY,
+                    "Permission android.permission.SETUP_FSVERITY not grantted to access "
+                    + "FileIntegrityManager#setupFsverity");
+
             Objects.requireNonNull(authToken);
             Objects.requireNonNull(filePath);
             Objects.requireNonNull(packageName);

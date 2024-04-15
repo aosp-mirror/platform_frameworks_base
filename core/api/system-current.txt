@@ -355,6 +355,7 @@ package android {
     field public static final String SEND_SHOW_SUSPENDED_APP_DETAILS = "android.permission.SEND_SHOW_SUSPENDED_APP_DETAILS";
     field public static final String SEND_SMS_NO_CONFIRMATION = "android.permission.SEND_SMS_NO_CONFIRMATION";
     field public static final String SERIAL_PORT = "android.permission.SERIAL_PORT";
+    field @FlaggedApi("android.security.fsverity_api") public static final String SETUP_FSVERITY = "android.permission.SETUP_FSVERITY";
     field public static final String SET_ACTIVITY_WATCHER = "android.permission.SET_ACTIVITY_WATCHER";
     field public static final String SET_CLIP_SOURCE = "android.permission.SET_CLIP_SOURCE";
     field public static final String SET_DEFAULT_ACCOUNT_FOR_CONTACTS = "android.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS";
@@ -12105,6 +12106,11 @@ package android.se.omapi {
 }
 
 package android.security {
+
+  public final class FileIntegrityManager {
+    method @FlaggedApi("android.security.fsverity_api") @Nullable public byte[] getFsVerityDigest(@NonNull java.io.File) throws java.io.IOException;
+    method @FlaggedApi("android.security.fsverity_api") public void setupFsVerity(@NonNull java.io.File) throws java.io.IOException;
+  }
 
   public final class KeyChain {
     method @Nullable @WorkerThread public static String getWifiKeyGrantAsUser(@NonNull android.content.Context, @NonNull android.os.UserHandle, @NonNull String);
