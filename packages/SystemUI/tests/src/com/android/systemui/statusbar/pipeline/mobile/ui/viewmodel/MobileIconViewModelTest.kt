@@ -54,6 +54,7 @@ import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupReposi
 import com.android.systemui.util.CarrierConfigTracker
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
@@ -276,6 +277,76 @@ class MobileIconViewModelTest : SysuiTestCase() {
                 .isEqualTo(PHONE_SIGNAL_STRENGTH[0])
 
             job.cancel()
+        }
+
+    @Test
+    fun contentDescription_nonInflated_invalidLevelIsNull() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.contentDescription)
+
+            repository.inflateSignalStrength.value = false
+            repository.setAllLevels(-1)
+            assertThat(latest).isNull()
+
+            repository.setAllLevels(100)
+            assertThat(latest).isNull()
+        }
+
+    @Test
+    fun contentDescription_inflated_invalidLevelIsNull() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.contentDescription)
+
+            repository.inflateSignalStrength.value = true
+            repository.numberOfLevels.value = 6
+            repository.setAllLevels(-2)
+            assertThat(latest).isNull()
+
+            repository.setAllLevels(100)
+            assertThat(latest).isNull()
+        }
+
+    @Test
+    fun contentDescription_nonInflated_testABunchOfLevelsForNull() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.contentDescription)
+
+            repository.inflateSignalStrength.value = false
+            repository.numberOfLevels.value = 5
+
+            // -1 and 5 are out of the bounds for non-inflated content descriptions
+            for (i in -1..5) {
+                repository.setAllLevels(i)
+                when (i) {
+                    -1,
+                    5 -> assertWithMessage("Level $i is expected to be null").that(latest).isNull()
+                    else ->
+                        assertWithMessage("Level $i is expected not to be null")
+                            .that(latest)
+                            .isNotNull()
+                }
+            }
+        }
+
+    @Test
+    fun contentDescription_inflated_testABunchOfLevelsForNull() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.contentDescription)
+            repository.inflateSignalStrength.value = true
+            repository.numberOfLevels.value = 6
+            // -1 and 6 are out of the bounds for inflated content descriptions
+            // Note that the interactor adds 1 to the reported level, hence the -2 to 5 range
+            for (i in -2..5) {
+                repository.setAllLevels(i)
+                when (i) {
+                    -2,
+                    5 -> assertWithMessage("Level $i is expected to be null").that(latest).isNull()
+                    else ->
+                        assertWithMessage("Level $i is not expected to be null")
+                            .that(latest)
+                            .isNotNull()
+                }
+            }
         }
 
     @Test

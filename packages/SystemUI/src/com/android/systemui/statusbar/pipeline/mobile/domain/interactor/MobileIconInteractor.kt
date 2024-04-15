@@ -323,8 +323,11 @@ class MobileIconInteractorImpl(
         combine(
                 level,
                 isInService,
-            ) { level, isInService ->
-                if (isInService) level else 0
+                connectionRepository.inflateSignalStrength,
+            ) { level, isInService, inflate ->
+                if (isInService) {
+                    if (inflate) level + 1 else level
+                } else 0
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), 0)
 
