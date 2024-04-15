@@ -588,7 +588,7 @@ class DesktopTasksController(
             if (taskBoundsBeforeMaximize != null) {
                 destinationBounds.set(taskBoundsBeforeMaximize)
             } else {
-                getDefaultDesktopTaskBounds(displayLayout, destinationBounds)
+                destinationBounds.set(getDefaultDesktopTaskBounds(displayLayout))
             }
         } else {
             // Save current bounds so that task can be restored back to original bounds if necessary
@@ -624,18 +624,14 @@ class DesktopTasksController(
         }
     }
 
-    private fun getDefaultDesktopTaskBounds(displayLayout: DisplayLayout, outBounds: Rect) {
+    private fun getDefaultDesktopTaskBounds(displayLayout: DisplayLayout): Rect {
         // TODO(b/319819547): Account for app constraints so apps do not become letterboxed
-        val screenBounds = Rect(0, 0, displayLayout.width(), displayLayout.height())
-        // Update width and height with default desktop mode values
-        val desiredWidth = screenBounds.width().times(DESKTOP_MODE_INITIAL_BOUNDS_SCALE).toInt()
-        val desiredHeight = screenBounds.height().times(DESKTOP_MODE_INITIAL_BOUNDS_SCALE).toInt()
-        outBounds.set(0, 0, desiredWidth, desiredHeight)
-        // Center the task in screen bounds
-        outBounds.offset(
-            screenBounds.centerX() - outBounds.centerX(),
-            screenBounds.centerY() - outBounds.centerY()
-        )
+        val desiredWidth = (displayLayout.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE).toInt()
+        val desiredHeight = (displayLayout.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE).toInt()
+        val heightOffset = (displayLayout.height() - desiredHeight) / 2
+        val widthOffset = (displayLayout.width() - desiredWidth) / 2
+        return Rect(widthOffset, heightOffset,
+            desiredWidth + widthOffset, desiredHeight + heightOffset)
     }
 
     private fun getSnapBounds(taskInfo: RunningTaskInfo, position: SnapPosition): Rect {
@@ -1090,17 +1086,14 @@ class DesktopTasksController(
      * @param taskInfo the task being dragged.
      * @param y height of drag, to be checked against status bar height.
      */
-    fun onDragPositioningEndThroughStatusBar(
-            inputCoordinates: PointF,
-            taskInfo: RunningTaskInfo,
-            freeformBounds: Rect
-    ) {
+    fun onDragPositioningEndThroughStatusBar(inputCoordinates: PointF, taskInfo: RunningTaskInfo) {
         val indicator = visualIndicator ?: return
         val indicatorType = indicator
             .updateIndicatorType(inputCoordinates, taskInfo.windowingMode)
         when (indicatorType) {
             DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR -> {
-                finalizeDragToDesktop(taskInfo, freeformBounds)
+                val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
+                finalizeDragToDesktop(taskInfo, getDefaultDesktopTaskBounds(displayLayout))
             }
             DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR,
                     DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR -> {
