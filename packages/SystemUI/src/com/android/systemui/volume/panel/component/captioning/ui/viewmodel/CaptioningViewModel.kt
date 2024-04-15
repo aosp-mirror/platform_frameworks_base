@@ -21,7 +21,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.view.accessibility.domain.interactor.CaptioningInteractor
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.res.R
-import com.android.systemui.volume.panel.component.button.ui.viewmodel.ToggleButtonViewModel
+import com.android.systemui.volume.panel.component.button.ui.viewmodel.ButtonViewModel
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import javax.inject.Inject
@@ -43,11 +43,11 @@ constructor(
     private val uiEventLogger: UiEventLogger,
 ) {
 
-    val buttonViewModel: StateFlow<ToggleButtonViewModel?> =
+    val buttonViewModel: StateFlow<ButtonViewModel?> =
         captioningInteractor.isSystemAudioCaptioningEnabled
             .map { isEnabled ->
-                ToggleButtonViewModel(
-                    isChecked = isEnabled,
+                ButtonViewModel(
+                    isActive = isEnabled,
                     icon =
                         Icon.Resource(
                             if (isEnabled) R.drawable.ic_volume_odi_captions

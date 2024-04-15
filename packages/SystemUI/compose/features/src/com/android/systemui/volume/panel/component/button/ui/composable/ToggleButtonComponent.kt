@@ -40,14 +40,14 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.android.systemui.common.ui.compose.Icon
-import com.android.systemui.volume.panel.component.button.ui.viewmodel.ToggleButtonViewModel
+import com.android.systemui.volume.panel.component.button.ui.viewmodel.ButtonViewModel
 import com.android.systemui.volume.panel.ui.composable.ComposeVolumePanelUiComponent
 import com.android.systemui.volume.panel.ui.composable.VolumePanelComposeScope
 import kotlinx.coroutines.flow.StateFlow
 
 /** [ComposeVolumePanelUiComponent] implementing a toggleable button from a bottom row. */
 class ToggleButtonComponent(
-    private val viewModelFlow: StateFlow<ToggleButtonViewModel?>,
+    private val viewModelFlow: StateFlow<ButtonViewModel?>,
     private val onCheckedChange: (isChecked: Boolean) -> Unit
 ) : ComposeVolumePanelUiComponent {
 
@@ -64,7 +64,7 @@ class ToggleButtonComponent(
         ) {
             BottomComponentButtonSurface {
                 val colors =
-                    if (viewModel.isChecked) {
+                    if (viewModel.isActive) {
                         ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                             contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
@@ -81,7 +81,7 @@ class ToggleButtonComponent(
                             role = Role.Switch
                             contentDescription = label
                         },
-                    onClick = { onCheckedChange(!viewModel.isChecked) },
+                    onClick = { onCheckedChange(!viewModel.isActive) },
                     shape = RoundedCornerShape(28.dp),
                     colors = colors
                 ) {
