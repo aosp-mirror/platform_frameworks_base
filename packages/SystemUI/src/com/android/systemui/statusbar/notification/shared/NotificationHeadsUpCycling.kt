@@ -33,7 +33,12 @@ object NotificationHeadsUpCycling {
     /** Is the heads-up cycling animation enabled */
     @JvmStatic
     inline val isEnabled
-        get() = Flags.notificationContentAlphaOptimization()
+        get() = Flags.notificationHeadsUpCycling()
+
+    /** Whether to animate the bottom line when transiting from a tall HUN to a short HUN */
+    @JvmStatic
+    inline val animateTallToShort
+        get() = false
 
     /**
      * Called to ensure code is only run when the flag is enabled. This protects users from the

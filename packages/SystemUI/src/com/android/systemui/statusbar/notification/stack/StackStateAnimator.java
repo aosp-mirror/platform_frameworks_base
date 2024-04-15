@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.notification.stack;
 
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_HEADS_UP_APPEAR;
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_HEADS_UP_CYCLING_IN;
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_HEADS_UP_CYCLING_OUT;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK;
 
@@ -57,6 +59,7 @@ public class StackStateAnimator {
     public static final int ANIMATION_DURATION_CLOSE_REMOTE_INPUT = 150;
     public static final int ANIMATION_DURATION_HEADS_UP_APPEAR = 400;
     public static final int ANIMATION_DURATION_HEADS_UP_DISAPPEAR = 400;
+    public static final int ANIMATION_DURATION_HEADS_UP_CYCLING = 400;
     public static final int ANIMATION_DURATION_FOLD_TO_AOD =
             AnimatableClockView.ANIMATION_DURATION_FOLD_TO_AOD;
     public static final int ANIMATION_DURATION_PRIORITY_CHANGE = 500;
@@ -68,6 +71,8 @@ public class StackStateAnimator {
 
     @VisibleForTesting int mGoToFullShadeAppearingTranslation;
     @VisibleForTesting float mHeadsUpAppearStartAboveScreen;
+    // Padding between the old and new heads up notifications for the hun cycling animation
+    private float mHeadsUpCyclingPadding;
     private final ExpandableViewState mTmpState = new ExpandableViewState();
     private final AnimationProperties mAnimationProperties;
     public NotificationStackScrollLayout mHostLayout;
@@ -125,6 +130,8 @@ public class StackStateAnimator {
                         R.dimen.go_to_full_shade_appearing_translation);
         mHeadsUpAppearStartAboveScreen = context.getResources()
                 .getDimensionPixelSize(R.dimen.heads_up_appear_y_above_screen);
+        mHeadsUpCyclingPadding = context.getResources()
+                .getDimensionPixelSize(R.dimen.heads_up_cycling_padding);
     }
 
     protected void setLogger(StackStateLogger logger) {
@@ -449,7 +456,8 @@ public class StackStateAnimator {
                 }
                 changingView.performRemoveAnimation(ANIMATION_DURATION_APPEAR_DISAPPEAR,
                         0 /* delay */, translationDirection, false /* isHeadsUpAppear */,
-                        startAnimation, postAnimation, getGlobalAnimationFinishedListener());
+                        startAnimation, postAnimation, getGlobalAnimationFinishedListener(),
+                        ExpandableView.ClipSide.BOTTOM);
                 needsCustomAnimation = true;
             } else if (event.animationType ==
                 NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_REMOVE_SWIPED_OUT) {
@@ -464,6 +472,27 @@ public class StackStateAnimator {
                     .AnimationEvent.ANIMATION_TYPE_GROUP_EXPANSION_CHANGED) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) event.mChangingView;
                 row.prepareExpansionChanged();
+            } else if (event.animationType == ANIMATION_TYPE_HEADS_UP_CYCLING_IN) {
+                mHeadsUpAppearChildren.add(changingView);
+
+                mTmpState.copyFrom(changingView.getViewState());
+                mTmpState.setYTranslation(changingView.getViewState().getYTranslation()
+                        + getHeadsUpCyclingInYTranslationStart(event.headsUpFromBottom));
+                mTmpState.applyToView(changingView);
+
+                // TODO(b/339519404): use a different interpolator
+                Runnable onAnimationEnd = null;
+                if (loggable) {
+                    // This only captures HEADS_UP_APPEAR animations, but HUNs can appear with
+                    // normal ADD animations, which would not be logged here.
+                    String finalKey = key;
+                    mLogger.logHUNViewAppearing(key);
+                    onAnimationEnd = () -> {
+                        mLogger.appearAnimationEnded(finalKey);
+                    };
+                }
+                changingView.performAddAnimation(0, ANIMATION_DURATION_HEADS_UP_CYCLING,
+                        /* isHeadsUpAppear= */ true, onAnimationEnd);
             } else if (NotificationsImprovedHunAnimation.isEnabled()
                     && (event.animationType == ANIMATION_TYPE_HEADS_UP_APPEAR)) {
                 mHeadsUpAppearChildren.add(changingView);
@@ -486,6 +515,87 @@ public class StackStateAnimator {
                 }
                 changingView.performAddAnimation(0, ANIMATION_DURATION_HEADS_UP_APPEAR,
                         /* isHeadsUpAppear= */ true, onAnimationEnd);
+            } else if (event.animationType == ANIMATION_TYPE_HEADS_UP_CYCLING_OUT) {
+                mHeadsUpDisappearChildren.add(changingView);
+                Runnable endRunnable = null;
+                mTmpState.copyFrom(changingView.getViewState());
+
+                if (changingView.getParent() == null) {
+                    // This notification was actually removed, so we need to add it
+                    // transiently
+                    mHostLayout.addTransientView(changingView, 0);
+                    changingView.setTransientContainer(mHostLayout);
+                    // TODO(b/316404716): remove the hard-coded height
+                    // StackScrollAlgorithm cannot find this view because it has been removed
+                    // from the NSSL. To correctly translate the view to the top or bottom of
+                    // the screen (where it animated from), we need to update its translation.
+                    mTmpState.setYTranslation(
+                            mTmpState.getYTranslation() + 10
+                    );
+                    endRunnable = changingView::removeFromTransientContainer;
+                }
+
+                boolean needsAnimation = true;
+                if (changingView instanceof ExpandableNotificationRow) {
+                    ExpandableNotificationRow row =
+                            (ExpandableNotificationRow) changingView;
+                    if (row.isDismissed()) {
+                        needsAnimation = false;
+                    }
+                }
+                if (needsAnimation) {
+                    // We need to add the global animation listener, since once no animations are
+                    // running anymore, the panel will instantly hide itself. We need to wait until
+                    // the animation is fully finished for this though.
+                    final Runnable tmpEndRunnable = endRunnable;
+                    Runnable postAnimation;
+                    Runnable startAnimation;
+                    if (loggable) {
+                        String finalKey1 = key;
+                        final boolean finalIsHeadsUp = isHeadsUp;
+                        final String type = "ANIMATION_TYPE_HEADS_UP_CYCLING_OUT";
+                        startAnimation = () -> {
+                            mLogger.animationStart(finalKey1, type, finalIsHeadsUp);
+                            changingView.setInRemovalAnimation(true);
+                        };
+                        postAnimation = () -> {
+                            mLogger.animationEnd(finalKey1, type, finalIsHeadsUp);
+                            changingView.setInRemovalAnimation(false);
+                            if (tmpEndRunnable != null) {
+                                tmpEndRunnable.run();
+                            }
+
+                        };
+                    } else {
+                        postAnimation = () -> {
+                            changingView.setInRemovalAnimation(false);
+                            if (tmpEndRunnable != null) {
+                                tmpEndRunnable.run();
+                            }
+                        };
+                        startAnimation = () -> {
+                            changingView.setInRemovalAnimation(true);
+                        };
+                    }
+                    long removeAnimationDelay = changingView.performRemoveAnimation(
+                            ANIMATION_DURATION_HEADS_UP_CYCLING,
+                            /* delay= */ 0,
+                            // It's a shame that translationDirection isn't where we do the y
+                            // translation, the actual translation is in StackScrollAlgorithm.
+                            /* translationDirection= */ 0.0f,
+                            /* isHeadsUpAnimation= */ true,
+                            startAnimation, postAnimation,
+                            getGlobalAnimationFinishedListener(), ExpandableView.ClipSide.TOP);
+                    mAnimationProperties.delay += removeAnimationDelay;
+                    mAnimationProperties.duration = ANIMATION_DURATION_HEADS_UP_CYCLING;
+                    mAnimationProperties.setCustomInterpolator(View.TRANSLATION_Y,
+                            Interpolators.LINEAR);
+                    mAnimationProperties.getAnimationFilter().animateY = true;
+                    mTmpState.animateTo(changingView, mAnimationProperties);
+                } else if (endRunnable != null) {
+                    endRunnable.run();
+                }
+                needsCustomAnimation |= needsAnimation;
             } else if (event.animationType == ANIMATION_TYPE_HEADS_UP_APPEAR) {
                 NotificationsImprovedHunAnimation.assertInLegacyMode();
                 // This item is added, initialize its properties.
@@ -565,21 +675,21 @@ public class StackStateAnimator {
                             }
                         };
                     } else {
+                        startAnimation = () -> {
+                            changingView.setInRemovalAnimation(true);
+                        };
                         postAnimation = () -> {
                             changingView.setInRemovalAnimation(false);
                             if (tmpEndRunnable != null) {
                                 tmpEndRunnable.run();
                             }
                         };
-                        startAnimation = () -> {
-                            changingView.setInRemovalAnimation(true);
-                        };
                     }
                     long removeAnimationDelay = changingView.performRemoveAnimation(
                             ANIMATION_DURATION_HEADS_UP_DISAPPEAR,
                             0, 0.0f, true /* isHeadsUpAppear */,
                             startAnimation, postAnimation,
-                            getGlobalAnimationFinishedListener());
+                            getGlobalAnimationFinishedListener(), ExpandableView.ClipSide.BOTTOM);
                     mAnimationProperties.delay += removeAnimationDelay;
                     if (NotificationsImprovedHunAnimation.isEnabled()) {
                         mAnimationProperties.duration = ANIMATION_DURATION_HEADS_UP_DISAPPEAR;
@@ -605,6 +715,38 @@ public class StackStateAnimator {
         }
         // start from the top of the screen
         return -mStackTopMargin - mHeadsUpAppearStartAboveScreen;
+    }
+
+    /**
+     * @param headsUpFromBottom Whether we are showing the HUNs at the bottom of the screen
+     * @return The start y translation of the HUN cycling in animation
+     */
+    private float getHeadsUpCyclingInYTranslationStart(boolean headsUpFromBottom) {
+        if (headsUpFromBottom) {
+            // start from the bottom of the screen
+            return mHeadsUpAppearHeightBottom + mHeadsUpCyclingPadding;
+        }
+        // start from the top of the screen
+        return -mHeadsUpCyclingPadding;
+    }
+
+    /**
+     * @param headsUpFromBottom Whether we are showing the HUNs at the bottom of the screen
+     * @param oldHunHeight Height of the old HUN
+     * @param newHunHeight Height of the new HUN
+     * @return The y translation target value of the HUN cycling out animation
+     */
+    private float getHeadsUpCyclingOutYTranslation(
+            boolean headsUpFromBottom,
+            int oldHunHeight,
+            int newHunHeight
+    ) {
+        final float translationDistance = mHeadsUpCyclingPadding + newHunHeight - oldHunHeight;
+        if (headsUpFromBottom) {
+            // start from the bottom of the screen
+            return mHeadsUpAppearHeightBottom - translationDistance;
+        }
+        return translationDistance;
     }
 
     public void animateOverScrollToAmount(float targetAmount, final boolean onTop,

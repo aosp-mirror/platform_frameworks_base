@@ -285,6 +285,9 @@
     the amount by the view is positioned above the screen before the animation starts. -->
     <dimen name="heads_up_appear_y_above_screen">32dp</dimen>
 
+    <!-- padding between the old and new heads up notifications for the hun cycling animation -->
+    <dimen name="heads_up_cycling_padding">8dp</dimen>
+
     <!-- padding between the heads up and the statusbar -->
     <dimen name="heads_up_status_bar_padding">8dp</dimen>
 

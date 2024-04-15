@@ -293,11 +293,18 @@ public class AmbientState implements Dumpable {
     }
 
     String getAvalancheShowingHunKey() {
+        // If we don't have a previous showing hun, we don't consider the showing hun as avalanche
+        if (isNullAvalancheKey(getAvalanchePreviousHunKey())) return "";
         return mAvalancheController.getShowingHunKey();
     }
 
     String getAvalanchePreviousHunKey() {
         return mAvalancheController.getPreviousHunKey();
+    }
+
+    boolean isNullAvalancheKey(String key) {
+        if (key == null || key.isEmpty()) return true;
+        return key.equals("HeadsUpEntry null") || key.equals("HeadsUpEntry.mEntry null");
     }
 
     void setOverExpansion(float overExpansion) {
