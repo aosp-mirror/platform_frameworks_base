@@ -28,7 +28,7 @@ import org.junit.runners.Parameterized
 /**
  * Test expanding a pip window back to full screen via the expand button
  *
- * To run this test: `atest WMShellFlickerTests:ExitPipViaExpandButtonClickTest`
+ * To run this test: `atest WMShellFlickerTestsPip2:ExitPipToAppViaExpandButtonTest`
  *
  * Actions:
  * ```

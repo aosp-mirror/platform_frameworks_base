@@ -30,7 +30,7 @@ import org.junit.runners.Parameterized
 /**
  * Test auto entering pip using a source rect hint.
  *
- * To run this test: `atest AutoEnterPipWithSourceRectHintTest`
+ * To run this test: `atest WMShellFlickerTestsPip1:AutoEnterPipWithSourceRectHintTest`
  *
  * Actions:
  * ```
