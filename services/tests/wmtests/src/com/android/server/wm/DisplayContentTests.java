@@ -1717,6 +1717,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // The display should be rotated after the launch is finished.
         doReturn(false).when(app).isAnimating(anyInt(), anyInt());
         mDisplayContent.mAppTransition.notifyAppTransitionFinishedLocked(app.token);
+        waitHandlerIdle(mWm.mH);
         mStatusBarWindow.finishSeamlessRotation(t);
         mNavBarWindow.finishSeamlessRotation(t);
 

@@ -2007,7 +2007,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         // Update directly because the app which will change the orientation of display is ready.
         if (mDisplayRotation.updateOrientation(getOrientation(), false /* forceUpdate */)) {
-            sendNewConfiguration();
+            // Run rotation change on display thread. See Transition#shouldApplyOnDisplayThread().
+            mWmService.mH.post(() -> {
+                synchronized (mWmService.mGlobalLock) {
+                    sendNewConfiguration();
+                }
+            });
             return;
         }
         if (mRemoteDisplayChangeController.isWaitingForRemoteDisplayChange()) {
