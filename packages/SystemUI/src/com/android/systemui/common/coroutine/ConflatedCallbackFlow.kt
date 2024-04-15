@@ -16,14 +16,14 @@
 
 package com.android.systemui.common.coroutine
 
-import kotlin.experimental.ExperimentalTypeInference
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.callbackFlow
+import kotlin.experimental.ExperimentalTypeInference
+import com.android.systemui.common.coroutine.conflatedCallbackFlow as wrapped
 
+@Deprecated("Use com.android.systemui.common.coroutine.conflatedCallbackFlow instead")
 object ConflatedCallbackFlow {
 
     /**
@@ -32,9 +32,9 @@ object ConflatedCallbackFlow {
      * consumer(s) of the values in the flow), the values are buffered and, if the buffer fills up,
      * we drop the oldest values automatically instead of suspending the producer.
      */
-    @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
-    @OptIn(ExperimentalTypeInference::class, ExperimentalCoroutinesApi::class)
+    @Deprecated("Use com.android.systemui.common.coroutine.conflatedCallbackFlow instead")
+    @OptIn(ExperimentalTypeInference::class)
     fun <T> conflatedCallbackFlow(
         @BuilderInference block: suspend ProducerScope<T>.() -> Unit,
-    ): Flow<T> = callbackFlow(block).buffer(capacity = Channel.CONFLATED)
+    ): Flow<T> = wrapped(block)
 }
