@@ -54,7 +54,7 @@
     <string name="permission_microphone" msgid="2152206421428732949">"माइक्रोफ़ोन"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"कॉल लॉग"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"आस-पास मौजूद डिवाइस"</string>
-    <string name="permission_media_routing_control" msgid="5498639511586715253">"मीडिया आउटपुट बदलें"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"मीडिया आउटपुट में बदलाव करे"</string>
     <string name="permission_storage" msgid="6831099350839392343">"फ़ोटो और मीडिया"</string>
     <string name="permission_notifications" msgid="4099418516590632909">"सूचनाएं"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"ऐप्लिकेशन"</string>
