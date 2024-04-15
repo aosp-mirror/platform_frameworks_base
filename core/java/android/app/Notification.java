@@ -4123,6 +4123,17 @@ public class Notification implements Parcelable
     }
 
     /**
+     * Sets which type of notifications in a group are responsible for audibly alerting the
+     * user. See {@link #GROUP_ALERT_ALL}, {@link #GROUP_ALERT_CHILDREN},
+     * {@link #GROUP_ALERT_SUMMARY}.
+     * @param groupAlertBehavior
+     * @hide
+     */
+    public void setGroupAlertBehavior(@GroupAlertBehavior int groupAlertBehavior) {
+        mGroupAlertBehavior = groupAlertBehavior;
+    }
+
+    /**
      * Returns the bubble metadata that will be used to display app content in a floating window
      * over the existing foreground activity.
      */
