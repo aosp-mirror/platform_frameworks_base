@@ -142,6 +142,16 @@ flag {
 }
 
 flag {
+    name: "prevent_leaking_viewrootimpl"
+    namespace: "accessibility"
+    description: "Clear pending messages and callbacks of the handler in AccessibilityInteractionController when the ViewRootImpl is detached from Window to prevent leaking ViewRootImpl"
+    bug: "320701910"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "support_system_pinch_zoom_opt_out_apis"
     namespace: "accessibility"
     description: "Feature flag for declaring system pinch zoom opt-out apis"
