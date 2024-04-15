@@ -548,6 +548,17 @@ public final class DisplayManagerService extends SystemService {
         }
     };
 
+    private final DisplayModeDirector.DisplayDeviceConfigProvider mDisplayDeviceConfigProvider =
+            displayId -> {
+                synchronized (mSyncRoot) {
+                    final DisplayDevice device = getDeviceForDisplayLocked(displayId);
+                    if (device == null) {
+                        return null;
+                    }
+                    return device.getDisplayDeviceConfig();
+                }
+            };
+
     private final BrightnessSynchronizer mBrightnessSynchronizer;
 
     private final DeviceConfigParameterProvider mConfigParameterProvider;
@@ -599,7 +610,8 @@ public final class DisplayManagerService extends SystemService {
         mLogicalDisplayMapper = new LogicalDisplayMapper(mContext,
                 foldSettingProvider, new FoldGracePeriodProvider(),
                 mDisplayDeviceRepo, new LogicalDisplayListener(), mSyncRoot, mHandler, mFlags);
-        mDisplayModeDirector = new DisplayModeDirector(context, mHandler, mFlags);
+        mDisplayModeDirector = new DisplayModeDirector(
+                context, mHandler, mFlags, mDisplayDeviceConfigProvider);
         mBrightnessSynchronizer = new BrightnessSynchronizer(mContext,
                 mFlags.isBrightnessIntRangeUserPerceptionEnabled());
         Resources resources = mContext.getResources();
@@ -4937,18 +4949,6 @@ public final class DisplayManagerService extends SystemService {
                 config = device.getDisplayDeviceConfig();
             }
             return config.getRefreshRateLimitations();
-        }
-
-        @Override
-        public boolean isVrrSupportEnabled(int displayId) {
-            DisplayDevice device;
-            synchronized (mSyncRoot) {
-                device = getDeviceForDisplayLocked(displayId);
-            }
-            if (device == null) {
-                return false;
-            }
-            return device.getDisplayDeviceConfig().isVrrSupportEnabled();
         }
 
         @Override

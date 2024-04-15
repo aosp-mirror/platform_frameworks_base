@@ -112,6 +112,8 @@ public class DisplayObserverTest {
     private Resources mResources;
     @Mock
     private DisplayManagerFlags mDisplayManagerFlags;
+    @Mock
+    private DisplayModeDirector.DisplayDeviceConfigProvider mDisplayDeviceConfigProvider;
     private int mExternalDisplayUserPreferredModeId = INVALID_MODE_ID;
     private int mInternalDisplayUserPreferredModeId = INVALID_MODE_ID;
     private Display mDefaultDisplay;
@@ -455,7 +457,8 @@ public class DisplayObserverTest {
 
         when(mInjector.getDisplays()).thenReturn(new Display[] {mDefaultDisplay, mExternalDisplay});
 
-        mDmd = new DisplayModeDirector(mContext, mHandler, mInjector, mDisplayManagerFlags);
+        mDmd = new DisplayModeDirector(mContext, mHandler, mInjector,
+                mDisplayManagerFlags, mDisplayDeviceConfigProvider);
         mDmd.start(null);
         assertThat(mObserver).isNotNull();
     }
