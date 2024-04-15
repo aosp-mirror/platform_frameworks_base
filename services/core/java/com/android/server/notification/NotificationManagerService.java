@@ -220,6 +220,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
+import android.content.pm.ModuleInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
@@ -675,6 +676,10 @@ public class NotificationManagerService extends SystemService {
 
     private static final int DB_VERSION = 1;
 
+
+    private static final String ADSERVICES_MODULE_PKG_NAME =
+            "com.android.adservices";
+
     private static final String TAG_NOTIFICATION_POLICY = "notification-policy";
     private static final String ATTR_VERSION = "version";
 
@@ -735,6 +740,8 @@ public class NotificationManagerService extends SystemService {
     private ReviewNotificationPermissionsReceiver mReviewNotificationPermissionsReceiver;
 
     private AppOpsManager.OnOpChangedListener mAppOpsListener;
+
+    private ModuleInfo mAdservicesModuleInfo;
 
     static class Archive {
         final SparseArray<Boolean> mEnabled;
@@ -2933,6 +2940,15 @@ public class NotificationManagerService extends SystemService {
                 // Cannot be done earlier, as some services aren't ready until this point.
                 mZenModeHelper.setDeviceEffectsApplier(
                         new DefaultDeviceEffectsApplier(getContext()));
+            }
+            List<ModuleInfo> moduleInfoList =
+            mPackageManagerClient.getInstalledModules(
+                PackageManager.MATCH_DEBUG_TRIAGED_MISSING);
+            // Cache adservices module info
+            for (ModuleInfo mi : moduleInfoList) {
+                if (Objects.equals(mi.getApexModuleName(), ADSERVICES_MODULE_PKG_NAME)) {
+                    mAdservicesModuleInfo = mi;
+                }
             }
         } else if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
             mSnoozeHelper.scheduleRepostsForPersistedNotifications(System.currentTimeMillis());
@@ -7683,11 +7699,25 @@ public class NotificationManagerService extends SystemService {
     private boolean canBeNonDismissible(ApplicationInfo ai, Notification notification) {
         return notification.isMediaNotification() || isEnterpriseExempted(ai)
                 || notification.isStyle(Notification.CallStyle.class)
-                || isDefaultSearchSelectorPackage(ai.packageName);
+                || isDefaultSearchSelectorPackage(ai.packageName)
+                || isDefaultAdservicesPackage(ai.packageName);
     }
 
     private boolean isDefaultSearchSelectorPackage(String pkg) {
         return Objects.equals(mDefaultSearchSelectorPkg, pkg);
+    }
+
+    private boolean isDefaultAdservicesPackage(String pkg) {
+        if (mAdservicesModuleInfo == null) {
+            return false;
+        }
+        // Handles the special package structure for mainline modules
+        for (String apkName : mAdservicesModuleInfo.getApkInApexPackageNames()) {
+            if (Objects.equals(apkName, pkg)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isEnterpriseExempted(ApplicationInfo ai) {
