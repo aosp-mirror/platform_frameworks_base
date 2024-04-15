@@ -5890,7 +5890,7 @@
     <!-- Allows an application to subscribe to notifications about the nearby devices' presence
          status change base on the UUIDs.
          <p>Not for use by third-party applications.</p>
-         @FlaggedApi("android.companion.flags.device_presence")
+         @FlaggedApi("android.companion.device_presence")
     -->
     <permission android:name="android.permission.REQUEST_OBSERVE_DEVICE_UUID_PRESENCE"
                 android:protectionLevel="signature|privileged" />
