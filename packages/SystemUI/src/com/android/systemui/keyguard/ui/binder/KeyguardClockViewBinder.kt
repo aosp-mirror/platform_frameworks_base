@@ -36,7 +36,6 @@ import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.clocks.ClockController
-import com.android.systemui.shared.clocks.DEFAULT_CLOCK_ID
 import kotlinx.coroutines.launch
 
 object KeyguardClockViewBinder {
@@ -76,13 +75,13 @@ object KeyguardClockViewBinder {
                 }
                 launch {
                     if (!MigrateClocksToBlueprint.isEnabled) return@launch
-                    viewModel.clockShouldBeCentered.collect { clockShouldBeCentered ->
+                    viewModel.clockShouldBeCentered.collect {
                         viewModel.currentClock.value?.let {
-                            // Weather clock also has hasCustomPositionUpdatedAnimation as true
-                            // TODO(b/323020908): remove ID check
+                            // TODO(b/301502635): remove "!it.config.useCustomClockScene" when
+                            // migrate clocks to blueprint is fully rolled out
                             if (
                                 it.largeClock.config.hasCustomPositionUpdatedAnimation &&
-                                    it.config.id == DEFAULT_CLOCK_ID
+                                    !it.config.useCustomClockScene
                             ) {
                                 blueprintInteractor.refreshBlueprint(Type.DefaultClockStepping)
                             } else {
@@ -93,12 +92,9 @@ object KeyguardClockViewBinder {
                 }
                 launch {
                     if (!MigrateClocksToBlueprint.isEnabled) return@launch
-                    viewModel.isAodIconsVisible.collect { isAodIconsVisible ->
+                    viewModel.isAodIconsVisible.collect {
                         viewModel.currentClock.value?.let {
-                            // Weather clock also has hasCustomPositionUpdatedAnimation as true
-                            if (
-                                viewModel.useLargeClock && it.config.id == "DIGITAL_CLOCK_WEATHER"
-                            ) {
+                            if (viewModel.useLargeClock && it.config.useCustomClockScene) {
                                 blueprintInteractor.refreshBlueprint(Type.DefaultTransition)
                             }
                         }

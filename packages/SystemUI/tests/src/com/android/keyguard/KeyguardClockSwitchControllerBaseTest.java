@@ -205,9 +205,9 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
         when(mClockRegistry.createCurrentClock()).thenReturn(mClockController);
         when(mClockEventController.getClock()).thenReturn(mClockController);
         when(mSmallClockController.getConfig())
-                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, false, false));
+                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, false, false, false));
         when(mLargeClockController.getConfig())
-                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, false, false));
+                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, false, false, false));
 
         mSliceView = new View(getContext());
         when(mView.findViewById(R.id.keyguard_slice_view)).thenReturn(mSliceView);

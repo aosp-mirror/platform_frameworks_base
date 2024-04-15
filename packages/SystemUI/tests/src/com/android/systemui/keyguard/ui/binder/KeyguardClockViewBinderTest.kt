@@ -113,7 +113,8 @@ class KeyguardClockViewBinderTest : SysuiTestCase() {
                 id = "WEATHER_CLOCK",
                 name = "",
                 description = "",
-                useAlternateSmartspaceAODTransition = true
+                useAlternateSmartspaceAODTransition = true,
+                useCustomClockScene = true
             )
         whenever(clock.config).thenReturn(clockConfig)
     }
