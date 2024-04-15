@@ -16,7 +16,7 @@
 
 @file:OptIn(ExperimentalTypeInference::class)
 
-package com.android.systemui.common.coroutine
+package com.android.systemui.utils.coroutines.flow
 
 import kotlin.experimental.ExperimentalTypeInference
 import kotlinx.coroutines.channels.ProducerScope

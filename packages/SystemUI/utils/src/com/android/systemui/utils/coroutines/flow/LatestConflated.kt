@@ -16,7 +16,7 @@
 
 @file:OptIn(ExperimentalCoroutinesApi::class, ExperimentalTypeInference::class)
 
-package com.android.systemui.common.coroutine
+package com.android.systemui.utils.coroutines.flow
 
 import kotlin.experimental.ExperimentalTypeInference
 import kotlinx.coroutines.ExperimentalCoroutinesApi
