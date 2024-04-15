@@ -706,7 +706,7 @@
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Bewege das Smartphone näher heran"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Bewege das Smartphone nach oben"</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"Bewege das Smartphone nach unten"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"Bewege das Smartphone nach links"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Bewege das Smart­phone nach links"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Bewege das Smartphone nach rechts"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Bitte sieh direkt auf dein Gerät."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Gesicht nicht erkannt. Smartphone auf Augenhöhe halten."</string>

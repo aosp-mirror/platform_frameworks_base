@@ -452,7 +452,7 @@
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"इससे ऐप्लिकेशन, \"specialUse\" टाइप वाली फ़ोरग्राउंड सेवाओं का इस्तेमाल कर पाता है"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"पता करें कि ऐप मेमोरी में कितनी जगह है"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"ऐप को उसका कोड, डेटा, और कैश मेमोरी के आकारों को फिर से पाने देता है"</string>
-    <string name="permlab_writeSettings" msgid="8057285063719277394">"सिस्‍टम सेटिंग बदलें"</string>
+    <string name="permlab_writeSettings" msgid="8057285063719277394">"सिस्‍टम की सेटिंग में बदलाव करे"</string>
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"ऐप्लिकेशन को सिस्टम सेटिंग डेटा में बदलाव करने देता है. नुकसान पहुंचाने वाले ऐप्लिकेशन आपके सिस्टम के कॉन्फ़िगरेशन को खराब सकते हैं."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"प्रारंभ होने पर चलाएं"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"ऐप्लिकेशन को सिस्टम से बूटिंग पूरी करते ही अपने आप शुरू करने देता है. इससे टैबलेट को शुरू होने में ज़्यादा समय लग सकता है और ऐप्लिकेशन निरंतर चलाकर संपूर्ण टैबलेट को धीमा करने देता है."</string>
@@ -831,7 +831,7 @@
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"स्‍क्रीन को अनलॉक करते समय गलत लिखे गए पासवर्ड की संख्‍या पर निगरानी करें, और बहुत ज़्यादा बार गलत पासवर्ड लिखे जाने पर टैबलेट लॉक करें या टैबलेट का संपूर्ण डेटा मिटाएं."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"स्क्रीन को अनलॉक करते समय ध्यान रखें कि कितनी बार गलत पासवर्ड डाला गया है. अगर बहुत ज़्यादा बार गलत पासवर्ड डाला गया है, तो अपने Android TV डिवाइस को तुरंत लॉक करें या इसका सभी डेटा मिटाएं."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"स्क्रीन को अनलॉक करते समय ध्यान रखें कि कितनी बार गलत पासवर्ड डाला गया है. अगर बहुत ज़्यादा बार गलत पासवर्ड डाला गया है, तो सूचना और मनोरंजन की सुविधा देने वाले डिवाइस को लॉक करें या इस डिवाइस का सारा डेटा मिटाएं."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"स्क्रीन को अनलॉक करते समय ध्यान रखें कि कितनी बार गलत पासवर्ड डाला गया है. अगर बहुत ज़्यादा बार गलत पासवर्ड डाला गया है, तो अपने फ़ोन को तुरंत लॉक करें या फ़ोन का सारा डेटा मिटा दें."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"स्क्रीन को अनलॉक करते समय ध्यान रखेगा कि कितनी बार गलत पासवर्ड डाला गया है. अगर बहुत ज़्यादा बार गलत पासवर्ड डाला जाएगा, तो फ़ोन को तुरंत लॉक करेगा या फ़ोन का सारा डेटा मिटा देगा."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"स्‍क्रीन का लॉक खोलते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें, और अगर बार-बार ज़्यादा पासवर्ड लिखे जाते हैं तो टैबलेट को लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटा दें."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"स्क्रीन को अनलॉक करते समय ध्यान रखें कि कितनी बार गलत पासवर्ड डाला गया है. अगर बहुत ज़्यादा बार गलत पासवर्ड डाला गया है, तो अपने Android TV डिवाइस को तुरंत लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटाएं."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"स्क्रीन को अनलॉक करते समय ध्यान रखें कि कितनी बार गलत पासवर्ड डाला गया है. अगर बहुत ज़्यादा बार गलत पासवर्ड डाला गया है, तो सूचना और मनोरंजन की सुविधा देने वाले डिवाइस को लॉक करें या इस प्रोफ़ाइल का सारा डेटा मिटाएं."</string>
@@ -844,7 +844,7 @@
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"फ़ैक्‍टरी डेटा रीसेट करके चेतावनी दिए बिना फ़ोन का डेटा मिटाना."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"फ़ैक्ट्री डेटा रीसेट करके अपने Android TV डिवाइस का डेटा बिना चेतावनी दिए मिटाएं."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"फ़ैक्ट्री डेटा रीसेट करके, बिना किसी चेतावनी के सूचना और मनोरंजन की सुविधा देने वाले डिवाइस में सेव डेटा को हमेशा के लिए मिटाएं."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"इससे फ़ैक्‍टरी डेटा रीसेट करके, चेतावनी दिए बिना फ़ोन का डेटा मिट जाता है."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"फ़ैक्‍टरी डेटा रीसेट करके, चेतावनी दिए बिना फ़ोन का डेटा मिटा देगा."</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"प्रोफ़ाइल का डेटा मिटाना"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"उपयोगकर्ता डेटा मिटाएं"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"इस टैबलेट पर मौजूद इस उपयोगकर्ता का डेटा बिना चेतावनी के मिटा दें."</string>
@@ -1655,7 +1655,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"वायरलेस डिसप्ले"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"कास्ट करें"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"डिवाइस से कनेक्ट करें"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"स्क्रीन को डिवाइस में कास्ट करें"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"स्क्रीन को डिवाइस पर कास्ट करें"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"डिवाइस खोजे जा रहे हैं…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"सेटिंग"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"डिसकनेक्ट करें"</string>
@@ -1722,14 +1722,14 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"चालू न करें"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"चालू है"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"बंद है"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> को अपना डिवाइस पूरी तरह कंट्रोल करने की मंज़ूरी दें?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> को अपना डिवाइस पूरी तरह कंट्रोल करने की अनुमति देनी है?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"पूरी तरह कंट्रोल करने की अनुमति उन ऐप्लिकेशन के लिए ठीक है जो सुलभता से जुड़ी ज़रूरतों के लिए बने हैं, लेकिन ज़्यादातर ऐप्लिकेशन के लिए यह ठीक नहीं है."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"स्क्रीन को देखें और कंट्रोल करें"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"यह स्क्रीन पर दिखने वाले कॉन्टेंट को पढ़ सकता है और उसे दूसरे ऐप्लिकेशन के ऊपर दिखा सकता है."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"देखें और कार्रवाई करें"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"यह आपके और किसी ऐप्लिकेशन या हार्डवेयर सेंसर के बीच होने वाले इंटरैक्शन को ट्रैक कर सकता है और आपकी तरफ़ से ऐप्लिकेशन के साथ इंटरैक्ट कर सकता है."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"अनुमति दें"</string>
-    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"इंकार करें"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"न दें"</string>
     <string name="accessibility_dialog_button_uninstall" msgid="2952465517671708108">"अनइंस्टॉल करें"</string>
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"ऐप्लिकेशन की वजह से, अनुमति का अनुरोध समझने में परेशानी हो रही है. इसलिए, आपके जवाब की पुष्टि नहीं की जा सकी."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"किसी सुविधा का इस्तेमाल करने के लिए, उस पर टैप करें:"</string>
@@ -1761,7 +1761,7 @@
     <string name="owner_name" msgid="8713560351570795743">"मालिक"</string>
     <string name="guest_name" msgid="8502103277839834324">"मेहमान"</string>
     <string name="error_message_title" msgid="4082495589294631966">"गड़बड़ी"</string>
-    <string name="error_message_change_not_allowed" msgid="843159705042381454">"आपका व्यवस्थापक इस बदलाव की अनुमति नहीं देता"</string>
+    <string name="error_message_change_not_allowed" msgid="843159705042381454">"आपका एडमिन इस बदलाव की अनुमति नहीं देता"</string>
     <string name="app_not_found" msgid="3429506115332341800">"इस कार्यवाही को प्रबंधित करने के लिए कोई ऐप्स  नहीं मिला"</string>
     <string name="revoke" msgid="5526857743819590458">"रद्द करें"</string>
     <string name="mediasize_iso_a0" msgid="7039061159929977973">"ISO A0"</string>
@@ -1902,7 +1902,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ठीक है"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"बैटरी सेवर, गहरे रंग वाली थीम को चालू करता है. साथ ही, इस मोड में बैकग्राउंड की गतिविधि, कुछ विज़ुअल इफ़ेक्ट, और कुछ खास सुविधाएं कम या बंद हो जाती हैं. कुछ इंटरनेट कनेक्शन भी पूरी तरह काम नहीं करते."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"बैटरी सेवर, गहरे रंग वाली थीम को चालू करता है. साथ ही, इस मोड में बैकग्राउंड की गतिविधि, कुछ विज़ुअल इफ़ेक्ट, और कुछ सुविधाएं सीमित या बंद हो जाती हैं. कुछ इंटरनेट कनेक्शन भी पूरी तरह काम नहीं करते."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"डेटा खर्च को कम करने के लिए, डेटा बचाने की सेटिंग कुछ ऐप्लिकेशन को बैकग्राउंड में डेटा भेजने या डेटा पाने से रोकती है. फ़िलहाल, जिस ऐप्लिकेशन का इस्तेमाल किया जा रहा है वह डेटा ऐक्सेस कर सकता है, लेकिन ऐसा कभी-कभी ही हो पाएगा. उदाहरण के लिए, इमेज तब तक नहीं दिखेंगी, जब तक उन पर टैप नहीं किया जाएगा."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"डेटा खर्च को कम करने के लिए, डेटा बचाने की सेटिंग बैकग्राउंड में चलने वाले कुछ ऐप्लिकेशन को डेटा भेजने या पाने से रोकती है. हालांकि, फ़िलहाल इस्तेमाल किया जा रहा ऐप्लिकेशन, डेटा को ऐक्सेस कर सकता है, लेकिन वह अक्सर ऐसा नहीं कर पाएगा. उदाहरण के लिए, ऐसा हो सकता है कि इमेज तब तक न दिखें, जब तक आप उन पर टैप न करें."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"डेटा बचाने की सेटिंग चालू करनी है?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"चालू करें"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{एक मिनट के लिए ({formattedTime} तक)}one{# मिनट के लिए ({formattedTime} तक)}other{# मिनट के लिए ({formattedTime} तक)}}"</string>
