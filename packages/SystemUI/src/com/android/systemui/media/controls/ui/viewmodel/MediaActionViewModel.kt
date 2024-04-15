@@ -24,7 +24,8 @@ data class MediaActionViewModel(
     val icon: Drawable?,
     val contentDescription: CharSequence?,
     val background: Drawable?,
-    val isVisible: Boolean = true,
+    /** whether action is visible if user is touching seekbar to change position. */
+    val isVisibleWhenScrubbing: Boolean = true,
     val notVisibleValue: Int = ConstraintSet.GONE,
     val showInCollapsed: Boolean,
     val rebindId: Int? = null,
