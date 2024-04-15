@@ -270,12 +270,20 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"查看全部"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"使用藍牙"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"已連接"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing (1496358082943301670) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"已儲存"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"解除連結"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"啟動"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"明天自動重新開啟"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"「快速共享」、「尋找我的裝置」和裝置位置等功能都會使用藍牙"</string>
-    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"藍牙將於明天上午 5 時開啟"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (682984290339848844) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (7440944034584560279) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (4499275822759907822) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (8626191139359072540) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"電量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"音訊"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"耳機"</string>
@@ -350,8 +358,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"錄製問題"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"開始"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"停止"</string>
-    <!-- no translation found for qs_record_issue_bug_report (8229031766918650079) -->
-    <skip />
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"錯誤報告"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"哪些裝置使用體驗受影響？"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"選取問題類型"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"螢幕錄影"</string>
@@ -1303,5 +1310,5 @@
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"鍵盤背光"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"第 %1$d 級，共 %2$d 級"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"智能家居"</string>
-    <string name="home_controls_dream_description" msgid="4644150952104035789">"在螢幕保護程式畫面上快速存取家居控制功能"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"在螢幕保護程式畫面上控制智能家居"</string>
 </resources>

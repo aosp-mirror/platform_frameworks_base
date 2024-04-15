@@ -270,12 +270,20 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Ikusi guztiak"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Erabili Bluetootha"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Konektatuta"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing (1496358082943301670) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Gordeta"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"deskonektatu"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktibatu"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Aktibatu automatikoki berriro bihar"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"Quick Share, Bilatu nire gailua, gailuaren kokapena eta beste eginbide batzuek Bluetootha darabilte"</string>
-    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"Bluetootha bihar 05:00etan aktibatuko da"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (682984290339848844) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (7440944034584560279) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (4499275822759907822) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (8626191139359072540) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audioa"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Entzungailua"</string>
@@ -350,8 +358,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"Arazo bat dago grabaketarekin"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Hasi"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Gelditu"</string>
-    <!-- no translation found for qs_record_issue_bug_report (8229031766918650079) -->
-    <skip />
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Akatsen txostena"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Gailuaren erabileraren zer alderdiri eragin dio?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Hautatu arazo mota"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Pantaila-grabaketa"</string>
@@ -735,7 +742,7 @@
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"Zenbaki-teklatuko <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"Kendu eranskina"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"Sistema"</string>
-    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"Hasierako pantaila"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"Orri nagusia"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Azkenaldikoak"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Atzera"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Jakinarazpenak"</string>
@@ -1302,6 +1309,6 @@
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) aplikazioak erabili du duela gutxi"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Teklatuaren hondoko argia"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d/%2$d maila"</string>
-    <string name="home_controls_dream_label" msgid="6567105701292324257">"Etxeko gailuak kontrolatzeko aukerak"</string>
-    <string name="home_controls_dream_description" msgid="4644150952104035789">"Atzitu etxeko gailuak kontrolatzeko aukerak pantaila-babesletik"</string>
+    <string name="home_controls_dream_label" msgid="6567105701292324257">"Etxeko gailuen kontrola"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"Kontrolatu etxeko gailuak pantaila-babesletik"</string>
 </resources>

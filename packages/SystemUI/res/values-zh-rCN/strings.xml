@@ -270,12 +270,20 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"查看全部"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"使用蓝牙"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"已连接"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing (1496358082943301670) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"已保存"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"断开连接"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"启用"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"明天自动重新开启"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"“快速分享”“查找我的设备”“设备位置信息”等功能会使用蓝牙"</string>
-    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"蓝牙将于明天早晨 5 点开启"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (682984290339848844) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (7440944034584560279) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (4499275822759907822) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (8626191139359072540) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> 的电量"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"音频"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"耳机"</string>
@@ -350,8 +358,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"录制问题"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"开始"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"停止"</string>
-    <!-- no translation found for qs_record_issue_bug_report (8229031766918650079) -->
-    <skip />
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"错误报告"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"设备体验的哪个方面受到影响？"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"选择问题类型"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"屏幕录制"</string>
@@ -748,7 +755,7 @@
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"未找到任何快捷键"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"系统"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"输入"</string>
-    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"已打开的应用"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"打开应用"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"当前应用"</string>
     <string name="keyboard_shortcut_a11y_show_search_results" msgid="2865241062981833705">"目前显示的是搜索结果"</string>
     <string name="keyboard_shortcut_a11y_filter_system" msgid="7744143131119370483">"目前显示的是系统快捷键"</string>

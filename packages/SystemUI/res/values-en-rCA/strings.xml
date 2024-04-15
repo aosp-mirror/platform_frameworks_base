@@ -270,12 +270,15 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"See all"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Use Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Connected"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Audio Sharing"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Saved"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"disconnect"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"activate"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Automatically turn on again tomorrow"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"Features like Quick Share, Find My Device, and device location use Bluetooth"</string>
-    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"Bluetooth will turn on tomorrow at 5 AM"</string>
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Features like Quick Share and Find My Device use Bluetooth"</string>
+    <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth will turn on tomorrow morning"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"Audio Sharing"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"Sharing Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> battery"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
