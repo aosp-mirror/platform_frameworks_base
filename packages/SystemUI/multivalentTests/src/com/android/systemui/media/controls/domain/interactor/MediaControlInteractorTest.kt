@@ -187,7 +187,12 @@ class MediaControlInteractorTest : SysuiTestCase() {
         underTest.startMediaOutputDialog(expandable, PACKAGE_NAME)
 
         verify(kosmos.mediaOutputDialogManager)
-            .createAndShowWithController(eq(PACKAGE_NAME), eq(true), eq(dialogTransitionController))
+            .createAndShowWithController(
+                eq(PACKAGE_NAME),
+                eq(true),
+                eq(dialogTransitionController),
+                eq(null)
+            )
     }
 
     @Test

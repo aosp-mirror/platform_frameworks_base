@@ -20,6 +20,7 @@ import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.RouteListingPreference;
 import android.media.RoutingSessionInfo;
+import android.os.UserHandle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -58,8 +59,9 @@ import java.util.List;
     NoOpInfoMediaManager(
             Context context,
             @NonNull String packageName,
+            @NonNull UserHandle userHandle,
             LocalBluetoothManager localBluetoothManager) {
-        super(context, packageName, localBluetoothManager);
+        super(context, packageName, userHandle, localBluetoothManager);
     }
 
     @Override
