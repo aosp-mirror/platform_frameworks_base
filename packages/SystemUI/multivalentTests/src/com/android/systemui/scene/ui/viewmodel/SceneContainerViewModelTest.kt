@@ -23,13 +23,13 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.domain.interactor.falsingInteractor
 import com.android.systemui.classifier.fakeFalsingManager
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.testKosmos
@@ -45,6 +45,7 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableSceneContainer
 class SceneContainerViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
@@ -58,7 +59,6 @@ class SceneContainerViewModelTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        kosmos.fakeSceneContainerFlags.enabled = true
         underTest =
             SceneContainerViewModel(
                 sceneInteractor = sceneInteractor,

@@ -23,7 +23,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.utils.GlobalWindowManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -63,8 +62,8 @@ class ResourceTrimmerTest : SysuiTestCase() {
 
         val withDeps =
             KeyguardInteractorFactory.create(
-                repository = keyguardRepository,
                 featureFlags = featureFlags,
+                repository = keyguardRepository,
             )
         val keyguardInteractor = withDeps.keyguardInteractor
         resourceTrimmer =

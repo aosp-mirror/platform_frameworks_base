@@ -34,10 +34,10 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Sim
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.testKosmos
@@ -60,6 +60,7 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableSceneContainer
 class BouncerViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
@@ -70,7 +71,6 @@ class BouncerViewModelTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        kosmos.fakeSceneContainerFlags.enabled = true
         underTest = kosmos.bouncerViewModel
     }
 

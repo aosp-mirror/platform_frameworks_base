@@ -22,7 +22,7 @@ import android.view.ViewConfiguration;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.res.R;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.statusbar.phone.NotificationTapHelper;
 
 import dagger.Binds;
@@ -51,9 +51,8 @@ public interface FalsingModule {
     @SysUISingleton
     static FalsingCollector providesFalsingCollectorLegacy(
             FalsingCollectorImpl impl,
-            FalsingCollectorNoOp noOp,
-            SceneContainerFlags flags) {
-        return flags.isEnabled() ? noOp : impl;
+            FalsingCollectorNoOp noOp) {
+        return SceneContainerFlag.isEnabled() ? noOp : impl;
     }
 
     /** Provides the actual {@link FalsingCollector}. */

@@ -35,7 +35,7 @@ import com.android.systemui.dump.DumpHandler;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeSurface;
@@ -61,14 +61,14 @@ import com.android.systemui.statusbar.phone.StatusBarIconList;
 import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
-import javax.inject.Provider;
-
 import dagger.Binds;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
+
+import javax.inject.Provider;
 
 /**
  * This module provides instances needed to construct {@link CentralSurfacesImpl}. These are moved to
@@ -185,10 +185,9 @@ public interface CentralSurfacesDependenciesModule {
     @Provides
     @SysUISingleton
     static ShadeSurface provideShadeSurface(
-            SceneContainerFlags sceneContainerFlags,
             Provider<ShadeSurfaceImpl> sceneContainerOn,
             Provider<NotificationPanelViewController> sceneContainerOff) {
-        if (sceneContainerFlags.isEnabled()) {
+        if (SceneContainerFlag.isEnabled()) {
             return sceneContainerOn.get();
         } else {
             return sceneContainerOff.get();

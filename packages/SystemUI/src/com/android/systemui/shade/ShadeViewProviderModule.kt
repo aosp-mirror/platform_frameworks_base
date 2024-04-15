@@ -33,7 +33,7 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.res.R
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
@@ -78,15 +78,13 @@ abstract class ShadeViewProviderModule {
         @SysUISingleton
         fun providesWindowRootView(
             layoutInflater: LayoutInflater,
-            sceneContainerFlags: SceneContainerFlags,
             viewModelProvider: Provider<SceneContainerViewModel>,
             containerConfigProvider: Provider<SceneContainerConfig>,
-            flagsProvider: Provider<SceneContainerFlags>,
             scenesProvider: Provider<Set<@JvmSuppressWildcards Scene>>,
             layoutInsetController: NotificationInsetsController,
             sceneDataSourceDelegator: Provider<SceneDataSourceDelegator>,
         ): WindowRootView {
-            return if (sceneContainerFlags.isEnabled()) {
+            return if (SceneContainerFlag.isEnabled) {
                 checkNoSceneDuplicates(scenesProvider.get())
                 val sceneWindowRootView =
                     layoutInflater.inflate(R.layout.scene_window_root, null) as SceneWindowRootView
@@ -95,7 +93,6 @@ abstract class ShadeViewProviderModule {
                     containerConfig = containerConfigProvider.get(),
                     sharedNotificationContainer =
                         sceneWindowRootView.requireViewById(R.id.shared_notification_container),
-                    flags = flagsProvider.get(),
                     scenes = scenesProvider.get(),
                     layoutInsetController = layoutInsetController,
                     sceneDataSourceDelegator = sceneDataSourceDelegator.get(),
@@ -115,9 +112,8 @@ abstract class ShadeViewProviderModule {
         @SysUISingleton
         fun providesNotificationShadeWindowView(
             root: WindowRootView,
-            sceneContainerFlags: SceneContainerFlags,
         ): NotificationShadeWindowView {
-            if (sceneContainerFlags.isEnabled()) {
+            if (SceneContainerFlag.isEnabled) {
                 return root.requireViewById(R.id.legacy_window_root)
             }
             return root as NotificationShadeWindowView?

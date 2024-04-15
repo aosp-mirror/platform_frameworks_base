@@ -24,12 +24,9 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor.ConfigurationBasedDimensions
@@ -49,7 +46,6 @@ object KeyguardInteractorFactory {
     @JvmStatic
     fun create(
         featureFlags: FakeFeatureFlags = FakeFeatureFlags(),
-        sceneContainerFlags: SceneContainerFlags = FakeSceneContainerFlags(),
         repository: FakeKeyguardRepository = FakeKeyguardRepository(),
         commandQueue: FakeCommandQueue = FakeCommandQueue(),
         bouncerRepository: FakeKeyguardBouncerRepository = FakeKeyguardBouncerRepository(),
@@ -88,7 +84,6 @@ object KeyguardInteractorFactory {
             repository = repository,
             commandQueue = commandQueue,
             featureFlags = featureFlags,
-            sceneContainerFlags = sceneContainerFlags,
             bouncerRepository = bouncerRepository,
             configurationRepository = configurationRepository,
             shadeRepository = shadeRepository,
@@ -96,13 +91,12 @@ object KeyguardInteractorFactory {
             KeyguardInteractor(
                 repository = repository,
                 commandQueue = commandQueue,
-                sceneContainerFlags = sceneContainerFlags,
+                powerInteractor = powerInteractor,
                 bouncerRepository = bouncerRepository,
                 configurationInteractor = ConfigurationInteractor(configurationRepository),
                 shadeRepository = shadeRepository,
-                sceneInteractorProvider = { sceneInteractor },
                 keyguardTransitionInteractor = keyguardTransitionInteractor,
-                powerInteractor = powerInteractor,
+                sceneInteractorProvider = { sceneInteractor },
                 fromGoneTransitionInteractor = { fromGoneTransitionInteractor },
                 sharedNotificationContainerInteractor = { sncInteractor },
                 applicationScope = testScope,
@@ -114,7 +108,6 @@ object KeyguardInteractorFactory {
         val repository: FakeKeyguardRepository,
         val commandQueue: FakeCommandQueue,
         val featureFlags: FakeFeatureFlags,
-        val sceneContainerFlags: SceneContainerFlags,
         val bouncerRepository: FakeKeyguardBouncerRepository,
         val configurationRepository: FakeConfigurationRepository,
         val shadeRepository: FakeShadeRepository,

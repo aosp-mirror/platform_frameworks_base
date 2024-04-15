@@ -31,7 +31,6 @@ import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.se
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
-import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.statusbar.NotificationPresenter
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.setActiveNotifs
@@ -82,7 +81,6 @@ class WindowRootViewVisibilityInteractorTest : SysuiTestCase() {
                 headsUpManager,
                 powerInteractor,
                 activeNotificationsInteractor,
-                kosmos.sceneContainerFlags,
                 kosmos::sceneInteractor,
             )
             .apply { setUp(notificationPresenter, notificationsController) }

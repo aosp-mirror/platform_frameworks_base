@@ -54,7 +54,6 @@ import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.shade.domain.interactor.shadeInteractor
@@ -102,7 +101,6 @@ class SceneContainerStartableTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
-    private val sceneContainerFlags by lazy { kosmos.fakeSceneContainerFlags }
     private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
     private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
     private val faceAuthRepository by lazy { kosmos.fakeDeviceEntryFaceAuthRepository }
@@ -124,15 +122,15 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 applicationScope = testScope.backgroundScope,
                 sceneInteractor = sceneInteractor,
                 deviceEntryInteractor = deviceEntryInteractor,
+                deviceUnlockedInteractor = kosmos.deviceUnlockedInteractor,
+                bouncerInteractor = bouncerInteractor,
                 keyguardInteractor = keyguardInteractor,
-                flags = sceneContainerFlags,
                 sysUiState = sysUiState,
                 displayId = Display.DEFAULT_DISPLAY,
                 sceneLogger = mock(),
                 falsingCollector = falsingCollector,
                 falsingManager = kosmos.falsingManager,
                 powerInteractor = powerInteractor,
-                bouncerInteractor = bouncerInteractor,
                 simBouncerInteractor = { kosmos.simBouncerInteractor },
                 authenticationInteractor = { authenticationInteractor },
                 windowController = windowController,
@@ -141,7 +139,6 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 headsUpInteractor = kosmos.headsUpNotificationInteractor,
                 occlusionInteractor = kosmos.sceneContainerOcclusionInteractor,
                 faceUnlockInteractor = kosmos.deviceEntryFaceAuthInteractor,
-                deviceUnlockedInteractor = kosmos.deviceUnlockedInteractor,
                 shadeInteractor = kosmos.shadeInteractor,
             )
     }
@@ -1245,7 +1242,6 @@ class SceneContainerStartableTest : SysuiTestCase() {
             "Cannot start on the Gone scene and have the device be locked at the same time."
         }
 
-        sceneContainerFlags.enabled = true
         kosmos.fakeDeviceEntryRepository.setBypassEnabled(isBypassEnabled)
         authenticationMethod?.let {
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(authenticationMethod)

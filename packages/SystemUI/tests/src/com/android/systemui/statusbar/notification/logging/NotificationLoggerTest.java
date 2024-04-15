@@ -138,7 +138,6 @@ public class NotificationLoggerTest extends SysuiTestCase {
                 mHeadsUpManager,
                 mPowerInteractor,
                 mActiveNotificationsInteractor,
-                mKosmos.getSceneContainerFlags(),
                 () -> mKosmos.getSceneInteractor());
         mWindowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true);
 

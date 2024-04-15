@@ -48,10 +48,9 @@ import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.sceneContainerConfig
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
-import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.scene.shared.model.sceneDataSource
 import com.android.systemui.settings.brightness.domain.interactor.brightnessMirrorShowingInteractor
+import com.android.systemui.shade.shadeController
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 import com.android.systemui.statusbar.phone.screenOffAnimationController
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
@@ -71,8 +70,6 @@ class KosmosJavaAdapter(
     val testDispatcher by lazy { kosmos.testDispatcher }
     val testScope by lazy { kosmos.testScope }
     val fakeFeatureFlags by lazy { kosmos.fakeFeatureFlagsClassic }
-    val fakeSceneContainerFlags by lazy { kosmos.fakeSceneContainerFlags }
-    val sceneContainerFlags by lazy { kosmos.sceneContainerFlags }
     val fakeExecutor by lazy { kosmos.fakeExecutor }
     val fakeExecutorHandler by lazy { kosmos.fakeExecutorHandler }
     val configurationRepository by lazy { kosmos.fakeConfigurationRepository }
@@ -112,6 +109,7 @@ class KosmosJavaAdapter(
     }
     val brightnessMirrorShowingInteractor by lazy { kosmos.brightnessMirrorShowingInteractor }
     val qsLongPressEffect by lazy { kosmos.qsLongPressEffect }
+    val shadeController by lazy { kosmos.shadeController }
 
     init {
         kosmos.applicationContext = testCase.context

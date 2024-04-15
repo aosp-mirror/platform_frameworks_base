@@ -52,6 +52,7 @@ import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
@@ -61,7 +62,6 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.fakeUserTracker
@@ -698,10 +698,9 @@ class CommunalInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableSceneContainer
     fun isCommunalShowing_whenSceneContainerEnabled() =
         testScope.runTest {
-            kosmos.fakeSceneContainerFlags.enabled = true
-
             // Verify default is false
             val isCommunalShowing by collectLastValue(underTest.isCommunalShowing)
             runCurrent()

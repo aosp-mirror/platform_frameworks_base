@@ -37,7 +37,7 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -91,7 +91,6 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
             ShadeInteractor shadeInteractor,
             Provider<SceneInteractor> sceneInteractor,
             JavaAdapter javaAdapter,
-            SceneContainerFlags sceneContainerFlags,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             PrimaryBouncerInteractor primaryBouncerInteractor,
             AlternateBouncerInteractor alternateBouncerInteractor
@@ -130,7 +129,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
 
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
 
-        if (sceneContainerFlags.isEnabled()) {
+        if (SceneContainerFlag.isEnabled()) {
             javaAdapter.alwaysCollectFlow(
                     sceneInteractor.get().isVisible(),
                     this::onSceneContainerVisibilityChanged);

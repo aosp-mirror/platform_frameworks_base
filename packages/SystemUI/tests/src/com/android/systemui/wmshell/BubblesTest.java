@@ -121,8 +121,6 @@ import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.scene.FakeWindowRootViewComponent;
 import com.android.systemui.scene.data.repository.SceneContainerRepository;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.scene.shared.logger.SceneLogger;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.settings.UserTracker;
@@ -360,8 +358,6 @@ public class BubblesTest extends SysuiTestCase {
     @Mock
     private Display mDefaultDisplay;
     @Mock
-    private SceneContainerFlags mSceneContainerFlags;
-    @Mock
     private LargeScreenHeaderHelper mLargeScreenHeaderHelper;
 
     private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
@@ -430,14 +426,12 @@ public class BubblesTest extends SysuiTestCase {
                 mock(SceneLogger.class),
                 mKosmos.getDeviceUnlockedInteractor());
 
-        FakeSceneContainerFlags sceneContainerFlags = new FakeSceneContainerFlags();
         KeyguardTransitionInteractor keyguardTransitionInteractor =
                 mKosmos.getKeyguardTransitionInteractor();
         KeyguardInteractor keyguardInteractor = new KeyguardInteractor(
                 keyguardRepository,
                 new FakeCommandQueue(),
                 powerInteractor,
-                sceneContainerFlags,
                 new FakeKeyguardBouncerRepository(),
                 new ConfigurationInteractor(configurationRepository),
                 shadeRepository,
@@ -503,7 +497,6 @@ public class BubblesTest extends SysuiTestCase {
                 mShadeWindowLogger,
                 () -> mSelectedUserInteractor,
                 mUserTracker,
-                mSceneContainerFlags,
                 mKosmos::getCommunalInteractor
         );
         mNotificationShadeWindowController.fetchWindowRootView();

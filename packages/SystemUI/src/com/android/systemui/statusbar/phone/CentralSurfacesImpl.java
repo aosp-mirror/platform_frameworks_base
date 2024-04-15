@@ -164,7 +164,6 @@ import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
@@ -592,9 +591,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     private final ColorExtractor.OnColorsChangedListener mOnColorsChangedListener =
             (extractor, which) -> updateTheme();
-
-    private final SceneContainerFlags mSceneContainerFlags;
-
     private final BrightnessMirrorShowingInteractor mBrightnessMirrorShowingInteractor;
 
     /**
@@ -708,7 +704,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             UserTracker userTracker,
             Provider<FingerprintManager> fingerprintManager,
             ActivityStarter activityStarter,
-            SceneContainerFlags sceneContainerFlags,
             BrightnessMirrorShowingInteractor brightnessMirrorShowingInteractor
     ) {
         mContext = context;
@@ -804,7 +799,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mUserTracker = userTracker;
         mFingerprintManager = fingerprintManager;
         mActivityStarter = activityStarter;
-        mSceneContainerFlags = sceneContainerFlags;
         mBrightnessMirrorShowingInteractor = brightnessMirrorShowingInteractor;
 
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
@@ -1088,7 +1082,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mJavaAdapter.alwaysCollectFlow(
                 mCommunalInteractor.isIdleOnCommunal(),
                 mIdleOnCommunalConsumer);
-        if (mSceneContainerFlags.isEnabled()) {
+        if (SceneContainerFlag.isEnabled()) {
             mJavaAdapter.alwaysCollectFlow(
                     mBrightnessMirrorShowingInteractor.isShowing(),
                     this::setBrightnessMirrorShowing
@@ -1277,7 +1271,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         // Set up the quick settings tile panel
         final View container = getNotificationShadeWindowView().findViewById(R.id.qs_frame);
-        if (container != null && !mSceneContainerFlags.isEnabled()) {
+        if (container != null && !SceneContainerFlag.isEnabled()) {
             FragmentHostManager fragmentHostManager =
                     mFragmentService.getFragmentHostManager(container);
             ExtensionFragmentListener.attachExtensonToFragment(

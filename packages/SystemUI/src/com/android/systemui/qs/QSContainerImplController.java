@@ -24,7 +24,7 @@ import android.view.View;
 
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.dagger.QSScope;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.ViewController;
 
@@ -66,15 +66,14 @@ public class QSContainerImplController extends ViewController<QSContainerImpl> {
             QSPanelController qsPanelController,
             QuickStatusBarHeaderController quickStatusBarHeaderController,
             ConfigurationController configurationController,
-            FalsingManager falsingManager,
-            SceneContainerFlags sceneContainerFlags) {
+            FalsingManager falsingManager) {
         super(view);
         mQsPanelController = qsPanelController;
         mQuickStatusBarHeaderController = quickStatusBarHeaderController;
         mConfigurationController = configurationController;
         mFalsingManager = falsingManager;
         mQSPanelContainer = mView.getQSPanelContainer();
-        mSceneContainerEnabled = sceneContainerFlags.isEnabled();
+        mSceneContainerEnabled = SceneContainerFlag.isEnabled();
     }
 
     @Override

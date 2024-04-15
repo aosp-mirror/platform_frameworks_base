@@ -37,7 +37,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.logging.QSLogger;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.settings.brightness.BrightnessController;
 import com.android.systemui.settings.brightness.BrightnessMirrorHandler;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
@@ -94,7 +94,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             FalsingManager falsingManager,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             SplitShadeStateController splitShadeStateController,
-            SceneContainerFlags sceneContainerFlags,
             Provider<QSLongPressEffect> longPRessEffectProvider) {
         super(view, qsHost, qsCustomizerController, usingMediaPlayer, mediaHost,
                 metricsLogger, uiEventLogger, qsLogger, dumpManager, splitShadeStateController,
@@ -113,7 +112,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         mBrightnessMirrorHandler = new BrightnessMirrorHandler(mBrightnessController);
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mLastDensity = view.getResources().getConfiguration().densityDpi;
-        mSceneContainerEnabled = sceneContainerFlags.isEnabled();
+        mSceneContainerEnabled = SceneContainerFlag.isEnabled();
     }
 
     @Override

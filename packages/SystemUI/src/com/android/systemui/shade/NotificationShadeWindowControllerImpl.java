@@ -59,7 +59,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.res.R;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.scene.ui.view.WindowRootViewComponent;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
@@ -117,7 +117,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     private final AuthController mAuthController;
     private final Lazy<SelectedUserInteractor> mUserInteractor;
     private final Lazy<ShadeInteractor> mShadeInteractorLazy;
-    private final SceneContainerFlags mSceneContainerFlags;
     private final Lazy<CommunalInteractor> mCommunalInteractor;
     private ViewGroup mWindowRootView;
     private LayoutParams mLp;
@@ -166,7 +165,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             ShadeWindowLogger logger,
             Lazy<SelectedUserInteractor> userInteractor,
             UserTracker userTracker,
-            SceneContainerFlags sceneContainerFlags,
             Lazy<CommunalInteractor> communalInteractor) {
         mContext = context;
         mWindowRootViewComponentFactory = windowRootViewComponentFactory;
@@ -186,7 +184,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         dumpManager.registerCriticalDumpable("{slow}NotificationShadeWindowControllerImpl", this);
         mAuthController = authController;
         mUserInteractor = userInteractor;
-        mSceneContainerFlags = sceneContainerFlags;
         mCommunalInteractor = communalInteractor;
         mLastKeyguardRotationAllowed = mKeyguardStateController.isKeyguardScreenRotationAllowed();
         mLockScreenDisplayTimeout = context.getResources()
@@ -289,7 +286,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mLp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         mLp.privateFlags |= PRIVATE_FLAG_OPTIMIZE_MEASURE;
 
-        if (mSceneContainerFlags.isEnabled()) {
+        if (SceneContainerFlag.isEnabled()) {
             // This prevents the appearance and disappearance of the software keyboard (also known
             // as the "IME") from scrolling/panning the window to make room for the keyboard.
             //

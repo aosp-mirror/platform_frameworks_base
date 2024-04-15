@@ -27,7 +27,7 @@ import com.android.systemui.keyguard.data.repository.BiometricType
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -52,7 +52,6 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     @Application private val context: Context,
     deviceEntryFingerprintAuthRepository: DeviceEntryFingerprintAuthRepository,
-    private val sceneContainerFlags: SceneContainerFlags,
     private val sceneInteractor: SceneInteractor,
     private val primaryBouncerInteractor: PrimaryBouncerInteractor,
     alternateBouncerInteractor: AlternateBouncerInteractor,
@@ -75,7 +74,7 @@ constructor(
         get() = context.resources.getBoolean(R.bool.config_show_sidefps_hint_on_bouncer)
 
     private val isBouncerSceneActive: Flow<Boolean> =
-        if (sceneContainerFlags.isEnabled()) {
+        if (SceneContainerFlag.isEnabled) {
             sceneInteractor.currentScene.map { it == Scenes.Bouncer }.distinctUntilChanged()
         } else {
             flowOf(false)
@@ -115,7 +114,7 @@ constructor(
             .distinctUntilChanged()
 
     private fun isBouncerActive(): Boolean {
-        if (sceneContainerFlags.isEnabled()) {
+        if (SceneContainerFlag.isEnabled) {
             return sceneInteractor.currentScene.value == Scenes.Bouncer
         }
         return primaryBouncerInteractor.isBouncerShowing() &&

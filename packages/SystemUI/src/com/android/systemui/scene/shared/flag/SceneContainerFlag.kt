@@ -20,7 +20,6 @@ package com.android.systemui.scene.shared.flag
 
 import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.Flags.sceneContainer
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
@@ -32,8 +31,6 @@ import com.android.systemui.keyguard.shared.RefactorKeyguardDismissIntent
 import com.android.systemui.media.controls.util.MediaInSceneContainerFlag
 import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import com.android.systemui.statusbar.phone.PredictiveBackSysUiFlag
-import dagger.Module
-import dagger.Provides
 
 /** Helper for reading or using the scene container flag state. */
 object SceneContainerFlag {
@@ -99,40 +96,16 @@ object SceneContainerFlag {
      */
     @JvmStatic
     inline fun assertInLegacyMode() = RefactorFlagUtils.assertInLegacyMode(isEnabled, DESCRIPTION)
-}
-
-/**
- * Defines interface for classes that can check whether the scene container framework feature is
- * enabled.
- */
-interface SceneContainerFlags {
-
-    /** Returns `true` if the Scene Container Framework is enabled; `false` otherwise. */
-    fun isEnabled(): Boolean
 
     /** Returns a developer-readable string that describes the current requirement list. */
-    fun requirementDescription(): String
-}
-
-class SceneContainerFlagsImpl : SceneContainerFlags {
-
-    override fun isEnabled(): Boolean {
-        return SceneContainerFlag.isEnabled
-    }
-
-    override fun requirementDescription(): String {
+    @JvmStatic
+    fun requirementDescription(): String {
         return buildString {
-            SceneContainerFlag.getAllRequirements().forEach { requirement ->
+            getAllRequirements().forEach { requirement ->
                 append('\n')
                 append(if (requirement.isEnabled) "    [MET]" else "[NOT MET]")
                 append(" ${requirement.name}")
             }
         }
     }
-}
-
-@Module
-object SceneContainerFlagsModule {
-
-    @Provides @SysUISingleton fun impl(): SceneContainerFlags = SceneContainerFlagsImpl()
 }

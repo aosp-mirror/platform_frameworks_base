@@ -38,6 +38,7 @@ import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReaso
 import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReason.TrustAgentDisabled
 import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReason.UnattendedUpdate
 import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReason.UserLockdown
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.fakeSystemPropertiesHelper
 import com.android.systemui.keyguard.data.repository.fakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
@@ -47,7 +48,6 @@ import com.android.systemui.keyguard.shared.model.AuthenticationFlags
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -62,6 +62,7 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableSceneContainer
 class DeviceEntryInteractorTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
@@ -74,7 +75,6 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        kosmos.fakeSceneContainerFlags.enabled = true
         underTest = kosmos.deviceEntryInteractor
     }
 

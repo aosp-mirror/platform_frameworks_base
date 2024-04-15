@@ -20,7 +20,6 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlagsModule
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
-import com.android.systemui.scene.shared.flag.SceneContainerFlagsModule
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
 import dagger.Binds
@@ -40,7 +39,6 @@ import dagger.multibindings.IntoMap
             GoneSceneModule::class,
             LockscreenSceneModule::class,
             QuickSettingsSceneModule::class,
-            SceneContainerFlagsModule::class,
             ShadeSceneModule::class,
         ],
 )

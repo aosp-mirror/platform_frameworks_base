@@ -75,8 +75,6 @@ import com.android.systemui.res.R;
 import com.android.systemui.scene.FakeWindowRootViewComponent;
 import com.android.systemui.scene.data.repository.SceneContainerRepository;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.scene.shared.logger.SceneLogger;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
@@ -136,7 +134,6 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     @Mock private ShadeWindowLogger mShadeWindowLogger;
     @Mock private SelectedUserInteractor mSelectedUserInteractor;
     @Mock private UserTracker mUserTracker;
-    @Mock private SceneContainerFlags mSceneContainerFlags;
     @Mock private LargeScreenHeaderHelper mLargeScreenHeaderHelper;
     @Captor private ArgumentCaptor<WindowManager.LayoutParams> mLayoutParameters;
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mStateListener;
@@ -185,14 +182,12 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mKosmos.getDeviceUnlockedInteractor());
 
         FakeConfigurationRepository configurationRepository = new FakeConfigurationRepository();
-        FakeSceneContainerFlags sceneContainerFlags = new FakeSceneContainerFlags();
         KeyguardTransitionInteractor keyguardTransitionInteractor =
                 mKosmos.getKeyguardTransitionInteractor();
         KeyguardInteractor keyguardInteractor = new KeyguardInteractor(
                 keyguardRepository,
                 new FakeCommandQueue(),
                 powerInteractor,
-                sceneContainerFlags,
                 new FakeKeyguardBouncerRepository(),
                 new ConfigurationInteractor(configurationRepository),
                 shadeRepository,
@@ -256,7 +251,6 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mShadeWindowLogger,
                 () -> mSelectedUserInteractor,
                 mUserTracker,
-                mSceneContainerFlags,
                 () -> communalInteractor) {
                     @Override
                     protected boolean isDebuggable() {
