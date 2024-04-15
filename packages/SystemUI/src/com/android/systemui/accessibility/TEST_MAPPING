@@ -20,5 +20,10 @@
         }
       ]
     }
+  ],
+  "postsubmit": [
+    {
+      "name": "CtsAccessibilityServiceTestCases"
+    }
   ]
 }
