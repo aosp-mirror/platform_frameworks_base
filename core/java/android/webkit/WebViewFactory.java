@@ -40,6 +40,7 @@ import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Slog;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -609,7 +610,7 @@ public final class WebViewFactory {
             startedRelroProcesses = WebViewLibraryLoader.prepareNativeLibraries(packageInfo);
         } catch (Throwable t) {
             // Log and discard errors at this stage as we must not crash the system server.
-            Log.e(LOGTAG, "error preparing webview native library", t);
+            Slog.wtf(LOGTAG, "error preparing webview native library", t);
         }
 
         WebViewZygote.onWebViewProviderChanged(packageInfo);

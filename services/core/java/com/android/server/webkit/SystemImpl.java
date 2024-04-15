@@ -35,6 +35,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
+import android.util.Slog;
 import android.webkit.UserPackage;
 import android.webkit.WebViewFactory;
 import android.webkit.WebViewProviderInfo;
@@ -201,6 +202,7 @@ public class SystemImpl implements SystemInterface {
             ActivityManager.getService().killPackageDependents(packageName,
                     UserHandle.USER_ALL);
         } catch (RemoteException e) {
+            Slog.wtf(TAG, "failed to call killPackageDependents for " + packageName, e);
         }
     }
 
