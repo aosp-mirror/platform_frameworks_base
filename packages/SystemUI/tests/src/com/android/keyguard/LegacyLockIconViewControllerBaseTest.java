@@ -52,6 +52,7 @@ import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -148,7 +149,7 @@ public class LegacyLockIconViewControllerBaseTest extends SysuiTestCase {
         when(mStatusBarStateController.isDozing()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD);
 
-        if (!Flags.sceneContainer()) {
+        if (!SceneContainerFlag.isEnabled()) {
             mSetFlagsRule.disableFlags(Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR);
             mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
         }
