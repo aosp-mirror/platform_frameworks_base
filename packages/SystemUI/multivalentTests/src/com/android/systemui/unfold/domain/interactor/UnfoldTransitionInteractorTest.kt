@@ -15,42 +15,31 @@
  */
 package com.android.systemui.unfold.domain.interactor
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.unfold.TestUnfoldTransitionProvider
-import com.android.systemui.unfold.data.repository.UnfoldTransitionRepositoryImpl
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
+import com.android.systemui.unfold.fakeUnfoldTransitionProgressProvider
 import com.google.common.truth.Truth.assertThat
-import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
-open class UnfoldTransitionInteractorTest : SysuiTestCase() {
+@RunWith(AndroidJUnit4::class)
+class UnfoldTransitionInteractorTest : SysuiTestCase() {
 
-    private val testScope = TestScope()
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val unfoldTransitionProgressProvider = kosmos.fakeUnfoldTransitionProgressProvider
 
-    private val unfoldTransitionProgressProvider = TestUnfoldTransitionProvider()
-    private val unfoldTransitionRepository =
-        UnfoldTransitionRepositoryImpl(Optional.of(unfoldTransitionProgressProvider))
-
-    private lateinit var underTest: UnfoldTransitionInteractor
-
-    @Before
-    fun setUp() {
-        MockitoAnnotations.initMocks(this)
-
-        underTest = UnfoldTransitionInteractorImpl(unfoldTransitionRepository)
-    }
+    private val underTest: UnfoldTransitionInteractor = kosmos.unfoldTransitionInteractor
 
     @Test
     fun waitForTransitionFinish_noEvents_doesNotComplete() =
@@ -87,5 +76,27 @@ open class UnfoldTransitionInteractorTest : SysuiTestCase() {
 
             assertThat(deferred.isCompleted).isFalse()
             deferred.cancel()
+        }
+
+    @Test
+    fun unfoldProgress() =
+        testScope.runTest {
+            val progress by collectLastValue(underTest.unfoldProgress)
+            runCurrent()
+
+            unfoldTransitionProgressProvider.onTransitionStarted()
+            assertThat(progress).isEqualTo(1f)
+
+            repeat(10) { repetition ->
+                val transitionProgress = 0.1f * (repetition + 1)
+                unfoldTransitionProgressProvider.onTransitionProgress(transitionProgress)
+                assertThat(progress).isEqualTo(transitionProgress)
+            }
+
+            unfoldTransitionProgressProvider.onTransitionFinishing()
+            assertThat(progress).isEqualTo(1f)
+
+            unfoldTransitionProgressProvider.onTransitionFinished()
+            assertThat(progress).isEqualTo(1f)
         }
 }

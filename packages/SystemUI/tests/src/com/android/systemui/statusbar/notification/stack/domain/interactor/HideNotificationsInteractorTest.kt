@@ -31,7 +31,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.shared.model.ScreenPowerState.SCREEN_ON
 import com.android.systemui.power.shared.model.WakefulnessState.STARTING_TO_SLEEP
 import com.android.systemui.statusbar.policy.FakeConfigurationController
-import com.android.systemui.unfold.TestUnfoldTransitionProvider
+import com.android.systemui.unfold.FakeUnfoldTransitionProvider
 import com.android.systemui.unfold.data.repository.UnfoldTransitionRepositoryImpl
 import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractorImpl
 import com.android.systemui.util.animation.data.repository.FakeAnimationStatusRepository
@@ -59,7 +59,7 @@ open class HideNotificationsInteractorTest : SysuiTestCase() {
 
     private val animationStatus = FakeAnimationStatusRepository()
     private val configurationController = FakeConfigurationController()
-    private val unfoldTransitionProgressProvider = TestUnfoldTransitionProvider()
+    private val unfoldTransitionProgressProvider = FakeUnfoldTransitionProvider()
     private val powerRepository = FakePowerRepository()
     private val powerInteractor =
         PowerInteractor(

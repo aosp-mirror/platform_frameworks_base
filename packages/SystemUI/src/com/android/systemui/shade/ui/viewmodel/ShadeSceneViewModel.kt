@@ -37,6 +37,7 @@ import com.android.systemui.settings.brightness.ui.viewModel.BrightnessMirrorVie
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
+import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -64,6 +65,7 @@ constructor(
     private val footerActionsViewModelFactory: FooterActionsViewModel.Factory,
     private val footerActionsController: FooterActionsController,
     private val sceneInteractor: SceneInteractor,
+    unfoldTransitionInteractor: UnfoldTransitionInteractor,
 ) {
     val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
         combine(
@@ -105,6 +107,16 @@ constructor(
             )
 
     val shadeMode: StateFlow<ShadeMode> = shadeInteractor.shadeMode
+
+    /**
+     * The unfold transition progress. When fully-unfolded, this is `1` and fully folded, it's `0`.
+     */
+    val unfoldTransitionProgress: StateFlow<Float> =
+        unfoldTransitionInteractor.unfoldProgress.stateIn(
+            scope = applicationScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = 1f
+        )
 
     /** Notifies that some content in the shade was clicked. */
     fun onContentClicked() {

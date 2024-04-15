@@ -86,7 +86,7 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
     private val areAnimationEnabled = MutableStateFlow(true)
     private val lastWakefulnessEvent = MutableStateFlow(WakefulnessModel())
     private val systemClock = FakeSystemClock()
-    private val unfoldTransitionProgressProvider = TestUnfoldTransitionProvider()
+    private val unfoldTransitionProgressProvider = FakeUnfoldTransitionProvider()
     private val unfoldTransitionRepository =
         UnfoldTransitionRepositoryImpl(Optional.of(unfoldTransitionProgressProvider))
     private val unfoldTransitionInteractor =
