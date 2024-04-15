@@ -103,7 +103,9 @@ class KeyguardSimPukViewControllerTest : SysuiTestCase() {
 
     @Test
     fun onViewAttached() {
+        Mockito.reset(keyguardMessageAreaController)
         underTest.onViewAttached()
+        Mockito.verify(keyguardMessageAreaController).setIsVisible(true)
         Mockito.verify(keyguardUpdateMonitor)
             .registerCallback(any(KeyguardUpdateMonitorCallback::class.java))
         Mockito.verify(keyguardMessageAreaController)

@@ -107,7 +107,10 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
         }
     }
 
-    private void updateMessageAreaVisibility() {
+    /**
+     * Determines whether to show the message area controlled by MessageAreaController.
+     */
+    public void updateMessageAreaVisibility() {
         if (mMessageAreaController == null) return;
         if (Flags.revampedBouncerMessages()) {
             mMessageAreaController.disable();
