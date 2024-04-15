@@ -721,6 +721,12 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         return !(splitAttributes.getSplitType() instanceof ExpandContainersSplitType);
     }
 
+    static boolean shouldShowPlaceholderWhenExpanded(@NonNull SplitAttributes splitAttributes) {
+        // The placeholder should be kept if the expand split type is a result of user dragging
+        // the divider.
+        return SplitAttributesHelper.isDraggableExpandType(splitAttributes);
+    }
+
     @NonNull
     SplitAttributes computeSplitAttributes(@NonNull TaskProperties taskProperties,
             @NonNull SplitRule rule, @NonNull SplitAttributes defaultSplitAttributes,
