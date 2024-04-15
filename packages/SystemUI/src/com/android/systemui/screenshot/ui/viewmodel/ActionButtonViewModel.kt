@@ -19,6 +19,7 @@ package com.android.systemui.screenshot.ui.viewmodel
 data class ActionButtonViewModel(
     val appearance: ActionButtonAppearance,
     val id: Int,
+    val visible: Boolean,
     val onClicked: (() -> Unit)?,
 ) {
     companion object {
@@ -29,6 +30,6 @@ data class ActionButtonViewModel(
         fun withNextId(
             appearance: ActionButtonAppearance,
             onClicked: (() -> Unit)?
-        ): ActionButtonViewModel = ActionButtonViewModel(appearance, getId(), onClicked)
+        ): ActionButtonViewModel = ActionButtonViewModel(appearance, getId(), true, onClicked)
     }
 }
