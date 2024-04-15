@@ -28,7 +28,7 @@ import org.junit.runners.Parameterized
 /**
  * Test entering pip from an app by interacting with the app UI
  *
- * To run this test: `atest WMShellFlickerTests:EnterPipTest`
+ * To run this test: `atest WMShellFlickerTestsPip2:EnterPipViaAppUiButtonTest`
  *
  * Actions:
  * ```

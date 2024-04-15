@@ -34,7 +34,10 @@ import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
-/** Test Pip launch. To run this test: `atest WMShellFlickerTests:PipKeyboardTest` */
+/**
+ * Test Pip launch. To run this test:
+ * `atest WMShellFlickerTestsPip3:MovePipOnImeVisibilityChangeTest`
+ */
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)

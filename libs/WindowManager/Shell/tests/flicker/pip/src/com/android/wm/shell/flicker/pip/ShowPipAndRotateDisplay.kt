@@ -35,7 +35,7 @@ import org.junit.runners.Parameterized
 /**
  * Test Pip Stack in bounds after rotations.
  *
- * To run this test: `atest WMShellFlickerTests:PipRotationTest`
+ * To run this test: `atest WMShellFlickerTestsPip1:ShowPipAndRotateDisplay`
  *
  * Actions:
  * ```

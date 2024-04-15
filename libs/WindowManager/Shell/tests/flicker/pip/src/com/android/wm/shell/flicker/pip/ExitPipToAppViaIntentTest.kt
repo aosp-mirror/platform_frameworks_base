@@ -28,7 +28,7 @@ import org.junit.runners.Parameterized
 /**
  * Test expanding a pip window back to full screen via an intent
  *
- * To run this test: `atest WMShellFlickerTests:ExitPipViaIntentTest`
+ * To run this test: `atest WMShellFlickerTestsPip2:ExitPipToAppViaIntentTest`
  *
  * Actions:
  * ```
