@@ -22,7 +22,9 @@ class Constants {
         const val BUNDLE_KEY_PREFER_IMMEDIATELY_AVAILABLE_CREDENTIALS =
             "androidx.credentials.BUNDLE_KEY_IS_AUTO_SELECT_ALLOWED"
         const val IS_AUTO_SELECTED_KEY = "IS_AUTO_SELECTED"
-        const val BIOMETRIC_AUTH_TYPE = "BIOMETRIC_AUTH_TYPE"
-        const val BIOMETRIC_AUTH_FAILURE = "BIOMETRIC_AUTH_FAILURE"
+        // TODO(b/333445772) : Qualify error codes fully for propagation
+        const val BIOMETRIC_AUTH_RESULT = "BIOMETRIC_AUTH_RESULT"
+        const val BIOMETRIC_AUTH_ERROR_CODE = "BIOMETRIC_AUTH_ERROR_CODE"
+        const val BIOMETRIC_AUTH_ERROR_MESSAGE = "BIOMETRIC_AUTH_ERROR_MESSAGE"
     }
 }
