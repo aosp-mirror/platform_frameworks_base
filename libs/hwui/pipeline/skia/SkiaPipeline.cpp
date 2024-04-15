@@ -24,7 +24,6 @@
 #include <SkImageAndroid.h>
 #include <SkImageInfo.h>
 #include <SkMatrix.h>
-#include <SkMultiPictureDocument.h>
 #include <SkOverdrawCanvas.h>
 #include <SkOverdrawColorFilter.h>
 #include <SkPicture.h>
@@ -38,6 +37,7 @@
 #include <android-base/properties.h>
 #include <gui/TraceUtils.h>
 #include <include/android/SkSurfaceAndroid.h>
+#include <include/docs/SkMultiPictureDocument.h>
 #include <include/encode/SkPngEncoder.h>
 #include <include/gpu/ganesh/SkSurfaceGanesh.h>
 #include <unistd.h>
@@ -185,7 +185,7 @@ bool SkiaPipeline::setupMultiFrameCapture() {
         // we need to keep it until after mMultiPic.close()
         // procs is passed as a pointer, but just as a method of having an optional default.
         // procs doesn't need to outlive this Make call.
-        mMultiPic = SkMakeMultiPictureDocument(mOpenMultiPicStream.get(), &procs,
+        mMultiPic = SkMultiPictureDocument::Make(mOpenMultiPicStream.get(), &procs,
             [sharingCtx = mSerialContext.get()](const SkPicture* pic) {
                     SkSharingSerialContext::collectNonTextureImagesFromPicture(pic, sharingCtx);
             });
