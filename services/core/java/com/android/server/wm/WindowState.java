@@ -2974,6 +2974,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return true;
         }
 
+        // Do not allow back predictive animation target to receive touch, app can trigger an
+        // unexpected transition so basically unable to polish it.
+        if (mWmService.mAtmService.mBackNavigationController.shouldPauseTouch(mActivityRecord)) {
+            return false;
+        }
         return !mActivityRecord.getTask().getRootTask().shouldIgnoreInput()
                 && mActivityRecord.isVisibleRequested();
     }
