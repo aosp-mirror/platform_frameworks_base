@@ -42,9 +42,9 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Kreirati pristupni ključ da se prijavite u aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"Sačuvati lozinku da se prijavite u aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Sačuvati podatke za prijavu u aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"Želite li upotrijebiti zaključavanje zaslona za izradu pristupnog ključa za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"Želite li upotrijebiti zaključavanje zaslona za izradu zaporke za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"Želite li upotrijebiti zaključavanje zaslona za spremanje podataka za prijavu za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"Koristiti zaključavanje ekrana da kreirate pristupni ključ za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"Koristiti zaključavanje ekrana da kreirate lozinku za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"Koristiti zaključavanje ekrana da sačuvate podatke za prijavu za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"pristupni ključ"</string>
     <string name="password" msgid="6738570945182936667">"lozinka"</string>
     <string name="passkeys" msgid="5733880786866559847">"pristupni ključevi"</string>

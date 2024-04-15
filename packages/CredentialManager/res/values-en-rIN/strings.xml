@@ -42,12 +42,9 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Create passkey to sign in to <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"Save password to sign in to <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Save sign-in info for <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <!-- no translation found for choose_create_single_tap_passkey_title (3872793514041774218) -->
-    <skip />
-    <!-- no translation found for choose_create_single_tap_password_title (5231871886818921622) -->
-    <skip />
-    <!-- no translation found for choose_create_single_tap_sign_in_title (256498714574099587) -->
-    <skip />
+    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"Use your screen lock to create a passkey for <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"Use your screen lock to create a password for <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"Use your screen lock to save sign-in info for <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"passkey"</string>
     <string name="password" msgid="6738570945182936667">"password"</string>
     <string name="passkeys" msgid="5733880786866559847">"passkeys"</string>

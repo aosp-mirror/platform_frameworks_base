@@ -42,12 +42,9 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Sukurti prieigos raktą, skirtą prisijungti prie „<xliff:g id="APP_NAME">%1$s</xliff:g>“?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"Sukurti slaptažodį, skirtą prisijungti prie „<xliff:g id="APP_NAME">%1$s</xliff:g>“?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Išsaugoti prisijungimo prie „<xliff:g id="APP_NAME">%1$s</xliff:g>“ informaciją?"</string>
-    <!-- no translation found for choose_create_single_tap_passkey_title (3872793514041774218) -->
-    <skip />
-    <!-- no translation found for choose_create_single_tap_password_title (5231871886818921622) -->
-    <skip />
-    <!-- no translation found for choose_create_single_tap_sign_in_title (256498714574099587) -->
-    <skip />
+    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"Sukurti „<xliff:g id="APP_NAME">%1$s</xliff:g>“ prieigos raktą naudojant ekrano užraktą?"</string>
+    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"Sukurti „<xliff:g id="APP_NAME">%1$s</xliff:g>“ slaptažodį naudojant ekrano užraktą?"</string>
+    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"Naudoti ekrano užraktą norint išsaugoti „<xliff:g id="APP_NAME">%1$s</xliff:g>“ prisijungimo informaciją?"</string>
     <string name="passkey" msgid="632353688396759522">"„passkey“"</string>
     <string name="password" msgid="6738570945182936667">"slaptažodis"</string>
     <string name="passkeys" msgid="5733880786866559847">"prieigos raktas"</string>

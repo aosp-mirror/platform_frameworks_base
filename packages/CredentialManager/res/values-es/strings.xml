@@ -42,12 +42,9 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"¿Crear llave de acceso para iniciar sesión en <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"¿Guardar contraseña para iniciar sesión en <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"¿Guardar la información de inicio de sesión de <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <!-- no translation found for choose_create_single_tap_passkey_title (3872793514041774218) -->
-    <skip />
-    <!-- no translation found for choose_create_single_tap_password_title (5231871886818921622) -->
-    <skip />
-    <!-- no translation found for choose_create_single_tap_sign_in_title (256498714574099587) -->
-    <skip />
+    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"¿Usar tu bloqueo de pantalla para crear una llave de acceso para <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"¿Usar tu bloqueo de pantalla para crear una contraseña para <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"¿Usar tu bloqueo de pantalla para guardar tu información de inicio de sesión para <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"llave de acceso"</string>
     <string name="password" msgid="6738570945182936667">"contraseña"</string>
     <string name="passkeys" msgid="5733880786866559847">"llaves de acceso"</string>
