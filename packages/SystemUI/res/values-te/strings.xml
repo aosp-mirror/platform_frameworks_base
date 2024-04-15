@@ -1273,5 +1273,5 @@
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"కీబోర్డ్ బ్యాక్‌లైట్"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$dలో %1$dవ స్థాయి"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"హోమ్ కంట్రోల్స్"</string>
-    <string name="home_controls_dream_description" msgid="4644150952104035789">"స్క్రీన్ సేవర్‌గా మీ హోమ్ కంట్రోల్స్‌ను త్వరగా యాక్సెస్ చేయండి"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"హోమ్ కంట్రోల్స్‌ను స్క్రీన్ సేవర్‌గా చేసి వేగంగా యాక్సెస్ పొందండి"</string>
 </resources>

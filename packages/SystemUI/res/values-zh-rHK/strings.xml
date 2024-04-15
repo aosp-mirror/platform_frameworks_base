@@ -1273,5 +1273,5 @@
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"鍵盤背光"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"第 %1$d 級，共 %2$d 級"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"智能家居"</string>
-    <string name="home_controls_dream_description" msgid="4644150952104035789">"在螢幕保護程式畫面上快速存取家居控制功能"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"在螢幕保護程式畫面上控制智能家居"</string>
 </resources>

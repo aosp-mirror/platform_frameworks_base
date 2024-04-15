@@ -1273,5 +1273,5 @@
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"கீபோர்டு பேக்லைட்"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"நிலை, %2$d இல் %1$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ஹோம் கன்ட்ரோல்கள்"</string>
-    <string name="home_controls_dream_description" msgid="4644150952104035789">"ஹோம் கன்ட்ரோல்களை ஸ்கிரீன் சேவராக விரைவாக அணுகலாம்"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"ஹோம் கன்ட்ரோல்களை ஸ்கிரீன் சேவராக அணுகலாம்"</string>
 </resources>

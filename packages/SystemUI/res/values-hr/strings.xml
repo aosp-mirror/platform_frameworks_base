@@ -277,7 +277,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Unos"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"Slušna pomagala"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Uključivanje…"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Autom. zakretanje"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Automatsko zakretanje"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Automatsko zakretanje zaslona"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Lokacija"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Čuvar zaslona"</string>
@@ -1272,6 +1272,6 @@
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Nedavno koristila aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Pozadinsko osvjetljenje tipkovnice"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Razina %1$d od %2$d"</string>
-    <string name="home_controls_dream_label" msgid="6567105701292324257">"Upr. kuć. uređ."</string>
-    <string name="home_controls_dream_description" msgid="4644150952104035789">"Brzo pristupajte Upr. kuć. uređ. kao čuvaru zasl."</string>
+    <string name="home_controls_dream_label" msgid="6567105701292324257">"Upravljanje uređajima"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"Brzo upravljajte uređajima putem čuvara zaslona"</string>
 </resources>

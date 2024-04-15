@@ -1273,5 +1273,5 @@
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Հետին լուսավորությամբ ստեղնաշար"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d՝ %2$d-ից"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Տան կառավարման տարրեր"</string>
-    <string name="home_controls_dream_description" msgid="4644150952104035789">"Օգտագործեք տան կառավարման տարրերը որպես էկրանապահ"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"Տան կառավարման տարրերը դարձրեք էկրանապահ"</string>
 </resources>
