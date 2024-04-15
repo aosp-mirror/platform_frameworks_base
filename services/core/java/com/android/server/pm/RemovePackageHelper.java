@@ -376,11 +376,14 @@ final class RemovePackageHelper {
             @NonNull PackageRemovedInfo outInfo, int flags, boolean writeSettings) {
         String packageName = deletedPs.getPackageName();
         if (DEBUG_REMOVE) Slog.d(TAG, "removePackageDataLI: " + deletedPs);
+        final boolean shouldDeletePackageSetting =
+                shouldDeletePackageSetting(deletedPs, targetUserId, allUserHandles, flags);
         // Retrieve object to delete permissions for shared user later on
         final AndroidPackage deletedPkg = deletedPs.getPkg();
 
         // Delete all the data and states related to this package.
-        clearPackageStateForUserLIF(deletedPs, targetUserId, flags);
+        clearPackageStateForUserLIF(deletedPs,
+                shouldDeletePackageSetting ? UserHandle.USER_ALL : targetUserId, flags);
 
         // Delete from mPackages
         removePackageLI(packageName, (flags & PackageManager.DELETE_CHATTY) != 0);
@@ -392,7 +395,7 @@ final class RemovePackageHelper {
             deletedPs.setPkg(null);
         }
 
-        if (shouldDeletePackageSetting(deletedPs, targetUserId, allUserHandles, flags)) {
+        if (shouldDeletePackageSetting) {
             // Delete from mSettings
             final SparseBooleanArray changedUsers = new SparseBooleanArray();
             synchronized (mPm.mLock) {
