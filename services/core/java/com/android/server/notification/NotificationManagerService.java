@@ -2508,12 +2508,8 @@ public class NotificationManagerService extends SystemService {
                 mAppOps,
                 mUserProfiles,
                 mShowReviewPermissionsNotification);
-        mRankingHelper = new RankingHelper(getContext(),
-                mRankingHandler,
-                mPreferencesHelper,
-                mZenModeHelper,
-                mUsageStats,
-                extractorNames);
+        mRankingHelper = new RankingHelper(getContext(), mRankingHandler, mPreferencesHelper,
+                mZenModeHelper, mUsageStats, extractorNames, mPlatformCompat);
         mSnoozeHelper = snoozeHelper;
         mGroupHelper = groupHelper;
         mHistoryManager = historyManager;
