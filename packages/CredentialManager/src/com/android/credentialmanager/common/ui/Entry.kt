@@ -349,6 +349,38 @@ fun MoreOptionTopAppBar(
     }
 }
 
+@Composable
+fun MoreOptionTopAppBarWithCustomNavigation(
+        text: String,
+        onNavigationIconClicked: () -> Unit,
+        navigationIcon: ImageVector,
+        navigationIconContentDescription: String,
+        bottomPadding: Dp,
+) {
+    Row(
+            modifier = Modifier.padding(top = 12.dp, bottom = bottomPadding),
+            verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(
+                modifier = Modifier.padding(top = 8.dp, bottom = 8.dp, start = 4.dp).size(48.dp),
+                onClick = onNavigationIconClicked
+        ) {
+            Box(
+                    modifier = Modifier.size(48.dp),
+                    contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                        imageVector = navigationIcon,
+                        contentDescription = navigationIconContentDescription,
+                        modifier = Modifier.size(24.dp).autoMirrored(),
+                        tint = LocalAndroidColorScheme.current.onSurfaceVariant,
+                )
+            }
+        }
+        LargeTitleText(text = text, modifier = Modifier.padding(horizontal = 4.dp))
+    }
+}
+
 private fun Modifier.autoMirrored() = composed {
     when (LocalLayoutDirection.current) {
         LayoutDirection.Rtl -> graphicsLayer(scaleX = -1f)

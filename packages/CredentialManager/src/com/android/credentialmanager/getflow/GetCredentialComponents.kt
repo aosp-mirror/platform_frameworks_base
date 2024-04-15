@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material3.Divider
 import androidx.compose.material3.TextButton
@@ -70,6 +71,7 @@ import com.android.credentialmanager.common.ui.HeadlineText
 import com.android.credentialmanager.common.ui.LargeLabelTextOnSurfaceVariant
 import com.android.credentialmanager.common.ui.ModalBottomSheet
 import com.android.credentialmanager.common.ui.MoreOptionTopAppBar
+import com.android.credentialmanager.common.ui.MoreOptionTopAppBarWithCustomNavigation
 import com.android.credentialmanager.common.ui.SheetContainerCard
 import com.android.credentialmanager.common.ui.Snackbar
 import com.android.credentialmanager.common.ui.SnackbarActionText
@@ -148,7 +150,7 @@ fun GetCredentialScreen(
                                 .currentScreenState == GetScreenState.BIOMETRIC_SELECTION) {
                             BiometricSelectionPage(
                                 biometricEntry = getCredentialUiState.activeEntry,
-                                onMoreOptionSelected = viewModel::getFlowOnMoreOptionSelected,
+                                onMoreOptionSelected = viewModel::getFlowOnMoreOptionOnlySelected,
                                 onCancelFlowAndFinish = viewModel::onUserCancel,
                                 onIllegalStateAndFinish = viewModel::onIllegalUiState,
                                 requestDisplayInfo = getCredentialUiState.requestDisplayInfo,
@@ -163,6 +165,28 @@ fun GetCredentialScreen(
                                 onBiometricPromptStateChange =
                                 viewModel::onBiometricPromptStateChange
                             )
+                        } else if (credmanBiometricApiEnabled() &&
+                                getCredentialUiState.currentScreenState
+                                == GetScreenState.ALL_SIGN_IN_OPTIONS_ONLY) {
+                            AllSignInOptionCard(
+                                    providerInfoList = getCredentialUiState.providerInfoList,
+                                    providerDisplayInfo = getCredentialUiState.providerDisplayInfo,
+                                    onEntrySelected = viewModel::getFlowOnEntrySelected,
+                                    onBackButtonClicked = viewModel::onUserCancel,
+                                    onCancel = viewModel::onUserCancel,
+                                    onLog = { viewModel.logUiEvent(it) },
+                                    customTopBar = { MoreOptionTopAppBarWithCustomNavigation(
+                                            text = stringResource(
+                                                    R.string.get_dialog_title_sign_in_options),
+                                            onNavigationIconClicked = viewModel::onUserCancel,
+                                            navigationIcon = Icons.Filled.Close,
+                                            navigationIconContentDescription =
+                                            stringResource(R.string.accessibility_close_button),
+                                            bottomPadding = 0.dp
+                                    ) }
+                            )
+                            viewModel.uiMetrics.log(GetCredentialEvent
+                                    .CREDMAN_GET_CRED_SCREEN_ALL_SIGN_IN_OPTIONS)
                         } else {
                             AllSignInOptionCard(
                                 providerInfoList = getCredentialUiState.providerInfoList,
@@ -642,7 +666,13 @@ private fun findSingleProviderIdForPrimaryPage(
     return providerId
 }
 
-/** Draws the secondary credential selection page, where all sign-in options are listed. */
+/**
+ * Draws the secondary credential selection page, where all sign-in options are listed.
+ *
+ * By default, this card has 'back' navigation whereby user can navigate back to invoke
+ * [onBackButtonClicked]. However if a different top bar with possibly a different navigation
+ * is required, then the caller of this Composable can set a [customTopBar].
+ */
 @Composable
 fun AllSignInOptionCard(
     providerInfoList: List<ProviderInfo>,
@@ -651,16 +681,21 @@ fun AllSignInOptionCard(
     onBackButtonClicked: () -> Unit,
     onCancel: () -> Unit,
     onLog: @Composable (UiEventEnum) -> Unit,
+    customTopBar: (@Composable() () -> Unit)? = null
 ) {
     val sortedUserNameToCredentialEntryList =
         providerDisplayInfo.sortedUserNameToCredentialEntryList
     val authenticationEntryList = providerDisplayInfo.authenticationEntryList
     SheetContainerCard(topAppBar = {
-        MoreOptionTopAppBar(
-            text = stringResource(R.string.get_dialog_title_sign_in_options),
-            onNavigationIconClicked = onBackButtonClicked,
-            bottomPadding = 0.dp,
-        )
+        if (customTopBar != null) {
+            customTopBar()
+        } else {
+            MoreOptionTopAppBar(
+                    text = stringResource(R.string.get_dialog_title_sign_in_options),
+                    onNavigationIconClicked = onBackButtonClicked,
+                    bottomPadding = 0.dp,
+            )
+        }
     }) {
         var isFirstSection = true
         // For username

@@ -270,6 +270,15 @@ class CredentialSelectorViewModel(
         )
     }
 
+    fun getFlowOnMoreOptionOnlySelected() {
+        Log.d(Constants.LOG_TAG, "More Option Only selected")
+        uiState = uiState.copy(
+                getCredentialUiState = uiState.getCredentialUiState?.copy(
+                        currentScreenState = GetScreenState.ALL_SIGN_IN_OPTIONS_ONLY
+                )
+        )
+    }
+
     fun getFlowOnMoreOptionOnSnackBarSelected(isNoAccount: Boolean) {
         Log.d(Constants.LOG_TAG, "More Option on snackBar selected")
         uiState = uiState.copy(

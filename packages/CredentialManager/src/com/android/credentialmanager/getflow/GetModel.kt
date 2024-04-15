@@ -163,7 +163,11 @@ enum class GetScreenState {
     /** The single tap biometric selection page. */
     BIOMETRIC_SELECTION,
 
-    /** The secondary credential selection page, where all sign-in options are listed. */
+    /**
+     * The secondary credential selection page, where all sign-in options are listed.
+     *
+     * This state is expected to go back to PRIMARY_SELECTION on back navigation
+     */
     ALL_SIGN_IN_OPTIONS,
 
     /** The snackbar only page when there's no account but only a remoteEntry. */
@@ -171,6 +175,14 @@ enum class GetScreenState {
 
     /** The snackbar when there are only auth entries and all of them turn out to be empty. */
     UNLOCKED_AUTH_ENTRIES_ONLY,
+
+    /**
+     * The secondary credential selection page, where all sign-in options are listed.
+     *
+     * This state has no option for the user to navigate back to PRIMARY_SELECTION, and
+     * instead can be terminated independently.
+     */
+    ALL_SIGN_IN_OPTIONS_ONLY,
 }
 
 
@@ -285,7 +297,7 @@ private fun toGetScreenState(
         providerDisplayInfo.remoteEntry != null)
         GetScreenState.REMOTE_ONLY
     else if (isRequestForAllOptions)
-        GetScreenState.ALL_SIGN_IN_OPTIONS
+        GetScreenState.ALL_SIGN_IN_OPTIONS_ONLY
     else if (isBiometricFlow(providerDisplayInfo, isFlowAutoSelectable(providerDisplayInfo)))
         GetScreenState.BIOMETRIC_SELECTION
     else GetScreenState.PRIMARY_SELECTION
