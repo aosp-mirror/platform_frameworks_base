@@ -16,15 +16,8 @@
 
 package com.android.internal.systemui.lint
 
-import com.android.annotations.NonNull
-import com.android.tools.lint.checks.infrastructure.LintDetectorTest.java
 import com.android.tools.lint.checks.infrastructure.TestFiles.LibraryReferenceTestFile
 import java.io.File
-import org.intellij.lang.annotations.Language
-
-@Suppress("UnstableApiUsage")
-@NonNull
-private fun indentedJava(@NonNull @Language("JAVA") source: String) = java(source).indented()
 
 /*
  * This file contains stubs of framework APIs and System UI classes for testing purposes only. The
@@ -33,16 +26,5 @@ private fun indentedJava(@NonNull @Language("JAVA") source: String) = java(sourc
 internal val androidStubs =
     arrayOf(
         LibraryReferenceTestFile(File("framework.jar").canonicalFile),
-        LibraryReferenceTestFile(File("androidx.annotation_annotation.jar").canonicalFile),
-        indentedJava(
-            """
-package com.android.systemui.settings;
-import android.content.pm.UserInfo;
-
-public interface UserTracker {
-    int getUserId();
-    UserInfo getUserInfo();
-}
-"""
-        ),
+        LibraryReferenceTestFile(File("androidx.annotation_annotation-nodeps.jar").canonicalFile),
     )
