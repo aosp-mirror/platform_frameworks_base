@@ -9189,6 +9189,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     private class MyBinderProxyCountEventListener implements BinderProxyCountEventListener {
         @Override
         public void onLimitReached(int uid) {
+            // Spawn a new thread for the dump as it'll take long time.
+            new Thread(() -> handleLimitReached(uid), "BinderProxy Dump: " + uid).start();
+        }
+
+        private void handleLimitReached(int uid) {
             Slog.wtf(TAG, "Uid " + uid + " sent too many Binders to uid "
                     + Process.myUid());
             BinderProxy.dumpProxyDebugInfo();
