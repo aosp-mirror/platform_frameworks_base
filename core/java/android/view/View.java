@@ -2428,6 +2428,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public static final int FRAME_RATE_CATEGORY_REASON_IDLE = 0x0700_0000;
 
+    /**
+     * This indicates that the frame rate category was chosen because it is currently boosting.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_REASON_BOOST = 0x0800_0000;
+
+    /**
+     * This indicates that the frame rate category was chosen because it is currently having
+     * touch boost.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_REASON_TOUCH = 0x0900_0000;
+
+    /**
+     * This indicates that the frame rate category was chosen because it is currently having
+     * touch boost.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_REASON_CONFLICTED = 0x0A00_0000;
+
     private static final int FRAME_RATE_CATEGORY_REASON_MASK = 0xFFFF_0000;
 
     /**
@@ -5742,7 +5762,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private static final float FRAME_RATE_SIZE_PERCENTAGE_THRESHOLD = 0.07f;
 
-    private static final float MAX_FRAME_RATE = 140;
+    static final float MAX_FRAME_RATE = 140;
 
     private static final int INFREQUENT_UPDATE_INTERVAL_MILLIS = 100;
     private static final int INFREQUENT_UPDATE_COUNTS = 2;
@@ -33897,36 +33917,41 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         int height = mBottom - mTop;
 
         if (viewRootImpl != null && (width != 0 && height != 0)) {
-            if (mAttachInfo.mViewVelocityApi) {
-                float velocity = mFrameContentVelocity;
-                int mask = PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN;
-                float frameRate = 0;
+            if (viewRootImpl.shouldCheckFrameRate(mPreferredFrameRate > 0f)) {
+                float velocityFrameRate = 0f;
+                if (mAttachInfo.mViewVelocityApi) {
+                    float velocity = mFrameContentVelocity;
 
-                if (velocity < 0f
-                        && (mPrivateFlags4 & mask) == mask
-                        && mParent instanceof View
-                        && ((View) mParent).mFrameContentVelocity <= 0
-                ) {
-                    // This current calculation is very simple. If something on the screen moved,
-                    // then it votes for the highest velocity. If it doesn't move, then return 0.
-                    velocity = Float.POSITIVE_INFINITY;
-                    frameRate = MAX_FRAME_RATE;
-                }
-                if (velocity > 0f) {
-                    if (sToolkitFrameRateVelocityMappingReadOnlyFlagValue) {
-                        frameRate = convertVelocityToFrameRate(velocity);
+                    if (velocity < 0f
+                            && (mPrivateFlags4 & (PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)) == (
+                            PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)
+                            && mParent instanceof View
+                            && ((View) mParent).mFrameContentVelocity <= 0
+                    ) {
+                        // This current calculation is very simple. If something on the screen
+                        // moved, then it votes for the highest velocity.
+                        velocityFrameRate = MAX_FRAME_RATE;
+                    } else if (velocity > 0f) {
+                        velocityFrameRate = convertVelocityToFrameRate(velocity);
                     }
-                    viewRootImpl.votePreferredFrameRate(frameRate, FRAME_RATE_COMPATIBILITY_GTE);
-                    return;
+                }
+                if (velocityFrameRate > 0f || mPreferredFrameRate > 0f) {
+                    int compatibility = FRAME_RATE_COMPATIBILITY_GTE;
+                    float frameRate = velocityFrameRate;
+                    if (mPreferredFrameRate > velocityFrameRate) {
+                        compatibility = FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
+                        frameRate = mPreferredFrameRate;
+                    }
+                    viewRootImpl.votePreferredFrameRate(frameRate, compatibility);
                 }
             }
-            if (!willNotDraw() && isDirty()) {
+            if (!willNotDraw() && isDirty() && viewRootImpl.shouldCheckFrameRateCategory()) {
                 if (sToolkitMetricsForFrameRateDecisionFlagValue) {
                     float sizePercentage = width * height / mAttachInfo.mDisplayPixelCount;
                     viewRootImpl.recordViewPercentage(sizePercentage);
                 }
 
-                int frameRateCategory;
+                int frameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
                 if (Float.isNaN(mPreferredFrameRate)) {
                     frameRateCategory = calculateFrameRateCategory();
                 } else if (mPreferredFrameRate < 0) {
@@ -33951,10 +33976,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                                     | FRAME_RATE_CATEGORY_REASON_INVALID;
                         }
                     }
-                } else {
-                    viewRootImpl.votePreferredFrameRate(mPreferredFrameRate,
-                            mFrameRateCompatibility);
-                    return;
                 }
 
                 int category = frameRateCategory & ~FRAME_RATE_CATEGORY_REASON_MASK;
