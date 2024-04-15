@@ -22,16 +22,19 @@ import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.screenshot.data.model.DisplayContentModel
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.ActivityNames.FILES
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.ActivityNames.YOUTUBE
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.Bounds.FREE_FORM
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.Bounds.FULL_SCREEN
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.Bounds.SPLIT_TOP
+import com.android.systemui.screenshot.data.model.DisplayContentScenarios.RootTasks
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.TaskSpec
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.freeFormApps
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.pictureInPictureApp
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.singleFullScreen
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.splitScreenApps
+import com.android.systemui.screenshot.data.model.SystemUiState
 import com.android.systemui.screenshot.data.repository.profileTypeRepository
 import com.android.systemui.screenshot.policy.CapturePolicy.PolicyResult
 import com.android.systemui.screenshot.policy.CapturePolicy.PolicyResult.NotMatched
@@ -53,6 +56,30 @@ class WorkProfilePolicyTest {
 
     private val kosmos = Kosmos()
     private val policy = WorkProfilePolicy(kosmos.profileTypeRepository)
+
+    /**
+     * There is no guarantee that every RootTaskInfo contains a non-empty list of child tasks. Test
+     * the case where the RootTaskInfo would match but child tasks are empty.
+     */
+    @Test
+    fun withEmptyChildTasks_notMatched() = runTest {
+        val result =
+            policy.check(
+                DisplayContentModel(
+                    displayId = 0,
+                    systemUiState = SystemUiState(shadeExpanded = false),
+                    rootTasks = listOf(RootTasks.emptyWithNoChildTasks)
+                )
+            )
+
+        assertThat(result)
+            .isEqualTo(
+                NotMatched(
+                    WorkProfilePolicy.NAME,
+                    WORK_TASK_NOT_TOP,
+                )
+            )
+    }
 
     @Test
     fun noWorkApp_notMatched() = runTest {

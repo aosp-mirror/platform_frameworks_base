@@ -188,6 +188,18 @@ object DisplayContentScenarios {
      * actual values returned by ActivityTaskManager
      */
     object RootTasks {
+        /** An empty RootTaskInfo with no child tasks. */
+        val emptyWithNoChildTasks =
+            newRootTaskInfo(
+                taskId = 2,
+                visible = true,
+                running = true,
+                numActivities = 0,
+                bounds = FULL_SCREEN,
+            ) {
+                emptyList()
+            }
+
         /**
          * The empty RootTaskInfo that is always at the end of a list from ActivityTaskManager when
          * no other visible activities are in split mode

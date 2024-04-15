@@ -57,7 +57,9 @@ constructor(
         // Find the first non PiP rootTask with a top child task owned by a work user
         val (rootTask, childTask) =
             content.rootTasks
-                .filter { it.isVisible && it.windowingMode != WINDOWING_MODE_PINNED }
+                .filter {
+                    it.isVisible && it.windowingMode != WINDOWING_MODE_PINNED && it.hasChildTasks()
+                }
                 .map { it to it.childTasksTopDown().first() }
                 .firstOrNull { (_, child) ->
                     profileTypes.getProfileType(child.userId) == ProfileType.WORK
