@@ -523,8 +523,11 @@ class ActivityStartInterceptor {
     void onActivityLaunched(TaskInfo taskInfo, ActivityRecord r) {
         final SparseArray<ActivityInterceptorCallback> callbacks =
                 mService.getActivityInterceptorCallbacks();
-        ActivityInterceptorCallback.ActivityInterceptorInfo info = getInterceptorInfo(
-                r::clearOptionsAnimationForSiblings);
+        final ActivityInterceptorCallback.ActivityInterceptorInfo info = getInterceptorInfo(() -> {
+            synchronized (mService.mGlobalLock) {
+                r.clearOptionsAnimationForSiblings();
+            }
+        });
         for (int i = 0; i < callbacks.size(); i++) {
             final ActivityInterceptorCallback callback = callbacks.valueAt(i);
             callback.onActivityLaunched(taskInfo, r.info, info);
