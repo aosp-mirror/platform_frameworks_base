@@ -1176,6 +1176,8 @@
     <string name="work_mode_turn_on">Unpause</string>
     <!-- Label for accessibility action that navigates to lock screen. [CHAR LIMIT=NONE] -->
     <string name="accessibility_action_label_close_communal_hub">Close widgets on lock screen</string>
+    <!-- Label for accessibility action that navigates to edit mode. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_label_edit_widgets">Customize widgets</string>
     <!-- Accessibility content description for communal hub. [CHAR LIMIT=NONE] -->
     <string name="accessibility_content_description_for_communal_hub">Widgets on lock screen</string>
 
