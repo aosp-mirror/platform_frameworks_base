@@ -19,8 +19,6 @@ package com.android.systemui.statusbar.pipeline.dagger
 import android.net.wifi.WifiManager
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.log.table.TableLogBuffer
@@ -52,11 +50,8 @@ import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.CollapsedStat
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.CollapsedStatusBarViewModelImpl
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.RealWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
-import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositoryDagger
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositorySwitcher
-import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositoryViaTrackerLibDagger
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.DisabledWifiRepository
-import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryViaTrackerLib
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractorImpl
@@ -131,55 +126,21 @@ abstract class StatusBarPipelineModule {
         impl: CollapsedStatusBarViewBinderImpl
     ): CollapsedStatusBarViewBinder
 
-    @Binds
-    @IntoMap
-    @ClassKey(WifiRepositoryDagger::class)
-    abstract fun bindWifiRepositoryDagger(impl: WifiRepositoryDagger): CoreStartable
-
     companion object {
-        @Provides
-        @SysUISingleton
-        fun provideWifiRepositoryDagger(
-            wifiManager: WifiManager?,
-            disabledWifiRepository: DisabledWifiRepository,
-            wifiRepositoryImplFactory: WifiRepositoryImpl.Factory,
-        ): WifiRepositoryDagger {
-            // If we have a null [WifiManager], then the wifi repository should be permanently
-            // disabled.
-            return if (wifiManager == null) {
-                disabledWifiRepository
-            } else {
-                wifiRepositoryImplFactory.create(wifiManager)
-            }
-        }
 
         @Provides
         @SysUISingleton
-        fun provideWifiRepositoryViaTrackerLibDagger(
+        fun provideRealWifiRepository(
             wifiManager: WifiManager?,
             disabledWifiRepository: DisabledWifiRepository,
             wifiRepositoryFromTrackerLibFactory: WifiRepositoryViaTrackerLib.Factory,
-        ): WifiRepositoryViaTrackerLibDagger {
+        ): RealWifiRepository {
             // If we have a null [WifiManager], then the wifi repository should be permanently
             // disabled.
             return if (wifiManager == null) {
                 disabledWifiRepository
             } else {
                 wifiRepositoryFromTrackerLibFactory.create(wifiManager)
-            }
-        }
-
-        @Provides
-        @SysUISingleton
-        fun provideRealWifiRepository(
-            wifiRepository: WifiRepositoryDagger,
-            wifiRepositoryFromTrackerLib: WifiRepositoryViaTrackerLibDagger,
-            flags: FeatureFlags,
-        ): RealWifiRepository {
-            return if (flags.isEnabled(Flags.WIFI_TRACKER_LIB_FOR_WIFI_ICON)) {
-                wifiRepositoryFromTrackerLib
-            } else {
-                wifiRepository
             }
         }
 
@@ -192,13 +153,6 @@ abstract class StatusBarPipelineModule {
             return Supplier<Flow<Boolean>> {
                 mobileIconsViewModel.firstMobileSubShowingNetworkTypeIcon
             }
-        }
-
-        @Provides
-        @SysUISingleton
-        @WifiInputLog
-        fun provideWifiInputLogBuffer(factory: LogBufferFactory): LogBuffer {
-            return factory.create("WifiInputLog", 50)
         }
 
         @Provides
