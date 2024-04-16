@@ -523,6 +523,12 @@ class KeyboardLayoutManagerTests {
                 createImeSubtypeForLanguageTagAndLayoutType("en-Deva-US", "")
             )
         )
+        // If prefer layout with empty country over mismatched country
+        assertCorrectLayout(
+            keyboardDevice,
+            createImeSubtypeForLanguageTagAndLayoutType("en-AU", "qwerty"),
+            ENGLISH_US_LAYOUT_DESCRIPTOR
+        )
     }
 
     @Test
