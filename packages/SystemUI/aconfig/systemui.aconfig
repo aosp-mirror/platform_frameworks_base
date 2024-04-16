@@ -784,3 +784,13 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "slice_broadcast_relay_in_background"
+    namespace: "systemui"
+    description: "Move handling of slice broadcast relay broadcasts to background threads"
+    bug: "334767208"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
