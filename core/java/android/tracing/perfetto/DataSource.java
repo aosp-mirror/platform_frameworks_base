@@ -18,8 +18,6 @@ package android.tracing.perfetto;
 
 import android.util.proto.ProtoInputStream;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 import dalvik.annotation.optimization.CriticalNative;
 
 /**
@@ -73,7 +71,8 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
      * @param fun The tracing lambda that will be called with the tracing contexts of each active
      *            tracing instance.
      */
-    public final void trace(TraceFunction<TlsStateType, IncrementalStateType> fun) {
+    public final void trace(
+            TraceFunction<DataSourceInstanceType, TlsStateType, IncrementalStateType> fun) {
         boolean startedIterator = nativePerfettoDsTraceIterateBegin(mNativeObj);
 
         if (!startedIterator) {
@@ -82,8 +81,10 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
 
         try {
             do {
-                TracingContext<TlsStateType, IncrementalStateType> ctx =
-                        new TracingContext<>(mNativeObj);
+                int instanceIndex = nativeGetPerfettoDsInstanceIndex(mNativeObj);
+
+                TracingContext<DataSourceInstanceType, TlsStateType, IncrementalStateType> ctx =
+                        new TracingContext<>(this, instanceIndex);
                 fun.trace(ctx);
 
                 ctx.flush();
@@ -104,9 +105,7 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
      * Override this method to create a custom TlsState object for your DataSource. A new instance
      * will be created per trace instance per thread.
      *
-     * NOTE: Should only be called from native side.
      */
-    @VisibleForTesting
     public TlsStateType createTlsState(CreateTlsStateArgs<DataSourceInstanceType> args) {
         return null;
     }
@@ -114,9 +113,8 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
     /**
      * Override this method to create and use a custom IncrementalState object for your DataSource.
      *
-     * NOTE: Should only be called from native side.
      */
-    protected IncrementalStateType createIncrementalState(
+    public IncrementalStateType createIncrementalState(
             CreateIncrementalStateArgs<DataSourceInstanceType> args) {
         return null;
     }
@@ -185,4 +183,6 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
     private static native boolean nativePerfettoDsTraceIterateNext(long dataSourcePtr);
     @CriticalNative
     private static native void nativePerfettoDsTraceIterateBreak(long dataSourcePtr);
+    @CriticalNative
+    private static native int nativeGetPerfettoDsInstanceIndex(long dataSourcePtr);
 }

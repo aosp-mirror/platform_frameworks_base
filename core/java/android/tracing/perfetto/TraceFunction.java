@@ -19,12 +19,14 @@ package android.tracing.perfetto;
 /**
  * The interface for the trace function called from native on a trace call with a context.
  *
+ * @param <DataSourceInstanceType> The type of DataSource this tracing context is for.
  * @param <TlsStateType> The type of the custom TLS state, if any is used.
  * @param <IncrementalStateType> The type of the custom incremental state, if any is used.
  *
  * @hide
  */
-public interface TraceFunction<TlsStateType, IncrementalStateType> {
+public interface TraceFunction<DataSourceInstanceType extends DataSourceInstance,
+        TlsStateType, IncrementalStateType> {
 
     /**
      * This function will be called synchronously (i.e., always before trace() returns) only if
@@ -34,5 +36,5 @@ public interface TraceFunction<TlsStateType, IncrementalStateType> {
      *
      * @param ctx the tracing context to trace for in the trace function.
      */
-    void trace(TracingContext<TlsStateType, IncrementalStateType> ctx);
+    void trace(TracingContext<DataSourceInstanceType, TlsStateType, IncrementalStateType> ctx);
 }
