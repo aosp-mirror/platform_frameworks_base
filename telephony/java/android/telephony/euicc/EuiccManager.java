@@ -1039,17 +1039,18 @@ public class EuiccManager {
      * subscription on the
      * current eUICC and the subscription to be downloaded according to the subscription metadata.
      * Without the former, an {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR} will be
-     * eturned in the callback intent to prompt the user to accept the download.
+     * returned in the callback intent to prompt the user to accept the download.
      *
      * <p> Starting from Android {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM},
      * if the caller has the
      * {@code android.Manifest.permission#MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS} permission or
-     * is a profile owner or device owner, and
-     * {@code switchAfterDownload} is {@code false}, then the downloaded subscription
-     * will be managed by that caller. If {@code switchAfterDownload} is true,
-     * an {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR} will be
-     * returned in the callback intent to prompt the user to accept the download and the
-     * subscription will not be managed.
+     * is a profile owner or device owner, then the downloaded subscription
+     * will be managed by that caller.
+     * In case the caller is device owner or profile owner of an organization-owned device, {@code
+     * switchAfterDownload} can be set to true to automatically enable the subscription after
+     * download. If the caller is a profile owner on non organization owned device
+     * {@code switchAfterDownload} should be false otherwise the operation will fail with
+     * {@link #EMBEDDED_SUBSCRIPTION_RESULT_ERROR}.
      *
      * <p>On a multi-active SIM device, requires the
      * {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission, or a calling app
