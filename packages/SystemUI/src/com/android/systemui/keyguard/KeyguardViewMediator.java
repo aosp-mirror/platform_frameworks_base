@@ -43,7 +43,6 @@ import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.Flags.notifyPowerManagerUserActivityBackground;
 import static com.android.systemui.Flags.refactorGetCurrentUser;
 import static com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel.DREAMING_ANIMATION_DURATION_MS;
-import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -98,7 +97,6 @@ import android.view.SurfaceControl.Transaction;
 import android.view.SyncRtSurfaceTransactionApplier;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants;
 import android.view.animation.Animation;
@@ -165,7 +163,6 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -1623,24 +1620,18 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             adjustStatusBarLocked();
             mDreamOverlayStateController.addCallback(mDreamOverlayStateCallback);
 
-            ViewRootImpl viewRootImpl = mKeyguardViewControllerLazy.get().getViewRootImpl();
-            if (viewRootImpl != null) {
-                final DreamViewModel dreamViewModel = mDreamViewModel.get();
-                final CommunalTransitionViewModel communalViewModel =
-                        mCommunalTransitionViewModel.get();
-                collectFlow(viewRootImpl.getView(), dreamViewModel.getDreamAlpha(),
-                        getRemoteSurfaceAlphaApplier(), mMainDispatcher);
-                collectFlow(viewRootImpl.getView(), dreamViewModel.getTransitionEnded(),
-                        getFinishedCallbackConsumer(), mMainDispatcher);
-                collectFlow(viewRootImpl.getView(), communalViewModel.getShowByDefault(),
-                        (showByDefault) ->
-                                mShowCommunalByDefault = showByDefault, mMainDispatcher);
-                collectFlow(viewRootImpl.getView(),
-                        communalViewModel.getTransitionFromOccludedEnded(),
-                        getFinishedCallbackConsumer(), mMainDispatcher);
-            } else {
-                Log.e(TAG, "Keyguard ViewRootImpl is null");
-            }
+            final DreamViewModel dreamViewModel = mDreamViewModel.get();
+            final CommunalTransitionViewModel communalViewModel =
+                    mCommunalTransitionViewModel.get();
+
+            mJavaAdapter.alwaysCollectFlow(dreamViewModel.getDreamAlpha(),
+                    getRemoteSurfaceAlphaApplier());
+            mJavaAdapter.alwaysCollectFlow(dreamViewModel.getTransitionEnded(),
+                    getFinishedCallbackConsumer());
+            mJavaAdapter.alwaysCollectFlow(communalViewModel.getShowByDefault(),
+                    (showByDefault) -> mShowCommunalByDefault = showByDefault);
+            mJavaAdapter.alwaysCollectFlow(communalViewModel.getTransitionFromOccludedEnded(),
+                    getFinishedCallbackConsumer());
         }
         // Most services aren't available until the system reaches the ready state, so we
         // send it here when the device first boots.
