@@ -1952,7 +1952,7 @@ public class DisplayModeDirectorTest {
         SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
         votesByDisplay.put(DISPLAY_ID_2, votes);
 
-        director.getDisplayObserver().onExternalDisplayReadyToBeEnabled(DISPLAY_ID_2);
+        director.getDisplayObserver().onDisplayAdded(DISPLAY_ID_2);
         director.injectVotesByDisplay(votesByDisplay);
 
         var desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID_2);
