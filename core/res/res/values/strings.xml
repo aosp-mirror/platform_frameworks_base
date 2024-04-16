@@ -6041,6 +6041,10 @@
     <!-- Dialog text.  Shown when the user is unable to send a text message from a personal app due to restrictions set
          by their organization, and so must switch to a work app or cancel. [CHAR LIMIT=NONE] -->
     <string name="miniresolver_sms_information">Your organization only allows you to send messages from work apps</string>
+    <!-- Dialog text. Shown as when redirecting Calls from Private Space to the main user. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_private_space_phone_information">"You can only make phone calls from your personal Phone app. Calls made with personal Phone will be added to your personal call history."</string>
+    <!-- Dialog text. Shown as when redirecting SMS and MMS messages from Private Space to the main user. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_private_space_messages_information">"You can only send SMS messages from your personal Messages app."</string>
     <!-- Button option. Open the link in the personal browser. [CHAR LIMIT=NONE] -->
     <string name="miniresolver_use_personal_browser">Use personal browser</string>
     <!-- Button option. Open the link in the work browser. [CHAR LIMIT=NONE] -->

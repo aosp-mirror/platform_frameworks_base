@@ -272,6 +272,7 @@ public class IntentForwarderActivity extends Activity  {
                 getOpenInWorkMessage(launchIntent, target.loadLabel(packageManagerForTargetUser)),
                 packageManagerForTargetUser);
 
+        ((Button) findViewById(R.id.button_open)).setText(getOpenInWorkButtonString(launchIntent));
 
         View telephonyInfo = findViewById(R.id.miniresolver_info_section);
 
@@ -310,7 +311,15 @@ public class IntentForwarderActivity extends Activity  {
                 packageManagerForTargetUser);
 
         View telephonyInfo = findViewById(R.id.miniresolver_info_section);
-        telephonyInfo.setVisibility(View.GONE);
+        telephonyInfo.setVisibility(View.VISIBLE);
+
+        if (isTextMessageIntent(launchIntent)) {
+            ((TextView) findViewById(R.id.miniresolver_info_section_text)).setText(
+                    R.string.miniresolver_private_space_messages_information);
+        } else {
+            ((TextView) findViewById(R.id.miniresolver_info_section_text)).setText(
+                    R.string.miniresolver_private_space_phone_information);
+        }
     }
 
     private void buildMiniResolver(ResolveInfo target, Intent launchIntent, int targetUserId,
@@ -334,7 +343,6 @@ public class IntentForwarderActivity extends Activity  {
         ((Button) findViewById(R.id.use_same_profile_browser)).setText(R.string.cancel);
         findViewById(R.id.use_same_profile_browser).setOnClickListener(v -> finish());
 
-        ((Button) findViewById(R.id.button_open)).setText(getOpenInWorkButtonString(launchIntent));
         findViewById(R.id.button_open).setOnClickListener(v -> {
             startActivityAsCaller(
                     launchIntent,
