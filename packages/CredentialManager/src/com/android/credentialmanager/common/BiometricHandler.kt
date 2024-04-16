@@ -210,7 +210,7 @@ private fun runBiometricFlow(
     onCancelFlowAndFinish: () -> Unit
 ) {
     try {
-        if (onlyUsingDeviceCredentials(biometricDisplayInfo, context)) {
+        if (!canCallBiometricPrompt(biometricDisplayInfo, context)) {
             onBiometricFailureFallback(biometricFlowType)
             return
         }
@@ -251,40 +251,40 @@ private fun getCryptoOpId(biometricDisplayInfo: BiometricDisplayInfo): Int? {
  * consistency because for biometrics to exist, **device credentials must exist**. Thus, fallbacks
  * occur if *only* device credentials are available, to avoid going right into the PIN screen.
  * Note that if device credential is the only available modality but not requested, or if none
- * of the requested modalities are available, we propagate the error to the provider instead of
- * falling back and expect them to handle it as they would prior.
- * // TODO(b/334197980) : Finalize error propagation/not propagation in real use cases
+ * of the requested modalities are available, we fallback to the normal flow to ensure a selector
+ * shows up.
+ * // TODO(b/334197980) : While we already fallback in cases the selector doesn't show, confirm
+ * // final plan.
  */
-private fun onlyUsingDeviceCredentials(
+private fun canCallBiometricPrompt(
     biometricDisplayInfo: BiometricDisplayInfo,
     context: Context
 ): Boolean {
     val allowedAuthenticators = biometricDisplayInfo.biometricRequestInfo.allowedAuthenticators
     if (allowedAuthenticators == BiometricManager.Authenticators.DEVICE_CREDENTIAL) {
-        return true
-    }
-
-    val allowedAuthContainsDeviceCredential = containsBiometricAuthenticatorWithDeviceCredentials(
-        allowedAuthenticators)
-
-    if (!allowedAuthContainsDeviceCredential) {
-        // At this point, allowed authenticators is requesting biometrics without device creds.
-        // Thus, a fallback mechanism will be displayed via our own negative button - "cancel".
-        // Beyond this point, fallbacks will occur if none of the stronger authenticators can
-        // be used.
         return false
     }
 
     val biometricManager = context.getSystemService(Context.BIOMETRIC_SERVICE) as BiometricManager
 
-    if (allowedAuthContainsDeviceCredential &&
-        biometricManager.canAuthenticate(Authenticators.BIOMETRIC_WEAK) !=
-        BiometricManager.BIOMETRIC_SUCCESS &&
-        biometricManager.canAuthenticate(Authenticators.BIOMETRIC_STRONG) !=
+    if (biometricManager.canAuthenticate(allowedAuthenticators) !=
         BiometricManager.BIOMETRIC_SUCCESS) {
-        return true
+        return false
     }
 
+    if (ifOnlySupportsAtMostDeviceCredentials(biometricManager)) return false
+
+    return true
+}
+
+private fun ifOnlySupportsAtMostDeviceCredentials(biometricManager: BiometricManager): Boolean {
+    if (biometricManager.canAuthenticate(Authenticators.BIOMETRIC_WEAK) !=
+        BiometricManager.BIOMETRIC_SUCCESS &&
+        biometricManager.canAuthenticate(Authenticators.BIOMETRIC_STRONG) !=
+        BiometricManager.BIOMETRIC_SUCCESS
+    ) {
+        return true
+    }
     return false
 }
 
