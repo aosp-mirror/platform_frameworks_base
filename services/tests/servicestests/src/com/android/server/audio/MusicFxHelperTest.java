@@ -57,8 +57,9 @@ public class MusicFxHelperTest {
 
     private ResolveInfo mResolveInfo1 = new ResolveInfo();
     private ResolveInfo mResolveInfo2 = new ResolveInfo();
-    private final String mTestPkg1 = "testPkg1", mTestPkg2 = "testPkg2", mTestPkg3 = "testPkg3";
-    private final String mMusicFxPkgName = "com.android.musicfx";
+    private final String mTestPkg1 = new String("testPkg1"), mTestPkg2 = new String("testPkg2"),
+            mTestPkg3 = new String("testPkg3"), mTestPkg1Equivalent = new String("testPkg1");
+    private final String mMusicFxPkgName = new String("com.android.musicfx");
     private final int mTestUid1 = 1, mTestUid2 = 2, mTestUid3 = 3, mMusicFxUid = 78;
     private final int mTestSession1 = 11, mTestSession2 = 22, mTestSession3 = 33;
 
@@ -191,7 +192,8 @@ public class MusicFxHelperTest {
     public void testCloseBroadcastIntent() {
         Log.i(TAG, "running testCloseBroadcastIntent");
 
-        closeSessionWithResList(null, 0, 0, null, mTestSession1, mTestUid1);
+        closeSessionWithResList(null, 0 /* unbind */, 0 /* broadcast */, null /* packageName */,
+                mTestSession1, mTestUid1);
     }
 
     /**
@@ -225,8 +227,10 @@ public class MusicFxHelperTest {
     public void testBroadcastIntentWithNoPackageAndNoBroadcastReceiver() {
         Log.i(TAG, "running testBroadcastIntentWithNoPackageAndNoBroadcastReceiver");
 
-        openSessionWithResList(mEmptyList, 0, 0, null, mTestSession1, mTestUid1);
-        closeSessionWithResList(mEmptyList, 0, 0, null, mTestSession1, mTestUid1);
+        openSessionWithResList(mEmptyList, 0 /* bind */, 0 /* broadcast */, null /* packageName */,
+                mTestSession1, mTestUid1);
+        closeSessionWithResList(mEmptyList, 0 /* unbind */, 0 /* broadcast */,
+                null /* packageName */, mTestSession1, mTestUid1);
     }
 
     /**
@@ -236,26 +240,10 @@ public class MusicFxHelperTest {
     public void testBroadcastIntentWithNoPackageAndOneBroadcastReceiver() {
         Log.i(TAG, "running testBroadcastIntentWithNoPackageAndOneBroadcastReceiver");
 
-        int broadcasts = 1, bind = 1, unbind = 1;
-        openSessionWithResList(mSingleList, bind, broadcasts, null, mTestSession1, mTestUid1);
-        broadcasts = broadcasts + 1;
-        closeSessionWithResList(mSingleList, unbind, broadcasts, null, mTestSession1, mTestUid1);
-
-        // repeat with different session ID
-        broadcasts = broadcasts + 1;
-        bind = bind + 1;
-        unbind = unbind + 1;
-        openSessionWithResList(mSingleList, bind, broadcasts, null, mTestSession2, mTestUid1);
-        broadcasts = broadcasts + 1;
-        closeSessionWithResList(mSingleList, unbind, broadcasts, null, mTestSession2, mTestUid1);
-
-        // repeat with different UID
-        broadcasts = broadcasts + 1;
-        bind = bind + 1;
-        unbind = unbind + 1;
-        openSessionWithResList(mSingleList, bind, broadcasts, null, mTestSession1, mTestUid2);
-        broadcasts = broadcasts + 1;
-        closeSessionWithResList(mSingleList, unbind, broadcasts, null, mTestSession1, mTestUid2);
+        openSessionWithResList(mSingleList, 0 /* bind */, 0 /* broadcast */,
+                null /* packageName */, mTestSession1, mTestUid1);
+        closeSessionWithResList(mSingleList, 0 /* unbind */, 0 /* broadcast */,
+                null /* packageName */, mTestSession1, mTestUid1);
     }
 
     /**
@@ -265,8 +253,50 @@ public class MusicFxHelperTest {
     public void testBroadcastIntentWithNoPackageAndTwoBroadcastReceivers() {
         Log.i(TAG, "running testBroadcastIntentWithNoPackageAndTwoBroadcastReceivers");
 
-        openSessionWithResList(mDoubleList, 1, 1, null, mTestSession1, mTestUid1);
-        closeSessionWithResList(mDoubleList, 1, 2, null, mTestSession1, mTestUid1);
+        openSessionWithResList(mDoubleList, 0 /* bind */, 0 /* broadcast */,
+                null /* packageName */, mTestSession1, mTestUid1);
+        closeSessionWithResList(mDoubleList, 0 /* bind */, 0 /* broadcast */,
+                null /* packageName */, mTestSession1, mTestUid1);
+    }
+
+    @Test
+    public void testBroadcastIntentWithPackageAndOneBroadcastReceiver() {
+        Log.i(TAG, "running testBroadcastIntentWithPackageAndOneBroadcastReceiver");
+
+        int broadcasts = 1, bind = 1, unbind = 1;
+        openSessionWithResList(mSingleList, bind, broadcasts, mTestPkg1, mTestSession1, mTestUid1);
+
+        broadcasts = broadcasts + 1;
+        closeSessionWithResList(mSingleList, unbind, broadcasts, mTestPkg1, mTestSession1,
+                mTestUid1);
+
+        // repeat with different session ID
+        broadcasts = broadcasts + 1;
+        bind = bind + 1;
+        unbind = unbind + 1;
+        openSessionWithResList(mSingleList, bind, broadcasts, mTestPkg2, mTestSession2, mTestUid1);
+        broadcasts = broadcasts + 1;
+        closeSessionWithResList(mSingleList, unbind, broadcasts, mTestPkg2, mTestSession2,
+                mTestUid1);
+
+        // repeat with different UID
+        broadcasts = broadcasts + 1;
+        bind = bind + 1;
+        unbind = unbind + 1;
+        openSessionWithResList(mSingleList, bind, broadcasts, mTestPkg3, mTestSession1, mTestUid2);
+        broadcasts = broadcasts + 1;
+        closeSessionWithResList(mSingleList, unbind, broadcasts, mTestPkg3, mTestSession1,
+                mTestUid2);
+    }
+
+    @Test
+    public void testBroadcastIntentWithPackageAndTwoBroadcastReceivers() {
+        Log.i(TAG, "running testBroadcastIntentWithPackageAndTwoBroadcastReceivers");
+
+        openSessionWithResList(mDoubleList, 1 /* bind */, 1 /* broadcast */,
+                mTestPkg1 /* packageName */, mTestSession1, mTestUid1);
+        closeSessionWithResList(mDoubleList, 1 /* unbind */, 2 /* broadcast */,
+                mTestPkg1 /* packageName */, mTestSession1, mTestUid1);
     }
 
     /**
@@ -639,4 +669,18 @@ public class MusicFxHelperTest {
         unbind = unbind + 1;
         sendMessage(MusicFxHelper.MSG_EFFECT_CLIENT_GONE, mTestUid3, unbind, broadcasts);
     }
+
+    /**
+     * Test audio session open/close with same package name value but different String object.
+     */
+    @Test
+    public void testSessionOpenCloseWithSamePackageNameValueButDiffObject() {
+        Log.i(TAG, "running testSessionOpenCloseWithSamePackageNameValueButDiffObject");
+        int broadcasts = 1;
+        openSessionWithResList(mSingleList, 1 /* bind */, broadcasts, mTestPkg1, mTestSession1,
+                mTestUid1);
+        closeSessionWithResList(mSingleList, 1 /* unbind */, broadcasts + 1, mTestPkg1Equivalent,
+                mTestSession1, mTestUid1);
+    }
+
 }
