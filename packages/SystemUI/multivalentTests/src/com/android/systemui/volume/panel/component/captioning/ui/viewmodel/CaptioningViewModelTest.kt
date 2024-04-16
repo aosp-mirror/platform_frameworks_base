@@ -64,7 +64,7 @@ class CaptioningViewModelTest : SysuiTestCase() {
                 val buttonViewModel by collectLastValue(underTest.buttonViewModel)
                 runCurrent()
 
-                assertThat(buttonViewModel!!.isChecked).isFalse()
+                assertThat(buttonViewModel!!.isActive).isFalse()
             }
         }
     }
@@ -78,7 +78,7 @@ class CaptioningViewModelTest : SysuiTestCase() {
                 val buttonViewModel by collectLastValue(underTest.buttonViewModel)
                 runCurrent()
 
-                assertThat(buttonViewModel!!.isChecked).isTrue()
+                assertThat(buttonViewModel!!.isActive).isTrue()
             }
         }
     }

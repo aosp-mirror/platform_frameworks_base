@@ -52,7 +52,7 @@ constructor(
             VolumePanelUiEvent.VOLUME_PANEL_SPATIAL_AUDIO_POP_UP_SHOWN,
             0,
             null,
-            viewModel.spatialAudioButtons.value.indexOfFirst { it.button.isChecked }
+            viewModel.spatialAudioButtons.value.indexOfFirst { it.button.isActive }
         )
         volumePanelPopup.show(expandable, { Title() }, { Content(it) })
     }
@@ -85,7 +85,7 @@ constructor(
             for (buttonViewModel in enabledModelStates) {
                 val label = buttonViewModel.button.label.toString()
                 item(
-                    isSelected = buttonViewModel.button.isChecked,
+                    isSelected = buttonViewModel.button.isActive,
                     onItemSelected = { viewModel.setEnabled(buttonViewModel.model) },
                     contentDescription = label,
                     icon = { Icon(icon = buttonViewModel.button.icon) },
