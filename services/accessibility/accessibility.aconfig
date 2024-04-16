@@ -91,6 +91,16 @@ flag {
 }
 
 flag {
+    name: "focus_click_point_window_bounds_from_a11y_window_info"
+    namespace: "accessibility"
+    description: "Uses A11yWindowInfo bounds for focus click point bounds checking"
+    bug: "317166487"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "fullscreen_fling_gesture"
     namespace: "accessibility"
     description: "When true, adds a fling gesture animation for fullscreen magnification"
