@@ -1087,20 +1087,6 @@ public class DisplayModeDirector {
             if (Float.isInfinite(minRefreshRate)) {
                 // Infinity means that we want the highest possible refresh rate
                 minRefreshRate = highestRefreshRate;
-
-                if (!mIsBackUpSmoothDisplayAndForcePeakRefreshRateEnabled
-                        && displayId == Display.DEFAULT_DISPLAY) {
-                    // The flag has been turned off, we need to restore the original value. We'll
-                    // use the peak refresh rate of the default display.
-                    Settings.System.putFloatForUser(cr, Settings.System.MIN_REFRESH_RATE,
-                            highestRefreshRate, cr.getUserId());
-                }
-            } else if (mIsBackUpSmoothDisplayAndForcePeakRefreshRateEnabled
-                    && displayId == Display.DEFAULT_DISPLAY
-                    && Math.round(minRefreshRate) == Math.round(highestRefreshRate)) {
-                // The flag has been turned on, we need to upgrade the setting
-                Settings.System.putFloatForUser(cr, Settings.System.MIN_REFRESH_RATE,
-                        Float.POSITIVE_INFINITY, cr.getUserId());
             }
 
             float peakRefreshRate = Settings.System.getFloatForUser(cr,
@@ -1108,20 +1094,6 @@ public class DisplayModeDirector {
             if (Float.isInfinite(peakRefreshRate)) {
                 // Infinity means that we want the highest possible refresh rate
                 peakRefreshRate = highestRefreshRate;
-
-                if (!mIsBackUpSmoothDisplayAndForcePeakRefreshRateEnabled
-                        && displayId == Display.DEFAULT_DISPLAY) {
-                    // The flag has been turned off, we need to restore the original value. We'll
-                    // use the peak refresh rate of the default display.
-                    Settings.System.putFloatForUser(cr, Settings.System.PEAK_REFRESH_RATE,
-                            highestRefreshRate, cr.getUserId());
-                }
-            } else if (mIsBackUpSmoothDisplayAndForcePeakRefreshRateEnabled
-                    && displayId == Display.DEFAULT_DISPLAY
-                    && Math.round(peakRefreshRate) == Math.round(highestRefreshRate)) {
-                // The flag has been turned on, we need to upgrade the setting
-                Settings.System.putFloatForUser(cr, Settings.System.PEAK_REFRESH_RATE,
-                        Float.POSITIVE_INFINITY, cr.getUserId());
             }
 
             updateRefreshRateSettingLocked(minRefreshRate, peakRefreshRate, mDefaultRefreshRate,
