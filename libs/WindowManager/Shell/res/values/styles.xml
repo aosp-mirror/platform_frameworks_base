@@ -23,6 +23,14 @@
         <item name="android:windowAnimationStyle">@style/Animation.ForcedResizable</item>
     </style>
 
+    <!-- Theme used for the activity that shows below the desktop mode windows to show wallpaper -->
+    <style name="DesktopWallpaperTheme" parent="@android:style/Theme.Wallpaper.NoTitleBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+
     <style name="Animation.ForcedResizable" parent="@android:style/Animation">
         <item name="android:activityOpenEnterAnimation">@anim/forced_resizable_enter</item>
 

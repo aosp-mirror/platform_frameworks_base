@@ -118,8 +118,7 @@ constructor(
                 currentClock
             ) { isLargeClockVisible, clockShouldBeCentered, shadeMode, currentClock ->
                 val shouldUseSplitShade = shadeMode == ShadeMode.Split
-                // TODO(b/326098079): make id a constant field in config
-                if (currentClock?.config?.id == "DIGITAL_CLOCK_WEATHER") {
+                if (currentClock?.config?.useCustomClockScene == true) {
                     val weatherClockLayout =
                         when {
                             shouldUseSplitShade && clockShouldBeCentered ->

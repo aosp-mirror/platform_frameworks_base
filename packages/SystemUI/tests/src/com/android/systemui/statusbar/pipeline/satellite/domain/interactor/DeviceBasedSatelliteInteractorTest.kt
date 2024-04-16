@@ -26,6 +26,10 @@ import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobi
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.FakeDeviceBasedSatelliteRepository
 import com.android.systemui.statusbar.pipeline.satellite.shared.model.SatelliteConnectionState
+import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
+import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractorImpl
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository
 import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisioningInteractor
 import com.android.systemui.util.mockito.mock
@@ -53,6 +57,10 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
     private val deviceProvisionedRepository = FakeDeviceProvisioningRepository()
     private val deviceProvisioningInteractor =
         DeviceProvisioningInteractor(deviceProvisionedRepository)
+    private val connectivityRepository = FakeConnectivityRepository()
+    private val wifiRepository = FakeWifiRepository()
+    private val wifiInteractor =
+        WifiInteractorImpl(connectivityRepository, wifiRepository, testScope.backgroundScope)
 
     @Before
     fun setUp() {
@@ -61,6 +69,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                 repo,
                 iconsInteractor,
                 deviceProvisioningInteractor,
+                wifiInteractor,
                 testScope.backgroundScope,
             )
     }
@@ -103,6 +112,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                     repo,
                     iconsInteractor,
                     deviceProvisioningInteractor,
+                    wifiInteractor,
                     testScope.backgroundScope,
                 )
 
@@ -150,6 +160,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                     repo,
                     iconsInteractor,
                     deviceProvisioningInteractor,
+                    wifiInteractor,
                     testScope.backgroundScope,
                 )
 
@@ -205,6 +216,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                     repo,
                     iconsInteractor,
                     deviceProvisioningInteractor,
+                    wifiInteractor,
                     testScope.backgroundScope,
                 )
 
@@ -337,6 +349,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                     repo,
                     iconsInteractor,
                     deviceProvisioningInteractor,
+                    wifiInteractor,
                     testScope.backgroundScope,
                 )
 
@@ -352,5 +365,29 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
 
             // THEN the value is still false, because the flag is off
             assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun isWifiActive_falseWhenWifiNotActive() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isWifiActive)
+
+            // WHEN wifi is not active
+            wifiRepository.setWifiNetwork(WifiNetworkModel.Invalid("test"))
+
+            // THEN the interactor returns false due to the wifi network not being active
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun isWifiActive_trueWhenWifiIsActive() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isWifiActive)
+
+            // WHEN wifi is active
+            wifiRepository.setWifiNetwork(WifiNetworkModel.Active(networkId = 0, level = 1))
+
+            // THEN the interactor returns true due to the wifi network being active
+            assertThat(latest).isTrue()
         }
 }

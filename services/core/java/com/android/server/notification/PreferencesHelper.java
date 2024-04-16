@@ -1387,8 +1387,7 @@ public class PreferencesHelper implements RankingConfig {
     public void updateFixedImportance(List<UserInfo> users) {
         for (UserInfo user : users) {
             List<PackageInfo> packages = mPm.getInstalledPackagesAsUser(
-                    PackageManager.PackageInfoFlags.of(PackageManager.MATCH_SYSTEM_ONLY),
-                    user.getUserHandle().getIdentifier());
+                    0, user.getUserHandle().getIdentifier());
             for (PackageInfo pi : packages) {
                 boolean fixed = mPermissionHelper.isPermissionFixed(
                         pi.packageName, user.getUserHandle().getIdentifier());

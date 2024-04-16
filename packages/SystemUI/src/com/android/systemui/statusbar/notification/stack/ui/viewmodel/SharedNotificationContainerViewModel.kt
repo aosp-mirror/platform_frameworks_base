@@ -66,6 +66,7 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
+import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
 import com.android.systemui.util.kotlin.BooleanFlowOperators.and
 import com.android.systemui.util.kotlin.BooleanFlowOperators.or
 import com.android.systemui.util.kotlin.FlowDumperImpl
@@ -80,6 +81,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -128,6 +130,7 @@ constructor(
     private val primaryBouncerToLockscreenTransitionViewModel:
         PrimaryBouncerToLockscreenTransitionViewModel,
     private val aodBurnInViewModel: AodBurnInViewModel,
+    unfoldTransitionInteractor: UnfoldTransitionInteractor,
 ) : FlowDumperImpl(dumpManager) {
     private val statesForConstrainedNotifications: Set<KeyguardState> =
         setOf(AOD, LOCKSCREEN, DOZING, ALTERNATE_BOUNCER, PRIMARY_BOUNCER)
@@ -577,14 +580,20 @@ constructor(
             .dumpWhileCollecting("translationY")
     }
 
-    /**
-     * The container may need to be translated in the x direction as the keyguard fades out, such as
-     * when swiping open the glanceable hub from the lockscreen.
-     */
+    /** Horizontal translation to apply to the container. */
     val translationX: Flow<Float> =
         merge(
+                // The container may need to be translated along the X axis as the keyguard fades
+                // out, such as when swiping open the glanceable hub from the lockscreen.
                 lockscreenToGlanceableHubTransitionViewModel.notificationTranslationX,
                 glanceableHubToLockscreenTransitionViewModel.notificationTranslationX,
+                if (SceneContainerFlag.isEnabled) {
+                    // The container may need to be translated along the X axis as the unfolded
+                    // foldable is folded slightly.
+                    unfoldTransitionInteractor.unfoldTranslationX(isOnStartSide = false)
+                } else {
+                    emptyFlow()
+                }
             )
             .dumpWhileCollecting("translationX")
 

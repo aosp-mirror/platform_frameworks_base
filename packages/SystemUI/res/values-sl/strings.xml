@@ -270,12 +270,20 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Pokaži vse"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Uporabi Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Povezano"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing (1496358082943301670) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Shranjeno"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"prekinitev povezave"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktiviranje"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Samodejno znova vklopi jutri"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"Funkcije, kot so Hitro deljenje, Poišči mojo napravo in zaznavanje lokacije naprave, uporabljajo Bluetooth"</string>
-    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"Bluetooth se bo vklopil jutri ob 5. uri"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (682984290339848844) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (7440944034584560279) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (4499275822759907822) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (8626191139359072540) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Baterija na <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Zvok"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Slušalke z mikrofonom"</string>
@@ -1302,5 +1310,5 @@
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Osvetlitev tipkovnice"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Stopnja %1$d od %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Kontrolniki za dom"</string>
-    <string name="home_controls_dream_description" msgid="4644150952104035789">"Hiter dostop do kontrol. za dom na ohranj. zaslona"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"Hiter dostop do kontrolnikov za dom na ohranjevalniku zaslona"</string>
 </resources>

@@ -69,9 +69,19 @@ class ButtonComponent(
                             role = Role.Button
                             contentDescription = label
                         },
-                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                    color =
+                        if (viewModel.isActive) {
+                            MaterialTheme.colorScheme.tertiaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.surface
+                        },
                     shape = RoundedCornerShape(28.dp),
-                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                    contentColor =
+                        if (viewModel.isActive) {
+                            MaterialTheme.colorScheme.onTertiaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        },
                     onClick = onClick,
                 ) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

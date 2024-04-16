@@ -59,6 +59,7 @@ import com.android.wm.shell.desktopmode.DesktopModeLoggerTransitionObserver;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
+import com.android.wm.shell.desktopmode.DesktopTasksTransitionObserver;
 import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler;
 import com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler;
@@ -569,6 +570,18 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
+    static Optional<DesktopTasksTransitionObserver> provideDesktopTasksTransitionObserver(
+            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
+            Transitions transitions,
+            ShellInit shellInit
+    ) {
+        return desktopModeTaskRepository.flatMap(repository ->
+                Optional.of(new DesktopTasksTransitionObserver(repository, transitions, shellInit))
+        );
+    }
+
+    @WMSingleton
+    @Provides
     static DesktopModeLoggerTransitionObserver provideDesktopModeLoggerTransitionObserver(
             ShellInit shellInit,
             Transitions transitions,
@@ -623,7 +636,8 @@ public abstract class WMShellModule {
     @Provides
     static Object provideIndependentShellComponentsToCreate(
             DragAndDropController dragAndDropController,
-            DefaultMixedHandler defaultMixedHandler) {
+            DefaultMixedHandler defaultMixedHandler,
+            Optional<DesktopTasksTransitionObserver> desktopTasksTransitionObserverOptional) {
         return new Object();
     }
 }

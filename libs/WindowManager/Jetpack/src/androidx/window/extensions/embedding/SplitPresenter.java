@@ -467,6 +467,11 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             reorderTaskFragmentToFront(wct,
                     pinnedContainer.getSecondaryContainer().getTaskFragmentToken());
         }
+        final TaskFragmentContainer alwaysOnTopOverlayContainer = container.getTaskContainer()
+                .getAlwaysOnTopOverlayContainer();
+        if (alwaysOnTopOverlayContainer != null) {
+            reorderTaskFragmentToFront(wct, alwaysOnTopOverlayContainer.getTaskFragmentToken());
+        }
     }
 
     @Override

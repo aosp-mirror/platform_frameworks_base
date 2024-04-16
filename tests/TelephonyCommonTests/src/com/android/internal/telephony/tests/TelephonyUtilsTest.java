@@ -85,6 +85,8 @@ public class TelephonyUtilsTest {
         assertTrue(TelephonyUtils.isValidPlmn("45006"));
         assertFalse(TelephonyUtils.isValidPlmn("1234567"));
         assertFalse(TelephonyUtils.isValidPlmn("1234"));
+        assertFalse(TelephonyUtils.isValidPlmn(""));
+        assertFalse(TelephonyUtils.isValidPlmn(null));
     }
 
     @Test
@@ -93,6 +95,19 @@ public class TelephonyUtilsTest {
         assertTrue(TelephonyUtils.isValidService(LAST_SERVICE_TYPE));
         assertFalse(TelephonyUtils.isValidService(FIRST_SERVICE_TYPE - 1));
         assertFalse(TelephonyUtils.isValidService(LAST_SERVICE_TYPE + 1));
+    }
+
+    @Test
+    public void testIsValidCountryCode() {
+        assertTrue(TelephonyUtils.isValidCountryCode("US"));
+        assertTrue(TelephonyUtils.isValidCountryCode("cn"));
+        assertFalse(TelephonyUtils.isValidCountryCode("11"));
+        assertFalse(TelephonyUtils.isValidCountryCode("USA"));
+        assertFalse(TelephonyUtils.isValidCountryCode("chn"));
+        assertFalse(TelephonyUtils.isValidCountryCode("U"));
+        assertFalse(TelephonyUtils.isValidCountryCode("G7"));
+        assertFalse(TelephonyUtils.isValidCountryCode(""));
+        assertFalse(TelephonyUtils.isValidCountryCode(null));
     }
 }
 

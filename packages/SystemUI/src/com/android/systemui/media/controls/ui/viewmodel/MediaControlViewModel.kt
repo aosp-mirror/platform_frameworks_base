@@ -18,6 +18,7 @@ package com.android.systemui.media.controls.ui.viewmodel
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.media.session.MediaController
 import android.media.session.MediaSession.Token
 import android.text.TextUtils
 import android.util.Log
@@ -40,6 +41,7 @@ import com.android.systemui.monet.ColorScheme
 import com.android.systemui.monet.Style
 import com.android.systemui.res.R
 import com.android.systemui.util.kotlin.sample
+import java.util.concurrent.Executor
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,6 +53,7 @@ import kotlinx.coroutines.flow.flowOn
 class MediaControlViewModel(
     @Application private val applicationContext: Context,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
+    @Background private val backgroundExecutor: Executor,
     private val interactor: MediaControlInteractor,
     private val logger: MediaUiEventLogger,
 ) {
@@ -124,13 +127,15 @@ class MediaControlViewModel(
                 }
             },
             backgroundCover = model.artwork,
-            appIcon = getAppIcon(model.appIcon, model.isResume, model.packageName),
+            appIcon = model.appIcon,
+            launcherIcon = getIconFromApp(model.packageName),
             useGrayColorFilter = model.appIcon == null || model.isResume,
             artistName = model.artistName ?: "",
             titleName = model.songName ?: "",
             isExplicitVisible = model.showExplicit,
+            shouldAddGradient = wallpaperColors != null,
             colorScheme = scheme,
-            isTimeVisible = canShowScrubbingTimeViews(model.semanticActionButtons),
+            canShowTime = canShowScrubbingTimeViews(model.semanticActionButtons),
             playTurbulenceNoise = playTurbulenceNoise,
             useSemanticActions = model.semanticActionButtons != null,
             actionButtons = toActionViewModels(model),
@@ -146,6 +151,21 @@ class MediaControlViewModel(
             onLongClicked = {
                 logger.logLongPressOpen(model.uid, model.packageName, model.instanceId)
             },
+            onSeek = {
+                logger.logSeek(model.uid, model.packageName, model.instanceId)
+                // TODO (b/330897926) log smartspace card reported (SMARTSPACE_CARD_CLICK_EVENT)
+            },
+            onBindSeekbar = { seekBarViewModel ->
+                if (model.isResume && model.resumeProgress != null) {
+                    seekBarViewModel.updateStaticProgress(model.resumeProgress)
+                } else {
+                    backgroundExecutor.execute {
+                        seekBarViewModel.updateController(
+                            model.token?.let { MediaController(applicationContext, it) }
+                        )
+                    }
+                }
+            }
         )
     }
 
@@ -278,16 +298,16 @@ class MediaControlViewModel(
         model: MediaControlModel,
         mediaAction: MediaAction,
         buttonId: Int,
-        isScrubbingTimeEnabled: Boolean
+        canShowScrubbingTimeViews: Boolean
     ): MediaActionViewModel {
         val showInCollapsed = SEMANTIC_ACTIONS_COMPACT.contains(buttonId)
         val hideWhenScrubbing = SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING.contains(buttonId)
-        val shouldHideDueToScrubbing = isScrubbingTimeEnabled && hideWhenScrubbing
+        val shouldHideWhenScrubbing = canShowScrubbingTimeViews && hideWhenScrubbing
         return MediaActionViewModel(
             icon = mediaAction.icon,
             contentDescription = mediaAction.contentDescription,
             background = mediaAction.background,
-            isVisible = !shouldHideDueToScrubbing,
+            isVisibleWhenScrubbing = !shouldHideWhenScrubbing,
             notVisibleValue =
                 if (
                     (buttonId == R.id.actionPrev && model.semanticActionButtons!!.reservePrev) ||
@@ -342,19 +362,6 @@ class MediaControlViewModel(
         action.run()
     }
 
-    private fun getAppIcon(
-        icon: android.graphics.drawable.Icon?,
-        isResume: Boolean,
-        packageName: String
-    ): Icon {
-        if (icon != null && !isResume) {
-            icon.loadDrawable(applicationContext)?.let { drawable ->
-                return Icon.Loaded(drawable, null)
-            }
-        }
-        return getIconFromApp(packageName)
-    }
-
     private fun getIconFromApp(packageName: String): Icon {
         return try {
             Icon.Loaded(applicationContext.packageManager.getApplicationIcon(packageName), null)
@@ -381,17 +388,17 @@ class MediaControlViewModel(
         private const val DISABLED_ALPHA = 0.38f
 
         /** Buttons to show in small player when using semantic actions */
-        private val SEMANTIC_ACTIONS_COMPACT =
+        val SEMANTIC_ACTIONS_COMPACT =
             listOf(R.id.actionPlayPause, R.id.actionPrev, R.id.actionNext)
 
         /**
          * Buttons that should get hidden when we are scrubbing (they will be replaced with the
          * views showing scrubbing time)
          */
-        private val SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING = listOf(R.id.actionPrev, R.id.actionNext)
+        val SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING = listOf(R.id.actionPrev, R.id.actionNext)
 
         /** Buttons to show in player when using semantic actions. */
-        private val SEMANTIC_ACTIONS_ALL =
+        val SEMANTIC_ACTIONS_ALL =
             listOf(
                 R.id.actionPlayPause,
                 R.id.actionPrev,
@@ -399,5 +406,9 @@ class MediaControlViewModel(
                 R.id.action0,
                 R.id.action1
             )
+
+        const val TURBULENCE_NOISE_PLAY_MS_DURATION = 7500L
+        const val MEDIA_PLAYER_SCRIM_START_ALPHA = 0.25f
+        const val MEDIA_PLAYER_SCRIM_END_ALPHA = 1.0f
     }
 }

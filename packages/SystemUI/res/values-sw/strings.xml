@@ -270,12 +270,20 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Angalia vyote"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Tumia Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Imeunganishwa"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing (1496358082943301670) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Imehifadhiwa"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ondoa"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"anza kutumia"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Iwashe tena kesho kiotomatiki"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"Vipengele kama vile Kutuma Haraka, Tafuta Kifaa Changu na mahali kifaa kilipo hutumia Bluetooth"</string>
-    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"Bluetooth itawaka kesho saa 11 alfajiri"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (682984290339848844) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (7440944034584560279) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (4499275822759907822) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (8626191139359072540) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Chaji ya betri ni <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Sauti"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Vifaa vya sauti"</string>
@@ -1301,6 +1309,6 @@
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Ilitumiwa hivi majuzi na <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Mwanga chini ya kibodi"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Kiwango cha %1$d kati ya %2$d"</string>
-    <string name="home_controls_dream_label" msgid="6567105701292324257">"Vidhibiti vya Vifaa Nyumbani"</string>
-    <string name="home_controls_dream_description" msgid="4644150952104035789">"Fikia haraka vidhibiti vya vifaa nyumbani kama taswira ya skrini"</string>
+    <string name="home_controls_dream_label" msgid="6567105701292324257">"Dhibiti Vifaa Nyumbani"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"Fikia haraka vidhibiti vya vifaa nyumbani vikiwa taswira ya skrini"</string>
 </resources>

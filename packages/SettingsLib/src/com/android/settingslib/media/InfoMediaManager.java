@@ -150,7 +150,16 @@ public abstract class InfoMediaManager {
         mUserHandle = userHandle;
     }
 
-    /** Creates an instance of InfoMediaManager. */
+    /**
+     * Creates an instance of InfoMediaManager.
+     *
+     * @param context The {@link Context}.
+     * @param packageName The package name of the app for which to control routing, or null if the
+     *     caller is interested in system-level routing only (for example, headsets, built-in
+     *     speakers, as opposed to app-specific routing (for example, casting to another device).
+     * @param userHandle The {@link UserHandle} of the user on which the app to control is running,
+     *     or null if the caller does not need app-specific routing (see {@code packageName}).
+     */
     public static InfoMediaManager createInstance(
             Context context,
             @Nullable String packageName,
@@ -185,11 +194,7 @@ public abstract class InfoMediaManager {
     }
 
     public void startScan() {
-        mMediaDevices.clear();
-        registerRouter();
         startScanOnRouter();
-        updateRouteListingPreference();
-        refreshDevices();
     }
 
     private void updateRouteListingPreference() {
@@ -203,7 +208,6 @@ public abstract class InfoMediaManager {
 
     public final void stopScan() {
         stopScanOnRouter();
-        unregisterRouter();
     }
 
     protected abstract void stopScanOnRouter();
@@ -290,14 +294,37 @@ public abstract class InfoMediaManager {
         return null;
     }
 
-    protected final void registerCallback(MediaDeviceCallback callback) {
+    /**
+     * Registers the specified {@code callback} to receive state updates about routing information.
+     *
+     * <p>As long as there is a registered {@link MediaDeviceCallback}, {@link InfoMediaManager}
+     * will receive state updates from the platform.
+     *
+     * <p>Call {@link #unregisterCallback(MediaDeviceCallback)} once you no longer need platform
+     * updates.
+     */
+    public final void registerCallback(@NonNull MediaDeviceCallback callback) {
+        boolean wasEmpty = mCallbacks.isEmpty();
         if (!mCallbacks.contains(callback)) {
             mCallbacks.add(callback);
+            if (wasEmpty) {
+                mMediaDevices.clear();
+                registerRouter();
+                updateRouteListingPreference();
+                refreshDevices();
+            }
         }
     }
 
-    protected final void unregisterCallback(MediaDeviceCallback callback) {
-        mCallbacks.remove(callback);
+    /**
+     * Unregisters the specified {@code callback}.
+     *
+     * @see #registerCallback(MediaDeviceCallback)
+     */
+    public final void unregisterCallback(@NonNull MediaDeviceCallback callback) {
+        if (mCallbacks.remove(callback) && mCallbacks.isEmpty()) {
+            unregisterRouter();
+        }
     }
 
     private void dispatchDeviceListAdded(@NonNull List<MediaDevice> devices) {

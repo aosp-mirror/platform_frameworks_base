@@ -41,3 +41,10 @@ flag {
   description: "Use weak reference to address binder leak problem"
   bug: "307972253"
 }
+
+flag {
+  name: "include_last_focused_id_and_session_id_in_client_state"
+  namespace: "autofill"
+  description: "Include the current view id and session id into the FillEventHistory as part of ClientState"
+  bug: "334141398"
+}

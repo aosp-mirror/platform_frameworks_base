@@ -578,6 +578,14 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         assertEquals(keyEvent, falsingCollector.lastKeyEvent)
     }
 
+    @Test
+    fun cancelCurrentTouch_callsDragDownHelper() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+        underTest.cancelCurrentTouch()
+
+        verify(dragDownHelper).stopDragging()
+    }
+
     companion object {
         private val DOWN_EVENT = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
         private val MOVE_EVENT = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 0f, 0)

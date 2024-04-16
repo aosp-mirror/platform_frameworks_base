@@ -1373,7 +1373,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private final Lazy<DreamViewModel> mDreamViewModel;
     private final Lazy<CommunalTransitionViewModel> mCommunalTransitionViewModel;
     private RemoteAnimationTarget mRemoteAnimationTarget;
-    private Boolean mShowCommunalByDefault;
+    private boolean mShowCommunalByDefault = false;
 
     private final Lazy<WindowManagerLockscreenVisibilityManager> mWmLockscreenVisibilityManager;
 

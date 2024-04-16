@@ -22,6 +22,8 @@ import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.internal.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.ui.data.repository.ConfigurationRepositoryImpl
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.display.data.repository.DeviceStateRepository
 import com.android.systemui.display.data.repository.DeviceStateRepository.DeviceState
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -31,11 +33,12 @@ import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessModel
 import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.shared.system.SysUiStatsLog
+import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.unfold.DisplaySwitchLatencyTracker.Companion.FOLDABLE_DEVICE_STATE_CLOSED
 import com.android.systemui.unfold.DisplaySwitchLatencyTracker.Companion.FOLDABLE_DEVICE_STATE_HALF_OPEN
 import com.android.systemui.unfold.DisplaySwitchLatencyTracker.DisplaySwitchLatencyEvent
 import com.android.systemui.unfold.data.repository.UnfoldTransitionRepositoryImpl
-import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractorImpl
+import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
 import com.android.systemui.util.animation.data.repository.AnimationStatusRepository
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
@@ -86,11 +89,20 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
     private val areAnimationEnabled = MutableStateFlow(true)
     private val lastWakefulnessEvent = MutableStateFlow(WakefulnessModel())
     private val systemClock = FakeSystemClock()
-    private val unfoldTransitionProgressProvider = TestUnfoldTransitionProvider()
+    private val configurationController = FakeConfigurationController()
+    private val configurationRepository =
+        ConfigurationRepositoryImpl(
+            configurationController,
+            context,
+            testScope.backgroundScope,
+            mock()
+        )
+    private val configurationInteractor = ConfigurationInteractor(configurationRepository)
+    private val unfoldTransitionProgressProvider = FakeUnfoldTransitionProvider()
     private val unfoldTransitionRepository =
         UnfoldTransitionRepositoryImpl(Optional.of(unfoldTransitionProgressProvider))
     private val unfoldTransitionInteractor =
-        UnfoldTransitionInteractorImpl(unfoldTransitionRepository)
+        UnfoldTransitionInteractor(unfoldTransitionRepository, configurationInteractor)
 
     @Before
     fun setup() {
@@ -155,7 +167,10 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
     fun unfold_progressUnavailable_logsLatencyTillScreenTurnedOn() {
         testScope.runTest {
             val unfoldTransitionInteractorWithEmptyProgressProvider =
-                UnfoldTransitionInteractorImpl(UnfoldTransitionRepositoryImpl(Optional.empty()))
+                UnfoldTransitionInteractor(
+                    UnfoldTransitionRepositoryImpl(Optional.empty()),
+                    configurationInteractor,
+                )
             displaySwitchLatencyTracker =
                 DisplaySwitchLatencyTracker(
                     mockContext,

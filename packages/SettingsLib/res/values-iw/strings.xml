@@ -122,8 +122,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"העברת קבצים"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"התקן קלט"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"גישה לאינטרנט"</string>
-    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"אישור גישה אל אנשי קשר והיסטוריית שיחות"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"המידע ישמש להודעות על שיחות ועוד"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"אישור גישה אל אנשי הקשר והיסטוריית השיחות"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"המידע הזה ישמש למשל כדי להשמיע התראות על שיחות נכנסות"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"שיתוף חיבור לאינטרנט"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"הודעות טקסט"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"‏גישה ל-SIM"</string>
@@ -487,6 +487,14 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – הזמן הנותר לטעינה מלאה: <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – הטעינה עברה אופטימיזציה"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"‫<xliff:g id="LEVEL">%1$s</xliff:g> – בטעינה"</string>
+    <!-- no translation found for power_fast_charging_duration_v2 (3797735998640359490) -->
+    <skip />
+    <!-- no translation found for power_charging_duration_v2 (2938998284074003248) -->
+    <skip />
+    <!-- no translation found for power_remaining_charging_duration_only_v2 (5358176435722950193) -->
+    <skip />
+    <!-- no translation found for power_remaining_fast_charging_duration_only_v2 (6270950195810579563) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"לא ידוע"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"בטעינה"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"הסוללה נטענת מהר"</string>
@@ -498,6 +506,10 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"הסוללה טעונה"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"טעונה במלואה"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"הטעינה הושהתה"</string>
+    <!-- no translation found for battery_info_status_charging_v2 (6118522107222245505) -->
+    <skip />
+    <!-- no translation found for battery_info_status_charging_fast_v2 (1825439848151256589) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"נמצא בשליטת מנהל מערכת"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"בשליטה של הגדרה מוגבלת"</string>
     <string name="disabled" msgid="8017887509554714950">"מושבת"</string>
@@ -684,6 +696,8 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"פס אחד של טלפון."</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"שני פסים של טלפון."</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"שלושה פסים של טלפון."</string>
+    <!-- no translation found for accessibility_phone_four_bars (4477202400261338403) -->
+    <skip />
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"אות הטלפון מלא."</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"אין נתונים."</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"פס אחד של נתונים."</string>

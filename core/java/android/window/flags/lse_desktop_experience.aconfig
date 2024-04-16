@@ -49,3 +49,10 @@ flag {
     description: "Shows running apps in Desktop Mode Taskbar"
     bug: "332504528"
 }
+
+flag {
+    name: "enable_desktop_windowing_wallpaper_activity"
+    namespace: "lse_desktop_experience"
+    description: "Enables desktop wallpaper activity to show wallpaper in the desktop mode"
+    bug: "309014605"
+}

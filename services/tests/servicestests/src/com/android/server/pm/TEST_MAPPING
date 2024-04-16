@@ -1,31 +1,11 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.pm."
-        },
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
+      "name": "FrameworksServicesTests_pm_presubmit"
     }
   ],
   "postsubmit": [
     {
-      // Presubmit is intentional here while testing with SLO checker.
-      // Tests are flaky, waiting to bypass.
-      "name": "FrameworksServicesTests_pm_presubmit"
-    },
-    {
-      // Leave postsubmit here when migrating
       "name": "FrameworksServicesTests_pm_postsubmit"
     }
   ]

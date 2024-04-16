@@ -80,6 +80,7 @@
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
         android:importantForAccessibility="no"
+        android:focusable="false"
         />
 
     <include layout="@layout/notification_expand_button"

@@ -5188,11 +5188,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     String[] exception =  resultData.getStringArray(
                             CredentialProviderService.EXTRA_GET_CREDENTIAL_EXCEPTION);
                     if (exception != null && exception.length >= 2) {
+                        String errType = exception[0];
+                        String errMsg = exception[1];
                         Slog.w(TAG, "Credman bottom sheet from pinned "
-                                + "entry failed with: + " + exception[0] + " , "
-                                + exception[1]);
+                                + "entry failed with: + " + errType + " , "
+                                + errMsg);
                         sendCredentialManagerResponseToApp(/*response=*/ null,
-                                new GetCredentialException(exception[0], exception[1]),
+                                new GetCredentialException(errType, errMsg),
                                 mAutofillId);
                     }
                 } else {

@@ -35,7 +35,7 @@ import org.mockito.Mockito.verify
 @SmallTest
 class UnfoldHapticsPlayerTest : SysuiTestCase() {
 
-    private val progressProvider = TestUnfoldTransitionProvider()
+    private val progressProvider = FakeUnfoldTransitionProvider()
     private val vibrator: Vibrator = mock()
     private val testFoldProvider = TestFoldProvider()
 

@@ -2,7 +2,7 @@ package com.android.systemui.unfold
 
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 
-class TestUnfoldTransitionProvider : UnfoldTransitionProgressProvider, TransitionProgressListener {
+class FakeUnfoldTransitionProvider : UnfoldTransitionProgressProvider, TransitionProgressListener {
 
     private val listeners = mutableListOf<TransitionProgressListener>()
 

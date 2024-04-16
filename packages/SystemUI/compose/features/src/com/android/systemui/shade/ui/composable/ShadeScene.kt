@@ -62,6 +62,7 @@ import com.android.compose.animation.scene.TransitionState
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.animateSceneFloatAsState
+import com.android.compose.modifiers.padding
 import com.android.compose.modifiers.thenIf
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
@@ -289,6 +290,18 @@ private fun SceneScope.SplitShade(
         remember(lifecycleOwner, viewModel) { viewModel.getFooterActionsViewModel(lifecycleOwner) }
     val tileSquishiness by
         animateSceneFloatAsState(value = 1f, key = QuickSettings.SharedValues.TilesSquishiness)
+    val unfoldTranslationXForStartSide by
+        viewModel
+            .unfoldTranslationX(
+                isOnStartSide = true,
+            )
+            .collectAsState(0f)
+    val unfoldTranslationXForEndSide by
+        viewModel
+            .unfoldTranslationX(
+                isOnStartSide = false,
+            )
+            .collectAsState(0f)
 
     val navBarBottomHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val density = LocalDensity.current
@@ -337,10 +350,18 @@ private fun SceneScope.SplitShade(
                 modifier =
                     Modifier.padding(horizontal = Shade.Dimensions.HorizontalPadding)
                         .then(brightnessMirrorShowingModifier)
+                        .padding(
+                            horizontal = { unfoldTranslationXForStartSide.roundToInt() },
+                        )
             )
 
             Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
-                Box(modifier = Modifier.weight(1f)) {
+                Box(
+                    modifier =
+                        Modifier.weight(1f).graphicsLayer {
+                            translationX = unfoldTranslationXForStartSide
+                        },
+                ) {
                     BrightnessMirror(
                         viewModel = viewModel.brightnessMirrorViewModel,
                         qsSceneAdapter = viewModel.qsSceneAdapter,
@@ -407,7 +428,7 @@ private fun SceneScope.SplitShade(
                         Modifier.weight(1f)
                             .fillMaxHeight()
                             .padding(bottom = navBarBottomHeight)
-                            .then(brightnessMirrorShowingModifier),
+                            .then(brightnessMirrorShowingModifier)
                 )
             }
         }

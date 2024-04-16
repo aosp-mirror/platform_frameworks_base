@@ -40,6 +40,9 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.RowContentBindParams;
 import com.android.systemui.statusbar.notification.row.RowContentBindStage;
+import com.android.systemui.statusbar.notification.row.RowInflaterTask;
+import com.android.systemui.statusbar.notification.row.RowInflaterTaskLogger;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -114,20 +117,25 @@ public class DynamicChildBindControllerTest extends SysuiTestCase {
 
     private NotificationEntry addGroup(int size) {
         NotificationEntry summary = new NotificationEntryBuilder().build();
-        summary.setRow(createRow());
+        summary.setRow(createRow(summary));
         ArrayList<NotificationEntry> children = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             NotificationEntry child = new NotificationEntryBuilder().build();
-            child.setRow(createRow());
+            child.setRow(createRow(child));
             children.add(child);
         }
         mGroupNotifs.put(summary, children);
         return summary;
     }
 
-    private ExpandableNotificationRow createRow() {
+    private ExpandableNotificationRow createRow(NotificationEntry entry) {
+        LayoutInflater inflater = LayoutInflater.from(mContext);
+        inflater.setFactory2(
+                new RowInflaterTask.RowAsyncLayoutInflater(entry, new FakeSystemClock(), mock(
+                        RowInflaterTaskLogger.class)));
+
         ExpandableNotificationRow row = (ExpandableNotificationRow)
-                LayoutInflater.from(mContext).inflate(R.layout.status_bar_notification_row, null);
+                inflater.inflate(R.layout.status_bar_notification_row, null);
         row.getPrivateLayout().setContractedChild(new View(mContext));
         row.getPrivateLayout().setExpandedChild(new View(mContext));
         return row;

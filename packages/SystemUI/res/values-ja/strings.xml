@@ -173,7 +173,7 @@
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"PIN が正しくありません"</string>
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"パターンが正しくありません"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"パスワードが正しくありません"</string>
-    <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"間違えた回数が上限を超えました。\n<xliff:g id="NUMBER">%d</xliff:g> 秒後にもう一度お試しください。"</string>
+    <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"試行回数が上限に達しました。\n<xliff:g id="NUMBER">%d</xliff:g> 秒後にもう一度お試しください。"</string>
     <string name="work_challenge_emergency_button_text" msgid="8946588434515599288">"緊急通報"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"もう一度お試しください。入力回数: <xliff:g id="ATTEMPTS_0">%1$d</xliff:g>/<xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> 回"</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"データが削除されます"</string>
@@ -270,12 +270,20 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"すべて表示"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth を使用"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"接続しました"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing (1496358082943301670) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"保存しました"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"接続を解除"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"有効化"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"明日自動的に ON に戻す"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"クイック共有、デバイスを探す、デバイスの位置情報などの機能は Bluetooth を使用します"</string>
-    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"午前 5 時に Bluetooth が ON になります"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (682984290339848844) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (7440944034584560279) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (4499275822759907822) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (8626191139359072540) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"バッテリー <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"オーディオ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ヘッドセット"</string>
@@ -350,8 +358,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"録音に関する問題"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"開始"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"停止"</string>
-    <!-- no translation found for qs_record_issue_bug_report (8229031766918650079) -->
-    <skip />
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"バグレポート"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"デバイスのどの部分が影響を受けましたか？"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"問題の種類を選択する"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"スクリーン レコード"</string>
@@ -549,7 +556,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"このデバイスは保護者によって管理されています。保護者は、あなたが使用するアプリ、あなたの現在地、デバイスの利用時間などの情報を確認したり、管理したりできます。"</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"信頼エージェントがロック解除を管理"</string>
-    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"認証の試行回数が上限を超えたため、デバイスがロックされました"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"認証の試行回数が上限に達したため、デバイスがロックされました"</string>
     <string name="keyguard_indication_after_adaptive_auth_lock" msgid="2323400645470712787">"デバイスがロックされました\n認証に失敗しました"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>。<xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"音声の設定"</string>
@@ -606,7 +613,7 @@
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"空間オーディオ"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"OFF"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"固定"</string>
-    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"ヘッド トラッキング"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"ヘ⁠ッ⁠ド ト⁠ラ⁠ッ⁠キ⁠ン⁠グ"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"タップすると、着信音のモードを変更できます"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"ミュート"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ミュートを解除"</string>
@@ -1303,5 +1310,5 @@
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"キーボード バックライト"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"レベル %1$d/%2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ホーム コントロール"</string>
-    <string name="home_controls_dream_description" msgid="4644150952104035789">"ホーム コントロールにスクリーンセーバーとしてすばやくアクセス"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"ホーム コントロールにスクリーンセーバーからすばやくアクセス"</string>
 </resources>

@@ -55,6 +55,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.compat.IPlatformCompat;
 import com.android.server.UiServiceTestCase;
 
 import org.junit.Before;
@@ -155,7 +156,8 @@ public class RankingHelperTest extends UiServiceTestCase {
                 NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND, 0);
         when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
         mHelper = new RankingHelper(getContext(), mHandler, mConfig, mMockZenModeHelper,
-                mUsageStats, new String[] {ImportanceExtractor.class.getName()});
+                mUsageStats, new String[] {ImportanceExtractor.class.getName()},
+                mock(IPlatformCompat.class));
 
         mNotiGroupGSortA = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setContentTitle("A")

@@ -24,6 +24,7 @@ import com.android.compose.animation.scene.SwipeDirection
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
@@ -44,10 +45,14 @@ import com.android.systemui.shade.domain.startable.shadeStartable
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.testKosmos
+import com.android.systemui.unfold.domain.interactor.unfoldTransitionInteractor
+import com.android.systemui.unfold.fakeUnfoldTransitionProgressProvider
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import java.util.Locale
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -91,6 +96,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
                 footerActionsViewModelFactory = kosmos.footerActionsViewModelFactory,
                 footerActionsController = kosmos.footerActionsController,
                 sceneInteractor = kosmos.sceneInteractor,
+                unfoldTransitionInteractor = kosmos.unfoldTransitionInteractor,
             )
     }
 
@@ -254,4 +260,59 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             shadeRepository.setShadeMode(ShadeMode.Split)
             assertThat(shadeMode).isEqualTo(ShadeMode.Split)
         }
+
+    @Test
+    fun unfoldTransitionProgress() =
+        testScope.runTest {
+            val maxTranslation = prepareConfiguration()
+            val translations by
+                collectLastValue(
+                    combine(
+                        underTest.unfoldTranslationX(isOnStartSide = true),
+                        underTest.unfoldTranslationX(isOnStartSide = false),
+                    ) { start, end ->
+                        Translations(
+                            start = start,
+                            end = end,
+                        )
+                    }
+                )
+
+            val unfoldProvider = kosmos.fakeUnfoldTransitionProgressProvider
+            unfoldProvider.onTransitionStarted()
+            assertThat(translations?.start).isEqualTo(0f)
+            assertThat(translations?.end).isEqualTo(-0f)
+
+            repeat(10) { repetition ->
+                val transitionProgress = 0.1f * (repetition + 1)
+                unfoldProvider.onTransitionProgress(transitionProgress)
+                assertThat(translations?.start).isEqualTo((1 - transitionProgress) * maxTranslation)
+                assertThat(translations?.end).isEqualTo(-(1 - transitionProgress) * maxTranslation)
+            }
+
+            unfoldProvider.onTransitionFinishing()
+            assertThat(translations?.start).isEqualTo(0f)
+            assertThat(translations?.end).isEqualTo(-0f)
+
+            unfoldProvider.onTransitionFinished()
+            assertThat(translations?.start).isEqualTo(0f)
+            assertThat(translations?.end).isEqualTo(-0f)
+        }
+
+    private fun prepareConfiguration(): Int {
+        val configuration = context.resources.configuration
+        configuration.setLayoutDirection(Locale.US)
+        kosmos.fakeConfigurationRepository.onConfigurationChange(configuration)
+        val maxTranslation = 10
+        kosmos.fakeConfigurationRepository.setDimensionPixelSize(
+            R.dimen.notification_side_paddings,
+            maxTranslation
+        )
+        return maxTranslation
+    }
+
+    private data class Translations(
+        val start: Float,
+        val end: Float,
+    )
 }

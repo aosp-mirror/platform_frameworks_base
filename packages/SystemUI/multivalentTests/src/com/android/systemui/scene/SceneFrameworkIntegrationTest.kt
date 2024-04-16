@@ -85,6 +85,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobile
 import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
 import com.android.systemui.telephony.data.repository.fakeTelephonyRepository
 import com.android.systemui.testKosmos
+import com.android.systemui.unfold.domain.interactor.unfoldTransitionInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -228,6 +229,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 footerActionsController = kosmos.footerActionsController,
                 footerActionsViewModelFactory = kosmos.footerActionsViewModelFactory,
                 sceneInteractor = sceneInteractor,
+                unfoldTransitionInteractor = kosmos.unfoldTransitionInteractor,
             )
 
         val displayTracker = FakeDisplayTracker(context)

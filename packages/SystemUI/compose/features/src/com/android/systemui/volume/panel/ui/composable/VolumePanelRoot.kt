@@ -16,7 +16,7 @@
 
 package com.android.systemui.volume.panel.ui.composable
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,6 +38,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
@@ -75,21 +76,13 @@ fun VolumePanelRoot(
                 modifier =
                     modifier
                         .fillMaxSize()
-                        .clickable(onClick = onDismiss)
+                        .volumePanelClick(onDismiss)
                         .volumePanelPaddings(isPortrait = isPortrait),
                 contentAlignment = Alignment.BottomCenter,
             ) {
                 val radius = dimensionResource(R.dimen.volume_panel_corner_radius)
                 Surface(
-                    modifier =
-                        Modifier.clickable(
-                            interactionSource = null,
-                            indication = null,
-                            onClick = {
-                                // prevent windowCloseOnTouchOutside from dismissing when tapped
-                                // on the panel itself.
-                            },
-                        ),
+                    modifier = Modifier.volumePanelClick {},
                     shape = RoundedCornerShape(topStart = radius, topEnd = radius),
                     color = MaterialTheme.colorScheme.surfaceContainer,
                 ) {
@@ -185,3 +178,13 @@ private fun Modifier.volumePanelPaddings(isPortrait: Boolean): Modifier {
         )
     }
 }
+
+/**
+ * For some reason adding clickable modifier onto the VolumePanel affects the traversal order:
+ * b/331155283.
+ *
+ * TODO(b/334870995) revert this to Modifier.clickable
+ */
+@Composable
+private fun Modifier.volumePanelClick(onClick: () -> Unit) =
+    pointerInput(onClick) { detectTapGestures { onClick() } }

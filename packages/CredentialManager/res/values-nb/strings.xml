@@ -42,12 +42,9 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Vil du opprette en passnøkkel for å logge på <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"Vil du lagre passordet for å logge på <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Vil du lagre påloggingsinformasjon for <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <!-- no translation found for choose_create_single_tap_passkey_title (3872793514041774218) -->
-    <skip />
-    <!-- no translation found for choose_create_single_tap_password_title (5231871886818921622) -->
-    <skip />
-    <!-- no translation found for choose_create_single_tap_sign_in_title (256498714574099587) -->
-    <skip />
+    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"Vil du bruke skjermlåsen til å opprette en passnøkkel for <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"Vil du bruke skjermlåsen til å opprette et passord for <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"Vil du bruke skjermlåsen til å lagre påloggingsinformasjon for <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"passnøkkel"</string>
     <string name="password" msgid="6738570945182936667">"passord"</string>
     <string name="passkeys" msgid="5733880786866559847">"passnøkler"</string>

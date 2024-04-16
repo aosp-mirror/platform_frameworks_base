@@ -440,6 +440,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     }
 
     private int internStacktraceString(TracingContext<
+            ProtoLogDataSource.Instance,
             ProtoLogDataSource.TlsState,
             ProtoLogDataSource.IncrementalState> ctx,
             String stacktrace) {
@@ -449,7 +450,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     }
 
     private int internStringArg(
-            TracingContext<ProtoLogDataSource.TlsState, ProtoLogDataSource.IncrementalState> ctx,
+            TracingContext<ProtoLogDataSource.Instance, ProtoLogDataSource.TlsState,
+                    ProtoLogDataSource.IncrementalState> ctx,
             String string
     ) {
         final ProtoLogDataSource.IncrementalState incrementalState = ctx.getIncrementalState();
@@ -458,7 +460,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     }
 
     private int internString(
-            TracingContext<ProtoLogDataSource.TlsState, ProtoLogDataSource.IncrementalState> ctx,
+            TracingContext<ProtoLogDataSource.Instance, ProtoLogDataSource.TlsState,
+                    ProtoLogDataSource.IncrementalState> ctx,
             Map<String, Integer> internMap,
             long fieldId,
             String string

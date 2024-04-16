@@ -153,18 +153,20 @@ class AvalancheController @Inject constructor(
             // Use default duration, like we did before AvalancheController existed
             return autoDismissMs
         }
+
         val showingList: MutableList<HeadsUpEntry> = mutableListOf()
         headsUpEntryShowing?.let { showingList.add(it) }
 
+        nextList.sort()
         val entryList = showingList + nextList
-        if (entryList.indexOf(entry) == entryList.size - 1) {
-            // Use default duration if last entry
+        val thisEntryIndex = entryList.indexOf(entry)
+        val nextEntryIndex = thisEntryIndex + 1
+
+        // If last entry, use default duration
+        if (nextEntryIndex >= entryList.size) {
             return autoDismissMs
         }
-
-        nextList.sort()
-        val nextEntry = nextList[0]
-
+        val nextEntry = entryList[nextEntryIndex]
         if (nextEntry.compareNonTimeFields(entry) == -1) {
             // Next entry is higher priority
             return 500

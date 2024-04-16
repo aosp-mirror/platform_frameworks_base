@@ -349,19 +349,36 @@ public final class TelephonyUtils {
     }
 
     /**
-     * @param plmn target plmn for validation.
-     * @return {@code true} if the target plmn is valid {@code false} otherwise.
+     * @param input string that want to be compared.
+     * @param regex string that express regular expression
+     * @return {@code true} if matched  {@code false} otherwise.
      */
-    public static boolean isValidPlmn(@Nullable String plmn) {
-        if (TextUtils.isEmpty(plmn)) {
+    private static boolean isValidPattern(@Nullable String input, @Nullable String regex) {
+        if (TextUtils.isEmpty(input) || TextUtils.isEmpty(regex)) {
             return false;
         }
-        Pattern pattern = Pattern.compile("^(?:[0-9]{3})(?:[0-9]{2}|[0-9]{3})$");
-        Matcher matcher = pattern.matcher(plmn);
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
         if (!matcher.matches()) {
             return false;
         }
         return true;
+    }
+
+    /**
+     * @param countryCode two letters country code based on the ISO 3166-1.
+     * @return {@code true} if the countryCode is valid {@code false} otherwise.
+     */
+    public static boolean isValidCountryCode(@Nullable String countryCode) {
+        return isValidPattern(countryCode, "^[A-Za-z]{2}$");
+    }
+
+    /**
+     * @param plmn target plmn for validation.
+     * @return {@code true} if the target plmn is valid {@code false} otherwise.
+     */
+    public static boolean isValidPlmn(@Nullable String plmn) {
+        return isValidPattern(plmn, "^(?:[0-9]{3})(?:[0-9]{2}|[0-9]{3})$");
     }
 
     /**

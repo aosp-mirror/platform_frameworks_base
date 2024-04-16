@@ -16,10 +16,10 @@
 
 package com.android.systemui.volume.panel.component.spatial.ui.viewmodel
 
-import com.android.systemui.volume.panel.component.button.ui.viewmodel.ToggleButtonViewModel
+import com.android.systemui.volume.panel.component.button.ui.viewmodel.ButtonViewModel
 import com.android.systemui.volume.panel.component.spatial.domain.model.SpatialAudioEnabledModel
 
 data class SpatialAudioButtonViewModel(
     val model: SpatialAudioEnabledModel,
-    val button: ToggleButtonViewModel,
+    val button: ButtonViewModel,
 )

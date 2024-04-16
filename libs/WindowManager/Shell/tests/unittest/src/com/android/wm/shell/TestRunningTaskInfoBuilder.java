@@ -23,8 +23,10 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.WindowConfiguration;
+import android.content.Intent;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
@@ -38,6 +40,7 @@ public final class TestRunningTaskInfoBuilder {
 
     private WindowContainerToken mToken = createMockWCToken();
     private int mParentTaskId = INVALID_TASK_ID;
+    private Intent mBaseIntent = new Intent();
     private @WindowConfiguration.ActivityType int mActivityType = ACTIVITY_TYPE_STANDARD;
     private @WindowConfiguration.WindowingMode int mWindowingMode = WINDOWING_MODE_UNDEFINED;
     private int mDisplayId = Display.DEFAULT_DISPLAY;
@@ -65,6 +68,15 @@ public final class TestRunningTaskInfoBuilder {
 
     public TestRunningTaskInfoBuilder setParentTaskId(int taskId) {
         mParentTaskId = taskId;
+        return this;
+    }
+
+    /**
+     * Set {@link ActivityManager.RunningTaskInfo#baseIntent} for the task info, by default
+     * an empty intent is assigned
+     */
+    public TestRunningTaskInfoBuilder setBaseIntent(@NonNull Intent intent) {
+        mBaseIntent = intent;
         return this;
     }
 
@@ -109,6 +121,7 @@ public final class TestRunningTaskInfoBuilder {
     public ActivityManager.RunningTaskInfo build() {
         final ActivityManager.RunningTaskInfo info = new ActivityManager.RunningTaskInfo();
         info.taskId = sNextTaskId++;
+        info.baseIntent = mBaseIntent;
         info.parentTaskId = mParentTaskId;
         info.displayId = mDisplayId;
         info.configuration.windowConfiguration.setBounds(mBounds);

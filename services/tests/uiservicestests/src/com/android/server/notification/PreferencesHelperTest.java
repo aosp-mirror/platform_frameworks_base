@@ -3981,7 +3981,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         pm.applicationInfo = new ApplicationInfo();
         pm.applicationInfo.uid = UID_O;
         List<PackageInfo> packages = ImmutableList.of(pm);
-        when(mPm.getInstalledPackagesAsUser(any(), anyInt())).thenReturn(packages);
+        when(mPm.getInstalledPackagesAsUser(eq(0), anyInt())).thenReturn(packages);
         mHelper.updateFixedImportance(users);
 
         assertTrue(mHelper.isImportanceLocked(PKG_O, UID_O));
@@ -4097,7 +4097,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         pm.applicationInfo = new ApplicationInfo();
         pm.applicationInfo.uid = UID_O;
         List<PackageInfo> packages = ImmutableList.of(pm);
-        when(mPm.getInstalledPackagesAsUser(any(), eq(0))).thenReturn(packages);
+        when(mPm.getInstalledPackagesAsUser(0, 0)).thenReturn(packages);
         mHelper.updateFixedImportance(users);
 
         assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
@@ -4120,7 +4120,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         pm.applicationInfo = new ApplicationInfo();
         pm.applicationInfo.uid = UID_O;
         List<PackageInfo> packages = ImmutableList.of(pm);
-        when(mPm.getInstalledPackagesAsUser(any(), eq(0))).thenReturn(packages);
+        when(mPm.getInstalledPackagesAsUser(0, 0)).thenReturn(packages);
         mHelper.updateFixedImportance(users);
 
         NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
@@ -4309,7 +4309,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         pm.applicationInfo = new ApplicationInfo();
         pm.applicationInfo.uid = UID_O;
         List<PackageInfo> packages = ImmutableList.of(pm);
-        when(mPm.getInstalledPackagesAsUser(any(), eq(0))).thenReturn(packages);
+        when(mPm.getInstalledPackagesAsUser(0, 0)).thenReturn(packages);
         mHelper.updateFixedImportance(users);
 
         ArraySet<String> toRemove = new ArraySet<>();
@@ -4341,7 +4341,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         pm.applicationInfo = new ApplicationInfo();
         pm.applicationInfo.uid = UID_O;
         List<PackageInfo> packages = ImmutableList.of(pm);
-        when(mPm.getInstalledPackagesAsUser(any(), eq(0))).thenReturn(packages);
+        when(mPm.getInstalledPackagesAsUser(0, 0)).thenReturn(packages);
         mHelper.updateFixedImportance(users);
 
         assertTrue(mHelper.isImportanceLocked(PKG_O, UID_O));

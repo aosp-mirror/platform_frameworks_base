@@ -313,7 +313,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"正在流式传输：<xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"专用 DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"选择专用 DNS 模式"</string>
-    <string name="private_dns_mode_off" msgid="7065962499349997041">"已关闭"</string>
+    <string name="private_dns_mode_off" msgid="7065962499349997041">"关闭"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"自动"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"专用 DNS 提供商主机名"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"输入 DNS 提供商的主机名"</string>
@@ -487,6 +487,14 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - 还需<xliff:g id="TIME">%2$s</xliff:g>充满"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充电方式已优化"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - 正在充电"</string>
+    <!-- no translation found for power_fast_charging_duration_v2 (3797735998640359490) -->
+    <skip />
+    <!-- no translation found for power_charging_duration_v2 (2938998284074003248) -->
+    <skip />
+    <!-- no translation found for power_remaining_charging_duration_only_v2 (5358176435722950193) -->
+    <skip />
+    <!-- no translation found for power_remaining_fast_charging_duration_only_v2 (6270950195810579563) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"未知"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"正在充电"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"正在快速充电"</string>
@@ -498,6 +506,10 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"已充满电"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"已充满电"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"充电已暂停"</string>
+    <!-- no translation found for battery_info_status_charging_v2 (6118522107222245505) -->
+    <skip />
+    <!-- no translation found for battery_info_status_charging_fast_v2 (1825439848151256589) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"由管理员控制"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"由受限设置控制"</string>
     <string name="disabled" msgid="8017887509554714950">"已停用"</string>
@@ -684,6 +696,8 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"手机信号强度为一格。"</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"手机信号强度为两格。"</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"手机信号强度为三格。"</string>
+    <!-- no translation found for accessibility_phone_four_bars (4477202400261338403) -->
+    <skip />
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"手机信号满格。"</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"没有数据网络信号。"</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"数据信号强度为一格。"</string>
