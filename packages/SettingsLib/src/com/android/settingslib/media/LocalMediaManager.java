@@ -17,7 +17,6 @@ package com.android.settingslib.media;
 
 import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 
-import android.app.Notification;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
@@ -125,7 +124,7 @@ public class LocalMediaManager implements BluetoothCallback {
      *
      * It will use {@link BluetoothAdapter#getDefaultAdapter()] for setting the bluetooth adapter.
      */
-    public LocalMediaManager(Context context, String packageName, Notification notification) {
+    public LocalMediaManager(Context context, String packageName) {
         mContext = context;
         mPackageName = packageName;
         mLocalBluetoothManager =
