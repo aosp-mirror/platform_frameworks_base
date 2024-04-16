@@ -487,6 +487,14 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> تا شارژ کامل باقی مانده است"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - شارژ بهینه شده است"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - درحال شارژ"</string>
+    <!-- no translation found for power_fast_charging_duration_v2 (3797735998640359490) -->
+    <skip />
+    <!-- no translation found for power_charging_duration_v2 (2938998284074003248) -->
+    <skip />
+    <!-- no translation found for power_remaining_charging_duration_only_v2 (5358176435722950193) -->
+    <skip />
+    <!-- no translation found for power_remaining_fast_charging_duration_only_v2 (6270950195810579563) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ناشناس"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"در حال شارژ شدن"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"درحال شارژ شدن سریع"</string>
@@ -498,6 +506,10 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"شارژ کامل شد"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"کاملاً شارژ شده است"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"شارژ موقتاً متوقف شده است"</string>
+    <!-- no translation found for battery_info_status_charging_v2 (6118522107222245505) -->
+    <skip />
+    <!-- no translation found for battery_info_status_charging_fast_v2 (1825439848151256589) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"توسط سرپرست سیستم کنترل می‌شود"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"با تنظیم «حالت محدود» کنترل می‌شود"</string>
     <string name="disabled" msgid="8017887509554714950">"غیر فعال شد"</string>
@@ -684,6 +696,8 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"یک نوار برای تلفن."</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"دو نوار برای تلفن."</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"سه نوار برای تلفن."</string>
+    <!-- no translation found for accessibility_phone_four_bars (4477202400261338403) -->
+    <skip />
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"قدرت امواج تلفن همراه کامل است."</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"داده‌ای وجود ندارد."</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"یک نوار برای داده."</string>
