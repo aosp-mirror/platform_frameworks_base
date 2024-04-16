@@ -334,6 +334,8 @@ public final class AppRestrictionController {
 
     final ActivityManagerService mActivityManagerService;
 
+    private volatile boolean mLockedBootCompleted = false;
+
     static final int TRACKER_TYPE_UNKNOWN = 0;
     static final int TRACKER_TYPE_BATTERY = 1;
     static final int TRACKER_TYPE_BATTERY_EXEMPTION = 2;
@@ -1721,8 +1723,10 @@ public final class AppRestrictionController {
                 level = RESTRICTION_LEVEL_EXEMPTED;
                 break;
             case STANDBY_BUCKET_NEVER:
-                level = RESTRICTION_LEVEL_BACKGROUND_RESTRICTED;
-                break;
+                if (!android.app.Flags.appRestrictionsApi()) {
+                    level = RESTRICTION_LEVEL_BACKGROUND_RESTRICTED;
+                    break;
+                }
             case STANDBY_BUCKET_ACTIVE:
             case STANDBY_BUCKET_WORKING_SET:
             case STANDBY_BUCKET_FREQUENT:
@@ -1802,7 +1806,9 @@ public final class AppRestrictionController {
             case STANDBY_BUCKET_EXEMPTED:
                 return RESTRICTION_LEVEL_EXEMPTED;
             case STANDBY_BUCKET_NEVER:
-                return RESTRICTION_LEVEL_BACKGROUND_RESTRICTED;
+                if (!android.app.Flags.appRestrictionsApi()) {
+                    return RESTRICTION_LEVEL_BACKGROUND_RESTRICTED;
+                }
             case STANDBY_BUCKET_ACTIVE:
             case STANDBY_BUCKET_WORKING_SET:
             case STANDBY_BUCKET_FREQUENT:
@@ -2214,7 +2220,8 @@ public final class AppRestrictionController {
             }
         }
 
-        if (doItNow && android.app.Flags.appRestrictionsApi()) {
+        if (doItNow && android.app.Flags.appRestrictionsApi()
+                && curLevel != RESTRICTION_LEVEL_UNKNOWN) {
             logAppBackgroundRestrictionInfo(pkgName, uid, curLevel, level, trackerInfo,
                     reason);
         }
@@ -2308,6 +2315,9 @@ public final class AppRestrictionController {
 
     private void handleAppStandbyBucketChanged(int bucket, String packageName,
             @UserIdInt int userId) {
+        // Ignore spurious changes to standby bucket during early boot
+        if (android.app.Flags.appRestrictionsApi() && !mLockedBootCompleted) return;
+
         final int uid = mInjector.getPackageManagerInternal().getPackageUid(
                 packageName, STOCK_PM_FLAGS, userId);
         final Pair<Integer, TrackerInfo> levelTypePair = calcAppRestrictionLevel(
@@ -3391,6 +3401,7 @@ public final class AppRestrictionController {
         for (int i = 0, size = mAppStateTrackers.size(); i < size; i++) {
             mAppStateTrackers.get(i).onLockedBootCompleted();
         }
+        mLockedBootCompleted = true;
     }
 
     boolean isBgAutoRestrictedBucketFeatureFlagEnabled() {
