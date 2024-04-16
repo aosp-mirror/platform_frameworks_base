@@ -21,6 +21,7 @@ import android.media.MediaDescription
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.service.notification.StatusBarNotification
+import com.android.internal.logging.InstanceId
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -213,6 +214,10 @@ constructor(
 
     override fun dismissMediaData(key: String, delay: Long): Boolean {
         return mediaDataProcessor.dismissMediaData(key, delay)
+    }
+
+    fun removeMediaControl(instanceId: InstanceId, delay: Long) {
+        mediaDataProcessor.dismissMediaData(instanceId, delay)
     }
 
     override fun dismissSmartspaceRecommendation(key: String, delay: Long) {
