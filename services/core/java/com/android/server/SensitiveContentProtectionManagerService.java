@@ -306,6 +306,7 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
         }
     }
 
+    @GuardedBy("mSensitiveContentProtectionLock")
     private void updateAppsThatShouldBlockScreenCapture() {
         RankingMap rankingMap;
         try {
@@ -318,6 +319,7 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
         updateAppsThatShouldBlockScreenCapture(rankingMap);
     }
 
+    @GuardedBy("mSensitiveContentProtectionLock")
     private void updateAppsThatShouldBlockScreenCapture(RankingMap rankingMap) {
         StatusBarNotification[] notifications;
         try {
