@@ -235,8 +235,7 @@ private fun runBiometricFlow(
         } else {
             biometricPrompt.authenticate(cancellationSignal, executor, callback)
         }
-    } catch (e: Exception) {
-        // TODO(b/334923201) : Specialize exception catching
+    } catch (e: IllegalArgumentException) {
         Log.w(TAG, "Calling the biometric prompt API failed with: /n${e.localizedMessage}\n")
         onBiometricFailureFallback(biometricFlowType)
     }
