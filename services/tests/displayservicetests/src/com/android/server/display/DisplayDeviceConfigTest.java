@@ -920,6 +920,7 @@ public final class DisplayDeviceConfigTest {
     @Test
     public void testEvenDimmer() throws IOException {
         when(mFlags.isEvenDimmerEnabled()).thenReturn(true);
+        when(mResources.getBoolean(R.bool.config_evenDimmerEnabled)).thenReturn(true);
         setupDisplayDeviceConfigFromDisplayConfigFile(getContent(getValidLuxThrottling(),
                 getValidProxSensor(), /* includeIdleMode= */ false, /* enableEvenDimmer */ true));
 

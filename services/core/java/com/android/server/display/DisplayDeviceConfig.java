@@ -1766,7 +1766,8 @@ public class DisplayDeviceConfig {
                 loadDensityMapping(config);
                 loadBrightnessDefaultFromDdcXml(config);
                 loadBrightnessConstraintsFromConfigXml();
-                if (mFlags.isEvenDimmerEnabled()) {
+                if (mFlags.isEvenDimmerEnabled() && mContext.getResources().getBoolean(
+                        com.android.internal.R.bool.config_evenDimmerEnabled)) {
                     mEvenDimmerBrightnessData = EvenDimmerBrightnessData.loadConfig(config);
                 }
                 loadBrightnessMap(config);
