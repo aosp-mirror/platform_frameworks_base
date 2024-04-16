@@ -175,6 +175,26 @@ constructor(
             )
     }
 
+    /** Log with level [LogLevel.WARNING] */
+    fun logWarning(
+        tileSpec: TileSpec,
+        message: String,
+    ) {
+        tileSpec
+            .getLogBuffer()
+            .log(tileSpec.getLogTag(), LogLevel.WARNING, { str1 = message }, { str1!! })
+    }
+
+    /** Log with level [LogLevel.INFO] */
+    fun logInfo(
+        tileSpec: TileSpec,
+        message: String,
+    ) {
+        tileSpec
+            .getLogBuffer()
+            .log(tileSpec.getLogTag(), LogLevel.INFO, { str1 = message }, { str1!! })
+    }
+
     fun logCustomTileUserActionDelivered(tileSpec: TileSpec) {
         tileSpec
             .getLogBuffer()

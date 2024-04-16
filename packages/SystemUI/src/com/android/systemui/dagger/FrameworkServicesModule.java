@@ -224,6 +224,13 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
+    static UserScopedService<ColorDisplayManager> provideScopedColorDisplayManager(
+            Context context) {
+        return new UserScopedServiceImpl<>(context, ColorDisplayManager.class);
+    }
+
+    @Provides
+    @Singleton
     static CrossWindowBlurListeners provideCrossWindowBlurListeners() {
         return CrossWindowBlurListeners.getInstance();
     }
