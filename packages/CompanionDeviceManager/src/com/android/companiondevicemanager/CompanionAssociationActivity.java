@@ -65,7 +65,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.text.Spanned;
-import android.util.Log;
+import android.util.Slog;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -91,9 +91,8 @@ import java.util.List;
  *  nearby devices to be associated with.
  */
 @SuppressLint("LongLogTag")
-public class CompanionDeviceActivity extends FragmentActivity implements
+public class CompanionAssociationActivity extends FragmentActivity implements
         CompanionVendorHelperDialogFragment.CompanionVendorHelperDialogListener {
-    private static final boolean DEBUG = false;
     private static final String TAG = "CDM_CompanionDeviceActivity";
 
     // Keep the following constants in sync with
@@ -183,11 +182,11 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        if (DEBUG) Log.d(TAG, "onCreate()");
-        boolean forceCancelDialog = getIntent().getBooleanExtra("cancel_confirmation", false);
+        boolean forceCancelDialog = getIntent().getBooleanExtra(EXTRA_FORCE_CANCEL_CONFIRMATION,
+                false);
         // Must handle the force cancel request in onNewIntent.
         if (forceCancelDialog) {
-            Log.i(TAG, "The confirmation does not exist, skipping the cancel request");
+            Slog.i(TAG, "The confirmation does not exist, skipping the cancel request");
             finish();
         }
 
@@ -198,13 +197,13 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     @Override
     protected void onStart() {
         super.onStart();
-        if (DEBUG) Log.d(TAG, "onStart()");
 
         final Intent intent = getIntent();
-        mRequest = intent.getParcelableExtra(EXTRA_ASSOCIATION_REQUEST);
+        mRequest = intent.getParcelableExtra(EXTRA_ASSOCIATION_REQUEST, AssociationRequest.class);
         mAppCallback = IAssociationRequestCallback.Stub.asInterface(
                 intent.getExtras().getBinder(EXTRA_APPLICATION_CALLBACK));
-        mCdmServiceReceiver = intent.getParcelableExtra(EXTRA_RESULT_RECEIVER);
+        mCdmServiceReceiver = intent.getParcelableExtra(EXTRA_RESULT_RECEIVER,
+                ResultReceiver.class);
 
         requireNonNull(mRequest);
         requireNonNull(mAppCallback);
@@ -221,29 +220,22 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         initUI();
     }
 
-    @SuppressWarnings("MissingSuperCall") // TODO: Fix me
     @Override
-    protected void onNewIntent(Intent intent) {
+    protected void onNewIntent(@NonNull Intent intent) {
+        super.onNewIntent(intent);
+
         // Force cancels the CDM dialog if this activity receives another intent with
         // EXTRA_FORCE_CANCEL_CONFIRMATION.
         boolean forCancelDialog = intent.getBooleanExtra(EXTRA_FORCE_CANCEL_CONFIRMATION, false);
-
         if (forCancelDialog) {
-            Log.i(TAG, "Cancelling the user confirmation");
-
-            cancel(/* discoveryTimeOut */ false,
-                    /* userRejected */ false, /* internalError */ false);
+            Slog.i(TAG, "Cancelling the user confirmation");
+            cancel(/* discoveryTimeOut */ false, /* userRejected */ false,
+                    /* internalError */ false);
             return;
         }
 
         // Handle another incoming request (while we are not done with the original - mRequest -
-        // yet).
-        final AssociationRequest request = requireNonNull(
-                intent.getParcelableExtra(EXTRA_ASSOCIATION_REQUEST));
-
-        if (DEBUG) Log.d(TAG, "onNewIntent(), request=" + request);
-
-        // We can only "process" one request at a time.
+        // yet). We can only "process" one request at a time.
         final IAssociationRequestCallback appCallback = IAssociationRequestCallback.Stub
                 .asInterface(intent.getExtras().getBinder(EXTRA_APPLICATION_CALLBACK));
         try {
@@ -255,7 +247,6 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     @Override
     protected void onStop() {
         super.onStop();
-        if (DEBUG) Log.d(TAG, "onStop(), finishing=" + isFinishing());
 
         // TODO: handle config changes without cancelling.
         if (!isDone()) {
@@ -264,26 +255,8 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (DEBUG) Log.d(TAG, "onDestroy()");
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (DEBUG) Log.d(TAG, "onBackPressed()");
-        super.onBackPressed();
-    }
-
-    @Override
-    public void finish() {
-        if (DEBUG) Log.d(TAG, "finish()", new Exception("Stack Trace Dump"));
-        super.finish();
-    }
-
     private void initUI() {
-        if (DEBUG) Log.d(TAG, "initUI(), request=" + mRequest);
+        Slog.d(TAG, "initUI(), request=" + mRequest);
 
         final String packageName = mRequest.getPackageName();
         final int userId = mRequest.getUserId();
@@ -292,7 +265,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         try {
             appLabel = getApplicationLabel(this, packageName, userId);
         } catch (PackageManager.NameNotFoundException e) {
-            Log.w(TAG, "Package u" + userId + "/" + packageName + " not found.");
+            Slog.w(TAG, "Package u" + userId + "/" + packageName + " not found.");
 
             CompanionDeviceDiscoveryService.stop(this);
             setResultAndFinish(null, RESULT_INTERNAL_ERROR);
@@ -341,9 +314,9 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         if (mRequest.isSelfManaged()) {
             initUiForSelfManagedAssociation();
         } else if (mRequest.isSingleDevice()) {
-            initUiForSingleDevice(appLabel);
+            initUiForSingleDevice();
         } else {
-            initUiForMultipleDevices(appLabel);
+            initUiForMultipleDevices();
         }
     }
 
@@ -364,12 +337,12 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
     private void onAssociationApproved(@Nullable MacAddress macAddress) {
         if (isDone()) {
-            if (DEBUG) Log.w(TAG, "Already done: " + (mApproved ? "Approved" : "Cancelled"));
+            Slog.w(TAG, "Already done: " + (mApproved ? "Approved" : "Cancelled"));
             return;
         }
         mApproved = true;
 
-        if (DEBUG) Log.i(TAG, "onAssociationApproved() macAddress=" + macAddress);
+        Slog.i(TAG, "onAssociationApproved() macAddress=" + macAddress);
 
         if (!mRequest.isSelfManaged()) {
             requireNonNull(macAddress);
@@ -390,17 +363,8 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     }
 
     private void cancel(boolean discoveryTimeout, boolean userRejected, boolean internalError) {
-        if (DEBUG) {
-            Log.i(TAG, "cancel(), discoveryTimeout="
-                    + discoveryTimeout
-                    + ", userRejected="
-                    + userRejected
-                    + ", internalError="
-                    + internalError, new Exception("Stack Trace Dump"));
-        }
-
         if (isDone()) {
-            if (DEBUG) Log.w(TAG, "Already done: " + (mApproved ? "Approved" : "Cancelled"));
+            Slog.w(TAG, "Already done: " + (mApproved ? "Approved" : "Cancelled"));
             return;
         }
         mCancelled = true;
@@ -428,6 +392,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
         // First send callback to the app directly...
         try {
+            Slog.i(TAG, "Sending onFailure to app due to reason=" + cancelReason);
             mAppCallback.onFailure(cancelReason);
         } catch (RemoteException ignore) {
         }
@@ -437,7 +402,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     }
 
     private void setResultAndFinish(@Nullable AssociationInfo association, int resultCode) {
-        Log.i(TAG, "setResultAndFinish(), association="
+        Slog.i(TAG, "setResultAndFinish(), association="
                 + (association == null ? "null" : association)
                 + "resultCode=" + resultCode);
 
@@ -454,7 +419,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     }
 
     private void initUiForSelfManagedAssociation() {
-        if (DEBUG) Log.i(TAG, "initUiFor_SelfManaged_Association()");
+        Slog.d(TAG, "initUiForSelfManagedAssociation()");
 
         final CharSequence deviceName = mRequest.getDisplayName();
         final String deviceProfile = mRequest.getDeviceProfile();
@@ -477,7 +442,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
                 mVendorHeaderImage.setColorFilter(getResources().getColor(color, /* Theme= */null));
             }
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "Package u" + userId + "/" + packageName + " not found.");
+            Slog.e(TAG, "Package u" + userId + "/" + packageName + " not found.");
             cancel(/* discoveryTimeout */ false,
                     /* userRejected */ false, /* internalError */ true);
             return;
@@ -506,8 +471,8 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         mBorderBottom.setVisibility(View.GONE);
     }
 
-    private void initUiForSingleDevice(CharSequence appLabel) {
-        if (DEBUG) Log.i(TAG, "initUiFor_SingleDevice()");
+    private void initUiForSingleDevice() {
+        Slog.d(TAG, "initUiForSingleDevice()");
 
         final String deviceProfile = mRequest.getDeviceProfile();
 
@@ -515,9 +480,16 @@ public class CompanionDeviceActivity extends FragmentActivity implements
             throw new RuntimeException("Unsupported profile " + deviceProfile);
         }
 
-        CompanionDeviceDiscoveryService.getScanResult().observe(this,
-                deviceFilterPairs -> updateSingleDeviceUi(
-                        deviceFilterPairs, deviceProfile, appLabel));
+        final Drawable profileIcon = getIcon(this, PROFILE_ICONS.get(deviceProfile));
+        mProfileIcon.setImageDrawable(profileIcon);
+
+        CompanionDeviceDiscoveryService.getScanResult().observe(this, deviceFilterPairs -> {
+            if (deviceFilterPairs.isEmpty()) {
+                return;
+            }
+            mSelectedDevice = requireNonNull(deviceFilterPairs.get(0));
+            updateSingleDeviceUi();
+        });
 
         mSingleDeviceSpinner.setVisibility(View.VISIBLE);
         // Hide permission list and confirmation dialog first before the
@@ -527,33 +499,8 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         mAssociationConfirmationDialog.setVisibility(View.GONE);
     }
 
-    private void updateSingleDeviceUi(List<DeviceFilterPair<?>> deviceFilterPairs,
-            String deviceProfile, CharSequence appLabel) {
-        // Ignore "empty" scan reports.
-        if (deviceFilterPairs.isEmpty()) return;
-
-        mSelectedDevice = requireNonNull(deviceFilterPairs.get(0));
-
-        final Drawable profileIcon = getIcon(this, PROFILE_ICONS.get(deviceProfile));
-
-        // No need to show permission consent dialog if it is a isSkipPrompt(true)
-        // AssociationRequest. See AssociationRequestsProcessor#mayAssociateWithoutPrompt.
-        if (mRequest.isSkipPrompt()) {
-            Log.d(TAG, "Skipping the permission consent dialog.");
-            mSingleDeviceSpinner.setVisibility(View.GONE);
-            onUserSelectedDevice(mSelectedDevice);
-            return;
-        }
-
-        updatePermissionUi();
-
-        mProfileIcon.setImageDrawable(profileIcon);
-        mAssociationConfirmationDialog.setVisibility(View.VISIBLE);
-        mSingleDeviceSpinner.setVisibility(View.GONE);
-    }
-
-    private void initUiForMultipleDevices(CharSequence appLabel) {
-        if (DEBUG) Log.i(TAG, "initUiFor_MultipleDevices()");
+    private void initUiForMultipleDevices() {
+        Slog.d(TAG, "initUiForMultipleDevices()");
 
         final Drawable profileIcon;
         final Spanned title;
@@ -566,7 +513,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         profileIcon = getIcon(this, PROFILE_ICONS.get(deviceProfile));
 
         if (deviceProfile == null) {
-            title = getHtmlFromResources(this, R.string.chooser_title_non_profile, appLabel);
+            title = getHtmlFromResources(this, R.string.chooser_title_non_profile, mAppLabel);
             mButtonNotAllowMultipleDevices.setText(R.string.consent_no);
         } else {
             title = getHtmlFromResources(this,
@@ -606,7 +553,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         final DeviceFilterPair<?> selectedDevice = mDeviceAdapter.getItem(position);
         // To prevent double tap on the selected device.
         if (mSelectedDevice != null) {
-            if (DEBUG) Log.w(TAG, "Already selected.");
+            Slog.w(TAG, "Already selected.");
             return;
         }
         // Notify the adapter to highlight the selected item.
@@ -614,17 +561,9 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
         mSelectedDevice = requireNonNull(selectedDevice);
 
-        Log.d(TAG, "onDeviceClicked(): " + mSelectedDevice.toShortString());
+        Slog.d(TAG, "onDeviceClicked(): " + mSelectedDevice.toShortString());
 
-        // No need to show permission consent dialog if it is a isSkipPrompt(true)
-        // AssociationRequest. See AssociationRequestsProcessor#mayAssociateWithoutPrompt.
-        if (mRequest.isSkipPrompt()) {
-            Log.d(TAG, "Skipping the permission consent dialog.");
-            onUserSelectedDevice(mSelectedDevice);
-            return;
-        }
-
-        updatePermissionUi();
+        updateSingleDeviceUi();
 
         mSummary.setVisibility(View.VISIBLE);
         mButtonAllow.setVisibility(View.VISIBLE);
@@ -633,7 +572,18 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         mNotAllowMultipleDevicesLayout.setVisibility(View.GONE);
     }
 
-    private void updatePermissionUi() {
+    private void updateSingleDeviceUi() {
+        // No need to show permission consent dialog if it is a isSkipPrompt(true)
+        // AssociationRequest. See AssociationRequestsProcessor#mayAssociateWithoutPrompt.
+        if (mRequest.isSkipPrompt()) {
+            Slog.d(TAG, "Skipping the permission consent dialog.");
+            onUserSelectedDevice(mSelectedDevice);
+            return;
+        }
+
+        mSingleDeviceSpinner.setVisibility(View.GONE);
+        mAssociationConfirmationDialog.setVisibility(View.VISIBLE);
+
         final String deviceProfile = mRequest.getDeviceProfile();
         final int summaryResourceId = PROFILE_SUMMARIES.get(deviceProfile);
         final String remoteDeviceName = mSelectedDevice.getDisplayName();
@@ -658,7 +608,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     }
 
     private void onPositiveButtonClick(View v) {
-        if (DEBUG) Log.d(TAG, "on_Positive_ButtonClick()");
+        Slog.d(TAG, "onPositiveButtonClick()");
 
         // Disable the button, to prevent more clicks.
         v.setEnabled(false);
@@ -671,7 +621,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     }
 
     private void onNegativeButtonClick(View v) {
-        if (DEBUG) Log.d(TAG, "on_Negative_ButtonClick()");
+        Slog.d(TAG, "onNegativeButtonClick()");
 
         // Disable the button, to prevent more clicks.
         v.setEnabled(false);
