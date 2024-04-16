@@ -150,7 +150,16 @@ public abstract class InfoMediaManager {
         mUserHandle = userHandle;
     }
 
-    /** Creates an instance of InfoMediaManager. */
+    /**
+     * Creates an instance of InfoMediaManager.
+     *
+     * @param context The {@link Context}.
+     * @param packageName The package name of the app for which to control routing, or null if the
+     *     caller is interested in system-level routing only (for example, headsets, built-in
+     *     speakers, as opposed to app-specific routing (for example, casting to another device).
+     * @param userHandle The {@link UserHandle} of the user on which the app to control is running,
+     *     or null if the caller does not need app-specific routing (see {@code packageName}).
+     */
     public static InfoMediaManager createInstance(
             Context context,
             @Nullable String packageName,
