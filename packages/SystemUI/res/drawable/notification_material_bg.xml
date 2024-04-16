@@ -28,4 +28,9 @@
             <solid android:color="@color/notification_state_color_default" />
         </shape>
     </item>
+    <item>
+        <shape>
+            <stroke android:width="3dp" android:color="@color/notification_focus_overlay_color"/>
+        </shape>
+    </item>
 </layer-list>
