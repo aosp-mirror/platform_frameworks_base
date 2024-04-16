@@ -556,7 +556,6 @@ public class LocalMediaManager implements BluetoothCallback {
         private MediaDevice getMutingExpectedDevice() {
             if (mBluetoothAdapter == null
                     || mAudioManager.getMutingExpectedDevice() == null) {
-                Log.w(TAG, "BluetoothAdapter is null or muting expected device not exist");
                 return null;
             }
             final List<BluetoothDevice> bluetoothDevices =
