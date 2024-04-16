@@ -549,19 +549,8 @@ fun PrimarySelectionCardVImpl(
                                 R.string.get_dialog_title_choose_password_for
                             else if (areAllPasskeysOnPrimaryScreen)
                                 R.string.get_dialog_title_choose_passkey_for
-                            else if (primaryPageLockedEntryList.isNotEmpty() ||
-                                primaryPageCredentialEntryList.any {
-                                    it.sortedCredentialEntryList.first().credentialType !=
-                                            CredentialType.PASSWORD &&
-                                    it.sortedCredentialEntryList.first().credentialType !=
-                                            CredentialType.PASSKEY
-                                }
-                            ) // An unknown typed / locked entry exists, and we can't say it is
-                            // already saved, strictly speaking. Hence use a different title
-                            // without the mention of "saved".
+                            else
                                 R.string.get_dialog_title_choose_sign_in_for
-                            else // All entries on the primary screen are passkeys or passwords
-                                R.string.get_dialog_title_choose_saved_sign_in_for
                         },
                         requestDisplayInfo.appName
                     ),
