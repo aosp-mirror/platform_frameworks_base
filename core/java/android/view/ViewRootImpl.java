@@ -239,6 +239,7 @@ import android.view.animation.Interpolator;
 import android.view.autofill.AutofillManager;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.ContentCaptureSession;
+import android.view.flags.Flags;
 import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
@@ -1153,7 +1154,9 @@ public final class ViewRootImpl implements ViewParent,
     private static boolean sToolkitFrameRateTypingReadOnlyFlagValue;
     private static final boolean sToolkitFrameRateViewEnablingReadOnlyFlagValue;
     private static boolean sToolkitFrameRateVelocityMappingReadOnlyFlagValue =
-            toolkitFrameRateVelocityMappingReadOnly();;
+            toolkitFrameRateVelocityMappingReadOnly();
+    private static boolean sToolkitEnableInvalidateCheckThreadFlagValue =
+            Flags.enableInvalidateCheckThread();
 
     static {
         sToolkitSetFrameRateReadOnlyFlagValue = toolkitSetFrameRateReadOnly();
@@ -2375,8 +2378,9 @@ public final class ViewRootImpl implements ViewParent,
 
     @Override
     public void onDescendantInvalidated(@NonNull View child, @NonNull View descendant) {
-        // TODO: Re-enable after camera is fixed or consider targetSdk checking this
-        // checkThread();
+        if (sToolkitEnableInvalidateCheckThreadFlagValue) {
+            checkThread();
+        }
         if ((descendant.mPrivateFlags & PFLAG_DRAW_ANIMATION) != 0) {
             mIsAnimating = true;
         }
