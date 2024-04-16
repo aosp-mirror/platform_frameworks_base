@@ -22,7 +22,7 @@
     <application>
         <uses-library android:name="android.test.runner" />
         <activity android:name="android.perftests.utils.PerfTestActivity"
-                  android:theme="@android:style/Theme.DeviceDefault.NoActionBar"
+                  android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar"
                   android:exported="true">
           <intent-filter>
             <action android:name="com.android.perftests.core.PERFTEST" />
