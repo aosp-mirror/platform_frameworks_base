@@ -798,7 +798,9 @@ public class MagnificationController implements MagnificationConnectionManager.C
                         mLock,
                         this,
                         mScaleProvider,
-                        mBackgroundExecutor
+                        mBackgroundExecutor,
+                        () -> (isMagnificationConnectionManagerInitialized()
+                                && getMagnificationConnectionManager().isConnected())
                 );
             }
         }
@@ -828,6 +830,12 @@ public class MagnificationController implements MagnificationConnectionManager.C
                         mScaleProvider);
             }
             return mMagnificationConnectionManager;
+        }
+    }
+
+    private boolean isMagnificationConnectionManagerInitialized() {
+        synchronized (mLock) {
+            return mMagnificationConnectionManager != null;
         }
     }
 

@@ -26,6 +26,7 @@ import static android.view.accessibility.Flags.FLAG_SKIP_ACCESSIBILITY_WARNING_D
 import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
 import static com.android.server.accessibility.AccessibilityManagerService.ACTION_LAUNCH_HEARING_DEVICES_DIALOG;
+import static com.android.window.flags.Flags.FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -68,6 +69,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.LocaleList;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
@@ -222,6 +224,8 @@ public class AccessibilityManagerServiceTest {
                 mMockMagnificationConnectionManager);
         when(mMockMagnificationController.getFullScreenMagnificationController()).thenReturn(
                 mMockFullScreenMagnificationController);
+        when(mMockMagnificationController.isFullScreenMagnificationControllerInitialized())
+                .thenReturn(true);
         when(mMockMagnificationController.supportWindowMagnification()).thenReturn(true);
         when(mMockWindowManagerService.getAccessibilityController()).thenReturn(
                 mMockA11yController);
@@ -566,6 +570,16 @@ public class AccessibilityManagerServiceTest {
         mA11yms.readAlwaysOnMagnificationLocked(userState);
 
         verify(mMockMagnificationController).setAlwaysOnMagnificationEnabled(eq(true));
+    }
+
+    @Test
+    @EnableFlags(FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER)
+    public void testSetConnectionNull_borderFlagEnabled_unregisterFullScreenMagnification()
+            throws RemoteException {
+        mA11yms.setMagnificationConnection(null);
+
+        verify(mMockFullScreenMagnificationController, atLeastOnce()).reset(
+                /* displayId= */ anyInt(), /* animate= */ anyBoolean());
     }
 
     @SmallTest

@@ -220,7 +220,8 @@ public class MagnificationControllerTest {
                                 () -> null,
                                 ConcurrentUtils.DIRECT_EXECUTOR,
                                 () -> mMockScroller,
-                                () -> mTimeAnimator));
+                                () -> mTimeAnimator,
+                                () -> true));
         mScreenMagnificationController.register(TEST_DISPLAY);
 
         mMagnificationConnectionManager = spy(
