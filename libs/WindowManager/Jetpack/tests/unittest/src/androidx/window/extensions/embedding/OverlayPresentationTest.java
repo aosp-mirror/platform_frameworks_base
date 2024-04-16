@@ -836,6 +836,30 @@ public class OverlayPresentationTest {
                 any());
     }
 
+    @Test
+    public void testOnActivityReparentedToTask_overlayRestoration() {
+        mSetFlagRule.enableFlags(Flags.FLAG_FIX_PIP_RESTORE_TO_OVERLAY);
+
+        // Prepares and mock the data necessary for the test.
+        final IBinder activityToken = mActivity.getActivityToken();
+        final Intent intent = new Intent();
+        final IBinder fillTaskActivityToken = new Binder();
+        final IBinder lastOverlayToken = new Binder();
+        final TaskFragmentContainer overlayContainer = mSplitController.newContainer(intent,
+                mActivity, TASK_ID);
+        final TaskFragmentContainer.OverlayContainerRestoreParams params = mock(
+                TaskFragmentContainer.OverlayContainerRestoreParams.class);
+        doReturn(params).when(mSplitController).getOverlayContainerRestoreParams(any(), any());
+        doReturn(overlayContainer).when(mSplitController).createOrUpdateOverlayTaskFragmentIfNeeded(
+                any(), any(), any(), any());
+
+        // Verify the activity should be reparented to the overlay container.
+        mSplitController.onActivityReparentedToTask(mTransaction, TASK_ID, intent, activityToken,
+                fillTaskActivityToken, lastOverlayToken);
+        verify(mTransaction).reparentActivityToTaskFragment(
+                eq(overlayContainer.getTaskFragmentToken()), eq(activityToken));
+    }
+
     /**
      * A simplified version of {@link SplitController#createOrUpdateOverlayTaskFragmentIfNeeded}
      */

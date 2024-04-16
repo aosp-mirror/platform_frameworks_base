@@ -365,7 +365,8 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
 
         @Nullable
         TaskFragmentTransaction.Change prepareActivityReparentedToTask(
-                @NonNull ActivityRecord activity) {
+                @NonNull ActivityRecord activity, @Nullable ActivityRecord nextFillTaskActivity,
+                @Nullable IBinder lastParentTfToken) {
             if (activity.finishing) {
                 Slog.d(TAG, "Reparent activity=" + activity.token + " is finishing");
                 return null;
@@ -408,10 +409,21 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             }
             ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Activity=%s reparent to taskId=%d",
                     activity.token, task.mTaskId);
-            return new TaskFragmentTransaction.Change(TYPE_ACTIVITY_REPARENTED_TO_TASK)
-                    .setTaskId(task.mTaskId)
-                    .setActivityIntent(trimIntent(activity.intent))
-                    .setActivityToken(activityToken);
+
+            final TaskFragmentTransaction.Change change =
+                    new TaskFragmentTransaction.Change(TYPE_ACTIVITY_REPARENTED_TO_TASK)
+                            .setTaskId(task.mTaskId)
+                            .setActivityIntent(trimIntent(activity.intent))
+                            .setActivityToken(activityToken);
+            if (lastParentTfToken != null) {
+                change.setTaskFragmentToken(lastParentTfToken);
+            }
+            // Only pass the activity token to the client if it belongs to the same process.
+            if (Flags.fixPipRestoreToOverlay() && nextFillTaskActivity != null
+                    && nextFillTaskActivity.getPid() == mOrganizerPid) {
+                change.setOtherActivityToken(nextFillTaskActivity.token);
+            }
+            return change;
         }
 
         void dispatchTransaction(@NonNull TaskFragmentTransaction transaction) {
@@ -733,13 +745,13 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
     }
 
     void onActivityReparentedToTask(@NonNull ActivityRecord activity) {
+        final Task task = activity.getTask();
         final ITaskFragmentOrganizer organizer;
         if (activity.mLastTaskFragmentOrganizerBeforePip != null) {
             // If the activity is previously embedded in an organized TaskFragment.
             organizer = activity.mLastTaskFragmentOrganizerBeforePip;
         } else {
             // Find the topmost TaskFragmentOrganizer.
-            final Task task = activity.getTask();
             final TaskFragment[] organizedTf = new TaskFragment[1];
             task.forAllLeafTaskFragments(tf -> {
                 if (tf.isOrganizedTaskFragment()) {
@@ -757,10 +769,24 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             Slog.w(TAG, "The last TaskFragmentOrganizer no longer exists");
             return;
         }
-        addPendingEvent(new PendingTaskFragmentEvent.Builder(
+
+        final IBinder parentTfTokenBeforePip = activity.getLastEmbeddedParentTfTokenBeforePip();
+        final PendingTaskFragmentEvent.Builder builder = new PendingTaskFragmentEvent.Builder(
                 PendingTaskFragmentEvent.EVENT_ACTIVITY_REPARENTED_TO_TASK, organizer)
                 .setActivity(activity)
-                .build());
+                .setTaskFragmentToken(activity.getLastEmbeddedParentTfTokenBeforePip());
+
+        // Sets the next activity behinds the reparented Activity that's also not in the last
+        // embedded parent TF.
+        final ActivityRecord candidateAssociatedActivity = task.getActivity(
+                ar -> ar != activity && !ar.finishing
+                        && ar.getTaskFragment().getFragmentToken() != parentTfTokenBeforePip);
+        if (candidateAssociatedActivity != null && (!candidateAssociatedActivity.isEmbedded()
+                || candidateAssociatedActivity.getTaskFragment().fillsParent())) {
+            builder.setOtherActivity(candidateAssociatedActivity);
+        }
+
+        addPendingEvent(builder.build());
     }
 
     void onTaskFragmentParentInfoChanged(@NonNull ITaskFragmentOrganizer organizer,
@@ -889,11 +915,16 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         @Nullable
         private final TaskFragment mTaskFragment;
         @Nullable
+        private final IBinder mTaskFragmentToken;
+        @Nullable
         private final IBinder mErrorCallbackToken;
         @Nullable
         private final Throwable mException;
         @Nullable
         private final ActivityRecord mActivity;
+        // An additional Activity that's needed to send back to the client other than the mActivity.
+        @Nullable
+        private final ActivityRecord mOtherActivity;
         @Nullable
         private final Task mTask;
         // Set when the event is deferred due to the host task is invisible. The defer time will
@@ -905,17 +936,21 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         private PendingTaskFragmentEvent(@EventType int eventType,
                 ITaskFragmentOrganizer taskFragmentOrg,
                 @Nullable TaskFragment taskFragment,
+                @Nullable IBinder taskFragmentToken,
                 @Nullable IBinder errorCallbackToken,
                 @Nullable Throwable exception,
                 @Nullable ActivityRecord activity,
+                @Nullable ActivityRecord otherActivity,
                 @Nullable Task task,
                 @TaskFragmentOperation.OperationType int opType) {
             mEventType = eventType;
             mTaskFragmentOrg = taskFragmentOrg;
             mTaskFragment = taskFragment;
+            mTaskFragmentToken = taskFragmentToken;
             mErrorCallbackToken = errorCallbackToken;
             mException = exception;
             mActivity = activity;
+            mOtherActivity = otherActivity;
             mTask = task;
             mOpType = opType;
         }
@@ -943,11 +978,15 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             @Nullable
             private TaskFragment mTaskFragment;
             @Nullable
+            private IBinder mTaskFragmentToken;
+            @Nullable
             private IBinder mErrorCallbackToken;
             @Nullable
             private Throwable mException;
             @Nullable
             private ActivityRecord mActivity;
+            @Nullable
+            private ActivityRecord mOtherActivity;
             @Nullable
             private Task mTask;
             @TaskFragmentOperation.OperationType
@@ -960,6 +999,11 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
 
             Builder setTaskFragment(@Nullable TaskFragment taskFragment) {
                 mTaskFragment = taskFragment;
+                return this;
+            }
+
+            Builder setTaskFragmentToken(@Nullable IBinder fragmentToken) {
+                mTaskFragmentToken = fragmentToken;
                 return this;
             }
 
@@ -978,6 +1022,11 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 return this;
             }
 
+            Builder setOtherActivity(@NonNull ActivityRecord otherActivity) {
+                mOtherActivity = otherActivity;
+                return this;
+            }
+
             Builder setTask(@NonNull Task task) {
                 mTask = requireNonNull(task);
                 return this;
@@ -990,7 +1039,8 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
 
             PendingTaskFragmentEvent build() {
                 return new PendingTaskFragmentEvent(mEventType, mTaskFragmentOrg, mTaskFragment,
-                        mErrorCallbackToken, mException, mActivity, mTask, mOpType);
+                        mTaskFragmentToken, mErrorCallbackToken, mException, mActivity,
+                        mOtherActivity, mTask, mOpType);
             }
         }
     }
@@ -1191,7 +1241,8 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 return state.prepareTaskFragmentError(event.mErrorCallbackToken, taskFragment,
                         event.mOpType, event.mException);
             case PendingTaskFragmentEvent.EVENT_ACTIVITY_REPARENTED_TO_TASK:
-                return state.prepareActivityReparentedToTask(event.mActivity);
+                return state.prepareActivityReparentedToTask(event.mActivity, event.mOtherActivity,
+                        event.mTaskFragmentToken);
             default:
                 throw new IllegalArgumentException("Unknown TaskFragmentEvent=" + event.mEventType);
         }
