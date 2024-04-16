@@ -22,6 +22,7 @@ import android.util.ArrayMap
 import android.util.ArraySet
 import android.util.SparseArray
 import android.view.Display.INVALID_DISPLAY
+import android.window.WindowContainerToken
 import androidx.core.util.forEach
 import androidx.core.util.keyIterator
 import androidx.core.util.valueIterator
@@ -49,6 +50,8 @@ class DesktopModeTaskRepository {
         var stashed: Boolean = false
     )
 
+    // Token of the current wallpaper activity, used to remove it when the last task is removed
+    var wallpaperActivityToken: WindowContainerToken? = null
     // Tasks currently in freeform mode, ordered from top to bottom (top is at index 0).
     private val freeformTasksInZOrder = mutableListOf<Int>()
     private val activeTasksListeners = ArraySet<ActiveTasksListener>()
@@ -196,6 +199,15 @@ class DesktopModeTaskRepository {
     fun isVisibleTask(taskId: Int): Boolean {
         return displayData.valueIterator().asSequence().any { data ->
             data.visibleTasks.contains(taskId)
+        }
+    }
+
+    /**
+     *  Check if a task with the given [taskId] is the only active task on its display
+     */
+    fun isOnlyActiveTask(taskId: Int): Boolean {
+        return displayData.valueIterator().asSequence().any { data ->
+            data.activeTasks.singleOrNull() == taskId
         }
     }
 
