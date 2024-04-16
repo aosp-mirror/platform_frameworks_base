@@ -373,22 +373,22 @@ void nativeReleasePerfettoInstanceLocked(JNIEnv* /* env */, jclass /* clazz */, 
     PerfettoDsImplReleaseInstanceLocked(datasource->dataSource.impl, instance_idx);
 }
 
-bool nativePerfettoDsTraceIterateBegin(jlong dataSourcePtr) {
+bool nativePerfettoDsTraceIterateBegin(JNIEnv* /* env */, jclass /* clazz */, jlong dataSourcePtr) {
     sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
     return datasource->TraceIterateBegin();
 }
 
-bool nativePerfettoDsTraceIterateNext(jlong dataSourcePtr) {
+bool nativePerfettoDsTraceIterateNext(JNIEnv* /* env */, jclass /* clazz */, jlong dataSourcePtr) {
     sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
     return datasource->TraceIterateNext();
 }
 
-void nativePerfettoDsTraceIterateBreak(jlong dataSourcePtr) {
+void nativePerfettoDsTraceIterateBreak(JNIEnv* /* env */, jclass /* clazz */, jlong dataSourcePtr) {
     sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
     return datasource->TraceIterateBreak();
 }
 
-jint nativeGetPerfettoDsInstanceIndex(jlong dataSourcePtr) {
+jint nativeGetPerfettoDsInstanceIndex(JNIEnv* /* env */, jclass /* clazz */, jlong dataSourcePtr) {
     sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
     return (jint)datasource->GetInstanceIndex();
 }
