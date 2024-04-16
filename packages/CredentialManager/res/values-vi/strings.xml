@@ -42,12 +42,9 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Tạo khoá truy cập để đăng nhập vào <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"Lưu mật khẩu để đăng nhập vào <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Lưu thông tin đăng nhập cho <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <!-- no translation found for choose_create_single_tap_passkey_title (3872793514041774218) -->
-    <skip />
-    <!-- no translation found for choose_create_single_tap_password_title (5231871886818921622) -->
-    <skip />
-    <!-- no translation found for choose_create_single_tap_sign_in_title (256498714574099587) -->
-    <skip />
+    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"Sử dụng phương thức khoá màn hình để tạo khoá truy cập cho ứng dụng <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"Sử dụng phương thức khoá màn hình để tạo mật khẩu cho ứng dụng <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"Sử dụng phương thức khoá màn hình để lưu thông tin đăng nhập cho ứng dụng <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"khoá đăng nhập"</string>
     <string name="password" msgid="6738570945182936667">"mật khẩu"</string>
     <string name="passkeys" msgid="5733880786866559847">"khoá truy cập"</string>

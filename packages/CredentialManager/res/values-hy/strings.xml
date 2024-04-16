@@ -42,12 +42,9 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Ստեղծե՞լ անցաբառ՝ <xliff:g id="APP_NAME">%1$s</xliff:g> հավելված մուտք գործելու համար"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"Պահե՞լ գաղտնաբառը՝ <xliff:g id="APP_NAME">%1$s</xliff:g> հավելված մուտք գործելու համար"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Պահե՞լ «<xliff:g id="APP_NAME">%1$s</xliff:g>» հավելվածի մուտքի տվյալները"</string>
-    <!-- no translation found for choose_create_single_tap_passkey_title (3872793514041774218) -->
-    <skip />
-    <!-- no translation found for choose_create_single_tap_password_title (5231871886818921622) -->
-    <skip />
-    <!-- no translation found for choose_create_single_tap_sign_in_title (256498714574099587) -->
-    <skip />
+    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"Օգտագործե՞լ էկրանի կողպումը՝ <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի մուտքի բանալի ստեղծելու համար"</string>
+    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"Օգտագործե՞լ էկրանի կողպումը՝ <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի գաղտնաբառ ստեղծելու համար"</string>
+    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"Օգտագործե՞լ էկրանի կողպումը՝ <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի մուտքի տվյալները պահելու համար"</string>
     <string name="passkey" msgid="632353688396759522">"անցաբառ"</string>
     <string name="password" msgid="6738570945182936667">"գաղտնաբառ"</string>
     <string name="passkeys" msgid="5733880786866559847">"անցաբառեր"</string>
