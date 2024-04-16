@@ -39,6 +39,7 @@ import static org.mockito.Mockito.when;
 import android.content.ComponentName;
 import android.content.pm.PackageManagerInternal;
 import android.frameworks.vibrator.ScaleParam;
+import android.frameworks.vibrator.VibrationParam;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -59,6 +60,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -177,6 +180,24 @@ public class VibratorControlServiceTest {
         verifyZeroInteractions(mMockVibrationScaler);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testOnRequestVibrationParamsComplete_withNullVibrationParams_throwsException() {
+        mVibratorControlService.registerVibratorController(mFakeVibratorController);
+        int timeoutInMillis = 10;
+        CompletableFuture<Void> unusedFuture =
+                mVibratorControlService.triggerVibrationParamsRequest(UID, USAGE_RINGTONE,
+                        timeoutInMillis);
+        IBinder token = mVibratorControlService.getRequestVibrationParamsToken();
+
+        List<VibrationParam> vibrationParamList = Arrays.asList(
+                VibrationParamGenerator.generateVibrationParam(ScaleParam.TYPE_ALARM, 0.7f),
+                null,
+                VibrationParamGenerator.generateVibrationParam(ScaleParam.TYPE_NOTIFICATION, 0.4f));
+
+        mVibratorControlService.onRequestVibrationParamsComplete(token,
+                vibrationParamList.toArray(new VibrationParam[0]));
+    }
+
     @Test
     public void testSetVibrationParams_cachesAdaptiveHapticsScalesCorrectly() {
         mVibratorControlService.registerVibratorController(mFakeVibratorController);
@@ -212,6 +233,19 @@ public class VibratorControlServiceTest {
 
         verify(mStatsLoggerMock, never()).logVibrationParamScale(anyFloat());
         verifyZeroInteractions(mMockVibrationScaler);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetVibrationParams_withNullVibrationParams_throwsException() {
+        mVibratorControlService.registerVibratorController(mFakeVibratorController);
+        List<VibrationParam> vibrationParamList = Arrays.asList(
+                VibrationParamGenerator.generateVibrationParam(ScaleParam.TYPE_ALARM, 0.7f),
+                null,
+                VibrationParamGenerator.generateVibrationParam(ScaleParam.TYPE_NOTIFICATION, 0.4f));
+
+        mVibratorControlService.setVibrationParams(
+                vibrationParamList.toArray(new VibrationParam[0]),
+                mFakeVibratorController);
     }
 
     @Test
