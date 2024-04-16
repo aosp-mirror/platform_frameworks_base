@@ -410,6 +410,8 @@ public class WallpaperControllerTests extends WindowTestsBase {
         final WindowState wallpaperWindow = createWallpaperWindow(dc);
         final WallpaperWindowToken token = wallpaperWindow.mToken.asWallpaperToken();
         wallpaperWindow.setHasSurface(true);
+        spyOn(dc.mWallpaperController);
+        doReturn(wallpaperWindow).when(dc.mWallpaperController).getWallpaperTarget();
 
         // Set-up mock shell transitions
         registerTestTransitionPlayer();
