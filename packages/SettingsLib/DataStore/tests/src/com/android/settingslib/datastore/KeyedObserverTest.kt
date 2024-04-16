@@ -16,76 +16,58 @@
 
 package com.android.settingslib.datastore
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.google.common.util.concurrent.MoreExecutors.directExecutor
+import com.google.common.util.concurrent.MoreExecutors
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.Assert
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnit
-import org.mockito.junit.MockitoRule
-import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.reset
 import org.mockito.kotlin.verify
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 class KeyedObserverTest {
-    @get:Rule
-    val mockitoRule: MockitoRule = MockitoJUnit.rule()
+    private val observer1 = mock<KeyedObserver<Any?>>()
+    private val observer2 = mock<KeyedObserver<Any?>>()
+    private val keyedObserver1 = mock<KeyedObserver<Any>>()
+    private val keyedObserver2 = mock<KeyedObserver<Any>>()
 
-    @Mock
-    private lateinit var observer1: KeyedObserver<Any?>
+    private val key1 = Object()
+    private val key2 = Object()
 
-    @Mock
-    private lateinit var observer2: KeyedObserver<Any?>
-
-    @Mock
-    private lateinit var keyedObserver1: KeyedObserver<Any>
-
-    @Mock
-    private lateinit var keyedObserver2: KeyedObserver<Any>
-
-    @Mock
-    private lateinit var key1: Any
-
-    @Mock
-    private lateinit var key2: Any
-
-    @Mock
-    private lateinit var executor: Executor
-
+    private val executor1: Executor = MoreExecutors.directExecutor()
+    private val executor2: Executor = MoreExecutors.newDirectExecutorService()
     private val keyedObservable = KeyedDataObservable<Any>()
 
     @Test
     fun addObserver_sameExecutor() {
-        keyedObservable.addObserver(observer1, executor)
-        keyedObservable.addObserver(observer1, executor)
+        keyedObservable.addObserver(observer1, executor1)
+        keyedObservable.addObserver(observer1, executor1)
     }
 
     @Test
     fun addObserver_keyedObserver_sameExecutor() {
-        keyedObservable.addObserver(key1, keyedObserver1, executor)
-        keyedObservable.addObserver(key1, keyedObserver1, executor)
+        keyedObservable.addObserver(key1, keyedObserver1, executor1)
+        keyedObservable.addObserver(key1, keyedObserver1, executor1)
     }
 
     @Test
     fun addObserver_differentExecutor() {
-        keyedObservable.addObserver(observer1, executor)
+        keyedObservable.addObserver(observer1, executor1)
         Assert.assertThrows(IllegalStateException::class.java) {
-            keyedObservable.addObserver(observer1, directExecutor())
+            keyedObservable.addObserver(observer1, executor2)
         }
     }
 
     @Test
     fun addObserver_keyedObserver_differentExecutor() {
-        keyedObservable.addObserver(key1, keyedObserver1, executor)
+        keyedObservable.addObserver(key1, keyedObserver1, executor1)
         Assert.assertThrows(IllegalStateException::class.java) {
-            keyedObservable.addObserver(key1, keyedObserver1, directExecutor())
+            keyedObservable.addObserver(key1, keyedObserver1, executor2)
         }
     }
 
@@ -93,7 +75,7 @@ class KeyedObserverTest {
     fun addObserver_weaklyReferenced() {
         val counter = AtomicInteger()
         var observer: KeyedObserver<Any?>? = KeyedObserver { _, _ -> counter.incrementAndGet() }
-        keyedObservable.addObserver(observer!!, directExecutor())
+        keyedObservable.addObserver(observer!!, executor1)
 
         keyedObservable.notifyChange(ChangeReason.UPDATE)
         assertThat(counter.get()).isEqualTo(1)
@@ -111,7 +93,7 @@ class KeyedObserverTest {
     fun addObserver_keyedObserver_weaklyReferenced() {
         val counter = AtomicInteger()
         var keyObserver: KeyedObserver<Any>? = KeyedObserver { _, _ -> counter.incrementAndGet() }
-        keyedObservable.addObserver(key1, keyObserver!!, directExecutor())
+        keyedObservable.addObserver(key1, keyObserver!!, executor1)
 
         keyedObservable.notifyChange(key1, ChangeReason.UPDATE)
         assertThat(counter.get()).isEqualTo(1)
@@ -127,45 +109,43 @@ class KeyedObserverTest {
 
     @Test
     fun addObserver_notifyObservers_removeObserver() {
-        keyedObservable.addObserver(observer1, directExecutor())
-        keyedObservable.addObserver(observer2, executor)
+        keyedObservable.addObserver(observer1, executor1)
+        keyedObservable.addObserver(observer2, executor2)
 
         keyedObservable.notifyChange(ChangeReason.UPDATE)
         verify(observer1).onKeyChanged(null, ChangeReason.UPDATE)
-        verify(observer2, never()).onKeyChanged(any(), any())
-        verify(executor).execute(any())
+        verify(observer2).onKeyChanged(null, ChangeReason.UPDATE)
 
-        reset(observer1, executor)
+        reset(observer1, observer2)
         keyedObservable.removeObserver(observer2)
 
         keyedObservable.notifyChange(ChangeReason.DELETE)
         verify(observer1).onKeyChanged(null, ChangeReason.DELETE)
-        verify(executor, never()).execute(any())
+        verify(observer2, never()).onKeyChanged(null, ChangeReason.DELETE)
     }
 
     @Test
     fun addObserver_keyedObserver_notifyObservers_removeObserver() {
-        keyedObservable.addObserver(key1, keyedObserver1, directExecutor())
-        keyedObservable.addObserver(key2, keyedObserver2, executor)
+        keyedObservable.addObserver(key1, keyedObserver1, executor1)
+        keyedObservable.addObserver(key2, keyedObserver2, executor2)
 
         keyedObservable.notifyChange(key1, ChangeReason.UPDATE)
         verify(keyedObserver1).onKeyChanged(key1, ChangeReason.UPDATE)
-        verify(keyedObserver2, never()).onKeyChanged(any(), any())
-        verify(executor, never()).execute(any())
+        verify(keyedObserver2, never()).onKeyChanged(key2, ChangeReason.UPDATE)
 
-        reset(keyedObserver1, executor)
-        keyedObservable.removeObserver(key2, keyedObserver2)
+        reset(keyedObserver1, keyedObserver2)
+        keyedObservable.removeObserver(key1, keyedObserver1)
 
         keyedObservable.notifyChange(key1, ChangeReason.DELETE)
-        verify(keyedObserver1).onKeyChanged(key1, ChangeReason.DELETE)
-        verify(executor, never()).execute(any())
+        verify(keyedObserver1, never()).onKeyChanged(key1, ChangeReason.DELETE)
+        verify(keyedObserver2, never()).onKeyChanged(key2, ChangeReason.DELETE)
     }
 
     @Test
     fun notifyChange_addMoreTypeObservers_checkOnKeyChanged() {
-        keyedObservable.addObserver(observer1, directExecutor())
-        keyedObservable.addObserver(key1, keyedObserver1, directExecutor())
-        keyedObservable.addObserver(key2, keyedObserver2, directExecutor())
+        keyedObservable.addObserver(observer1, executor1)
+        keyedObservable.addObserver(key1, keyedObserver1, executor1)
+        keyedObservable.addObserver(key2, keyedObserver2, executor1)
 
         keyedObservable.notifyChange(ChangeReason.UPDATE)
         verify(observer1).onKeyChanged(null, ChangeReason.UPDATE)
@@ -191,10 +171,10 @@ class KeyedObserverTest {
     fun notifyChange_addObserverWithinCallback() {
         // ConcurrentModificationException is raised if it is not implemented correctly
         val observer: KeyedObserver<Any?> = KeyedObserver { _, _ ->
-            keyedObservable.addObserver(observer1, executor)
+            keyedObservable.addObserver(observer1, executor1)
         }
 
-        keyedObservable.addObserver(observer, directExecutor())
+        keyedObservable.addObserver(observer, executor1)
 
         keyedObservable.notifyChange(ChangeReason.UPDATE)
         keyedObservable.removeObserver(observer)
@@ -204,10 +184,10 @@ class KeyedObserverTest {
     fun notifyChange_KeyedObserver_addObserverWithinCallback() {
         // ConcurrentModificationException is raised if it is not implemented correctly
         val keyObserver: KeyedObserver<Any?> = KeyedObserver { _, _ ->
-            keyedObservable.addObserver(key1, keyedObserver1, executor)
+            keyedObservable.addObserver(key1, keyedObserver1, executor1)
         }
 
-        keyedObservable.addObserver(key1, keyObserver, directExecutor())
+        keyedObservable.addObserver(key1, keyObserver, executor1)
 
         keyedObservable.notifyChange(key1, ChangeReason.UPDATE)
         keyedObservable.removeObserver(key1, keyObserver)
