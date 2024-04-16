@@ -361,6 +361,7 @@ public class MediaRouter2ManagerTest {
      * Tests if MR2.SessionCallback.onSessionCreated is called
      * when a route is selected from MR2Manager.
      */
+    @Ignore // Ignored due to flakiness. No plans to fix though, in favor of removal (b/334970551).
     @Test
     public void testRouterOnSessionCreated() throws Exception {
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
@@ -908,6 +909,7 @@ public class MediaRouter2ManagerTest {
      * Tests if getSelectableRoutes and getDeselectableRoutes filter routes based on
      * selected routes
      */
+    @Ignore // Ignored due to flakiness. No plans to fix though, in favor of removal (b/334970551).
     @Test
     public void testGetSelectableRoutes_notReturnsSelectedRoutes() throws Exception {
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
