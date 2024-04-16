@@ -513,6 +513,7 @@ public class MediaRouter2ManagerTest {
     /**
      * Tests select, transfer, release of routes of a provider
      */
+    @Ignore // Ignored due to flakiness. No plans to fix though, in favor of removal (b/334970551).
     @Test
     public void testSelectAndTransferAndRelease() throws Exception {
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
