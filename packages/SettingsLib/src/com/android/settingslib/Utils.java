@@ -65,6 +65,7 @@ import com.android.launcher3.icons.IconFactory;
 import com.android.launcher3.util.UserIconInfo;
 import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.settingslib.fuelgauge.BatteryStatus;
+import com.android.settingslib.fuelgauge.BatteryUtils;
 import com.android.settingslib.utils.BuildCompatUtils;
 
 import java.text.NumberFormat;
@@ -259,25 +260,23 @@ public class Utils {
         } else {
             if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
                 if (compactStatus) {
-                    statusString = res.getString(R.string.battery_info_status_charging);
+                    statusString = getRegularChargingStatusString(res);
                 } else if (batteryStatus.isPluggedInWired()) {
                     switch (batteryStatus.getChargingSpeed(context)) {
                         case BatteryStatus.CHARGING_FAST:
-                            statusString =
-                                    res.getString(R.string.battery_info_status_charging_fast);
+                            statusString = getFastChargingStatusString(res);
                             break;
                         case BatteryStatus.CHARGING_SLOWLY:
-                            statusString =
-                                    res.getString(R.string.battery_info_status_charging_slow);
+                            statusString = getSlowChargingStatusString(res);
                             break;
                         default:
-                            statusString = res.getString(R.string.battery_info_status_charging);
+                            statusString = getRegularChargingStatusString(res);
                             break;
                     }
                 } else if (batteryStatus.isPluggedInDock()) {
-                    statusString = res.getString(R.string.battery_info_status_charging_dock);
+                    statusString = getDockChargingStatusString(res);
                 } else {
-                    statusString = res.getString(R.string.battery_info_status_charging_wireless);
+                    statusString = getWirelessChargingStatusString(res);
                 }
             } else if (status == BatteryManager.BATTERY_STATUS_DISCHARGING) {
                 statusString = res.getString(R.string.battery_info_status_discharging);
@@ -287,6 +286,41 @@ public class Utils {
         }
 
         return statusString;
+    }
+
+    private static String getFastChargingStatusString(Resources res) {
+        return res.getString(
+                BatteryUtils.isChargingStringV2Enabled()
+                        ? R.string.battery_info_status_charging_fast_v2
+                        : R.string.battery_info_status_charging_fast);
+    }
+
+    private static String getSlowChargingStatusString(Resources res) {
+        return res.getString(
+                BatteryUtils.isChargingStringV2Enabled()
+                        ? R.string.battery_info_status_charging_v2
+                        : R.string.battery_info_status_charging_slow);
+    }
+
+    private static String getRegularChargingStatusString(Resources res) {
+        return res.getString(
+                BatteryUtils.isChargingStringV2Enabled()
+                        ? R.string.battery_info_status_charging_v2
+                        : R.string.battery_info_status_charging);
+    }
+
+    private static String getWirelessChargingStatusString(Resources res) {
+        return res.getString(
+                BatteryUtils.isChargingStringV2Enabled()
+                        ? R.string.battery_info_status_charging_v2
+                        : R.string.battery_info_status_charging_wireless);
+    }
+
+    private static String getDockChargingStatusString(Resources res) {
+        return res.getString(
+                BatteryUtils.isChargingStringV2Enabled()
+                        ? R.string.battery_info_status_charging_v2
+                        : R.string.battery_info_status_charging_dock);
     }
 
     public static ColorStateList getColorAccent(Context context) {
