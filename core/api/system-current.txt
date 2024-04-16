@@ -1144,6 +1144,7 @@ package android.app {
   public static final class StatusBarManager.DisableInfo implements android.os.Parcelable {
     method public boolean areAllComponentsEnabled();
     method public int describeContents();
+    method public boolean isBackDisabled();
     method public boolean isNavigateToHomeDisabled();
     method public boolean isNotificationPeekingDisabled();
     method public boolean isRecentsDisabled();
