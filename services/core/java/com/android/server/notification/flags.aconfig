@@ -95,3 +95,9 @@ flag {
   bug: "331967355"
 }
 
+flag {
+  name: "persist_incomplete_restore_data"
+  namespace: "systemui"
+  description: "Stores restore data for not-yet-installed pkgs for 48 hours"
+  bug: "334999659"
+}
