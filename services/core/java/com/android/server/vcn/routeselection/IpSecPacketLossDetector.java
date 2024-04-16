@@ -64,12 +64,19 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
 
     private static final int PACKET_LOSS_PERCENT_UNAVAILABLE = -1;
 
+    // Ignore the packet loss detection result if the expected packet number is smaller than 10.
+    // Solarwinds NPM uses 10 ICMP echos to calculate packet loss rate (as per
+    // https://thwack.solarwinds.com/products/network-performance-monitor-npm/f/forum/63829/how-is-packet-loss-calculated)
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    static final int MIN_VALID_EXPECTED_RX_PACKET_NUM = 10;
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(
             prefix = {"PACKET_LOSS_"},
             value = {
                 PACKET_LOSS_RATE_VALID,
                 PACKET_LOSS_RATE_INVALID,
+                PACKET_LOSS_UNUSUAL_SEQ_NUM_LEAP,
             })
     @Target({ElementType.TYPE_USE})
     private @interface PacketLossResultType {}
@@ -84,10 +91,22 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
      * <ul>
      *   <li>The replay window did not proceed and thus all packets might have been delivered out of
      *       order
+     *   <li>The expected received packet number is too small and thus the detection result is not
+     *       reliable
      *   <li>There are unexpected errors
      * </ul>
      */
     private static final int PACKET_LOSS_RATE_INVALID = 1;
+
+    /**
+     * The sequence number increase is unusually large and might be caused an intentional leap on
+     * the server's downlink
+     *
+     * <p>Inbound sequence number will not always increase consecutively. During load balancing the
+     * server might add a big leap on the sequence number intentionally. In such case a high packet
+     * loss rate does not always indicate a lossy network
+     */
+    private static final int PACKET_LOSS_UNUSUAL_SEQ_NUM_LEAP = 2;
 
     // For VoIP, losses between 5% and 10% of the total packet stream will affect the quality
     // significantly (as per "Computer Networking for LANS to WANS: Hardware, Software and
@@ -98,8 +117,12 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
 
     private static final int POLL_IPSEC_STATE_INTERVAL_SECONDS_DEFAULT = 20;
 
+    // By default, there's no maximum limit enforced
+    private static final int MAX_SEQ_NUM_INCREASE_DEFAULT_DISABLED = -1;
+
     private long mPollIpSecStateIntervalMs;
-    private final int mPacketLossRatePercentThreshold;
+    private int mPacketLossRatePercentThreshold;
+    private int mMaxSeqNumIncreasePerSecond;
 
     @NonNull private final Handler mHandler;
     @NonNull private final PowerManager mPowerManager;
@@ -138,6 +161,7 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
 
         mPollIpSecStateIntervalMs = getPollIpSecStateIntervalMs(carrierConfig);
         mPacketLossRatePercentThreshold = getPacketLossRatePercentThreshold(carrierConfig);
+        mMaxSeqNumIncreasePerSecond = getMaxSeqNumIncreasePerSecond(carrierConfig);
 
         // Register for system broadcasts to monitor idle mode change
         final IntentFilter intentFilter = new IntentFilter();
@@ -202,6 +226,24 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
         return IPSEC_PACKET_LOSS_PERCENT_THRESHOLD_DEFAULT;
     }
 
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    static int getMaxSeqNumIncreasePerSecond(@Nullable PersistableBundleWrapper carrierConfig) {
+        int maxSeqNumIncrease = MAX_SEQ_NUM_INCREASE_DEFAULT_DISABLED;
+        if (Flags.handleSeqNumLeap() && carrierConfig != null) {
+            maxSeqNumIncrease =
+                    carrierConfig.getInt(
+                            VcnManager.VCN_NETWORK_SELECTION_MAX_SEQ_NUM_INCREASE_PER_SECOND_KEY,
+                            MAX_SEQ_NUM_INCREASE_DEFAULT_DISABLED);
+        }
+
+        if (maxSeqNumIncrease < MAX_SEQ_NUM_INCREASE_DEFAULT_DISABLED) {
+            logE(TAG, "Invalid value of MAX_SEQ_NUM_INCREASE_PER_SECOND_KEY " + maxSeqNumIncrease);
+            return MAX_SEQ_NUM_INCREASE_DEFAULT_DISABLED;
+        }
+
+        return maxSeqNumIncrease;
+    }
+
     @Override
     protected void onSelectedUnderlyingNetworkChanged() {
         if (!isSelectedUnderlyingNetwork()) {
@@ -237,6 +279,11 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
         // The already scheduled event will not be affected. The followup events will be scheduled
         // with the new interval
         mPollIpSecStateIntervalMs = getPollIpSecStateIntervalMs(carrierConfig);
+
+        if (Flags.handleSeqNumLeap()) {
+            mPacketLossRatePercentThreshold = getPacketLossRatePercentThreshold(carrierConfig);
+            mMaxSeqNumIncreasePerSecond = getMaxSeqNumIncreasePerSecond(carrierConfig);
+        }
     }
 
     @Override
@@ -339,7 +386,10 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
 
         final PacketLossCalculationResult calculateResult =
                 mPacketLossCalculator.getPacketLossRatePercentage(
-                        mLastIpSecTransformState, state, getLogPrefix());
+                        mLastIpSecTransformState,
+                        state,
+                        mMaxSeqNumIncreasePerSecond,
+                        getLogPrefix());
 
         if (calculateResult.getResultType() == PACKET_LOSS_RATE_INVALID) {
             return;
@@ -356,11 +406,18 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
         mLastIpSecTransformState = state;
         if (calculateResult.getPacketLossRatePercent() < mPacketLossRatePercentThreshold) {
             logV(logMsg);
+
+            // In both "valid" or "unusual_seq_num_leap" cases, notify that the network has passed
+            // the validation
             onValidationResultReceivedInternal(false /* isFailed */);
         } else {
             logInfo(logMsg);
-            onValidationResultReceivedInternal(true /* isFailed */);
 
+            if (calculateResult.getResultType() == PACKET_LOSS_RATE_VALID) {
+                onValidationResultReceivedInternal(true /* isFailed */);
+            }
+
+            // In both "valid" or "unusual_seq_num_leap" cases, trigger network validation
             if (Flags.validateNetworkOnIpsecLoss()) {
                 // Trigger re-validation of the underlying network; if it fails, the VCN will
                 // attempt to migrate away.
@@ -376,6 +433,7 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
         public PacketLossCalculationResult getPacketLossRatePercentage(
                 @NonNull IpSecTransformState oldState,
                 @NonNull IpSecTransformState newState,
+                int maxSeqNumIncreasePerSecond,
                 String logPrefix) {
             logVIpSecTransform("oldState", oldState, logPrefix);
             logVIpSecTransform("newState", newState, logPrefix);
@@ -390,6 +448,22 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
                 // The replay window did not proceed and all packets might have been delivered out
                 // of order
                 return PacketLossCalculationResult.invalid();
+            }
+
+            boolean isUnusualSeqNumLeap = false;
+
+            // Handle sequence number leap
+            if (Flags.handleSeqNumLeap()
+                    && maxSeqNumIncreasePerSecond != MAX_SEQ_NUM_INCREASE_DEFAULT_DISABLED) {
+                final long timeDiffMillis =
+                        newState.getTimestampMillis() - oldState.getTimestampMillis();
+                final long maxSeqNumIncrease = timeDiffMillis * maxSeqNumIncreasePerSecond / 1000;
+
+                // Sequence numbers are unsigned 32-bit values. If maxSeqNumIncrease overflows,
+                // isUnusualSeqNumLeap can never be true.
+                if (maxSeqNumIncrease >= 0 && newSeqHi - oldSeqHi >= maxSeqNumIncrease) {
+                    isUnusualSeqNumLeap = true;
+                }
             }
 
             // Get the expected packet count by assuming there is no packet loss. In this case, SA
@@ -411,6 +485,11 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
                             + " actualPktCntDiff: "
                             + actualPktCntDiff);
 
+            if (Flags.handleSeqNumLeap() && expectedPktCntDiff < MIN_VALID_EXPECTED_RX_PACKET_NUM) {
+                // The sample size is too small to ensure a reliable detection result
+                return PacketLossCalculationResult.invalid();
+            }
+
             if (expectedPktCntDiff < 0
                     || expectedPktCntDiff == 0
                     || actualPktCntDiff < 0
@@ -420,7 +499,9 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
             }
 
             final int percent = 100 - (int) (actualPktCntDiff * 100 / expectedPktCntDiff);
-            return PacketLossCalculationResult.valid(percent);
+            return isUnusualSeqNumLeap
+                    ? PacketLossCalculationResult.unusualSeqNumLeap(percent)
+                    : PacketLossCalculationResult.valid(percent);
         }
     }
 
@@ -460,6 +541,11 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
         public static PacketLossCalculationResult invalid() {
             return new PacketLossCalculationResult(
                     PACKET_LOSS_RATE_INVALID, PACKET_LOSS_PERCENT_UNAVAILABLE);
+        }
+
+        /** Construct an instance indicating that there is an unusual sequence number leap */
+        public static PacketLossCalculationResult unusualSeqNumLeap(int percent) {
+            return new PacketLossCalculationResult(PACKET_LOSS_UNUSUAL_SEQ_NUM_LEAP, percent);
         }
 
         @PacketLossResultType

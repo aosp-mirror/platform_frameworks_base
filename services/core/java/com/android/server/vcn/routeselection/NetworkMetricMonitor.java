@@ -272,6 +272,11 @@ public abstract class NetworkMetricMonitor implements AutoCloseable {
         }
     }
 
+    protected static void logE(String className, String msgWithPrefix) {
+        Slog.w(className, msgWithPrefix);
+        LOCAL_LOG.log("[ERROR ] " + className + msgWithPrefix);
+    }
+
     protected static void logWtf(String className, String msgWithPrefix) {
         Slog.wtf(className, msgWithPrefix);
         LOCAL_LOG.log("[WTF ] " + className + msgWithPrefix);
