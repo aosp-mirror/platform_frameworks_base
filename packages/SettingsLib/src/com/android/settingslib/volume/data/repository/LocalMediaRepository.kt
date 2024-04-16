@@ -17,6 +17,7 @@ package com.android.settingslib.volume.data.repository
 
 import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
+import com.android.settingslib.media.flags.Flags
 import com.android.settingslib.volume.shared.AudioManagerEventsReceiver
 import com.android.settingslib.volume.shared.model.AudioManagerEvent
 import kotlinx.coroutines.CoroutineScope
@@ -69,10 +70,14 @@ class LocalMediaRepositoryImpl(
                         }
                     }
                 localMediaManager.registerCallback(callback)
-                localMediaManager.startScan()
+                if (!Flags.removeUnnecessaryRouteScanning()) {
+                    localMediaManager.startScan()
+                }
 
                 awaitClose {
-                    localMediaManager.stopScan()
+                    if (!Flags.removeUnnecessaryRouteScanning()) {
+                        localMediaManager.stopScan()
+                    }
                     localMediaManager.unregisterCallback(callback)
                 }
             }

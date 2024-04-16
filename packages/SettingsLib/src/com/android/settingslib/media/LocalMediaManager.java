@@ -106,14 +106,23 @@ public class LocalMediaManager implements BluetoothCallback {
      * Register to start receiving callbacks for MediaDevice events.
      */
     public void registerCallback(DeviceCallback callback) {
-        mCallbacks.add(callback);
+        boolean wasEmpty = mCallbacks.isEmpty();
+        if (!mCallbacks.contains(callback)) {
+            mCallbacks.add(callback);
+            if (wasEmpty) {
+                mInfoMediaManager.registerCallback(mMediaDeviceCallback);
+            }
+        }
     }
 
     /**
      * Unregister to stop receiving callbacks for MediaDevice events
      */
     public void unregisterCallback(DeviceCallback callback) {
-        mCallbacks.remove(callback);
+        if (mCallbacks.remove(callback) && mCallbacks.isEmpty()) {
+            mInfoMediaManager.unregisterCallback(mMediaDeviceCallback);
+            unRegisterDeviceAttributeChangeCallback();
+        }
     }
 
     /**
@@ -228,10 +237,6 @@ public class LocalMediaManager implements BluetoothCallback {
      * Start scan connected MediaDevice
      */
     public void startScan() {
-        synchronized (mMediaDevicesLock) {
-            mMediaDevices.clear();
-        }
-        mInfoMediaManager.registerCallback(mMediaDeviceCallback);
         mInfoMediaManager.startScan();
     }
 
@@ -281,9 +286,7 @@ public class LocalMediaManager implements BluetoothCallback {
      * Stop scan MediaDevice
      */
     public void stopScan() {
-        mInfoMediaManager.unregisterCallback(mMediaDeviceCallback);
         mInfoMediaManager.stopScan();
-        unRegisterDeviceAttributeChangeCallback();
     }
 
     /**
