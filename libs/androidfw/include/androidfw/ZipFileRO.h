@@ -151,6 +151,10 @@ public:
         uint32_t* pCompLen, off64_t* pOffset, uint32_t* pModWhen,
         uint32_t* pCrc32) const;
 
+    bool getEntryInfo(ZipEntryRO entry, uint16_t* pMethod,
+        uint32_t* pUncompLen, uint32_t* pCompLen, off64_t* pOffset,
+        uint32_t* pModWhen, uint32_t* pCrc32, uint16_t* pExtraFieldSize) const;
+
     /*
      * Create a new FileMap object that maps a subset of the archive. For
      * an uncompressed entry this effectively provides a pointer to the
@@ -186,6 +190,8 @@ public:
      * Uncompress the data to an open file descriptor.
      */
     bool uncompressEntry(ZipEntryRO entry, int fd) const;
+
+    const char* getZipFileName();
 
     ~ZipFileRO();
 

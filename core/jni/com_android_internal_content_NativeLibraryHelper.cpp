@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/statfs.h>
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
@@ -36,6 +37,7 @@
 
 #include <memory>
 
+#include "com_android_internal_content_FileSystemUtils.h"
 #include "core_jni_helpers.h"
 
 #define RS_BITCODE_SUFFIX ".bc"
@@ -144,8 +146,9 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
 
     uint16_t method;
     off64_t offset;
-
-    if (!zipFile->getEntryInfo(zipEntry, &method, &uncompLen, nullptr, &offset, &when, &crc)) {
+    uint16_t extraFieldLength;
+    if (!zipFile->getEntryInfo(zipEntry, &method, &uncompLen, nullptr, &offset, &when, &crc,
+                               &extraFieldLength)) {
         ALOGE("Couldn't read zip entry info\n");
         return INSTALL_FAILED_INVALID_APK;
     }
@@ -168,6 +171,21 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
                   "from apk.\n", fileName, kPageSize);
             return INSTALL_FAILED_INVALID_APK;
         }
+
+#ifdef ENABLE_PUNCH_HOLES
+        // if library is uncompressed, punch hole in it in place
+        if (!punchHolesInElf64(zipFile->getZipFileName(), offset)) {
+            ALOGW("Failed to punch uncompressed elf file :%s inside apk : %s at offset: "
+                  "%" PRIu64 "",
+                  fileName, zipFile->getZipFileName(), offset);
+        }
+
+        // if extra field for this zip file is present with some length, possibility is that it is
+        // padding added for zip alignment. Punch holes there too.
+        if (!punchHolesInZip(zipFile->getZipFileName(), offset, extraFieldLength)) {
+            ALOGW("Failed to punch apk : %s at extra field", zipFile->getZipFileName());
+        }
+#endif // ENABLE_PUNCH_HOLES
 
         return INSTALL_SUCCEEDED;
     }
@@ -268,6 +286,25 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
         unlink(localTmpFileName);
         return INSTALL_FAILED_CONTAINER_ERROR;
     }
+
+#ifdef ENABLE_PUNCH_HOLES
+    // punch extracted elf files as well. This will fail where compression is on (like f2fs) but it
+    // will be useful for ext4 based systems
+    struct statfs64 fsInfo;
+    int result = statfs64(localFileName, &fsInfo);
+    if (result < 0) {
+        ALOGW("Failed to stat file :%s", localFileName);
+    }
+
+    if (result == 0 && fsInfo.f_type == EXT4_SUPER_MAGIC) {
+        ALOGD("Punching extracted elf file %s on fs:%" PRIu64 "", fileName,
+              static_cast<uint64_t>(fsInfo.f_type));
+        if (!punchHolesInElf64(localFileName, 0)) {
+            ALOGW("Failed to punch extracted elf file :%s from apk : %s", fileName,
+                  zipFile->getZipFileName());
+        }
+    }
+#endif // ENABLE_PUNCH_HOLES
 
     ALOGV("Successfully moved %s to %s\n", localTmpFileName, localFileName);
 
