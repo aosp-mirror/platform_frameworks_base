@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.ColorRes;
+import android.annotation.NonNull;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -40,7 +41,7 @@ import android.widget.ImageView;
 import android.window.TaskConstants;
 
 import com.android.wm.shell.R;
-import com.android.wm.shell.common.SurfaceUtils;
+import com.android.wm.shell.common.DisplayController;
 
 import java.util.function.Supplier;
 
@@ -48,6 +49,7 @@ import java.util.function.Supplier;
  * Creates and updates a veil that covers task contents on resize.
  */
 public class ResizeVeil {
+    private static final String TAG = "ResizeVeil";
     private static final int RESIZE_ALPHA_DURATION = 100;
 
     private static final int VEIL_CONTAINER_LAYER = TaskConstants.TASK_CHILD_LAYER_RESIZE_VEIL;
@@ -57,8 +59,10 @@ public class ResizeVeil {
     private static final int VEIL_ICON_LAYER = 1;
 
     private final Context mContext;
-    private final Supplier<SurfaceControl.Builder> mSurfaceControlBuilderSupplier;
+    private final DisplayController mDisplayController;
     private final Supplier<SurfaceControl.Transaction> mSurfaceControlTransactionSupplier;
+    private final SurfaceControlBuilderFactory mSurfaceControlBuilderFactory;
+    private final WindowDecoration.SurfaceControlViewHostFactory mSurfaceControlViewHostFactory;
     private final SurfaceSession mSurfaceSession = new SurfaceSession();
     private final Drawable mAppIcon;
     private ImageView mIconView;
@@ -74,41 +78,82 @@ public class ResizeVeil {
 
     private final RunningTaskInfo mTaskInfo;
     private SurfaceControlViewHost mViewHost;
-    private final Display mDisplay;
+    private Display mDisplay;
     private ValueAnimator mVeilAnimator;
 
-    public ResizeVeil(Context context, Drawable appIcon, RunningTaskInfo taskInfo,
+    private boolean mIsShowing = false;
+
+    private final DisplayController.OnDisplaysChangedListener mOnDisplaysChangedListener =
+            new DisplayController.OnDisplaysChangedListener() {
+                @Override
+                public void onDisplayAdded(int displayId) {
+                    if (mTaskInfo.displayId != displayId) {
+                        return;
+                    }
+                    mDisplayController.removeDisplayWindowListener(this);
+                    setupResizeVeil();
+                }
+            };
+
+    public ResizeVeil(Context context,
+            @NonNull DisplayController displayController,
+            Drawable appIcon, RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
-            Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier, Display display,
             Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier) {
+        this(context,
+                displayController,
+                appIcon,
+                taskInfo,
+                taskSurface,
+                surfaceControlTransactionSupplier,
+                new SurfaceControlBuilderFactory() {},
+                new WindowDecoration.SurfaceControlViewHostFactory() {});
+    }
+
+    public ResizeVeil(Context context,
+            @NonNull DisplayController displayController,
+            Drawable appIcon, RunningTaskInfo taskInfo,
+            SurfaceControl taskSurface,
+            Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
+            SurfaceControlBuilderFactory surfaceControlBuilderFactory,
+            WindowDecoration.SurfaceControlViewHostFactory surfaceControlViewHostFactory) {
         mContext = context;
+        mDisplayController = displayController;
         mAppIcon = appIcon;
-        mSurfaceControlBuilderSupplier = surfaceControlBuilderSupplier;
         mSurfaceControlTransactionSupplier = surfaceControlTransactionSupplier;
         mTaskInfo = taskInfo;
         mParentSurface = taskSurface;
-        mDisplay = display;
+        mSurfaceControlBuilderFactory = surfaceControlBuilderFactory;
+        mSurfaceControlViewHostFactory = surfaceControlViewHostFactory;
         setupResizeVeil();
     }
-
     /**
      * Create the veil in its default invisible state.
      */
     private void setupResizeVeil() {
-        mVeilSurface = mSurfaceControlBuilderSupplier.get()
+        if (!obtainDisplayOrRegisterListener()) {
+            // Display may not be available yet, skip this until then.
+            return;
+        }
+        mVeilSurface = mSurfaceControlBuilderFactory
+                .create("Resize veil of Task=" + mTaskInfo.taskId)
                 .setContainerLayer()
-                .setName("Resize veil of Task=" + mTaskInfo.taskId)
                 .setHidden(true)
                 .setParent(mParentSurface)
                 .setCallsite("ResizeVeil#setupResizeVeil")
                 .build();
-        mBackgroundSurface = SurfaceUtils.makeColorLayer(mVeilSurface,
-                "Resize veil background of Task=" + mTaskInfo.taskId, mSurfaceSession);
-        mIconSurface = mSurfaceControlBuilderSupplier.get()
-                .setName("Resize veil icon of Task= " + mTaskInfo.taskId)
-                .setContainerLayer()
-                .setParent(mVeilSurface)
+        mBackgroundSurface = mSurfaceControlBuilderFactory
+                .create("Resize veil background of Task=" + mTaskInfo.taskId, mSurfaceSession)
+                .setColorLayer()
                 .setHidden(true)
+                .setParent(mVeilSurface)
+                .setCallsite("ResizeVeil#setupResizeVeil")
+                .build();
+        mIconSurface = mSurfaceControlBuilderFactory
+                .create("Resize veil icon of Task=" + mTaskInfo.taskId)
+                .setContainerLayer()
+                .setHidden(true)
+                .setParent(mVeilSurface)
                 .setCallsite("ResizeVeil#setupResizeVeil")
                 .build();
 
@@ -131,8 +176,18 @@ public class ResizeVeil {
 
         final WindowlessWindowManager wwm = new WindowlessWindowManager(mTaskInfo.configuration,
                 mIconSurface, null /* hostInputToken */);
-        mViewHost = new SurfaceControlViewHost(mContext, mDisplay, wwm, "ResizeVeil");
+
+        mViewHost = mSurfaceControlViewHostFactory.create(mContext, mDisplay, wwm, "ResizeVeil");
         mViewHost.setView(root, lp);
+    }
+
+    private boolean obtainDisplayOrRegisterListener() {
+        mDisplay = mDisplayController.getDisplay(mTaskInfo.displayId);
+        if (mDisplay == null) {
+            mDisplayController.addDisplayWindowListener(mOnDisplaysChangedListener);
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -146,6 +201,12 @@ public class ResizeVeil {
      */
     public void showVeil(SurfaceControl.Transaction t, SurfaceControl parentSurface,
             Rect taskBounds, boolean fadeIn) {
+        if (!isReady() || isVisible()) {
+            t.apply();
+            return;
+        }
+        mIsShowing = true;
+
         // Parent surface can change, ensure it is up to date.
         if (!parentSurface.equals(mParentSurface)) {
             t.reparent(mVeilSurface, parentSurface);
@@ -226,6 +287,9 @@ public class ResizeVeil {
      * Animate veil's alpha to 1, fading it in.
      */
     public void showVeil(SurfaceControl parentSurface, Rect taskBounds) {
+        if (!isReady() || isVisible()) {
+            return;
+        }
         SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
         showVeil(t, parentSurface, taskBounds, true /* fadeIn */);
     }
@@ -247,6 +311,9 @@ public class ResizeVeil {
      * @param newBounds bounds to update veil to.
      */
     public void updateResizeVeil(Rect newBounds) {
+        if (!isVisible()) {
+            return;
+        }
         SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
         updateResizeVeil(t, newBounds);
     }
@@ -260,6 +327,10 @@ public class ResizeVeil {
      * @param newBounds bounds to update veil to.
      */
     public void updateResizeVeil(SurfaceControl.Transaction t, Rect newBounds) {
+        if (!isVisible()) {
+            t.apply();
+            return;
+        }
         if (mVeilAnimator != null && mVeilAnimator.isStarted()) {
             mVeilAnimator.removeAllUpdateListeners();
             mVeilAnimator.end();
@@ -272,6 +343,9 @@ public class ResizeVeil {
      * Animate veil's alpha to 0, fading it out.
      */
     public void hideVeil() {
+        if (!isVisible()) {
+            return;
+        }
         cancelAnimation();
         mVeilAnimator = new ValueAnimator();
         mVeilAnimator.setFloatValues(1, 0);
@@ -292,6 +366,7 @@ public class ResizeVeil {
             }
         });
         mVeilAnimator.start();
+        mIsShowing = false;
     }
 
     @ColorRes
@@ -318,10 +393,26 @@ public class ResizeVeil {
     }
 
     /**
+     * Whether the resize veil is currently visible.
+     *
+     * Note: when animating a {@link ResizeVeil#hideVeil()}, the veil is considered visible as soon
+     * as the animation starts.
+     */
+    private boolean isVisible() {
+        return mIsShowing;
+    }
+
+    /** Whether the resize veil is ready to be shown. */
+    private boolean isReady() {
+        return mViewHost != null;
+    }
+
+    /**
      * Dispose of veil when it is no longer needed, likely on close of its container decor.
      */
     void dispose() {
         cancelAnimation();
+        mIsShowing = false;
         mVeilAnimator = null;
 
         if (mViewHost != null) {
@@ -342,5 +433,16 @@ public class ResizeVeil {
             mVeilSurface = null;
         }
         t.apply();
+        mDisplayController.removeDisplayWindowListener(mOnDisplaysChangedListener);
+    }
+
+    interface SurfaceControlBuilderFactory {
+        default SurfaceControl.Builder create(@NonNull String name) {
+            return new SurfaceControl.Builder().setName(name);
+        }
+        default SurfaceControl.Builder create(@NonNull String name,
+                @NonNull SurfaceSession surfaceSession) {
+            return new SurfaceControl.Builder(surfaceSession).setName(name);
+        }
     }
 }
