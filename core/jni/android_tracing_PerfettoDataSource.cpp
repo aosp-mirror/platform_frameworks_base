@@ -201,7 +201,7 @@ void PerfettoDataSource::WritePackets(JNIEnv* env, jobjectArray packets) {
     for (int i = 0; i < packets_count; i++) {
         jbyteArray packet_proto_buffer = (jbyteArray)env->GetObjectArrayElement(packets, i);
 
-        jbyte* raw_proto_buffer = env->GetByteArrayElements(packet_proto_buffer, 0);
+        jbyte* raw_proto_buffer = env->GetByteArrayElements(packet_proto_buffer, nullptr);
         int buffer_size = env->GetArrayLength(packet_proto_buffer);
 
         struct PerfettoDsRootTracePacket trace_packet;
@@ -209,6 +209,8 @@ void PerfettoDataSource::WritePackets(JNIEnv* env, jobjectArray packets) {
         PerfettoPbMsgAppendBytes(&trace_packet.msg.msg, (const uint8_t*)raw_proto_buffer,
                                  buffer_size);
         PerfettoDsTracerPacketEnd(&gIterator, &trace_packet);
+
+        env->ReleaseByteArrayElements(packet_proto_buffer, raw_proto_buffer, 0 /* default mode */);
     }
 }
 
