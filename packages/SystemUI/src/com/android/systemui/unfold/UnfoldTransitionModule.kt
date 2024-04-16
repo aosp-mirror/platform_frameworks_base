@@ -32,8 +32,6 @@ import com.android.systemui.unfold.data.repository.FoldStateRepository
 import com.android.systemui.unfold.data.repository.FoldStateRepositoryImpl
 import com.android.systemui.unfold.data.repository.UnfoldTransitionRepository
 import com.android.systemui.unfold.data.repository.UnfoldTransitionRepositoryImpl
-import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
-import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractorImpl
 import com.android.systemui.unfold.system.SystemUnfoldSharedModule
 import com.android.systemui.unfold.updates.FoldProvider
 import com.android.systemui.unfold.updates.FoldStateProvider
@@ -185,8 +183,6 @@ class UnfoldTransitionModule {
     @Module
     interface Bindings {
         @Binds fun bindRepository(impl: UnfoldTransitionRepositoryImpl): UnfoldTransitionRepository
-
-        @Binds fun bindInteractor(impl: UnfoldTransitionInteractorImpl): UnfoldTransitionInteractor
 
         @Binds fun bindFoldStateRepository(impl: FoldStateRepositoryImpl): FoldStateRepository
     }

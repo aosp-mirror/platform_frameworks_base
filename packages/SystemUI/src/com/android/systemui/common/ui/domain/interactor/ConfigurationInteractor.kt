@@ -56,6 +56,13 @@ class ConfigurationInteractor @Inject constructor(private val repository: Config
     val naturalMaxBounds: Flow<Rect> =
         repository.configurationValues.map { it.naturalScreenBounds }.distinctUntilChanged()
 
+    /**
+     * The layout direction. Will be either `View#LAYOUT_DIRECTION_LTR` or
+     * `View#LAYOUT_DIRECTION_RTL`.
+     */
+    val layoutDirection: Flow<Int> =
+        repository.configurationValues.map { it.layoutDirection }.distinctUntilChanged()
+
     /** Given [resourceId], emit the dimension pixel size on config change */
     fun dimensionPixelSize(resourceId: Int): Flow<Int> {
         return onAnyConfigurationChange.mapLatest { repository.getDimensionPixelSize(resourceId) }
