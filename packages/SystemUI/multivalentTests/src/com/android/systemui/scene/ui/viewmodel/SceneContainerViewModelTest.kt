@@ -51,9 +51,9 @@ class SceneContainerViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope by lazy { kosmos.testScope }
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
-    private val fakeSceneDataSource = kosmos.fakeSceneDataSource
-    private val sceneContainerConfig = kosmos.sceneContainerConfig
-    private val falsingManager = kosmos.fakeFalsingManager
+    private val fakeSceneDataSource by lazy { kosmos.fakeSceneDataSource }
+    private val sceneContainerConfig by lazy { kosmos.sceneContainerConfig }
+    private val falsingManager by lazy { kosmos.fakeFalsingManager }
 
     private lateinit var underTest: SceneContainerViewModel
 
