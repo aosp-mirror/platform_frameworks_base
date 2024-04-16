@@ -1404,7 +1404,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             if (mScreenOffBrightnessSensorController != null) {
                 mScreenOffBrightnessSensorController.setLightSensorEnabled(false);
             }
-            setBrightnessFromOffload(PowerManager.BRIGHTNESS_INVALID_FLOAT);
         }
         // AutomaticBrightnessStrategy has higher priority than OffloadBrightnessStrategy
         if (!mFlags.isRefactorDisplayPowerControllerEnabled() && (Float.isNaN(brightnessState)

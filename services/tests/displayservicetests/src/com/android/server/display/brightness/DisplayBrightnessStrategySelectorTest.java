@@ -142,7 +142,8 @@ public final class DisplayBrightnessStrategySelectorTest {
                 }
 
                 @Override
-                OffloadBrightnessStrategy getOffloadBrightnessStrategy() {
+                OffloadBrightnessStrategy getOffloadBrightnessStrategy(
+                        DisplayManagerFlags displayManagerFlags) {
                     return mOffloadBrightnessStrategy;
                 }
             };

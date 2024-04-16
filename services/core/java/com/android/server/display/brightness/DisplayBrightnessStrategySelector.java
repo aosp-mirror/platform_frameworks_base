@@ -121,7 +121,8 @@ public class DisplayBrightnessStrategySelector {
                 (mDisplayManagerFlags.isRefactorDisplayPowerControllerEnabled())
                         ? mAutomaticBrightnessStrategy1 : mAutomaticBrightnessStrategy2;
         if (flags.isDisplayOffloadEnabled()) {
-            mOffloadBrightnessStrategy = injector.getOffloadBrightnessStrategy();
+            mOffloadBrightnessStrategy = injector
+                    .getOffloadBrightnessStrategy(mDisplayManagerFlags);
         } else {
             mOffloadBrightnessStrategy = null;
         }
@@ -314,8 +315,9 @@ public class DisplayBrightnessStrategySelector {
             return new AutomaticBrightnessStrategy2(context, displayId);
         }
 
-        OffloadBrightnessStrategy getOffloadBrightnessStrategy() {
-            return new OffloadBrightnessStrategy();
+        OffloadBrightnessStrategy getOffloadBrightnessStrategy(
+                DisplayManagerFlags displayManagerFlags) {
+            return new OffloadBrightnessStrategy(displayManagerFlags);
         }
     }
 }
