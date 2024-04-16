@@ -316,11 +316,16 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
             rankingMap = null;
         }
 
+        if (rankingMap == null) {
+            Log.w(TAG, "Ranking map not initialized.");
+            return;
+        }
+
         updateAppsThatShouldBlockScreenCapture(rankingMap);
     }
 
     @GuardedBy("mSensitiveContentProtectionLock")
-    private void updateAppsThatShouldBlockScreenCapture(RankingMap rankingMap) {
+    private void updateAppsThatShouldBlockScreenCapture(@NonNull RankingMap rankingMap) {
         StatusBarNotification[] notifications;
         try {
             notifications = mNotificationListener.getActiveNotifications();
@@ -337,15 +342,15 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
         }
     }
 
-    private ArraySet<PackageInfo> getSensitivePackagesFromNotifications(
-            @NonNull StatusBarNotification[] notifications, RankingMap rankingMap) {
+    private static @NonNull ArraySet<PackageInfo> getSensitivePackagesFromNotifications(
+            @NonNull StatusBarNotification[] notifications, @NonNull RankingMap rankingMap) {
         ArraySet<PackageInfo> sensitivePackages = new ArraySet<>();
-        if (rankingMap == null) {
-            Log.w(TAG, "Ranking map not initialized.");
-            return sensitivePackages;
-        }
-
         for (StatusBarNotification sbn : notifications) {
+            if (sbn == null) {
+                Log.w(TAG, "Unable to parse null notification");
+                continue;
+            }
+
             PackageInfo info = getSensitivePackageFromNotification(sbn, rankingMap);
             if (info != null) {
                 sensitivePackages.add(info);
@@ -354,22 +359,18 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
         return sensitivePackages;
     }
 
-    private PackageInfo getSensitivePackageFromNotification(
-            StatusBarNotification sbn, RankingMap rankingMap) {
-        if (sbn == null) {
-            Log.w(TAG, "Unable to protect null notification");
-            return null;
-        }
-        if (rankingMap == null) {
-            Log.w(TAG, "Ranking map not initialized.");
-            return null;
-        }
-
-        NotificationListenerService.Ranking ranking = rankingMap.getRawRankingObject(sbn.getKey());
-        if (ranking != null && ranking.hasSensitiveContent()) {
+    private static @Nullable PackageInfo getSensitivePackageFromNotification(
+            @NonNull StatusBarNotification sbn, @NonNull RankingMap rankingMap) {
+        if (notificationHasSensitiveContent(sbn, rankingMap)) {
             return new PackageInfo(sbn.getPackageName(), sbn.getUid());
         }
         return null;
+    }
+
+    private static boolean notificationHasSensitiveContent(
+            @NonNull StatusBarNotification sbn, @NonNull RankingMap rankingMap) {
+        NotificationListenerService.Ranking ranking = rankingMap.getRawRankingObject(sbn.getKey());
+        return ranking != null && ranking.hasSensitiveContent();
     }
 
     @VisibleForTesting
@@ -397,6 +398,16 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
             Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
                     "SensitiveContentProtectionManagerService.onNotificationPosted");
             try {
+                if (sbn == null) {
+                    Log.w(TAG, "Unable to parse null notification");
+                    return;
+                }
+
+                if (rankingMap == null) {
+                    Log.w(TAG, "Ranking map not initialized.");
+                    return;
+                }
+
                 synchronized (mSensitiveContentProtectionLock) {
                     if (!mProjectionActive) {
                         return;
@@ -421,6 +432,11 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
             Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
                     "SensitiveContentProtectionManagerService.onNotificationRankingUpdate");
             try {
+                if (rankingMap == null) {
+                    Log.w(TAG, "Ranking map not initialized.");
+                    return;
+                }
+
                 synchronized (mSensitiveContentProtectionLock) {
                     if (mProjectionActive) {
                         updateAppsThatShouldBlockScreenCapture(rankingMap);

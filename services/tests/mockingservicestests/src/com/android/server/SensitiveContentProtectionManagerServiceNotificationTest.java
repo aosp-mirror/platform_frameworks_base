@@ -282,6 +282,14 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
                 .getActiveNotifications();
     }
 
+    private void setupNullNotifications() {
+        // Setup Notification Values
+        StatusBarNotification[] mNotifications = new StatusBarNotification[] { null, null};
+        doReturn(mNotifications)
+                .when(mSensitiveContentProtectionManagerService.mNotificationListener)
+                .getActiveNotifications();
+    }
+
     private MediaProjectionInfo createMediaProjectionInfo() {
         return new MediaProjectionInfo(SCREEN_RECORDER_PACKAGE, Process.myUserHandle(), null);
     }
@@ -493,6 +501,17 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
     @Test
     public void nlsOnListenerConnected_noNotifications_noBlockedPackages() {
         setupNoNotifications();
+        mMediaProjectionCallbackCaptor.getValue().onStart(createMediaProjectionInfo());
+        Mockito.reset(mWindowManager);
+
+        mSensitiveContentProtectionManagerService.mNotificationListener.onListenerConnected();
+
+        verifyZeroInteractions(mWindowManager);
+    }
+
+    @Test
+    public void nlsOnListenerConnected_nullNotifications_noBlockedPackages() {
+        setupNullNotifications();
         mMediaProjectionCallbackCaptor.getValue().onStart(createMediaProjectionInfo());
         Mockito.reset(mWindowManager);
 
