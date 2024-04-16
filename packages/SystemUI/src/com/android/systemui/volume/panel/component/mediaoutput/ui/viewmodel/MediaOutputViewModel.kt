@@ -27,6 +27,7 @@ import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputInteractor
 import com.android.systemui.volume.panel.component.mediaoutput.shared.model.SessionWithPlayback
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
+import com.android.systemui.volume.panel.shared.model.Result
 import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -34,6 +35,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -53,32 +55,40 @@ constructor(
     private val uiEventLogger: UiEventLogger,
 ) {
 
-    private val sessionWithPlayback: StateFlow<SessionWithPlayback?> =
+    private val sessionWithPlayback: StateFlow<Result<SessionWithPlayback?>> =
         interactor.defaultActiveMediaSession
             .flatMapLatest { session ->
                 if (session == null) {
-                    flowOf(null)
+                    flowOf(Result.Data<SessionWithPlayback?>(null))
                 } else {
-                    mediaDeviceSessionInteractor.playbackState(session).map { playback ->
-                        playback?.let { SessionWithPlayback(session, it) }
-                    }
+                    mediaDeviceSessionInteractor
+                        .playbackState(session)
+                        .map { playback ->
+                            playback?.let {
+                                Result.Data<SessionWithPlayback?>(SessionWithPlayback(session, it))
+                            }
+                        }
+                        .filterNotNull()
                 }
             }
             .stateIn(
                 coroutineScope,
                 SharingStarted.Eagerly,
-                null,
+                Result.Loading(),
             )
 
     val connectedDeviceViewModel: StateFlow<ConnectedDeviceViewModel?> =
         combine(sessionWithPlayback, interactor.currentConnectedDevice) {
                 mediaDeviceSession,
                 currentConnectedDevice ->
+                if (mediaDeviceSession !is Result.Data) {
+                    return@combine null
+                }
                 ConnectedDeviceViewModel(
-                    if (mediaDeviceSession?.playback?.isActive == true) {
+                    if (mediaDeviceSession.data?.playback?.isActive == true) {
                         context.getString(
                             R.string.media_output_label_title,
-                            mediaDeviceSession.session.appLabel
+                            mediaDeviceSession.data.session.appLabel
                         )
                     } else {
                         context.getString(R.string.media_output_title_without_playing)
@@ -96,7 +106,10 @@ constructor(
         combine(sessionWithPlayback, interactor.currentConnectedDevice) {
                 mediaDeviceSession,
                 currentConnectedDevice ->
-                if (mediaDeviceSession?.playback?.isActive == true) {
+                if (mediaDeviceSession !is Result.Data) {
+                    return@combine null
+                }
+                if (mediaDeviceSession.data?.playback?.isActive == true) {
                     val icon =
                         currentConnectedDevice?.icon?.let { Icon.Loaded(it, null) }
                             ?: Icon.Resource(
@@ -130,6 +143,7 @@ constructor(
 
     fun onBarClick(expandable: Expandable) {
         uiEventLogger.log(VolumePanelUiEvent.VOLUME_PANEL_MEDIA_OUTPUT_CLICKED)
-        actionsInteractor.onBarClick(sessionWithPlayback.value, expandable)
+        val result = sessionWithPlayback.value
+        actionsInteractor.onBarClick((result as? Result.Data)?.data, expandable)
     }
 }
