@@ -237,7 +237,8 @@ class UserAspectRatioSettingsWindowManager extends CompatUIWindowManagerAbstract
         final int letterboxWidth = taskInfo.topActivityLetterboxWidth;
         // App is not visibly letterboxed if it covers status bar/bottom insets or matches the
         // stable bounds, so don't show the button
-        if (stableBounds.height() <= letterboxHeight && stableBounds.width() <= letterboxWidth) {
+        if (stableBounds.height() <= letterboxHeight && stableBounds.width() <= letterboxWidth
+                && !taskInfo.isUserFullscreenOverrideEnabled) {
             return false;
         }
 
