@@ -487,6 +487,14 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - 完了まであと <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充電が最適化されています"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充電中"</string>
+    <!-- no translation found for power_fast_charging_duration_v2 (3797735998640359490) -->
+    <skip />
+    <!-- no translation found for power_charging_duration_v2 (2938998284074003248) -->
+    <skip />
+    <!-- no translation found for power_remaining_charging_duration_only_v2 (5358176435722950193) -->
+    <skip />
+    <!-- no translation found for power_remaining_fast_charging_duration_only_v2 (6270950195810579563) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"不明"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"充電中"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"急速充電中"</string>
@@ -498,6 +506,10 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"充電が完了しました"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"充電完了"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"充電を一時停止しています"</string>
+    <!-- no translation found for battery_info_status_charging_v2 (6118522107222245505) -->
+    <skip />
+    <!-- no translation found for battery_info_status_charging_fast_v2 (1825439848151256589) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"管理者により管理されています"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"制限付き設定によって管理されています"</string>
     <string name="disabled" msgid="8017887509554714950">"無効"</string>
@@ -655,9 +667,9 @@
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"終了時にアクティビティを保存、削除できます"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"アクティビティは、リセットして今すぐ削除するか、終了時に保存または削除できます"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"写真を選択"</string>
-    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"間違えた回数が上限を超えました。このデバイスのデータが削除されます。"</string>
-    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"間違えた回数が上限を超えました。このユーザーが削除されます。"</string>
-    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"間違えた回数が上限を超えました。この仕事用プロファイルと関連データが削除されます。"</string>
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"試行回数が上限に達しました。このデバイスのデータが削除されます。"</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"試行回数が上限に達しました。このユーザーが削除されます。"</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"試行回数が上限に達しました。この仕事用プロファイルと関連データが削除されます。"</string>
     <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"閉じる"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"デバイスのデフォルト"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"無効"</string>
@@ -684,6 +696,8 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"電波状態:レベル1"</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"電波状態:レベル2"</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"電波状態:レベル3"</string>
+    <!-- no translation found for accessibility_phone_four_bars (4477202400261338403) -->
+    <skip />
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"電波状態:フル"</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"データ信号:なし"</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"データ信号:レベル1"</string>

@@ -192,7 +192,7 @@
     <string name="launch_defaults_none" msgid="8049374306261262709">"कोई डिफ़ॉल्‍ट सेट नहीं है"</string>
     <string name="tts_settings" msgid="8130616705989351312">"लेख से बोली सेटिंग"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"लिखे गए शब्दों को सुनने की सुविधा"</string>
-    <string name="tts_default_rate_title" msgid="3964187817364304022">"बोलने की दर"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"बोलने की स्पीड"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"बोलने की गति तय करें"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"पिच"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"कृत्रिम बोली के लहजे को प्रभावित करता है"</string>
@@ -487,6 +487,14 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> में बैटरी पूरी चार्ज हो जाएगी"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्जिंग को ऑप्टिमाइज़ किया गया"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्ज हो रही है"</string>
+    <!-- no translation found for power_fast_charging_duration_v2 (3797735998640359490) -->
+    <skip />
+    <!-- no translation found for power_charging_duration_v2 (2938998284074003248) -->
+    <skip />
+    <!-- no translation found for power_remaining_charging_duration_only_v2 (5358176435722950193) -->
+    <skip />
+    <!-- no translation found for power_remaining_fast_charging_duration_only_v2 (6270950195810579563) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज हो रही है"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"तेज़ चार्ज हो रही है"</string>
@@ -498,12 +506,16 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"बैटरी चार्ज हो गई"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"बैटरी पूरी चार्ज है"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"फ़ोन को चार्ज होने से रोक दिया गया है"</string>
+    <!-- no translation found for battery_info_status_charging_v2 (6118522107222245505) -->
+    <skip />
+    <!-- no translation found for battery_info_status_charging_fast_v2 (1825439848151256589) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"इसका नियंत्रण एडमिन के पास है"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"इसे पाबंदी मोड वाली सेटिंग से कंट्रोल किया जाता है"</string>
     <string name="disabled" msgid="8017887509554714950">"बंद किया गया"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"अनुमति है"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"अनुमति नहीं है"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"अज्ञात ऐप्लिकेशन इंस्टॉल करने की अनुमति देना"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"अनजान ऐप्लिकेशन इंस्टॉल करने की अनुमति"</string>
     <string name="home" msgid="973834627243661438">"सेटिंग का होम पेज"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -684,6 +696,8 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"फ़ोन एक बार."</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"फ़ोन दो बार."</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"फोन तीन बार."</string>
+    <!-- no translation found for accessibility_phone_four_bars (4477202400261338403) -->
+    <skip />
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"फ़ोन सि‍ग्‍नल पूरा."</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"कोई डेटा नहीं."</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"डेटा एक बार."</string>

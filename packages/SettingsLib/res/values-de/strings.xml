@@ -487,6 +487,14 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – voll in <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – Laden wird optimiert"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – Wird geladen"</string>
+    <!-- no translation found for power_fast_charging_duration_v2 (3797735998640359490) -->
+    <skip />
+    <!-- no translation found for power_charging_duration_v2 (2938998284074003248) -->
+    <skip />
+    <!-- no translation found for power_remaining_charging_duration_only_v2 (5358176435722950193) -->
+    <skip />
+    <!-- no translation found for power_remaining_fast_charging_duration_only_v2 (6270950195810579563) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Unbekannt"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Wird aufgeladen"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Schnelles Aufladen"</string>
@@ -498,6 +506,10 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"Aufgeladen"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Vollständig geladen"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Ladevorgang angehalten"</string>
+    <!-- no translation found for battery_info_status_charging_v2 (6118522107222245505) -->
+    <skip />
+    <!-- no translation found for battery_info_status_charging_fast_v2 (1825439848151256589) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Durch den Administrator verwaltet"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Gesteuert durch eingeschränkte Einstellung"</string>
     <string name="disabled" msgid="8017887509554714950">"Deaktiviert"</string>
@@ -582,7 +594,7 @@
     <string name="tv_media_transfer_default" msgid="5403053145185843843">"Standardeinstellung: Fernseher"</string>
     <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI-Ausgang"</string>
     <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Interne Lautsprecher"</string>
-    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Verbindung kann nicht hergestellt werden. Schalte das Gerät aus &amp; und wieder ein."</string>
+    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Verbindung kann nicht hergestellt werden. Schalte das Gerät aus und wieder ein."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Netzbetriebenes Audiogerät"</string>
     <string name="help_label" msgid="3528360748637781274">"Hilfe und Feedback"</string>
     <string name="storage_category" msgid="2287342585424631813">"Speicher"</string>
@@ -684,6 +696,8 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"Telefonsignal - ein Balken"</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"Telefonsignal - zwei Balken"</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"Telefonsignal - drei Balken"</string>
+    <!-- no translation found for accessibility_phone_four_bars (4477202400261338403) -->
+    <skip />
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"Volle Telefonsignalstärke"</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"Keine Daten"</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"Datensignal - ein Balken"</string>
