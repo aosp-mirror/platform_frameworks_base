@@ -62,11 +62,10 @@ import com.android.compose.animation.scene.TransitionState
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.animateSceneFloatAsState
+import com.android.compose.modifiers.padding
 import com.android.compose.modifiers.thenIf
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.fold.ui.composable.unfoldHorizontalPadding
-import com.android.systemui.fold.ui.composable.unfoldTranslation
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
@@ -291,7 +290,18 @@ private fun SceneScope.SplitShade(
         remember(lifecycleOwner, viewModel) { viewModel.getFooterActionsViewModel(lifecycleOwner) }
     val tileSquishiness by
         animateSceneFloatAsState(value = 1f, key = QuickSettings.SharedValues.TilesSquishiness)
-    val unfoldTransitionProgress by viewModel.unfoldTransitionProgress.collectAsState()
+    val unfoldTranslationXForStartSide by
+        viewModel
+            .unfoldTranslationX(
+                isOnStartSide = true,
+            )
+            .collectAsState(0f)
+    val unfoldTranslationXForEndSide by
+        viewModel
+            .unfoldTranslationX(
+                isOnStartSide = false,
+            )
+            .collectAsState(0f)
 
     val navBarBottomHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val density = LocalDensity.current
@@ -340,21 +350,16 @@ private fun SceneScope.SplitShade(
                 modifier =
                     Modifier.padding(horizontal = Shade.Dimensions.HorizontalPadding)
                         .then(brightnessMirrorShowingModifier)
-                        .unfoldHorizontalPadding(
-                            fullPadding = dimensionResource(R.dimen.notification_side_paddings),
-                        ) {
-                            unfoldTransitionProgress
-                        }
+                        .padding(
+                            horizontal = { unfoldTranslationXForStartSide.roundToInt() },
+                        )
             )
 
             Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
                 Box(
                     modifier =
-                        Modifier.weight(1f).unfoldTranslation(
-                            startSide = true,
-                            fullTranslation = dimensionResource(R.dimen.notification_side_paddings),
-                        ) {
-                            unfoldTransitionProgress
+                        Modifier.weight(1f).graphicsLayer {
+                            translationX = unfoldTranslationXForStartSide
                         },
                 ) {
                     BrightnessMirror(
@@ -424,15 +429,6 @@ private fun SceneScope.SplitShade(
                             .fillMaxHeight()
                             .padding(bottom = navBarBottomHeight)
                             .then(brightnessMirrorShowingModifier)
-                            .unfoldTranslation(
-                                startSide = false,
-                                fullTranslation =
-                                    dimensionResource(
-                                        R.dimen.notification_side_paddings,
-                                    ),
-                            ) {
-                                unfoldTransitionProgress
-                            },
                 )
             }
         }

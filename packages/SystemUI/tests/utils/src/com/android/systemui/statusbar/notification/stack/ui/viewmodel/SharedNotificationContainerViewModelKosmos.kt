@@ -46,6 +46,7 @@ import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
+import com.android.systemui.unfold.domain.interactor.unfoldTransitionInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -81,5 +82,6 @@ val Kosmos.sharedNotificationContainerViewModel by Fixture {
         primaryBouncerToLockscreenTransitionViewModel =
             primaryBouncerToLockscreenTransitionViewModel,
         aodBurnInViewModel = aodBurnInViewModel,
+        unfoldTransitionInteractor = unfoldTransitionInteractor,
     )
 }

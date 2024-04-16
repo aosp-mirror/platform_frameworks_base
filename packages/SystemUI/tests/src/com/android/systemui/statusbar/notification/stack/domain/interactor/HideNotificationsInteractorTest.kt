@@ -33,7 +33,7 @@ import com.android.systemui.power.shared.model.WakefulnessState.STARTING_TO_SLEE
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.unfold.FakeUnfoldTransitionProvider
 import com.android.systemui.unfold.data.repository.UnfoldTransitionRepositoryImpl
-import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractorImpl
+import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
 import com.android.systemui.util.animation.data.repository.FakeAnimationStatusRepository
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
@@ -69,11 +69,6 @@ open class HideNotificationsInteractorTest : SysuiTestCase() {
             statusBarStateController = mock()
         )
 
-    private val unfoldTransitionRepository =
-        UnfoldTransitionRepositoryImpl(Optional.of(unfoldTransitionProgressProvider))
-    private val unfoldTransitionInteractor =
-        UnfoldTransitionInteractorImpl(unfoldTransitionRepository)
-
     private val configurationRepository =
         ConfigurationRepositoryImpl(
             configurationController,
@@ -82,6 +77,11 @@ open class HideNotificationsInteractorTest : SysuiTestCase() {
             mock()
         )
     private val configurationInteractor = ConfigurationInteractor(configurationRepository)
+
+    private val unfoldTransitionRepository =
+        UnfoldTransitionRepositoryImpl(Optional.of(unfoldTransitionProgressProvider))
+    private val unfoldTransitionInteractor =
+        UnfoldTransitionInteractor(unfoldTransitionRepository, configurationInteractor)
 
     private lateinit var configuration: Configuration
     private lateinit var underTest: HideNotificationsInteractor

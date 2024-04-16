@@ -65,7 +65,7 @@ constructor(
     private val footerActionsViewModelFactory: FooterActionsViewModel.Factory,
     private val footerActionsController: FooterActionsController,
     private val sceneInteractor: SceneInteractor,
-    unfoldTransitionInteractor: UnfoldTransitionInteractor,
+    private val unfoldTransitionInteractor: UnfoldTransitionInteractor,
 ) {
     val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
         combine(
@@ -109,14 +109,12 @@ constructor(
     val shadeMode: StateFlow<ShadeMode> = shadeInteractor.shadeMode
 
     /**
-     * The unfold transition progress. When fully-unfolded, this is `1` and fully folded, it's `0`.
+     * Amount of X-axis translation to apply to various elements as the unfolded foldable is folded
+     * slightly, in pixels.
      */
-    val unfoldTransitionProgress: StateFlow<Float> =
-        unfoldTransitionInteractor.unfoldProgress.stateIn(
-            scope = applicationScope,
-            started = SharingStarted.WhileSubscribed(),
-            initialValue = 1f
-        )
+    fun unfoldTranslationX(isOnStartSide: Boolean): Flow<Float> {
+        return unfoldTransitionInteractor.unfoldTranslationX(isOnStartSide)
+    }
 
     /** Notifies that some content in the shade was clicked. */
     fun onContentClicked() {
