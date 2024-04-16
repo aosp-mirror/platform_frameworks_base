@@ -1273,5 +1273,5 @@
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Baklýsing lyklaborðs"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Stig %1$d af %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Heimastýringar"</string>
-    <string name="home_controls_dream_description" msgid="4644150952104035789">"Fáðu skjótan aðgang að heimastýringum með því að stilla þær sem skjávara"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"Fáðu skjótan aðgang að heimastýringum sem skjávara"</string>
 </resources>

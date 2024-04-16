@@ -706,7 +706,7 @@
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"Zenbaki-teklatuko <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"Kendu eranskina"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"Sistema"</string>
-    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"Hasierako pantaila"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"Orri nagusia"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Azkenaldikoak"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Atzera"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Jakinarazpenak"</string>
@@ -1272,6 +1272,6 @@
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) aplikazioak erabili du duela gutxi"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Teklatuaren hondoko argia"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d/%2$d maila"</string>
-    <string name="home_controls_dream_label" msgid="6567105701292324257">"Etxeko gailuak kontrolatzeko aukerak"</string>
-    <string name="home_controls_dream_description" msgid="4644150952104035789">"Atzitu etxeko gailuak kontrolatzeko aukerak pantaila-babesletik"</string>
+    <string name="home_controls_dream_label" msgid="6567105701292324257">"Etxeko gailuen kontrola"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"Kontrolatu etxeko gailuak pantaila-babesletik"</string>
 </resources>

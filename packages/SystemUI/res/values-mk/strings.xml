@@ -1273,5 +1273,5 @@
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Осветлување на тастатура"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Ниво %1$d од %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Контроли за домот"</string>
-    <string name="home_controls_dream_description" msgid="4644150952104035789">"Брзо прист. до контр. за дом. како штедач на екран"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"Контролите за домот како штедач на екран"</string>
 </resources>
