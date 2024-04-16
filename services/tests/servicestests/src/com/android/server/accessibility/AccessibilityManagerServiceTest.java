@@ -110,6 +110,7 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -989,6 +990,9 @@ public class AccessibilityManagerServiceTest {
     @Test
     public void enableShortcutsForTargets_enableSoftwareShortcut_shortcutTurnedOn()
             throws Exception {
+        // TODO(b/111889696): Remove the user 0 assumption once we support multi-user
+        Assume.assumeTrue("The test is setup to run as a user 0",
+                isSameCurrentUser(mA11yms, mTestableContext));
         mockManageAccessibilityGranted(mTestableContext);
         setupShortcutTargetServices();
         String target = TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString();
@@ -1008,6 +1012,9 @@ public class AccessibilityManagerServiceTest {
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_HARDWARE_SHORTCUT_DISABLES_WARNING)
     public void enableHardwareShortcutsForTargets_shortcutDialogSetting_isShown() {
+        // TODO(b/111889696): Remove the user 0 assumption once we support multi-user
+        Assume.assumeTrue("The test is setup to run as a user 0",
+                isSameCurrentUser(mA11yms, mTestableContext));
         Settings.Secure.putInt(
                 mTestableContext.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
@@ -1035,6 +1042,9 @@ public class AccessibilityManagerServiceTest {
     @Test
     public void enableShortcutsForTargets_disableSoftwareShortcut_shortcutTurnedOff()
             throws Exception {
+        // TODO(b/111889696): Remove the user 0 assumption once we support multi-user
+        Assume.assumeTrue("The test is setup to run as a user 0",
+                isSameCurrentUser(mA11yms, mTestableContext));
         String target = TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString();
         enableShortcutsForTargets_enableSoftwareShortcut_shortcutTurnedOn();
 
@@ -1052,6 +1062,9 @@ public class AccessibilityManagerServiceTest {
 
     @Test
     public void enableShortcutsForTargets_enableSoftwareShortcutWithMagnification_menuSizeIncreased() {
+        // TODO(b/111889696): Remove the user 0 assumption once we support multi-user
+        Assume.assumeTrue("The test is setup to run as a user 0",
+                isSameCurrentUser(mA11yms, mTestableContext));
         mockManageAccessibilityGranted(mTestableContext);
 
         mA11yms.enableShortcutsForTargets(
@@ -1095,6 +1108,9 @@ public class AccessibilityManagerServiceTest {
     @Test
     public void enableShortcutsForTargets_enableAlwaysOnServiceSoftwareShortcut_turnsOnAlwaysOnService()
             throws Exception {
+        // TODO(b/111889696): Remove the user 0 assumption once we support multi-user
+        Assume.assumeTrue("The test is setup to run as a user 0",
+                isSameCurrentUser(mA11yms, mTestableContext));
         mockManageAccessibilityGranted(mTestableContext);
         setupShortcutTargetServices();
 
@@ -1115,6 +1131,9 @@ public class AccessibilityManagerServiceTest {
     @Test
     public void enableShortcutsForTargets_disableAlwaysOnServiceSoftwareShortcut_turnsOffAlwaysOnService()
             throws Exception {
+        // TODO(b/111889696): Remove the user 0 assumption once we support multi-user
+        Assume.assumeTrue("The test is setup to run as a user 0",
+                isSameCurrentUser(mA11yms, mTestableContext));
         enableShortcutsForTargets_enableAlwaysOnServiceSoftwareShortcut_turnsOnAlwaysOnService();
 
         mA11yms.enableShortcutsForTargets(
@@ -1154,6 +1173,9 @@ public class AccessibilityManagerServiceTest {
     @Test
     public void enableShortcutsForTargets_disableStandardServiceSoftwareShortcutWithServiceOn_wontTurnOffService()
             throws Exception {
+        // TODO(b/111889696): Remove the user 0 assumption once we support multi-user
+        Assume.assumeTrue("The test is setup to run as a user 0",
+                isSameCurrentUser(mA11yms, mTestableContext));
         enableShortcutsForTargets_enableStandardServiceSoftwareShortcut_wontTurnOnService();
         AccessibilityUtils.setAccessibilityServiceState(
                 mTestableContext, TARGET_STANDARD_A11Y_SERVICE, /* enabled= */ true);
@@ -1174,6 +1196,9 @@ public class AccessibilityManagerServiceTest {
 
     @Test
     public void enableShortcutsForTargets_enableTripleTapShortcut_settingUpdated() {
+        // TODO(b/111889696): Remove the user 0 assumption once we support multi-user
+        Assume.assumeTrue("The test is setup to run as a user 0",
+                isSameCurrentUser(mA11yms, mTestableContext));
         mockManageAccessibilityGranted(mTestableContext);
 
         mA11yms.enableShortcutsForTargets(
@@ -1193,6 +1218,9 @@ public class AccessibilityManagerServiceTest {
 
     @Test
     public void enableShortcutsForTargets_disableTripleTapShortcut_settingUpdated() {
+        // TODO(b/111889696): Remove the user 0 assumption once we support multi-user
+        Assume.assumeTrue("The test is setup to run as a user 0",
+                isSameCurrentUser(mA11yms, mTestableContext));
         enableShortcutsForTargets_enableTripleTapShortcut_settingUpdated();
 
         mA11yms.enableShortcutsForTargets(
@@ -1211,6 +1239,9 @@ public class AccessibilityManagerServiceTest {
 
     @Test
     public void enableShortcutsForTargets_enableMultiFingerMultiTapsShortcut_settingUpdated() {
+        // TODO(b/111889696): Remove the user 0 assumption once we support multi-user
+        Assume.assumeTrue("The test is setup to run as a user 0",
+                isSameCurrentUser(mA11yms, mTestableContext));
         mockManageAccessibilityGranted(mTestableContext);
 
         mA11yms.enableShortcutsForTargets(
@@ -1230,6 +1261,9 @@ public class AccessibilityManagerServiceTest {
 
     @Test
     public void enableShortcutsForTargets_disableMultiFingerMultiTapsShortcut_settingUpdated() {
+        // TODO(b/111889696): Remove the user 0 assumption once we support multi-user
+        Assume.assumeTrue("The test is setup to run as a user 0",
+                isSameCurrentUser(mA11yms, mTestableContext));
         enableShortcutsForTargets_enableMultiFingerMultiTapsShortcut_settingUpdated();
 
         mA11yms.enableShortcutsForTargets(
@@ -1249,6 +1283,9 @@ public class AccessibilityManagerServiceTest {
 
     @Test
     public void enableShortcutsForTargets_enableVolumeKeysShortcut_shortcutSet() {
+        // TODO(b/111889696): Remove the user 0 assumption once we support multi-user
+        Assume.assumeTrue("The test is setup to run as a user 0",
+                isSameCurrentUser(mA11yms, mTestableContext));
         mockManageAccessibilityGranted(mTestableContext);
         setupShortcutTargetServices();
 
@@ -1268,6 +1305,9 @@ public class AccessibilityManagerServiceTest {
 
     @Test
     public void enableShortcutsForTargets_disableVolumeKeysShortcut_shortcutNotSet() {
+        // TODO(b/111889696): Remove the user 0 assumption once we support multi-user
+        Assume.assumeTrue("The test is setup to run as a user 0",
+                isSameCurrentUser(mA11yms, mTestableContext));
         enableShortcutsForTargets_enableVolumeKeysShortcut_shortcutSet();
 
         mA11yms.enableShortcutsForTargets(
@@ -1286,6 +1326,9 @@ public class AccessibilityManagerServiceTest {
 
     @Test
     public void enableShortcutsForTargets_enableQuickSettings_shortcutSet() {
+        // TODO(b/111889696): Remove the user 0 assumption once we support multi-user
+        Assume.assumeTrue("The test is setup to run as a user 0",
+                isSameCurrentUser(mA11yms, mTestableContext));
         mockManageAccessibilityGranted(mTestableContext);
         setupShortcutTargetServices();
 
@@ -1311,6 +1354,9 @@ public class AccessibilityManagerServiceTest {
 
     @Test
     public void enableShortcutsForTargets_disableQuickSettings_shortcutNotSet() {
+        // TODO(b/111889696): Remove the user 0 assumption once we support multi-user
+        Assume.assumeTrue("The test is setup to run as a user 0",
+                isSameCurrentUser(mA11yms, mTestableContext));
         enableShortcutsForTargets_enableQuickSettings_shortcutSet();
 
         mA11yms.enableShortcutsForTargets(
@@ -1694,5 +1740,9 @@ public class AccessibilityManagerServiceTest {
         Map<String, List<BroadcastReceiver>> getBroadcastReceivers() {
             return mBroadcastReceivers;
         }
+    }
+
+    private static boolean isSameCurrentUser(AccessibilityManagerService service, Context context) {
+        return service.getCurrentUserIdLocked() == context.getUserId();
     }
 }
