@@ -150,6 +150,12 @@ static void write_message(stringstream& text, const DescriptorProto& message,
         write_field(text, message.field(i), indented);
     }
 
+    // Extensions
+    N = message.extension_size();
+    for (int i = 0; i < N; i++) {
+        write_field(text, message.extension(i), indented);
+    }
+
     text << indent << "}" << endl;
     text << endl;
 }
