@@ -16,14 +16,16 @@
 
 package com.android.internal.protolog;
 
-import static android.internal.perfetto.protos.PerfettoTrace.DataSourceConfig.PROTOLOG_CONFIG;
-import static android.internal.perfetto.protos.PerfettoTrace.ProtoLogConfig.GROUP_OVERRIDES;
-import static android.internal.perfetto.protos.PerfettoTrace.ProtoLogConfig.TRACING_MODE;
-import static android.internal.perfetto.protos.PerfettoTrace.ProtoLogGroup.COLLECT_STACKTRACE;
-import static android.internal.perfetto.protos.PerfettoTrace.ProtoLogGroup.GROUP_NAME;
-import static android.internal.perfetto.protos.PerfettoTrace.ProtoLogGroup.LOG_FROM;
+import static android.internal.perfetto.protos.ProtologConfig.ProtoLogConfig.DEFAULT;
+import static android.internal.perfetto.protos.ProtologConfig.ProtoLogConfig.ENABLE_ALL;
+import static android.internal.perfetto.protos.ProtologConfig.ProtoLogConfig.GROUP_OVERRIDES;
+import static android.internal.perfetto.protos.ProtologConfig.ProtoLogConfig.TRACING_MODE;
+import static android.internal.perfetto.protos.ProtologConfig.ProtoLogGroup.COLLECT_STACKTRACE;
+import static android.internal.perfetto.protos.ProtologConfig.ProtoLogGroup.GROUP_NAME;
+import static android.internal.perfetto.protos.ProtologConfig.ProtoLogGroup.LOG_FROM;
 
-import android.internal.perfetto.protos.PerfettoTrace;
+import android.internal.perfetto.protos.DataSourceConfigOuterClass.DataSourceConfig;
+import android.internal.perfetto.protos.ProtologCommon;
 import android.tracing.perfetto.CreateIncrementalStateArgs;
 import android.tracing.perfetto.CreateTlsStateArgs;
 import android.tracing.perfetto.DataSource;
@@ -65,7 +67,7 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
         try {
             while (configStream.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
                 try {
-                    if (configStream.getFieldNumber() == (int) PROTOLOG_CONFIG) {
+                    if (configStream.getFieldNumber() == (int) DataSourceConfig.PROTOLOG_CONFIG) {
                         if (config != null) {
                             throw new RuntimeException("ProtoLog config already set in loop");
                         }
@@ -179,7 +181,7 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
 
     private ProtoLogConfig readProtoLogConfig(ProtoInputStream configStream)
             throws IOException {
-        final long config_token = configStream.start(PROTOLOG_CONFIG);
+        final long config_token = configStream.start(DataSourceConfig.PROTOLOG_CONFIG);
 
         LogLevel defaultLogFromLevel = LogLevel.WTF;
         final Map<String, GroupConfig> groupConfigs = new HashMap<>();
@@ -188,9 +190,9 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
             if (configStream.getFieldNumber() == (int) TRACING_MODE) {
                 int tracingMode = configStream.readInt(TRACING_MODE);
                 switch (tracingMode) {
-                    case PerfettoTrace.ProtoLogConfig.DEFAULT:
+                    case DEFAULT:
                         break;
-                    case PerfettoTrace.ProtoLogConfig.ENABLE_ALL:
+                    case ENABLE_ALL:
                         defaultLogFromLevel = LogLevel.DEBUG;
                         break;
                     default:
@@ -210,27 +212,27 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
                     if (configStream.getFieldNumber() == (int) LOG_FROM) {
                         final int logFromInt = configStream.readInt(LOG_FROM);
                         switch (logFromInt) {
-                            case (PerfettoTrace.PROTOLOG_LEVEL_DEBUG): {
+                            case (ProtologCommon.PROTOLOG_LEVEL_DEBUG): {
                                 logFromLevel = LogLevel.DEBUG;
                                 break;
                             }
-                            case (PerfettoTrace.PROTOLOG_LEVEL_VERBOSE): {
+                            case (ProtologCommon.PROTOLOG_LEVEL_VERBOSE): {
                                 logFromLevel = LogLevel.VERBOSE;
                                 break;
                             }
-                            case (PerfettoTrace.PROTOLOG_LEVEL_INFO): {
+                            case (ProtologCommon.PROTOLOG_LEVEL_INFO): {
                                 logFromLevel = LogLevel.INFO;
                                 break;
                             }
-                            case (PerfettoTrace.PROTOLOG_LEVEL_WARN): {
+                            case (ProtologCommon.PROTOLOG_LEVEL_WARN): {
                                 logFromLevel = LogLevel.WARN;
                                 break;
                             }
-                            case (PerfettoTrace.PROTOLOG_LEVEL_ERROR): {
+                            case (ProtologCommon.PROTOLOG_LEVEL_ERROR): {
                                 logFromLevel = LogLevel.ERROR;
                                 break;
                             }
-                            case (PerfettoTrace.PROTOLOG_LEVEL_WTF): {
+                            case (ProtologCommon.PROTOLOG_LEVEL_WTF): {
                                 logFromLevel = LogLevel.WTF;
                                 break;
                             }

@@ -1,8 +1,8 @@
 package com.android.internal.protolog;
 
-import static android.internal.perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.MESSAGES;
-import static android.internal.perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.MessageData.MESSAGE;
-import static android.internal.perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.MessageData.MESSAGE_ID;
+import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MESSAGES;
+import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.MESSAGE;
+import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.MESSAGE_ID;
 
 import android.util.ArrayMap;
 import android.util.proto.ProtoInputStream;
