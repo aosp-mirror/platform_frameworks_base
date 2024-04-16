@@ -21,6 +21,7 @@ import static android.view.InsetsController.ANIMATION_TYPE_HIDE;
 import static android.view.InsetsController.ANIMATION_TYPE_NONE;
 import static android.view.InsetsController.ANIMATION_TYPE_RESIZE;
 import static android.view.InsetsController.ANIMATION_TYPE_SHOW;
+import static android.view.InsetsController.ANIMATION_TYPE_USER;
 import static android.view.InsetsSource.FLAG_ANIMATE_RESIZING;
 import static android.view.InsetsSource.ID_IME;
 import static android.view.InsetsSourceConsumer.ShowResult.IME_SHOW_DELAYED;
@@ -922,6 +923,95 @@ public class InsetsControllerTest {
 
             mController.hide(ime());
             assertFalse(isRequestedVisible(mController, ime()));
+        });
+    }
+
+    @Test
+    public void testImeRequestedVisibleDuringPredictiveBackAnim() {
+        prepareControls();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            // show ime as initial state
+            mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            mController.cancelExistingAnimations(); // fast forward show animation
+            assertTrue(mController.getState().peekSource(ID_IME).isVisible());
+
+            // start control request (for predictive back animation)
+            WindowInsetsAnimationControlListener listener =
+                    mock(WindowInsetsAnimationControlListener.class);
+            mController.controlWindowInsetsAnimation(ime(), /*cancellationSignal*/ null,
+                    listener, /*fromIme*/ false, /*duration*/ -1, /*interpolator*/ null,
+                    ANIMATION_TYPE_USER, /*fromPredictiveBack*/ true);
+
+            // Verify that onReady is called (after next predraw)
+            mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
+            verify(listener).onReady(notNull(), eq(ime()));
+
+            // verify that insets are requested visible during animation
+            assertTrue(isRequestedVisible(mController, ime()));
+        });
+    }
+
+    @Test
+    public void testImeShowRequestCancelsPredictiveBackPostCommitAnim() {
+        prepareControls();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            // show ime as initial state
+            mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            mController.cancelExistingAnimations(); // fast forward show animation
+            mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
+            assertTrue(mController.getState().peekSource(ID_IME).isVisible());
+
+            // start control request (for predictive back animation)
+            WindowInsetsAnimationControlListener listener =
+                    mock(WindowInsetsAnimationControlListener.class);
+            mController.controlWindowInsetsAnimation(ime(), /*cancellationSignal*/ null,
+                    listener, /*fromIme*/ false, /*duration*/ -1, /*interpolator*/ null,
+                    ANIMATION_TYPE_USER, /*fromPredictiveBack*/ true);
+
+            // verify that controller
+            // has ANIMATION_TYPE_USER set for ime()
+            assertEquals(ANIMATION_TYPE_USER, mController.getAnimationType(ime()));
+
+            // verify show request is ignored during pre commit phase of predictive back anim
+            mController.show(ime(), true /* fromIme */, null /* statsToken */);
+            assertEquals(ANIMATION_TYPE_USER, mController.getAnimationType(ime()));
+
+            // verify show request is applied during post commit phase of predictive back anim
+            mController.setPredictiveBackImeHideAnimInProgress(true);
+            mController.show(ime(), true /* fromIme */, null /* statsToken */);
+            assertEquals(ANIMATION_TYPE_SHOW, mController.getAnimationType(ime()));
+
+            // additionally verify that IME ends up visible
+            mController.cancelExistingAnimations();
+            assertTrue(mController.getState().peekSource(ID_IME).isVisible());
+        });
+    }
+
+    @Test
+    public void testImeHideRequestIgnoredDuringPredictiveBackPostCommitAnim() {
+        prepareControls();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            // show ime as initial state
+            mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            mController.cancelExistingAnimations(); // fast forward show animation
+            mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
+            assertTrue(mController.getState().peekSource(ID_IME).isVisible());
+
+            // start control request (for predictive back animation)
+            WindowInsetsAnimationControlListener listener =
+                    mock(WindowInsetsAnimationControlListener.class);
+            mController.controlWindowInsetsAnimation(ime(), /*cancellationSignal*/ null,
+                    listener, /*fromIme*/ false, /*duration*/ -1, /*interpolator*/ null,
+                    ANIMATION_TYPE_USER, /*fromPredictiveBack*/ true);
+
+            // verify that controller has ANIMATION_TYPE_USER set for ime()
+            assertEquals(ANIMATION_TYPE_USER, mController.getAnimationType(ime()));
+
+            // verify hide request is ignored during post commit phase of predictive back anim
+            // since IME is already animating away
+            mController.setPredictiveBackImeHideAnimInProgress(true);
+            mController.hide(ime(), true /* fromIme */, null /* statsToken */);
+            assertEquals(ANIMATION_TYPE_USER, mController.getAnimationType(ime()));
         });
     }
 

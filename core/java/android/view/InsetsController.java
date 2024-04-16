@@ -1028,7 +1028,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         reportRequestedVisibleTypes();
     }
 
-    void setPredictiveBackImeHideAnimInProgress(boolean isInProgress) {
+    @VisibleForTesting(visibility = PACKAGE)
+    public void setPredictiveBackImeHideAnimInProgress(boolean isInProgress) {
         mIsPredictiveBackImeHideAnimInProgress = isInProgress;
     }
 
@@ -1231,7 +1232,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 false /* fromPredictiveBack */);
     }
 
-    void controlWindowInsetsAnimation(@InsetsType int types,
+    @VisibleForTesting(visibility = PACKAGE)
+    public void controlWindowInsetsAnimation(@InsetsType int types,
             @Nullable CancellationSignal cancellationSignal,
             WindowInsetsAnimationControlListener listener,
             boolean fromIme, long durationMs, @Nullable Interpolator interpolator,
@@ -1983,7 +1985,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
     }
 
-    Host getHost() {
+    @VisibleForTesting(visibility = PACKAGE)
+    public Host getHost() {
         return mHost;
     }
 }

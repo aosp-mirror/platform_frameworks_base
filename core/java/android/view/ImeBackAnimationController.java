@@ -63,8 +63,8 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
     private boolean mIsPreCommitAnimationInProgress = false;
     private int mStartRootScrollY = 0;
 
-    public ImeBackAnimationController(ViewRootImpl viewRoot) {
-        mInsetsController = viewRoot.getInsetsController();
+    public ImeBackAnimationController(ViewRootImpl viewRoot, InsetsController insetsController) {
+        mInsetsController = insetsController;
         mViewRoot = viewRoot;
     }
 

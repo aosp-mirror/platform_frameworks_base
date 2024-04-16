@@ -1205,7 +1205,7 @@ public final class ViewRootImpl implements ViewParent,
         // TODO(b/222696368): remove getSfInstance usage and use vsyncId for transactions
         mChoreographer = Choreographer.getInstance();
         mInsetsController = new InsetsController(new ViewRootInsetsControllerHost(this));
-        mImeBackAnimationController = new ImeBackAnimationController(this);
+        mImeBackAnimationController = new ImeBackAnimationController(this, mInsetsController);
         mHandwritingInitiator = new HandwritingInitiator(
                 mViewConfiguration,
                 mContext.getSystemService(InputMethodManager.class));
@@ -5881,11 +5881,17 @@ public final class ViewRootImpl implements ViewParent,
         return handled;
     }
 
-    void setScrollY(int scrollY) {
+    @VisibleForTesting(visibility = PACKAGE)
+    public void setScrollY(int scrollY) {
         if (mScroller != null) {
             mScroller.abortAnimation();
         }
         mScrollY = scrollY;
+    }
+
+    @VisibleForTesting
+    public int getScrollY() {
+        return mScrollY;
     }
 
     /**
