@@ -694,6 +694,13 @@ public class DisplayModeDirector {
     }
 
     /**
+     * Called when external display is ready to be enabled.
+     */
+    public void onExternalDisplayReadyToBeEnabled(int displayId) {
+        mDisplayObserver.onExternalDisplayReadyToBeEnabled(displayId);
+    }
+
+    /**
      * Listens for changes refresh rate coordination.
      */
     public interface DesiredDisplayModeSpecsListener {
@@ -1379,6 +1386,13 @@ public class DisplayModeDirector {
             }
         }
 
+
+        void onExternalDisplayReadyToBeEnabled(int displayId) {
+            DisplayInfo displayInfo = getDisplayInfo(displayId);
+            updateDisplaysPeakRefreshRateAndResolution(displayInfo);
+            addDisplaysSynchronizedPeakRefreshRate(displayInfo);
+        }
+
         @Override
         public void onDisplayAdded(int displayId) {
             updateVrrStatus(displayId);
@@ -1386,8 +1400,6 @@ public class DisplayModeDirector {
             updateDisplayModes(displayId, displayInfo);
             updateLayoutLimitedFrameRate(displayId, displayInfo);
             updateUserSettingDisplayPreferredSize(displayInfo);
-            updateDisplaysPeakRefreshRateAndResolution(displayInfo);
-            addDisplaysSynchronizedPeakRefreshRate(displayInfo);
         }
 
         @Override

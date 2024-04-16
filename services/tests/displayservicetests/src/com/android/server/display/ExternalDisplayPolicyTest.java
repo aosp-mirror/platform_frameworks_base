@@ -157,6 +157,7 @@ public class ExternalDisplayPolicyTest {
         verify(mMockedLogicalDisplayMapper, never()).setDisplayEnabledLocked(any(), anyBoolean());
         verify(mMockedDisplayNotificationManager, times(2))
                 .onHighTemperatureExternalDisplayNotAllowed();
+        verify(mMockedInjector, never()).onExternalDisplayReadyToBeEnabled(anyInt());
     }
 
     @Test
@@ -167,6 +168,7 @@ public class ExternalDisplayPolicyTest {
         verify(mMockedLogicalDisplayMapper, never()).setDisplayEnabledLocked(any(), anyBoolean());
         verify(mMockedDisplayNotificationManager, never())
                 .onHighTemperatureExternalDisplayNotAllowed();
+        verify(mMockedInjector, never()).onExternalDisplayReadyToBeEnabled(anyInt());
     }
 
     @Test
@@ -184,6 +186,7 @@ public class ExternalDisplayPolicyTest {
         // Expected only 1 invocation, upon critical temperature.
         verify(mMockedDisplayNotificationManager).onHighTemperatureExternalDisplayNotAllowed();
         verify(mMockedExternalDisplayStatsService).onDisplayDisabled(eq(EXTERNAL_DISPLAY_ID));
+        verify(mMockedInjector, never()).onExternalDisplayReadyToBeEnabled(anyInt());
     }
 
     @Test
@@ -191,6 +194,7 @@ public class ExternalDisplayPolicyTest {
         mExternalDisplayPolicy.setExternalDisplayEnabledLocked(mMockedLogicalDisplay,
                 /*enabled=*/ true);
         assertDisplaySetEnabled(/*enabled=*/ true);
+        verify(mMockedInjector).onExternalDisplayReadyToBeEnabled(eq(EXTERNAL_DISPLAY_ID));
     }
 
     @Test
