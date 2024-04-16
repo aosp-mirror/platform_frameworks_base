@@ -36,11 +36,8 @@ import android.app.AlarmManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.SensorPrivacyManager;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
-import android.net.NetworkRequest;
 import android.provider.Settings;
+import android.testing.TestableLooper;
 import android.view.View;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -51,6 +48,7 @@ import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.core.FakeLogBuffer;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -72,6 +70,7 @@ import java.util.Optional;
 import java.util.concurrent.Executor;
 
 @SmallTest
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidJUnit4.class)
 public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     private static final String NOTIFICATION_INDICATOR_FORMATTER_STRING =
@@ -79,12 +78,6 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
 
     @Mock
     MockDreamOverlayStatusBarView mView;
-    @Mock
-    ConnectivityManager mConnectivityManager;
-    @Mock
-    NetworkCapabilities mNetworkCapabilities;
-    @Mock
-    Network mNetwork;
     @Mock
     TouchInsetManager.TouchInsetSession mTouchSession;
     @Mock
@@ -121,6 +114,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
 
     private final Executor mMainExecutor = Runnable::run;
 
+    private final FakeWifiRepository mWifiRepository = new FakeWifiRepository();
+
     DreamOverlayStatusBarViewController mController;
 
     @Before
@@ -137,7 +132,6 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 mView,
                 mResources,
                 mMainExecutor,
-                mConnectivityManager,
                 mTouchSession,
                 mAlarmManager,
                 mNextAlarmController,
@@ -149,6 +143,7 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 mDreamOverlayStatusBarItemsProvider,
                 mDreamOverlayStateController,
                 mUserTracker,
+                mWifiRepository,
                 mLogBuffer);
     }
 
@@ -164,39 +159,21 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOnViewAttachedRegistersNetworkCallback() {
+    public void testWifiIconShownWhenWifiUnavailable() {
         mController.onViewAttached();
-        verify(mConnectivityManager)
-                .registerNetworkCallback(any(NetworkRequest.class), any(
-                        ConnectivityManager.NetworkCallback.class));
-    }
+        mController.updateWifiUnavailableStatusIcon(false);
 
-    @Test
-    public void testOnViewAttachedShowsWifiIconWhenWifiUnavailable() {
-        when(mNetworkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI))
-                .thenReturn(false);
-        when(mConnectivityManager.getNetworkCapabilities(any())).thenReturn(mNetworkCapabilities);
-        mController.onViewAttached();
         verify(mView).showIcon(
                 DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, true, null);
     }
 
     @Test
-    public void testOnViewAttachedHidesWifiIconWhenWifiAvailable() {
-        when(mNetworkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI))
-                .thenReturn(true);
-        when(mConnectivityManager.getNetworkCapabilities(any())).thenReturn(mNetworkCapabilities);
+    public void testWifiIconHiddenWhenWifiAvailable() {
         mController.onViewAttached();
+        mController.updateWifiUnavailableStatusIcon(true);
+
         verify(mView).showIcon(
                 DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, false, null);
-    }
-
-    @Test
-    public void testOnViewAttachedShowsWifiIconWhenNetworkCapabilitiesUnavailable() {
-        when(mConnectivityManager.getNetworkCapabilities(any())).thenReturn(null);
-        mController.onViewAttached();
-        verify(mView).showIcon(
-                DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, true, null);
     }
 
     @Test
@@ -282,7 +259,6 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 mView,
                 mResources,
                 mMainExecutor,
-                mConnectivityManager,
                 mTouchSession,
                 mAlarmManager,
                 mNextAlarmController,
@@ -294,6 +270,7 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 mDreamOverlayStatusBarItemsProvider,
                 mDreamOverlayStateController,
                 mUserTracker,
+                mWifiRepository,
                 mLogBuffer);
         controller.onViewAttached();
         verify(mView, never()).showIcon(
@@ -319,13 +296,6 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOnViewDetachedUnregistersNetworkCallback() {
-        mController.onViewDetached();
-        verify(mConnectivityManager)
-                .unregisterNetworkCallback(any(ConnectivityManager.NetworkCallback.class));
-    }
-
-    @Test
     public void testOnViewDetachedRemovesCallbacks() {
         mController.onViewDetached();
         verify(mNextAlarmController).removeCallback(any());
@@ -340,61 +310,6 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     public void testOnViewDetachedRemovesViews() {
         mController.onViewDetached();
         verify(mView).removeAllExtraStatusBarItemViews();
-    }
-
-    @Test
-    public void testWifiIconHiddenWhenWifiBecomesAvailable() {
-        // Make sure wifi starts out unavailable when onViewAttached is called, and then returns
-        // true on the second query.
-        when(mNetworkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI))
-                .thenReturn(false).thenReturn(true);
-        when(mConnectivityManager.getNetworkCapabilities(any())).thenReturn(mNetworkCapabilities);
-        mController.onViewAttached();
-
-        final ArgumentCaptor<ConnectivityManager.NetworkCallback> callbackCapture =
-                ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
-        verify(mConnectivityManager).registerNetworkCallback(any(), callbackCapture.capture());
-        callbackCapture.getValue().onAvailable(mNetwork);
-
-        verify(mView).showIcon(
-                DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, false, null);
-    }
-
-    @Test
-    public void testWifiIconShownWhenWifiBecomesUnavailable() {
-        // Make sure wifi starts out available when onViewAttached is called, then returns false
-        // on the second query.
-        when(mNetworkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI))
-                .thenReturn(true).thenReturn(false);
-        when(mConnectivityManager.getNetworkCapabilities(any())).thenReturn(mNetworkCapabilities);
-        mController.onViewAttached();
-
-        final ArgumentCaptor<ConnectivityManager.NetworkCallback> callbackCapture =
-                ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
-        verify(mConnectivityManager).registerNetworkCallback(any(), callbackCapture.capture());
-        callbackCapture.getValue().onLost(mNetwork);
-
-        verify(mView).showIcon(
-                DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, true, null);
-    }
-
-    @Test
-    public void testWifiIconHiddenWhenCapabilitiesChange() {
-        // Make sure wifi starts out unavailable when onViewAttached is called.
-        when(mNetworkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI))
-                .thenReturn(false);
-        when(mConnectivityManager.getNetworkCapabilities(any())).thenReturn(mNetworkCapabilities);
-        mController.onViewAttached();
-
-        final ArgumentCaptor<ConnectivityManager.NetworkCallback> callbackCapture =
-                ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
-        verify(mConnectivityManager).registerNetworkCallback(any(), callbackCapture.capture());
-        when(mNetworkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI))
-                .thenReturn(true);
-        callbackCapture.getValue().onCapabilitiesChanged(mNetwork, mNetworkCapabilities);
-
-        verify(mView).showIcon(
-                DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, false, null);
     }
 
     @Test
