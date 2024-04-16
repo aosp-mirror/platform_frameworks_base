@@ -1767,7 +1767,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      */
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
         this(context, attrs, context);
-        Log.e(TAG, "This constructor shouldn't be called");
+        // NOTE(b/317503801): Always crash when using the insecure constructor.
+        throw new UnsupportedOperationException("Insecure constructor");
     }
 
     /**

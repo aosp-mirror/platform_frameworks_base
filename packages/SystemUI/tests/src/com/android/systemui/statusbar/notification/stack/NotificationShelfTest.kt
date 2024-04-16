@@ -1,5 +1,6 @@
 package com.android.systemui.statusbar.notification.stack
 
+import android.service.notification.StatusBarNotification
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.LayoutInflater
@@ -14,6 +15,7 @@ import com.android.systemui.res.R
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
@@ -457,8 +459,13 @@ open class NotificationShelfTest : SysuiTestCase() {
         expansionFraction: Float,
         expectedAlpha: Float
     ) {
+        val sbnMock: StatusBarNotification = mock()
+        val mockEntry = mock<NotificationEntry>().apply {
+            whenever(this.sbn).thenReturn(sbnMock)
+        }
+        val row = ExpandableNotificationRow(mContext, null, mockEntry)
         whenever(ambientState.lastVisibleBackgroundChild)
-            .thenReturn(ExpandableNotificationRow(mContext, null))
+            .thenReturn(row)
         whenever(ambientState.isExpansionChanging).thenReturn(true)
         whenever(ambientState.expansionFraction).thenReturn(expansionFraction)
         whenever(hostLayoutController.speedBumpIndex).thenReturn(0)
