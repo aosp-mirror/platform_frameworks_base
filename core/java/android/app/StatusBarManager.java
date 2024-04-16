@@ -21,7 +21,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -44,7 +43,6 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -59,7 +57,6 @@ import com.android.internal.statusbar.IAddTileResultCallback;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.IUndoMediaTransferCallback;
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.internal.util.DataClass;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -632,49 +629,38 @@ public class StatusBarManager {
     }
 
     /**
-     * @deprecated
-     * Disable some features in the status bar.  Pass the bitwise-or of the DISABLE_*
-     * flags. To re-enable everything, pass {@link #DISABLE_NONE}.
-     *
-     * This method is deprecated and callers should use
-     * {@link #requestDisabledComponent(DisableInfo, String)}
+     * Disable some features in the status bar.  Pass the bitwise-or of the DISABLE_* flags.
+     * To re-enable everything, pass {@link #DISABLE_NONE}.
      *
      * @hide
      */
-    @Deprecated
     @UnsupportedAppUsage
     public void disable(int what) {
-        requestDisabledComponent(new DisableInfo(what & DISABLE_MASK, what & DISABLE2_MASK), null);
-    }
-
-    /**
-     * @deprecated
-     * Disable some features in the status bar.  Pass the bitwise-or of the DISABLE_2*
-     * flags. To re-enable everything, pass {@link #DISABLE2_NONE}.
-     *
-     * This method is deprecated and callers should use
-     * {@link #requestDisabledComponent(DisableInfo, String)}
-     *
-     * @hide
-     */
-    @Deprecated
-    @UnsupportedAppUsage
-    public void disable2(int what) {
-        requestDisabledComponent(new DisableInfo(what & DISABLE_MASK, what & DISABLE2_MASK), null);
-    }
-
-    /**
-     * Disable some features in the status bar. Pass a DisableInfo object with the required flags.
-     *
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public void requestDisabledComponent(DisableInfo disableInfo, String reason) {
         try {
             final int userId = Binder.getCallingUserHandle().getIdentifier();
             final IStatusBarService svc = getService();
             if (svc != null) {
-                svc.disableForUser(disableInfo, mToken, mContext.getPackageName(), userId, reason);
+                svc.disableForUser(what, mToken, mContext.getPackageName(), userId);
+            }
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Disable additional status bar features. Pass the bitwise-or of the DISABLE2_* flags.
+     * To re-enable everything, pass {@link #DISABLE_NONE}.
+     *
+     * Warning: Only pass DISABLE2_* flags into this function, do not use DISABLE_* flags.
+     *
+     * @hide
+     */
+    public void disable2(@Disable2Flags int what) {
+        try {
+            final int userId = Binder.getCallingUserHandle().getIdentifier();
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                svc.disable2ForUser(what, mToken, mContext.getPackageName(), userId);
             }
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
@@ -902,9 +888,18 @@ public class StatusBarManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.STATUS_BAR)
     public void setDisabledForSetup(boolean disabled) {
-        int flags1 = disabled ? DEFAULT_SETUP_DISABLE_FLAGS : DISABLE_NONE;
-        DisableInfo info = new DisableInfo(flags1, DISABLE2_NONE);
-        requestDisabledComponent(info, "setDisabledForSetup");
+        try {
+            final int userId = Binder.getCallingUserHandle().getIdentifier();
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                svc.disableForUser(disabled ? DEFAULT_SETUP_DISABLE_FLAGS : DISABLE_NONE,
+                        mToken, mContext.getPackageName(), userId);
+                svc.disable2ForUser(disabled ? DEFAULT_SETUP_DISABLE2_FLAGS : DISABLE2_NONE,
+                        mToken, mContext.getPackageName(), userId);
+            }
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -919,9 +914,16 @@ public class StatusBarManager {
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.STATUS_BAR)
     public void setExpansionDisabledForSimNetworkLock(boolean disabled) {
-        int flags1 = disabled ? DEFAULT_SIM_LOCKED_DISABLED_FLAGS : DISABLE_NONE;
-        DisableInfo info = new DisableInfo(flags1, DISABLE2_NONE);
-        requestDisabledComponent(info, "setExpansionDisabledForSimNetworkLock");
+        try {
+            final int userId = Binder.getCallingUserHandle().getIdentifier();
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                svc.disableForUser(disabled ? DEFAULT_SIM_LOCKED_DISABLED_FLAGS : DISABLE_NONE,
+                        mToken, mContext.getPackageName(), userId);
+            }
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -1313,75 +1315,33 @@ public class StatusBarManager {
      * @hide
      */
     @SystemApi
-    @DataClass
-    public static final class DisableInfo implements Parcelable {
+    public static final class DisableInfo {
 
-        /**
-         * @hide
-         */
         private boolean mStatusBarExpansion;
-        /**
-         * @hide
-         */
         private boolean mNavigateHome;
-        /**
-         * @hide
-         */
         private boolean mNotificationPeeking;
-        /**
-         * @hide
-         */
         private boolean mRecents;
-        /**
-         * @hide
-         */
-        private boolean mBack;
-        /**
-         * @hide
-         */
         private boolean mSearch;
-        /**
-         * @hide
-         */
         private boolean mSystemIcons;
-        /**
-         * @hide
-         */
         private boolean mClock;
-        /**
-         * @hide
-         */
         private boolean mNotificationIcons;
-        /**
-         * @hide
-         */
         private boolean mRotationSuggestion;
-        /**
-         * @hide
-         */
-        private boolean mNotificationTicker;
 
         /** @hide */
-        @SuppressLint("UnflaggedApi")
         public DisableInfo(int flags1, int flags2) {
             mStatusBarExpansion = (flags1 & DISABLE_EXPAND) != 0;
             mNavigateHome = (flags1 & DISABLE_HOME) != 0;
             mNotificationPeeking = (flags1 & DISABLE_NOTIFICATION_ALERTS) != 0;
             mRecents = (flags1 & DISABLE_RECENT) != 0;
-            mBack = (flags1 & DISABLE_BACK) != 0;
             mSearch = (flags1 & DISABLE_SEARCH) != 0;
             mSystemIcons = (flags1 & DISABLE_SYSTEM_INFO) != 0;
             mClock = (flags1 & DISABLE_CLOCK) != 0;
             mNotificationIcons = (flags1 & DISABLE_NOTIFICATION_ICONS) != 0;
-            mNotificationTicker = (flags1 & DISABLE_NOTIFICATION_TICKER) != 0;
             mRotationSuggestion = (flags2 & DISABLE2_ROTATE_SUGGESTIONS) != 0;
         }
 
         /** @hide */
-        @SuppressLint("UnflaggedApi")
-        public DisableInfo() {
-            setEnableAll();
-        }
+        public DisableInfo() {}
 
         /**
          * @return {@code true} if expanding the notification shade is disabled
@@ -1409,7 +1369,7 @@ public class StatusBarManager {
         }
 
         /** * @hide */
-        public void setNavigationHomeDisabled(boolean disabled) {
+        public void setNagivationHomeDisabled(boolean disabled) {
             mNavigateHome = disabled;
         }
 
@@ -1441,20 +1401,6 @@ public class StatusBarManager {
         /**  @hide */
         public void setRecentsDisabled(boolean disabled) {
             mRecents = disabled;
-        }
-
-        /**
-         * @return {@code true} if mBack is disabled
-         *
-         * @hide
-         */
-        public boolean isBackDisabled() {
-            return mBack;
-        }
-
-        /**  @hide */
-        public void setBackDisabled(boolean disabled) {
-            mBack = disabled;
         }
 
         /**
@@ -1515,20 +1461,6 @@ public class StatusBarManager {
         }
 
         /**
-         * @return {@code true} if notification ticker is disabled
-         *
-         * @hide
-         */
-        public boolean isNotificationTickerDisabled() {
-            return mNotificationTicker;
-        }
-
-        /** * @hide */
-        public void setNotificationTickerDisabled(boolean disabled) {
-            mNotificationTicker = disabled;
-        }
-
-        /**
          * Returns whether the rotation suggestion is disabled.
          *
          * @hide
@@ -1538,11 +1470,6 @@ public class StatusBarManager {
             return mRotationSuggestion;
         }
 
-        /** * @hide */
-        public void setRotationSuggestionDisabled(boolean disabled) {
-            mNotificationIcons = disabled;
-        }
-
         /**
          * @return {@code true} if no components are disabled (default state)
          * @hide
@@ -1550,8 +1477,8 @@ public class StatusBarManager {
         @SystemApi
         public boolean areAllComponentsEnabled() {
             return !mStatusBarExpansion && !mNavigateHome && !mNotificationPeeking && !mRecents
-                    && !mBack && !mSearch && !mSystemIcons && !mClock && !mNotificationIcons
-                    && !mNotificationTicker && !mRotationSuggestion;
+                    && !mSearch && !mSystemIcons && !mClock && !mNotificationIcons
+                    && !mRotationSuggestion;
         }
 
         /** @hide */
@@ -1560,12 +1487,10 @@ public class StatusBarManager {
             mNavigateHome = false;
             mNotificationPeeking = false;
             mRecents = false;
-            mBack = false;
             mSearch = false;
             mSystemIcons = false;
             mClock = false;
             mNotificationIcons = false;
-            mNotificationTicker = false;
             mRotationSuggestion = false;
         }
 
@@ -1575,9 +1500,9 @@ public class StatusBarManager {
          * @hide
          */
         public boolean areAllComponentsDisabled() {
-            return mStatusBarExpansion && mNavigateHome && mNotificationPeeking && mRecents && mBack
-                    && mSearch && mSystemIcons && mClock && mNotificationIcons
-                    && mNotificationTicker && mRotationSuggestion;
+            return mStatusBarExpansion && mNavigateHome && mNotificationPeeking
+                    && mRecents && mSearch && mSystemIcons && mClock && mNotificationIcons
+                    && mRotationSuggestion;
         }
 
         /** @hide */
@@ -1586,12 +1511,10 @@ public class StatusBarManager {
             mNavigateHome = true;
             mNotificationPeeking = true;
             mRecents = true;
-            mBack = true;
             mSearch = true;
             mSystemIcons = true;
             mClock = true;
             mNotificationIcons = true;
-            mNotificationTicker = true;
             mRotationSuggestion = true;
         }
 
@@ -1599,19 +1522,16 @@ public class StatusBarManager {
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
-
-            sb.append("Disable Info: ");
+            sb.append("DisableInfo: ");
             sb.append(" mStatusBarExpansion=").append(mStatusBarExpansion ? "disabled" : "enabled");
             sb.append(" mNavigateHome=").append(mNavigateHome ? "disabled" : "enabled");
             sb.append(" mNotificationPeeking=")
                     .append(mNotificationPeeking ? "disabled" : "enabled");
             sb.append(" mRecents=").append(mRecents ? "disabled" : "enabled");
-            sb.append(" mBack=").append(mBack ? "disabled" : "enabled");
             sb.append(" mSearch=").append(mSearch ? "disabled" : "enabled");
             sb.append(" mSystemIcons=").append(mSystemIcons ? "disabled" : "enabled");
             sb.append(" mClock=").append(mClock ? "disabled" : "enabled");
             sb.append(" mNotificationIcons=").append(mNotificationIcons ? "disabled" : "enabled");
-            sb.append(" mNotificationTicker=").append(mNotificationTicker ? "disabled" : "enabled");
             sb.append(" mRotationSuggestion=").append(mRotationSuggestion ? "disabled" : "enabled");
 
             return sb.toString();
@@ -1619,7 +1539,7 @@ public class StatusBarManager {
         }
 
         /**
-         * Convert a DisableInfo to equivalent flags.
+         * Convert a DisableInfo to equivalent flags
          * @return a pair of equivalent disable flags
          *
          * @hide
@@ -1632,278 +1552,14 @@ public class StatusBarManager {
             if (mNavigateHome) disable1 |= DISABLE_HOME;
             if (mNotificationPeeking) disable1 |= DISABLE_NOTIFICATION_ALERTS;
             if (mRecents) disable1 |= DISABLE_RECENT;
-            if (mBack) disable1 |= DISABLE_BACK;
             if (mSearch) disable1 |= DISABLE_SEARCH;
             if (mSystemIcons) disable1 |= DISABLE_SYSTEM_INFO;
             if (mClock) disable1 |= DISABLE_CLOCK;
             if (mNotificationIcons) disable1 |= DISABLE_NOTIFICATION_ICONS;
-            if (mNotificationTicker) disable1 |= DISABLE_NOTIFICATION_TICKER;
             if (mRotationSuggestion) disable2 |= DISABLE2_ROTATE_SUGGESTIONS;
 
             return new Pair<Integer, Integer>(disable1, disable2);
         }
-
-
-
-        // Code below generated by codegen v1.0.23.
-        //
-        // DO NOT MODIFY!
-        // CHECKSTYLE:OFF Generated code
-        //
-        // To regenerate run:
-        // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/app/StatusBarManager.java
-        //
-        // To exclude the generated code from IntelliJ auto-formatting enable (one-time):
-        //   Settings > Editor > Code Style > Formatter Control
-        //@formatter:off
-
-
-        /**
-         * Creates a new DisableInfo.
-         * @hide
-         */
-        @DataClass.Generated.Member
-        public DisableInfo(
-                boolean statusBarExpansion,
-                boolean navigateHome,
-                boolean notificationPeeking,
-                boolean recents,
-                boolean back,
-                boolean search,
-                boolean systemIcons,
-                boolean clock,
-                boolean notificationIcons,
-                boolean rotationSuggestion,
-                boolean notificationTicker) {
-            this.mStatusBarExpansion = statusBarExpansion;
-            this.mNavigateHome = navigateHome;
-            this.mNotificationPeeking = notificationPeeking;
-            this.mRecents = recents;
-            this.mBack = back;
-            this.mSearch = search;
-            this.mSystemIcons = systemIcons;
-            this.mClock = clock;
-            this.mNotificationIcons = notificationIcons;
-            this.mRotationSuggestion = rotationSuggestion;
-            this.mNotificationTicker = notificationTicker;
-
-            // onConstructed(); // You can define this method to get a callback
-        }
-
-        /**
-         * @hide
-         */
-        @DataClass.Generated.Member
-        public boolean isStatusBarExpansion() {
-            return mStatusBarExpansion;
-        }
-
-        /**
-         * @hide
-         */
-        @DataClass.Generated.Member
-        public boolean isNavigateHome() {
-            return mNavigateHome;
-        }
-
-        /**
-         * @hide
-         */
-        @DataClass.Generated.Member
-        public boolean isNotificationPeeking() {
-            return mNotificationPeeking;
-        }
-
-        /**
-         * @hide
-         */
-        @DataClass.Generated.Member
-        public boolean isRecents() {
-            return mRecents;
-        }
-
-        /**
-         * @hide
-         */
-        @DataClass.Generated.Member
-        public boolean isBack() {
-            return mBack;
-        }
-
-        /**
-         * @hide
-         */
-        @DataClass.Generated.Member
-        public boolean isSearch() {
-            return mSearch;
-        }
-
-        /**
-         * @hide
-         */
-        @DataClass.Generated.Member
-        public boolean isSystemIcons() {
-            return mSystemIcons;
-        }
-
-        /**
-         * @hide
-         */
-        @DataClass.Generated.Member
-        public boolean isClock() {
-            return mClock;
-        }
-
-        /**
-         * @hide
-         */
-        @DataClass.Generated.Member
-        public boolean isNotificationIcons() {
-            return mNotificationIcons;
-        }
-
-        /**
-         * @hide
-         */
-        @DataClass.Generated.Member
-        public boolean isRotationSuggestion() {
-            return mRotationSuggestion;
-        }
-
-        /**
-         * @hide
-         */
-        @DataClass.Generated.Member
-        public boolean isNotificationTicker() {
-            return mNotificationTicker;
-        }
-
-        /**
-         * @hide
-         */
-        @SuppressLint("UnflaggedApi")
-        @Override
-        @DataClass.Generated.Member
-        public void writeToParcel(@NonNull android.os.Parcel dest, int flags) {
-            // You can override field parcelling by defining methods like:
-            // void parcelFieldName(Parcel dest, int flags) { ... }
-
-            int flg = 0;
-            if (mStatusBarExpansion) flg |= 0x1;
-            if (mNavigateHome) flg |= 0x2;
-            if (mNotificationPeeking) flg |= 0x4;
-            if (mRecents) flg |= 0x8;
-            if (mBack) flg |= 0x10;
-            if (mSearch) flg |= 0x20;
-            if (mSystemIcons) flg |= 0x40;
-            if (mClock) flg |= 0x80;
-            if (mNotificationIcons) flg |= 0x100;
-            if (mRotationSuggestion) flg |= 0x200;
-            if (mNotificationTicker) flg |= 0x400;
-            dest.writeInt(flg);
-        }
-
-        /**
-         * @hide
-         */
-        @SuppressLint("UnflaggedApi")
-        @Override
-        @DataClass.Generated.Member
-        public int describeContents() { return 0; }
-
-        /** @hide */
-        @SuppressWarnings({"unchecked", "RedundantCast"})
-        @DataClass.Generated.Member
-        /* package-private */ DisableInfo(@NonNull android.os.Parcel in) {
-            // You can override field unparcelling by defining methods like:
-            // static FieldType unparcelFieldName(Parcel in) { ... }
-
-            int flg = in.readInt();
-            boolean statusBarExpansion = (flg & 0x1) != 0;
-            boolean navigateHome = (flg & 0x2) != 0;
-            boolean notificationPeeking = (flg & 0x4) != 0;
-            boolean recents = (flg & 0x8) != 0;
-            boolean back = (flg & 0x10) != 0;
-            boolean search = (flg & 0x20) != 0;
-            boolean systemIcons = (flg & 0x40) != 0;
-            boolean clock = (flg & 0x80) != 0;
-            boolean notificationIcons = (flg & 0x100) != 0;
-            boolean rotationSuggestion = (flg & 0x200) != 0;
-            boolean notificationTicker = (flg & 0x400) != 0;
-
-            this.mStatusBarExpansion = statusBarExpansion;
-            this.mNavigateHome = navigateHome;
-            this.mNotificationPeeking = notificationPeeking;
-            this.mRecents = recents;
-            this.mBack = back;
-            this.mSearch = search;
-            this.mSystemIcons = systemIcons;
-            this.mClock = clock;
-            this.mNotificationIcons = notificationIcons;
-            this.mRotationSuggestion = rotationSuggestion;
-            this.mNotificationTicker = notificationTicker;
-
-            // onConstructed(); // You can define this method to get a callback
-        }
-
-        @DataClass.Generated.Member
-        public static final @NonNull Parcelable.Creator<DisableInfo> CREATOR
-                = new Parcelable.Creator<DisableInfo>() {
-            @Override
-            public DisableInfo[] newArray(int size) {
-                return new DisableInfo[size];
-            }
-
-            @Override
-            public DisableInfo createFromParcel(@NonNull android.os.Parcel in) {
-                return new DisableInfo(in);
-            }
-        };
-
-        @DataClass.Generated(
-                time = 1708625947132L,
-                codegenVersion = "1.0.23",
-                sourceFile = "frameworks/base/core/java/android/app/StatusBarManager.java",
-                inputSignatures = "private  boolean mStatusBarExpansion\nprivate  boolean "
-                        + "mNavigateHome\nprivate  boolean mNotificationPeeking\nprivate  "
-                        + "boolean mRecents\nprivate  boolean mBack\nprivate  boolean mSearch\n"
-                        + "private  boolean mSystemIcons\nprivate  boolean mClock\nprivate  "
-                        + "boolean mNotificationIcons\nprivate  boolean mRotationSuggestion\n"
-                        + "private  boolean mNotificationTicker\npublic "
-                        + "@android.annotation.SystemApi boolean isStatusBarExpansionDisabled()\n"
-                        + "public  void setStatusBarExpansionDisabled(boolean)\npublic "
-                        + "@android.annotation.SystemApi boolean isNavigateToHomeDisabled()\npublic"
-                        + "  void setNavigationHomeDisabled(boolean)\npublic "
-                        + "@android.annotation.SystemApi boolean isNotificationPeekingDisabled()"
-                        + "\npublic  void setNotificationPeekingDisabled(boolean)\npublic "
-                        + "@android.annotation.SystemApi boolean isRecentsDisabled()\npublic  "
-                        + "void setRecentsDisabled(boolean)\npublic  boolean isBackDisabled()"
-                        + "\npublic  void setBackDisabled(boolean)\npublic "
-                        + "@android.annotation.SystemApi boolean isSearchDisabled()\npublic  "
-                        + "void setSearchDisabled(boolean)\npublic  boolean "
-                        + "areSystemIconsDisabled()\npublic  void setSystemIconsDisabled(boolean)\n"
-                        + "public  boolean isClockDisabled()\npublic  "
-                        + "void setClockDisabled(boolean)\npublic  boolean "
-                        + "areNotificationIconsDisabled()\npublic  void "
-                        + "setNotificationIconsDisabled(boolean)\npublic  boolean "
-                        + "isNotificationTickerDisabled()\npublic  void "
-                        + "setNotificationTickerDisabled(boolean)\npublic "
-                        + "@android.annotation.TestApi boolean isRotationSuggestionDisabled()\n"
-                        + "public  void setRotationSuggestionDisabled(boolean)\npublic "
-                        + "@android.annotation.SystemApi boolean areAllComponentsEnabled()\npublic"
-                        + "  void setEnableAll()\npublic  boolean areAllComponentsDisabled()\n"
-                        + "public  void setDisableAll()\npublic @android.annotation.NonNull "
-                        + "@java.lang.Override java.lang.String toString()\npublic  "
-                        + "android.util.Pair<java.lang.Integer,java.lang.Integer> toFlags()\n"
-                        + "class DisableInfo extends java.lang.Object implements "
-                        + "[android.os.Parcelable]\n@com.android.internal.util.DataClass")
-        @Deprecated
-        private void __metadata() {}
-
-
-        //@formatter:on
-        // End of generated code
-
     }
 
     /**

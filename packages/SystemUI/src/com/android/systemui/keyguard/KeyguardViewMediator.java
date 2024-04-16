@@ -16,7 +16,6 @@
 
 package com.android.systemui.keyguard;
 
-import static android.app.StatusBarManager.DISABLE2_NONE;
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
 import static android.provider.Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT;
 import static android.provider.Settings.System.LOCKSCREEN_SOUNDS_ENABLED;
@@ -3411,12 +3410,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             //  unless disable is called to show un-hide it once first
             if (forceClearFlags) {
                 try {
-                    StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo(flags,
-                            DISABLE2_NONE);
-                    mStatusBarService.disableForUser(info, mStatusBarDisableToken,
+                    mStatusBarService.disableForUser(flags, mStatusBarDisableToken,
                             mContext.getPackageName(),
-                            mSelectedUserInteractor.getSelectedUserId(true),
-                            "adjustStatusBarLocked - force clear flags");
+                            mSelectedUserInteractor.getSelectedUserId(true));
                 } catch (RemoteException e) {
                     Log.d(TAG, "Failed to force clear flags", e);
                 }
@@ -3442,11 +3438,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             }
 
             try {
-                StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo(flags,
-                        DISABLE2_NONE);
-                mStatusBarService.disableForUser(info, mStatusBarDisableToken,
-                        mContext.getPackageName(), mSelectedUserInteractor.getSelectedUserId(true),
-                        "adjustStatusBarLocked - set disable flags");
+                mStatusBarService.disableForUser(flags, mStatusBarDisableToken,
+                        mContext.getPackageName(),
+                        mSelectedUserInteractor.getSelectedUserId(true));
             } catch (RemoteException e) {
                 Log.d(TAG, "Failed to set disable flags: " + flags, e);
             }

@@ -17,7 +17,6 @@
 package com.android.internal.statusbar;
 
 import android.app.Notification;
-import android.app.StatusBarManager;
 import android.content.ComponentName;
 import android.graphics.drawable.Icon;
 import android.graphics.Rect;
@@ -53,9 +52,9 @@ interface IStatusBarService
     void togglePanel();
     @UnsupportedAppUsage
     void disable(int what, IBinder token, String pkg);
+    void disableForUser(int what, IBinder token, String pkg, int userId);
     void disable2(int what, IBinder token, String pkg);
-    void disableForUser(in StatusBarManager.DisableInfo info, IBinder token, String pkg, int userId, String reason);
-
+    void disable2ForUser(int what, IBinder token, String pkg, int userId);
     int[] getDisableFlags(IBinder token, int userId);
     void setIcon(String slot, String iconPackage, int iconId, int iconLevel, String contentDescription);
     @UnsupportedAppUsage
