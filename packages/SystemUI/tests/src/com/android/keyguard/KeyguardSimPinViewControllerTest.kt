@@ -115,6 +115,7 @@ class KeyguardSimPinViewControllerTest : SysuiTestCase() {
     @Test
     fun onViewAttached() {
         underTest.onViewAttached()
+        verify(keyguardMessageAreaController).setIsVisible(true)
         verify(keyguardMessageAreaController)
             .setMessage(context.resources.getString(R.string.keyguard_enter_your_pin), false)
         verify(keyguardUpdateMonitor)

@@ -118,6 +118,12 @@ public class KeyguardSimPinViewController
     }
 
     @Override
+    public void updateMessageAreaVisibility() {
+        if (mMessageAreaController == null) return;
+        mMessageAreaController.setIsVisible(true);
+    }
+
+    @Override
     void resetState() {
         super.resetState();
         if (DEBUG) Log.v(TAG, "Resetting state");
