@@ -181,7 +181,7 @@
     <string name="launch_defaults_none" msgid="8049374306261262709">"कोई डिफ़ॉल्‍ट सेट नहीं है"</string>
     <string name="tts_settings" msgid="8130616705989351312">"लेख से बोली सेटिंग"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"लिखे गए शब्दों को सुनने की सुविधा"</string>
-    <string name="tts_default_rate_title" msgid="3964187817364304022">"बोलने की दर"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"बोलने की स्पीड"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"बोलने की गति तय करें"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"पिच"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"कृत्रिम बोली के लहजे को प्रभावित करता है"</string>
@@ -495,7 +495,7 @@
     <string name="disabled" msgid="8017887509554714950">"बंद किया गया"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"अनुमति है"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"अनुमति नहीं है"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"अज्ञात ऐप्लिकेशन इंस्टॉल करने की अनुमति देना"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"अनजान ऐप्लिकेशन इंस्टॉल करने की अनुमति"</string>
     <string name="home" msgid="973834627243661438">"सेटिंग का होम पेज"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>

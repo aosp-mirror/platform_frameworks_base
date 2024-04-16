@@ -256,7 +256,7 @@
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"ขณะนี้หน้าจอถูกล็อกให้วางในแนวนอน"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"ขณะนี้หน้าจอถูกล็อกให้วางในแนวตั้ง"</string>
     <string name="dessert_case" msgid="9104973640704357717">"ชั้นแสดงของหวาน"</string>
-    <string name="start_dreams" msgid="9131802557946276718">"โปรแกรมรักษาหน้าจอ"</string>
+    <string name="start_dreams" msgid="9131802557946276718">"ภาพพักหน้าจอ"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"อีเทอร์เน็ต"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"ห้ามรบกวน"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"บลูทูธ"</string>
@@ -719,7 +719,7 @@
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"ไม่พบแป้นพิมพ์ลัด"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"ระบบ"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"อินพุต"</string>
-    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"แอปที่เปิดอยู่"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"เปิดแอป"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"แอปปัจจุบัน"</string>
     <string name="keyboard_shortcut_a11y_show_search_results" msgid="2865241062981833705">"แสดงผลการค้นหา"</string>
     <string name="keyboard_shortcut_a11y_filter_system" msgid="7744143131119370483">"แสดงแป้นพิมพ์ลัดสำหรับระบบ"</string>
@@ -1273,5 +1273,5 @@
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ไฟแบ็กไลต์ของแป้นพิมพ์"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"ระดับที่ %1$d จาก %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ระบบควบคุมอุปกรณ์สมาร์ทโฮม"</string>
-    <string name="home_controls_dream_description" msgid="4644150952104035789">"เข้าถึงระบบควบคุมอุปกรณ์สมาร์ทโฮมได้อย่างรวดเร็วที่การพักหน้าจอ"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"เข้าถึงระบบควบคุมอุปกรณ์สมาร์ทโฮมได้อย่างรวดเร็วผ่านภาพพักหน้าจอ"</string>
 </resources>

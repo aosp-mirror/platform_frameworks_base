@@ -95,7 +95,7 @@ object ScreenshotShelfViewBinder {
                                     // mean that the new action must be inserted here.
                                     val actionButton =
                                         layoutInflater.inflate(
-                                            R.layout.overlay_action_chip,
+                                            R.layout.shelf_action_chip,
                                             actionsContainer,
                                             false
                                         )

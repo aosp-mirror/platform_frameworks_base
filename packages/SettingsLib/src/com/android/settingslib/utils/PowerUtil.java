@@ -33,7 +33,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-/** Utility class for keeping power related strings consistent**/
+/** Utility class for keeping power related strings consistent. **/
 public class PowerUtil {
 
     private static final long SEVEN_MINUTES_MILLIS = TimeUnit.MINUTES.toMillis(7);
@@ -221,4 +221,19 @@ public class PowerUtil {
             return time - remainder + multiple;
         }
     }
+
+    /** Gets the rounded target time string in a short format. */
+    public static String getTargetTimeShortString(
+            Context context, long targetTimeOffsetMs, long currentTimeMs) {
+        final long roundedTimeOfDayMs =
+                roundTimeToNearestThreshold(
+                        currentTimeMs + targetTimeOffsetMs, FIFTEEN_MINUTES_MILLIS);
+
+        // convert the time to a properly formatted string.
+        String skeleton = android.text.format.DateFormat.getTimeFormatString(context);
+        DateFormat fmt = DateFormat.getInstanceForSkeleton(skeleton);
+        Date date = Date.from(Instant.ofEpochMilli(roundedTimeOfDayMs));
+        return fmt.format(date);
+    }
 }
+

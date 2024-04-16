@@ -719,7 +719,7 @@
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"未找到任何快捷键"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"系统"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"输入"</string>
-    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"已打开的应用"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"打开应用"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"当前应用"</string>
     <string name="keyboard_shortcut_a11y_show_search_results" msgid="2865241062981833705">"目前显示的是搜索结果"</string>
     <string name="keyboard_shortcut_a11y_filter_system" msgid="7744143131119370483">"目前显示的是系统快捷键"</string>

@@ -2014,7 +2014,7 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             if (!mBgCurrentDrainHighThresholdByBgLocation) {
                 return false;
             }
-            if (mTracker.mContext.checkPermission(ACCESS_BACKGROUND_LOCATION,
+            if (mTracker.mInjector.checkPermission(ACCESS_BACKGROUND_LOCATION,
                     Process.INVALID_PID, uid) == PERMISSION_GRANTED) {
                 return true;
             }

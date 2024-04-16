@@ -194,20 +194,20 @@ public class KeyguardIndicationController {
     private boolean mOrganizationOwnedDevice;
 
     // these all assume the device is plugged in (wired/wireless/docked) AND chargingOrFull:
-    private boolean mPowerPluggedIn;
-    private boolean mPowerPluggedInWired;
-    private boolean mPowerPluggedInWireless;
-    private boolean mPowerPluggedInDock;
+    protected boolean mPowerPluggedIn;
+    protected boolean mPowerPluggedInWired;
+    protected boolean mPowerPluggedInWireless;
+    protected boolean mPowerPluggedInDock;
 
     private boolean mPowerCharged;
     private boolean mBatteryDefender;
     private boolean mEnableBatteryDefender;
     private boolean mIncompatibleCharger;
-    private int mChargingSpeed;
+    protected int mChargingSpeed;
     private int mChargingWattage;
     private int mBatteryLevel;
     private boolean mBatteryPresent = true;
-    private long mChargingTimeRemaining;
+    protected long mChargingTimeRemaining;
     private Pair<String, BiometricSourceType> mBiometricErrorMessageToShowOnScreenOn;
     private final Set<Integer> mCoExFaceAcquisitionMsgIdsToShow;
     private final FaceHelpMessageDeferral mFaceAcquiredMessageDeferral;
@@ -1052,20 +1052,24 @@ public class KeyguardIndicationController {
      * Assumption: device is charging
      */
     protected String computePowerIndication() {
-        int chargingId;
         if (mBatteryDefender) {
-            chargingId = R.string.keyguard_plugged_in_charging_limited;
             String percentage = NumberFormat.getPercentInstance().format(mBatteryLevel / 100f);
-            return mContext.getResources().getString(chargingId, percentage);
+            return mContext.getResources().getString(
+                    R.string.keyguard_plugged_in_charging_limited, percentage);
         } else if (mPowerPluggedIn && mIncompatibleCharger) {
-            chargingId = R.string.keyguard_plugged_in_incompatible_charger;
             String percentage = NumberFormat.getPercentInstance().format(mBatteryLevel / 100f);
-            return mContext.getResources().getString(chargingId, percentage);
+            return mContext.getResources().getString(
+                    R.string.keyguard_plugged_in_incompatible_charger, percentage);
         } else if (mPowerCharged) {
             return mContext.getResources().getString(R.string.keyguard_charged);
         }
 
+        return computePowerChargingStringIndication();
+    }
+
+    protected String computePowerChargingStringIndication() {
         final boolean hasChargingTime = mChargingTimeRemaining > 0;
+        int chargingId;
         if (mPowerPluggedInWired) {
             switch (mChargingSpeed) {
                 case BatteryStatus.CHARGING_FAST:

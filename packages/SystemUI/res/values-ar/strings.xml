@@ -73,7 +73,7 @@
     <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"تم إيقاف ميزة \"إبقاء الجهاز مفتوحًا\"."</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"أرسَل صورة"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"جارٍ حفظ لقطة الشاشة..."</string>
-    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"جارٍ حفظ لقطة الشاشة في الملف الشخصي للعمل…"</string>
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"جارٍ حفظ لقطة الشاشة في ملف العمل…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"تم حفظ لقطة الشاشة."</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"تعذّر حفظ لقطة الشاشة"</string>
     <string name="screenshot_failed_external_display_indication" msgid="6555673132061101936">"الشاشة الخارجية"</string>
@@ -88,13 +88,13 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"مشاركة لقطة الشاشة"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"التقاط المزيد من المحتوى"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"إغلاق لقطة الشاشة"</string>
-    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"تجاهل رسالة الملف الشخصي للعمل"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"تجاهل رسالة ملف العمل"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"معاينة لقطة الشاشة"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"الحد العلوي <xliff:g id="PERCENT">%1$d</xliff:g> في المئة"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"الحد السفلى <xliff:g id="PERCENT">%1$d</xliff:g> في المئة"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"الحد الأيسر <xliff:g id="PERCENT">%1$d</xliff:g> في المئة"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"الحد الأيمن <xliff:g id="PERCENT">%1$d</xliff:g> في المئة"</string>
-    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"تم حفظ لقطة الشاشة في \"<xliff:g id="APP">%1$s</xliff:g>\" في الملف الشخصي للعمل."</string>
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"تم حفظ لقطة الشاشة في \"<xliff:g id="APP">%1$s</xliff:g>\" في ملف العمل."</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"الملفات"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"رصَد تطبيق \"<xliff:g id="APPNAME">%1$s</xliff:g>\" لقطة الشاشة هذه."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"رصَد تطبيق \"<xliff:g id="APPNAME">%1$s</xliff:g>\" والتطبيقات المفتوحة الأخرى لقطة الشاشة هذه."</string>
@@ -499,9 +499,9 @@
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"هذا الجهاز يخص <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>."</string>
     <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"‏ينتمي هذا الجهاز إلى مؤسستك، ويتّصل بالإنترنت من خلال خدمات الشبكة الافتراضية الخاصة (VPN)."</string>
     <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"‏ينتمي هذا الجهاز إلى <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>، ويتّصل بالإنترنت من خلال خدمات الشبكة الافتراضية الخاصة (VPN)."</string>
-    <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"يمكن لمؤسستك مراقبة حركة بيانات الشبكة في الملف الشخصي للعمل"</string>
+    <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"يمكن لمؤسستك مراقبة حركة بيانات الشبكة في ملف العمل"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"يمكن لـ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> مراقبة حركة بيانات الشبكة في ملفك الشخصي للعمل"</string>
-    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"تكون أنشطة شبكة الملف الشخصي للعمل مرئية لمشرف تكنولوجيا المعلومات."</string>
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"تكون أنشطة شبكة ملف العمل مرئية لمشرف تكنولوجيا المعلومات."</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"قد تكون الشبكة خاضعة للمراقبة"</string>
     <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"‏هذا الجهاز متّصل بالإنترنت من خلال خدمات الشبكات الافتراضية الخاصة (VPN)."</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"تطبيقات العمل الخاصة بك متّصلة بالإنترنت من خلال <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
@@ -608,7 +608,7 @@
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"إعدادات شاشة القفل"</string>
     <string name="qr_code_scanner_title" msgid="1938155688725760702">"ماسح ضوئي لرمز الاستجابة السريعة"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"جارٍ تعديل الحالة"</string>
-    <string name="status_bar_work" msgid="5238641949837091056">"الملف الشخصي للعمل"</string>
+    <string name="status_bar_work" msgid="5238641949837091056">"ملف العمل"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"وضع الطيران"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"لن تسمع المنبّه القادم في <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"في <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -618,7 +618,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"قمر صناعي، الاتصال ضعيف"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"قمر صناعي، الاتصال جيد"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"قمر صناعي، الاتصال متوفّر"</string>
-    <string name="accessibility_managed_profile" msgid="4703836746209377356">"الملف الشخصي للعمل"</string>
+    <string name="accessibility_managed_profile" msgid="4703836746209377356">"ملف العمل"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"متعة للبعض وليس للجميع"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"‏توفر لك أداة ضبط واجهة مستخدم النظام طرقًا إضافية لتعديل واجهة مستخدم Android وتخصيصها. ويمكن أن تطرأ تغييرات على هذه الميزات التجريبية أو يمكن أن تتعطل هذه الميزات أو تختفي في الإصدارات المستقبلية. عليك متابعة الاستخدام مع توخي الحذر."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"يمكن أن تطرأ تغييرات على هذه الميزات التجريبية أو يمكن أن تتعطل هذه الميزات أو تختفي في الإصدارات المستقبلية. عليك متابعة الاستخدام مع توخي الحذر."</string>
@@ -1233,8 +1233,8 @@
     <string name="video_camera" msgid="7654002575156149298">"كاميرا فيديو"</string>
     <string name="call_from_work_profile_title" msgid="5418253516453177114">"لا يمكن الاتصال من تطبيق شخصي"</string>
     <string name="call_from_work_profile_text" msgid="2856337395968118274">"تسمح لك مؤسستك بإجراء المكالمات من تطبيقات العمل فقط."</string>
-    <string name="call_from_work_profile_action" msgid="2937701298133010724">"التبديل إلى الملف الشخصي للعمل"</string>
-    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"تثبيت تطبيق الهاتف في الملف الشخصي للعمل"</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"التبديل إلى ملف العمل"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"تثبيت تطبيق الهاتف في ملف العمل"</string>
     <string name="call_from_work_profile_close" msgid="5830072964434474143">"إلغاء"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"تخصيص شاشة القفل"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"الفتح لتخصيص شاشة القفل"</string>

@@ -1892,7 +1892,7 @@
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g> ပုံတူပွား"</string>
     <string name="private_profile_label_badge" msgid="1712086003787839183">"သီးသန့် <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ပင်မဖြုတ်မီမှာ PIN ကို မေးကြည့်ရန်"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"ပင်မဖြုတ်မီမှာ သော့ဖွင့် ရေးဆွဲမှုပုံစံကို မေးကြည့်ရန်"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"ပင်မဖြုတ်မီ လော့ခ်ဖွင့်ပုံစံကို မေးရန်"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"ပင်မဖြုတ်မီမှာ စကားဝှက်ကို မေးကြည့်ရန်"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"သင်၏ စီမံခန့်ခွဲသူက ထည့်သွင်းထားသည်"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"သင်၏ စီမံခန့်ခွဲသူက အပ်ဒိတ်လုပ်ထားသည်"</string>
