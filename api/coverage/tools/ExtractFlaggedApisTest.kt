@@ -141,6 +141,84 @@ class ExtractFlaggedApisTest {
         assertThat(result).isEqualTo(expected.build())
     }
 
+    @Test
+    fun extractFlaggedApis_unflaggedNestedClassShouldUseOuterClassFlag() {
+        val apiText =
+            """
+            // Signature format: 2.0
+            package android.location.provider {
+              @FlaggedApi(Flags.FLAG_NEW_GEOCODER) public final class ForwardGeocodeRequest implements android.os.Parcelable {
+                method public int describeContents();
+              }
+              public static final class ForwardGeocodeRequest.Builder {
+                method @NonNull public android.location.provider.ForwardGeocodeRequest build();
+              }
+            }
+        """
+                .trimIndent()
+        Files.write(apiTextFile, apiText.toByteArray(Charsets.UTF_8), StandardOpenOption.APPEND)
+
+        val process = Runtime.getRuntime().exec(createCommand())
+        process.waitFor()
+
+        val content = Files.readAllBytes(flagToApiMap).toString(Charsets.UTF_8)
+        val result = TextFormat.parse(content, FlagApiMap::class.java)
+
+        val expected = FlagApiMap.newBuilder()
+        val api1 =
+            JavaMethod.newBuilder()
+                .setPackageName("android.location.provider")
+                .setClassName("ForwardGeocodeRequest")
+                .setMethodName("describeContents")
+        addFlaggedApi(expected, api1, "Flags.FLAG_NEW_GEOCODER")
+        val api2 =
+            JavaMethod.newBuilder()
+                .setPackageName("android.location.provider")
+                .setClassName("ForwardGeocodeRequest.Builder")
+                .setMethodName("build")
+        addFlaggedApi(expected, api2, "Flags.FLAG_NEW_GEOCODER")
+        assertThat(result).ignoringRepeatedFieldOrder().isEqualTo(expected.build())
+    }
+
+    @Test
+    fun extractFlaggedApis_unflaggedNestedClassShouldUseOuterClassFlag_deeplyNested() {
+        val apiText =
+            """
+            // Signature format: 2.0
+            package android.package.xyz {
+              @FlaggedApi(outer_class_flag) public final class OuterClass {
+                method public int apiInOuterClass();
+              }
+              public final class OuterClass.Deeply.NestedClass {
+                method public void apiInNestedClass();
+              }
+            }
+        """
+                .trimIndent()
+        Files.write(apiTextFile, apiText.toByteArray(Charsets.UTF_8), StandardOpenOption.APPEND)
+
+        val process = Runtime.getRuntime().exec(createCommand())
+        process.waitFor()
+
+        val content = Files.readAllBytes(flagToApiMap).toString(Charsets.UTF_8)
+        val result = TextFormat.parse(content, FlagApiMap::class.java)
+
+        val expected = FlagApiMap.newBuilder()
+        val api1 =
+            JavaMethod.newBuilder()
+                .setPackageName("android.package.xyz")
+                .setClassName("OuterClass")
+                .setMethodName("apiInOuterClass")
+        addFlaggedApi(expected, api1, "outer_class_flag")
+        val api2 =
+            JavaMethod.newBuilder()
+                .setPackageName("android.package.xyz")
+                .setClassName("OuterClass.Deeply.NestedClass")
+                .setMethodName("apiInNestedClass")
+        addFlaggedApi(expected, api2, "outer_class_flag")
+        assertThat(result).ignoringRepeatedFieldOrder().isEqualTo(expected.build())
+    }
+
     private fun addFlaggedApi(builder: FlagApiMap.Builder, api: JavaMethod.Builder, flag: String) {
         if (builder.containsFlagToApi(flag)) {
             val updatedApis =

@@ -17,6 +17,7 @@
 package android.platform.coverage
 
 import com.android.tools.metalava.model.ClassItem
+import com.android.tools.metalava.model.Item
 import com.android.tools.metalava.model.MethodItem
 import com.android.tools.metalava.model.text.ApiFile
 import java.io.File
@@ -44,20 +45,9 @@ fun extractFlaggedApisFromClass(
     builder: FlagApiMap.Builder
 ) {
     if (methods.isEmpty()) return
-    val classFlag =
-        classItem.modifiers
-            .findAnnotation("android.annotation.FlaggedApi")
-            ?.findAttribute("value")
-            ?.value
-            ?.value() as? String
+    val classFlag = getClassFlag(classItem)
     for (method in methods) {
-        val methodFlag =
-            method.modifiers
-                .findAnnotation("android.annotation.FlaggedApi")
-                ?.findAttribute("value")
-                ?.value
-                ?.value() as? String
-                ?: classFlag
+        val methodFlag = getFlagAnnotation(method) ?: classFlag
         val api =
             JavaMethod.newBuilder()
                 .setPackageName(packageName)
@@ -80,4 +70,24 @@ fun addFlaggedApi(builder: FlagApiMap.Builder, api: JavaMethod.Builder, flag: St
         val apis = FlaggedApis.newBuilder().addJavaMethods(api).build()
         builder.putFlagToApi(flag, apis)
     }
+}
+
+fun getClassFlag(classItem: ClassItem): String? {
+    var classFlag = getFlagAnnotation(classItem)
+    var cur = classItem
+    // If a class is not an inner class, use its @FlaggedApi annotation value.
+    // Otherwise, use the flag value of the closest outer class that is annotated by @FlaggedApi.
+    while (cur.isInnerClass() && classFlag == null) {
+        cur = cur.parent() as ClassItem
+        classFlag = getFlagAnnotation(cur)
+    }
+    return classFlag
+}
+
+fun getFlagAnnotation(item: Item): String? {
+    return item.modifiers
+        .findAnnotation("android.annotation.FlaggedApi")
+        ?.findAttribute("value")
+        ?.value
+        ?.value() as? String
 }
