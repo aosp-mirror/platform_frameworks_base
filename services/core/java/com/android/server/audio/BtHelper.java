@@ -1116,6 +1116,12 @@ public class BtHelper {
         return mLeAudio.getGroupId(device);
     }
 
+    /**
+     * Returns all addresses and identity addresses for LE Audio devices a group.
+     * @param groupId The ID of the group from which to get addresses.
+     * @return A List of Pair(String main_address, String identity_address). Note that the
+     * addresses returned by BluetoothDevice can be null.
+     */
     /*package*/ List<Pair<String, String>> getLeAudioGroupAddresses(int groupId) {
         List<Pair<String, String>> addresses = new ArrayList<>();
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
