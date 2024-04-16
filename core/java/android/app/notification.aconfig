@@ -138,3 +138,10 @@ flag {
   description: "Cleans up spans and unnecessary new lines from standard notification templates"
   bug: "313439845"
 }
+
+flag {
+  name: "compact_heads_up_notification"
+  namespace: "systemui"
+  description: "[Minimal HUN] Enables the compact heads up notification feature"
+  bug: "270709257"
+}

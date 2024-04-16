@@ -199,6 +199,7 @@ public class NotificationTestHelper {
                 mock(Executor.class),
                 new MockSmartReplyInflater(),
                 mock(NotifLayoutInflaterFactory.Provider.class),
+                mock(HeadsUpStyleProvider.class),
                 mock(NotificationContentInflaterLogger.class));
         contentBinder.setInflateSynchronously(true);
         mBindStage = new RowContentBindStage(contentBinder,
