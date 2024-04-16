@@ -659,6 +659,9 @@ public class NotificationShadeWindowViewController implements Dumpable {
             mTouchCancelled = true;
         }
         mAmbientState.setSwipingUp(false);
+        if (MigrateClocksToBlueprint.isEnabled()) {
+            mDragDownHelper.stopDragging();
+        }
     }
 
     @Override
