@@ -80,6 +80,7 @@ aconfig_declarations_group {
         "com.android.input.flags-aconfig-java",
         "com.android.internal.compat.flags-aconfig-java",
         "com.android.internal.foldables.flags-aconfig-java",
+        "com.android.internal.os.flags-aconfig-java",
         "com.android.internal.pm.pkg.component.flags-aconfig-java",
         "com.android.media.flags.bettertogether-aconfig-java",
         "com.android.media.flags.editing-aconfig-java",
@@ -359,6 +360,19 @@ cc_aconfig_library {
     name: "android.os.flags-aconfig-cc-host",
     aconfig_declarations: "android.os.flags-aconfig",
     host_supported: true,
+}
+
+// OS Internal
+aconfig_declarations {
+    name: "com.android.internal.os.flags-aconfig",
+    package: "com.android.internal.os",
+    srcs: ["core/java/com/android/internal/os/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "com.android.internal.os.flags-aconfig-java",
+    aconfig_declarations: "com.android.internal.os.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
 // VirtualDeviceManager
