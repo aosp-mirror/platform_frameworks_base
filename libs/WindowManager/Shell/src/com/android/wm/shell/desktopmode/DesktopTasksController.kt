@@ -885,8 +885,9 @@ class DesktopTasksController(
         wct: WindowContainerTransaction,
         taskInfo: RunningTaskInfo
     ) {
-        val displayWindowingMode = taskInfo.configuration.windowConfiguration.displayWindowingMode
-        val targetWindowingMode = if (displayWindowingMode == WINDOWING_MODE_FREEFORM) {
+        val tdaInfo = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(taskInfo.displayId)!!
+        val tdaWindowingMode = tdaInfo.configuration.windowConfiguration.windowingMode
+        val targetWindowingMode = if (tdaWindowingMode == WINDOWING_MODE_FREEFORM) {
             // Display windowing is freeform, set to undefined and inherit it
             WINDOWING_MODE_UNDEFINED
         } else {
@@ -903,8 +904,9 @@ class DesktopTasksController(
         wct: WindowContainerTransaction,
         taskInfo: RunningTaskInfo
     ) {
-        val displayWindowingMode = taskInfo.configuration.windowConfiguration.displayWindowingMode
-        val targetWindowingMode = if (displayWindowingMode == WINDOWING_MODE_FULLSCREEN) {
+        val tdaInfo = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(taskInfo.displayId)!!
+        val tdaWindowingMode = tdaInfo.configuration.windowConfiguration.windowingMode
+        val targetWindowingMode = if (tdaWindowingMode == WINDOWING_MODE_FULLSCREEN) {
             // Display windowing is fullscreen, set to undefined and inherit it
             WINDOWING_MODE_UNDEFINED
         } else {
