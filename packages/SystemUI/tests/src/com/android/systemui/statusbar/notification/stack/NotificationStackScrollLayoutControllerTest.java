@@ -22,6 +22,8 @@ import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 
+import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -35,8 +37,6 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-
-import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
 
 import android.metrics.LogMaker;
 import android.platform.test.annotations.DisableFlags;
@@ -56,8 +56,6 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
@@ -126,7 +124,6 @@ import javax.inject.Provider;
 public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
 
     protected KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
-    private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
     @Mock private NotificationGutsManager mNotificationGutsManager;
     @Mock private NotificationsController mNotificationsController;
     @Mock private NotificationVisibilityProvider mVisibilityProvider;
@@ -192,8 +189,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     public void setUp() {
         allowTestableLooperAsMainThread();
         MockitoAnnotations.initMocks(this);
-
-        mFeatureFlags.set(Flags.USE_REPOS_FOR_BOUNCER_SHOWING, true);
 
         when(mNotificationSwipeHelperBuilder.build()).thenReturn(mNotificationSwipeHelper);
         when(mKeyguardTransitionRepo.getTransitions()).thenReturn(emptyFlow());
@@ -299,36 +294,11 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
 
     @Test
     @DisableFlags(FooterViewRefactor.FLAG_NAME)
-    public void testUpdateEmptyShadeView_bouncerShowing_flagOff_hideEmptyView() {
+    public void testUpdateEmptyShadeView_bouncerShowing_hideEmptyView() {
         when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
         initController(/* viewIsAttached= */ true);
 
-        // WHEN the flag is off and *only* CentralSurfaces has bouncer as showing
-        mFeatureFlags.set(Flags.USE_REPOS_FOR_BOUNCER_SHOWING, false);
-        mController.setBouncerShowingFromCentralSurfaces(true);
-        when(mPrimaryBouncerInteractor.isBouncerShowing()).thenReturn(false);
-
-        setupShowEmptyShadeViewState(true);
-        reset(mNotificationStackScrollLayout);
-        mController.updateShowEmptyShadeView();
-
-        // THEN the CentralSurfaces value is used. Since the bouncer is showing, we hide the empty
-        // view.
-        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
-                /* visible= */ false,
-                /* areNotificationsHiddenInShade= */ false);
-    }
-
-    @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
-    public void testUpdateEmptyShadeView_bouncerShowing_flagOn_hideEmptyView() {
-        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
-        initController(/* viewIsAttached= */ true);
-
-        // WHEN the flag is on and *only* PrimaryBouncerInteractor has bouncer as showing
-        mFeatureFlags.set(Flags.USE_REPOS_FOR_BOUNCER_SHOWING, true);
         when(mPrimaryBouncerInteractor.isBouncerShowing()).thenReturn(true);
-        mController.setBouncerShowingFromCentralSurfaces(false);
 
         setupShowEmptyShadeViewState(true);
         reset(mNotificationStackScrollLayout);
@@ -343,36 +313,11 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
 
     @Test
     @DisableFlags(FooterViewRefactor.FLAG_NAME)
-    public void testUpdateEmptyShadeView_bouncerNotShowing_flagOff_showEmptyView() {
+    public void testUpdateEmptyShadeView_bouncerNotShowing_showEmptyView() {
         when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
         initController(/* viewIsAttached= */ true);
 
-        // WHEN the flag is off and *only* CentralSurfaces has bouncer as not showing
-        mFeatureFlags.set(Flags.USE_REPOS_FOR_BOUNCER_SHOWING, false);
-        mController.setBouncerShowingFromCentralSurfaces(false);
-        when(mPrimaryBouncerInteractor.isBouncerShowing()).thenReturn(true);
-
-        setupShowEmptyShadeViewState(true);
-        reset(mNotificationStackScrollLayout);
-        mController.updateShowEmptyShadeView();
-
-        // THEN the CentralSurfaces value is used. Since the bouncer isn't showing, we can show the
-        // empty view.
-        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
-                /* visible= */ true,
-                /* areNotificationsHiddenInShade= */ false);
-    }
-
-    @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
-    public void testUpdateEmptyShadeView_bouncerNotShowing_flagOn_showEmptyView() {
-        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
-        initController(/* viewIsAttached= */ true);
-
-        // WHEN the flag is on and *only* PrimaryBouncerInteractor has bouncer as not showing
-        mFeatureFlags.set(Flags.USE_REPOS_FOR_BOUNCER_SHOWING, true);
         when(mPrimaryBouncerInteractor.isBouncerShowing()).thenReturn(false);
-        mController.setBouncerShowingFromCentralSurfaces(true);
 
         setupShowEmptyShadeViewState(true);
         reset(mNotificationStackScrollLayout);
@@ -1018,7 +963,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mStackLogger,
                 mLogger,
                 mNotificationStackSizeCalculator,
-                mFeatureFlags,
                 mNotificationTargetsHelper,
                 mSecureSettings,
                 mock(NotificationDismissibilityProvider.class),

@@ -2416,7 +2416,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mBouncerShowing = bouncerShowing;
         mKeyguardBypassController.setBouncerShowing(bouncerShowing);
         mPulseExpansionHandler.setBouncerShowing(bouncerShowing);
-        mStackScrollerController.setBouncerShowingFromCentralSurfaces(bouncerShowing);
         setBouncerShowingForStatusBarComponents(bouncerShowing);
         mStatusBarHideIconsForBouncerManager.setBouncerShowingAndTriggerUpdate(bouncerShowing);
         mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);

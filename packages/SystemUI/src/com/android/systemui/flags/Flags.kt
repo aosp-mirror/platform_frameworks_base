@@ -487,12 +487,6 @@ object Flags {
     @JvmField val DECOUPLE_REMOTE_INPUT_DELEGATE_AND_CALLBACK_UPDATE =
             unreleasedFlag("decouple_remote_input_delegate_and_callback_update")
 
-    // 2900 - CentralSurfaces-related flags
-
-    // TODO(b/285174336): Tracking Bug
-    @JvmField
-    val USE_REPOS_FOR_BOUNCER_SHOWING = releasedFlag("use_repos_for_bouncer_showing")
-
     /** TODO(b/296223317): Enables the new keyguard presentation containing a clock. */
     @JvmField
     val ENABLE_CLOCK_KEYGUARD_PRESENTATION = releasedFlag("enable_clock_keyguard_presentation")
