@@ -237,7 +237,7 @@
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳು ಮತ್ತು ಅಧಿಸೂಚನೆಯ ಪರದೆ."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"ಲಾಕ್‌ ಸ್ಕ್ರೀನ್."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"ಕೆಲಸದ ಲಾಕ್ ಪರದೆ"</string>
-    <string name="accessibility_desc_close" msgid="8293708213442107755">"ಮುಚ್ಚು"</string>
+    <string name="accessibility_desc_close" msgid="8293708213442107755">"ಮುಚ್ಚಿ"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"ಸಂಪೂರ್ಣ ನಿಶ್ಯಬ್ಧ"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"ಅಲಾರಮ್‌ಗಳು ಮಾತ್ರ"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ."</string>
@@ -270,12 +270,20 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"ಎಲ್ಲವನ್ನೂ ನೋಡಿ"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ಬ್ಲೂಟೂತ್ ಬಳಸಿ"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing (1496358082943301670) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"ಸೇವ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ಡಿಸ್‌ಕನೆಕ್ಟ್ ಮಾಡಿ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"ನಾಳೆ ಪುನಃ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆನ್ ಮಾಡಿ"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"ಕ್ವಿಕ್ ಶೇರ್, Find My Device ನಂತಹ ಫೀಚರ್‌ಗಳು ಹಾಗೂ ಸಾಧನದ ಸ್ಥಳವು ಬ್ಲೂಟೂತ್ ಅನ್ನು ಬಳಸುತ್ತವೆ"</string>
-    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"ಬ್ಲೂಟೂತ್ ನಾಳೆ ಬೆಳಗ್ಗೆ 5 ಗಂಟೆಗೆ ಆನ್ ಆಗುತ್ತದೆ"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (682984290339848844) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (7440944034584560279) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (4499275822759907822) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (8626191139359072540) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ಬ್ಯಾಟರಿ"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ಆಡಿಯೋ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ಹೆಡ್‌ಸೆಟ್"</string>
@@ -350,8 +358,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"ರೆಕಾರ್ಡ್ ದೋಷ"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"ಪ್ರಾರಂಭಿಸಿ"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"ನಿಲ್ಲಿಸಿ"</string>
-    <!-- no translation found for qs_record_issue_bug_report (8229031766918650079) -->
-    <skip />
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"ಬಗ್ ವರದಿ ಮಾಡುವಿಕೆ"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"ಸಾಧನ ಬಳಸುವಾಗ ನೀವು ಯಾವ ರೀತಿಯ ಸಮಸ್ಯೆ ಎದುರಿಸುತ್ತೀರಿ?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"ಸಮಸ್ಯೆಯ ಪ್ರಕಾರವನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡ್"</string>
@@ -367,7 +374,7 @@
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"ಹೆಚ್ಚು"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"ಹಿಯರಿಂಗ್ ಸಾಧನಗಳು"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"ಹಿಯರಿಂಗ್ ಸಾಧನಗಳು"</string>
-    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"ಹೊಸ ಸಾಧನವನ್ನು ಜೋಡಿಸಿ"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"ಹೊಸ ಸಾಧನವನ್ನು ಪೇರ್ ಮಾಡಿ"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"ಹೊಸ ಸಾಧನವನ್ನು ಜೋಡಿಸಲು ಕ್ಲಿಕ್ ಮಾಡಿ"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ಸಾಧನದ ಮೈಕ್ರೋಫೋನ್ ನಿರ್ಬಂಧವನ್ನು ತೆಗೆಯಬೇಕೆ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ಸಾಧನದ ಕ್ಯಾಮರಾ ನಿರ್ಬಂಧವನ್ನು ತೆಗೆಯಬೇಕೆ?"</string>
@@ -1302,6 +1309,6 @@
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"ಇತ್ತೀಚೆಗೆ <xliff:g id="APP_NAME">%1$s</xliff:g> ಇದನ್ನು ಬಳಸಿದೆ (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ಕೀಬೋರ್ಡ್ ಬ್ಯಾಕ್‌ಲೈಟ್"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d ರಲ್ಲಿ %1$d ಮಟ್ಟ"</string>
-    <string name="home_controls_dream_label" msgid="6567105701292324257">"ಹೋಮ್ ನಿಯಂತ್ರಣಗಳು"</string>
-    <string name="home_controls_dream_description" msgid="4644150952104035789">"ಹೋಮ್ ನಿಯಂತ್ರಣವನ್ನು ಸ್ಕ್ರೀನ್‌ಸೇವರ್‌ನಂತೆ ತ್ವರಿತವಾಗಿ ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಿ"</string>
+    <string name="home_controls_dream_label" msgid="6567105701292324257">"ಮನೆ ನಿಯಂತ್ರಣಗಳು"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"ಮನೆ ನಿಯಂತ್ರಣವನ್ನು ಸ್ಕ್ರೀನ್‌ಸೇವರ್‌ನಂತೆ ಬೇಗ ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಿ"</string>
 </resources>
