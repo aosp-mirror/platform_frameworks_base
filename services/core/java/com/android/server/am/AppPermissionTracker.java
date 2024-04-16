@@ -293,7 +293,7 @@ final class AppPermissionTracker extends BaseAppStateTracker<AppPermissionPolicy
                 mPermissionGranted = true;
                 return;
             }
-            mPermissionGranted = mContext.checkPermission(mPermission, Process.INVALID_PID, mUid)
+            mPermissionGranted = mInjector.checkPermission(mPermission, Process.INVALID_PID, mUid)
                     == PERMISSION_GRANTED;
         }
 
