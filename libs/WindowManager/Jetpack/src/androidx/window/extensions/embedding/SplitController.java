@@ -2694,77 +2694,87 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         final int taskId = getTaskId(launchActivity);
         if (!overlayContainers.isEmpty()) {
-            // TODO(b/243518738): refactor logic below for readability.
             for (final TaskFragmentContainer overlayContainer : overlayContainers) {
-                final boolean isTopNonFinishingOverlay = overlayContainer.getTaskContainer()
-                        .getTopNonFinishingTaskFragmentContainer(true /* includePin */,
-                                true /* includeOverlay */).equals(overlayContainer);
-                if (!overlayTag.equals(overlayContainer.getOverlayTag())
-                        && taskId == overlayContainer.getTaskId()
-                        && isTopNonFinishingOverlay) {
-                    // If there's an overlay container with different tag shown in the same
-                    // task, dismiss the existing overlay container.
-                    mPresenter.cleanupContainer(wct, overlayContainer,
-                            false /* shouldFinishDependant */);
-                }
-                if (overlayTag.equals(overlayContainer.getOverlayTag())
-                        && taskId != overlayContainer.getTaskId()) {
-                    Log.w(TAG, "The overlay container with tag:"
-                            + overlayContainer.getOverlayTag() + " is dismissed because"
-                            + " there's an existing overlay container with the same tag but"
-                            + " different task ID:" + overlayContainer.getTaskId() + ". "
-                            + "The new associated activity is " + launchActivity);
+                final boolean isTopNonFinishingOverlay = overlayContainer.equals(
+                        overlayContainer.getTaskContainer().getTopNonFinishingTaskFragmentContainer(
+                                true /* includePin */, true /* includeOverlay */));
+                if (taskId != overlayContainer.getTaskId()) {
                     // If there's an overlay container with same tag in a different task,
                     // dismiss the overlay container since the tag must be unique per process.
-                    mPresenter.cleanupContainer(wct, overlayContainer,
-                            false /* shouldFinishDependant */);
-                }
-                if (overlayTag.equals(overlayContainer.getOverlayTag())
-                        && taskId == overlayContainer.getTaskId()) {
-                    if (!isTopNonFinishingOverlay) {
-                        Log.w(TAG, "The invisible overlay container with tag:"
-                                + overlayContainer.getOverlayTag() + " is dismissed because"
-                                + " there's a launching overlay container with the same tag."
-                                + " The new associated activity is " + launchActivity);
-                        // Dismiss the invisible overlay container regardless of activity
-                        // association if it collides the tag of new launched overlay container .
-                        mPresenter.cleanupContainer(wct, overlayContainer,
-                                false /* shouldFinishDependant */);
-                    } else if (associateLaunchingActivity && !launchActivity.getActivityToken()
-                            .equals(overlayContainer.getAssociatedActivityToken())) {
+                    if (overlayTag.equals(overlayContainer.getOverlayTag())) {
                         Log.w(TAG, "The overlay container with tag:"
                                 + overlayContainer.getOverlayTag() + " is dismissed because"
                                 + " there's an existing overlay container with the same tag but"
-                                + " different associated launching activity. The new associated"
-                                + " activity is " + launchActivity);
-                        // The associated activity must be the same, or it will be dismissed.
+                                + " different task ID:" + overlayContainer.getTaskId() + ". "
+                                + "The new associated activity is " + launchActivity);
                         mPresenter.cleanupContainer(wct, overlayContainer,
                                 false /* shouldFinishDependant */);
-                    } else if (!associateLaunchingActivity
-                            && overlayContainer.isAssociatedWithActivity()) {
+                    }
+                    continue;
+                }
+                if (!overlayTag.equals(overlayContainer.getOverlayTag())) {
+                    // If there's an overlay container with different tag on top in the same
+                    // task, dismiss the existing overlay container.
+                    if (isTopNonFinishingOverlay) {
+                        mPresenter.cleanupContainer(wct, overlayContainer,
+                                false /* shouldFinishDependant */);
+                    }
+                    continue;
+                }
+                // The overlay container has the same tag and task ID with the new launching
+                // overlay container.
+                if (!isTopNonFinishingOverlay) {
+                    // Dismiss the invisible overlay container regardless of activity
+                    // association if it collides the tag of new launched overlay container .
+                    Log.w(TAG, "The invisible overlay container with tag:"
+                            + overlayContainer.getOverlayTag() + " is dismissed because"
+                            + " there's a launching overlay container with the same tag."
+                            + " The new associated activity is " + launchActivity);
+                    mPresenter.cleanupContainer(wct, overlayContainer,
+                            false /* shouldFinishDependant */);
+                    continue;
+                }
+                // Requesting an always-on-top overlay.
+                if (!associateLaunchingActivity) {
+                    if (overlayContainer.isAssociatedWithActivity()) {
+                        // Dismiss the overlay container since it has associated with an activity.
                         Log.w(TAG, "The overlay container with tag:"
                                 + overlayContainer.getOverlayTag() + " is dismissed because"
                                 + " there's an existing overlay container with the same tag but"
                                 + " different associated launching activity. The overlay container"
                                 + " doesn't associate with any activity.");
-                        // Dismiss the overlay container since it has been associated with an
-                        // activity.
                         mPresenter.cleanupContainer(wct, overlayContainer,
                                 false /* shouldFinishDependant */);
+                        continue;
                     } else {
-                        // Just update the overlay container if
-                        // - should associate with an activity and associated activity matches
-                        // - should not associate with an activity and the overlay container
-                        //     don't have an associated activity
+                        // The existing overlay container doesn't associate an activity as well.
+                        // Just update the overlay and return.
+                        // Note that going to this condition means the tag, task ID matches a
+                        // visible always-on-top overlay, and won't dismiss any overlay any more.
                         mPresenter.applyActivityStackAttributes(wct, overlayContainer, attrs,
                                 getMinDimensions(intent));
-                        // We can just return the updated overlay container and don't need to
-                        // check other condition since we only have one OverlayCreateParams, and
-                        // if the tag and task are matched, it's impossible to match another task
-                        // or tag since tags and tasks are all unique.
                         return overlayContainer;
                     }
                 }
+                if (launchActivity.getActivityToken()
+                        != overlayContainer.getAssociatedActivityToken()) {
+                    Log.w(TAG, "The overlay container with tag:"
+                            + overlayContainer.getOverlayTag() + " is dismissed because"
+                            + " there's an existing overlay container with the same tag but"
+                            + " different associated launching activity. The new associated"
+                            + " activity is " + launchActivity);
+                    // The associated activity must be the same, or it will be dismissed.
+                    mPresenter.cleanupContainer(wct, overlayContainer,
+                            false /* shouldFinishDependant */);
+                    continue;
+                }
+                // Reaching here means the launching activity launch an overlay container with the
+                // same task ID, tag, while there's a previously launching visible overlay
+                // container. We'll regard it as updating the existing overlay container.
+                mPresenter.applyActivityStackAttributes(wct, overlayContainer, attrs,
+                        getMinDimensions(intent));
+                return overlayContainer;
+
             }
         }
         // Launch the overlay container to the task with taskId.
