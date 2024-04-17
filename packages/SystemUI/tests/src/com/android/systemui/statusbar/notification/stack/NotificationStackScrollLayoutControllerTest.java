@@ -24,6 +24,7 @@ import static com.android.systemui.statusbar.notification.stack.NotificationStac
 
 import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -43,6 +44,7 @@ import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
@@ -51,11 +53,14 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.systemui.ExpandHelper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.DisableSceneContainer;
+import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
@@ -171,6 +176,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private NotificationListViewBinder mViewBinder;
     @Mock
     private SensitiveNotificationProtectionController mSensitiveNotificationProtectionController;
+    @Mock private ExpandHelper mExpandHelper;
 
     @Captor
     private ArgumentCaptor<Runnable> mSensitiveStateListenerArgumentCaptor;
@@ -893,6 +899,50 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     public void sensitiveNotificationProtectionControllerListenerRegistered() {
         initController(/* viewIsAttached= */ true);
         verify(mSensitiveNotificationProtectionController).registerSensitiveStateListener(any());
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void onTouchEvent_stopExpandingNotification_sceneContainerEnabled() {
+        boolean touchHandled = stopExpandingNotification();
+
+        verify(mNotificationStackScrollLayout).startOverscrollAfterExpanding();
+        verify(mNotificationStackScrollLayout, never()).dispatchDownEventToScroller(any());
+        assertTrue(touchHandled);
+    }
+
+    @Test
+    @DisableSceneContainer
+    public void onTouchEvent_stopExpandingNotification_sceneContainerDisabled() {
+        stopExpandingNotification();
+
+        verify(mNotificationStackScrollLayout, never()).startOverscrollAfterExpanding();
+        verify(mNotificationStackScrollLayout).dispatchDownEventToScroller(any());
+    }
+
+    private boolean stopExpandingNotification() {
+        when(mNotificationStackScrollLayout.getExpandHelper()).thenReturn(mExpandHelper);
+        when(mNotificationStackScrollLayout.getIsExpanded()).thenReturn(true);
+        when(mNotificationStackScrollLayout.getExpandedInThisMotion()).thenReturn(true);
+        when(mNotificationStackScrollLayout.isExpandingNotification()).thenReturn(true);
+
+        when(mExpandHelper.onTouchEvent(any())).thenAnswer(i -> {
+            when(mNotificationStackScrollLayout.isExpandingNotification()).thenReturn(false);
+            return false;
+        });
+
+        initController(/* viewIsAttached= */ true);
+        NotificationStackScrollLayoutController.TouchHandler touchHandler =
+                mController.getTouchHandler();
+
+        return touchHandler.onTouchEvent(MotionEvent.obtain(
+                /* downTime= */ 0,
+                /* eventTime= */ 0,
+                MotionEvent.ACTION_DOWN,
+                0,
+                0,
+                /* metaState= */ 0
+        ));
     }
 
     private LogMaker logMatcher(int category, int type) {

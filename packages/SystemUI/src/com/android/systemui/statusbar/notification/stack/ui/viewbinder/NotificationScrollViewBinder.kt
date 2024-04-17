@@ -89,10 +89,12 @@ constructor(
 
         launchAndDispose {
             view.setSyntheticScrollConsumer(viewModel.syntheticScrollConsumer)
+            view.setCurrentGestureOverscrollConsumer(viewModel.currentGestureOverscrollConsumer)
             view.setStackHeightConsumer(viewModel.stackHeightConsumer)
             view.setHeadsUpHeightConsumer(viewModel.headsUpHeightConsumer)
             DisposableHandle {
                 view.setSyntheticScrollConsumer(null)
+                view.setCurrentGestureOverscrollConsumer(null)
                 view.setStackHeightConsumer(null)
                 view.setHeadsUpHeightConsumer(null)
             }

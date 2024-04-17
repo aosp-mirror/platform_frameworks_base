@@ -569,6 +569,11 @@ public class ExpandHelper implements Gefingerpoken {
         return true;
     }
 
+    /** Finish the current expand motion without accounting for velocity. */
+    public void finishExpanding() {
+        finishExpanding(false, 0);
+    }
+
     /**
      * Finish the current expand motion
      * @param forceAbort whether the expansion should be forcefully aborted and returned to the old

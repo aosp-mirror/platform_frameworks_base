@@ -105,6 +105,13 @@ constructor(
      */
     val syntheticScroll: Flow<Float> = viewHeightRepository.syntheticScroll.asStateFlow()
 
+    /**
+     * Whether the current touch gesture is overscroll. If true, it means the NSSL has already
+     * consumed part of the gesture.
+     */
+    val isCurrentGestureOverscroll: Flow<Boolean> =
+        viewHeightRepository.isCurrentGestureOverscroll.asStateFlow()
+
     /** Sets the alpha to apply to the NSSL for the brightness mirror */
     fun setAlphaForBrightnessMirror(alpha: Float) {
         placeholderRepository.alphaForBrightnessMirror.value = alpha
@@ -144,6 +151,11 @@ constructor(
     /** Sets the amount (px) that the notification stack should scroll due to internal expansion. */
     fun setSyntheticScroll(delta: Float) {
         viewHeightRepository.syntheticScroll.value = delta
+    }
+
+    /** Sets whether the current touch gesture is overscroll. */
+    fun setCurrentGestureOverscroll(isOverscroll: Boolean) {
+        viewHeightRepository.isCurrentGestureOverscroll.value = isOverscroll
     }
 
     fun setConstrainedAvailableSpace(height: Int) {

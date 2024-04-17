@@ -145,6 +145,12 @@ constructor(
 
     /** Receives the amount (px) that the stack should scroll due to internal expansion. */
     val syntheticScrollConsumer: (Float) -> Unit = stackAppearanceInteractor::setSyntheticScroll
+    /**
+     * Receives whether the current touch gesture is overscroll as it has already been consumed by
+     * the stack.
+     */
+    val currentGestureOverscrollConsumer: (Boolean) -> Unit =
+        stackAppearanceInteractor::setCurrentGestureOverscroll
     /** Receives the height of the contents of the notification stack. */
     val stackHeightConsumer: (Float) -> Unit = stackAppearanceInteractor::setStackHeight
     /** Receives the height of the heads up notification. */
