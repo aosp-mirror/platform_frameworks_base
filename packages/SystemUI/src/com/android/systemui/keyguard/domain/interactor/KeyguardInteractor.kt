@@ -226,7 +226,7 @@ constructor(
     val ambientIndicationVisible: Flow<Boolean> = repository.ambientIndicationVisible.asStateFlow()
 
     /** Whether the primary bouncer is showing or not. */
-    val primaryBouncerShowing: Flow<Boolean> = bouncerRepository.primaryBouncerShow
+    @JvmField val primaryBouncerShowing: Flow<Boolean> = bouncerRepository.primaryBouncerShow
 
     /** Whether the alternate bouncer is showing or not. */
     val alternateBouncerShowing: Flow<Boolean> = bouncerRepository.alternateBouncerVisible
