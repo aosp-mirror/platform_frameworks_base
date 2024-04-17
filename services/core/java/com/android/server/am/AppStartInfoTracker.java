@@ -315,7 +315,7 @@ public final class AppStartInfoTracker {
     }
 
     public void handleProcessServiceStart(long startTimeNs, ProcessRecord app,
-                ServiceRecord serviceRecord, boolean cold) {
+                ServiceRecord serviceRecord) {
         synchronized (mLock) {
             if (!mEnabled) {
                 return;
@@ -325,8 +325,7 @@ public final class AppStartInfoTracker {
             start.setStartupState(ApplicationStartInfo.STARTUP_STATE_STARTED);
             start.addStartupTimestamp(
                     ApplicationStartInfo.START_TIMESTAMP_LAUNCH, startTimeNs);
-            start.setStartType(cold ? ApplicationStartInfo.START_TYPE_COLD
-                    : ApplicationStartInfo.START_TYPE_WARM);
+            start.setStartType(ApplicationStartInfo.START_TYPE_COLD);
 
             // TODO: handle possible alarm service start.
             start.setReason(serviceRecord.permission != null
