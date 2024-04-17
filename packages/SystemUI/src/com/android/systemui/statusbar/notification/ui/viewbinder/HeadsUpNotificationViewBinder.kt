@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.notification.ui.viewbinder
 
-import android.util.Log
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.shared.HeadsUpRowKey
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
@@ -25,9 +24,6 @@ import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-
-private const val TAG = "HunBinder"
-private val DEBUG = true // Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG)
 
 class HeadsUpNotificationViewBinder
 @Inject
@@ -39,10 +35,6 @@ constructor(private val viewModel: NotificationListViewModel) {
                 viewModel.pinnedHeadsUpRows
                     .sample(viewModel.headsUpAnimationsEnabled, ::Pair)
                     .collect { (newKeys, animationsEnabled) ->
-                        if (DEBUG) {
-                            Log.d(TAG, "update:$newKeys")
-                        }
-
                         val added = newKeys - previousKeys
                         val removed = previousKeys - newKeys
                         previousKeys = newKeys

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
+import com.android.systemui.dump.dumpManager
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
@@ -48,5 +49,6 @@ val Kosmos.notificationListViewModel by Fixture {
         userSetupInteractor,
         zenModeInteractor,
         testDispatcher,
+        dumpManager,
     )
 }
