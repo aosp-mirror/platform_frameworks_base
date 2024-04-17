@@ -205,8 +205,6 @@ public class MockingOomAdjusterTests {
                 new ProcessStatsService(sService, new File(sContext.getFilesDir(), "procstats")));
         setFieldValue(ActivityManagerService.class, sService, "mBackupTargets",
                 mock(SparseArray.class));
-        setFieldValue(ActivityManagerService.class, sService, "mOomAdjProfiler",
-                mock(OomAdjProfiler.class));
         setFieldValue(ActivityManagerService.class, sService, "mUserController",
                 mock(UserController.class));
         setFieldValue(ActivityManagerService.class, sService, "mAppProfiler", profiler);
