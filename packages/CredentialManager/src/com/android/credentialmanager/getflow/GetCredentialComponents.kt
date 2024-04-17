@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material3.Divider
@@ -71,7 +72,6 @@ import com.android.credentialmanager.common.ui.HeadlineText
 import com.android.credentialmanager.common.ui.LargeLabelTextOnSurfaceVariant
 import com.android.credentialmanager.common.ui.ModalBottomSheet
 import com.android.credentialmanager.common.ui.MoreOptionTopAppBar
-import com.android.credentialmanager.common.ui.MoreOptionTopAppBarWithCustomNavigation
 import com.android.credentialmanager.common.ui.SheetContainerCard
 import com.android.credentialmanager.common.ui.Snackbar
 import com.android.credentialmanager.common.ui.SnackbarActionText
@@ -175,7 +175,7 @@ fun GetCredentialScreen(
                                     onBackButtonClicked = viewModel::onUserCancel,
                                     onCancel = viewModel::onUserCancel,
                                     onLog = { viewModel.logUiEvent(it) },
-                                    customTopBar = { MoreOptionTopAppBarWithCustomNavigation(
+                                    customTopBar = { MoreOptionTopAppBar(
                                             text = stringResource(
                                                     R.string.get_dialog_title_sign_in_options),
                                             onNavigationIconClicked = viewModel::onUserCancel,
@@ -683,7 +683,10 @@ fun AllSignInOptionCard(
                     text = stringResource(R.string.get_dialog_title_sign_in_options),
                     onNavigationIconClicked = onBackButtonClicked,
                     bottomPadding = 0.dp,
-            )
+                    navigationIcon = Icons.Filled.ArrowBack,
+                    navigationIconContentDescription = stringResource(
+                            R.string.accessibility_back_arrow_button
+            ))
         }
     }) {
         var isFirstSection = true
