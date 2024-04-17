@@ -243,7 +243,6 @@ import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.FlagsParameterization;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.platform.test.rule.LimitDevicesRule;
-import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
@@ -280,7 +279,6 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
-import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.config.sysui.TestableFlagResolver;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.InstanceIdSequenceFake;
@@ -602,7 +600,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mContext.getContentResolver()).thenReturn(cr);
         doNothing().when(cr).registerContentObserver(any(), anyBoolean(), any(), anyInt());
 
-        setDpmAppOppsExemptFromDismissal(false);
+        when(mAppOpsManager.checkOpNoThrow(
+                AppOpsManager.OP_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS, mUid,
+                mPkg)).thenReturn(AppOpsManager.MODE_IGNORED);
 
         // Use this testable looper.
         mTestableLooper = TestableLooper.get(this);
@@ -900,7 +900,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @After
     public void tearDown() throws Exception {
         if (mFile != null) mFile.delete();
-        clearDeviceConfig();
 
         if (mActivityIntent != null) {
             mActivityIntent.cancel();
@@ -1198,19 +1197,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         });
 
         return answers;
-    }
-
-    private void clearDeviceConfig() {
-        DeviceConfig.resetToDefaults(
-                Settings.RESET_MODE_PACKAGE_DEFAULTS, DeviceConfig.NAMESPACE_SYSTEMUI);
-    }
-
-    private void setDefaultAssistantInDeviceConfig(String componentName) {
-        DeviceConfig.setProperty(
-                DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE,
-                componentName,
-                false);
     }
 
     private Notification.Builder getMessageStyleNotifBuilder(boolean addBubbleMetadata,
@@ -9092,7 +9078,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void setDefaultAssistantForUser_fromConfigXml() {
-        clearDeviceConfig();
         ComponentName xmlConfig = new ComponentName("config", "xml");
         ArraySet<ComponentName> components = new ArraySet<>(Arrays.asList(xmlConfig));
         when(mResources
@@ -9107,51 +9092,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.setNotificationAssistantAccessGrantedCallback(
                 mNotificationAssistantAccessGrantedCallback);
 
-
-        mService.setDefaultAssistantForUser(0);
-
-        verify(mNotificationAssistantAccessGrantedCallback)
-                .onGranted(eq(xmlConfig), eq(0), eq(true), eq(false));
-    }
-
-    @Test
-    public void setDefaultAssistantForUser_fromDeviceConfig() {
-        ComponentName xmlConfig = new ComponentName("xml", "config");
-        ComponentName deviceConfig = new ComponentName("device", "config");
-        setDefaultAssistantInDeviceConfig(deviceConfig.flattenToString());
-        when(mResources
-                .getString(com.android.internal.R.string.config_defaultAssistantAccessComponent))
-                .thenReturn(xmlConfig.flattenToString());
-        when(mContext.getResources()).thenReturn(mResources);
-        when(mAssistants.queryPackageForServices(eq(null), anyInt(), anyInt()))
-                .thenReturn(new ArraySet<>(Arrays.asList(xmlConfig, deviceConfig)));
-        when(mAssistants.getDefaultComponents())
-                .thenReturn(new ArraySet<>(Arrays.asList(deviceConfig)));
-        mService.setNotificationAssistantAccessGrantedCallback(
-                mNotificationAssistantAccessGrantedCallback);
-
-        mService.setDefaultAssistantForUser(0);
-
-        verify(mNotificationAssistantAccessGrantedCallback)
-                .onGranted(eq(deviceConfig), eq(0), eq(true), eq(false));
-    }
-
-    @Test
-    public void setDefaultAssistantForUser_deviceConfigInvalid() {
-        ComponentName xmlConfig = new ComponentName("xml", "config");
-        ComponentName deviceConfig = new ComponentName("device", "config");
-        setDefaultAssistantInDeviceConfig(deviceConfig.flattenToString());
-        when(mResources
-                .getString(com.android.internal.R.string.config_defaultAssistantAccessComponent))
-                .thenReturn(xmlConfig.flattenToString());
-        when(mContext.getResources()).thenReturn(mResources);
-        // Only xmlConfig is valid, deviceConfig is not.
-        when(mAssistants.queryPackageForServices(eq(null), anyInt(), eq(0)))
-                .thenReturn(new ArraySet<>(Collections.singleton(xmlConfig)));
-        when(mAssistants.getDefaultComponents())
-                .thenReturn(new ArraySet<>(Arrays.asList(xmlConfig, deviceConfig)));
-        mService.setNotificationAssistantAccessGrantedCallback(
-                mNotificationAssistantAccessGrantedCallback);
 
         mService.setDefaultAssistantForUser(0);
 
@@ -11006,7 +10946,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         tr.addOverride(com.android.internal.R.string.config_defaultListenerAccessPackages, "");
         tr.addOverride(com.android.internal.R.string.config_defaultDndAccessPackages, "");
         tr.addOverride(com.android.internal.R.string.config_defaultAssistantAccessComponent, "");
-        setDefaultAssistantInDeviceConfig("");
 
         mService.loadDefaultApprovedServices(USER_SYSTEM);
 
@@ -13425,7 +13364,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             throws Exception {
         when(mDevicePolicyManager.isActiveDeviceOwner(mUid)).thenReturn(true);
         // Given: a notification has the flag FLAG_ONGOING_EVENT set
-        setDpmAppOppsExemptFromDismissal(false);
         Notification n = new Notification.Builder(mContext, "test")
                 .setOngoing(true)
                 .build();
@@ -13451,7 +13389,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 AppOpsManager.OP_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS, mUid,
                 mPkg)).thenReturn(AppOpsManager.MODE_ALLOWED);
         // Given: a notification has the flag FLAG_ONGOING_EVENT set
-        setDpmAppOppsExemptFromDismissal(true);
         Notification n = new Notification.Builder(mContext, "test")
                 .setOngoing(true)
                 .build();
@@ -13459,8 +13396,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // When: fix the notification with NotificationManagerService
         mService.fixNotification(n, mPkg, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE, true);
 
-        // Then: the notification's flag FLAG_NO_DISMISS should be cleared
-        assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
+        // Then: the notification's flag FLAG_NO_DISMISS should be set
+        assertNotSame(0, n.flags & Notification.FLAG_NO_DISMISS);
     }
 
     @Test
@@ -13468,9 +13405,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             throws Exception {
         when(mAppOpsManager.checkOpNoThrow(
                 AppOpsManager.OP_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS, mUid,
-                mPkg)).thenReturn(AppOpsManager.MODE_ALLOWED);
+                mPkg)).thenReturn(AppOpsManager.MODE_IGNORED);
         // Given: a notification has the flag FLAG_ONGOING_EVENT set
-        setDpmAppOppsExemptFromDismissal(false);
         Notification n = new Notification.Builder(mContext, "test")
                 .setOngoing(true)
                 .build();
@@ -15549,14 +15485,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         return PendingIntent.getActivity(mContext, 0,
                 new Intent(action).setPackage(mContext.getPackageName()),
                 PendingIntent.FLAG_MUTABLE);
-    }
-
-    private void setDpmAppOppsExemptFromDismissal(boolean isOn) {
-        DeviceConfig.setProperty(
-                DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER,
-                /* name= */ "application_exemptions",
-                String.valueOf(isOn),
-                /* makeDefault= */ false);
     }
 
     private void allowTestPackageToToast() throws Exception {
