@@ -17,8 +17,10 @@
 package com.android.wm.shell.pip2.phone;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_PIP;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
@@ -182,6 +184,10 @@ public class PipTransition extends PipTransitionController {
             mResizeTransition = null;
             return startResizeAnimation(info, startTransaction, finishTransaction, finishCallback);
         }
+
+        if (isRemovePipTransition(info)) {
+            return removePipImmediately(info, startTransaction, finishTransaction, finishCallback);
+        }
         return false;
     }
 
@@ -291,6 +297,10 @@ public class PipTransition extends PipTransitionController {
         startOverlayFadeoutAnimation();
     }
 
+    //
+    // Subroutines setting up and starting transitions' animations.
+    //
+
     private void startOverlayFadeoutAnimation() {
         ValueAnimator animator = ValueAnimator.ofFloat(1f, 0f);
         animator.setDuration(CONTENT_OVERLAY_FADE_OUT_DELAY_MS);
@@ -326,6 +336,7 @@ public class PipTransition extends PipTransitionController {
         mPipScheduler.setPipTaskToken(mPipTaskToken);
 
         startTransaction.apply();
+        // TODO: b/275910498 Use a new implementation of the PiP animator here.
         finishCallback.onTransitionFinished(null);
         return true;
     }
@@ -353,10 +364,25 @@ public class PipTransition extends PipTransitionController {
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         startTransaction.apply();
+        // TODO: b/275910498 Use a new implementation of the PiP animator here.
         finishCallback.onTransitionFinished(null);
         onExitPip();
         return true;
     }
+
+    private boolean removePipImmediately(@NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        startTransaction.apply();
+        finishCallback.onTransitionFinished(null);
+        onExitPip();
+        return true;
+    }
+
+    //
+    // Utility methods for checking PiP-related transition info and requests.
+    //
 
     @Nullable
     private TransitionInfo.Change getPipChange(TransitionInfo info) {
@@ -413,6 +439,25 @@ public class PipTransition extends PipTransitionController {
         // then this is legacy-enter PiP.
         return pipChange != null && pipChange.getMode() == TRANSIT_TO_FRONT
                 && info.getChanges().size() == 1;
+    }
+
+    private boolean isRemovePipTransition(@NonNull TransitionInfo info) {
+        if (mPipTaskToken == null) {
+            // PiP removal makes sense if enter-PiP has cached a valid pinned task token.
+            return false;
+        }
+        TransitionInfo.Change pipChange = info.getChange(mPipTaskToken);
+        if (pipChange == null) {
+            // Search for the PiP change by token since the windowing mode might be FULLSCREEN now.
+            return false;
+        }
+
+        boolean isPipMovedToBack = info.getType() == TRANSIT_TO_BACK
+                && pipChange.getMode() == TRANSIT_TO_BACK;
+        boolean isPipClosed = info.getType() == TRANSIT_CLOSE
+                && pipChange.getMode() == TRANSIT_CLOSE;
+        // PiP is being removed if the pinned task is either moved to back or closed.
+        return isPipMovedToBack || isPipClosed;
     }
 
     /**
