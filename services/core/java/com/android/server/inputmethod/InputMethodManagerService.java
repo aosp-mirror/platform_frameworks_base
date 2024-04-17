@@ -1099,7 +1099,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         imesToClearAdditionalSubtypes.add(imiId);
                     }
                     int change = isPackageDisappearing(imi.getPackageName());
-                    if (change == PACKAGE_TEMPORARY_CHANGE || change == PACKAGE_PERMANENT_CHANGE) {
+                    if (change == PACKAGE_PERMANENT_CHANGE) {
                         Slog.i(TAG, "Input method uninstalled, disabling: " + imi.getComponent());
                         if (isCurrentUser) {
                             setInputMethodEnabledLocked(imi.getId(), false);
