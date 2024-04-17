@@ -4509,18 +4509,18 @@ public class NotificationStackScrollLayout
         mEmptyShadeView.setVisible(visible, mIsExpanded && mAnimationsEnabled);
 
         if (areNotificationsHiddenInShade) {
-            updateEmptyShadeView(R.string.dnd_suppressing_shade_text, 0, 0);
+            updateEmptyShadeViewResources(R.string.dnd_suppressing_shade_text, 0, 0);
         } else if (hasFilteredOutSeenNotifications) {
-            updateEmptyShadeView(
+            updateEmptyShadeViewResources(
                     R.string.no_unseen_notif_text,
                     R.string.unlock_to_see_notif_text,
                     R.drawable.ic_friction_lock_closed);
         } else {
-            updateEmptyShadeView(R.string.empty_shade_text, 0, 0);
+            updateEmptyShadeViewResources(R.string.empty_shade_text, 0, 0);
         }
     }
 
-    private void updateEmptyShadeView(
+    private void updateEmptyShadeViewResources(
             @StringRes int newTextRes,
             @StringRes int newFooterTextRes,
             @DrawableRes int newFooterIconRes) {
@@ -5338,7 +5338,8 @@ public class NotificationStackScrollLayout
             mActivityStarter.startActivity(intent, true, true, Intent.FLAG_ACTIVITY_SINGLE_TOP);
         });
         setEmptyShadeView(view);
-        updateEmptyShadeView(
+        view.setVisible(oldView != null && oldView.isVisible(), /* animate = */ false);
+        updateEmptyShadeViewResources(
                 oldView == null ? R.string.empty_shade_text : oldView.getTextResource(),
                 oldView == null ? 0 : oldView.getFooterTextResource(),
                 oldView == null ? 0 : oldView.getFooterIconResource());
