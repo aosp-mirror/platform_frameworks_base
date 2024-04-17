@@ -16,12 +16,12 @@
 
 package com.android.systemui.volume.panel.component.volume.ui.viewmodel
 
-import android.media.AudioManager
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaDeviceSessionInteractor
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputInteractor
 import com.android.systemui.volume.panel.component.mediaoutput.shared.model.MediaDeviceSession
-import com.android.systemui.volume.panel.component.mediaoutput.shared.model.isTheSameSession
+import com.android.systemui.volume.panel.component.volume.domain.interactor.AudioSlidersInteractor
+import com.android.systemui.volume.panel.component.volume.domain.model.SliderType
 import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.AudioStreamSliderViewModel
 import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.CastVolumeSliderViewModel
 import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.SliderViewModel
@@ -33,12 +33,12 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
 
 /**
@@ -55,28 +55,21 @@ constructor(
     private val mediaDeviceSessionInteractor: MediaDeviceSessionInteractor,
     private val streamSliderViewModelFactory: AudioStreamSliderViewModel.Factory,
     private val castVolumeSliderViewModelFactory: CastVolumeSliderViewModel.Factory,
+    streamsInteractor: AudioSlidersInteractor,
 ) {
 
     val sliderViewModels: StateFlow<List<SliderViewModel>> =
-        combineTransform(
-                mediaOutputInteractor.activeMediaDeviceSessions,
-                mediaOutputInteractor.defaultActiveMediaSession,
-            ) { activeSessions, defaultSession ->
+        streamsInteractor.volumePanelSliders
+            .transformLatest { sliderTypes ->
                 coroutineScope {
-                    val viewModels = buildList {
-                        if (defaultSession?.isTheSameSession(activeSessions.remote) == true) {
-                            addRemoteViewModelIfNeeded(this, activeSessions.remote)
-                            addStreamViewModel(this, AudioManager.STREAM_MUSIC)
-                        } else {
-                            addStreamViewModel(this, AudioManager.STREAM_MUSIC)
-                            addRemoteViewModelIfNeeded(this, activeSessions.remote)
+                    val viewModels =
+                        sliderTypes.map { type ->
+                            when (type) {
+                                is SliderType.Stream -> createStreamViewModel(type.stream)
+                                is SliderType.MediaDeviceCast ->
+                                    createSessionViewModel(type.session)
+                            }
                         }
-
-                        addStreamViewModel(this, AudioManager.STREAM_VOICE_CALL)
-                        addStreamViewModel(this, AudioManager.STREAM_RING)
-                        addStreamViewModel(this, AudioManager.STREAM_NOTIFICATION)
-                        addStreamViewModel(this, AudioManager.STREAM_ALARM)
-                    }
                     emit(viewModels)
                 }
             }
@@ -98,29 +91,18 @@ constructor(
         scope.launch { mutableIsExpanded.emit(isExpanded) }
     }
 
-    private fun CoroutineScope.addRemoteViewModelIfNeeded(
-        list: MutableList<SliderViewModel>,
-        remoteMediaDeviceSession: MediaDeviceSession?
-    ) {
-        if (remoteMediaDeviceSession?.canAdjustVolume == true) {
-            val viewModel =
-                castVolumeSliderViewModelFactory.create(
-                    remoteMediaDeviceSession,
-                    this,
-                )
-            list.add(viewModel)
-        }
+    private fun CoroutineScope.createSessionViewModel(
+        session: MediaDeviceSession
+    ): CastVolumeSliderViewModel {
+        return castVolumeSliderViewModelFactory.create(session, this)
     }
 
-    private fun CoroutineScope.addStreamViewModel(
-        list: MutableList<SliderViewModel>,
-        stream: Int,
-    ) {
-        val viewModel =
-            streamSliderViewModelFactory.create(
-                AudioStreamSliderViewModel.FactoryAudioStreamWrapper(AudioStream(stream)),
-                this,
-            )
-        list.add(viewModel)
+    private fun CoroutineScope.createStreamViewModel(
+        stream: AudioStream,
+    ): AudioStreamSliderViewModel {
+        return streamSliderViewModelFactory.create(
+            AudioStreamSliderViewModel.FactoryAudioStreamWrapper(stream),
+            this,
+        )
     }
 }
