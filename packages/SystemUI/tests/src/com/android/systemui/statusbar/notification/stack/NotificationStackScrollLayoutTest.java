@@ -90,6 +90,7 @@ import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefac
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -106,6 +107,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /**
  * Tests for {@link NotificationStackScrollLayout}.
@@ -1044,6 +1046,96 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         assertFalse(mStackScroller.getIsBeingDragged());
     }
 
+
+    @Test
+    @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
+    public void testGenerateHeadsUpDisappearEvent_setsHeadsUpAnimatingAway() {
+        // GIVEN NSSL is ready for HUN animations
+        Consumer<Boolean> headsUpAnimatingAwayListener = mock(BooleanConsumer.class);
+        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
+        prepareStackScrollerForHunAnimations(headsUpAnimatingAwayListener);
+
+        // WHEN we generate a disappear event
+        mStackScroller.generateHeadsUpAnimation(row, /* isHeadsUp = */ false);
+
+        // THEN headsUpAnimatingAway is true
+        verify(headsUpAnimatingAwayListener).accept(true);
+        assertTrue(mStackScroller.mHeadsUpAnimatingAway);
+    }
+
+    @Test
+    @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
+    public void testGenerateHeadsUpDisappearEvent_stackExpanded_headsUpAnimatingAwayNotSet() {
+        // GIVEN NSSL would be ready for HUN animations, BUT it is expanded
+        Consumer<Boolean> headsUpAnimatingAwayListener = mock(BooleanConsumer.class);
+        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
+        assertTrue("Should be expanded by default.", mStackScroller.isExpanded());
+        mStackScroller.setHeadsUpAnimatingAwayListener(headsUpAnimatingAwayListener);
+        mStackScroller.setAnimationsEnabled(true);
+        mStackScroller.setHeadsUpGoingAwayAnimationsAllowed(true);
+
+        // WHEN we generate a disappear event
+        mStackScroller.generateHeadsUpAnimation(row, /* isHeadsUp = */ false);
+
+        // THEN nothing happens
+        verify(headsUpAnimatingAwayListener, never()).accept(anyBoolean());
+        assertFalse(mStackScroller.mHeadsUpAnimatingAway);
+    }
+
+    @Test
+    @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
+    public void testGenerateHeadsUpDisappearEvent_pendingAppearEvent_headsUpAnimatingAwayNotSet() {
+        // GIVEN NSSL is ready for HUN animations
+        Consumer<Boolean> headsUpAnimatingAwayListener = mock(BooleanConsumer.class);
+        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
+        prepareStackScrollerForHunAnimations(headsUpAnimatingAwayListener);
+        // BUT there is a pending appear event
+        mStackScroller.generateHeadsUpAnimation(row, /* isHeadsUp = */ true);
+
+        // WHEN we generate a disappear event
+        mStackScroller.generateHeadsUpAnimation(row, /* isHeadsUp = */ false);
+
+        // THEN nothing happens
+        verify(headsUpAnimatingAwayListener, never()).accept(anyBoolean());
+        assertFalse(mStackScroller.mHeadsUpAnimatingAway);
+    }
+
+    @Test
+    @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
+    public void testGenerateHeadsUpAppearEvent_headsUpAnimatingAwayNotSet() {
+        // GIVEN NSSL is ready for HUN animations
+        Consumer<Boolean> headsUpAnimatingAwayListener = mock(BooleanConsumer.class);
+        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
+        prepareStackScrollerForHunAnimations(headsUpAnimatingAwayListener);
+
+        // WHEN we generate a disappear event
+        mStackScroller.generateHeadsUpAnimation(row, /* isHeadsUp = */ true);
+
+        // THEN headsUpAnimatingWay is not set
+        verify(headsUpAnimatingAwayListener, never()).accept(anyBoolean());
+        assertFalse(mStackScroller.mHeadsUpAnimatingAway);
+    }
+
+    @Test
+    @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
+    public void testOnChildAnimationsFinished_resetsheadsUpAnimatingAway() {
+        // GIVEN NSSL is ready for HUN animations
+        Consumer<Boolean> headsUpAnimatingAwayListener = mock(BooleanConsumer.class);
+        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
+        prepareStackScrollerForHunAnimations(headsUpAnimatingAwayListener);
+
+        // AND there is a HUN animating away
+        mStackScroller.generateHeadsUpAnimation(row, /* isHeadsUp = */ false);
+        assertTrue("a HUN should be animating away", mStackScroller.mHeadsUpAnimatingAway);
+
+        // WHEN the child animations are finished
+        mStackScroller.onChildAnimationFinished();
+
+        // THEN headsUpAnimatingAway is false
+        verify(headsUpAnimatingAwayListener).accept(false);
+        assertFalse(mStackScroller.mHeadsUpAnimatingAway);
+    }
+
     private MotionEvent captureTouchSentToSceneFramework() {
         ArgumentCaptor<MotionEvent> captor = ArgumentCaptor.forClass(MotionEvent.class);
         verify(mStackScrollLayoutController).sendTouchToSceneFramework(captor.capture());
@@ -1054,6 +1146,14 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         // Can't inject this through the listener or we end up on the actual implementation
         // rather than the mock because the spy just coppied the anonymous inner /shruggie.
         mStackScroller.setStatusBarState(state);
+    }
+
+    private void prepareStackScrollerForHunAnimations(
+            Consumer<Boolean> headsUpAnimatingAwayListener) {
+        mStackScroller.setHeadsUpAnimatingAwayListener(headsUpAnimatingAwayListener);
+        mStackScroller.setIsExpanded(false);
+        mStackScroller.setAnimationsEnabled(true);
+        mStackScroller.setHeadsUpGoingAwayAnimationsAllowed(true);
     }
 
     private ExpandableNotificationRow createClearableRow() {
@@ -1116,4 +1216,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
             assertThat(mActual.getY()).isEqualTo(expected.getY());
         }
     }
+
+    private abstract static class BooleanConsumer implements Consumer<Boolean> { }
 }
