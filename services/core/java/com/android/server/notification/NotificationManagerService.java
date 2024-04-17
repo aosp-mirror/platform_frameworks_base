@@ -139,6 +139,7 @@ import static android.service.notification.NotificationListenerService.TRIM_FULL
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.contentprotection.flags.Flags.rapidClearNotificationsByListenerAppOpEnabled;
+
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
@@ -306,6 +307,7 @@ import android.view.Display;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.RemoteViews;
 import android.widget.Toast;
+
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -357,7 +359,9 @@ import com.android.server.utils.quota.MultiRateLimiter;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.BackgroundActivityStartCallback;
 import com.android.server.wm.WindowManagerInternal;
+
 import libcore.io.IoUtils;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParserException;
@@ -11774,10 +11778,18 @@ public class NotificationManagerService extends SystemService {
                     }
 
                     if (lifetimeExtensionRefactor()) {
+                        if (sendRedacted && redactedSbn == null) {
+                            redactedSbn = redactStatusBarNotification(sbn);
+                            redactedCache = new TrimCache(redactedSbn);
+                        }
+                        final StatusBarNotification sbnToPost = sendRedacted
+                                ? redactedCache.ForListener(info) : trimCache.ForListener(info);
+
                         // Checks if this is a request to notify system UI about a notification that
                         // has been lifetime extended.
                         // (We only need to check old for the flag, because in both cancellation and
-                        // update cases, old should have the flag.)
+                        // update cases, old should have the flag, whereas in update cases the
+                        // new will NOT have the flag.)
                         // If it is such a request, and this is system UI, we send the post request
                         // only to System UI, and break as we don't need to continue checking other
                         // Managed Services.
@@ -11785,7 +11797,7 @@ public class NotificationManagerService extends SystemService {
                                 && (old.getNotification().flags
                                 & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY) > 0) {
                             final NotificationRankingUpdate update = makeRankingUpdateLocked(info);
-                            listenerCalls.add(() -> notifyPosted(info, oldSbn, update));
+                            listenerCalls.add(() -> notifyPosted(info, sbnToPost, update));
                             break;
                         }
                     }
