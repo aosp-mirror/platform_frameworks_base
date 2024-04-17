@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.isStartResultSuccessful;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.TaskFragmentOperation.OP_TYPE_CLEAR_ADJACENT_TASK_FRAGMENTS;
@@ -848,6 +849,17 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
 
         final int childWindowingMode = c.getActivityWindowingMode();
+        if (!ActivityTaskManagerService.isPip2ExperimentEnabled()
+                && tr.getWindowingMode() == WINDOWING_MODE_PINNED
+                && (childWindowingMode == WINDOWING_MODE_PINNED
+                || childWindowingMode == WINDOWING_MODE_UNDEFINED)) {
+            // If setActivityWindowingMode requested to match its pinned task's windowing mode,
+            // remove any inconsistency checking timeout callbacks for PiP.
+            Slog.d(TAG, "Task and activity windowing modes match, so remove any timeout "
+                    + "abort PiP callbacks scheduled if needed; task_win_mode="
+                    + tr.getWindowingMode() + ", activity_win_mode=" + childWindowingMode);
+            mService.mRootWindowContainer.removeAllMaybeAbortPipEnterRunnable();
+        }
         if (childWindowingMode > -1) {
             tr.forAllActivities(a -> { a.setWindowingMode(childWindowingMode); });
         }
