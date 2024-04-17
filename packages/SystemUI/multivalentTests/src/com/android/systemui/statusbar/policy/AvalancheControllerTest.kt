@@ -248,6 +248,35 @@ class AvalancheControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testGetDurationMs_untrackedEntryEmptyAvalanche_useAutoDismissTime() {
+        val givenEntry = createHeadsUpEntry(id = 0)
+
+        // Nothing is showing
+        mAvalancheController.headsUpEntryShowing = null
+
+        // Nothing is next
+        mAvalancheController.clearNext()
+
+        val durationMs = mAvalancheController.getDurationMs(givenEntry, autoDismissMs = 5000)
+        Truth.assertThat(durationMs).isEqualTo(5000)
+    }
+
+    @Test
+    fun testGetDurationMs_untrackedEntryNonEmptyAvalanche_useAutoDismissTime() {
+        val givenEntry = createHeadsUpEntry(id = 0)
+
+        // Given entry not tracked
+        mAvalancheController.headsUpEntryShowing = createHeadsUpEntry(id = 1)
+
+        mAvalancheController.clearNext()
+        val nextEntry = createHeadsUpEntry(id = 2)
+        mAvalancheController.addToNext(nextEntry, runnableMock!!)
+
+        val durationMs = mAvalancheController.getDurationMs(givenEntry, autoDismissMs = 5000)
+        Truth.assertThat(durationMs).isEqualTo(5000)
+    }
+
+    @Test
     fun testGetDurationMs_lastEntry_useAutoDismissTime() {
         // Entry is showing
         val showingEntry = createHeadsUpEntry(id = 0)
@@ -261,7 +290,7 @@ class AvalancheControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testGetDurationMs_nextEntryLowerPriority_500() {
+    fun testGetDurationMs_nextEntryLowerPriority_5000() {
         // Entry is showing
         val showingEntry = createFsiHeadsUpEntry(id = 1)
         mAvalancheController.headsUpEntryShowing = showingEntry
