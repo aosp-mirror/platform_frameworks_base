@@ -30,6 +30,7 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -474,6 +475,16 @@ public class RecentTasksController implements TaskStackListenerCallback,
                         executor.execute(() -> listener.accept(running));
                     }
                 });
+            });
+        }
+
+        @Override
+        public void setTransitionBackgroundColor(@Nullable Color color) {
+            mMainExecutor.execute(() -> {
+                if (mTransitionHandler == null) {
+                    return;
+                }
+                mTransitionHandler.setTransitionBackgroundColor(color);
             });
         }
     }

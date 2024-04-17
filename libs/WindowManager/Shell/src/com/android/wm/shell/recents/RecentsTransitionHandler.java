@@ -36,6 +36,7 @@ import android.app.ActivityTaskManager;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -55,6 +56,8 @@ import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
+
+import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
@@ -92,6 +95,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
     private final ArrayList<RecentsMixedHandler> mMixers = new ArrayList<>();
 
     private final HomeTransitionObserver mHomeTransitionObserver;
+    private @Nullable Color mBackgroundColor;
 
     public RecentsTransitionHandler(ShellInit shellInit, Transitions transitions,
             @Nullable RecentTasksController recentTasksController,
@@ -121,6 +125,15 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
     /** Adds the callback for receiving the state change of transition. */
     public void addTransitionStateListener(RecentsTransitionStateListener listener) {
         mStateListeners.add(listener);
+    }
+
+    /**
+     * Sets a background color on the transition root layered behind the outgoing task. {@code null}
+     * may be used to clear any previously set colors to avoid showing a background at all. The
+     * color is always shown at full opacity.
+     */
+    public void setTransitionBackgroundColor(@Nullable Color color) {
+        mBackgroundColor = color;
     }
 
     @VisibleForTesting
@@ -469,6 +482,16 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             final int belowLayers = info.getChanges().size();
             final int middleLayers = info.getChanges().size() * 2;
             final int aboveLayers = info.getChanges().size() * 3;
+
+            // Add a background color to each transition root in this transition.
+            if (mBackgroundColor != null) {
+                info.getChanges().stream()
+                        .mapToInt((change) -> TransitionUtil.rootIndexFor(change, info))
+                        .distinct()
+                        .mapToObj((rootIndex) -> info.getRoot(rootIndex).getLeash())
+                        .forEach((root) -> createBackgroundSurface(t, root, middleLayers));
+            }
+
             for (int i = 0; i < info.getChanges().size(); ++i) {
                 final TransitionInfo.Change change = info.getChanges().get(i);
                 final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
@@ -1105,6 +1128,29 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 }
             }
             return true;
+        }
+
+        private void createBackgroundSurface(SurfaceControl.Transaction transaction,
+                SurfaceControl parent, int layer) {
+            if (mBackgroundColor == null) {
+                return;
+            }
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                    "  adding background color to layer=%d", layer);
+            final SurfaceControl background = new SurfaceControl.Builder()
+                    .setName("recents_background")
+                    .setColorLayer()
+                    .setOpaque(true)
+                    .setParent(parent)
+                    .build();
+            transaction.setColor(background, colorToFloatArray(mBackgroundColor));
+            transaction.setLayer(background, layer);
+            transaction.setAlpha(background, 1F);
+            transaction.show(background);
+        }
+
+        private static float[] colorToFloatArray(@NonNull Color color) {
+            return new float[]{color.red(), color.green(), color.blue()};
         }
 
         private void cleanUpPausingOrClosingTask(TaskState task, WindowContainerTransaction wct,

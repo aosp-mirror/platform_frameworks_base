@@ -16,7 +16,9 @@
 
 package com.android.systemui.communal.ui.viewmodel
 
+import android.graphics.Color
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -28,6 +30,7 @@ import com.android.systemui.keyguard.ui.viewmodel.LockscreenToGlanceableHubTrans
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.merge
@@ -38,6 +41,7 @@ import kotlinx.coroutines.flow.merge
 class CommunalTransitionViewModel
 @Inject
 constructor(
+    communalColors: CommunalColors,
     glanceableHubToLockscreenTransitionViewModel: GlanceableHubToLockscreenTransitionViewModel,
     lockscreenToGlanceableHubTransitionViewModel: LockscreenToGlanceableHubTransitionViewModel,
     dreamToGlanceableHubTransitionViewModel: DreamingToGlanceableHubTransitionViewModel,
@@ -67,5 +71,14 @@ constructor(
             ->
             step.transitionState == TransitionState.FINISHED ||
                 step.transitionState == TransitionState.CANCELED
+        }
+
+    val recentsBackgroundColor: Flow<Color?> =
+        combine(showByDefault, communalColors.backgroundColor) { showByDefault, backgroundColor ->
+            if (showByDefault) {
+                backgroundColor
+            } else {
+                null
+            }
         }
 }

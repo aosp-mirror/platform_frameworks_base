@@ -36,6 +36,7 @@ import com.android.systemui.communal.dagger.Communal
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.ui.compose.CommunalContainer
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
+import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -64,6 +65,7 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val shadeInteractor: ShadeInteractor,
     private val powerManager: PowerManager,
+    private val communalColors: CommunalColors,
     @Communal private val dataSourceDelegator: SceneDataSourceDelegator,
 ) {
     /** The container view for the hub. This will not be initialized until [initView] is called. */
@@ -168,6 +170,7 @@ constructor(
                                 PlatformTheme {
                                     CommunalContainer(
                                         viewModel = communalViewModel,
+                                        colors = communalColors,
                                         dataSourceDelegator = dataSourceDelegator,
                                         dialogFactory = dialogFactory,
                                     )
