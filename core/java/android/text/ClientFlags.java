@@ -61,4 +61,11 @@ public class ClientFlags {
     public static boolean icuBidiMigration() {
         return TextFlags.isFeatureEnabled(Flags.FLAG_ICU_BIDI_MIGRATION);
     }
+
+    /**
+     * @see Flags#fixMisalignedContextMenu()
+     */
+    public static boolean fixMisalignedContextMenu() {
+        return TextFlags.isFeatureEnabled(Flags.FLAG_FIX_MISALIGNED_CONTEXT_MENU);
+    }
 }
