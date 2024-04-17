@@ -292,7 +292,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
      */
 
     public final boolean mAnimateBack;
-    private final boolean mTrackpadGestureFeaturesEnabled;
     /**
      * The minimum scale to "squish" the Shade and associated elements down to, for Back gesture
      */
@@ -891,7 +890,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mLayoutInflater = layoutInflater;
         mFeatureFlags = featureFlags;
         mAnimateBack = predictiveBackAnimateShade();
-        mTrackpadGestureFeaturesEnabled = mFeatureFlags.isEnabled(Flags.TRACKPAD_GESTURE_FEATURES);
         mFalsingCollector = falsingCollector;
         mWakeUpCoordinator = coordinator;
         mMainDispatcher = mainDispatcher;
@@ -4925,9 +4923,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             final float x = event.getX(pointerIndex);
             final float y = event.getY(pointerIndex);
             boolean canCollapsePanel = canCollapsePanelOnTouch();
-            final boolean isTrackpadTwoOrThreeFingerSwipe = isTrackpadScroll(
-                    mTrackpadGestureFeaturesEnabled, event) || isTrackpadThreeFingerSwipe(
-                    mTrackpadGestureFeaturesEnabled, event);
+            final boolean isTrackpadTwoOrThreeFingerSwipe = isTrackpadScroll(event)
+                    || isTrackpadThreeFingerSwipe(event);
 
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
@@ -4947,7 +4944,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
                     mIsTrackpadReverseScroll =
                             !mNaturalScrollingSettingObserver.isNaturalScrollingEnabled()
-                                    && isTrackpadScroll(mTrackpadGestureFeaturesEnabled, event);
+                                    && isTrackpadScroll(event);
                     if (!isTracking() || isFullyCollapsed()) {
                         mInitialExpandY = y;
                         mInitialExpandX = x;
@@ -5170,9 +5167,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 mIgnoreXTouchSlop = true;
             }
 
-            final boolean isTrackpadTwoOrThreeFingerSwipe = isTrackpadScroll(
-                    mTrackpadGestureFeaturesEnabled, event) || isTrackpadThreeFingerSwipe(
-                    mTrackpadGestureFeaturesEnabled, event);
+            final boolean isTrackpadTwoOrThreeFingerSwipe = isTrackpadScroll(event)
+                    || isTrackpadThreeFingerSwipe(event);
 
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
