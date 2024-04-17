@@ -253,7 +253,7 @@ public final class AccessibilityManager {
     boolean mIsTouchExplorationEnabled;
 
     @UnsupportedAppUsage(trackingBug = 123768939L)
-    boolean mIsHighTextContrastEnabled;
+    boolean mIsHighContrastTextEnabled;
 
     boolean mIsAudioDescriptionByDefaultRequested;
 
@@ -276,8 +276,8 @@ public final class AccessibilityManager {
     private final ArrayMap<TouchExplorationStateChangeListener, Handler>
             mTouchExplorationStateChangeListeners = new ArrayMap<>();
 
-    private final ArrayMap<HighTextContrastChangeListener, Handler>
-            mHighTextContrastStateChangeListeners = new ArrayMap<>();
+    private final ArrayMap<HighContrastTextStateChangeListener, Executor>
+            mHighContrastTextStateChangeListeners = new ArrayMap<>();
 
     private final ArrayMap<AccessibilityServicesStateChangeListener, Executor>
             mServicesStateChangeListeners = new ArrayMap<>();
@@ -356,21 +356,20 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Listener for the system high text contrast state. To listen for changes to
-     * the high text contrast state on the device, implement this interface and
+     * Listener for the system high contrast text state. To listen for changes to
+     * the high contrast text state on the device, implement this interface and
      * register it with the system by calling
-     * {@link #addHighTextContrastStateChangeListener}.
-     *
-     * @hide
+     * {@link #addHighContrastTextStateChangeListener}.
      */
-    public interface HighTextContrastChangeListener {
+    @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_HIGH_CONTRAST_TEXT_SMALL_TEXT_RECT)
+    public interface HighContrastTextStateChangeListener {
 
         /**
-         * Called when the high text contrast enabled state changes.
+         * Called when the high contrast text enabled state changes.
          *
-         * @param enabled Whether high text contrast is enabled.
+         * @param enabled Whether high contrast text is enabled.
          */
-        void onHighTextContrastStateChanged(boolean enabled);
+        void onHighContrastTextStateChanged(boolean enabled);
     }
 
     /**
@@ -655,24 +654,23 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Returns if the high text contrast in the system is enabled.
+     * Returns if high contrast text in the system is enabled.
      * <p>
      * <strong>Note:</strong> You need to query this only if you application is
      * doing its own rendering and does not rely on the platform rendering pipeline.
      * </p>
      *
-     * @return True if high text contrast is enabled, false otherwise.
+     * @return True if high contrast text is enabled, false otherwise.
      *
-     * @hide
      */
-    @UnsupportedAppUsage
-    public boolean isHighTextContrastEnabled() {
+    @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_HIGH_CONTRAST_TEXT_SMALL_TEXT_RECT)
+    public boolean isHighContrastTextEnabled() {
         synchronized (mLock) {
             IAccessibilityManager service = getServiceLocked();
             if (service == null) {
                 return false;
             }
-            return mIsHighTextContrastEnabled;
+            return mIsHighContrastTextEnabled;
         }
     }
 
@@ -1303,32 +1301,32 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Registers a {@link HighTextContrastChangeListener} for changes in
-     * the global high text contrast state of the system.
+     * Registers a {@link HighContrastTextStateChangeListener} for changes in
+     * the global high contrast text state of the system.
      *
-     * @param listener The listener.
-     *
-     * @hide
+     * @param executor a executor to call the listener from
+     * @param listener The listener to be called
      */
-    public void addHighTextContrastStateChangeListener(
-            @NonNull HighTextContrastChangeListener listener, @Nullable Handler handler) {
+    @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_HIGH_CONTRAST_TEXT_SMALL_TEXT_RECT)
+    public void addHighContrastTextStateChangeListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull HighContrastTextStateChangeListener listener
+    ) {
         synchronized (mLock) {
-            mHighTextContrastStateChangeListeners
-                    .put(listener, (handler == null) ? mHandler : handler);
+            mHighContrastTextStateChangeListeners.put(listener, executor);
         }
     }
 
     /**
-     * Unregisters a {@link HighTextContrastChangeListener}.
+     * Unregisters a {@link HighContrastTextStateChangeListener}.
      *
      * @param listener The listener.
-     *
-     * @hide
      */
-    public void removeHighTextContrastStateChangeListener(
-            @NonNull HighTextContrastChangeListener listener) {
+    @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_HIGH_CONTRAST_TEXT_SMALL_TEXT_RECT)
+    public void removeHighContrastTextStateChangeListener(
+            @NonNull HighContrastTextStateChangeListener listener) {
         synchronized (mLock) {
-            mHighTextContrastStateChangeListeners.remove(listener);
+            mHighContrastTextStateChangeListeners.remove(listener);
         }
     }
 
@@ -1505,13 +1503,13 @@ public final class AccessibilityManager {
 
         final boolean wasEnabled = isEnabled();
         final boolean wasTouchExplorationEnabled = mIsTouchExplorationEnabled;
-        final boolean wasHighTextContrastEnabled = mIsHighTextContrastEnabled;
+        final boolean wasHighTextContrastEnabled = mIsHighContrastTextEnabled;
         final boolean wasAudioDescriptionByDefaultRequested = mIsAudioDescriptionByDefaultRequested;
 
         // Ensure listeners get current state from isZzzEnabled() calls.
         mIsEnabled = enabled;
         mIsTouchExplorationEnabled = touchExplorationEnabled;
-        mIsHighTextContrastEnabled = highTextContrastEnabled;
+        mIsHighContrastTextEnabled = highTextContrastEnabled;
         mIsAudioDescriptionByDefaultRequested = audioDescriptionEnabled;
 
         if (wasEnabled != isEnabled()) {
@@ -1523,7 +1521,7 @@ public final class AccessibilityManager {
         }
 
         if (wasHighTextContrastEnabled != highTextContrastEnabled) {
-            notifyHighTextContrastStateChanged();
+            notifyHighContrastTextStateChanged();
         }
 
         if (wasAudioDescriptionByDefaultRequested
@@ -2397,24 +2395,24 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Notifies the registered {@link HighTextContrastChangeListener}s.
+     * Notifies the registered {@link HighContrastTextStateChangeListener}s.
      */
-    private void notifyHighTextContrastStateChanged() {
+    private void notifyHighContrastTextStateChanged() {
         final boolean isHighTextContrastEnabled;
-        final ArrayMap<HighTextContrastChangeListener, Handler> listeners;
+        final ArrayMap<HighContrastTextStateChangeListener, Executor> listeners;
         synchronized (mLock) {
-            if (mHighTextContrastStateChangeListeners.isEmpty()) {
+            if (mHighContrastTextStateChangeListeners.isEmpty()) {
                 return;
             }
-            isHighTextContrastEnabled = mIsHighTextContrastEnabled;
-            listeners = new ArrayMap<>(mHighTextContrastStateChangeListeners);
+            isHighTextContrastEnabled = mIsHighContrastTextEnabled;
+            listeners = new ArrayMap<>(mHighContrastTextStateChangeListeners);
         }
 
         final int numListeners = listeners.size();
         for (int i = 0; i < numListeners; i++) {
-            final HighTextContrastChangeListener listener = listeners.keyAt(i);
-            listeners.valueAt(i).post(() ->
-                    listener.onHighTextContrastStateChanged(isHighTextContrastEnabled));
+            final HighContrastTextStateChangeListener listener = listeners.keyAt(i);
+            listeners.valueAt(i).execute(() ->
+                    listener.onHighContrastTextStateChanged(isHighTextContrastEnabled));
         }
     }
 
