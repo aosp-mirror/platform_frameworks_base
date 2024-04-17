@@ -38,6 +38,7 @@ import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel.Companion.POPUP_AUTO_HIDE_TIMEOUT_MS
+import com.android.systemui.communal.ui.viewmodel.PopupType
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
@@ -237,7 +238,7 @@ class CommunalViewModelTest : SysuiTestCase() {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
 
             val communalContent by collectLastValue(underTest.communalContent)
-            val isPopupOnDismissCtaShowing by collectLastValue(underTest.isPopupOnDismissCtaShowing)
+            val currentPopup by collectLastValue(underTest.currentPopup)
 
             assertThat(communalContent?.size).isEqualTo(1)
             assertThat(communalContent?.get(0))
@@ -247,11 +248,11 @@ class CommunalViewModelTest : SysuiTestCase() {
 
             // hide CTA tile and show the popup
             assertThat(communalContent).isEmpty()
-            assertThat(isPopupOnDismissCtaShowing).isEqualTo(true)
+            assertThat(currentPopup).isEqualTo(PopupType.CtaTile)
 
             // hide popup after time elapsed
             advanceTimeBy(POPUP_AUTO_HIDE_TIMEOUT_MS)
-            assertThat(isPopupOnDismissCtaShowing).isEqualTo(false)
+            assertThat(currentPopup).isNull()
         }
 
     @Test
@@ -259,14 +260,40 @@ class CommunalViewModelTest : SysuiTestCase() {
         testScope.runTest {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
 
-            val isPopupOnDismissCtaShowing by collectLastValue(underTest.isPopupOnDismissCtaShowing)
+            val currentPopup by collectLastValue(underTest.currentPopup)
 
             underTest.onDismissCtaTile()
-            assertThat(isPopupOnDismissCtaShowing).isEqualTo(true)
+            assertThat(currentPopup).isEqualTo(PopupType.CtaTile)
 
             // dismiss the popup directly
-            underTest.onHidePopupAfterDismissCta()
-            assertThat(isPopupOnDismissCtaShowing).isEqualTo(false)
+            underTest.onHidePopup()
+            assertThat(currentPopup).isNull()
+        }
+
+    @Test
+    fun customizeWidgetButton_showsThenHidesAfterTimeout() =
+        testScope.runTest {
+            tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
+            val currentPopup by collectLastValue(underTest.currentPopup)
+
+            assertThat(currentPopup).isNull()
+            underTest.onShowCustomizeWidgetButton()
+            assertThat(currentPopup).isEqualTo(PopupType.CustomizeWidgetButton)
+            advanceTimeBy(POPUP_AUTO_HIDE_TIMEOUT_MS)
+            assertThat(currentPopup).isNull()
+        }
+
+    @Test
+    fun customizeWidgetButton_onDismiss_hidesImmediately() =
+        testScope.runTest {
+            tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
+            val currentPopup by collectLastValue(underTest.currentPopup)
+
+            underTest.onShowCustomizeWidgetButton()
+            assertThat(currentPopup).isEqualTo(PopupType.CustomizeWidgetButton)
+
+            underTest.onHidePopup()
+            assertThat(currentPopup).isNull()
         }
 
     @Test

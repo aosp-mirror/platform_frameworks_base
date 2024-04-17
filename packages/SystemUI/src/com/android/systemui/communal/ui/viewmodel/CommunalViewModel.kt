@@ -90,9 +90,8 @@ constructor(
             .distinctUntilChanged()
             .onEach { logger.d("isEmptyState: $it") }
 
-    private val _isPopupOnDismissCtaShowing: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    override val isPopupOnDismissCtaShowing: Flow<Boolean> =
-        _isPopupOnDismissCtaShowing.asStateFlow()
+    private val _currentPopup: MutableStateFlow<PopupType?> = MutableStateFlow(null)
+    override val currentPopup: Flow<PopupType?> = _currentPopup.asStateFlow()
 
     private val _isEnableWidgetDialogShowing: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isEnableWidgetDialogShowing: Flow<Boolean> = _isEnableWidgetDialogShowing.asStateFlow()
@@ -124,14 +123,16 @@ constructor(
     override fun onDismissCtaTile() {
         scope.launch {
             communalInteractor.dismissCtaTile()
-            setPopupOnDismissCtaVisibility(true)
-            schedulePopupHiding()
+            setCurrentPopupType(PopupType.CtaTile)
         }
     }
 
-    override fun onHidePopupAfterDismissCta() {
-        cancelDelayedPopupHiding()
-        setPopupOnDismissCtaVisibility(false)
+    override fun onShowCustomizeWidgetButton() {
+        setCurrentPopupType(PopupType.CustomizeWidgetButton)
+    }
+
+    override fun onHidePopup() {
+        setCurrentPopupType(null)
     }
 
     override fun onOpenEnableWidgetDialog() {
@@ -168,25 +169,22 @@ constructor(
         _isEnableWorkProfileDialogShowing.value = isVisible
     }
 
-    private fun setPopupOnDismissCtaVisibility(isVisible: Boolean) {
-        _isPopupOnDismissCtaShowing.value = isVisible
+    private fun setCurrentPopupType(popupType: PopupType?) {
+        _currentPopup.value = popupType
+        delayedHideCurrentPopupJob?.cancel()
+
+        if (popupType != null) {
+            delayedHideCurrentPopupJob =
+                scope.launch {
+                    delay(POPUP_AUTO_HIDE_TIMEOUT_MS)
+                    setCurrentPopupType(null)
+                }
+        } else {
+            delayedHideCurrentPopupJob = null
+        }
     }
 
-    private var delayedHidePopupJob: Job? = null
-
-    private fun schedulePopupHiding() {
-        cancelDelayedPopupHiding()
-        delayedHidePopupJob =
-            scope.launch {
-                delay(POPUP_AUTO_HIDE_TIMEOUT_MS)
-                onHidePopupAfterDismissCta()
-            }
-    }
-
-    private fun cancelDelayedPopupHiding() {
-        delayedHidePopupJob?.cancel()
-        delayedHidePopupJob = null
-    }
+    private var delayedHideCurrentPopupJob: Job? = null
 
     /** Whether we can transition to a new scene based on a user gesture. */
     fun canChangeScene(): Boolean {
@@ -196,4 +194,9 @@ constructor(
     companion object {
         const val POPUP_AUTO_HIDE_TIMEOUT_MS = 12000L
     }
+}
+
+sealed class PopupType {
+    object CtaTile : PopupType()
+    object CustomizeWidgetButton : PopupType()
 }
