@@ -38,9 +38,6 @@ import com.android.systemui.keyguard.ui.composable.section.SettingsMenuSection
 import com.android.systemui.keyguard.ui.composable.section.StatusBarSection
 import com.android.systemui.keyguard.ui.composable.section.TopAreaSection
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
-import dagger.Binds
-import dagger.Module
-import dagger.multibindings.IntoSet
 import java.util.Optional
 import javax.inject.Inject
 
@@ -195,9 +192,4 @@ constructor(
             }
         }
     }
-}
-
-@Module
-interface DefaultBlueprintModule {
-    @Binds @IntoSet fun blueprint(blueprint: DefaultBlueprint): ComposableLockscreenSceneBlueprint
 }
