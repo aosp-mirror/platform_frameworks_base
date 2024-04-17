@@ -6088,6 +6088,11 @@ public final class ViewRootImpl implements ViewParent,
         mAccessibilityInteractionConnectionManager.ensureNoConnection();
         mAccessibilityInteractionConnectionManager.ensureNoDirectConnection();
         removeSendWindowContentChangedCallback();
+        if (android.view.accessibility.Flags.preventLeakingViewrootimpl()
+                && mAccessibilityInteractionController != null) {
+            mAccessibilityInteractionController.destroy();
+            mAccessibilityInteractionController = null;
+        }
 
         destroyHardwareRenderer();
 
