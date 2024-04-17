@@ -462,6 +462,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @Override
+    public int getNumRegisteredAttributionSources(int uid) {
+        return mAttributionSourceRegistry.getNumRegisteredAttributionSources(uid);
+    }
+
+    @Override
     public List<String> getAutoRevokeExemptionRequestedPackages(int userId) {
         return getPackagesWithAutoRevokePolicy(AUTO_REVOKE_DISCOURAGED, userId);
     }
@@ -935,6 +940,26 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     return cachedSource.equalsExceptToken(source);
                 }
                 return false;
+            }
+        }
+
+        public int getNumRegisteredAttributionSources(int uid) {
+            mContext.enforceCallingOrSelfPermission(UPDATE_APP_OPS_STATS,
+                    "getting the number of registered AttributionSources requires "
+                            + "UPDATE_APP_OPS_STATS");
+            // Influence the system to perform a garbage collection, so the provided number is as
+            // accurate as possible
+            System.gc();
+            System.gc();
+            synchronized (mLock) {
+                int[] numForUid = { 0 };
+                mAttributions.forEach((key, value) -> {
+                    if (value.getUid() == uid) {
+                        numForUid[0]++;
+                    }
+
+                });
+                return numForUid[0];
             }
         }
 
