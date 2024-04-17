@@ -232,7 +232,7 @@ internal class FakeScreenshotExecutor : TakeScreenshotExecutor {
     override fun onCloseSystemDialogsReceived() {}
     override suspend fun executeScreenshots(
         screenshotRequest: ScreenshotRequest,
-        onSaved: (Uri) -> Unit,
+        onSaved: (Uri?) -> Unit,
         requestCallback: RequestCallback,
     ) {
         requestReceived = screenshotRequest
@@ -248,7 +248,7 @@ internal class FakeScreenshotExecutor : TakeScreenshotExecutor {
 
     override fun executeScreenshotsAsync(
         screenshotRequest: ScreenshotRequest,
-        onSaved: Consumer<Uri>,
+        onSaved: Consumer<Uri?>,
         requestCallback: RequestCallback,
     ) {
         runBlocking {
