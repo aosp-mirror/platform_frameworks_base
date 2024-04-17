@@ -18,6 +18,7 @@ package com.android.server.vcn;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.net.IpSecTransformState;
 import android.net.vcn.FeatureFlags;
 import android.net.vcn.FeatureFlagsImpl;
 import android.os.Looper;
@@ -34,7 +35,6 @@ public class VcnContext {
     @NonNull private final Looper mLooper;
     @NonNull private final VcnNetworkProvider mVcnNetworkProvider;
     @NonNull private final FeatureFlags mFeatureFlags;
-    @NonNull private final android.net.platform.flags.FeatureFlags mCoreNetFeatureFlags;
     private final boolean mIsInTestMode;
 
     public VcnContext(
@@ -49,7 +49,6 @@ public class VcnContext {
 
         // Auto-generated class
         mFeatureFlags = new FeatureFlagsImpl();
-        mCoreNetFeatureFlags = new android.net.platform.flags.FeatureFlagsImpl();
     }
 
     @NonNull
@@ -76,7 +75,16 @@ public class VcnContext {
     }
 
     public boolean isFlagIpSecTransformStateEnabled() {
-        return mCoreNetFeatureFlags.ipsecTransformState();
+        // TODO: b/328844044: Ideally this code should gate the behavior by checking the
+        // android.net.platform.flags.ipsec_transform_state flag but that flag is not accessible
+        // right now. We should either update the code when the flag is accessible or remove the
+        // legacy behavior after VIC SDK finalization
+        try {
+            new IpSecTransformState.Builder();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @NonNull
