@@ -31,7 +31,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.notification.domain.interactor.notificationsSoundPolicyInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.notificationsSoundPolicyRepository
 import com.android.systemui.testKosmos
-import com.android.systemui.volume.audioRepository
+import com.android.systemui.volume.data.repository.audioRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
