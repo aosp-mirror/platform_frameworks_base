@@ -171,6 +171,13 @@ flag {
 }
 
 flag {
+    name: "schedule_stop_of_background_user"
+    namespace: "multiuser"
+    description: "Schedule background users to be stopped at a future point."
+    bug: "330351042"
+}
+
+flag {
     name: "disable_private_space_items_on_home"
     namespace: "profile_experiences"
     description: "Disables adding items belonging to Private Space on Home Screen manually as well as automatically"
