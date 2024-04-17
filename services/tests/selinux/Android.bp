@@ -52,6 +52,7 @@ android_test {
         "androidx.test.ext.junit",
         "androidx.test.ext.truth",
         "androidx.test.runner",
+        "compatibility-device-util-axt",
         "services.core",
     ],
     test_suites: [

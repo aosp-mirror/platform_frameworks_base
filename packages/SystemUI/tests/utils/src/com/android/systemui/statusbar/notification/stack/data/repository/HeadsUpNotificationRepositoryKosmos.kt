@@ -30,4 +30,7 @@ class FakeHeadsUpNotificationRepository : HeadsUpRepository {
     override val topHeadsUpRow: Flow<HeadsUpRowRepository?> = MutableStateFlow(null)
     override val activeHeadsUpRows: MutableStateFlow<Set<HeadsUpRowRepository>> =
         MutableStateFlow(emptySet())
+    override fun setHeadsUpAnimatingAway(animatingAway: Boolean) {
+        isHeadsUpAnimatingAway.value = animatingAway
+    }
 }

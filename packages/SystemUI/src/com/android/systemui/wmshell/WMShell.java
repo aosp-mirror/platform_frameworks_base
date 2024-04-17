@@ -43,6 +43,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.CoreStartable;
+import com.android.systemui.communal.ui.viewmodel.CommunalTransitionViewModel;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -55,6 +56,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -124,6 +126,8 @@ public final class WMShell implements
     private final UserTracker mUserTracker;
     private final DisplayTracker mDisplayTracker;
     private final NoteTaskInitializer mNoteTaskInitializer;
+    private final CommunalTransitionViewModel mCommunalTransitionViewModel;
+    private final JavaAdapter mJavaAdapter;
     private final Executor mSysUiMainExecutor;
 
     // Listeners and callbacks. Note that we prefer member variable over anonymous class here to
@@ -187,6 +191,8 @@ public final class WMShell implements
             UserTracker userTracker,
             DisplayTracker displayTracker,
             NoteTaskInitializer noteTaskInitializer,
+            CommunalTransitionViewModel communalTransitionViewModel,
+            JavaAdapter javaAdapter,
             @Main Executor sysUiMainExecutor) {
         mContext = context;
         mShell = shell;
@@ -205,6 +211,8 @@ public final class WMShell implements
         mUserTracker = userTracker;
         mDisplayTracker = displayTracker;
         mNoteTaskInitializer = noteTaskInitializer;
+        mCommunalTransitionViewModel = communalTransitionViewModel;
+        mJavaAdapter = javaAdapter;
         mSysUiMainExecutor = sysUiMainExecutor;
     }
 
@@ -381,6 +389,8 @@ public final class WMShell implements
     void initRecentTasks(RecentTasks recentTasks) {
         recentTasks.addAnimationStateListener(mSysUiMainExecutor,
                 mCommandQueue::onRecentsAnimationStateChanged);
+        mJavaAdapter.alwaysCollectFlow(mCommunalTransitionViewModel.getRecentsBackgroundColor(),
+                recentTasks::setTransitionBackgroundColor);
     }
 
     @Override

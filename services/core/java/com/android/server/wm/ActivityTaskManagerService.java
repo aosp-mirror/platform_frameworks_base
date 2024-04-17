@@ -886,6 +886,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mRecentTasks.onSystemReadyLocked();
             mTaskSupervisor.onSystemReady();
             mActivityClientController.onSystemReady();
+            mAppWarnings.onSystemReady();
             // TODO(b/258792202) Cleanup once ASM is ready to launch
             ActivitySecurityModelFeatureFlags.initialize(mContext.getMainExecutor());
             mGrammaticalManagerInternal = LocalServices.getService(
@@ -3782,25 +3783,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 EventLogTags.writeWmEnterPip(r.mUserId, System.identityHashCode(r),
                         r.shortComponentName, Boolean.toString(isAutoEnter));
-
-                // Ensure the ClientTransactionItems are bundled for this operation.
-                deferWindowLayout();
-                try {
-                    r.setPictureInPictureParams(params);
-                    r.mAutoEnteringPip = isAutoEnter;
-                    mRootWindowContainer.moveActivityToPinnedRootTask(r,
-                            null /* launchIntoPipHostActivity */, "enterPictureInPictureMode",
-                            transition);
-                    // Continue the pausing process after entering pip.
-                    if (r.isState(PAUSING) && r.mPauseSchedulePendingForPip) {
-                        r.getTask().schedulePauseActivity(r, false /* userLeaving */,
-                                false /* pauseImmediately */, true /* autoEnteringPip */,
-                                "auto-pip");
-                    }
-                    r.mAutoEnteringPip = false;
-                } finally {
-                    continueWindowLayout();
+                r.setPictureInPictureParams(params);
+                r.mAutoEnteringPip = isAutoEnter;
+                mRootWindowContainer.moveActivityToPinnedRootTask(r,
+                        null /* launchIntoPipHostActivity */, "enterPictureInPictureMode",
+                        transition);
+                // Continue the pausing process after entering pip.
+                if (r.isState(PAUSING) && r.mPauseSchedulePendingForPip) {
+                    r.getTask().schedulePauseActivity(r, false /* userLeaving */,
+                            false /* pauseImmediately */, true /* autoEnteringPip */,
+                            "auto-pip");
                 }
+                r.mAutoEnteringPip = false;
             }
         };
 
@@ -6360,7 +6354,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void onPackageDataCleared(String name, int userId) {
             synchronized (mGlobalLock) {
                 mCompatModePackages.handlePackageDataClearedLocked(name);
-                mAppWarnings.onPackageDataCleared(name);
+                mAppWarnings.onPackageDataCleared(name, userId);
                 mPackageConfigPersister.onPackageDataCleared(name, userId);
             }
         }
@@ -6368,7 +6362,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void onPackageUninstalled(String name, int userId) {
             synchronized (mGlobalLock) {
-                mAppWarnings.onPackageUninstalled(name);
+                mAppWarnings.onPackageUninstalled(name, userId);
                 mCompatModePackages.handlePackageUninstalledLocked(name);
                 mPackageConfigPersister.onPackageUninstall(name, userId);
             }

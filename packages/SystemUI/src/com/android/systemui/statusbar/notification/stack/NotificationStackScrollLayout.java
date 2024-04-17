@@ -111,6 +111,7 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
+import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation;
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor;
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds;
@@ -450,7 +451,9 @@ public class NotificationStackScrollLayout
     private boolean mIsClipped;
     private Rect mRequestedClipBounds;
     private boolean mInHeadsUpPinnedMode;
-    private boolean mHeadsUpAnimatingAway;
+    @VisibleForTesting
+    boolean mHeadsUpAnimatingAway;
+    private Consumer<Boolean> mHeadsUpAnimatingAwayListener;
     private int mStatusBarState;
     private int mUpcomingStatusBarState;
     private boolean mHeadsUpGoingAwayAnimationsAllowed = true;
@@ -4084,7 +4087,14 @@ public class NotificationStackScrollLayout
         mSwipeHelper.setIsExpanded(isExpanded);
         if (changed) {
             mWillExpand = false;
-            if (!mIsExpanded) {
+            if (mIsExpanded) {
+                // Resetting headsUpAnimatingAway on Shade expansion avoids delays caused by
+                // waiting for all child animations to finish.
+                // TODO(b/328390331) Do we need to reset this on QS expanded as well?
+                if (NotificationsHeadsUpRefactor.isEnabled()) {
+                    setHeadsUpAnimatingAway(false);
+                }
+            } else {
                 mGroupExpansionManager.collapseGroups();
                 mExpandHelper.cancelImmediately();
                 if (!mIsExpansionChanging) {
@@ -4190,6 +4200,9 @@ public class NotificationStackScrollLayout
 
     void onChildAnimationFinished() {
         setAnimationRunning(false);
+        if (NotificationsHeadsUpRefactor.isEnabled()) {
+            setHeadsUpAnimatingAway(false);
+        }
         requestChildrenUpdate();
         runAnimationFinishedRunnables();
         clearTransient();
@@ -4509,18 +4522,18 @@ public class NotificationStackScrollLayout
         mEmptyShadeView.setVisible(visible, mIsExpanded && mAnimationsEnabled);
 
         if (areNotificationsHiddenInShade) {
-            updateEmptyShadeView(R.string.dnd_suppressing_shade_text, 0, 0);
+            updateEmptyShadeViewResources(R.string.dnd_suppressing_shade_text, 0, 0);
         } else if (hasFilteredOutSeenNotifications) {
-            updateEmptyShadeView(
+            updateEmptyShadeViewResources(
                     R.string.no_unseen_notif_text,
                     R.string.unlock_to_see_notif_text,
                     R.drawable.ic_friction_lock_closed);
         } else {
-            updateEmptyShadeView(R.string.empty_shade_text, 0, 0);
+            updateEmptyShadeViewResources(R.string.empty_shade_text, 0, 0);
         }
     }
 
-    private void updateEmptyShadeView(
+    private void updateEmptyShadeViewResources(
             @StringRes int newTextRes,
             @StringRes int newFooterTextRes,
             @DrawableRes int newFooterIconRes) {
@@ -4717,6 +4730,7 @@ public class NotificationStackScrollLayout
     }
 
     public void generateHeadsUpAnimation(NotificationEntry entry, boolean isHeadsUp) {
+        NotificationsHeadsUpRefactor.assertInLegacyMode();
         ExpandableNotificationRow row = entry.getHeadsUpAnimationView();
         generateHeadsUpAnimation(row, isHeadsUp);
     }
@@ -4750,6 +4764,9 @@ public class NotificationStackScrollLayout
             mNeedsAnimation = true;
             if (!mIsExpanded && !mWillExpand && !isHeadsUp) {
                 row.setHeadsUpAnimatingAway(true);
+                if (NotificationsHeadsUpRefactor.isEnabled()) {
+                    setHeadsUpAnimatingAway(true);
+                }
             }
             requestChildrenUpdate();
         }
@@ -4939,11 +4956,28 @@ public class NotificationStackScrollLayout
         updateClipping();
     }
 
+    /** TODO(b/328390331) make this private, when {@link NotificationsHeadsUpRefactor} is removed */
     public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
-        mHeadsUpAnimatingAway = headsUpAnimatingAway;
+        if (mHeadsUpAnimatingAway != headsUpAnimatingAway) {
+            mHeadsUpAnimatingAway = headsUpAnimatingAway;
+            if (mHeadsUpAnimatingAwayListener != null) {
+                mHeadsUpAnimatingAwayListener.accept(headsUpAnimatingAway);
+            }
+        }
         updateClipping();
     }
 
+    /**
+     * Sets a listener to be notified about the heads up disappear animation state changes. If there
+     * are overlapping animations, it will receive updates when the first disappar animation has
+     * started, and when the last has finished.
+     *
+     * @param headsUpAnimatingAwayListener to be notified about disappear animation state changes.
+     */
+    public void setHeadsUpAnimatingAwayListener(
+            Consumer<Boolean> headsUpAnimatingAwayListener) {
+        mHeadsUpAnimatingAwayListener = headsUpAnimatingAwayListener;
+    }
     @VisibleForTesting
     public void setStatusBarState(int statusBarState) {
         mStatusBarState = statusBarState;
@@ -5338,7 +5372,8 @@ public class NotificationStackScrollLayout
             mActivityStarter.startActivity(intent, true, true, Intent.FLAG_ACTIVITY_SINGLE_TOP);
         });
         setEmptyShadeView(view);
-        updateEmptyShadeView(
+        view.setVisible(oldView != null && oldView.isVisible(), /* animate = */ false);
+        updateEmptyShadeViewResources(
                 oldView == null ? R.string.empty_shade_text : oldView.getTextResource(),
                 oldView == null ? 0 : oldView.getFooterTextResource(),
                 oldView == null ? 0 : oldView.getFooterIconResource());

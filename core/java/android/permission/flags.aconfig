@@ -125,6 +125,30 @@ flag {
 }
 
 flag {
+  name: "sensitive_content_metrics_bugfix"
+  namespace: "permissions"
+  description: "Enables metrics bugfixes for sensitive content/notification features"
+  bug: "312784351"
+  # Referenced in WM where WM starts before DeviceConfig
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "sensitive_content_recents_screenshot_bugfix"
+  namespace: "permissions"
+  description: "Enables recents screenshot bugfixes for sensitive content/notification features"
+  bug: "312784351"
+  # Referenced in WM where WM starts before DeviceConfig
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "device_aware_permissions_enabled"
     is_fixed_read_only: true
     namespace: "permissions"

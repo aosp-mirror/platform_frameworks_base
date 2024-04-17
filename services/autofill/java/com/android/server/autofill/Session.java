@@ -757,13 +757,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                             mPendingInlineSuggestionsRequest, id);
                 }
                 mSecondaryProviderHandler.onFillRequest(mPendingFillRequest,
-                        mPendingFillRequest.getFlags(), mClient);
+                        mPendingFillRequest.getFlags(), mClient.asBinder());
             } else if (mRemoteFillService != null) {
                 if (mIsPrimaryCredential) {
                     mPendingFillRequest = addCredentialManagerDataToClientState(
                             mPendingFillRequest,
                             mPendingInlineSuggestionsRequest, id);
-                    mRemoteFillService.onFillCredentialRequest(mPendingFillRequest, mClient);
+                    mRemoteFillService.onFillCredentialRequest(mPendingFillRequest,
+                            mClient.asBinder());
                 } else {
                     mRemoteFillService.onFillRequest(mPendingFillRequest);
                 }
@@ -2897,7 +2898,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + ", clientState=" + newClientState + ", authenticationId=" + authenticationId);
         }
         if (Flags.autofillCredmanDevIntegration() && exception != null
-                && exception instanceof GetCredentialException) {
+                && !exception.getType().equals(GetCredentialException.TYPE_USER_CANCELED)) {
             if (dataset != null && dataset.getFieldIds().size() == 1) {
                 if (sDebug) {
                     Slog.d(TAG, "setAuthenticationResultLocked(): result returns with"
@@ -6494,21 +6495,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     }
                 }
                 if (exception != null) {
-                    mClient.onGetCredentialException(id, viewId, exception.getType(),
-                            exception.getMessage());
+                    if (viewId.isVirtualInt()) {
+                        sendResponseToViewNode(viewId, /*response=*/ null, exception);
+                    } else {
+                        mClient.onGetCredentialException(id, viewId, exception.getType(),
+                                exception.getMessage());
+                    }
                 } else if (response != null) {
                     if (viewId.isVirtualInt()) {
-                        ViewNode viewNode = getViewNodeFromContextsLocked(viewId);
-                        if (viewNode != null && viewNode.getPendingCredentialCallback() != null) {
-                            Bundle resultData = new Bundle();
-                            resultData.putParcelable(
-                                    CredentialProviderService.EXTRA_GET_CREDENTIAL_RESPONSE,
-                                    response);
-                            viewNode.getPendingCredentialCallback().send(SUCCESS_CREDMAN_SELECTOR,
-                                        resultData);
-                        } else {
-                            Slog.w(TAG, "View node not found after GetCredentialResponse");
-                        }
+                        sendResponseToViewNode(viewId, response, /*exception=*/ null);
                     } else {
                         mClient.onGetCredentialResponse(id, viewId, response);
                     }
@@ -6519,6 +6514,30 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             } catch (RemoteException e) {
                 Slog.w(TAG, "Error sending credential response to activity: " + e);
             }
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void sendResponseToViewNode(AutofillId viewId, GetCredentialResponse response,
+            GetCredentialException exception) {
+        ViewNode viewNode = getViewNodeFromContextsLocked(viewId);
+        if (viewNode != null && viewNode.getPendingCredentialCallback() != null) {
+            Bundle resultData = new Bundle();
+            if (response != null) {
+                resultData.putParcelable(
+                        CredentialProviderService.EXTRA_GET_CREDENTIAL_RESPONSE,
+                        response);
+                viewNode.getPendingCredentialCallback().send(SUCCESS_CREDMAN_SELECTOR,
+                        resultData);
+            } else if (exception != null) {
+                resultData.putStringArray(
+                        CredentialProviderService.EXTRA_GET_CREDENTIAL_EXCEPTION,
+                        new String[] {exception.getType(), exception.getMessage()});
+                viewNode.getPendingCredentialCallback().send(FAILURE_CREDMAN_SELECTOR,
+                        resultData);
+            }
+        } else {
+            Slog.w(TAG, "View node not found after GetCredentialResponse");
         }
     }
 

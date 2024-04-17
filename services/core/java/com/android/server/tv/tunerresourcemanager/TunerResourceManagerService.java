@@ -1924,11 +1924,13 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         ownerProfile.useCiCam(grantingId);
     }
 
-    private void updateCasClientMappingOnRelease(
-            @NonNull CasResource releasingCas, int ownerClientId) {
-        ClientProfile ownerProfile = getClientProfile(ownerClientId);
-        releasingCas.removeOwner(ownerClientId);
-        ownerProfile.releaseCas();
+    private void updateCasClientMappingOnRelease(@NonNull CasResource cas, int ownerClientId) {
+        cas.removeSession(ownerClientId);
+        if (!cas.hasOpenSessions(ownerClientId)) {
+            ClientProfile ownerProfile = getClientProfile(ownerClientId);
+            cas.removeOwner(ownerClientId);
+            ownerProfile.releaseCas();
+        }
     }
 
     private void updateCiCamClientMappingOnRelease(

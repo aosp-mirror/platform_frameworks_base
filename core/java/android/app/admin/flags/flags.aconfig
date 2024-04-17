@@ -195,6 +195,25 @@ flag {
   }
 }
 
+flag {
+  name: "power_exemption_bg_usage_fix"
+  namespace: "enterprise"
+  description: "Ensure aps with EXEMPT_FROM_POWER_RESTRICTIONS can execute in the background"
+  bug: "333379020"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "disallow_user_control_bg_usage_fix"
+  namespace: "enterprise"
+  description: "Make DPM.setUserControlDisabledPackages() ensure background usage is allowed"
+  bug: "326031059"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
 
 flag {
   name: "esim_management_ux_enabled"
@@ -225,6 +244,16 @@ flag {
   namespace: "enterprise"
   description: "Allow COPE admin to control screen brightness and timeout."
   bug: "323894620"
+}
+
+flag {
+  name: "always_persist_do"
+  namespace: "enterprise"
+  description: "Always write device_owners2.xml so that migration flags aren't lost"
+  bug: "335232744"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {

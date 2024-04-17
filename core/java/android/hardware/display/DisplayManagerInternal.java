@@ -364,14 +364,6 @@ public abstract class DisplayManagerInternal {
     public abstract List<RefreshRateLimitation> getRefreshRateLimitations(int displayId);
 
     /**
-     * Returns if vrr support is enabled for specified display
-     *
-     * @param displayId The id of the display.
-     * @return true if associated display supports dvrr
-     */
-    public abstract boolean isVrrSupportEnabled(int displayId);
-
-    /**
      * For the given displayId, updates if WindowManager is responsible for mirroring on that
      * display. If {@code false}, then SurfaceFlinger performs no layer mirroring to the
      * given display.

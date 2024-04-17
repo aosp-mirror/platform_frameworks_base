@@ -15,6 +15,7 @@
  */
 package com.android.server.selinux;
 
+import static com.android.compatibility.common.util.SystemUtil.runWithShellPermissionIdentity;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
@@ -27,6 +28,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 
+import android.provider.DeviceConfig;
 import android.util.EventLog;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -50,6 +52,7 @@ public class SelinuxAuditLogsCollectorTest {
 
     // Fake tag to use for testing
     private static final int ANSWER_TAG = 42;
+    private static final String TEST_DOMAIN = "test_domain";
 
     private final MockClock mClock = new MockClock();
 
@@ -64,6 +67,14 @@ public class SelinuxAuditLogsCollectorTest {
 
     @Before
     public void setUp() {
+        runWithShellPermissionIdentity(
+                () ->
+                        DeviceConfig.setLocalOverride(
+                                DeviceConfig.NAMESPACE_ADSERVICES,
+                                SelinuxAuditLogBuilder.CONFIG_SELINUX_AUDIT_DOMAIN,
+                                TEST_DOMAIN));
+
+        mSelinuxAutidLogsCollector.setStopRequested(false);
         // move the clock forward for the limiters.
         mClock.currentTimeMillis += Duration.ofHours(1).toMillis();
         // Ignore what was written in the event logs by previous tests.
@@ -74,13 +85,14 @@ public class SelinuxAuditLogsCollectorTest {
 
     @After
     public void tearDown() {
+        runWithShellPermissionIdentity(() -> DeviceConfig.clearAllLocalOverrides());
         mMockitoSession.finishMocking();
     }
 
     @Test
-    public void testWriteSdkSandboxAuditLogs() {
-        writeTestLog("granted", "perm", "sdk_sandbox_audit", "ttype", "tclass");
-        writeTestLog("denied", "perm1", "sdk_sandbox_audit", "ttype1", "tclass1");
+    public void testWriteAuditLogs() {
+        writeTestLog("granted", "perm", TEST_DOMAIN, "ttype", "tclass");
+        writeTestLog("denied", "perm1", TEST_DOMAIN, "ttype1", "tclass1");
 
         boolean done = mSelinuxAutidLogsCollector.collect(ANSWER_TAG);
 
@@ -91,7 +103,7 @@ public class SelinuxAuditLogsCollectorTest {
                                 FrameworkStatsLog.SELINUX_AUDIT_LOG,
                                 true,
                                 new String[] {"perm"},
-                                "sdk_sandbox_audit",
+                                TEST_DOMAIN,
                                 null,
                                 "ttype",
                                 null,
@@ -104,7 +116,7 @@ public class SelinuxAuditLogsCollectorTest {
                                 FrameworkStatsLog.SELINUX_AUDIT_LOG,
                                 false,
                                 new String[] {"perm1"},
-                                "sdk_sandbox_audit",
+                                TEST_DOMAIN,
                                 null,
                                 "ttype1",
                                 null,
@@ -114,9 +126,9 @@ public class SelinuxAuditLogsCollectorTest {
     }
 
     @Test
-    public void testWriteSdkSandboxAuditLogs_multiplePerms() {
-        writeTestLog("denied", "perm1 perm2", "sdk_sandbox_audit", "ttype", "tclass");
-        writeTestLog("denied", "perm3 perm4", "sdk_sandbox_audit", "ttype", "tclass");
+    public void testWriteAuditLogs_multiplePerms() {
+        writeTestLog("denied", "perm1 perm2", TEST_DOMAIN, "ttype", "tclass");
+        writeTestLog("denied", "perm3 perm4", TEST_DOMAIN, "ttype", "tclass");
 
         boolean done = mSelinuxAutidLogsCollector.collect(ANSWER_TAG);
 
@@ -127,7 +139,7 @@ public class SelinuxAuditLogsCollectorTest {
                                 FrameworkStatsLog.SELINUX_AUDIT_LOG,
                                 false,
                                 new String[] {"perm1", "perm2"},
-                                "sdk_sandbox_audit",
+                                TEST_DOMAIN,
                                 null,
                                 "ttype",
                                 null,
@@ -140,7 +152,7 @@ public class SelinuxAuditLogsCollectorTest {
                                 FrameworkStatsLog.SELINUX_AUDIT_LOG,
                                 false,
                                 new String[] {"perm3", "perm4"},
-                                "sdk_sandbox_audit",
+                                TEST_DOMAIN,
                                 null,
                                 "ttype",
                                 null,
@@ -150,11 +162,11 @@ public class SelinuxAuditLogsCollectorTest {
     }
 
     @Test
-    public void testWriteSdkSandboxAuditLogs_withPaths() {
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass", "/good/path");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass", "/very/long/path");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass", "/short_path");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass", "not_a_path");
+    public void testWriteAuditLogs_withPaths() {
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass", "/good/path");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass", "/very/long/path");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass", "/short_path");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass", "not_a_path");
 
         boolean done = mSelinuxAutidLogsCollector.collect(ANSWER_TAG);
 
@@ -165,7 +177,7 @@ public class SelinuxAuditLogsCollectorTest {
                                 FrameworkStatsLog.SELINUX_AUDIT_LOG,
                                 false,
                                 new String[] {"perm"},
-                                "sdk_sandbox_audit",
+                                TEST_DOMAIN,
                                 null,
                                 "ttype",
                                 null,
@@ -178,7 +190,7 @@ public class SelinuxAuditLogsCollectorTest {
                                 FrameworkStatsLog.SELINUX_AUDIT_LOG,
                                 false,
                                 new String[] {"perm"},
-                                "sdk_sandbox_audit",
+                                TEST_DOMAIN,
                                 null,
                                 "ttype",
                                 null,
@@ -191,7 +203,7 @@ public class SelinuxAuditLogsCollectorTest {
                                 FrameworkStatsLog.SELINUX_AUDIT_LOG,
                                 false,
                                 new String[] {"perm"},
-                                "sdk_sandbox_audit",
+                                TEST_DOMAIN,
                                 null,
                                 "ttype",
                                 null,
@@ -204,7 +216,7 @@ public class SelinuxAuditLogsCollectorTest {
                                 FrameworkStatsLog.SELINUX_AUDIT_LOG,
                                 false,
                                 new String[] {"perm"},
-                                "sdk_sandbox_audit",
+                                TEST_DOMAIN,
                                 null,
                                 "ttype",
                                 null,
@@ -214,23 +226,14 @@ public class SelinuxAuditLogsCollectorTest {
     }
 
     @Test
-    public void testWriteSdkSandboxAuditLogs_withCategories() {
-        writeTestLog(
-                "denied", "perm", "sdk_sandbox_audit", new int[] {123}, "ttype", null, "tclass");
-        writeTestLog(
-                "denied",
-                "perm",
-                "sdk_sandbox_audit",
-                new int[] {123, 456},
-                "ttype",
-                null,
-                "tclass");
-        writeTestLog(
-                "denied", "perm", "sdk_sandbox_audit", null, "ttype", new int[] {666}, "tclass");
+    public void testWriteAuditLogs_withCategories() {
+        writeTestLog("denied", "perm", TEST_DOMAIN, new int[] {123}, "ttype", null, "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, new int[] {123, 456}, "ttype", null, "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, null, "ttype", new int[] {666}, "tclass");
         writeTestLog(
                 "denied",
                 "perm",
-                "sdk_sandbox_audit",
+                TEST_DOMAIN,
                 new int[] {123, 456},
                 "ttype",
                 new int[] {666, 777},
@@ -245,7 +248,7 @@ public class SelinuxAuditLogsCollectorTest {
                                 FrameworkStatsLog.SELINUX_AUDIT_LOG,
                                 false,
                                 new String[] {"perm"},
-                                "sdk_sandbox_audit",
+                                TEST_DOMAIN,
                                 new int[] {123},
                                 "ttype",
                                 null,
@@ -258,7 +261,7 @@ public class SelinuxAuditLogsCollectorTest {
                                 FrameworkStatsLog.SELINUX_AUDIT_LOG,
                                 false,
                                 new String[] {"perm"},
-                                "sdk_sandbox_audit",
+                                TEST_DOMAIN,
                                 new int[] {123, 456},
                                 "ttype",
                                 null,
@@ -271,7 +274,7 @@ public class SelinuxAuditLogsCollectorTest {
                                 FrameworkStatsLog.SELINUX_AUDIT_LOG,
                                 false,
                                 new String[] {"perm"},
-                                "sdk_sandbox_audit",
+                                TEST_DOMAIN,
                                 null,
                                 "ttype",
                                 new int[] {666},
@@ -284,7 +287,7 @@ public class SelinuxAuditLogsCollectorTest {
                                 FrameworkStatsLog.SELINUX_AUDIT_LOG,
                                 false,
                                 new String[] {"perm"},
-                                "sdk_sandbox_audit",
+                                TEST_DOMAIN,
                                 new int[] {123, 456},
                                 "ttype",
                                 new int[] {666, 777},
@@ -294,11 +297,11 @@ public class SelinuxAuditLogsCollectorTest {
     }
 
     @Test
-    public void testWriteSdkSandboxAuditLogs_withPathAndCategories() {
+    public void testWriteAuditLogs_withPathAndCategories() {
         writeTestLog(
                 "denied",
                 "perm",
-                "sdk_sandbox_audit",
+                TEST_DOMAIN,
                 new int[] {123},
                 "ttype",
                 new int[] {666},
@@ -314,7 +317,7 @@ public class SelinuxAuditLogsCollectorTest {
                                 FrameworkStatsLog.SELINUX_AUDIT_LOG,
                                 false,
                                 new String[] {"perm"},
-                                "sdk_sandbox_audit",
+                                TEST_DOMAIN,
                                 new int[] {123},
                                 "ttype",
                                 new int[] {666},
@@ -324,10 +327,10 @@ public class SelinuxAuditLogsCollectorTest {
     }
 
     @Test
-    public void testWriteSdkSandboxAuditLogs_permissive() {
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass", true);
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass", false);
+    public void testWriteAuditLogs_permissive() {
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass", true);
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass", false);
 
         boolean done = mSelinuxAutidLogsCollector.collect(ANSWER_TAG);
 
@@ -338,7 +341,7 @@ public class SelinuxAuditLogsCollectorTest {
                                 FrameworkStatsLog.SELINUX_AUDIT_LOG,
                                 false,
                                 new String[] {"perm"},
-                                "sdk_sandbox_audit",
+                                TEST_DOMAIN,
                                 null,
                                 "ttype",
                                 null,
@@ -352,7 +355,7 @@ public class SelinuxAuditLogsCollectorTest {
                                 FrameworkStatsLog.SELINUX_AUDIT_LOG,
                                 false,
                                 new String[] {"perm"},
-                                "sdk_sandbox_audit",
+                                TEST_DOMAIN,
                                 null,
                                 "ttype",
                                 null,
@@ -362,7 +365,7 @@ public class SelinuxAuditLogsCollectorTest {
     }
 
     @Test
-    public void testNotWriteAuditLogs_notSdkSandbox() {
+    public void testNotWriteAuditLogs_notTestDomain() {
         writeTestLog("denied", "perm", "stype", "ttype", "tclass");
 
         boolean done = mSelinuxAutidLogsCollector.collect(ANSWER_TAG);
@@ -385,15 +388,15 @@ public class SelinuxAuditLogsCollectorTest {
     }
 
     @Test
-    public void testWriteSdkSandboxAuditLogs_upToQuota() {
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
+    public void testWriteAuditLogs_upToQuota() {
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
         // These are not pushed.
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
 
         boolean done = mSelinuxAutidLogsCollector.collect(ANSWER_TAG);
 
@@ -415,14 +418,14 @@ public class SelinuxAuditLogsCollectorTest {
     }
 
     @Test
-    public void testWriteSdkSandboxAuditLogs_resetQuota() {
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
+    public void testWriteAuditLogs_resetQuota() {
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
 
         boolean done = mSelinuxAutidLogsCollector.collect(ANSWER_TAG);
         assertThat(done).isTrue();
@@ -441,11 +444,11 @@ public class SelinuxAuditLogsCollectorTest {
                                 anyBoolean()),
                 times(5));
 
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
         // move the clock forward to reset the quota limiter.
         mClock.currentTimeMillis += Duration.ofHours(1).toMillis();
         done = mSelinuxAutidLogsCollector.collect(ANSWER_TAG);
@@ -468,16 +471,16 @@ public class SelinuxAuditLogsCollectorTest {
 
     @Test
     public void testNotWriteAuditLogs_stopRequested() {
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
         // These are not pushed.
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
 
-        mSelinuxAutidLogsCollector.mStopRequested.set(true);
+        mSelinuxAutidLogsCollector.setStopRequested(true);
         boolean done = mSelinuxAutidLogsCollector.collect(ANSWER_TAG);
         assertThat(done).isFalse();
         verify(
@@ -495,7 +498,7 @@ public class SelinuxAuditLogsCollectorTest {
                                 anyBoolean()),
                 never());
 
-        mSelinuxAutidLogsCollector.mStopRequested.set(false);
+        mSelinuxAutidLogsCollector.setStopRequested(false);
         done = mSelinuxAutidLogsCollector.collect(ANSWER_TAG);
         assertThat(done).isTrue();
         verify(
@@ -516,8 +519,8 @@ public class SelinuxAuditLogsCollectorTest {
 
     @Test
     public void testAuditLogs_resumeJobDoesNotExceedLimit() {
-        writeTestLog("denied", "perm", "sdk_sandbox_audit", "ttype", "tclass");
-        mSelinuxAutidLogsCollector.mStopRequested.set(true);
+        writeTestLog("denied", "perm", TEST_DOMAIN, "ttype", "tclass");
+        mSelinuxAutidLogsCollector.setStopRequested(true);
 
         boolean done = mSelinuxAutidLogsCollector.collect(ANSWER_TAG);
 

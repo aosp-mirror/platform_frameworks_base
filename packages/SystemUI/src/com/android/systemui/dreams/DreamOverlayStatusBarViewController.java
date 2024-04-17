@@ -16,30 +16,30 @@
 
 package com.android.systemui.dreams;
 
+import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
+
 import android.app.AlarmManager;
 import android.app.StatusBarManager;
 import android.content.res.Resources;
 import android.hardware.SensorPrivacyManager;
-import android.net.ConnectivityManager;
-import android.net.ConnectivityManager.NetworkCallback;
-import android.net.Network;
-import android.net.NetworkCapabilities;
-import android.net.NetworkRequest;
 import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.util.PluralsMessageFormatter;
 import android.view.View;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayStatusBarItemsProvider.StatusBarItem;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.dagger.DreamLog;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CrossFadeHelper;
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository;
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -65,7 +65,6 @@ import javax.inject.Inject;
 public class DreamOverlayStatusBarViewController extends ViewController<DreamOverlayStatusBarView> {
     private static final String TAG = "DreamStatusBarCtrl";
 
-    private final ConnectivityManager mConnectivityManager;
     private final TouchInsetManager.TouchInsetSession mTouchInsetSession;
     private final NextAlarmController mNextAlarmController;
     private final AlarmManager mAlarmManager;
@@ -77,6 +76,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
     private final ZenModeController mZenModeController;
     private final DreamOverlayStateController mDreamOverlayStateController;
     private final UserTracker mUserTracker;
+    private final WifiRepository mWifiRepository;
     private final StatusBarWindowStateController mStatusBarWindowStateController;
     private final DreamOverlayStatusBarItemsProvider mStatusBarItemsProvider;
     private final Executor mMainExecutor;
@@ -88,28 +88,6 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
 
     // Whether dream entry animations are finished.
     private boolean mEntryAnimationsFinished = false;
-
-    private final NetworkRequest mNetworkRequest = new NetworkRequest.Builder()
-            .clearCapabilities()
-            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI).build();
-
-    private final NetworkCallback mNetworkCallback = new NetworkCallback() {
-        @Override
-        public void onCapabilitiesChanged(
-                Network network, NetworkCapabilities networkCapabilities) {
-            updateWifiUnavailableStatusIcon();
-        }
-
-        @Override
-        public void onAvailable(Network network) {
-            updateWifiUnavailableStatusIcon();
-        }
-
-        @Override
-        public void onLost(Network network) {
-            updateWifiUnavailableStatusIcon();
-        }
-    };
 
     private final DreamOverlayStateController.Callback mDreamOverlayStateCallback =
             new DreamOverlayStateController.Callback() {
@@ -151,7 +129,6 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
             DreamOverlayStatusBarView view,
             @Main Resources resources,
             @Main Executor mainExecutor,
-            ConnectivityManager connectivityManager,
             TouchInsetManager.TouchInsetSession touchInsetSession,
             AlarmManager alarmManager,
             NextAlarmController nextAlarmController,
@@ -163,11 +140,11 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
             DreamOverlayStatusBarItemsProvider statusBarItemsProvider,
             DreamOverlayStateController dreamOverlayStateController,
             UserTracker userTracker,
+            WifiRepository wifiRepository,
             @DreamLog LogBuffer logBuffer) {
         super(view);
         mResources = resources;
         mMainExecutor = mainExecutor;
-        mConnectivityManager = connectivityManager;
         mTouchInsetSession = touchInsetSession;
         mAlarmManager = alarmManager;
         mNextAlarmController = nextAlarmController;
@@ -179,6 +156,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         mZenModeController = zenModeController;
         mDreamOverlayStateController = dreamOverlayStateController;
         mUserTracker = userTracker;
+        mWifiRepository = wifiRepository;
         mLogger = new DreamLogger(logBuffer, TAG);
 
         // Register to receive show/hide updates for the system status bar. Our custom status bar
@@ -190,8 +168,11 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
     protected void onViewAttached() {
         mIsAttached = true;
 
-        mConnectivityManager.registerNetworkCallback(mNetworkRequest, mNetworkCallback);
-        updateWifiUnavailableStatusIcon();
+        collectFlow(
+                mView,
+                mWifiRepository.getWifiNetwork(),
+                network -> updateWifiUnavailableStatusIcon(
+                        network instanceof WifiNetworkModel.Active));
 
         mNextAlarmController.addCallback(mNextAlarmCallback);
         updateAlarmStatusIcon();
@@ -215,7 +196,6 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         mZenModeController.removeCallback(mZenModeCallback);
         mSensorPrivacyController.removeCallback(mSensorCallback);
         mNextAlarmController.removeCallback(mNextAlarmCallback);
-        mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
         mDreamOverlayNotificationCountProvider.ifPresent(
                 provider -> provider.removeCallback(mNotificationCountCallback));
         mStatusBarItemsProvider.removeCallback(mStatusBarItemsProviderCallback);
@@ -258,12 +238,8 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
                 && !mStatusBarWindowStateController.windowIsShowing();
     }
 
-    private void updateWifiUnavailableStatusIcon() {
-        final NetworkCapabilities capabilities =
-                mConnectivityManager.getNetworkCapabilities(
-                        mConnectivityManager.getActiveNetwork());
-        final boolean available = capabilities != null
-                && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
+    @VisibleForTesting
+    void updateWifiUnavailableStatusIcon(boolean available) {
         showIcon(DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, !available,
                 R.string.wifi_unavailable_dream_overlay_content_description);
     }

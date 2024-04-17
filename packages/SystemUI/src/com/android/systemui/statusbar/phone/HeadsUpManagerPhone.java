@@ -168,7 +168,10 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
                 updateResources();
             }
         });
-        javaAdapter.alwaysCollectFlow(shadeInteractor.isAnyExpanded(), this::onShadeOrQsExpanded);
+        if (!NotificationsHeadsUpRefactor.isEnabled()) {
+            javaAdapter.alwaysCollectFlow(shadeInteractor.isAnyExpanded(),
+                    this::onShadeOrQsExpanded);
+        }
     }
 
     public void setAnimationStateHandler(AnimationStateHandler handler) {
@@ -262,6 +265,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     }
 
     private void onShadeOrQsExpanded(Boolean isExpanded) {
+        NotificationsHeadsUpRefactor.assertInLegacyMode();
         if (isExpanded != mIsExpanded) {
             mIsExpanded = isExpanded;
             if (isExpanded) {
@@ -500,7 +504,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
 
     @Override
     @NonNull
-    public Flow<Boolean> isHeadsUpAnimatingAway() {
+    public StateFlow<Boolean> isHeadsUpAnimatingAway() {
         return mHeadsUpAnimatingAway;
     }
 

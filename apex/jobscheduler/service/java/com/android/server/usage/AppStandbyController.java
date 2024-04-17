@@ -1989,6 +1989,9 @@ public class AppStandbyController
                 mAdminProtectedPackages.put(userId, packageNames);
             }
         }
+        if (android.app.admin.flags.Flags.disallowUserControlBgUsageFix()) {
+            postCheckIdleStates(userId);
+        }
     }
 
     @Override

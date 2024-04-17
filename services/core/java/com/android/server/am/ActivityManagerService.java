@@ -497,6 +497,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -682,8 +684,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     final ArrayList<ActiveInstrumentation> mActiveInstrumentation = new ArrayList<>();
 
     public final IntentFirewall mIntentFirewall;
-
-    public OomAdjProfiler mOomAdjProfiler = new OomAdjProfiler();
 
     /**
      * The global lock for AMS, it's de-facto the ActivityManagerService object as of now.
@@ -2596,7 +2596,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 BackgroundThread.getHandler(), this);
         mOnBattery = DEBUG_POWER ? true
                 : mBatteryStatsService.getActiveStatistics().getIsOnBattery();
-        mOomAdjProfiler.batteryPowerChanged(mOnBattery);
 
         mProcessStats = new ProcessStatsService(this, new File(systemDir, "procstats"));
 
@@ -2845,13 +2844,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         updateCpuStatsNow();
         synchronized (mProcLock) {
             mOnBattery = DEBUG_POWER ? true : onBattery;
-            mOomAdjProfiler.batteryPowerChanged(onBattery);
         }
     }
 
     @Override
     public void batteryStatsReset() {
-        mOomAdjProfiler.reset();
+        // Empty for now.
     }
 
     @Override
@@ -5415,14 +5413,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    /**
-     * Checks if feature flag is enabled and if system is Headless (HSUM), case in which 
-     * home delay should be skipped.
-     *
-     * @hide
-     */
-    public boolean isHomeLaunchDelayable() {
-        return !UserManager.isHeadlessSystemUserMode() && enableHomeDelay();
+    /** Checks whether the home launch delay feature is enabled. */
+    private boolean isHomeLaunchDelayable() {
+        // This feature is disabled on Auto since it seems to add an unacceptably long boot delay
+        // without even solving the underlying issue (it merely hits the timeout).
+        return enableHomeDelay() &&
+                !mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
     }
 
     final void ensureBootCompleted() {
@@ -7419,7 +7415,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mServices.updateScreenStateLocked(isAwake);
                 reportCurWakefulnessUsageEvent();
                 mActivityTaskManager.onScreenAwakeChanged(isAwake);
-                mOomAdjProfiler.onWakefulnessChanged(wakefulness);
                 mOomAdjuster.onWakefulnessChanged(wakefulness);
 
                 updateOomAdjLocked(OOM_ADJ_REASON_UI_VISIBILITY);
@@ -9847,6 +9842,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 sb.append("Process-Runtime: ").append(runtimeMillis).append("\n");
             }
         }
+        if (eventType.equals("crash")) {
+            String formattedTime = DROPBOX_TIME_FORMATTER.format(
+                    Instant.now().atZone(ZoneId.systemDefault()));
+            sb.append("Timestamp: ").append(formattedTime).append("\n");
+        }
         if (activityShortComponentName != null) {
             sb.append("Activity: ").append(activityShortComponentName).append("\n");
         }
@@ -10539,12 +10539,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mProcessList.mAppExitInfoTracker.dumpHistoryProcessExitInfo(pw, dumpPackage);
             }
             if (dumpPackage == null) {
-                pw.println();
-                if (dumpAll) {
-                    pw.println(
-                            "-------------------------------------------------------------------------------");
-                }
-                mOomAdjProfiler.dump(pw);
                 pw.println();
                 if (dumpAll) {
                     pw.println(

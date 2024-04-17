@@ -664,6 +664,46 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
         }
     }
 
+    /**
+     * <ol>
+     *     <li> Layout selection Algorithm:
+     *     <ul>
+     *         <li> Choose product specific layout(KCM file with matching vendor ID and product
+     *         ID) </li>
+     *         <li> If none, then find layout based on PK layout info (based on country code
+     *         provided by the HID descriptor of the keyboard) </li>
+     *         <li> If none, then find layout based on IME layout info associated with the IME
+     *         subtype </li>
+     *         <li> If none, return null (Generic.kcm is the default) </li>
+     *     </ul>
+     *     </li>
+     *     <li> Finding correct layout corresponding to provided layout info:
+     *     <ul>
+     *         <li> Filter all available layouts based on the IME subtype script code </li>
+     *         <li> Derive locale from the provided layout info </li>
+     *         <li> If layoutType i.e. qwerty, azerty, etc. is provided, filter layouts by
+     *         layoutType and try to find matching layout to the derived locale. </li>
+     *         <li> If none found or layoutType not provided, then ignore the layoutType and try
+     *         to find matching layout to the derived locale. </li>
+     *     </ul>
+     *     </li>
+     *     <li> Finding matching layout for the derived locale:
+     *     <ul>
+     *         <li> If language code doesn't match, ignore the layout (We can never match a
+     *         layout if language code isn't matching) </li>
+     *         <li> If country code matches, layout score +1 </li>
+     *         <li> Else if country code of layout is empty, layout score +0.5 (empty country
+     *         code is a semi match with derived locale with country code, this is to prioritize
+     *         empty country code layouts over fully mismatching layouts) </li>
+     *         <li> If variant matches, layout score +1 </li>
+     *         <li> Else if variant of layout is empty, layout score +0.5 (empty variant is a
+     *         semi match with derive locale with country code, this is to prioritize empty
+     *         variant layouts over fully mismatching layouts) </li>
+     *         <li> Choose the layout with the best score. </li>
+     *     </ul>
+     *     </li>
+     * </ol>
+     */
     @NonNull
     private static KeyboardLayoutSelectionResult getDefaultKeyboardLayoutBasedOnImeInfo(
             KeyboardIdentifier keyboardIdentifier, @Nullable ImeInfo imeInfo,
@@ -753,8 +793,8 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     private static String getMatchingLayoutForProvidedLanguageTag(List<KeyboardLayout> layoutList,
             @NonNull String languageTag) {
         Locale locale = Locale.forLanguageTag(languageTag);
-        String layoutMatchingLanguage = null;
-        String layoutMatchingLanguageAndCountry = null;
+        String bestMatchingLayout = null;
+        float bestMatchingLayoutScore = 0;
 
         for (KeyboardLayout layout : layoutList) {
             final LocaleList locales = layout.getLocales();
@@ -763,23 +803,28 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
                 if (l == null) {
                     continue;
                 }
-                if (l.getLanguage().equals(locale.getLanguage())) {
-                    if (layoutMatchingLanguage == null) {
-                        layoutMatchingLanguage = layout.getDescriptor();
-                    }
-                    if (l.getCountry().equals(locale.getCountry())) {
-                        if (layoutMatchingLanguageAndCountry == null) {
-                            layoutMatchingLanguageAndCountry = layout.getDescriptor();
-                        }
-                        if (l.getVariant().equals(locale.getVariant())) {
-                            return layout.getDescriptor();
-                        }
-                    }
+                if (!l.getLanguage().equals(locale.getLanguage())) {
+                    // If language mismatches: NEVER choose that layout
+                    continue;
+                }
+                float layoutScore = 1; // If language matches then score +1
+                if (l.getCountry().equals(locale.getCountry())) {
+                    layoutScore += 1; // If country matches then score +1
+                } else if (TextUtils.isEmpty(l.getCountry())) {
+                    layoutScore += 0.5; // Consider empty country as semi-match
+                }
+                if (l.getVariant().equals(locale.getVariant())) {
+                    layoutScore += 1; // If variant matches then score +1
+                } else if (TextUtils.isEmpty(l.getVariant())) {
+                    layoutScore += 0.5; // Consider empty variant as semi-match
+                }
+                if (layoutScore > bestMatchingLayoutScore) {
+                    bestMatchingLayoutScore = layoutScore;
+                    bestMatchingLayout = layout.getDescriptor();
                 }
             }
         }
-        return layoutMatchingLanguageAndCountry != null
-                ? layoutMatchingLanguageAndCountry : layoutMatchingLanguage;
+        return bestMatchingLayout;
     }
 
     private void reloadKeyboardLayouts() {

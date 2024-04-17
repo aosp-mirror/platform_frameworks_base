@@ -24,6 +24,8 @@ import com.android.systemui.communal.data.repository.CommunalSettingsRepositoryM
 import com.android.systemui.communal.data.repository.CommunalTutorialRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalWidgetRepositoryModule
 import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.communal.util.CommunalColors
+import com.android.systemui.communal.util.CommunalColorsImpl
 import com.android.systemui.communal.widgets.CommunalWidgetModule
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarterImpl
@@ -59,6 +61,8 @@ interface CommunalModule {
     @Binds
     @Communal
     fun bindCommunalSceneDataSource(@Communal delegator: SceneDataSourceDelegator): SceneDataSource
+
+    @Binds fun bindCommunalColors(impl: CommunalColorsImpl): CommunalColors
 
     companion object {
         @Provides

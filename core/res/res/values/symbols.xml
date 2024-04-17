@@ -1527,7 +1527,6 @@
   <java-symbol type="layout" name="number_picker" />
   <java-symbol type="layout" name="permissions_package_list_item" />
   <java-symbol type="layout" name="popup_menu_item_layout" />
-  <java-symbol type="layout" name="popup_menu_item_layout_material" />
   <java-symbol type="layout" name="popup_menu_header_item_layout" />
   <java-symbol type="layout" name="remote_views_adapter_default_loading_view" />
   <java-symbol type="layout" name="search_bar" />
@@ -5380,6 +5379,13 @@
   <java-symbol type="string" name="satellite_notification_open_message" />
   <java-symbol type="string" name="satellite_notification_how_it_works" />
   <java-symbol type="drawable" name="ic_satellite_alt_24px" />
+
+  <!-- System notification for background user sound -->
+  <java-symbol type="string" name="bg_user_sound_notification_title_call" />
+  <java-symbol type="string" name="bg_user_sound_notification_title_alarm" />
+  <java-symbol type="string" name="bg_user_sound_notification_button_switch_user" />
+  <java-symbol type="string" name="bg_user_sound_notification_button_mute" />
+  <java-symbol type="string" name="bg_user_sound_notification_message" />
 
   <!-- DisplayManager configs. -->
   <java-symbol type="bool" name="config_evenDimmerEnabled" />

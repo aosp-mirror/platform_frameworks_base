@@ -16,6 +16,7 @@
 
 package com.android.systemui.screenshot.policy
 
+import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_PINNED
 import android.os.UserHandle
 import com.android.systemui.screenshot.data.model.DisplayContentModel
@@ -24,6 +25,7 @@ import com.android.systemui.screenshot.data.repository.ProfileTypeRepository
 import com.android.systemui.screenshot.policy.CapturePolicy.PolicyResult
 import com.android.systemui.screenshot.policy.CapturePolicy.PolicyResult.NotMatched
 import com.android.systemui.screenshot.policy.CaptureType.IsolatedTask
+import com.android.window.flags.Flags
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 
@@ -41,26 +43,36 @@ constructor(
     override suspend fun check(content: DisplayContentModel): PolicyResult {
         // The systemUI notification shade isn't a work app, skip.
         if (content.systemUiState.shadeExpanded) {
-            return NotMatched(policy = NAME, reason = "Notification shade is expanded")
+            return NotMatched(policy = NAME, reason = SHADE_EXPANDED)
+        }
+
+        if (Flags.enableDesktopWindowingMode()) {
+            content.rootTasks.firstOrNull()?.also {
+                if (it.windowingMode == WINDOWING_MODE_FREEFORM) {
+                    return NotMatched(policy = NAME, reason = DESKTOP_MODE_ENABLED)
+                }
+            }
         }
 
         // Find the first non PiP rootTask with a top child task owned by a work user
         val (rootTask, childTask) =
             content.rootTasks
-                .filter { it.isVisible && it.windowingMode != WINDOWING_MODE_PINNED }
+                .filter {
+                    it.isVisible && it.windowingMode != WINDOWING_MODE_PINNED && it.hasChildTasks()
+                }
                 .map { it to it.childTasksTopDown().first() }
                 .firstOrNull { (_, child) ->
                     profileTypes.getProfileType(child.userId) == ProfileType.WORK
                 }
                 ?: return NotMatched(
                     policy = NAME,
-                    reason = "The top-most non-PINNED task does not belong to a work profile user"
+                    reason = WORK_TASK_NOT_TOP,
                 )
 
         // If matched, return parameters needed to modify the request.
         return PolicyResult.Matched(
             policy = NAME,
-            reason = "The top-most non-PINNED task ($childTask) belongs to a work profile user",
+            reason = WORK_TASK_IS_TOP,
             CaptureParameters(
                 type = IsolatedTask(taskId = childTask.id, taskBounds = childTask.bounds),
                 component = childTask.componentName ?: rootTask.topActivity,
@@ -70,6 +82,13 @@ constructor(
     }
 
     companion object {
-        val NAME = "WorkProfile"
+        const val NAME = "WorkProfile"
+        const val SHADE_EXPANDED = "Notification shade is expanded"
+        const val WORK_TASK_NOT_TOP =
+            "The top-most non-PINNED task does not belong to a work profile user"
+        const val WORK_TASK_IS_TOP = "The top-most non-PINNED task belongs to a work profile user"
+        const val DESKTOP_MODE_ENABLED =
+            "enable_desktop_windowing_mode is enabled and top " +
+                "RootTask has WINDOWING_MODE_FREEFORM"
     }
 }

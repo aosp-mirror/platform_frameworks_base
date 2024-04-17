@@ -15,98 +15,144 @@
  */
 package com.android.server.selinux;
 
-import static com.android.server.selinux.SelinuxAuditLogBuilder.PATH_MATCHER;
-import static com.android.server.selinux.SelinuxAuditLogBuilder.SCONTEXT_MATCHER;
-import static com.android.server.selinux.SelinuxAuditLogBuilder.TCONTEXT_MATCHER;
+import static com.android.compatibility.common.util.SystemUtil.runWithShellPermissionIdentity;
 import static com.android.server.selinux.SelinuxAuditLogBuilder.toCategories;
 
 import static com.google.common.truth.Truth.assertThat;
+
+import android.provider.DeviceConfig;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.server.selinux.SelinuxAuditLogBuilder.SelinuxAuditLog;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.regex.Matcher;
 
 @RunWith(AndroidJUnit4.class)
 public class SelinuxAuditLogsBuilderTest {
 
-    private final SelinuxAuditLogBuilder mAuditLogBuilder = new SelinuxAuditLogBuilder();
+    private static final String TEST_DOMAIN = "test_domain";
+
+    private SelinuxAuditLogBuilder mAuditLogBuilder;
+    private Matcher mScontextMatcher;
+    private Matcher mTcontextMatcher;
+    private Matcher mPathMatcher;
+
+    @Before
+    public void setUp() {
+        runWithShellPermissionIdentity(
+                () ->
+                        DeviceConfig.setLocalOverride(
+                                DeviceConfig.NAMESPACE_ADSERVICES,
+                                SelinuxAuditLogBuilder.CONFIG_SELINUX_AUDIT_DOMAIN,
+                                TEST_DOMAIN));
+
+        mAuditLogBuilder = new SelinuxAuditLogBuilder();
+        mScontextMatcher = mAuditLogBuilder.mScontextMatcher;
+        mTcontextMatcher = mAuditLogBuilder.mTcontextMatcher;
+        mPathMatcher = mAuditLogBuilder.mPathMatcher;
+    }
+
+    @After
+    public void tearDown() {
+        runWithShellPermissionIdentity(() -> DeviceConfig.clearAllLocalOverrides());
+    }
 
     @Test
     public void testMatcher_scontext() {
-        assertThat(SCONTEXT_MATCHER.reset("u:r:sdk_sandbox_audit:s0").matches()).isTrue();
-        assertThat(SCONTEXT_MATCHER.group("stype")).isEqualTo("sdk_sandbox_audit");
-        assertThat(SCONTEXT_MATCHER.group("scategories")).isNull();
+        assertThat(mScontextMatcher.reset("u:r:" + TEST_DOMAIN + ":s0").matches()).isTrue();
+        assertThat(mScontextMatcher.group("stype")).isEqualTo(TEST_DOMAIN);
+        assertThat(mScontextMatcher.group("scategories")).isNull();
 
-        assertThat(SCONTEXT_MATCHER.reset("u:r:sdk_sandbox_audit:s0:c123,c456").matches()).isTrue();
-        assertThat(SCONTEXT_MATCHER.group("stype")).isEqualTo("sdk_sandbox_audit");
-        assertThat(toCategories(SCONTEXT_MATCHER.group("scategories")))
+        assertThat(mScontextMatcher.reset("u:r:" + TEST_DOMAIN + ":s0:c123,c456").matches())
+                .isTrue();
+        assertThat(mScontextMatcher.group("stype")).isEqualTo(TEST_DOMAIN);
+        assertThat(toCategories(mScontextMatcher.group("scategories")))
                 .isEqualTo(new int[] {123, 456});
 
-        assertThat(SCONTEXT_MATCHER.reset("u:r:not_sdk_sandbox:s0").matches()).isFalse();
-        assertThat(SCONTEXT_MATCHER.reset("u:object_r:sdk_sandbox_audit:s0").matches()).isFalse();
-        assertThat(SCONTEXT_MATCHER.reset("u:r:sdk_sandbox_audit:s0:p123").matches()).isFalse();
+        assertThat(mScontextMatcher.reset("u:r:wrong_domain:s0").matches()).isFalse();
+        assertThat(mScontextMatcher.reset("u:object_r:" + TEST_DOMAIN + ":s0").matches()).isFalse();
+        assertThat(mScontextMatcher.reset("u:r:" + TEST_DOMAIN + ":s0:p123").matches()).isFalse();
     }
 
     @Test
     public void testMatcher_tcontext() {
-        assertThat(TCONTEXT_MATCHER.reset("u:object_r:target_type:s0").matches()).isTrue();
-        assertThat(TCONTEXT_MATCHER.group("ttype")).isEqualTo("target_type");
-        assertThat(TCONTEXT_MATCHER.group("tcategories")).isNull();
+        assertThat(mTcontextMatcher.reset("u:object_r:target_type:s0").matches()).isTrue();
+        assertThat(mTcontextMatcher.group("ttype")).isEqualTo("target_type");
+        assertThat(mTcontextMatcher.group("tcategories")).isNull();
 
-        assertThat(TCONTEXT_MATCHER.reset("u:object_r:target_type2:s0:c666").matches()).isTrue();
-        assertThat(TCONTEXT_MATCHER.group("ttype")).isEqualTo("target_type2");
-        assertThat(toCategories(TCONTEXT_MATCHER.group("tcategories"))).isEqualTo(new int[] {666});
+        assertThat(mTcontextMatcher.reset("u:object_r:target_type2:s0:c666").matches()).isTrue();
+        assertThat(mTcontextMatcher.group("ttype")).isEqualTo("target_type2");
+        assertThat(toCategories(mTcontextMatcher.group("tcategories"))).isEqualTo(new int[] {666});
 
-        assertThat(TCONTEXT_MATCHER.reset("u:r:target_type:s0").matches()).isFalse();
-        assertThat(TCONTEXT_MATCHER.reset("u:r:sdk_sandbox_audit:s0:x456").matches()).isFalse();
+        assertThat(mTcontextMatcher.reset("u:r:target_type:s0").matches()).isFalse();
+        assertThat(mTcontextMatcher.reset("u:r:" + TEST_DOMAIN + ":s0:x456").matches()).isFalse();
     }
 
     @Test
     public void testMatcher_path() {
-        assertThat(PATH_MATCHER.reset("\"/data\"").matches()).isTrue();
-        assertThat(PATH_MATCHER.group("path")).isEqualTo("/data");
-        assertThat(PATH_MATCHER.reset("\"/data/local\"").matches()).isTrue();
-        assertThat(PATH_MATCHER.group("path")).isEqualTo("/data/local");
-        assertThat(PATH_MATCHER.reset("\"/data/local/tmp\"").matches()).isTrue();
-        assertThat(PATH_MATCHER.group("path")).isEqualTo("/data/local");
+        assertThat(mPathMatcher.reset("\"/data\"").matches()).isTrue();
+        assertThat(mPathMatcher.group("path")).isEqualTo("/data");
+        assertThat(mPathMatcher.reset("\"/data/local\"").matches()).isTrue();
+        assertThat(mPathMatcher.group("path")).isEqualTo("/data/local");
+        assertThat(mPathMatcher.reset("\"/data/local/tmp\"").matches()).isTrue();
+        assertThat(mPathMatcher.group("path")).isEqualTo("/data/local");
 
-        assertThat(PATH_MATCHER.reset("\"/data/local").matches()).isFalse();
-        assertThat(PATH_MATCHER.reset("\"_data_local\"").matches()).isFalse();
+        assertThat(mPathMatcher.reset("\"/data/local").matches()).isFalse();
+        assertThat(mPathMatcher.reset("\"_data_local\"").matches()).isFalse();
+    }
+
+    @Test
+    public void testMatcher_scontextDefaultConfig() {
+        runWithShellPermissionIdentity(
+                () ->
+                        DeviceConfig.clearLocalOverride(
+                                DeviceConfig.NAMESPACE_ADSERVICES,
+                                SelinuxAuditLogBuilder.CONFIG_SELINUX_AUDIT_DOMAIN));
+
+        Matcher scontexMatcher = new SelinuxAuditLogBuilder().mScontextMatcher;
+
+        assertThat(scontexMatcher.reset("u:r:" + TEST_DOMAIN + ":s0").matches()).isFalse();
+        assertThat(scontexMatcher.reset("u:r:" + TEST_DOMAIN + ":s0:c123,c456").matches())
+                .isFalse();
+        assertThat(scontexMatcher.reset("u:r:wrong_domain:s0").matches()).isFalse();
     }
 
     @Test
     public void testSelinuxAuditLogsBuilder_noOptionals() {
         mAuditLogBuilder.reset(
-                "granted { p } scontext=u:r:sdk_sandbox_audit:s0 tcontext=u:object_r:t:s0"
+                "granted { p } scontext=u:r:"
+                        + TEST_DOMAIN
+                        + ":s0 tcontext=u:object_r:t:s0"
                         + " tclass=c");
-        assertAuditLog(
-                mAuditLogBuilder.build(), true, new String[] {"p"}, "sdk_sandbox_audit", "t", "c");
+        assertAuditLog(mAuditLogBuilder.build(), true, new String[] {"p"}, TEST_DOMAIN, "t", "c");
 
         mAuditLogBuilder.reset(
                 "tclass=c2 granted { p2 } tcontext=u:object_r:t2:s0"
-                        + " scontext=u:r:sdk_sandbox_audit:s0");
+                        + " scontext=u:r:"
+                        + TEST_DOMAIN
+                        + ":s0");
         assertAuditLog(
-                mAuditLogBuilder.build(),
-                true,
-                new String[] {"p2"},
-                "sdk_sandbox_audit",
-                "t2",
-                "c2");
+                mAuditLogBuilder.build(), true, new String[] {"p2"}, TEST_DOMAIN, "t2", "c2");
     }
 
     @Test
     public void testSelinuxAuditLogsBuilder_withCategories() {
         mAuditLogBuilder.reset(
-                "granted { p } scontext=u:r:sdk_sandbox_audit:s0:c123"
+                "granted { p } scontext=u:r:"
+                        + TEST_DOMAIN
+                        + ":s0:c123"
                         + " tcontext=u:object_r:t:s0:c456,c666 tclass=c");
         assertAuditLog(
                 mAuditLogBuilder.build(),
                 true,
                 new String[] {"p"},
-                "sdk_sandbox_audit",
+                TEST_DOMAIN,
                 new int[] {123},
                 "t",
                 new int[] {456, 666},
@@ -118,13 +164,15 @@ public class SelinuxAuditLogsBuilderTest {
     @Test
     public void testSelinuxAuditLogsBuilder_withPath() {
         mAuditLogBuilder.reset(
-                "granted { p } scontext=u:r:sdk_sandbox_audit:s0 path=\"/very/long/path\""
+                "granted { p } scontext=u:r:"
+                        + TEST_DOMAIN
+                        + ":s0 path=\"/very/long/path\""
                         + " tcontext=u:object_r:t:s0 tclass=c");
         assertAuditLog(
                 mAuditLogBuilder.build(),
                 true,
                 new String[] {"p"},
-                "sdk_sandbox_audit",
+                TEST_DOMAIN,
                 null,
                 "t",
                 null,
@@ -136,13 +184,15 @@ public class SelinuxAuditLogsBuilderTest {
     @Test
     public void testSelinuxAuditLogsBuilder_withPermissive() {
         mAuditLogBuilder.reset(
-                "granted { p } scontext=u:r:sdk_sandbox_audit:s0 permissive=0"
+                "granted { p } scontext=u:r:"
+                        + TEST_DOMAIN
+                        + ":s0 permissive=0"
                         + " tcontext=u:object_r:t:s0 tclass=c");
         assertAuditLog(
                 mAuditLogBuilder.build(),
                 true,
                 new String[] {"p"},
-                "sdk_sandbox_audit",
+                TEST_DOMAIN,
                 null,
                 "t",
                 null,
@@ -151,19 +201,55 @@ public class SelinuxAuditLogsBuilderTest {
                 false);
 
         mAuditLogBuilder.reset(
-                "granted { p } scontext=u:r:sdk_sandbox_audit:s0 tcontext=u:object_r:t:s0 tclass=c"
+                "granted { p } scontext=u:r:"
+                        + TEST_DOMAIN
+                        + ":s0 tcontext=u:object_r:t:s0 tclass=c"
                         + " permissive=1");
         assertAuditLog(
                 mAuditLogBuilder.build(),
                 true,
                 new String[] {"p"},
-                "sdk_sandbox_audit",
+                TEST_DOMAIN,
                 null,
                 "t",
                 null,
                 "c",
                 null,
                 true);
+    }
+
+    @Test
+    public void testSelinuxAuditLogsBuilder_wrongConfig() {
+        String notARegexDomain = "not]a[regex";
+        runWithShellPermissionIdentity(
+                () ->
+                        DeviceConfig.setLocalOverride(
+                                DeviceConfig.NAMESPACE_ADSERVICES,
+                                SelinuxAuditLogBuilder.CONFIG_SELINUX_AUDIT_DOMAIN,
+                                notARegexDomain));
+        SelinuxAuditLogBuilder noOpBuilder = new SelinuxAuditLogBuilder();
+
+        noOpBuilder.reset(
+                "granted { p } scontext=u:r:"
+                        + TEST_DOMAIN
+                        + ":s0 tcontext=u:object_r:t:s0 tclass=c");
+        assertThat(noOpBuilder.build()).isNull();
+        noOpBuilder.reset(
+                "granted { p } scontext=u:r:"
+                        + TEST_DOMAIN
+                        + ":s0:c123 tcontext=u:object_r:t:s0:c456,c666 tclass=c");
+        assertThat(noOpBuilder.build()).isNull();
+        noOpBuilder.reset(
+                "granted { p } scontext=u:r:"
+                        + TEST_DOMAIN
+                        + ":s0 path=\"/very/long/path\""
+                        + " tcontext=u:object_r:t:s0 tclass=c");
+        assertThat(noOpBuilder.build()).isNull();
+        noOpBuilder.reset(
+                "granted { p } scontext=u:r:"
+                        + TEST_DOMAIN
+                        + ":s0 permissive=0 tcontext=u:object_r:t:s0 tclass=c");
+        assertThat(noOpBuilder.build()).isNull();
     }
 
     private void assertAuditLog(

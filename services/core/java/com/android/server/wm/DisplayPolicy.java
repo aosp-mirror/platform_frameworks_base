@@ -41,7 +41,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACK
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_CONSUME_IME_INSETS;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IMMERSIVE_CONFIRMATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
@@ -986,19 +985,6 @@ public class DisplayPolicy {
                                 + " to fit insets. fitInsetsTypes=" + WindowInsets.Type.toString(
                                         attrs.getFitInsetsTypes()));
                     }
-                    if ((attrs.privateFlags & PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED) != 0
-                            && attrs.layoutInDisplayCutoutMode
-                                    != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS) {
-                        // A non-translucent main window of the app enforced to go edge-to-edge
-                        // isn't allowed to fit display cutout, or it will cause software bezels.
-                        throw new IllegalArgumentException("Illegal attributes: Main window of "
-                                + win.mActivityRecord.getName() + " that isn't translucent and"
-                                + " targets SDK level " + win.mActivityRecord.mTargetSdk
-                                + " (>= 35) trying to specify layoutInDisplayCutoutMode as '"
-                                + WindowManager.LayoutParams.layoutInDisplayCutoutModeToString(
-                                        attrs.layoutInDisplayCutoutMode)
-                                + "' instead of 'always'");
-                    }
                 }
                 break;
         }
@@ -1939,6 +1925,11 @@ public class DisplayPolicy {
              */
             final Rect mOverrideConfigInsets = new Rect();
 
+            /**
+             * Override value of mNonDecorInsets for app compatibility purpose.
+             */
+            final Rect mOverrideNonDecorInsets = new Rect();
+
             /** The display frame available after excluding {@link #mNonDecorInsets}. */
             final Rect mNonDecorFrame = new Rect();
 
@@ -1953,6 +1944,11 @@ public class DisplayPolicy {
              * Override value of mConfigFrame for app compatibility purpose.
              */
             final Rect mOverrideConfigFrame = new Rect();
+
+            /**
+             * Override value of mNonDecorFrame for app compatibility purpose.
+             */
+            final Rect mOverrideNonDecorFrame = new Rect();
 
             private boolean mNeedUpdate = true;
 
@@ -1973,17 +1969,26 @@ public class DisplayPolicy {
                         ? configInsets
                         : insetsState.calculateInsets(displayFrame,
                                 dc.mWmService.mOverrideConfigTypes, true /* ignoreVisibility */);
+                final Insets overrideDecorInsets = dc.mWmService.mDecorTypes
+                        == dc.mWmService.mOverrideDecorTypes
+                        ? decor
+                        : insetsState.calculateInsets(displayFrame,
+                                dc.mWmService.mOverrideDecorTypes, true /* ignoreVisibility */);
                 mNonDecorInsets.set(decor.left, decor.top, decor.right, decor.bottom);
                 mConfigInsets.set(configInsets.left, configInsets.top, configInsets.right,
                         configInsets.bottom);
                 mOverrideConfigInsets.set(overrideConfigInsets.left, overrideConfigInsets.top,
                         overrideConfigInsets.right, overrideConfigInsets.bottom);
+                mOverrideNonDecorInsets.set(overrideDecorInsets.left, overrideDecorInsets.top,
+                        overrideDecorInsets.right, overrideDecorInsets.bottom);
                 mNonDecorFrame.set(displayFrame);
                 mNonDecorFrame.inset(mNonDecorInsets);
                 mConfigFrame.set(displayFrame);
                 mConfigFrame.inset(mConfigInsets);
                 mOverrideConfigFrame.set(displayFrame);
                 mOverrideConfigFrame.inset(mOverrideConfigInsets);
+                mOverrideNonDecorFrame.set(displayFrame);
+                mOverrideNonDecorFrame.inset(mOverrideNonDecorInsets);
                 mNeedUpdate = false;
                 return insetsState;
             }
@@ -1992,9 +1997,11 @@ public class DisplayPolicy {
                 mNonDecorInsets.set(other.mNonDecorInsets);
                 mConfigInsets.set(other.mConfigInsets);
                 mOverrideConfigInsets.set(other.mOverrideConfigInsets);
+                mOverrideNonDecorInsets.set(other.mOverrideNonDecorInsets);
                 mNonDecorFrame.set(other.mNonDecorFrame);
                 mConfigFrame.set(other.mConfigFrame);
                 mOverrideConfigFrame.set(other.mOverrideConfigFrame);
+                mOverrideNonDecorFrame.set(other.mOverrideNonDecorFrame);
                 mNeedUpdate = false;
             }
 

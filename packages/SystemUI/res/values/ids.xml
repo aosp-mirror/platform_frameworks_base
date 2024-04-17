@@ -186,6 +186,8 @@
     <item type="id" name="action_remove_menu"/>
     <item type="id" name="action_edit"/>
 
+    <item type="id" name="accessibility_action_open_communal_hub"/>
+
     <!-- rounded corner view id -->
     <item type="id" name="rounded_corner_top_left"/>
     <item type="id" name="rounded_corner_top_right"/>
@@ -231,6 +233,7 @@
     <item type="id" name="smart_space_barrier_bottom" />
     <item type="id" name="small_clock_guideline_top" />
     <item type="id" name="weather_clock_date_and_icons_barrier_bottom" />
+    <item type="id" name="accessibility_actions_view" />
 
     <!-- Privacy dialog -->
     <item type="id" name="privacy_dialog_close_app_button" />

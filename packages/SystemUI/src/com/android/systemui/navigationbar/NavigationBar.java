@@ -411,18 +411,16 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
         @Override
         public void setOverrideHomeButtonLongPress(long duration, float slopMultiplier) {
+            Log.d(TAG, "setOverrideHomeButtonLongPress receives: " + duration + "; "
+                    + slopMultiplier);
             mOverrideHomeButtonLongPressDurationMs = Optional.of(duration)
                     .filter(value -> value > 0);
             mOverrideHomeButtonLongPressSlopMultiplier = Optional.of(slopMultiplier)
                     .filter(value -> value > 0);
-            if (mOverrideHomeButtonLongPressDurationMs.isPresent()) {
-                Log.d(TAG, "Receive duration override: "
-                        + mOverrideHomeButtonLongPressDurationMs.get());
-            }
-            if (mOverrideHomeButtonLongPressSlopMultiplier.isPresent()) {
-                Log.d(TAG, "Receive slop multiplier override: "
-                        + mOverrideHomeButtonLongPressSlopMultiplier.get());
-            }
+            mOverrideHomeButtonLongPressDurationMs.ifPresent(aLong
+                    -> Log.d(TAG, "Use duration override: " + aLong));
+            mOverrideHomeButtonLongPressSlopMultiplier.ifPresent(aFloat
+                    -> Log.d(TAG, "Use slop multiplier override: " + aFloat));
             if (mView != null) {
                 reconfigureHomeLongClick();
             }
@@ -1395,9 +1393,10 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (!mHandler.hasCallbacks(mOnVariableDurationHomeLongClick)) {
-                    Log.w(TAG, "No callback. Don't handle touch slop.");
+                    Log.v(TAG, "ACTION_MOVE no callback. Don't handle touch slop.");
                     break;
                 }
+                Log.v(TAG, "ACTION_MOVE handle touch slop");
                 float customSlopMultiplier = mOverrideHomeButtonLongPressSlopMultiplier.orElse(1f);
                 float touchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
                 float calculatedTouchSlop =

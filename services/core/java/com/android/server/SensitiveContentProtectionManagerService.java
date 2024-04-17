@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.permission.flags.Flags.sensitiveContentImprovements;
 import static android.permission.flags.Flags.sensitiveNotificationAppProtection;
 import static android.provider.Settings.Global.DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS;
 import static android.view.flags.Flags.sensitiveContentAppProtection;
@@ -24,6 +25,7 @@ import static com.android.internal.util.FrameworkStatsLog.SENSITIVE_CONTENT_MEDI
 import static com.android.internal.util.FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__SOURCE__FRAMEWORKS;
 import static com.android.internal.util.FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__START;
 import static com.android.internal.util.FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__STOP;
+import static com.android.internal.util.FrameworkStatsLog.SENSITIVE_NOTIFICATION_APP_PROTECTION_SESSION;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -91,9 +93,11 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
     private boolean mProjectionActive = false;
 
     private static class MediaProjectionSession {
-        final int mUid;
-        final long mSessionId;
-        final boolean mIsExempted;
+        private final int mUid;
+        private final long mSessionId;
+        private final boolean mIsExempted;
+        private final ArraySet<String> mAllSeenNotificationKeys = new ArraySet<>();
+        private final ArraySet<String> mSeenOtpNotificationKeys = new ArraySet<>();
 
         MediaProjectionSession(int uid, boolean isExempted, long sessionId) {
             mUid = uid;
@@ -123,6 +127,14 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
             );
         }
 
+        public void logAppNotificationsProtected() {
+            FrameworkStatsLog.write(
+                    SENSITIVE_NOTIFICATION_APP_PROTECTION_SESSION,
+                    mSessionId,
+                    mAllSeenNotificationKeys.size(),
+                    mSeenOtpNotificationKeys.size());
+        }
+
         public void logAppBlocked(int uid) {
             FrameworkStatsLog.write(
                     FrameworkStatsLog.SENSITIVE_CONTENT_APP_PROTECTION,
@@ -141,6 +153,32 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
                     mUid,
                     FrameworkStatsLog.SENSITIVE_CONTENT_APP_PROTECTION__STATE__UNBLOCKED
             );
+        }
+
+        private void addSeenNotificationKey(String key) {
+            mAllSeenNotificationKeys.add(key);
+        }
+
+        private void addSeenOtpNotificationKey(String key) {
+            mAllSeenNotificationKeys.add(key);
+            mSeenOtpNotificationKeys.add(key);
+        }
+
+        public void addSeenNotifications(
+                @NonNull StatusBarNotification[] notifications,
+                @NonNull RankingMap rankingMap) {
+            for (StatusBarNotification sbn : notifications) {
+                if (sbn == null) {
+                    Log.w(TAG, "Unable to parse null notification");
+                    continue;
+                }
+
+                if (notificationHasSensitiveContent(sbn, rankingMap)) {
+                    addSeenOtpNotificationKey(sbn.getKey());
+                } else {
+                    addSeenNotificationKey(sbn.getKey());
+                }
+            }
         }
     }
 
@@ -297,6 +335,9 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
             mProjectionActive = false;
             if (mMediaProjectionSession != null) {
                 mMediaProjectionSession.logProjectionSessionStop();
+                if (sensitiveContentImprovements()) {
+                    mMediaProjectionSession.logAppNotificationsProtected();
+                }
                 mMediaProjectionSession = null;
             }
 
@@ -316,11 +357,16 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
             rankingMap = null;
         }
 
+        if (rankingMap == null) {
+            Log.w(TAG, "Ranking map not initialized.");
+            return;
+        }
+
         updateAppsThatShouldBlockScreenCapture(rankingMap);
     }
 
     @GuardedBy("mSensitiveContentProtectionLock")
-    private void updateAppsThatShouldBlockScreenCapture(RankingMap rankingMap) {
+    private void updateAppsThatShouldBlockScreenCapture(@NonNull RankingMap rankingMap) {
         StatusBarNotification[] notifications;
         try {
             notifications = mNotificationListener.getActiveNotifications();
@@ -329,23 +375,28 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
             notifications = new StatusBarNotification[0];
         }
 
+        if (sensitiveContentImprovements() && mMediaProjectionSession != null) {
+            mMediaProjectionSession.addSeenNotifications(notifications, rankingMap);
+        }
+
         // notify windowmanager of any currently posted sensitive content notifications
         ArraySet<PackageInfo> packageInfos =
                 getSensitivePackagesFromNotifications(notifications, rankingMap);
+
         if (packageInfos.size() > 0) {
             mWindowManager.addBlockScreenCaptureForApps(packageInfos);
         }
     }
 
-    private ArraySet<PackageInfo> getSensitivePackagesFromNotifications(
-            @NonNull StatusBarNotification[] notifications, RankingMap rankingMap) {
+    private static @NonNull ArraySet<PackageInfo> getSensitivePackagesFromNotifications(
+            @NonNull StatusBarNotification[] notifications, @NonNull RankingMap rankingMap) {
         ArraySet<PackageInfo> sensitivePackages = new ArraySet<>();
-        if (rankingMap == null) {
-            Log.w(TAG, "Ranking map not initialized.");
-            return sensitivePackages;
-        }
-
         for (StatusBarNotification sbn : notifications) {
+            if (sbn == null) {
+                Log.w(TAG, "Unable to parse null notification");
+                continue;
+            }
+
             PackageInfo info = getSensitivePackageFromNotification(sbn, rankingMap);
             if (info != null) {
                 sensitivePackages.add(info);
@@ -354,22 +405,18 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
         return sensitivePackages;
     }
 
-    private PackageInfo getSensitivePackageFromNotification(
-            StatusBarNotification sbn, RankingMap rankingMap) {
-        if (sbn == null) {
-            Log.w(TAG, "Unable to protect null notification");
-            return null;
-        }
-        if (rankingMap == null) {
-            Log.w(TAG, "Ranking map not initialized.");
-            return null;
-        }
-
-        NotificationListenerService.Ranking ranking = rankingMap.getRawRankingObject(sbn.getKey());
-        if (ranking != null && ranking.hasSensitiveContent()) {
+    private static @Nullable PackageInfo getSensitivePackageFromNotification(
+            @NonNull StatusBarNotification sbn, @NonNull RankingMap rankingMap) {
+        if (notificationHasSensitiveContent(sbn, rankingMap)) {
             return new PackageInfo(sbn.getPackageName(), sbn.getUid());
         }
         return null;
+    }
+
+    private static boolean notificationHasSensitiveContent(
+            @NonNull StatusBarNotification sbn, @NonNull RankingMap rankingMap) {
+        NotificationListenerService.Ranking ranking = rankingMap.getRawRankingObject(sbn.getKey());
+        return ranking != null && ranking.hasSensitiveContent();
     }
 
     @VisibleForTesting
@@ -397,6 +444,16 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
             Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
                     "SensitiveContentProtectionManagerService.onNotificationPosted");
             try {
+                if (sbn == null) {
+                    Log.w(TAG, "Unable to parse null notification");
+                    return;
+                }
+
+                if (rankingMap == null) {
+                    Log.w(TAG, "Ranking map not initialized.");
+                    return;
+                }
+
                 synchronized (mSensitiveContentProtectionLock) {
                     if (!mProjectionActive) {
                         return;
@@ -408,6 +465,14 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
                     if (packageInfo != null) {
                         mWindowManager.addBlockScreenCaptureForApps(
                                 new ArraySet(Set.of(packageInfo)));
+                    }
+
+                    if (sensitiveContentImprovements() && mMediaProjectionSession != null) {
+                        if (packageInfo != null) {
+                            mMediaProjectionSession.addSeenOtpNotificationKey(sbn.getKey());
+                        } else {
+                            mMediaProjectionSession.addSeenNotificationKey(sbn.getKey());
+                        }
                     }
                 }
             } finally {
@@ -421,6 +486,11 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
             Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
                     "SensitiveContentProtectionManagerService.onNotificationRankingUpdate");
             try {
+                if (rankingMap == null) {
+                    Log.w(TAG, "Ranking map not initialized.");
+                    return;
+                }
+
                 synchronized (mSensitiveContentProtectionLock) {
                     if (mProjectionActive) {
                         updateAppsThatShouldBlockScreenCapture(rankingMap);

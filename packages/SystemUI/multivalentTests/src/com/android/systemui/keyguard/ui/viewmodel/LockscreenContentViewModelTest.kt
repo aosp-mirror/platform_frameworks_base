@@ -21,17 +21,21 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardClockSwitch
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.authController
+import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.res.R
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.testKosmos
+import com.android.systemui.unfold.fakeUnfoldTransitionProgressProvider
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import java.util.Locale
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -137,4 +141,47 @@ class LockscreenContentViewModelTest : SysuiTestCase() {
                     .isFalse()
             }
         }
+
+    @Test
+    fun unfoldTranslations() =
+        with(kosmos) {
+            testScope.runTest {
+                val maxTranslation = prepareConfiguration()
+                val translations by collectLastValue(underTest.unfoldTranslations)
+
+                val unfoldProvider = fakeUnfoldTransitionProgressProvider
+                unfoldProvider.onTransitionStarted()
+                assertThat(translations?.start).isEqualTo(0f)
+                assertThat(translations?.end).isEqualTo(-0f)
+
+                repeat(10) { repetition ->
+                    val transitionProgress = 0.1f * (repetition + 1)
+                    unfoldProvider.onTransitionProgress(transitionProgress)
+                    assertThat(translations?.start)
+                        .isEqualTo((1 - transitionProgress) * maxTranslation)
+                    assertThat(translations?.end)
+                        .isEqualTo(-(1 - transitionProgress) * maxTranslation)
+                }
+
+                unfoldProvider.onTransitionFinishing()
+                assertThat(translations?.start).isEqualTo(0f)
+                assertThat(translations?.end).isEqualTo(-0f)
+
+                unfoldProvider.onTransitionFinished()
+                assertThat(translations?.start).isEqualTo(0f)
+                assertThat(translations?.end).isEqualTo(-0f)
+            }
+        }
+
+    private fun prepareConfiguration(): Int {
+        val configuration = context.resources.configuration
+        configuration.setLayoutDirection(Locale.US)
+        kosmos.fakeConfigurationRepository.onConfigurationChange(configuration)
+        val maxTranslation = 10
+        kosmos.fakeConfigurationRepository.setDimensionPixelSize(
+            R.dimen.notification_side_paddings,
+            maxTranslation,
+        )
+        return maxTranslation
+    }
 }

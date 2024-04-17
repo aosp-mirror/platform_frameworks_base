@@ -47,9 +47,9 @@ import android.service.autofill.SaveRequest
 import android.service.credentials.CredentialProviderService
 import android.util.Log
 import android.content.Intent
+import android.os.IBinder
 import android.view.autofill.AutofillId
 import android.view.autofill.AutofillManager
-import android.view.autofill.IAutoFillManagerClient
 import android.widget.RemoteViews
 import android.widget.inline.InlinePresentationSpec
 import androidx.autofill.inline.v1.InlineSuggestionUi
@@ -95,7 +95,7 @@ class CredentialAutofillService : AutofillService() {
             request: FillRequest,
             cancellationSignal: CancellationSignal,
             callback: FillCallback,
-            autofillCallback: IAutoFillManagerClient
+            autofillCallback: IBinder
     ) {
         val context = request.fillContexts
         val structure = context[context.size - 1].structure
@@ -160,7 +160,7 @@ class CredentialAutofillService : AutofillService() {
                 CancellationSignal(),
                 Executors.newSingleThreadExecutor(),
                 outcome,
-                autofillCallback.asBinder()
+                autofillCallback
         )
     }
 

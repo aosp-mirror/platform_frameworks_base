@@ -28,7 +28,9 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -97,7 +99,7 @@ public class FaceManagerTest {
         mLooper = new TestLooper();
         mHandler = new Handler(mLooper.getLooper());
 
-        when(mContext.getMainLooper()).thenReturn(mLooper.getLooper());
+        when(mContext.getMainThreadHandler()).thenReturn(mHandler);
         when(mContext.getOpPackageName()).thenReturn(PACKAGE_NAME);
         when(mContext.getAttributionTag()).thenReturn(ATTRIBUTION_TAG);
         when(mContext.getApplicationInfo()).thenReturn(new ApplicationInfo());
@@ -208,6 +210,39 @@ public class FaceManagerTest {
         mLooper.dispatchAll();
 
         verify(mFaceDetectionCallback).onDetectionError(anyInt());
+    }
+
+    @Test
+    public void authenticate_onErrorCanceled() throws RemoteException {
+        final FaceManager.AuthenticationCallback authenticationCallback1 = mock(
+                FaceManager.AuthenticationCallback.class);
+        final FaceManager.AuthenticationCallback authenticationCallback2 = mock(
+                FaceManager.AuthenticationCallback.class);
+
+        final ArgumentCaptor<IFaceServiceReceiver> faceServiceReceiverArgumentCaptor =
+                ArgumentCaptor.forClass(IFaceServiceReceiver.class);
+
+        mFaceManager.authenticate(null, new CancellationSignal(),
+                authenticationCallback1, mHandler,
+                new FaceAuthenticateOptions.Builder().build());
+        mFaceManager.authenticate(null, new CancellationSignal(),
+                authenticationCallback2, mHandler,
+                new FaceAuthenticateOptions.Builder().build());
+
+        verify(mService, times(2)).authenticate(any(IBinder.class), eq(0L),
+                faceServiceReceiverArgumentCaptor.capture(), any());
+
+        final List<IFaceServiceReceiver> faceServiceReceivers =
+                faceServiceReceiverArgumentCaptor.getAllValues();
+        faceServiceReceivers.get(0).onError(5 /* error */, 0 /* vendorCode */);
+        mLooper.dispatchAll();
+
+        verify(authenticationCallback1).onAuthenticationError(eq(5), anyString());
+        verify(authenticationCallback2, never()).onAuthenticationError(anyInt(), anyString());
+
+        faceServiceReceivers.get(1).onError(5 /* error */, 0 /* vendorCode */);
+        mLooper.dispatchAll();
+        verify(authenticationCallback2).onAuthenticationError(eq(5), anyString());
     }
 
     private void initializeProperties() throws RemoteException {
