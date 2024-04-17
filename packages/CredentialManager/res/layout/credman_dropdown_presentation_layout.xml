@@ -34,7 +34,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_alignParentStart="true"
-                    android:paddingLeft="@dimen/autofill_view_left_padding"
+                    android:paddingStart="@dimen/autofill_view_left_padding"
                     app:tint="?androidprv:attr/materialColorOnSurface"
                     android:background="@null"/>
 
