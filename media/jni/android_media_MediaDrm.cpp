@@ -27,6 +27,8 @@
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 
+#include <android_companion_virtualdevice_flags.h>
+#include <android/companion/virtualnative/IVirtualDeviceManagerNative.h>
 #include <android/hardware/drm/1.3/IDrmFactory.h>
 #include <binder/Parcel.h>
 #include <binder/PersistableBundle.h>
@@ -41,8 +43,10 @@
 #include <map>
 #include <string>
 
+using ::android::companion::virtualnative::IVirtualDeviceManagerNative;
 using ::android::os::PersistableBundle;
 namespace drm = ::android::hardware::drm;
+namespace virtualdevice_flags = android::companion::virtualdevice::flags;
 
 namespace android {
 
@@ -1045,6 +1049,26 @@ DrmPlugin::SecurityLevel jintToSecurityLevel(jint jlevel) {
     return level;
 }
 
+std::vector<int> getVirtualDeviceIds() {
+    if (!virtualdevice_flags::device_aware_drm()) {
+        ALOGW("Device-aware DRM flag disabled.");
+        return std::vector<int>();
+    }
+
+    sp<IBinder> binder =
+            defaultServiceManager()->checkService(String16("virtualdevice_native"));
+    if (binder != nullptr) {
+        auto vdm = interface_cast<IVirtualDeviceManagerNative>(binder);
+        std::vector<int> deviceIds;
+        const uid_t uid = IPCThreadState::self()->getCallingUid();
+        vdm->getDeviceIdsForUid(uid, &deviceIds);
+        return deviceIds;
+    } else {
+        ALOGW("Cannot get virtualdevice_native service");
+        return std::vector<int>();
+    }
+}
+
 static jbyteArray android_media_MediaDrm_getSupportedCryptoSchemesNative(JNIEnv *env) {
     sp<IDrm> drm = android::DrmUtils::MakeDrm();
     if (drm == NULL) return env->NewByteArray(0);
@@ -1081,6 +1105,15 @@ static jboolean android_media_MediaDrm_isCryptoSchemeSupportedNative(
     }
     DrmPlugin::SecurityLevel securityLevel = jintToSecurityLevel(jSecurityLevel);
 
+    if (getVirtualDeviceIds().size() > 0) {
+        // Cap security level at max SECURITY_LEVEL_SW_SECURE_CRYPTO because at
+        // higher security levels decode output cannot be captured and
+        // streamed to virtual devices rendered on virtual displays.
+        if (securityLevel > DrmPlugin::kSecurityLevelSwSecureCrypto) {
+            return false;
+        }
+    }
+
     bool isSupported;
     status_t err = JDrm::IsCryptoSchemeSupported(uuid.array(), mimeType,
             securityLevel, &isSupported);
@@ -1104,6 +1137,16 @@ static jbyteArray android_media_MediaDrm_openSession(
     if (level == DrmPlugin::kSecurityLevelUnknown) {
         jniThrowException(env, "java/lang/IllegalArgumentException", "Invalid security level");
         return NULL;
+    }
+
+    if (getVirtualDeviceIds().size() > 0) {
+        // Cap security level at max SECURITY_LEVEL_SW_SECURE_CRYPTO because at
+        // higher security levels decode output cannot be captured and
+        // streamed to virtual devices rendered on virtual displays.
+        if (level == DrmPlugin::kSecurityLevelMax ||
+            level > DrmPlugin::kSecurityLevelSwSecureCrypto) {
+            level = DrmPlugin::kSecurityLevelSwSecureCrypto;
+        }
     }
 
     DrmStatus err = drm->openSession(level, sessionId);
