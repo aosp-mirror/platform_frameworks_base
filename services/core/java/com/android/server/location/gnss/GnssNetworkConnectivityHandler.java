@@ -38,6 +38,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.android.internal.location.GpsNetInitiatedHandler;
+import com.android.server.FgThread;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -200,7 +201,12 @@ class GnssNetworkConnectivityHandler {
 
         SubscriptionManager subManager = mContext.getSystemService(SubscriptionManager.class);
         if (subManager != null) {
-            subManager.addOnSubscriptionsChangedListener(mOnSubscriptionsChangeListener);
+            if (Flags.subscriptionsListenerThread()) {
+                subManager.addOnSubscriptionsChangedListener(FgThread.getExecutor(),
+                        mOnSubscriptionsChangeListener);
+            } else {
+                subManager.addOnSubscriptionsChangedListener(mOnSubscriptionsChangeListener);
+            }
         }
 
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
