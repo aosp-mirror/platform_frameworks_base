@@ -34,7 +34,6 @@ import com.android.credentialmanager.getflow.ProviderDisplayInfo
 import com.android.credentialmanager.getflow.RequestDisplayInfo
 import com.android.credentialmanager.getflow.generateDisplayTitleTextResCode
 import com.android.credentialmanager.model.BiometricRequestInfo
-import com.android.credentialmanager.model.CredentialType
 import com.android.credentialmanager.model.EntryInfo
 import com.android.credentialmanager.model.creation.CreateOptionInfo
 import com.android.credentialmanager.model.get.CredentialEntryInfo
@@ -480,16 +479,7 @@ private fun retrieveBiometricGetDisplayValues(
     )
 
     descriptionText = context.getString(
-        when (singleEntryType) {
-            CredentialType.PASSKEY ->
-                R.string.get_dialog_description_single_tap_passkey
-
-            CredentialType.PASSWORD ->
-                R.string.get_dialog_description_single_tap_password
-
-            CredentialType.UNKNOWN ->
-                R.string.get_dialog_description_single_tap_saved_sign_in
-        },
+        R.string.get_dialog_description_single_tap,
         getRequestDisplayInfo.appName,
         username
     )
