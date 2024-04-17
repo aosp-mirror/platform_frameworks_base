@@ -32,6 +32,8 @@ import androidx.compose.material3.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -107,7 +109,7 @@ fun CreateCredentialScreen(
                                 onCancelFlowAndFinish = viewModel::onUserCancel,
                                 onIllegalScreenStateAndFinish = viewModel::onIllegalUiState,
                                 onMoreOptionSelected =
-                                viewModel::createFlowOnMoreOptionsSelectedOnCreationSelection,
+                                viewModel::createFlowOnMoreOptionsOnlySelectedOnCreationSelection,
                                 requestDisplayInfo = createCredentialUiState.requestDisplayInfo,
                                 enabledProviderInfo = createCredentialUiState
                                         .activeEntry?.activeProvider!!,
@@ -120,6 +122,41 @@ fun CreateCredentialScreen(
                                 onBiometricPromptStateChange =
                                 viewModel::onBiometricPromptStateChange
                             )
+                        CreateScreenState.MORE_OPTIONS_SELECTION_ONLY -> MoreOptionsSelectionCard(
+                                requestDisplayInfo = createCredentialUiState.requestDisplayInfo,
+                                enabledProviderList = createCredentialUiState.enabledProviders,
+                                disabledProviderList = createCredentialUiState.disabledProviders,
+                                sortedCreateOptionsPairs =
+                                createCredentialUiState.sortedCreateOptionsPairs,
+                                onBackCreationSelectionButtonSelected =
+                                viewModel::createFlowOnBackCreationSelectionButtonSelected,
+                                onOptionSelected =
+                                viewModel::createFlowOnEntrySelectedFromMoreOptionScreen,
+                                onDisabledProvidersSelected =
+                                viewModel::createFlowOnLaunchSettings,
+                                onRemoteEntrySelected = viewModel::createFlowOnEntrySelected,
+                                onLog = { viewModel.logUiEvent(it) },
+                                customTopAppBar = { MoreOptionTopAppBar(
+                                        text = stringResource(
+                                                R.string.save_credential_to_title,
+                                                when (createCredentialUiState.requestDisplayInfo
+                                                        .type) {
+                                                    CredentialType.PASSKEY ->
+                                                        stringResource(R.string.passkey)
+                                                    CredentialType.PASSWORD ->
+                                                        stringResource(R.string.password)
+                                                    CredentialType.UNKNOWN -> stringResource(
+                                                            R.string.sign_in_info)
+                                                }
+                                        ),
+                                        onNavigationIconClicked = viewModel::onUserCancel,
+                                        bottomPadding = 16.dp,
+                                        navigationIcon = Icons.Filled.Close,
+                                        navigationIconContentDescription = stringResource(
+                                                R.string.accessibility_close_button
+                                        )
+                                )}
+                        )
                         CreateScreenState.MORE_OPTIONS_SELECTION -> MoreOptionsSelectionCard(
                                 requestDisplayInfo = createCredentialUiState.requestDisplayInfo,
                                 enabledProviderList = createCredentialUiState.enabledProviders,
@@ -207,22 +244,31 @@ fun MoreOptionsSelectionCard(
     onDisabledProvidersSelected: () -> Unit,
     onRemoteEntrySelected: (EntryInfo) -> Unit,
     onLog: @Composable (UiEventEnum) -> Unit,
+    customTopAppBar: (@Composable() () -> Unit)? = null
 ) {
     SheetContainerCard(topAppBar = {
-        MoreOptionTopAppBar(
-            text = stringResource(
-                R.string.save_credential_to_title,
-                when (requestDisplayInfo.type) {
-                    CredentialType.PASSKEY ->
-                        stringResource(R.string.passkey)
-                    CredentialType.PASSWORD ->
-                        stringResource(R.string.password)
-                    CredentialType.UNKNOWN -> stringResource(R.string.sign_in_info)
-                }
-            ),
-            onNavigationIconClicked = onBackCreationSelectionButtonSelected,
-            bottomPadding = 16.dp,
-        )
+        if (customTopAppBar != null) {
+            customTopAppBar()
+        } else {
+            MoreOptionTopAppBar(
+                    text = stringResource(
+                            R.string.save_credential_to_title,
+                            when (requestDisplayInfo.type) {
+                                CredentialType.PASSKEY ->
+                                    stringResource(R.string.passkey)
+                                CredentialType.PASSWORD ->
+                                    stringResource(R.string.password)
+                                CredentialType.UNKNOWN -> stringResource(R.string.sign_in_info)
+                            }
+                    ),
+                    onNavigationIconClicked = onBackCreationSelectionButtonSelected,
+                    bottomPadding = 16.dp,
+                    navigationIcon = Icons.Filled.ArrowBack,
+                    navigationIconContentDescription = stringResource(
+                            R.string.accessibility_back_arrow_button
+                    )
+            )
+        }
     }) {
         // bottom padding already
         item {
