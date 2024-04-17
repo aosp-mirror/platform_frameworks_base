@@ -987,9 +987,9 @@ public class AudioDeviceInventory {
                     }
                     if (di.mPeerDeviceAddress.equals("")) {
                         for (Pair<String, String> addr : addresses) {
-                            if (!addr.first.equals(di.mDeviceAddress)) {
-                                di.mPeerDeviceAddress = addr.first;
-                                di.mPeerIdentityDeviceAddress = addr.second;
+                            if (!di.mDeviceAddress.equals(addr.first)) {
+                                di.mPeerDeviceAddress = TextUtils.emptyIfNull(addr.first);
+                                di.mPeerIdentityDeviceAddress = TextUtils.emptyIfNull(addr.second);
                                 break;
                             }
                         }
@@ -1000,8 +1000,8 @@ public class AudioDeviceInventory {
                     }
                     if (di.mDeviceIdentityAddress.equals("")) {
                         for (Pair<String, String> addr : addresses) {
-                            if (addr.first.equals(di.mDeviceAddress)) {
-                                di.mDeviceIdentityAddress = addr.second;
+                            if (di.mDeviceAddress.equals(addr.first)) {
+                                di.mDeviceIdentityAddress = TextUtils.emptyIfNull(addr.second);
                                 break;
                             }
                         }
