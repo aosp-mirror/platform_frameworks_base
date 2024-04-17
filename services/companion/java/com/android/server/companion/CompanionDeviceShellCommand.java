@@ -85,7 +85,7 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     final int userId = getNextIntArgRequired();
                     final List<AssociationInfo> associationsForUser =
                             mAssociationStore.getActiveAssociationsByUser(userId);
-                    final int maxId = mAssociationStore.getMaxId(userId);
+                    final int maxId = mAssociationStore.getMaxId();
                     out.println("Max ID: " + maxId);
                     out.println("Association ID | Package Name | Mac Address");
                     for (AssociationInfo association : associationsForUser) {

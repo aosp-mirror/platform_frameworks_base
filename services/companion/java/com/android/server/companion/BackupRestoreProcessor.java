@@ -175,7 +175,7 @@ class BackupRestoreProcessor {
 
             // Create a new association reassigned to this user and a valid association ID
             final String packageName = restored.getPackageName();
-            final int newId = mAssociationStore.getNextId(userId);
+            final int newId = mAssociationStore.getNextId();
             AssociationInfo newAssociation = new AssociationInfo.Builder(newId, userId, packageName,
                     restored).build();
 
