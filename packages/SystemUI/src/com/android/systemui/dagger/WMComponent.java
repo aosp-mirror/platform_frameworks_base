@@ -94,7 +94,7 @@ public interface WMComponent {
     Optional<TaskViewFactory> getTaskViewFactory();
 
     @WMSingleton
-    ShellTransitions getTransitions();
+    ShellTransitions getShellTransitions();
 
     @WMSingleton
     KeyguardTransitions getKeyguardTransitions();

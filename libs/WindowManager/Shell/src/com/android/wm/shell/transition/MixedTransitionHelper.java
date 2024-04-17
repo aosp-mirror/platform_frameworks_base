@@ -44,7 +44,7 @@ public class MixedTransitionHelper {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback,
-            @NonNull Transitions player, @NonNull DefaultMixedHandler mixedHandler,
+            @NonNull Transitions player, @NonNull MixedTransitionHandler mixedHandler,
             @NonNull PipTransitionController pipHandler, @NonNull StageCoordinator splitHandler) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Animating a mixed transition for "
                 + "entering PIP while Split-Screen is foreground.");
