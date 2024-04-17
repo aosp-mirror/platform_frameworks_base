@@ -16,9 +16,11 @@
   -->
 
 <resources>
-    <style name="Theme.SettingsBase" parent="Theme.SettingsBase_v31" >
+    <style name="Theme.SettingsBase_v33" parent="Theme.SettingsBase_v31" >
         <item name="android:spinnerStyle">@style/Spinner.SettingsLib</item>
         <item name="android:spinnerItemStyle">@style/SpinnerItem.SettingsLib</item>
         <item name="android:spinnerDropDownItemStyle">@style/SpinnerDropDownItem.SettingsLib</item>
     </style>
+
+    <style name="Theme.SettingsBase" parent="Theme.SettingsBase_v33" />
 </resources>
