@@ -163,8 +163,7 @@ final class PolicyDefinition<V> {
                     new NoArgsPolicyKey(
                             DevicePolicyIdentifiers.USER_CONTROL_DISABLED_PACKAGES_POLICY),
                     new StringSetUnion(),
-                    (Set<String> value, Context context, Integer userId, PolicyKey policyKey) ->
-                            PolicyEnforcerCallbacks.setUserControlDisabledPackages(value, userId),
+                    PolicyEnforcerCallbacks::setUserControlDisabledPackages,
                     new StringSetPolicySerializer());
 
     // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
