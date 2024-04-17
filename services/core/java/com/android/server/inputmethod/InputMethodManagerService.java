@@ -289,6 +289,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @GuardedBy("ImfLock.class")
     private int mCurrentUserId;
 
+    /** Holds all user related data */
+    @GuardedBy("ImfLock.class")
+    private UserDataRepository mUserDataRepository;
+
     @MultiUserUnawareField
     final SettingsObserver mSettingsObserver;
     final WindowManagerInternal mWindowManagerInternal;
@@ -1284,7 +1288,11 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         public void onUserStarting(TargetUser user) {
             // Called on ActivityManager thread.
             SecureSettingsWrapper.onUserStarting(user.getUserIdentifier());
+            synchronized (ImfLock.class) {
+                mService.mUserDataRepository.getOrCreate(user.getUserIdentifier());
+            }
         }
+
     }
 
     void onUnlockUser(@UserIdInt int userId) {
@@ -1373,6 +1381,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             AdditionalSubtypeMapRepository.initialize(mHandler, mContext);
 
             mCurrentUserId = mActivityManagerInternal.getCurrentUserId();
+            mUserDataRepository = new UserDataRepository(mHandler, mUserManagerInternal);
+            for (int id : mUserManagerInternal.getUserIds()) {
+                mUserDataRepository.getOrCreate(id);
+            }
 
             final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
 
