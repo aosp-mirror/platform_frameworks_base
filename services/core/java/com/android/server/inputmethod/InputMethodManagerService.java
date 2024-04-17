@@ -5856,6 +5856,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             @SuppressWarnings("GuardedBy") Consumer<ClientState> clientControllerDump = c -> {
                 p.println("  " + c + ":");
                 p.println("    client=" + c.mClient);
+
                 p.println("    fallbackInputConnection="
                         + c.mFallbackInputConnection);
                 p.println("    sessionRequested="
@@ -5864,6 +5865,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         "    sessionRequestedForAccessibility="
                                 + c.mSessionRequestedForAccessibility);
                 p.println("    curSession=" + c.mCurSession);
+                p.println("    selfReportedDisplayId=" + c.mSelfReportedDisplayId);
+                p.println("    uid=" + c.mUid);
+                p.println("    pid=" + c.mPid);
             };
             mClientController.forAllClients(clientControllerDump);
             p.println("  mCurrentUserId=" + mCurrentUserId);
