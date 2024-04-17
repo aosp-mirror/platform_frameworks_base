@@ -243,6 +243,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private Optional<Long> mHomeButtonLongPressDurationMs;
     private Optional<Long> mOverrideHomeButtonLongPressDurationMs = Optional.empty();
     private Optional<Float> mOverrideHomeButtonLongPressSlopMultiplier = Optional.empty();
+    private boolean mHomeButtonLongPressHapticEnabled = true;
 
     /** @see android.view.WindowInsetsController#setSystemBarsAppearance(int, int) */
     private @Appearance int mAppearance;
@@ -410,13 +411,15 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         }
 
         @Override
-        public void setOverrideHomeButtonLongPress(long duration, float slopMultiplier) {
-            Log.d(TAG, "setOverrideHomeButtonLongPress receives: " + duration + "; "
-                    + slopMultiplier);
+        public void setOverrideHomeButtonLongPress(long duration, float slopMultiplier,
+                boolean haptic) {
+            Log.d(TAG, "setOverrideHomeButtonLongPress receives: " + duration + ";"
+                    + slopMultiplier + ";" + haptic);
             mOverrideHomeButtonLongPressDurationMs = Optional.of(duration)
                     .filter(value -> value > 0);
             mOverrideHomeButtonLongPressSlopMultiplier = Optional.of(slopMultiplier)
                     .filter(value -> value > 0);
+            mHomeButtonLongPressHapticEnabled = haptic;
             mOverrideHomeButtonLongPressDurationMs.ifPresent(aLong
                     -> Log.d(TAG, "Use duration override: " + aLong));
             mOverrideHomeButtonLongPressSlopMultiplier.ifPresent(aFloat
@@ -463,9 +466,11 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private final Runnable mEnableLayoutTransitions = () -> mView.setLayoutTransitionsEnabled(true);
     private final Runnable mOnVariableDurationHomeLongClick = () -> {
         if (onHomeLongClick(mView.getHomeButton().getCurrentView())) {
-            mView.getHomeButton().getCurrentView().performHapticFeedback(
-                    HapticFeedbackConstants.LONG_PRESS,
-                    HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+            if (mHomeButtonLongPressHapticEnabled) {
+                mView.getHomeButton().getCurrentView().performHapticFeedback(
+                        HapticFeedbackConstants.LONG_PRESS,
+                        HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+            }
         }
     };
 
@@ -1042,7 +1047,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             mView.getHomeButton().setOnLongClickListener(null);
         } else {
             mView.getHomeButton().getCurrentView().setLongClickable(true);
-            mView.getHomeButton().getCurrentView().setHapticFeedbackEnabled(true);
+            mView.getHomeButton().getCurrentView().setHapticFeedbackEnabled(
+                    mHomeButtonLongPressHapticEnabled);
             mView.getHomeButton().setOnLongClickListener(this::onHomeLongClick);
         }
     }
