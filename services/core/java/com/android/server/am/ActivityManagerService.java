@@ -683,8 +683,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public final IntentFirewall mIntentFirewall;
 
-    public OomAdjProfiler mOomAdjProfiler = new OomAdjProfiler();
-
     /**
      * The global lock for AMS, it's de-facto the ActivityManagerService object as of now.
      */
@@ -2596,7 +2594,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 BackgroundThread.getHandler(), this);
         mOnBattery = DEBUG_POWER ? true
                 : mBatteryStatsService.getActiveStatistics().getIsOnBattery();
-        mOomAdjProfiler.batteryPowerChanged(mOnBattery);
 
         mProcessStats = new ProcessStatsService(this, new File(systemDir, "procstats"));
 
@@ -2845,13 +2842,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         updateCpuStatsNow();
         synchronized (mProcLock) {
             mOnBattery = DEBUG_POWER ? true : onBattery;
-            mOomAdjProfiler.batteryPowerChanged(onBattery);
         }
     }
 
     @Override
     public void batteryStatsReset() {
-        mOomAdjProfiler.reset();
+        // Empty for now.
     }
 
     @Override
@@ -7417,7 +7413,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mServices.updateScreenStateLocked(isAwake);
                 reportCurWakefulnessUsageEvent();
                 mActivityTaskManager.onScreenAwakeChanged(isAwake);
-                mOomAdjProfiler.onWakefulnessChanged(wakefulness);
                 mOomAdjuster.onWakefulnessChanged(wakefulness);
 
                 updateOomAdjLocked(OOM_ADJ_REASON_UI_VISIBILITY);
@@ -10537,12 +10532,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mProcessList.mAppExitInfoTracker.dumpHistoryProcessExitInfo(pw, dumpPackage);
             }
             if (dumpPackage == null) {
-                pw.println();
-                if (dumpAll) {
-                    pw.println(
-                            "-------------------------------------------------------------------------------");
-                }
-                mOomAdjProfiler.dump(pw);
                 pw.println();
                 if (dumpAll) {
                     pw.println(
