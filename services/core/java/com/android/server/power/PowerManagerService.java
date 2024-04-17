@@ -6840,6 +6840,16 @@ public final class PowerManagerService extends SystemService
                 Binder.restoreCallingIdentity(ident);
             }
         }
+
+        public void setUseFaceDownDetector(boolean enable) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mFaceDownDetector.setEnabledOverride(enable);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
     }
 
     @VisibleForTesting
