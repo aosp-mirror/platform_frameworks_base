@@ -24,6 +24,8 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.helpers.DesktopModeAppHelper
+import com.android.server.wm.flicker.helpers.MailAppHelper
+import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.window.flags.Flags
 import com.android.wm.shell.flicker.service.common.Utils
@@ -34,9 +36,8 @@ import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
-
 @Ignore("Base Test Class")
-abstract class EnterDesktopWithDrag
+abstract class CloseAllAppsWithAppHeaderExit
 @JvmOverloads
 constructor(val rotation: Rotation = Rotation.ROTATION_0) {
 
@@ -45,6 +46,10 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
     private val wmHelper = WindowManagerStateHelper(instrumentation)
     private val device = UiDevice.getInstance(instrumentation)
     private val testApp = DesktopModeAppHelper(SimpleAppHelper(instrumentation))
+    private val mailApp = DesktopModeAppHelper(MailAppHelper(instrumentation))
+    private val nonResizeableApp = DesktopModeAppHelper(NonResizeableAppHelper(instrumentation))
+
+
 
     @Rule @JvmField val testSetupRule = Utils.testSetupRule(NavBar.MODE_GESTURAL, rotation)
 
@@ -53,11 +58,16 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
         Assume.assumeTrue(Flags.enableDesktopWindowingMode())
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
+        testApp.enterDesktopWithDrag(wmHelper, device)
+        mailApp.launchViaIntent(wmHelper)
+        nonResizeableApp.launchViaIntent(wmHelper)
     }
 
     @Test
-    open fun enterDesktopWithDrag() {
-        testApp.enterDesktopWithDrag(wmHelper, device)
+    open fun closeAllAppsInDesktop() {
+        nonResizeableApp.closeDesktopApp(wmHelper, device)
+        mailApp.closeDesktopApp(wmHelper, device)
+        testApp.closeDesktopApp(wmHelper, device)
     }
 
     @After
