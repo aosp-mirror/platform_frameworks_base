@@ -36,8 +36,8 @@ import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.connectivity.WifiPickerTrackerFactory
-import com.android.systemui.statusbar.pipeline.dagger.WifiTrackerLibInputLog
-import com.android.systemui.statusbar.pipeline.dagger.WifiTrackerLibTableLog
+import com.android.systemui.statusbar.pipeline.dagger.WifiInputLog
+import com.android.systemui.statusbar.pipeline.dagger.WifiTableLog
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.model.toWifiDataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.RealWifiRepository
@@ -70,11 +70,9 @@ import kotlinx.coroutines.flow.stateIn
 /**
  * A real implementation of [WifiRepository] that uses [com.android.wifitrackerlib] as the source of
  * truth for wifi information.
- *
- * TODO(b/292533677): Rename to just WifiRepositoryImpl.
  */
 @SysUISingleton
-class WifiRepositoryViaTrackerLib
+class WifiRepositoryImpl
 @Inject
 constructor(
     featureFlags: FeatureFlags,
@@ -83,8 +81,8 @@ constructor(
     @Background private val bgDispatcher: CoroutineDispatcher,
     private val wifiPickerTrackerFactory: WifiPickerTrackerFactory,
     private val wifiManager: WifiManager,
-    @WifiTrackerLibInputLog private val inputLogger: LogBuffer,
-    @WifiTrackerLibTableLog private val wifiTrackerLibTableLogBuffer: TableLogBuffer,
+    @WifiInputLog private val inputLogger: LogBuffer,
+    @WifiTableLog private val tableLogger: TableLogBuffer,
 ) : RealWifiRepository, LifecycleOwner {
 
     override val lifecycle =
@@ -190,7 +188,7 @@ constructor(
             .map { it.state == WifiManager.WIFI_STATE_ENABLED }
             .distinctUntilChanged()
             .logDiffsForTable(
-                wifiTrackerLibTableLogBuffer,
+                tableLogger,
                 columnPrefix = "",
                 columnName = COL_NAME_IS_ENABLED,
                 initialValue = false,
@@ -202,7 +200,7 @@ constructor(
             .map { it.primaryNetwork }
             .distinctUntilChanged()
             .logDiffsForTable(
-                wifiTrackerLibTableLogBuffer,
+                tableLogger,
                 columnPrefix = "",
                 initialValue = WIFI_NETWORK_DEFAULT,
             )
@@ -213,7 +211,7 @@ constructor(
             .map { it.secondaryNetworks }
             .distinctUntilChanged()
             .logDiffsForTable(
-                wifiTrackerLibTableLogBuffer,
+                tableLogger,
                 columnPrefix = "",
                 columnName = "secondaryNetworks",
                 initialValue = emptyList(),
@@ -307,7 +305,7 @@ constructor(
             .map { it.isDefault }
             .distinctUntilChanged()
             .logDiffsForTable(
-                wifiTrackerLibTableLogBuffer,
+                tableLogger,
                 columnPrefix = "",
                 columnName = COL_NAME_IS_DEFAULT,
                 initialValue = false,
@@ -325,7 +323,7 @@ constructor(
                 awaitClose { wifiManager.unregisterTrafficStateCallback(callback) }
             }
             .logDiffsForTable(
-                wifiTrackerLibTableLogBuffer,
+                tableLogger,
                 columnPrefix = ACTIVITY_PREFIX,
                 initialValue = ACTIVITY_DEFAULT,
             )
@@ -420,11 +418,11 @@ constructor(
         @Main private val mainExecutor: Executor,
         @Background private val bgDispatcher: CoroutineDispatcher,
         private val wifiPickerTrackerFactory: WifiPickerTrackerFactory,
-        @WifiTrackerLibInputLog private val inputLogger: LogBuffer,
-        @WifiTrackerLibTableLog private val wifiTrackerLibTableLogBuffer: TableLogBuffer,
+        @WifiInputLog private val inputLogger: LogBuffer,
+        @WifiTableLog private val tableLogger: TableLogBuffer,
     ) {
-        fun create(wifiManager: WifiManager): WifiRepositoryViaTrackerLib {
-            return WifiRepositoryViaTrackerLib(
+        fun create(wifiManager: WifiManager): WifiRepositoryImpl {
+            return WifiRepositoryImpl(
                 featureFlags,
                 scope,
                 mainExecutor,
@@ -432,7 +430,7 @@ constructor(
                 wifiPickerTrackerFactory,
                 wifiManager,
                 inputLogger,
-                wifiTrackerLibTableLogBuffer,
+                tableLogger,
             )
         }
     }
@@ -458,7 +456,7 @@ constructor(
          * repository.
          *
          * The [WifiNetworkModel.Active.networkId] field should be deleted once we've fully migrated
-         * to [WifiRepositoryViaTrackerLib].
+         * to [WifiRepositoryImpl].
          */
         private const val NETWORK_ID = -1
     }

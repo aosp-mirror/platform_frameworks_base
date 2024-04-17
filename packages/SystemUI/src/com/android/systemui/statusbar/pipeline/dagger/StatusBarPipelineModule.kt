@@ -52,7 +52,7 @@ import com.android.systemui.statusbar.pipeline.wifi.data.repository.RealWifiRepo
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositorySwitcher
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.DisabledWifiRepository
-import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryViaTrackerLib
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractorImpl
 import com.android.systemui.statusbar.policy.data.repository.UserSetupRepository
@@ -133,14 +133,14 @@ abstract class StatusBarPipelineModule {
         fun provideRealWifiRepository(
             wifiManager: WifiManager?,
             disabledWifiRepository: DisabledWifiRepository,
-            wifiRepositoryFromTrackerLibFactory: WifiRepositoryViaTrackerLib.Factory,
+            wifiRepositoryImplFactory: WifiRepositoryImpl.Factory,
         ): RealWifiRepository {
             // If we have a null [WifiManager], then the wifi repository should be permanently
             // disabled.
             return if (wifiManager == null) {
                 disabledWifiRepository
             } else {
-                wifiRepositoryFromTrackerLibFactory.create(wifiManager)
+                wifiRepositoryImplFactory.create(wifiManager)
             }
         }
 
@@ -157,10 +157,9 @@ abstract class StatusBarPipelineModule {
 
         @Provides
         @SysUISingleton
-        @WifiTrackerLibInputLog
-        fun provideWifiTrackerLibInputLogBuffer(factory: LogBufferFactory): LogBuffer {
-            // WifiTrackerLib is pretty noisy, so give it more room than WifiInputLog.
-            return factory.create("WifiTrackerLibInputLog", 200)
+        @WifiInputLog
+        fun provideWifiLogBuffer(factory: LogBufferFactory): LogBuffer {
+            return factory.create("WifiInputLog", 200)
         }
 
         @Provides
@@ -168,13 +167,6 @@ abstract class StatusBarPipelineModule {
         @WifiTableLog
         fun provideWifiTableLogBuffer(factory: TableLogBufferFactory): TableLogBuffer {
             return factory.create("WifiTableLog", 100)
-        }
-
-        @Provides
-        @SysUISingleton
-        @WifiTrackerLibTableLog
-        fun provideWifiTrackerLibTableLogBuffer(factory: TableLogBufferFactory): TableLogBuffer {
-            return factory.create("WifiTrackerLibTableLog", 100)
         }
 
         @Provides

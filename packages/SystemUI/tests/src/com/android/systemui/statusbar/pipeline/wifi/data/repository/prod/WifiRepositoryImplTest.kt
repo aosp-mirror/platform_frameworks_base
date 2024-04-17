@@ -31,7 +31,7 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.connectivity.WifiPickerTrackerFactory
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
-import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryViaTrackerLib.Companion.WIFI_NETWORK_DEFAULT
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl.Companion.WIFI_NETWORK_DEFAULT
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -68,14 +68,14 @@ import org.mockito.Mockito.verify
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-class WifiRepositoryViaTrackerLibTest : SysuiTestCase() {
+class WifiRepositoryImplTest : SysuiTestCase() {
 
     // Using lazy means that the class will only be constructed once it's fetched. Because the
     // repository internally sets some values on construction, we need to set up some test
     // parameters (like feature flags) *before* construction. Using lazy allows us to do that setup
     // inside each test case without needing to manually recreate the repository.
-    private val underTest: WifiRepositoryViaTrackerLib by lazy {
-        WifiRepositoryViaTrackerLib(
+    private val underTest: WifiRepositoryImpl by lazy {
+        WifiRepositoryImpl(
             featureFlags,
             testScope.backgroundScope,
             executor,

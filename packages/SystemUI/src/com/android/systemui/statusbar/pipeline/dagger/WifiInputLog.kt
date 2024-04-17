@@ -18,8 +18,8 @@ package com.android.systemui.statusbar.pipeline.dagger
 
 import javax.inject.Qualifier
 
-/** Wifi logs from [WifiRepositoryViaTrackerLib] in table format. */
-@Qualifier
-@MustBeDocumented
-@Retention(AnnotationRetention.RUNTIME)
-annotation class WifiTrackerLibTableLog
+/**
+ * Wifi logs for inputs into
+ * [com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl].
+ */
+@Qualifier @MustBeDocumented @Retention(AnnotationRetention.RUNTIME) annotation class WifiInputLog

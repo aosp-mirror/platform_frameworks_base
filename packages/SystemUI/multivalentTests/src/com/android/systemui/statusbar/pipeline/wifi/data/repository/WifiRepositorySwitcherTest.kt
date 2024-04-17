@@ -30,7 +30,7 @@ import com.android.systemui.statusbar.connectivity.WifiPickerTrackerFactory
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoModeWifiDataSource
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.model.FakeWifiEventModel
-import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryViaTrackerLib
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.kotlinArgumentCaptor
@@ -59,7 +59,7 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class WifiRepositorySwitcherTest : SysuiTestCase() {
     private lateinit var underTest: WifiRepositorySwitcher
-    private lateinit var realImpl: WifiRepositoryViaTrackerLib
+    private lateinit var realImpl: WifiRepositoryImpl
     private lateinit var demoImpl: DemoWifiRepository
 
     @Mock private lateinit var demoModeController: DemoModeController
@@ -92,7 +92,7 @@ class WifiRepositorySwitcherTest : SysuiTestCase() {
         whenever(wifiPickerTrackerFactory.create(any(), any(), any())).thenReturn(wifiPickerTracker)
 
         realImpl =
-            WifiRepositoryViaTrackerLib(
+            WifiRepositoryImpl(
                 featureFlags,
                 testScope.backgroundScope,
                 mainExecutor,

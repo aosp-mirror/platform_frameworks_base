@@ -63,7 +63,7 @@ import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlo
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
-import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryViaTrackerLib
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -186,7 +186,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         airplaneModeRepository = FakeAirplaneModeRepository()
 
         wifiRepository =
-            WifiRepositoryViaTrackerLib(
+            WifiRepositoryImpl(
                 flags,
                 testScope.backgroundScope,
                 mainExecutor,
