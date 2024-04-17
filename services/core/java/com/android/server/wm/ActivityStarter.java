@@ -2524,7 +2524,9 @@ class ActivityStarter {
         // If the caller has asked not to resume at this point, we make note
         // of this in the record so that we can skip it when trying to find
         // the top running activity.
-        if (!r.showToCurrentUser() || mLaunchTaskBehind) {
+        final boolean canShowActivity = r.showToCurrentUser();
+        if (!canShowActivity) Slog.w(TAG, "Can't resume non-current user r=" + r);
+        if (!canShowActivity || mLaunchTaskBehind) {
             r.delayedResume = true;
             mDoResume = false;
         } else {
