@@ -67,6 +67,7 @@ import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Size;
 import android.view.Display;
 
@@ -347,7 +348,8 @@ public final class CameraManager {
      */
     @NonNull
     public Set<Set<String>> getConcurrentCameraIds() throws CameraAccessException {
-        return CameraManagerGlobal.get().getConcurrentCameraIds();
+        return CameraManagerGlobal.get().getConcurrentCameraIds(mContext.getDeviceId(),
+                getDevicePolicyFromContext(mContext));
     }
 
     /**
@@ -386,7 +388,8 @@ public final class CameraManager {
             @NonNull Map<String, SessionConfiguration> cameraIdAndSessionConfig)
             throws CameraAccessException {
         return CameraManagerGlobal.get().isConcurrentSessionConfigurationSupported(
-                cameraIdAndSessionConfig, mContext.getApplicationInfo().targetSdkVersion);
+                cameraIdAndSessionConfig, mContext.getApplicationInfo().targetSdkVersion,
+                mContext.getDeviceId(), getDevicePolicyFromContext(mContext));
     }
 
     /**
@@ -752,7 +755,7 @@ public final class CameraManager {
 
             boolean hasConcurrentStreams =
                     CameraManagerGlobal.get().cameraIdHasConcurrentStreamsLocked(cameraId,
-                            mContext.getDeviceId());
+                            mContext.getDeviceId(), getDevicePolicyFromContext(mContext));
             metadata.setHasMandatoryConcurrentStreams(hasConcurrentStreams);
 
             Size displaySize = getDisplaySize();
@@ -1991,7 +1994,7 @@ public final class CameraManager {
         // Opened Camera ID -> apk name map
         private final ArrayMap<DeviceCameraInfo, String> mOpenedDevices = new ArrayMap<>();
 
-        private final Set<Set<String>> mConcurrentCameraIdCombinations = new ArraySet<>();
+        private final Set<Set<DeviceCameraInfo>> mConcurrentCameraIdCombinations = new ArraySet<>();
 
         // Registered availability callbacks and their executors
         private final ArrayMap<AvailabilityCallback, Executor> mCallbackMap = new ArrayMap<>();
@@ -2150,7 +2153,13 @@ public final class CameraManager {
                 ConcurrentCameraIdCombination[] cameraIdCombinations =
                         cameraService.getConcurrentCameraIds();
                 for (ConcurrentCameraIdCombination comb : cameraIdCombinations) {
-                    mConcurrentCameraIdCombinations.add(comb.getConcurrentCameraIdCombination());
+                    Set<Pair<String, Integer>> combination =
+                            comb.getConcurrentCameraIdCombination();
+                    Set<DeviceCameraInfo> deviceCameraInfoSet = new ArraySet<>();
+                    for (Pair<String, Integer> entry : combination) {
+                        deviceCameraInfoSet.add(new DeviceCameraInfo(entry.first, entry.second));
+                    }
+                    mConcurrentCameraIdCombinations.add(deviceCameraInfoSet);
                 }
             } catch (ServiceSpecificException e) {
                 // Unexpected failure
@@ -2235,13 +2244,12 @@ public final class CameraManager {
             return cameraIds.toArray(new String[0]);
         }
 
-        private Set<Set<String>> extractConcurrentCameraIdListLocked() {
+        private Set<Set<String>> extractConcurrentCameraIdListLocked(int deviceId,
+                int devicePolicy) {
             Set<Set<String>> concurrentCameraIds = new ArraySet<>();
-            for (Set<String> cameraIds : mConcurrentCameraIdCombinations) {
+            for (Set<DeviceCameraInfo> deviceCameraInfos : mConcurrentCameraIdCombinations) {
                 Set<String> extractedCameraIds = new ArraySet<>();
-                for (String cameraId : cameraIds) {
-                    // TODO(b/291736219): This to be made device-aware.
-                    DeviceCameraInfo info = new DeviceCameraInfo(cameraId, DEVICE_ID_DEFAULT);
+                for (DeviceCameraInfo info : deviceCameraInfos) {
                     // if the camera id status is NOT_PRESENT or ENUMERATING; skip the device.
                     // TODO: Would a device status NOT_PRESENT ever be in the map ? it gets removed
                     // in the callback anyway.
@@ -2254,9 +2262,14 @@ public final class CameraManager {
                             || status == ICameraServiceListener.STATUS_NOT_PRESENT) {
                         continue;
                     }
-                    extractedCameraIds.add(cameraId);
+                    if (shouldHideCamera(deviceId, devicePolicy, info)) {
+                        continue;
+                    }
+                    extractedCameraIds.add(info.mCameraId);
                 }
-                concurrentCameraIds.add(extractedCameraIds);
+                if (!extractedCameraIds.isEmpty()) {
+                    concurrentCameraIds.add(extractedCameraIds);
+                }
             }
             return concurrentCameraIds;
         }
@@ -2417,12 +2430,13 @@ public final class CameraManager {
             return cameraIds;
         }
 
-        public @NonNull Set<Set<String>> getConcurrentCameraIds() {
+        public @NonNull Set<Set<String>> getConcurrentCameraIds(int deviceId, int devicePolicy) {
             Set<Set<String>> concurrentStreamingCameraIds;
             synchronized (mLock) {
                 // Try to make sure we have an up-to-date list of concurrent camera devices.
                 connectCameraServiceLocked();
-                concurrentStreamingCameraIds = extractConcurrentCameraIdListLocked();
+                concurrentStreamingCameraIds = extractConcurrentCameraIdListLocked(deviceId,
+                        devicePolicy);
             }
             // TODO: Some sort of sorting  ?
             return concurrentStreamingCameraIds;
@@ -2430,12 +2444,11 @@ public final class CameraManager {
 
         public boolean isConcurrentSessionConfigurationSupported(
                 @NonNull Map<String, SessionConfiguration> cameraIdsAndSessionConfigurations,
-                int targetSdkVersion) throws CameraAccessException {
+                int targetSdkVersion, int deviceId, int devicePolicy)
+                throws CameraAccessException {
             if (cameraIdsAndSessionConfigurations == null) {
                 throw new IllegalArgumentException("cameraIdsAndSessionConfigurations was null");
             }
-
-            // TODO(b/291736219): Check if this API needs to be made device-aware.
 
             int size = cameraIdsAndSessionConfigurations.size();
             if (size == 0) {
@@ -2446,14 +2459,20 @@ public final class CameraManager {
                 // Go through all the elements and check if the camera ids are valid at least /
                 // belong to one of the combinations returned by getConcurrentCameraIds()
                 boolean subsetFound = false;
-                for (Set<String> combination : mConcurrentCameraIdCombinations) {
-                    if (combination.containsAll(cameraIdsAndSessionConfigurations.keySet())) {
+                for (Set<DeviceCameraInfo> combination : mConcurrentCameraIdCombinations) {
+                    Set<DeviceCameraInfo> infos = new ArraySet<>();
+                    for (String cameraId : cameraIdsAndSessionConfigurations.keySet()) {
+                        infos.add(new DeviceCameraInfo(cameraId,
+                                devicePolicy == DEVICE_POLICY_DEFAULT
+                                        ? DEVICE_ID_DEFAULT : deviceId));
+                    }
+                    if (combination.containsAll(infos)) {
                         subsetFound = true;
                     }
                 }
                 if (!subsetFound) {
                     Log.v(TAG, "isConcurrentSessionConfigurationSupported called with a subset of"
-                            + "camera ids not returned by getConcurrentCameraIds");
+                            + " camera ids not returned by getConcurrentCameraIds");
                     return false;
                 }
                 CameraIdAndSessionConfiguration [] cameraIdsAndConfigs =
@@ -2467,7 +2486,7 @@ public final class CameraManager {
                 }
                 try {
                     return mCameraService.isConcurrentSessionConfigurationSupported(
-                            cameraIdsAndConfigs, targetSdkVersion);
+                            cameraIdsAndConfigs, targetSdkVersion, deviceId, devicePolicy);
                 } catch (ServiceSpecificException e) {
                     throw ExceptionUtils.throwAsPublicException(e);
                 } catch (RemoteException e) {
@@ -2486,8 +2505,10 @@ public final class CameraManager {
          * @return Whether the camera device was found in the set of combinations returned by
          *         getConcurrentCameraIds
          */
-        public boolean cameraIdHasConcurrentStreamsLocked(String cameraId, int deviceId) {
-            DeviceCameraInfo info = new DeviceCameraInfo(cameraId, deviceId);
+        public boolean cameraIdHasConcurrentStreamsLocked(String cameraId, int deviceId,
+                int devicePolicy) {
+            DeviceCameraInfo info = new DeviceCameraInfo(cameraId,
+                    devicePolicy == DEVICE_POLICY_DEFAULT ? DEVICE_ID_DEFAULT : deviceId);
             if (!mDeviceStatus.containsKey(info)) {
                 // physical camera ids aren't advertised in concurrent camera id combinations.
                 if (DEBUG) {
@@ -2496,8 +2517,8 @@ public final class CameraManager {
                 }
                 return false;
             }
-            for (Set<String> comb : mConcurrentCameraIdCombinations) {
-                if (comb.contains(cameraId)) {
+            for (Set<DeviceCameraInfo> comb : mConcurrentCameraIdCombinations) {
+                if (comb.contains(info)) {
                     return true;
                 }
             }
