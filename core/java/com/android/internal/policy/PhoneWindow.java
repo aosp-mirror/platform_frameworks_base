@@ -2486,9 +2486,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             setFlags(FLAG_LAYOUT_IN_SCREEN|FLAG_LAYOUT_INSET_DECOR, flagsToUpdate);
             params.setFitInsetsSides(0);
             params.setFitInsetsTypes(0);
-            if (mEdgeToEdgeEnforced) {
-                params.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-            }
         }
 
         if (a.getBoolean(R.styleable.Window_windowNoTitle, false)) {

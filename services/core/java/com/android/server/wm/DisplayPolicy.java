@@ -41,7 +41,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACK
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_CONSUME_IME_INSETS;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IMMERSIVE_CONFIRMATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
@@ -985,19 +984,6 @@ public class DisplayPolicy {
                                 + win.mActivityRecord.getName() + " that isn't translucent trying"
                                 + " to fit insets. fitInsetsTypes=" + WindowInsets.Type.toString(
                                         attrs.getFitInsetsTypes()));
-                    }
-                    if ((attrs.privateFlags & PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED) != 0
-                            && attrs.layoutInDisplayCutoutMode
-                                    != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS) {
-                        // A non-translucent main window of the app enforced to go edge-to-edge
-                        // isn't allowed to fit display cutout, or it will cause software bezels.
-                        throw new IllegalArgumentException("Illegal attributes: Main window of "
-                                + win.mActivityRecord.getName() + " that isn't translucent and"
-                                + " targets SDK level " + win.mActivityRecord.mTargetSdk
-                                + " (>= 35) trying to specify layoutInDisplayCutoutMode as '"
-                                + WindowManager.LayoutParams.layoutInDisplayCutoutModeToString(
-                                        attrs.layoutInDisplayCutoutMode)
-                                + "' instead of 'always'");
                     }
                 }
                 break;
