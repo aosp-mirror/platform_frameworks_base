@@ -105,6 +105,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.statusbar.StatusBarManagerInternal;
+import com.android.server.wm.utils.SurfaceControlUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -1631,8 +1632,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         if (mTransactionCompletedListeners != null) {
             for (int i = 0; i < mTransactionCompletedListeners.size(); i++) {
                 final Runnable listener = mTransactionCompletedListeners.get(i);
-                transaction.addTransactionCompletedListener(Runnable::run,
-                        (stats) -> listener.run());
+                SurfaceControlUtils.addTransactionCompletedListener(transaction, listener);
             }
         }
 
