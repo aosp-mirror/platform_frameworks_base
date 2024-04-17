@@ -28,6 +28,8 @@ interface IFileIntegrityService {
     boolean isAppSourceCertificateTrusted(in byte[] certificateBytes, in String packageName);
 
     IInstalld.IFsveritySetupAuthToken createAuthToken(in ParcelFileDescriptor authFd);
+
+    @EnforcePermission("SETUP_FSVERITY")
     int setupFsverity(IInstalld.IFsveritySetupAuthToken authToken, in String filePath,
             in String packageName);
 }
