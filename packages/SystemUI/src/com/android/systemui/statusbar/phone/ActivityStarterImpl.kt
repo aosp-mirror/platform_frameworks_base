@@ -24,7 +24,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
-import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import dagger.Lazy
@@ -37,16 +36,10 @@ class ActivityStarterImpl
 constructor(
     private val statusBarStateController: SysuiStatusBarStateController,
     @Main private val mainExecutor: DelayableExecutor,
-    legacyActivityStarter: Lazy<LegacyActivityStarterInternalImpl>,
-    activityStarterInternal: Lazy<ActivityStarterInternalImpl>,
+    legacyActivityStarter: Lazy<LegacyActivityStarterInternalImpl>
 ) : ActivityStarter {
 
-    private val activityStarterInternal: ActivityStarterInternal =
-        if (SceneContainerFlag.isEnabled) {
-            activityStarterInternal.get()
-        } else {
-            legacyActivityStarter.get()
-        }
+    private val activityStarterInternal: ActivityStarterInternal = legacyActivityStarter.get()
 
     override fun startPendingIntentDismissingKeyguard(intent: PendingIntent) {
         activityStarterInternal.startPendingIntentDismissingKeyguard(intent = intent)
