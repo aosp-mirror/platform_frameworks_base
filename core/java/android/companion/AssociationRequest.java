@@ -148,7 +148,7 @@ public final class AssociationRequest implements Parcelable {
 
     /** @hide */
     public void setSkipPrompt(boolean value) {
-        mSkipPrompt = true;
+        mSkipPrompt = value;
     }
 
     /** @hide */
