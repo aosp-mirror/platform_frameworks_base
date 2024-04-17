@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -111,6 +112,8 @@ public final class BackNavigationInfo implements Parcelable {
     @Nullable
     private final CustomAnimationInfo mCustomAnimationInfo;
 
+    private final int mLetterboxColor;
+
     /**
      * Create a new {@link BackNavigationInfo} instance.
      *
@@ -124,13 +127,15 @@ public final class BackNavigationInfo implements Parcelable {
             @Nullable IOnBackInvokedCallback onBackInvokedCallback,
             boolean isPrepareRemoteAnimation,
             boolean isAnimationCallback,
-            @Nullable CustomAnimationInfo customAnimationInfo) {
+            @Nullable CustomAnimationInfo customAnimationInfo,
+            int letterboxColor) {
         mType = type;
         mOnBackNavigationDone = onBackNavigationDone;
         mOnBackInvokedCallback = onBackInvokedCallback;
         mPrepareRemoteAnimation = isPrepareRemoteAnimation;
         mAnimationCallback = isAnimationCallback;
         mCustomAnimationInfo = customAnimationInfo;
+        mLetterboxColor = letterboxColor;
     }
 
     private BackNavigationInfo(@NonNull Parcel in) {
@@ -140,6 +145,7 @@ public final class BackNavigationInfo implements Parcelable {
         mPrepareRemoteAnimation = in.readBoolean();
         mAnimationCallback = in.readBoolean();
         mCustomAnimationInfo = in.readTypedObject(CustomAnimationInfo.CREATOR);
+        mLetterboxColor = in.readInt();
     }
 
     /** @hide */
@@ -151,6 +157,7 @@ public final class BackNavigationInfo implements Parcelable {
         dest.writeBoolean(mPrepareRemoteAnimation);
         dest.writeBoolean(mAnimationCallback);
         dest.writeTypedObject(mCustomAnimationInfo, flags);
+        dest.writeInt(mLetterboxColor);
     }
 
     /**
@@ -192,6 +199,13 @@ public final class BackNavigationInfo implements Parcelable {
         return mAnimationCallback;
     }
 
+    /**
+     * @return Letterbox color
+     * @hide
+     */
+    public int getLetterboxColor() {
+        return mLetterboxColor;
+    }
     /**
      * Callback to be called when the back preview is finished in order to notify the server that
      * it can clean up the resources created for the animation.
@@ -387,6 +401,8 @@ public final class BackNavigationInfo implements Parcelable {
         private CustomAnimationInfo mCustomAnimationInfo;
         private boolean mAnimationCallback = false;
 
+        private int mLetterboxColor = Color.TRANSPARENT;
+
         /**
          * @see BackNavigationInfo#getType()
          */
@@ -454,6 +470,14 @@ public final class BackNavigationInfo implements Parcelable {
         }
 
         /**
+         * @param color Non-transparent if there contain letterbox color.
+         */
+        public Builder setLetterboxColor(int color) {
+            mLetterboxColor = color;
+            return this;
+        }
+
+        /**
          * Builds and returns an instance of {@link BackNavigationInfo}
          */
         public BackNavigationInfo build() {
@@ -461,7 +485,8 @@ public final class BackNavigationInfo implements Parcelable {
                     mOnBackInvokedCallback,
                     mPrepareRemoteAnimation,
                     mAnimationCallback,
-                    mCustomAnimationInfo);
+                    mCustomAnimationInfo,
+                    mLetterboxColor);
         }
     }
 }
