@@ -98,6 +98,7 @@ import static android.os.UserHandle.USER_NULL;
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.Flags.callstyleCallbackApi;
 import static android.service.notification.Flags.redactSensitiveNotificationsFromUntrustedListeners;
+import static android.service.notification.Flags.redactSensitiveNotificationsBigTextStyle;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_CONVERSATIONS;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ONGOING;
@@ -11915,6 +11916,14 @@ public class NotificationManagerService extends SystemService {
                 messageStyle.addMessage(new MessagingStyle.Message(
                         redactedText, System.currentTimeMillis(), empty));
                 redactedNotifBuilder.setStyle(messageStyle);
+            }
+            if (redactSensitiveNotificationsBigTextStyle()
+                    && oldNotif.isStyle(Notification.BigTextStyle.class)) {
+                Notification.BigTextStyle bigTextStyle = new Notification.BigTextStyle();
+                bigTextStyle.bigText(mContext.getString(R.string.redacted_notification_message));
+                bigTextStyle.setBigContentTitle("");
+                bigTextStyle.setSummaryText("");
+                redactedNotifBuilder.setStyle(bigTextStyle);
             }
 
             Notification redacted = redactedNotifBuilder.build();
