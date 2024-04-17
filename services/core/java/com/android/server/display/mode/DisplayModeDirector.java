@@ -77,6 +77,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.display.DisplayDeviceConfig;
 import com.android.server.display.config.IdleScreenRefreshRateTimeoutLuxThresholdPoint;
+import com.android.server.display.config.RefreshRateData;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.utils.AmbientFilter;
@@ -961,13 +962,15 @@ public class DisplayModeDirector {
          * This is used to update the refresh rate configs from the DeviceConfig, which
          * if missing from DisplayDeviceConfig, and finally fallback to config.xml.
          */
-        public void setRefreshRates(DisplayDeviceConfig displayDeviceConfig,
+        void setRefreshRates(DisplayDeviceConfig displayDeviceConfig,
                 boolean attemptReadFromFeatureParams) {
+            RefreshRateData refreshRateData = displayDeviceConfig == null ? null
+                    : displayDeviceConfig.getRefreshRateData();
             setDefaultPeakRefreshRate(displayDeviceConfig, attemptReadFromFeatureParams);
             mDefaultRefreshRate =
-                    (displayDeviceConfig == null) ? (float) mContext.getResources().getInteger(
-                        R.integer.config_defaultRefreshRate)
-                        : (float) displayDeviceConfig.getDefaultRefreshRate();
+                    (refreshRateData == null) ? (float) mContext.getResources().getInteger(
+                            R.integer.config_defaultRefreshRate)
+                            : (float) refreshRateData.defaultRefreshRate;
         }
 
         public void observe() {
@@ -1049,7 +1052,8 @@ public class DisplayModeDirector {
                 defaultPeakRefreshRate =
                         (displayDeviceConfig == null) ? (float) mContext.getResources().getInteger(
                                 R.integer.config_defaultPeakRefreshRate)
-                                : (float) displayDeviceConfig.getDefaultPeakRefreshRate();
+                                : (float) displayDeviceConfig.getRefreshRateData()
+                                        .defaultPeakRefreshRate;
             }
             mDefaultPeakRefreshRate = defaultPeakRefreshRate;
         }
@@ -2809,7 +2813,7 @@ public class DisplayModeDirector {
         private int getRefreshRateInHbmHdr(DisplayDeviceConfig displayDeviceConfig) {
             return getRefreshRate(
                     () -> mConfigParameterProvider.getRefreshRateInHbmHdr(),
-                    () -> displayDeviceConfig.getDefaultRefreshRateInHbmHdr(),
+                    () -> displayDeviceConfig.getRefreshRateData().defaultRefreshRateInHbmHdr,
                     R.integer.config_defaultRefreshRateInHbmHdr,
                     displayDeviceConfig
             );
@@ -2818,7 +2822,7 @@ public class DisplayModeDirector {
         private int getRefreshRateInHbmSunlight(DisplayDeviceConfig displayDeviceConfig) {
             return getRefreshRate(
                     () -> mConfigParameterProvider.getRefreshRateInHbmSunlight(),
-                    () -> displayDeviceConfig.getDefaultRefreshRateInHbmSunlight(),
+                    () -> displayDeviceConfig.getRefreshRateData().defaultRefreshRateInHbmSunlight,
                     R.integer.config_defaultRefreshRateInHbmSunlight,
                     displayDeviceConfig
             );

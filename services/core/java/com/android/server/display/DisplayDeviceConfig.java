@@ -70,6 +70,7 @@ import com.android.server.display.config.PowerThrottlingMap;
 import com.android.server.display.config.PowerThrottlingPoint;
 import com.android.server.display.config.PredefinedBrightnessLimitNames;
 import com.android.server.display.config.RefreshRateConfigs;
+import com.android.server.display.config.RefreshRateData;
 import com.android.server.display.config.RefreshRateRange;
 import com.android.server.display.config.RefreshRateThrottlingMap;
 import com.android.server.display.config.RefreshRateThrottlingPoint;
@@ -617,9 +618,7 @@ public class DisplayDeviceConfig {
     private static final String STABLE_ID_SUFFIX_FORMAT = "id_%d";
     private static final String NO_SUFFIX_FORMAT = "%d";
     private static final long STABLE_FLAG = 1L << 62;
-    private static final int DEFAULT_PEAK_REFRESH_RATE = 0;
-    private static final int DEFAULT_REFRESH_RATE = 60;
-    private static final int DEFAULT_REFRESH_RATE_IN_HBM = 0;
+
     private static final int DEFAULT_HIGH_REFRESH_RATE = 0;
     private static final float[] DEFAULT_BRIGHTNESS_THRESHOLDS = new float[]{};
 
@@ -754,32 +753,6 @@ public class DisplayDeviceConfig {
     private boolean mDdcAutoBrightnessAvailable = true;
 
     /**
-     * The default peak refresh rate for a given device. This value prevents the framework from
-     * using higher refresh rates, even if display modes with higher refresh rates are available
-     * from hardware composer. Only has an effect if the value is non-zero.
-     */
-    private int mDefaultPeakRefreshRate = DEFAULT_PEAK_REFRESH_RATE;
-
-    /**
-     * The default refresh rate for a given device. This value sets the higher default
-     * refresh rate. If the hardware composer on the device supports display modes with
-     * a higher refresh rate than the default value specified here, the framework may use those
-     * higher refresh rate modes if an app chooses one by setting preferredDisplayModeId or calling
-     * setFrameRate(). We have historically allowed fallback to mDefaultPeakRefreshRate if
-     * mDefaultRefreshRate is set to 0, but this is not supported anymore.
-     */
-    private int mDefaultRefreshRate = DEFAULT_REFRESH_RATE;
-
-    /**
-     * Default refresh rate while the device has high brightness mode enabled for HDR.
-     */
-    private int mDefaultRefreshRateInHbmHdr = DEFAULT_REFRESH_RATE_IN_HBM;
-
-    /**
-     * Default refresh rate while the device has high brightness mode enabled for Sunlight.
-     */
-    private int mDefaultRefreshRateInHbmSunlight = DEFAULT_REFRESH_RATE_IN_HBM;
-    /**
      * Default refresh rate in the high zone defined by brightness and ambient thresholds.
      * If non-positive, then the refresh rate is unchanged even if thresholds are configured.
      */
@@ -866,6 +839,8 @@ public class DisplayDeviceConfig {
     // Null if even dimmer is disabled - in config or by flag.
     @Nullable
     public EvenDimmerBrightnessData mEvenDimmerBrightnessData;
+
+    private RefreshRateData mRefreshRateData = RefreshRateData.DEFAULT_REFRESH_RATE_DATA;
 
     /**
      * Maximum screen brightness setting when screen brightness capped in Wear Bedtime mode.
@@ -1450,33 +1425,8 @@ public class DisplayDeviceConfig {
         return mDisplayBrightnessMapping.getBrightnessArray(mode, preset);
     }
 
-    /**
-     * @return Default peak refresh rate of the associated display
-     */
-    public int getDefaultPeakRefreshRate() {
-        return mDefaultPeakRefreshRate;
-    }
-
-    /**
-     * @return Default refresh rate of the associated display
-     */
-    public int getDefaultRefreshRate() {
-        return mDefaultRefreshRate;
-    }
-
-    /**
-     * @return Default refresh rate while the device has high brightness mode enabled for HDR.
-     */
-    public int getDefaultRefreshRateInHbmHdr() {
-        return mDefaultRefreshRateInHbmHdr;
-    }
-
-    /**
-     * @return Default refresh rate while the device has high brightness mode enabled because of
-     * high lux.
-     */
-    public int getDefaultRefreshRateInHbmSunlight() {
-        return mDefaultRefreshRateInHbmSunlight;
+    public RefreshRateData getRefreshRateData() {
+        return mRefreshRateData;
     }
 
     /**
@@ -1687,11 +1637,8 @@ public class DisplayDeviceConfig {
                 + "\n"
                 + "mDefaultLowBlockingZoneRefreshRate= " + mDefaultLowBlockingZoneRefreshRate
                 + ", mDefaultHighBlockingZoneRefreshRate= " + mDefaultHighBlockingZoneRefreshRate
-                + ", mDefaultPeakRefreshRate= " + mDefaultPeakRefreshRate
-                + ", mDefaultRefreshRate= " + mDefaultRefreshRate
+                + ", mRefreshRateData= " + mRefreshRateData
                 + ", mRefreshRateZoneProfiles= " + mRefreshRateZoneProfiles
-                + ", mDefaultRefreshRateInHbmHdr= " + mDefaultRefreshRateInHbmHdr
-                + ", mDefaultRefreshRateInHbmSunlight= " + mDefaultRefreshRateInHbmSunlight
                 + ", mRefreshRateThrottlingMap= " + mRefreshRateThrottlingMap
                 + ", mLowBlockingZoneThermalMapId= " + mLowBlockingZoneThermalMapId
                 + ", mHighBlockingZoneThermalMapId= " + mHighBlockingZoneThermalMapId
@@ -1782,6 +1729,8 @@ public class DisplayDeviceConfig {
                 mScreenOffBrightnessSensor = SensorData.loadScreenOffBrightnessSensorConfig(config);
                 mProximitySensor = SensorData.loadProxSensorConfig(mFlags, config);
                 mTempSensor = SensorData.loadTempSensorConfig(mFlags, config);
+                mRefreshRateData = RefreshRateData
+                        .loadRefreshRateData(config, mContext.getResources());
                 loadAmbientHorizonFromDdc(config);
                 loadBrightnessChangeThresholds(config);
                 loadAutoBrightnessConfigValues(config);
@@ -1812,6 +1761,8 @@ public class DisplayDeviceConfig {
         mAmbientLightSensor = SensorData.loadAmbientLightSensorConfig(mContext.getResources());
         mProximitySensor = SensorData.loadSensorUnspecifiedConfig();
         mTempSensor = SensorData.loadTempSensorUnspecifiedConfig();
+        mRefreshRateData = RefreshRateData
+                .loadRefreshRateData(null, mContext.getResources());
         loadBrightnessChangeThresholdsFromXml();
         loadAutoBrightnessConfigsFromConfigXml();
         loadAutoBrightnessAvailableFromConfigXml();
@@ -2162,33 +2113,13 @@ public class DisplayDeviceConfig {
         BlockingZoneConfig higherBlockingZoneConfig =
                 (refreshRateConfigs == null) ? null
                         : refreshRateConfigs.getHigherBlockingZoneConfigs();
-        loadPeakDefaultRefreshRate(refreshRateConfigs);
-        loadDefaultRefreshRate(refreshRateConfigs);
-        loadDefaultRefreshRateInHbm(refreshRateConfigs);
         loadLowerRefreshRateBlockingZones(lowerBlockingZoneConfig);
         loadHigherRefreshRateBlockingZones(higherBlockingZoneConfig);
         loadRefreshRateZoneProfiles(refreshRateConfigs);
     }
 
-    private void loadPeakDefaultRefreshRate(RefreshRateConfigs refreshRateConfigs) {
-        if (refreshRateConfigs == null || refreshRateConfigs.getDefaultPeakRefreshRate() == null) {
-            mDefaultPeakRefreshRate = mContext.getResources().getInteger(
-                R.integer.config_defaultPeakRefreshRate);
-        } else {
-            mDefaultPeakRefreshRate =
-                refreshRateConfigs.getDefaultPeakRefreshRate().intValue();
-        }
-    }
 
-    private void loadDefaultRefreshRate(RefreshRateConfigs refreshRateConfigs) {
-        if (refreshRateConfigs == null || refreshRateConfigs.getDefaultRefreshRate() == null) {
-            mDefaultRefreshRate = mContext.getResources().getInteger(
-                R.integer.config_defaultRefreshRate);
-        } else {
-            mDefaultRefreshRate =
-                refreshRateConfigs.getDefaultRefreshRate().intValue();
-        }
-    }
+
 
     /** Loads the refresh rate profiles. */
     private void loadRefreshRateZoneProfiles(RefreshRateConfigs refreshRateConfigs) {
@@ -2202,26 +2133,6 @@ public class DisplayDeviceConfig {
                     zone.getId(),
                     new SurfaceControl.RefreshRateRange(
                     range.getMinimum().floatValue(), range.getMaximum().floatValue()));
-        }
-    }
-
-    private void loadDefaultRefreshRateInHbm(RefreshRateConfigs refreshRateConfigs) {
-        if (refreshRateConfigs != null
-                && refreshRateConfigs.getDefaultRefreshRateInHbmHdr() != null) {
-            mDefaultRefreshRateInHbmHdr = refreshRateConfigs.getDefaultRefreshRateInHbmHdr()
-                    .intValue();
-        } else {
-            mDefaultRefreshRateInHbmHdr = mContext.getResources().getInteger(
-                    R.integer.config_defaultRefreshRateInHbmHdr);
-        }
-
-        if (refreshRateConfigs != null
-                && refreshRateConfigs.getDefaultRefreshRateInHbmSunlight() != null) {
-            mDefaultRefreshRateInHbmSunlight =
-                    refreshRateConfigs.getDefaultRefreshRateInHbmSunlight().intValue();
-        } else {
-            mDefaultRefreshRateInHbmSunlight = mContext.getResources().getInteger(
-                R.integer.config_defaultRefreshRateInHbmSunlight);
         }
     }
 
