@@ -487,7 +487,6 @@ class AnrTimerService::Ticker {
         timer_id_t front = headTimerId();
         auto found = running_.find(key);
         if (found != running_.end()) running_.erase(found);
-        if (front != headTimerId()) restartLocked();
     }
 
     // Remove every timer associated with the service.
@@ -501,7 +500,6 @@ class AnrTimerService::Ticker {
                 i++;
             }
         }
-        if (front != headTimerId()) restartLocked();
     }
 
     // Return the number of timers still running.
