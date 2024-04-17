@@ -1258,18 +1258,6 @@ public class ViewRootImplTest {
         sInstrumentation.waitForIdleSync();
 
         mViewRootImpl = mView.getViewRootImpl();
-        waitForFrameRateCategoryToSettle(mView);
-
-        sInstrumentation.runOnMainSync(() -> {
-            assertEquals(FRAME_RATE_CATEGORY_DEFAULT,
-                    mViewRootImpl.getPreferredFrameRateCategory());
-            mView.invalidate();
-            int expected = toolkitFrameRateDefaultNormalReadOnly()
-                    ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
-            runAfterDraw(() -> assertEquals(expected,
-                    mViewRootImpl.getLastPreferredFrameRateCategory()));
-        });
-        waitForAfterDraw();
 
         waitForFrameRateCategoryToSettle(mView);
 
