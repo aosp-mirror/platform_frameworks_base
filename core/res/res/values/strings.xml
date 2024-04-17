@@ -6457,16 +6457,4 @@ ul.</string>
     <string name="satellite_notification_how_it_works">How it works</string>
     <!-- Initial/System provided label shown for an app which gets unarchived. [CHAR LIMIT=64]. -->
     <string name="unarchival_session_app_label">Pending...</string>
-
-    <!-- Background user sound notification related messages -->
-    <!-- Notification title when sound comes from a call on background user [CHAR LIMIT=NOTIF_TITLE]-->
-    <string name="bg_user_sound_notification_title_call">Call for <xliff:g id="user_name" example="John Doe">%s</xliff:g></string>
-    <!-- Notification title when sound comes from an alarm or timer on background user [CHAR LIMIT=NOTIF_TITLE]-->
-    <string name="bg_user_sound_notification_title_alarm">Alarm for <xliff:g id="user_name" example="John Doe">%s</xliff:g></string>
-    <!-- Notification action button to prompt user switch to the background user [CHAR LIMIT=NONE] -->
-    <string name="bg_user_sound_notification_button_switch_user">Switch user</string>
-    <!-- Notification action button to mute the sound from the background user [CHAR LIMIT=NONE] -->
-    <string name="bg_user_sound_notification_button_mute">Mute</string>
-    <!-- Notification content action to mute the sound from the background user [CHAR LIMIT=NOTIF_BODY]-->
-    <string name="bg_user_sound_notification_message">Tap to mute sound</string>
 </resources>
