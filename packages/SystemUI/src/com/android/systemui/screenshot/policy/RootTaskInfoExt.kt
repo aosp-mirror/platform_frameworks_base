@@ -30,3 +30,5 @@ internal fun RootTaskInfo.childTasksTopDown(): Sequence<ChildTaskModel> {
         )
     }
 }
+
+internal fun RootTaskInfo.hasChildTasks() = childTaskUserIds.isNotEmpty()
