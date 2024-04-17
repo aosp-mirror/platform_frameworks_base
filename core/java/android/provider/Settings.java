@@ -9020,6 +9020,16 @@ public final class Settings {
                 "accessibility_display_daltonizer";
 
         /**
+         * Integer property that determines the saturation level of color correction. Default value
+         * is defined in Settings config.xml.
+         * [0-10] inclusive where 0 would look as if color space adustment is not applied at all.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_DISPLAY_DALTONIZER_SATURATION_LEVEL =
+                "accessibility_display_daltonizer_saturation_level";
+
+        /**
          * Setting that specifies whether automatic click when the mouse pointer stops moving is
          * enabled.
          *
