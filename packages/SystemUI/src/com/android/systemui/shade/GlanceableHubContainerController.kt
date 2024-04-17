@@ -28,10 +28,14 @@ import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.setViewTreeOnBackPressedDispatcherOwner
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.annotations.VisibleForTesting
+import com.android.systemui.ambient.touch.TouchMonitor
+import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
 import com.android.systemui.communal.dagger.Communal
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.ui.compose.CommunalContainer
@@ -67,10 +71,25 @@ constructor(
     private val shadeInteractor: ShadeInteractor,
     private val powerManager: PowerManager,
     private val communalColors: CommunalColors,
-    @Communal private val dataSourceDelegator: SceneDataSourceDelegator,
-) {
+    private val ambientTouchComponentFactory: AmbientTouchComponent.Factory,
+    @Communal private val dataSourceDelegator: SceneDataSourceDelegator
+) : LifecycleOwner {
     /** The container view for the hub. This will not be initialized until [initView] is called. */
     private var communalContainerView: View? = null
+
+    /**
+     * This lifecycle is used to control when the [touchMonitor] listens to touches. The lifecycle
+     * should only be [Lifecycle.State.RESUMED] when the hub is showing and not covered by anything,
+     * such as the notification shade or bouncer.
+     */
+    private var lifecycleRegistry: LifecycleRegistry = LifecycleRegistry(this)
+
+    /**
+     * This [TouchMonitor] listens for top and bottom swipe gestures globally when the hub is open.
+     * When a top or bottom swipe is detected, they will be intercepted and used to open the
+     * notification shade/bouncer.
+     */
+    private var touchMonitor: TouchMonitor? = null
 
     /**
      * The width of the area in which a right edge swipe can open the hub, in pixels. Read from
@@ -80,20 +99,6 @@ constructor(
     private var rightEdgeSwipeRegionWidth: Int = 0
 
     /**
-     * The height of the area in which a top edge swipe while the hub is open will not intercept
-     * touches, in pixels. This allows the top edge swipe to instead open the notification shade.
-     * Read from resources when [initView] is called.
-     */
-    private var topEdgeSwipeRegionWidth: Int = 0
-
-    /**
-     * The height of the area in which a bottom edge swipe while the hub is open will not intercept
-     * touches, in pixels. This allows the bottom edge swipe to instead open the bouncer. Read from
-     * resources when [initView] is called.
-     */
-    private var bottomEdgeSwipeRegionWidth: Int = 0
-
-    /**
      * True if we are currently tracking a gesture for opening the hub that started in the edge
      * swipe region.
      */
@@ -101,9 +106,6 @@ constructor(
 
     /** True if we are currently tracking a touch on the hub while it's open. */
     private var isTrackingHubTouch = false
-
-    /** True if we are tracking a top or bottom swipe gesture while the hub is open. */
-    private var isTrackingHubGesture = false
 
     /**
      * True if the hub UI is fully open, meaning it should receive touch input.
@@ -132,8 +134,6 @@ constructor(
      * and just let the dream overlay's touch handling deal with them.
      *
      * Tracks [KeyguardInteractor.isDreaming].
-     *
-     * TODO(b/328838259): figure out a proper solution for touch handling above the lock screen too
      */
     private var isDreaming = false
 
@@ -192,28 +192,45 @@ constructor(
             throw RuntimeException("Communal view has already been initialized")
         }
 
+        if (touchMonitor == null) {
+            touchMonitor =
+                ambientTouchComponentFactory.create(this, HashSet()).getTouchMonitor().apply {
+                    init()
+                }
+        }
+        lifecycleRegistry.currentState = Lifecycle.State.CREATED
+
         communalContainerView = containerView
 
         rightEdgeSwipeRegionWidth =
             containerView.resources.getDimensionPixelSize(
                 R.dimen.communal_right_edge_swipe_region_width
             )
-        topEdgeSwipeRegionWidth =
-            containerView.resources.getDimensionPixelSize(
-                R.dimen.communal_top_edge_swipe_region_height
-            )
-        bottomEdgeSwipeRegionWidth =
-            containerView.resources.getDimensionPixelSize(
-                R.dimen.communal_bottom_edge_swipe_region_height
-            )
 
         collectFlow(
             containerView,
             keyguardTransitionInteractor.isFinishedInStateWhere(KeyguardState::isBouncerState),
-            { anyBouncerShowing = it }
+            {
+                anyBouncerShowing = it
+                updateLifecycleState()
+            }
         )
-        collectFlow(containerView, communalInteractor.isCommunalShowing, { hubShowing = it })
-        collectFlow(containerView, shadeInteractor.isAnyFullyExpanded, { shadeShowing = it })
+        collectFlow(
+            containerView,
+            communalInteractor.isCommunalShowing,
+            {
+                hubShowing = it
+                updateLifecycleState()
+            }
+        )
+        collectFlow(
+            containerView,
+            shadeInteractor.isAnyFullyExpanded,
+            {
+                shadeShowing = it
+                updateLifecycleState()
+            }
+        )
         collectFlow(containerView, keyguardInteractor.isDreaming, { isDreaming = it })
 
         communalContainerView = containerView
@@ -221,10 +238,24 @@ constructor(
         return containerView
     }
 
+    /**
+     * Updates the lifecycle stored by the [lifecycleRegistry] to control when the [touchMonitor]
+     * should listen for and intercept top and bottom swipes.
+     */
+    private fun updateLifecycleState() {
+        val shouldInterceptGestures = hubShowing && !(shadeShowing || anyBouncerShowing)
+        if (shouldInterceptGestures) {
+            lifecycleRegistry.currentState = Lifecycle.State.RESUMED
+        } else {
+            lifecycleRegistry.currentState = Lifecycle.State.STARTED
+        }
+    }
+
     /** Removes the container view from its parent. */
     fun disposeView() {
         communalContainerView?.let {
             (it.parent as ViewGroup).removeView(it)
+            lifecycleRegistry.currentState = Lifecycle.State.CREATED
             communalContainerView = null
         }
     }
@@ -262,15 +293,7 @@ constructor(
         if (isDown && !hubOccluded) {
             // Only intercept down events if the hub isn't occluded by the bouncer or
             // notification shade.
-            val y = ev.rawY
-            val topSwipe: Boolean = y <= topEdgeSwipeRegionWidth
-            val bottomSwipe = y >= view.height - bottomEdgeSwipeRegionWidth
-
-            if (topSwipe || bottomSwipe) {
-                isTrackingHubGesture = true
-            } else {
-                isTrackingHubTouch = true
-            }
+            isTrackingHubTouch = true
         }
 
         if (isTrackingHubTouch) {
@@ -283,19 +306,6 @@ constructor(
             // gesture
             // may return false from dispatchTouchEvent.
             return true
-        } else if (isTrackingHubGesture) {
-            // Tracking a top or bottom swipe on the hub UI.
-            if (isUp || isCancel) {
-                isTrackingHubGesture = false
-            }
-
-            // If we're dreaming, intercept touches so the hub UI doesn't receive them, but
-            // don't do anything so that the dream's touch handling takes care of opening
-            // the bouncer or shade.
-            //
-            // If we're not dreaming, we don't intercept touches at the top/bottom edge so that
-            // swipes can open the notification shade and bouncer.
-            return isDreaming
         }
 
         return false
@@ -347,4 +357,7 @@ constructor(
             0
         )
     }
+
+    override val lifecycle: Lifecycle
+        get() = lifecycleRegistry
 }
