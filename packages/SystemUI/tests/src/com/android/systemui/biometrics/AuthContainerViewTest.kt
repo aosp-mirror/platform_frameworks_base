@@ -176,7 +176,8 @@ open class AuthContainerViewTest : SysuiTestCase() {
                         testScope.backgroundScope,
                 )
         biometricStatusInteractor =
-                BiometricStatusInteractorImpl(activityTaskManager, biometricStatusRepository)
+                BiometricStatusInteractorImpl(activityTaskManager, biometricStatusRepository,
+                    fingerprintRepository)
         // Set up default logo icon
         whenever(packageManager.getApplicationIcon(OP_PACKAGE_NAME)).thenReturn(defaultLogoIcon)
         context.setMockPackageManager(packageManager)

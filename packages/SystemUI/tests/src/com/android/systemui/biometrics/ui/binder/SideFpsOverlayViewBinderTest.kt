@@ -204,7 +204,8 @@ class SideFpsOverlayViewBinderTest : SysuiTestCase() {
             )
 
         biometricStatusInteractor =
-            BiometricStatusInteractorImpl(activityTaskManager, biometricStatusRepository)
+            BiometricStatusInteractorImpl(activityTaskManager, biometricStatusRepository,
+                fingerprintPropertyRepository)
 
         displayStateInteractor =
             DisplayStateInteractorImpl(
