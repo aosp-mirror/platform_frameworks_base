@@ -23,6 +23,8 @@ import static com.android.window.flags.Flags.bundleClientTransactionFlag;
 
 import static java.util.Objects.requireNonNull;
 
+import android.annotation.AnyThread;
+import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.ActivityThread;
@@ -94,6 +96,7 @@ public class ClientTransactionListenerController {
      * The listener will be invoked with two parameters: {@link Activity#getActivityToken()} and
      * {@link ActivityWindowInfo}.
      */
+    @AnyThread
     public void registerActivityWindowInfoChangedListener(
             @NonNull BiConsumer<IBinder, ActivityWindowInfo> listener) {
         if (!activityWindowInfoFlag()) {
@@ -108,6 +111,7 @@ public class ClientTransactionListenerController {
      * Unregisters the listener that was previously registered via
      * {@link #registerActivityWindowInfoChangedListener(BiConsumer)}
      */
+    @AnyThread
     public void unregisterActivityWindowInfoChangedListener(
             @NonNull BiConsumer<IBinder, ActivityWindowInfo> listener) {
         if (!activityWindowInfoFlag()) {
@@ -122,6 +126,7 @@ public class ClientTransactionListenerController {
      * Called when receives a {@link ClientTransaction} that is updating an activity's
      * {@link ActivityWindowInfo}.
      */
+    @MainThread
     public void onActivityWindowInfoChanged(@NonNull IBinder activityToken,
             @NonNull ActivityWindowInfo activityWindowInfo) {
         if (!activityWindowInfoFlag()) {
@@ -141,17 +146,20 @@ public class ClientTransactionListenerController {
     }
 
     /** Called when starts executing a remote {@link ClientTransaction}. */
+    @MainThread
     public void onClientTransactionStarted() {
         mIsClientTransactionExecuting = true;
     }
 
     /** Called when finishes executing a remote {@link ClientTransaction}. */
+    @MainThread
     public void onClientTransactionFinished() {
         notifyDisplayManagerIfNeeded();
         mIsClientTransactionExecuting = false;
     }
 
     /** Called before updating the Configuration of the given {@code context}. */
+    @MainThread
     public void onContextConfigurationPreChanged(@NonNull Context context) {
         if (!bundleClientTransactionFlag() || ActivityThread.isSystem()) {
             // Not enable for system server.
@@ -166,6 +174,7 @@ public class ClientTransactionListenerController {
     }
 
     /** Called after updating the Configuration of the given {@code context}. */
+    @MainThread
     public void onContextConfigurationPostChanged(@NonNull Context context) {
         if (!bundleClientTransactionFlag() || ActivityThread.isSystem()) {
             // Not enable for system server.
