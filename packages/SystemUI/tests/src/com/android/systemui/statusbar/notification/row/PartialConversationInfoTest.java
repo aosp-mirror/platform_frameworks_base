@@ -41,7 +41,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.text.SpannableString;
@@ -50,10 +49,12 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.test.filters.SmallTest;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Dependency;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 
@@ -65,8 +66,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 @SmallTest

@@ -1,7 +1,7 @@
 package com.android.systemui.qs
 
 import android.content.res.Configuration
-import android.test.suitebuilder.annotation.SmallTest
+import androidx.test.filters.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableResources
 import android.view.ContextThemeWrapper

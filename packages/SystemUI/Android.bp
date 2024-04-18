@@ -363,6 +363,7 @@ android_library {
         "SystemUICustomizationTestUtils",
         "androidx.compose.runtime_runtime",
         "kosmos",
+        "androidx.test.rules",
     ],
     libs: [
         "android.test.runner",

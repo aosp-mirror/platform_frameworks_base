@@ -15,7 +15,7 @@
 package com.android.systemui.shared.animation
 
 import android.graphics.Point
-import android.test.suitebuilder.annotation.SmallTest
+import androidx.test.filters.SmallTest
 import android.testing.AndroidTestingRunner
 import android.view.Display
 import android.view.Surface.ROTATION_0
