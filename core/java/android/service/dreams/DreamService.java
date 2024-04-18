@@ -72,6 +72,7 @@ import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 
 import java.io.FileDescriptor;
@@ -193,13 +194,6 @@ public class DreamService extends Service implements Window.Callback {
             "android.service.dreams.DreamService";
 
     /**
-     * The name of the extra where the dream overlay component is stored.
-     * @hide
-     */
-    public static final String EXTRA_DREAM_OVERLAY_COMPONENT =
-            "android.service.dream.DreamService.dream_overlay_component";
-
-    /**
      * Name under which a Dream publishes information about itself.
      * This meta-data must reference an XML resource containing
      * a <code>&lt;{@link android.R.styleable#Dream dream}&gt;</code>
@@ -223,6 +217,7 @@ public class DreamService extends Service implements Window.Callback {
      * The default value for dream category
      * @hide
      */
+    @VisibleForTesting
     public static final int DREAM_CATEGORY_DEFAULT = 0;
 
     /**
@@ -246,8 +241,14 @@ public class DreamService extends Service implements Window.Callback {
     @Retention(RetentionPolicy.SOURCE)
     @interface DreamCategory {}
 
+    /**
+     * The name of the extra where the dream overlay component is stored.
+     */
+    static final String EXTRA_DREAM_OVERLAY_COMPONENT =
+            "android.service.dream.DreamService.dream_overlay_component";
+
     private final IDreamManager mDreamManager;
-    private final Handler mHandler = new Handler(Looper.getMainLooper());
+    private final Handler mHandler;
     private IBinder mDreamToken;
     private Window mWindow;
     private Activity mActivity;
@@ -280,9 +281,126 @@ public class DreamService extends Service implements Window.Callback {
 
     private Integer mTrackingConfirmKey = null;
 
+    private final Injector mInjector;
+
+    /**
+     * A helper object to inject dependencies into {@link DreamService}.
+     * @hide
+     */
+    @VisibleForTesting
+    public interface Injector {
+        /** Initializes the Injector */
+        void init(Context context);
+
+        /** Creates and returns the dream overlay connection */
+        DreamOverlayConnectionHandler createOverlayConnection(ComponentName overlayComponent);
+
+        /** Returns the {@link DreamActivity} component */
+        ComponentName getDreamActivityComponent();
+
+        /** Returns the dream component */
+        ComponentName getDreamComponent();
+
+        /** Returns the dream package name */
+        String getDreamPackageName();
+
+        /** Returns the {@link DreamManager} */
+        IDreamManager getDreamManager();
+
+        /** Returns the associated service info */
+        ServiceInfo getServiceInfo();
+
+        /** Returns the handler to be used for any posted operation */
+        Handler getHandler();
+
+        /** Returns the package manager */
+        PackageManager getPackageManager();
+
+        /** Returns the resources */
+        Resources getResources();
+    }
+
+    private static final class DefaultInjector implements Injector {
+        private Context mContext;
+        private Class<?> mClassName;
+
+        public void init(Context context) {
+            mContext = context;
+            mClassName = context.getClass();
+        }
+
+        @Override
+        public DreamOverlayConnectionHandler createOverlayConnection(
+                ComponentName overlayComponent) {
+            final Resources resources = mContext.getResources();
+
+            return new DreamOverlayConnectionHandler(
+                    /* context= */ mContext,
+                    Looper.getMainLooper(),
+                    new Intent().setComponent(overlayComponent),
+                    resources.getInteger(R.integer.config_minDreamOverlayDurationMs),
+                    resources.getInteger(R.integer.config_dreamOverlayMaxReconnectAttempts),
+                    resources.getInteger(R.integer.config_dreamOverlayReconnectTimeoutMs));
+        }
+
+        @Override
+        public ComponentName getDreamActivityComponent() {
+            return new ComponentName(mContext, DreamActivity.class);
+        }
+
+        @Override
+        public ComponentName getDreamComponent() {
+            return new ComponentName(mContext, mClassName);
+        }
+
+        @Override
+        public String getDreamPackageName() {
+            return mContext.getApplicationContext().getPackageName();
+        }
+
+        @Override
+        public IDreamManager getDreamManager() {
+            return IDreamManager.Stub.asInterface(ServiceManager.getService(DREAM_SERVICE));
+        }
+
+        @Override
+        public ServiceInfo getServiceInfo() {
+            return fetchServiceInfo(mContext, getDreamComponent());
+        }
+
+        @Override
+        public Handler getHandler() {
+            return new Handler(Looper.getMainLooper());
+        }
+
+        @Override
+        public PackageManager getPackageManager() {
+            return mContext.getPackageManager();
+        }
+
+        @Override
+        public Resources getResources() {
+            return mContext.getResources();
+        }
+
+    }
 
     public DreamService() {
-        mDreamManager = IDreamManager.Stub.asInterface(ServiceManager.getService(DREAM_SERVICE));
+        this(new DefaultInjector());
+    }
+
+    /**
+     * Constructor for test purposes.
+     *
+     * @param injector used for providing dependencies
+     * @hide
+     */
+    @VisibleForTesting
+    public DreamService(Injector injector) {
+        mInjector = injector;
+        mInjector.init(this);
+        mDreamManager = mInjector.getDreamManager();
+        mHandler = mInjector.getHandler();
     }
 
     /**
@@ -990,9 +1108,9 @@ public class DreamService extends Service implements Window.Callback {
     public void onCreate() {
         if (mDebug) Slog.v(mTag, "onCreate()");
 
-        mDreamComponent = new ComponentName(this, getClass());
-        mShouldShowComplications = fetchShouldShowComplications(getPackageManager(),
-                fetchServiceInfo(this /*context*/, mDreamComponent));
+        mDreamComponent = mInjector.getDreamComponent();
+        mShouldShowComplications = fetchShouldShowComplications(mInjector.getPackageManager(),
+                mInjector.getServiceInfo());
         mOverlayCallback = new IDreamOverlayCallback.Stub() {
             @Override
             public void onExitRequested() {
@@ -1059,16 +1177,7 @@ public class DreamService extends Service implements Window.Callback {
 
         // Connect to the overlay service if present.
         if (!mWindowless && overlayComponent != null) {
-            final Resources resources = getResources();
-            final Intent overlayIntent = new Intent().setComponent(overlayComponent);
-
-            mOverlayConnection = new DreamOverlayConnectionHandler(
-                    /* context= */ this,
-                    Looper.getMainLooper(),
-                    overlayIntent,
-                    resources.getInteger(R.integer.config_minDreamOverlayDurationMs),
-                    resources.getInteger(R.integer.config_dreamOverlayMaxReconnectAttempts),
-                    resources.getInteger(R.integer.config_dreamOverlayReconnectTimeoutMs));
+            mOverlayConnection = mInjector.createOverlayConnection(overlayComponent);
 
             if (!mOverlayConnection.bind()) {
                 // Binding failed.
@@ -1372,14 +1481,16 @@ public class DreamService extends Service implements Window.Callback {
         // for the DreamActivity to report onActivityCreated via
         // DreamServiceWrapper.onActivityCreated.
         if (!mWindowless) {
-            Intent i = new Intent(this, DreamActivity.class);
-            i.setPackage(getApplicationContext().getPackageName());
+            Intent i = new Intent();
+            i.setComponent(mInjector.getDreamActivityComponent());
+            i.setPackage(mInjector.getDreamPackageName());
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_USER_ACTION);
-            i.putExtra(DreamActivity.EXTRA_CALLBACK, new DreamActivityCallbacks(mDreamToken));
-            final ServiceInfo serviceInfo = fetchServiceInfo(this,
-                    new ComponentName(this, getClass()));
-            i.putExtra(DreamActivity.EXTRA_DREAM_TITLE,
-                    fetchDreamLabel(this, serviceInfo, isPreviewMode));
+            DreamActivity.setCallback(i, new DreamActivityCallbacks(mDreamToken));
+            final ServiceInfo serviceInfo = mInjector.getServiceInfo();
+            final CharSequence title = fetchDreamLabel(mInjector.getPackageManager(),
+                    mInjector.getResources(), serviceInfo, isPreviewMode);
+
+            DreamActivity.setTitle(i, title);
 
             try {
                 mDreamManager.startDreamActivity(i);
@@ -1515,19 +1626,20 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     @Nullable
-    private static CharSequence fetchDreamLabel(Context context,
+    private static CharSequence fetchDreamLabel(
+            PackageManager pm,
+            Resources resources,
             @Nullable ServiceInfo serviceInfo,
             boolean isPreviewMode) {
         if (serviceInfo == null) {
             return null;
         }
-        final PackageManager pm = context.getPackageManager();
         final CharSequence dreamLabel = serviceInfo.loadLabel(pm);
         if (!isPreviewMode || dreamLabel == null) {
             return dreamLabel;
         }
         // When in preview mode, return a special label indicating the dream is in preview.
-        return context.getResources().getString(R.string.dream_preview_title, dreamLabel);
+        return resources.getString(R.string.dream_preview_title, dreamLabel);
     }
 
     @Nullable
@@ -1609,14 +1721,16 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     /** @hide */
-    final class DreamActivityCallbacks extends Binder {
+    @VisibleForTesting
+    public final class DreamActivityCallbacks extends Binder {
         private final IBinder mActivityDreamToken;
 
         DreamActivityCallbacks(IBinder token) {
             mActivityDreamToken = token;
         }
 
-        void onActivityCreated(DreamActivity activity) {
+        /** Callback when the {@link DreamActivity} has been created */
+        public void onActivityCreated(DreamActivity activity) {
             if (mActivityDreamToken != mDreamToken || mFinished) {
                 Slog.d(TAG, "DreamActivity was created after the dream was finished or "
                         + "a new dream started, finishing DreamActivity");
@@ -1638,8 +1752,8 @@ public class DreamService extends Service implements Window.Callback {
             onWindowCreated(activity.getWindow());
         }
 
-        // If DreamActivity is destroyed, wake up from Dream.
-        void onActivityDestroyed() {
+        /** Callback when the {@link DreamActivity} has been destroyed */
+        public void onActivityDestroyed() {
             mActivity = null;
             mWindow = null;
             detach();
@@ -1651,6 +1765,7 @@ public class DreamService extends Service implements Window.Callback {
      *
      * @hide
      */
+    @VisibleForTesting
     @TestApi
     public static final class DreamMetadata {
         @Nullable
@@ -1666,7 +1781,11 @@ public class DreamService extends Service implements Window.Callback {
         @FlaggedApi(Flags.FLAG_HOME_PANEL_DREAM)
         public final int dreamCategory;
 
-        DreamMetadata(
+        /**
+         * @hide
+         */
+        @VisibleForTesting
+        public DreamMetadata(
                 ComponentName settingsActivity,
                 Drawable previewImage,
                 boolean showComplications,
@@ -1680,5 +1799,15 @@ public class DreamService extends Service implements Window.Callback {
                 this.dreamCategory = DREAM_CATEGORY_DEFAULT;
             }
         }
+    }
+
+    /**
+     * Sets the dream overlay component to be used by the dream.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static void setDreamOverlayComponent(Intent intent, ComponentName component) {
+        intent.putExtra(DreamService.EXTRA_DREAM_OVERLAY_COMPONENT, component);
     }
 }

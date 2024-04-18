@@ -19,17 +19,22 @@ package com.android.server.dreams;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.os.Looper;
 import android.service.dreams.DreamService;
+import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -37,6 +42,18 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class DreamServiceTest {
     private static final String TEST_PACKAGE_NAME = "com.android.frameworks.dreamservicetests";
+
+    private TestableLooper mTestableLooper;
+
+    @Before
+    public void setup() throws Exception {
+        mTestableLooper = new TestableLooper(Looper.getMainLooper());
+    }
+
+    @After
+    public void tearDown() {
+        mTestableLooper.destroy();
+    }
 
     @Test
     public void testMetadataParsing() throws PackageManager.NameNotFoundException {
@@ -69,5 +86,61 @@ public class DreamServiceTest {
                 new ComponentName(TEST_PACKAGE_NAME, dreamClassName),
                 PackageManager.ComponentInfoFlags.of(PackageManager.GET_META_DATA));
         return DreamService.getDreamMetadata(context, si);
+    }
+
+    /**
+     * Verifies progressing a {@link DreamService} to creation
+     */
+    @Test
+    public void testCreate() throws Exception {
+        final TestDreamEnvironment environment = new TestDreamEnvironment.Builder(mTestableLooper)
+                .setShouldShowComplications(true)
+                .build();
+        assertTrue(environment.advance(TestDreamEnvironment.DREAM_STATE_CREATE));
+    }
+
+    /**
+     * Verifies progressing a {@link DreamService}  to binding
+     */
+    @Test
+    public void testBind() throws Exception {
+        final TestDreamEnvironment environment = new TestDreamEnvironment.Builder(mTestableLooper)
+                .setShouldShowComplications(true)
+                .build();
+        assertTrue(environment.advance(TestDreamEnvironment.DREAM_STATE_BIND));
+    }
+
+    /**
+     * Verifies progressing a {@link DreamService} through
+     * {@link android.service.dreams.DreamActivity} creation.
+     */
+    @Test
+    public void testDreamActivityCreate() throws Exception {
+        final TestDreamEnvironment environment = new TestDreamEnvironment.Builder(mTestableLooper)
+                .setShouldShowComplications(true)
+                .build();
+        assertTrue(environment.advance(TestDreamEnvironment.DREAM_STATE_DREAM_ACTIVITY_CREATED));
+    }
+
+    /**
+     * Verifies progressing a {@link DreamService} through starting.
+     */
+    @Test
+    public void testStart() throws Exception {
+        final TestDreamEnvironment environment = new TestDreamEnvironment.Builder(mTestableLooper)
+                .setShouldShowComplications(true)
+                .build();
+        assertTrue(environment.advance(TestDreamEnvironment.DREAM_STATE_STARTED));
+    }
+
+    /**
+     * Verifies progressing a {@link DreamService} through waking.
+     */
+    @Test
+    public void testWake() throws Exception {
+        final TestDreamEnvironment environment = new TestDreamEnvironment.Builder(mTestableLooper)
+                .setShouldShowComplications(true)
+                .build();
+        assertTrue(environment.advance(TestDreamEnvironment.DREAM_STATE_WOKEN));
     }
 }

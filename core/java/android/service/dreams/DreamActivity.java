@@ -18,8 +18,11 @@ package android.service.dreams;
 
 import android.annotation.Nullable;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * The Activity used by the {@link DreamService} to draw screensaver content
@@ -41,6 +44,7 @@ import android.text.TextUtils;
  *
  * @hide
  */
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public class DreamActivity extends Activity {
     static final String EXTRA_CALLBACK = "binder";
     static final String EXTRA_DREAM_TITLE = "title";
@@ -53,19 +57,55 @@ public class DreamActivity extends Activity {
     public void onCreate(@Nullable Bundle bundle) {
         super.onCreate(bundle);
 
-        final String title = getIntent().getStringExtra(EXTRA_DREAM_TITLE);
+        final String title = getTitle(getIntent());
         if (!TextUtils.isEmpty(title)) {
             setTitle(title);
         }
 
-        final Object callback = getIntent().getExtras().getBinder(EXTRA_CALLBACK);
-        if (callback instanceof DreamService.DreamActivityCallbacks) {
-            mCallback = (DreamService.DreamActivityCallbacks) callback;
-            mCallback.onActivityCreated(this);
-        } else {
-            mCallback = null;
+        mCallback = getCallback(getIntent());
+
+        if (mCallback == null) {
             finishAndRemoveTask();
+            return;
         }
+
+        mCallback.onActivityCreated(this);
+    }
+
+    /**
+     * Sets the title of the dream in the intent for starting the {@link DreamActivity}.
+     */
+    public static void setTitle(Intent intent, CharSequence title) {
+        if (TextUtils.isEmpty(title)) {
+            return;
+        }
+
+        intent.putExtra(DreamActivity.EXTRA_DREAM_TITLE, title);
+    }
+
+    /**
+     * Gets the title of the dream from the intent used to start the {@link DreamActivity}.
+     */
+    public static String getTitle(Intent intent) {
+        return intent.getStringExtra(EXTRA_DREAM_TITLE);
+    }
+
+    /**
+     * Sets the dream callback in the intent for starting the {@link DreamActivity}.
+     */
+    public static void setCallback(Intent intent, DreamService.DreamActivityCallbacks callback) {
+        intent.putExtra(DreamActivity.EXTRA_CALLBACK, callback);
+    }
+
+    /**
+     * Retrieves the dream callback from the intent used to start the {@link DreamActivity}.
+     */
+    public static DreamService.DreamActivityCallbacks getCallback(Intent intent) {
+        final Object binder = intent.getExtras().getBinder(EXTRA_CALLBACK);
+
+        return (binder instanceof DreamService.DreamActivityCallbacks)
+                ? (DreamService.DreamActivityCallbacks) binder
+                : null;
     }
 
     @Override
