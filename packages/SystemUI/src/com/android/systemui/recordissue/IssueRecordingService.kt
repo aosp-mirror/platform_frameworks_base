@@ -47,6 +47,7 @@ import java.util.concurrent.Executor
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import javax.inject.Inject
+import kotlin.jvm.optionals.getOrElse
 
 class IssueRecordingService
 @Inject
@@ -140,15 +141,25 @@ constructor(
     }
 
     private fun shareRecording(screenRecording: Uri?) {
-        val sharableUri: Uri =
-            zipAndPackageRecordings(
-                TraceUtils.traceDump(contentResolver, TRACE_FILE_NAME).get(),
-                screenRecording
-            )
-                ?: return
+        val traces =
+            TraceUtils.traceDump(contentResolver, TRACE_FILE_NAME).getOrElse {
+                Log.v(
+                    TAG,
+                    "Traces were not present. This can happen if users double" +
+                        "click on share notification. Traces are cleaned up after sharing" +
+                        "so they won't be present for the 2nd share attempt."
+                )
+                return
+            }
+        val perfetto = FileProvider.getUriForFile(this, AUTHORITY, traces.first())
+        val urisToShare = mutableListOf(perfetto)
+        traces.removeFirst()
+
+        getZipWinscopeFileUri(traces)?.let { urisToShare.add(it) }
+        screenRecording?.let { urisToShare.add(it) }
+
         val sendIntent =
-            FileSender.buildSendIntent(this, listOf(sharableUri))
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            FileSender.buildSendIntent(this, urisToShare).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
         // TODO: Debug why the notification shade isn't closing upon starting the BetterBug activity
         mKeyguardDismissUtil.executeWhenUnlocked(
@@ -161,7 +172,7 @@ constructor(
         )
     }
 
-    private fun zipAndPackageRecordings(traceFiles: List<File>, screenRecording: Uri?): Uri? {
+    private fun getZipWinscopeFileUri(traceFiles: List<File>): Uri? {
         try {
             externalCacheDir?.mkdirs()
             val outZip: File = File.createTempFile(TEMP_FILE_PREFIX, ZIP_SUFFIX, externalCacheDir)
@@ -170,13 +181,6 @@ constructor(
                     os.putNextEntry(ZipEntry(file.name))
                     Files.copy(file.toPath(), os)
                     os.closeEntry()
-                }
-                if (screenRecording != null) {
-                    contentResolver.openInputStream(screenRecording)?.use {
-                        os.putNextEntry(ZipEntry(SCREEN_RECORDING_ZIP_LABEL))
-                        it.transferTo(os)
-                        os.closeEntry()
-                    }
                 }
             }
             return FileProvider.getUriForFile(this, AUTHORITY, outZip)
@@ -192,8 +196,7 @@ constructor(
         private const val EXTRA_SCREEN_RECORD = "extra_screenRecord"
         private const val EXTRA_WINSCOPE_TRACING = "extra_winscopeTracing"
         private const val ZIP_SUFFIX = ".zip"
-        private const val TEMP_FILE_PREFIX = "issue_recording"
-        private const val SCREEN_RECORDING_ZIP_LABEL = "screen-recording.mp4"
+        private const val TEMP_FILE_PREFIX = "winscope_recordings"
 
         private val DEFAULT_TRACE_TAGS = listOf<String>()
         private const val DEFAULT_BUFFER_SIZE = 16384
