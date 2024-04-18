@@ -202,11 +202,11 @@ class LargeTopAppBarNestedScrollConnectionTest(testCase: TestCase) {
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun data(): List<TestCase> =
-            listOf(
-                TestCase(NestedScrollSource.Drag),
-                TestCase(NestedScrollSource.Fling),
-                TestCase(NestedScrollSource.Wheel),
+        fun data(): List<TestCase> {
+            return listOf(
+                TestCase(NestedScrollSource.UserInput),
+                TestCase(NestedScrollSource.SideEffect),
             )
+        }
     }
 }
