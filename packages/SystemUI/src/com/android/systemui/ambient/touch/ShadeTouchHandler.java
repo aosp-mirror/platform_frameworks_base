@@ -23,7 +23,8 @@ import android.graphics.Region;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 
-import com.android.systemui.shade.ShadeViewController;
+import androidx.annotation.NonNull;
+
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import java.util.Optional;
@@ -37,29 +38,34 @@ import javax.inject.Named;
  */
 public class ShadeTouchHandler implements TouchHandler {
     private final Optional<CentralSurfaces> mSurfaces;
-    private final ShadeViewController mShadeViewController;
     private final int mInitiationHeight;
+
+    /**
+     * Tracks whether or not we are capturing a given touch. Will be null before and after a touch.
+     */
+    private Boolean mCapture;
 
     @Inject
     ShadeTouchHandler(Optional<CentralSurfaces> centralSurfaces,
-            ShadeViewController shadeViewController,
             @Named(NOTIFICATION_SHADE_GESTURE_INITIATION_HEIGHT) int initiationHeight) {
         mSurfaces = centralSurfaces;
-        mShadeViewController = shadeViewController;
         mInitiationHeight = initiationHeight;
     }
 
     @Override
     public void onSessionStart(TouchSession session) {
-        if (mSurfaces.map(CentralSurfaces::isBouncerShowing).orElse(false)) {
+        if (mSurfaces.isEmpty()) {
             session.pop();
             return;
         }
 
-        session.registerInputListener(ev -> {
-            mShadeViewController.handleExternalTouch((MotionEvent) ev);
+        session.registerCallback(() -> mCapture = null);
 
+        session.registerInputListener(ev -> {
             if (ev instanceof MotionEvent) {
+                if (mCapture != null && mCapture) {
+                    mSurfaces.get().handleExternalShadeWindowTouch((MotionEvent) ev);
+                }
                 if (((MotionEvent) ev).getAction() == MotionEvent.ACTION_UP) {
                     session.pop();
                 }
@@ -68,15 +74,25 @@ public class ShadeTouchHandler implements TouchHandler {
 
         session.registerGestureListener(new GestureDetector.SimpleOnGestureListener() {
             @Override
-            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
+            public boolean onScroll(MotionEvent e1, @NonNull MotionEvent e2, float distanceX,
                     float distanceY) {
-                return true;
+                if (mCapture == null) {
+                    // Only capture swipes that are going downwards.
+                    mCapture = Math.abs(distanceY) > Math.abs(distanceX) && distanceY < 0;
+                    if (mCapture) {
+                        // Send the initial touches over, as the input listener has already
+                        // processed these touches.
+                        mSurfaces.get().handleExternalShadeWindowTouch(e1);
+                        mSurfaces.get().handleExternalShadeWindowTouch(e2);
+                    }
+                }
+                return mCapture;
             }
 
             @Override
-            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+            public boolean onFling(MotionEvent e1, @NonNull MotionEvent e2, float velocityX,
                     float velocityY) {
-                return true;
+                return mCapture;
             }
         });
     }
