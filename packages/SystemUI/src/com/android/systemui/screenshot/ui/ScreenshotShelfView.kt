@@ -40,6 +40,8 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
 
     override fun onFinishInflate() {
         super.onFinishInflate()
+        // Get focus so that the key events go to the layout.
+        isFocusableInTouchMode = true
         screenshotPreview = requireViewById(R.id.screenshot_preview)
         actionsContainerBackground = requireViewById(R.id.actions_container_background)
         dismissButton = requireViewById(R.id.screenshot_dismiss_button)
