@@ -1141,7 +1141,7 @@ object Dimensions {
     val CardHeightHalf = 282.dp
     val CardHeightThird = 177.33.dp
     val CardOutlineWidth = 3.dp
-    val GridTopSpacing = 72.dp
+    val GridTopSpacing = 64.dp
     val GridHeight = CardHeightFull + GridTopSpacing
     val Spacing = 16.dp
 
