@@ -97,7 +97,7 @@ filegroup {
         // AIDL sources from external directories
         ":android.frameworks.location.altitude-V2-java-source",
         ":android.hardware.biometrics.common-V4-java-source",
-        ":android.hardware.biometrics.fingerprint-V3-java-source",
+        ":android.hardware.biometrics.fingerprint-V5-java-source",
         ":android.hardware.biometrics.face-V4-java-source",
         ":android.hardware.gnss-V2-java-source",
         ":android.hardware.graphics.common-V3-java-source",
