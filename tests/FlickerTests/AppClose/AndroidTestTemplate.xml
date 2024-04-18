@@ -8,6 +8,8 @@
     <option name="isolated-storage" value="false"/>
 
     <target_preparer class="com.android.tradefed.targetprep.DeviceSetup">
+        <!-- disable DeprecatedTargetSdk warning -->
+        <option name="run-command" value="setprop debug.wm.disable_deprecated_target_sdk_dialog 1"/>
         <!-- keeps the screen on during tests -->
         <option name="screen-always-on" value="on"/>
         <!-- prevents the phone from restarting -->
