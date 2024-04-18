@@ -19,6 +19,7 @@ package {
     // to get the below license kinds:
     //   SPDX-license-identifier-Apache-2.0
     default_applicable_licenses: ["frameworks_base_libs_androidfw_license"],
+    default_team: "trendy_team_android_resources",
 }
 
 cc_fuzz {
@@ -31,7 +32,7 @@ cc_fuzz {
     static_libs: ["libgmock"],
     target: {
         android: {
-            shared_libs:[
+            shared_libs: [
                 "libandroidfw",
                 "libbase",
                 "libcutils",
@@ -51,5 +52,16 @@ cc_fuzz {
                 "libz",
             ],
         },
+    },
+    fuzz_config: {
+        cc: [
+            "android-resources@google.com",
+        ],
+        componentid: 568761,
+        description: "The fuzzer targets the APIs of libandroidfw",
+        vector: "local_no_privileges_required",
+        service_privilege: "privileged",
+        users: "multi_user",
+        fuzzed_code_usage: "shipped",
     },
 }
