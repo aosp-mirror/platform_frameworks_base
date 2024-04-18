@@ -79,6 +79,13 @@ flag {
 }
 
 flag {
+    name: "subscriptions_listener_thread"
+    namespace: "location"
+    description: "Flag for running onSubscriptionsChangeListener on FgThread"
+    bug: "332451908"
+}
+
+flag {
     name: "gnss_configuration_from_resource"
     namespace: "location"
     description: "Flag for GNSS configuration from resource"
