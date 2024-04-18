@@ -65,6 +65,7 @@ constructor(
     ) {
 
     override fun start() {
+        listenForDreamingToAlternateBouncer()
         listenForDreamingToOccluded()
         listenForDreamingToGoneWhenDismissable()
         listenForDreamingToGoneFromBiometricUnlock()
@@ -73,6 +74,16 @@ constructor(
         listenForTransitionToCamera(scope, keyguardInteractor)
         listenForDreamingToGlanceableHub()
         listenForDreamingToPrimaryBouncer()
+    }
+
+    private fun listenForDreamingToAlternateBouncer() {
+        scope.launch("$TAG#listenForDreamingToAlternateBouncer") {
+            keyguardInteractor.alternateBouncerShowing
+                .filterRelevantKeyguardStateAnd { isAlternateBouncerShowing ->
+                    isAlternateBouncerShowing
+                }
+                .collect { startTransitionTo(KeyguardState.ALTERNATE_BOUNCER) }
+        }
     }
 
     private fun listenForDreamingToGlanceableHub() {
