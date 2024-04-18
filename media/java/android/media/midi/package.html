@@ -511,6 +511,11 @@ import android.media.midi.MidiDeviceStatus;
 import android.media.midi.MidiReceiver;
 import android.media.midi.MidiUmpDeviceService;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class MidiEchoDeviceService extends MidiUmpDeviceService {
     private static final String TAG = "MidiEchoDeviceService";
     // Other apps will write to this port.
