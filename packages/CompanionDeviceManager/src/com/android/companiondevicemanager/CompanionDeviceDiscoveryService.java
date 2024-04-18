@@ -55,7 +55,7 @@ import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.SystemProperties;
 import android.text.TextUtils;
-import android.util.Log;
+import android.util.Slog;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -71,7 +71,6 @@ import java.util.Objects;
  */
 @SuppressLint("LongLogTag")
 public class CompanionDeviceDiscoveryService extends Service {
-    private static final boolean DEBUG = false;
     private static final String TAG = "CDM_CompanionDeviceDiscoveryService";
 
     private static final String SYS_PROP_DEBUG_TIMEOUT = "debug.cdm.discovery_timeout";
@@ -147,7 +146,6 @@ public class CompanionDeviceDiscoveryService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        if (DEBUG) Log.d(TAG, "onCreate()");
 
         mBtManager = getSystemService(BluetoothManager.class);
         mBtAdapter = mBtManager.getAdapter();
@@ -158,7 +156,6 @@ public class CompanionDeviceDiscoveryService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         final String action = intent.getAction();
-        if (DEBUG) Log.d(TAG, "onStartCommand() action=" + action);
 
         switch (action) {
             case ACTION_START_DISCOVERY:
@@ -174,15 +171,9 @@ public class CompanionDeviceDiscoveryService extends Service {
         return START_NOT_STICKY;
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (DEBUG) Log.d(TAG, "onDestroy()");
-    }
-
     @MainThread
     private void startDiscovery(@NonNull AssociationRequest request) {
-        if (DEBUG) Log.i(TAG, "startDiscovery() request=" + request);
+        Slog.d(TAG, "startDiscovery() request=" + request);
         requireNonNull(request);
 
         if (mDiscoveryStarted) throw new RuntimeException("Discovery in progress.");
@@ -218,7 +209,7 @@ public class CompanionDeviceDiscoveryService extends Service {
 
     @MainThread
     private void stopDiscoveryAndFinish(boolean timeout) {
-        if (DEBUG) Log.i(TAG, "stopDiscovery()");
+        Slog.d(TAG, "stopDiscoveryAndFinish(" + timeout + ")");
 
         if (!mDiscoveryStarted) {
             stopSelf();
@@ -298,10 +289,9 @@ public class CompanionDeviceDiscoveryService extends Service {
     private BluetoothBroadcastReceiver startBtScanningIfNeeded(
             List<BluetoothDeviceFilter> filters, boolean force) {
         if (isEmpty(filters) && !force) return null;
-        if (DEBUG) Log.d(TAG, "registerReceiver(BluetoothDevice.ACTION_FOUND)");
+        Slog.d(TAG, "registerReceiver(BluetoothDevice.ACTION_FOUND)");
 
         final BluetoothBroadcastReceiver receiver = new BluetoothBroadcastReceiver(filters);
-
         final IntentFilter intentFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         registerReceiver(receiver, intentFilter);
 
@@ -313,7 +303,7 @@ public class CompanionDeviceDiscoveryService extends Service {
     private WifiBroadcastReceiver startWifiScanningIfNeeded(
             List<WifiDeviceFilter> filters, boolean force) {
         if (isEmpty(filters) && !force) return null;
-        if (DEBUG) Log.d(TAG, "registerReceiver(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)");
+        Slog.d(TAG, "registerReceiver(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)");
 
         final WifiBroadcastReceiver receiver = new WifiBroadcastReceiver(filters);
 
@@ -329,10 +319,10 @@ public class CompanionDeviceDiscoveryService extends Service {
     private ScanCallback startBleScanningIfNeeded(
             List<BluetoothLeDeviceFilter> filters, boolean force) {
         if (isEmpty(filters) && !force) return null;
-        if (DEBUG) Log.d(TAG, "BLEScanner.startScan");
+        Slog.d(TAG, "BLEScanner.startScan");
 
         if (mBleScanner == null) {
-            Log.w(TAG, "BLE Scanner is not available.");
+            Slog.w(TAG, "BLE Scanner is not available.");
             return null;
         }
 
@@ -350,18 +340,13 @@ public class CompanionDeviceDiscoveryService extends Service {
 
     private void onDeviceFound(@NonNull DeviceFilterPair<?> device) {
         runOnMainThread(() -> {
-            if (DEBUG) Log.v(TAG, "onDeviceFound() " + device);
             if (mDiscoveryStopped) return;
             if (mDevicesFound.contains(device)) {
                 // TODO: update the device instead of ignoring (new found device may contain
                 //  additional/updated info, eg. name of the device).
-                if (DEBUG) {
-                    Log.d(TAG, "onDeviceFound() " + device.toShortString()
-                            + " - Already seen: ignore.");
-                }
                 return;
             }
-            Log.i(TAG, "onDeviceFound() " + device.toShortString() + " - New device.");
+            Slog.i(TAG, "onDeviceFound() " + device.toShortString() + " - New device.");
 
             // First: make change.
             mDevicesFound.add(device);
@@ -376,7 +361,7 @@ public class CompanionDeviceDiscoveryService extends Service {
 
     private void onDeviceLost(@NonNull DeviceFilterPair<?> device) {
         runOnMainThread(() -> {
-            Log.i(TAG, "onDeviceLost(), device=" + device.toShortString());
+            Slog.i(TAG, "onDeviceLost(), device=" + device.toShortString());
 
             // First: make change.
             mDevicesFound.remove(device);
@@ -395,13 +380,10 @@ public class CompanionDeviceDiscoveryService extends Service {
             timeout = max(timeout, TIMEOUT_MIN); // should be >= 1 sec (TIMEOUT_MIN)
         }
 
-        if (DEBUG) Log.d(TAG, "scheduleTimeout(), timeout=" + timeout);
-
         Handler.getMain().postDelayed(mTimeoutRunnable, timeout);
     }
 
     private void timeout() {
-        if (DEBUG) Log.i(TAG, "timeout()");
         stopDiscoveryAndFinish(/* timeout */ true);
     }
 
@@ -419,10 +401,6 @@ public class CompanionDeviceDiscoveryService extends Service {
 
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
-            if (DEBUG) {
-                Log.v(TAG, "BLE.onScanResult() callback=" + callbackType + ", result=" + result);
-            }
-
             final DeviceFilterPair<ScanResult> match = findMatch(result, mFilters);
             if (match == null) return;
 
@@ -446,8 +424,6 @@ public class CompanionDeviceDiscoveryService extends Service {
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-
-            if (DEBUG) Log.v(TAG, action + ", device=" + device);
 
             if (action == null) return;
 
@@ -477,10 +453,6 @@ public class CompanionDeviceDiscoveryService extends Service {
             }
 
             final List<android.net.wifi.ScanResult> scanResults = mWifiManager.getScanResults();
-            if (DEBUG) {
-                Log.v(TAG, "WifiManager.SCAN_RESULTS_AVAILABLE_ACTION, results:\n  "
-                        + TextUtils.join("\n  ", scanResults));
-            }
 
             for (int i = 0; i < scanResults.size(); i++) {
                 final android.net.wifi.ScanResult scanResult = scanResults.get(i);
@@ -505,9 +477,7 @@ public class CompanionDeviceDiscoveryService extends Service {
 
         DeviceFilterPair<T> result = matchingFilter != null
                 ? new DeviceFilterPair<>(dev, matchingFilter) : null;
-        if (DEBUG) {
-            Log.v(TAG, "findMatch(dev=" + dev + ", filters=" + filters + ") -> " + result);
-        }
+
         return result;
     }
 }
