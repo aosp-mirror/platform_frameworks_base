@@ -68,14 +68,14 @@ import org.mockito.Mockito.verify
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-class WifiRepositoryViaTrackerLibTest : SysuiTestCase() {
+class WifiRepositoryImplTest : SysuiTestCase() {
 
     // Using lazy means that the class will only be constructed once it's fetched. Because the
     // repository internally sets some values on construction, we need to set up some test
     // parameters (like feature flags) *before* construction. Using lazy allows us to do that setup
     // inside each test case without needing to manually recreate the repository.
-    private val underTest: WifiRepositoryViaTrackerLib by lazy {
-        WifiRepositoryViaTrackerLib(
+    private val underTest: WifiRepositoryImpl by lazy {
+        WifiRepositoryImpl(
             featureFlags,
             testScope.backgroundScope,
             executor,
