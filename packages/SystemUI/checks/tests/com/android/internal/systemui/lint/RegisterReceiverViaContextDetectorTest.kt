@@ -21,7 +21,6 @@ import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Issue
 import org.junit.Test
 
-@Suppress("UnstableApiUsage")
 class RegisterReceiverViaContextDetectorTest : SystemUILintDetectorTest() {
 
     override fun getDetector(): Detector = RegisterReceiverViaContextDetector()
@@ -35,9 +34,8 @@ class RegisterReceiverViaContextDetectorTest : SystemUILintDetectorTest() {
                 TestFiles.java(
                         """
                     package test.pkg;
-                    import android.content.BroadcastReceiver;
+
                     import android.content.Context;
-                    import android.content.IntentFilter;
 
                     public class TestClass {
                         public void bind(Context context, BroadcastReceiver receiver,
@@ -48,13 +46,13 @@ class RegisterReceiverViaContextDetectorTest : SystemUILintDetectorTest() {
                 """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(RegisterReceiverViaContextDetector.ISSUE)
             .run()
             .expect(
                 """
-                src/test/pkg/TestClass.java:9: Warning: Register BroadcastReceiver using BroadcastDispatcher instead of Context [RegisterReceiverViaContext]
+                src/test/pkg/TestClass.java:8: Warning: Register BroadcastReceiver using BroadcastDispatcher instead of Context [RegisterReceiverViaContext]
                       context.registerReceiver(receiver, filter, 0);
                               ~~~~~~~~~~~~~~~~
                 0 errors, 1 warnings
@@ -69,9 +67,8 @@ class RegisterReceiverViaContextDetectorTest : SystemUILintDetectorTest() {
                 TestFiles.java(
                         """
                     package test.pkg;
-                    import android.content.BroadcastReceiver;
+
                     import android.content.Context;
-                    import android.content.IntentFilter;
 
                     @SuppressWarnings("RegisterReceiverViaContext")
                     public class TestClass {
@@ -83,7 +80,7 @@ class RegisterReceiverViaContextDetectorTest : SystemUILintDetectorTest() {
                 """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(RegisterReceiverViaContextDetector.ISSUE)
             .run()
@@ -97,11 +94,8 @@ class RegisterReceiverViaContextDetectorTest : SystemUILintDetectorTest() {
                 TestFiles.java(
                         """
                     package test.pkg;
-                    import android.content.BroadcastReceiver;
+
                     import android.content.Context;
-                    import android.content.IntentFilter;
-                    import android.os.Handler;
-                    import android.os.UserHandle;
 
                     public class TestClass {
                         public void bind(Context context, BroadcastReceiver receiver,
@@ -113,13 +107,13 @@ class RegisterReceiverViaContextDetectorTest : SystemUILintDetectorTest() {
                 """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(RegisterReceiverViaContextDetector.ISSUE)
             .run()
             .expect(
                 """
-                src/test/pkg/TestClass.java:11: Warning: Register BroadcastReceiver using BroadcastDispatcher instead of Context [RegisterReceiverViaContext]
+                src/test/pkg/TestClass.java:8: Warning: Register BroadcastReceiver using BroadcastDispatcher instead of Context [RegisterReceiverViaContext]
                       context.registerReceiverAsUser(receiver, UserHandle.ALL, filter,
                               ~~~~~~~~~~~~~~~~~~~~~~
                 0 errors, 1 warnings
@@ -134,11 +128,8 @@ class RegisterReceiverViaContextDetectorTest : SystemUILintDetectorTest() {
                 TestFiles.java(
                         """
                     package test.pkg;
-                    import android.content.BroadcastReceiver;
+
                     import android.content.Context;
-                    import android.content.IntentFilter;
-                    import android.os.Handler;
-                    import android.os.UserHandle;
 
                     public class TestClass {
                         public void bind(Context context, BroadcastReceiver receiver,
@@ -150,19 +141,17 @@ class RegisterReceiverViaContextDetectorTest : SystemUILintDetectorTest() {
                 """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(RegisterReceiverViaContextDetector.ISSUE)
             .run()
             .expect(
                 """
-                src/test/pkg/TestClass.java:11: Warning: Register BroadcastReceiver using BroadcastDispatcher instead of Context [RegisterReceiverViaContext]
+                src/test/pkg/TestClass.java:8: Warning: Register BroadcastReceiver using BroadcastDispatcher instead of Context [RegisterReceiverViaContext]
                       context.registerReceiverForAllUsers(receiver, filter, "permission",
                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 0 errors, 1 warnings
                 """
             )
     }
-
-    private val stubs = androidStubs
 }

@@ -34,7 +34,6 @@ import org.jetbrains.uast.UClass
  * Checks if any class has implemented the `Dumpable` interface but has not registered itself with
  * the `DumpManager`.
  */
-@Suppress("UnstableApiUsage")
 class DumpableNotRegisteredDetector : Detector(), SourceCodeScanner {
 
     private var isDumpable: Boolean = false
