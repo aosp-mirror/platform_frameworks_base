@@ -20,27 +20,17 @@ import com.android.internal.logging.InstanceId
 
 /** Models media data loading state. */
 sealed class MediaDataLoadingModel {
-    /** The initial loading state when no media data has yet loaded. */
-    data object Unknown : MediaDataLoadingModel()
+
+    abstract val instanceId: InstanceId
 
     /** Media data has been loaded. */
     data class Loaded(
-        val instanceId: InstanceId,
+        override val instanceId: InstanceId,
         val immediatelyUpdateUi: Boolean = true,
-    ) : MediaDataLoadingModel() {
-
-        /** Returns true if [other] has the same instance id, false otherwise. */
-        fun equalInstanceIds(other: MediaDataLoadingModel): Boolean {
-            return when (other) {
-                is Loaded -> other.instanceId == instanceId
-                is Removed -> other.instanceId == instanceId
-                Unknown -> false
-            }
-        }
-    }
+    ) : MediaDataLoadingModel()
 
     /** Media data has been removed. */
     data class Removed(
-        val instanceId: InstanceId,
+        override val instanceId: InstanceId,
     ) : MediaDataLoadingModel()
 }
