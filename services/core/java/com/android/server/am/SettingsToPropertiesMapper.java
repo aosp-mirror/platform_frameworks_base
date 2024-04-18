@@ -163,6 +163,7 @@ public class SettingsToPropertiesMapper {
         "media_reliability",
         "media_solutions",
         "media_tv",
+        "nearby",
         "nfc",
         "pdf_viewer",
         "perfetto",
