@@ -21,11 +21,13 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.log.core.FakeLogBuffer
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.FakeDeviceBasedSatelliteRepository
 import com.android.systemui.statusbar.pipeline.satellite.domain.interactor.DeviceBasedSatelliteInteractor
+import com.android.systemui.statusbar.pipeline.satellite.shared.model.SatelliteConnectionState
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractorImpl
@@ -76,7 +78,8 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
             )
 
         underTest =
-            DeviceBasedSatelliteViewModel(
+            DeviceBasedSatelliteViewModelImpl(
+                context,
                 interactor,
                 testScope.backgroundScope,
                 airplaneModeRepository,
@@ -124,6 +127,7 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
             assertThat(latest).isNull()
         }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun icon_nullWhenShouldNotShow_isEmergencyOnly() =
         testScope.runTest {
@@ -297,5 +301,314 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
 
             // THEN icon is set because the device lost wifi connection
             assertThat(latest).isInstanceOf(Icon::class.java)
+        }
+
+    @Test
+    fun carrierText_nullWhenShouldNotShow_satelliteNotAllowed() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.carrierText)
+
+            // GIVEN satellite is not allowed
+            repo.isSatelliteAllowedForCurrentLocation.value = false
+
+            // GIVEN all icons are OOS
+            val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
+            i1.isInService.value = false
+            i1.isEmergencyOnly.value = false
+
+            // GIVEN apm is disabled
+            airplaneModeRepository.setIsAirplaneMode(false)
+
+            // THEN carrier text is null because we should not be showing it
+            assertThat(latest).isNull()
+        }
+
+    @Test
+    fun carrierText_nullWhenShouldNotShow_notAllOos() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.carrierText)
+
+            // GIVEN satellite is allowed + connected
+            repo.isSatelliteAllowedForCurrentLocation.value = true
+            repo.connectionState.value = SatelliteConnectionState.Connected
+
+            // GIVEN all icons are not OOS
+            val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
+            i1.isInService.value = true
+            i1.isEmergencyOnly.value = false
+
+            // GIVEN apm is disabled
+            airplaneModeRepository.setIsAirplaneMode(false)
+
+            // THEN carrier text is null because we have service
+            assertThat(latest).isNull()
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun carrierText_nullWhenShouldNotShow_isEmergencyOnly() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.carrierText)
+
+            // GIVEN satellite is allowed + connected
+            repo.isSatelliteAllowedForCurrentLocation.value = true
+            repo.connectionState.value = SatelliteConnectionState.Connected
+
+            // GIVEN all icons are OOS
+            val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
+            i1.isInService.value = false
+            i1.isEmergencyOnly.value = false
+
+            // GIVEN apm is disabled
+            airplaneModeRepository.setIsAirplaneMode(false)
+
+            // Wait for delay to be completed
+            advanceTimeBy(10.seconds)
+
+            // THEN carrier text is set because we don't have service
+            assertThat(latest).isNotNull()
+
+            // GIVEN the connection is emergency only
+            i1.isEmergencyOnly.value = true
+
+            // THEN carrier text is null because we have emergency connection
+            assertThat(latest).isNull()
+        }
+
+    @Test
+    fun carrierText_nullWhenShouldNotShow_apmIsEnabled() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.carrierText)
+
+            // GIVEN satellite is allowed + connected
+            repo.isSatelliteAllowedForCurrentLocation.value = true
+            repo.connectionState.value = SatelliteConnectionState.Connected
+
+            // GIVEN all icons are OOS
+            val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
+            i1.isInService.value = false
+            i1.isEmergencyOnly.value = false
+
+            // GIVEN apm is enabled
+            airplaneModeRepository.setIsAirplaneMode(true)
+
+            // THEN carrier text is null because we should not be showing it
+            assertThat(latest).isNull()
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun carrierText_satelliteIsOn() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.carrierText)
+
+            // GIVEN satellite is allowed + connected
+            repo.isSatelliteAllowedForCurrentLocation.value = true
+            repo.connectionState.value = SatelliteConnectionState.Connected
+
+            // GIVEN all icons are OOS
+            val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
+            i1.isInService.value = false
+            i1.isEmergencyOnly.value = false
+
+            // GIVEN apm is disabled
+            airplaneModeRepository.setIsAirplaneMode(false)
+
+            // Wait for delay to be completed
+            advanceTimeBy(10.seconds)
+
+            // THEN carrier text is set because we don't have service
+            assertThat(latest).isNotNull()
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun carrierText_hysteresisWhenEnablingText() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.carrierText)
+
+            // GIVEN satellite is allowed + connected
+            repo.isSatelliteAllowedForCurrentLocation.value = true
+            repo.connectionState.value = SatelliteConnectionState.Connected
+
+            // GIVEN all icons are OOS
+            val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
+            i1.isInService.value = false
+            i1.isEmergencyOnly.value = false
+
+            // GIVEN apm is disabled
+            airplaneModeRepository.setIsAirplaneMode(false)
+
+            // THEN carrier text is null because of the hysteresis
+            assertThat(latest).isNull()
+
+            // Wait for delay to be completed
+            advanceTimeBy(10.seconds)
+
+            // THEN carrier text is set after the delay
+            assertThat(latest).isNotNull()
+
+            // GIVEN apm is enabled
+            airplaneModeRepository.setIsAirplaneMode(true)
+
+            // THEN carrier text is null immediately
+            assertThat(latest).isNull()
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun carrierText_deviceIsProvisioned() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.carrierText)
+
+            // GIVEN satellite is allowed + connected
+            repo.isSatelliteAllowedForCurrentLocation.value = true
+            repo.connectionState.value = SatelliteConnectionState.Connected
+
+            // GIVEN all icons are OOS
+            val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
+            i1.isInService.value = false
+            i1.isEmergencyOnly.value = false
+
+            // GIVEN apm is disabled
+            airplaneModeRepository.setIsAirplaneMode(false)
+
+            // GIVEN device is not provisioned
+            deviceProvisionedRepository.setDeviceProvisioned(false)
+
+            // THEN carrier text is null because the device is not provisioned
+            assertThat(latest).isNull()
+
+            // GIVEN device becomes provisioned
+            deviceProvisionedRepository.setDeviceProvisioned(true)
+
+            // Wait for delay to be completed
+            advanceTimeBy(10.seconds)
+
+            // THEN carrier text is null because the device is not provisioned
+            assertThat(latest).isNotNull()
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun carrierText_wifiIsActive() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.carrierText)
+
+            // GIVEN satellite is allowed + connected
+            repo.isSatelliteAllowedForCurrentLocation.value = true
+            repo.connectionState.value = SatelliteConnectionState.Connected
+
+            // GIVEN all icons are OOS
+            val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
+            i1.isInService.value = false
+            i1.isEmergencyOnly.value = false
+
+            // GIVEN apm is disabled
+            airplaneModeRepository.setIsAirplaneMode(false)
+
+            // GIVEN device is provisioned
+            deviceProvisionedRepository.setDeviceProvisioned(true)
+
+            // GIVEN wifi network is active
+            wifiRepository.setWifiNetwork(WifiNetworkModel.Active(networkId = 0, level = 1))
+
+            // THEN carrier text is null because the device is connected to wifi
+            assertThat(latest).isNull()
+
+            // GIVEN device loses wifi connection
+            wifiRepository.setWifiNetwork(WifiNetworkModel.Invalid("test"))
+
+            // Wait for delay to be completed
+            advanceTimeBy(10.seconds)
+
+            // THEN carrier text is set because the device lost wifi connection
+            assertThat(latest).isNotNull()
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun carrierText_connectionStateUnknown_null() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.carrierText)
+
+            // Set up the conditions for satellite to be enabled
+            repo.isSatelliteAllowedForCurrentLocation.value = true
+            val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
+            i1.isInService.value = false
+            i1.isEmergencyOnly.value = false
+            airplaneModeRepository.setIsAirplaneMode(false)
+
+            repo.connectionState.value = SatelliteConnectionState.Unknown
+
+            // Wait for delay to be completed
+            advanceTimeBy(10.seconds)
+
+            assertThat(latest).isNull()
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun carrierText_connectionStateOff_null() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.carrierText)
+
+            // Set up the conditions for satellite to be enabled
+            repo.isSatelliteAllowedForCurrentLocation.value = true
+            val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
+            i1.isInService.value = false
+            i1.isEmergencyOnly.value = false
+            airplaneModeRepository.setIsAirplaneMode(false)
+
+            repo.connectionState.value = SatelliteConnectionState.Off
+
+            // Wait for delay to be completed
+            advanceTimeBy(10.seconds)
+
+            assertThat(latest).isNull()
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun carrierText_connectionStateOn_notConnectedString() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.carrierText)
+
+            // Set up the conditions for satellite to be enabled
+            repo.isSatelliteAllowedForCurrentLocation.value = true
+            val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
+            i1.isInService.value = false
+            i1.isEmergencyOnly.value = false
+            airplaneModeRepository.setIsAirplaneMode(false)
+
+            repo.connectionState.value = SatelliteConnectionState.On
+
+            // Wait for delay to be completed
+            advanceTimeBy(10.seconds)
+
+            assertThat(latest)
+                .isEqualTo(context.getString(R.string.satellite_not_connected_carrier_text))
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun carrierText_connectionStateConnected_connectedString() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.carrierText)
+
+            // Set up the conditions for satellite to be enabled
+            repo.isSatelliteAllowedForCurrentLocation.value = true
+            val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
+            i1.isInService.value = false
+            i1.isEmergencyOnly.value = false
+            airplaneModeRepository.setIsAirplaneMode(false)
+
+            repo.connectionState.value = SatelliteConnectionState.Connected
+
+            // Wait for delay to be completed
+            advanceTimeBy(10.seconds)
+
+            assertThat(latest)
+                .isEqualTo(context.getString(R.string.satellite_connected_carrier_text))
         }
 }
