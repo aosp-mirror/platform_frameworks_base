@@ -321,8 +321,7 @@ public class ApplicationStartInfoTest {
                 app1PackageName);            // packageName
         ServiceRecord service = ServiceRecord.newEmptyInstanceForTest(mAms);
 
-        mAppStartInfoTracker.handleProcessServiceStart(appStartTimestampService, app, service,
-                false);
+        mAppStartInfoTracker.handleProcessServiceStart(appStartTimestampService, app, service);
         list.clear();
         mAppStartInfoTracker.getStartInfo(app1PackageName, app1Uid, 0, 0, list);
         assertEquals(list.size(), 2);
@@ -336,7 +335,7 @@ public class ApplicationStartInfoTest {
                 app1ProcessName,                                      // processName
                 ApplicationStartInfo.START_REASON_SERVICE,            // reason
                 ApplicationStartInfo.STARTUP_STATE_STARTED,           // startup state
-                ApplicationStartInfo.START_TYPE_WARM,                 // state type
+                ApplicationStartInfo.START_TYPE_COLD,                 // state type
                 ApplicationStartInfo.LAUNCH_MODE_STANDARD);           // launch mode
 
         // Case 5: Create an instance of app1 with a different user started for a broadcast

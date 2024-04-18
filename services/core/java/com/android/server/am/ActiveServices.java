@@ -5725,14 +5725,11 @@ public final class ActiveServices {
                 bringDownServiceLocked(r, enqueueOomAdj);
                 return msg;
             }
-            mAm.mProcessList.getAppStartInfoTracker().handleProcessServiceStart(startTimeNs, app, r,
-                    true);
+            mAm.mProcessList.getAppStartInfoTracker().handleProcessServiceStart(startTimeNs, app,
+                    r);
             if (isolated) {
                 r.isolationHostProc = app;
             }
-        } else {
-            mAm.mProcessList.getAppStartInfoTracker().handleProcessServiceStart(startTimeNs, app, r,
-                    false);
         }
 
         if (r.fgRequired) {
