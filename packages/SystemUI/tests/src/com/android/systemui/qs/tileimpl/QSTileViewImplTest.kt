@@ -385,7 +385,7 @@ class QSTileViewImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun onStateChange_longPressEffectActive_withInvalidDuration_doesNotCreateEffect() {
+    fun onStateChange_longPressEffectActive_withInvalidDuration_doesNotInitializeEffect() {
         val state = QSTile.State() // A state that handles longPress
 
         // GIVEN an invalid long-press effect duration
@@ -399,7 +399,7 @@ class QSTileViewImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun onStateChange_longPressEffectActive_withValidDuration_createsEffect() {
+    fun onStateChange_longPressEffectActive_withValidDuration_initializesEffect() {
         // GIVEN a test state that handles long-press and a valid long-press effect duration
         val state = QSTile.State()
 
@@ -420,7 +420,7 @@ class QSTileViewImplTest : SysuiTestCase() {
         tileView.changeState(state)
 
         // THEN the view binder no longer binds the view to the long-press effect
-        assertThat(tileView.longPressEffectHandle).isNull()
+        assertThat(tileView.isLongPressEffectBound).isFalse()
     }
 
     @Test
@@ -435,7 +435,7 @@ class QSTileViewImplTest : SysuiTestCase() {
         tileView.changeState(state)
 
         // THEN the view is bounded to the long-press effect
-        assertThat(tileView.longPressEffectHandle).isNotNull()
+        assertThat(tileView.isLongPressEffectBound).isTrue()
     }
 
     @Test
@@ -451,7 +451,7 @@ class QSTileViewImplTest : SysuiTestCase() {
         tileView.changeState(state)
 
         // THEN the view binder does not bind the view and no effect is initialized
-        assertThat(tileView.longPressEffectHandle).isNull()
+        assertThat(tileView.isLongPressEffectBound).isFalse()
         assertThat(tileView.isLongPressEffectInitialized).isFalse()
     }
 
@@ -470,7 +470,7 @@ class QSTileViewImplTest : SysuiTestCase() {
         tileView.changeState(state)
 
         // THEN the view binder does not bind the view and no effect is initialized
-        assertThat(tileView.longPressEffectHandle).isNull()
+        assertThat(tileView.isLongPressEffectBound).isFalse()
         assertThat(tileView.isLongPressEffectInitialized).isFalse()
     }
 
