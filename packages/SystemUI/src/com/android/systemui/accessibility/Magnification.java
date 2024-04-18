@@ -54,6 +54,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.io.PrintWriter;
+import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
@@ -71,6 +72,7 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
     private final ModeSwitchesController mModeSwitchesController;
     private final Context mContext;
     private final Handler mHandler;
+    private final Executor mExecutor;
     private final AccessibilityManager mAccessibilityManager;
     private final CommandQueue mCommandQueue;
     private final OverviewProxyService mOverviewProxyService;
@@ -139,12 +141,13 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
             DisplayIdIndexSupplier<FullscreenMagnificationController> {
 
         private final Context mContext;
+        private final Executor mExecutor;
 
-        FullscreenMagnificationControllerSupplier(Context context, Handler handler,
-                DisplayManager displayManager, SysUiState sysUiState,
-                SecureSettings secureSettings) {
+        FullscreenMagnificationControllerSupplier(Context context, DisplayManager displayManager,
+                Executor executor) {
             super(displayManager);
             mContext = context;
+            mExecutor = executor;
         }
 
         @Override
@@ -156,6 +159,7 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
             windowContext.setTheme(com.android.systemui.res.R.style.Theme_SystemUI);
             return new FullscreenMagnificationController(
                     windowContext,
+                    mExecutor,
                     windowContext.getSystemService(AccessibilityManager.class),
                     windowContext.getSystemService(WindowManager.class),
                     scvhSupplier);
@@ -200,13 +204,14 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
     DisplayIdIndexSupplier<MagnificationSettingsController> mMagnificationSettingsSupplier;
 
     @Inject
-    public Magnification(Context context, @Main Handler mainHandler,
+    public Magnification(Context context, @Main Handler mainHandler, @Main Executor executor,
             CommandQueue commandQueue, ModeSwitchesController modeSwitchesController,
             SysUiState sysUiState, OverviewProxyService overviewProxyService,
             SecureSettings secureSettings, DisplayTracker displayTracker,
             DisplayManager displayManager, AccessibilityLogger a11yLogger) {
         mContext = context;
         mHandler = mainHandler;
+        mExecutor = executor;
         mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
         mCommandQueue = commandQueue;
         mModeSwitchesController = modeSwitchesController;
@@ -218,7 +223,7 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
                 mHandler, mWindowMagnifierCallback,
                 displayManager, sysUiState, secureSettings);
         mFullscreenMagnificationControllerSupplier = new FullscreenMagnificationControllerSupplier(
-                context, mHandler, displayManager, sysUiState, secureSettings);
+                context, displayManager, mExecutor);
         mMagnificationSettingsSupplier = new SettingsSupplier(context,
                 mMagnificationSettingsControllerCallback, displayManager, secureSettings);
 
