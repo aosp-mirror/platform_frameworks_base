@@ -2616,7 +2616,30 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
-    public void testCancelAllDoesNotCancelLifetimeExtended() throws Exception {
+    public void testCancelAllClearsLifetimeExtended() throws Exception {
+        final NotificationRecord notif = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        notif.getNotification().flags |= Notification.FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+        mService.addNotification(notif);
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(notif.getSbn().getPackageName());
+        assertThat(notifs.length).isEqualTo(1);
+
+        // Simulate a "cancel all" received.
+        mService.mNotificationDelegate.onClearAll(mUid, Binder.getCallingPid(),
+                notif.getUserId());
+        waitForIdle();
+        notifs = mBinderService.getActiveNotifications(notif.getSbn().getPackageName());
+        assertThat(notifs.length).isEqualTo(0);
+
+        // Test that no update post is sent to System UI.
+        verify(mWorkerHandler, never())
+                .post(any(NotificationManagerService.EnqueueNotificationRunnable.class));
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
+    public void testAppCancelAllDoesNotCancelLifetimeExtended() throws Exception {
         // Adds a lifetime extended notification.
         final NotificationRecord notif = generateNotificationRecord(mTestNotificationChannel, 1,
                 null, false);
@@ -8836,9 +8859,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
     public void testActionClickLifetimeExtendedCancel_PreventByNoDismiss() throws Exception {
-        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR);
-
         final Notification.Action action =
                 new Notification.Action.Builder(null, "text", PendingIntent.getActivity(
                         mContext, 0, new Intent(), PendingIntent.FLAG_IMMUTABLE)).build();
@@ -8879,9 +8901,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
     public void testUpdateOnActionClickDropsLifetimeExtendedCancel() throws Exception {
-        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR);
-
         final Notification.Action action =
                 new Notification.Action.Builder(null, "text", PendingIntent.getActivity(
                         mContext, 0, new Intent(), PendingIntent.FLAG_IMMUTABLE)).build();
