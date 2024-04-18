@@ -840,10 +840,10 @@ public class StatsPullAtomService extends SystemService {
                 registerEventListeners();
             });
         } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
+            if (ENABLE_NETWORK_STATS_MANAGER_INIT_ORDER_FIX) {
+                initNetworkStatsManager();
+            }
             BackgroundThread.getHandler().post(() -> {
-                if (ENABLE_NETWORK_STATS_MANAGER_INIT_ORDER_FIX) {
-                    initNetworkStatsManager();
-                }
                 // Network stats related pullers can only be initialized after service is ready.
                 initAndRegisterNetworkStatsPullers();
                 // For services that are not ready at boot phase PHASE_SYSTEM_SERVICES_READY
