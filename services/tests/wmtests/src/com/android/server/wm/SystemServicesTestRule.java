@@ -56,6 +56,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.DisplayManagerGlobal;
@@ -86,6 +87,7 @@ import com.android.server.am.ActivityManagerService;
 import com.android.server.display.DisplayControl;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.firewall.IntentFirewall;
+import com.android.server.grammaticalinflection.GrammaticalInflectionManagerInternal;
 import com.android.server.input.InputManagerService;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
@@ -207,6 +209,11 @@ public class SystemServicesTestRule implements TestRule {
         setUpLocalServices();
         setUpActivityTaskManagerService();
         setUpWindowManagerService();
+
+        // We never load the system settings in the tests, thus need to setup the grammatical
+        // gender configuration explicitly.
+        mAtmService.getGlobalConfiguration().setGrammaticalGender(
+                Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED);
     }
 
     private void setUpSystemCore() {
@@ -336,6 +343,18 @@ public class SystemServicesTestRule implements TestRule {
         };
         when(umi.isUserVisible(anyInt())).thenAnswer(isUserVisibleAnswer);
         when(umi.isUserVisible(anyInt(), anyInt())).thenAnswer(isUserVisibleAnswer);
+
+        final var gimi = mock(
+                GrammaticalInflectionManagerInternal.class, withSettings().stubOnly());
+        doReturn(Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED).when(
+                gimi).getGrammaticalGenderFromDeveloperSettings();
+        doReturn(Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED).when(
+                gimi).getSystemGrammaticalGender(anyInt());
+        doReturn(Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED).when(
+                gimi).mergedFinalSystemGrammaticalGender();
+        doReturn(false).when(gimi).canGetSystemGrammaticalGender(anyInt());
+        doReturn(gimi).when(
+                () -> LocalServices.getService(GrammaticalInflectionManagerInternal.class));
     }
 
     private void setUpActivityTaskManagerService() {
@@ -474,6 +493,7 @@ public class SystemServicesTestRule implements TestRule {
         LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
         LocalServices.removeServiceForTest(UserManagerInternal.class);
         LocalServices.removeServiceForTest(ImeTargetVisibilityPolicy.class);
+        LocalServices.removeServiceForTest(GrammaticalInflectionManagerInternal.class);
     }
 
     Description getDescription() {
