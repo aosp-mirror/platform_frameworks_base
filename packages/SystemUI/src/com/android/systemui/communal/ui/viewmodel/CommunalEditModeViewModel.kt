@@ -63,7 +63,7 @@ constructor(
 
     override val isEditMode = true
 
-    // Only widgets are editable. The CTA tile comes last in the list and remains visible.
+    // Only widgets are editable.
     override val communalContent: Flow<List<CommunalContentModel>> =
         communalInteractor.widgetContent.onEach { models ->
             logger.d({ "Content updated: $str1" }) { str1 = models.joinToString { it.key } }

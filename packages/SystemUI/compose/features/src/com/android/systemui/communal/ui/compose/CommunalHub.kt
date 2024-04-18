@@ -250,7 +250,6 @@ fun CommunalHub(
                             )
                         isDraggingToRemove
                     },
-                    onOpenWidgetPicker = onOpenWidgetPicker,
                     gridState = gridState,
                     contentListState = contentListState,
                     selectedKey = selectedKey,
@@ -393,7 +392,6 @@ private fun BoxScope.CommunalHubLazyGrid(
     contentListState: ContentListState,
     setGridCoordinates: (coordinates: LayoutCoordinates) -> Unit,
     updateDragPositionForRemove: (offset: Offset) -> Boolean,
-    onOpenWidgetPicker: (() -> Unit)? = null,
     widgetConfigurator: WidgetConfigurator?,
 ) {
     var gridModifier =
@@ -461,7 +459,6 @@ private fun BoxScope.CommunalHubLazyGrid(
                         model = list[index],
                         viewModel = viewModel,
                         size = size,
-                        onOpenWidgetPicker = onOpenWidgetPicker,
                         selected = selected && !isDragging,
                         widgetConfigurator = widgetConfigurator,
                     )
@@ -739,7 +736,6 @@ private fun CommunalContent(
     size: SizeF,
     selected: Boolean,
     modifier: Modifier = Modifier,
-    onOpenWidgetPicker: (() -> Unit)? = null,
     widgetConfigurator: WidgetConfigurator? = null,
 ) {
     when (model) {
