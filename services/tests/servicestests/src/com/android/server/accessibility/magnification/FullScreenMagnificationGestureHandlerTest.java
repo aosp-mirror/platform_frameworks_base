@@ -197,6 +197,8 @@ public class FullScreenMagnificationGestureHandlerTest {
 
     private final Scroller mMockScroller = spy(new Scroller(mContext));
 
+    private boolean mMockMagnificationConnectionState;
+
     private OffsettableClock mClock;
     private FullScreenMagnificationGestureHandler mMgh;
     private TestHandler mHandler;
@@ -229,6 +231,7 @@ public class FullScreenMagnificationGestureHandlerTest {
         Settings.Secure.putFloatForUser(mContext.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, 2.0f,
                 UserHandle.USER_SYSTEM);
+        mMockMagnificationConnectionState = true;
         mFullScreenMagnificationController =
                 new FullScreenMagnificationController(
                         mockController,
@@ -238,7 +241,8 @@ public class FullScreenMagnificationGestureHandlerTest {
                         () -> null,
                         ConcurrentUtils.DIRECT_EXECUTOR,
                         () -> mMockScroller,
-                        TimeAnimator::new) {
+                        TimeAnimator::new,
+                        () -> mMockMagnificationConnectionState) {
                     @Override
                     public boolean magnificationRegionContains(int displayId, float x, float y) {
                         return true;

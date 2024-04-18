@@ -118,6 +118,7 @@ public class FullScreenMagnificationController implements
 
     private final MagnificationThumbnailFeatureFlag mMagnificationThumbnailFeatureFlag;
     @NonNull private final Supplier<MagnificationThumbnail> mThumbnailSupplier;
+    @NonNull private final Supplier<Boolean> mMagnificationConnectionStateSupplier;
 
     /**
      * This class implements {@link WindowManagerInternal.MagnificationCallbacks} and holds
@@ -682,6 +683,12 @@ public class FullScreenMagnificationController implements
             if (!mRegistered) {
                 return false;
             }
+            // If the border implementation is on system ui side but the connection is not
+            // established, the fullscreen magnification should not work.
+            if (com.android.window.flags.Flags.alwaysDrawMagnificationFullscreenBorder()
+                    && !mMagnificationConnectionStateSupplier.get()) {
+                return false;
+            }
             if (DEBUG) {
                 Slog.i(LOG_TAG,
                         "setScaleAndCenterLocked(scale = " + scale + ", centerX = " + centerX
@@ -941,7 +948,8 @@ public class FullScreenMagnificationController implements
             @NonNull AccessibilityTraceManager traceManager, @NonNull Object lock,
             @NonNull MagnificationInfoChangedCallback magnificationInfoChangedCallback,
             @NonNull MagnificationScaleProvider scaleProvider,
-            @NonNull Executor backgroundExecutor) {
+            @NonNull Executor backgroundExecutor,
+            @NonNull Supplier<Boolean> magnificationConnectionStateSupplier) {
         this(
                 new ControllerContext(
                         context,
@@ -955,7 +963,8 @@ public class FullScreenMagnificationController implements
                 /* thumbnailSupplier= */ null,
                 backgroundExecutor,
                 () -> new Scroller(context),
-                TimeAnimator::new);
+                TimeAnimator::new,
+                magnificationConnectionStateSupplier);
     }
 
     /** Constructor for tests */
@@ -968,11 +977,13 @@ public class FullScreenMagnificationController implements
             Supplier<MagnificationThumbnail> thumbnailSupplier,
             @NonNull Executor backgroundExecutor,
             Supplier<Scroller> scrollerSupplier,
-            Supplier<TimeAnimator> timeAnimatorSupplier) {
+            Supplier<TimeAnimator> timeAnimatorSupplier,
+            @NonNull Supplier<Boolean> magnificationConnectionStateSupplier) {
         mControllerCtx = ctx;
         mLock = lock;
         mScrollerSupplier = scrollerSupplier;
         mTimeAnimatorSupplier = timeAnimatorSupplier;
+        mMagnificationConnectionStateSupplier = magnificationConnectionStateSupplier;
         mMainThreadId = mControllerCtx.getContext().getMainLooper().getThread().getId();
         mScreenStateObserver = new ScreenStateObserver(mControllerCtx.getContext(), this);
         addInfoChangedCallback(magnificationInfoChangedCallback);
