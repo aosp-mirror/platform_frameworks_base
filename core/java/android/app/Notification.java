@@ -17,15 +17,14 @@
 package android.app;
 
 import static android.annotation.Dimension.DP;
+import static android.app.Flags.evenlyDividedCallStyleActionLayout;
+import static android.app.Flags.updateRankingTime;
 import static android.app.admin.DevicePolicyResources.Drawables.Source.NOTIFICATION;
 import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_COLORED;
 import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
 import static android.app.admin.DevicePolicyResources.UNDEFINED;
 import static android.graphics.drawable.Icon.TYPE_URI;
 import static android.graphics.drawable.Icon.TYPE_URI_ADAPTIVE_BITMAP;
-import static android.app.Flags.cleanUpSpansAndNewLines;
-import static android.app.Flags.evenlyDividedCallStyleActionLayout;
-import static android.app.Flags.updateRankingTime;
 
 import static java.util.Objects.requireNonNull;
 
