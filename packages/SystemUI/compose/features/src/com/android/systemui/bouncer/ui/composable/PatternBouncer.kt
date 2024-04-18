@@ -52,6 +52,7 @@ import com.android.compose.modifiers.thenIf
 import com.android.internal.R
 import com.android.systemui.bouncer.ui.viewmodel.PatternBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PatternDotViewModel
+import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -72,15 +73,17 @@ internal fun PatternBouncer(
     centerDotsVertically: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val scope = rememberCoroutineScope()
+    val density = LocalDensity.current
     DisposableEffect(Unit) { onDispose { viewModel.onHidden() } }
 
     val colCount = viewModel.columnCount
     val rowCount = viewModel.rowCount
 
     val dotColor = MaterialTheme.colorScheme.secondary
-    val dotRadius = with(LocalDensity.current) { (DOT_DIAMETER_DP / 2).dp.toPx() }
+    val dotRadius = with(density) { (DOT_DIAMETER_DP / 2).dp.toPx() }
     val lineColor = MaterialTheme.colorScheme.primary
-    val lineStrokeWidth = with(LocalDensity.current) { LINE_STROKE_WIDTH_DP.dp.toPx() }
+    val lineStrokeWidth = with(density) { LINE_STROKE_WIDTH_DP.dp.toPx() }
 
     // All dots that should be rendered on the grid.
     val dots: List<PatternDotViewModel> by viewModel.dots.collectAsState()
@@ -101,7 +104,70 @@ internal fun PatternBouncer(
         integerResource(R.integer.lock_pattern_line_fade_out_duration)
     val lineFadeOutAnimationDelayMs = integerResource(R.integer.lock_pattern_line_fade_out_delay)
 
-    val scope = rememberCoroutineScope()
+    val dotAppearFadeInAnimatables = remember(dots) { dots.associateWith { Animatable(0f) } }
+    val dotAppearMoveUpAnimatables = remember(dots) { dots.associateWith { Animatable(0f) } }
+    val dotAppearMaxOffsetPixels =
+        remember(dots) {
+            dots.associateWith { dot -> with(density) { (80 + (20 * dot.y)).dp.toPx() } }
+        }
+    val dotAppearScaleAnimatables = remember(dots) { dots.associateWith { Animatable(0f) } }
+    LaunchedEffect(Unit) {
+        dotAppearFadeInAnimatables.forEach { (dot, animatable) ->
+            scope.launch {
+                // Maps a dot at x and y to an ordinal number to denote the order in which all dots
+                // are visited by the fade-in animation.
+                //
+                // The order is basically starting from the top-left most dot (at 0,0) and ending at
+                // the bottom-right most dot (at 2,2). The visitation order happens
+                // diagonal-by-diagonal. Here's a visual representation of the expected output:
+                // [0][1][3]
+                // [2][4][6]
+                // [5][7][8]
+                //
+                // There's an assumption here that the grid is 3x3. If it's not, this formula needs
+                // to be revisited.
+                check(viewModel.columnCount == 3 && viewModel.rowCount == 3)
+                val staggerOrder = max(0, min(8, 2 * (dot.x + dot.y) + (dot.y - 1)))
+
+                animatable.animateTo(
+                    targetValue = 1f,
+                    animationSpec =
+                        tween(
+                            delayMillis = 33 * staggerOrder,
+                            durationMillis = 450,
+                            easing = Easings.LegacyDecelerate,
+                        )
+                )
+            }
+        }
+        dotAppearMoveUpAnimatables.forEach { (dot, animatable) ->
+            scope.launch {
+                animatable.animateTo(
+                    targetValue = 1f,
+                    animationSpec =
+                        tween(
+                            delayMillis = 0,
+                            durationMillis = 450 + (33 * dot.y),
+                            easing = Easings.StandardDecelerate,
+                        )
+                )
+            }
+        }
+        dotAppearScaleAnimatables.forEach { (dot, animatable) ->
+            scope.launch {
+                animatable.animateTo(
+                    targetValue = 1f,
+                    animationSpec =
+                        tween(
+                            delayMillis = 33 * dot.y,
+                            durationMillis = 450,
+                            easing = Easings.LegacyDecelerate,
+                        )
+                )
+            }
+        }
+    }
+
     val view = LocalView.current
 
     // When the current dot is changed, we need to update our animations.
@@ -322,10 +388,23 @@ internal fun PatternBouncer(
 
             // Draw each dot on the grid.
             dots.forEach { dot ->
+                val initialOffset = checkNotNull(dotAppearMaxOffsetPixels[dot])
+                val appearOffset =
+                    (1 - checkNotNull(dotAppearMoveUpAnimatables[dot]).value) * initialOffset
                 drawCircle(
-                    center = pixelOffset(dot, spacing, horizontalOffset, verticalOffset),
-                    color = dotColor,
-                    radius = dotRadius * (dotScalingAnimatables[dot]?.value ?: 1f),
+                    center =
+                        pixelOffset(
+                            dot,
+                            spacing,
+                            horizontalOffset,
+                            verticalOffset + appearOffset,
+                        ),
+                    color =
+                        dotColor.copy(alpha = checkNotNull(dotAppearFadeInAnimatables[dot]).value),
+                    radius =
+                        dotRadius *
+                            checkNotNull(dotScalingAnimatables[dot]).value *
+                            checkNotNull(dotAppearScaleAnimatables[dot]).value,
                 )
             }
         }
