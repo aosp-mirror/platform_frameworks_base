@@ -23,6 +23,7 @@
 #include <map>
 #include <sstream>
 #include <string>
+#include <unordered_set>
 
 #include "Errors.h"
 
@@ -214,7 +215,7 @@ static void write_file(CodeGeneratorResponse* response, const FileDescriptorProt
  */
 static void write_multiple_files(CodeGeneratorResponse* response,
                                  const FileDescriptorProto& file_descriptor,
-                                 set<string> messages_to_compile) {
+                                 const unordered_set<string>& messages_allowlist) {
     // If there is anything to put in the outer class file, create one
     if (file_descriptor.enum_type_size() > 0) {
         vector<EnumDescriptorProto> enums;
@@ -222,7 +223,7 @@ static void write_multiple_files(CodeGeneratorResponse* response,
         for (int i = 0; i < N; i++) {
             auto enum_full_name =
                     file_descriptor.package() + "." + file_descriptor.enum_type(i).name();
-            if (!messages_to_compile.empty() && !messages_to_compile.count(enum_full_name)) {
+            if (!messages_allowlist.empty() && !messages_allowlist.count(enum_full_name)) {
                 continue;
             }
             enums.push_back(file_descriptor.enum_type(i));
@@ -230,7 +231,7 @@ static void write_multiple_files(CodeGeneratorResponse* response,
 
         vector<DescriptorProto> messages;
 
-        if (messages_to_compile.empty() || !enums.empty()) {
+        if (messages_allowlist.empty() || !enums.empty()) {
             write_file(response, file_descriptor,
                        make_file_name(file_descriptor, make_outer_class_name(file_descriptor)),
                        true, enums, messages);
@@ -246,12 +247,12 @@ static void write_multiple_files(CodeGeneratorResponse* response,
 
         auto message_full_name =
                 file_descriptor.package() + "." + file_descriptor.message_type(i).name();
-        if (!messages_to_compile.empty() && !messages_to_compile.count(message_full_name)) {
+        if (!messages_allowlist.empty() && !messages_allowlist.count(message_full_name)) {
             continue;
         }
         messages.push_back(file_descriptor.message_type(i));
 
-        if (messages_to_compile.empty() || !messages.empty()) {
+        if (messages_allowlist.empty() || !messages.empty()) {
             write_file(response, file_descriptor,
                        make_file_name(file_descriptor, file_descriptor.message_type(i).name()),
                        false, enums, messages);
@@ -261,14 +262,14 @@ static void write_multiple_files(CodeGeneratorResponse* response,
 
 static void write_single_file(CodeGeneratorResponse* response,
                               const FileDescriptorProto& file_descriptor,
-                              set<string> messages_to_compile) {
+                              const unordered_set<string>& messages_allowlist) {
     int N;
 
     vector<EnumDescriptorProto> enums;
     N = file_descriptor.enum_type_size();
     for (int i = 0; i < N; i++) {
         auto enum_full_name = file_descriptor.package() + "." + file_descriptor.enum_type(i).name();
-        if (!messages_to_compile.empty() && !messages_to_compile.count(enum_full_name)) {
+        if (!messages_allowlist.empty() && !messages_allowlist.count(enum_full_name)) {
             continue;
         }
 
@@ -281,14 +282,14 @@ static void write_single_file(CodeGeneratorResponse* response,
         auto message_full_name =
                 file_descriptor.package() + "." + file_descriptor.message_type(i).name();
 
-        if (!messages_to_compile.empty() && !messages_to_compile.count(message_full_name)) {
+        if (!messages_allowlist.empty() && !messages_allowlist.count(message_full_name)) {
             continue;
         }
 
         messages.push_back(file_descriptor.message_type(i));
     }
 
-    if (messages_to_compile.empty() || !enums.empty() || !messages.empty()) {
+    if (messages_allowlist.empty() || !enums.empty() || !messages.empty()) {
         write_file(response, file_descriptor,
                    make_file_name(file_descriptor, make_outer_class_name(file_descriptor)), true,
                    enums, messages);
@@ -296,7 +297,7 @@ static void write_single_file(CodeGeneratorResponse* response,
 }
 
 static void parse_args_string(stringstream args_string_stream,
-                              set<string>* messages_to_compile_out) {
+                              unordered_set<string>& messages_allowlist_out) {
     string line;
     while (getline(args_string_stream, line, ';')) {
         stringstream line_ss(line);
@@ -305,7 +306,7 @@ static void parse_args_string(stringstream args_string_stream,
         if (arg_name == "include_filter") {
             string full_message_name;
             while (getline(line_ss, full_message_name, ',')) {
-                messages_to_compile_out->insert(full_message_name);
+                messages_allowlist_out.insert(full_message_name);
             }
         } else {
             ERRORS.Add(UNKNOWN_FILE, UNKNOWN_LINE, "Unexpected argument '%s'.", arg_name.c_str());
@@ -316,10 +317,10 @@ static void parse_args_string(stringstream args_string_stream,
 CodeGeneratorResponse generate_java_protostream_code(CodeGeneratorRequest request) {
     CodeGeneratorResponse response;
 
-    set<string> messages_to_compile;
+    unordered_set<string> messages_allowlist;
     auto request_params = request.parameter();
     if (!request_params.empty()) {
-        parse_args_string(stringstream(request_params), &messages_to_compile);
+        parse_args_string(stringstream(request_params), messages_allowlist);
     }
 
     // Build the files we need.
@@ -328,9 +329,9 @@ CodeGeneratorResponse generate_java_protostream_code(CodeGeneratorRequest reques
         const FileDescriptorProto& file_descriptor = request.proto_file(i);
         if (should_generate_for_file(request, file_descriptor.name())) {
             if (file_descriptor.options().java_multiple_files()) {
-                write_multiple_files(&response, file_descriptor, messages_to_compile);
+                write_multiple_files(&response, file_descriptor, messages_allowlist);
             } else {
-                write_single_file(&response, file_descriptor, messages_to_compile);
+                write_single_file(&response, file_descriptor, messages_allowlist);
             }
         }
     }
