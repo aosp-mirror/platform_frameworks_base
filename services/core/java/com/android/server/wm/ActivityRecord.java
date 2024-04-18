@@ -4643,6 +4643,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // at #postWindowRemoveCleanupLocked
                 return false;
             }
+            // Do not transfer if the orientation doesn't match, redraw starting window while it is
+            // on top will cause flicker.
+            if (fromActivity.getRequestedConfigurationOrientation()
+                    != getRequestedConfigurationOrientation()) {
+                return false;
+            }
             // In this case, the starting icon has already been displayed, so start
             // letting windows get shown immediately without any more transitions.
             if (fromActivity.mVisible) {
