@@ -2013,6 +2013,16 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void unfoldFromPostureChange_sendActionToFaceAuthInteractor() {
+        // WHEN device posture changes to unfold
+        deviceInPostureStateOpened();
+        mTestableLooper.processAllMessages();
+
+        // THEN request face auth
+        verify(mFaceAuthInteractor).onDeviceUnfolded();
+    }
+
+    @Test
     public void detectFingerprint_onTemporaryLockoutReset_authenticateFingerprint() {
         ArgumentCaptor<FingerprintManager.LockoutResetCallback> fpLockoutResetCallbackCaptor =
                 ArgumentCaptor.forClass(FingerprintManager.LockoutResetCallback.class);

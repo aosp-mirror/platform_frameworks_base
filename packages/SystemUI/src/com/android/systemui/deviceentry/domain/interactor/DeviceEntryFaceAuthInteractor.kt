@@ -64,6 +64,7 @@ interface DeviceEntryFaceAuthInteractor {
     fun onPrimaryBouncerUserInput()
     fun onAccessibilityAction()
     fun onWalletLaunched()
+    fun onDeviceUnfolded()
 
     /** Whether face auth is considered class 3 */
     fun isFaceAuthStrong(): Boolean
