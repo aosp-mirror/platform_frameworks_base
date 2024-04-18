@@ -2514,7 +2514,8 @@ public class NotificationManagerService extends SystemService {
                 mNotificationChannelLogger,
                 mAppOps,
                 mUserProfiles,
-                mShowReviewPermissionsNotification);
+                mShowReviewPermissionsNotification,
+                Clock.systemUTC());
         mRankingHelper = new RankingHelper(getContext(), mRankingHandler, mPreferencesHelper,
                 mZenModeHelper, mUsageStats, extractorNames, mPlatformCompat);
         mSnoozeHelper = snoozeHelper;
