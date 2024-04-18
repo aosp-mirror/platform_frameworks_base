@@ -57,12 +57,15 @@ import android.text.TextUtils;
 import com.android.keyguard.logging.CarrierTextManagerLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.log.LogBufferHelperKt;
 import com.android.systemui.res.R;
+import com.android.systemui.statusbar.pipeline.satellite.ui.viewmodel.FakeDeviceBasedSatelliteViewModel;
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository;
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
@@ -76,6 +79,8 @@ import org.mockito.invocation.InvocationOnMock;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import kotlinx.coroutines.test.TestScope;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -98,6 +103,8 @@ public class CarrierTextManagerTest extends SysuiTestCase {
             TEST_CARRIER, TEST_CARRIER, NAME_SOURCE_CARRIER_ID, 0xFFFFFF, "",
             DATA_ROAMING_ENABLE, null, null, null, null, false, null, "");
     private FakeWifiRepository mWifiRepository = new FakeWifiRepository();
+    private final FakeDeviceBasedSatelliteViewModel mSatelliteViewModel =
+            new FakeDeviceBasedSatelliteViewModel();
     @Mock
     private WakefulnessLifecycle mWakefulnessLifecycle;
     @Mock
@@ -122,6 +129,10 @@ public class CarrierTextManagerTest extends SysuiTestCase {
     private CarrierTextManagerLogger mLogger =
             new CarrierTextManagerLogger(
                     LogBufferHelperKt.logcatLogBuffer("CarrierTextManagerLog"));
+
+    private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
+    private final TestScope mTestScope = mKosmos.getTestScope();
+    private final JavaAdapter mJavaAdapter = new JavaAdapter(mTestScope.getBackgroundScope());
 
     private Void checkMainThread(InvocationOnMock inv) {
         assertThat(mMainExecutor.isExecuting()).isTrue();
@@ -155,9 +166,18 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         when(mTelephonyManager.getActiveModemCount()).thenReturn(3);
 
         mCarrierTextManager = new CarrierTextManager.Builder(
-                mContext, mContext.getResources(), mWifiRepository,
-                mTelephonyManager, mTelephonyListenerManager, mWakefulnessLifecycle, mMainExecutor,
-                mBgExecutor, mKeyguardUpdateMonitor, mLogger)
+                mContext,
+                mContext.getResources(),
+                mWifiRepository,
+                mSatelliteViewModel,
+                mJavaAdapter,
+                mTelephonyManager,
+                mTelephonyListenerManager,
+                mWakefulnessLifecycle,
+                mMainExecutor,
+                mBgExecutor,
+                mKeyguardUpdateMonitor,
+                mLogger)
                 .setShowAirplaneMode(true)
                 .setShowMissingSim(true)
                 .build();
@@ -210,6 +230,8 @@ public class CarrierTextManagerTest extends SysuiTestCase {
                 getContextSpyForStickyBroadcast(stickyIntent),
                 mContext.getResources(),
                 mWifiRepository,
+                mSatelliteViewModel,
+                mJavaAdapter,
                 mTelephonyManager,
                 mTelephonyListenerManager,
                 mWakefulnessLifecycle,
@@ -450,6 +472,107 @@ public class CarrierTextManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void carrierText_satelliteTextNull_notUsed() {
+        reset(mCarrierTextCallback);
+        List<SubscriptionInfo> list = new ArrayList<>();
+        list.add(TEST_SUBSCRIPTION);
+        when(mKeyguardUpdateMonitor.getSimState(anyInt())).thenReturn(
+                TelephonyManager.SIM_STATE_READY);
+        when(mKeyguardUpdateMonitor.getFilteredSubscriptionInfo()).thenReturn(list);
+        mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
+
+        // WHEN the satellite text is null
+        mSatelliteViewModel.getCarrierText().setValue(null);
+        mTestScope.getTestScheduler().runCurrent();
+
+        ArgumentCaptor<CarrierTextManager.CarrierTextCallbackInfo> captor =
+                ArgumentCaptor.forClass(
+                        CarrierTextManager.CarrierTextCallbackInfo.class);
+        FakeExecutor.exhaustExecutors(mMainExecutor, mBgExecutor);
+
+        // THEN the default subscription carrier text is used
+        verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
+        assertThat(captor.getValue().carrierText).isEqualTo(TEST_CARRIER);
+    }
+
+    @Test
+    public void carrierText_satelliteTextUpdates_autoTriggersCallback() {
+        reset(mCarrierTextCallback);
+        List<SubscriptionInfo> list = new ArrayList<>();
+        list.add(TEST_SUBSCRIPTION);
+        when(mKeyguardUpdateMonitor.getSimState(anyInt())).thenReturn(
+                TelephonyManager.SIM_STATE_READY);
+        when(mKeyguardUpdateMonitor.getFilteredSubscriptionInfo()).thenReturn(list);
+        mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
+
+        // WHEN the satellite text is set
+        mSatelliteViewModel.getCarrierText().setValue("Test satellite text");
+        mTestScope.getTestScheduler().runCurrent();
+
+        // THEN we should automatically re-trigger #updateCarrierText and get callback info
+        ArgumentCaptor<CarrierTextManager.CarrierTextCallbackInfo> captor =
+                ArgumentCaptor.forClass(
+                        CarrierTextManager.CarrierTextCallbackInfo.class);
+        FakeExecutor.exhaustExecutors(mMainExecutor, mBgExecutor);
+        verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
+        // AND use the satellite text as the carrier text
+        assertThat(captor.getValue().carrierText).isEqualTo("Test satellite text");
+
+        // WHEN the satellite text is reset to null
+        reset(mCarrierTextCallback);
+        mSatelliteViewModel.getCarrierText().setValue(null);
+        mTestScope.getTestScheduler().runCurrent();
+
+        // THEN we should automatically re-trigger #updateCarrierText and get callback info
+        // that doesn't include the satellite info
+        FakeExecutor.exhaustExecutors(mMainExecutor, mBgExecutor);
+        verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
+        assertThat(captor.getValue().carrierText).isEqualTo(TEST_CARRIER);
+    }
+
+    @Test
+    public void carrierText_updatedWhileNotListening_getsNewValueWhenListening() {
+        reset(mCarrierTextCallback);
+        List<SubscriptionInfo> list = new ArrayList<>();
+        list.add(TEST_SUBSCRIPTION);
+        when(mKeyguardUpdateMonitor.getSimState(anyInt())).thenReturn(
+                TelephonyManager.SIM_STATE_READY);
+        when(mKeyguardUpdateMonitor.getFilteredSubscriptionInfo()).thenReturn(list);
+        mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
+
+        mSatelliteViewModel.getCarrierText().setValue("Old satellite text");
+        mTestScope.getTestScheduler().runCurrent();
+
+        ArgumentCaptor<CarrierTextManager.CarrierTextCallbackInfo> captor =
+                ArgumentCaptor.forClass(
+                        CarrierTextManager.CarrierTextCallbackInfo.class);
+        FakeExecutor.exhaustExecutors(mMainExecutor, mBgExecutor);
+        verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
+        assertThat(captor.getValue().carrierText).isEqualTo("Old satellite text");
+
+        // WHEN we stop listening
+        reset(mCarrierTextCallback);
+        mCarrierTextManager.setListening(null);
+
+        // AND the satellite text updates
+        mSatelliteViewModel.getCarrierText().setValue("New satellite text");
+
+        // THEN we don't get new callback info because we aren't listening
+        verify(mCarrierTextCallback, never()).updateCarrierInfo(any());
+
+        // WHEN we start listening again
+        reset(mCarrierTextCallback);
+        mCarrierTextManager.setListening(mCarrierTextCallback);
+
+        // THEN we should automatically re-trigger #updateCarrierText and get callback info
+        // that includes the new satellite text
+        mTestScope.getTestScheduler().runCurrent();
+        FakeExecutor.exhaustExecutors(mMainExecutor, mBgExecutor);
+        verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
+        assertThat(captor.getValue().carrierText).isEqualTo("New satellite text");
+    }
+
+    @Test
     public void testCreateInfo_noSubscriptions() {
         reset(mCarrierTextCallback);
         when(mKeyguardUpdateMonitor.getFilteredSubscriptionInfo()).thenReturn(
@@ -467,6 +590,28 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         assertEquals(0, info.listOfCarriers.length);
         assertEquals(0, info.subscriptionIds.length);
 
+    }
+
+    @Test
+    public void testCarrierText_oneValidSubscription() {
+        reset(mCarrierTextCallback);
+        List<SubscriptionInfo> list = new ArrayList<>();
+        list.add(TEST_SUBSCRIPTION);
+        when(mKeyguardUpdateMonitor.getSimState(anyInt())).thenReturn(
+                TelephonyManager.SIM_STATE_READY);
+        when(mKeyguardUpdateMonitor.getFilteredSubscriptionInfo()).thenReturn(list);
+
+        mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
+
+        ArgumentCaptor<CarrierTextManager.CarrierTextCallbackInfo> captor =
+                ArgumentCaptor.forClass(
+                        CarrierTextManager.CarrierTextCallbackInfo.class);
+
+        mCarrierTextManager.updateCarrierText();
+        FakeExecutor.exhaustExecutors(mMainExecutor, mBgExecutor);
+        verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
+
+        assertThat(captor.getValue().carrierText).isEqualTo(TEST_CARRIER);
     }
 
     @Test
