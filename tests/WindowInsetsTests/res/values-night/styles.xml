@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2020 The Android Open Source Project
+  ~ Copyright (C) 2024 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 
 <resources>
 
-    <style name="base" parent="@style/Theme.MaterialComponents.Light">
+    <style name="base" parent="@style/Theme.MaterialComponents">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
 
@@ -27,38 +27,17 @@
         <item name="colorOnSecondary">@color/primaryTextColor</item>
 
         <!-- Window decor -->
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
 
     </style>
 
-    <style name="bubble_base" parent="">
-        <item name="android:textSize">20sp</item>
-        <item name="android:layout_marginBottom">16dp</item>
-    </style>
-
-    <style name="bubble" parent="@style/bubble_base">
-        <item name="android:layout_marginEnd">56dp</item>
-        <item name="android:background">@drawable/bubble</item>
-        <item name="android:layout_gravity">start</item>
-    </style>
-
-    <style name="bubble_self" parent="@style/bubble_base">
-        <item name="android:layout_marginStart">56dp</item>
-        <item name="android:background">@drawable/bubble_self</item>
-        <item name="android:layout_gravity">end</item>
-    </style>
-
-    <color name="primaryColor">#1c3fef</color>
+    <color name="primaryColor">#639ff9</color>
     <color name="primaryLightColor">#6f6bff</color>
     <color name="primaryDarkColor">#0016bb</color>
     <color name="primaryTextColor">#ffffff</color>
 
-    <color name="bubble">#eeeeee</color>
-    <color name="bubble_self">#D8DCF0</color>
-
-    <dimen name="bubble_corner">16dp</dimen>
-    <dimen name="bubble_padding">8dp</dimen>
-    <dimen name="bubble_padding_side">16dp</dimen>
+    <color name="bubble">#333333</color>
+    <color name="bubble_self">#185abc</color>
 
 </resources>
