@@ -31,6 +31,7 @@ import android.view.WindowInsets
 import android.view.WindowManager
 import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
+import androidx.core.animation.doOnEnd
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.log.DebugLogger.debugLog
 import com.android.systemui.res.R
@@ -109,7 +110,10 @@ constructor(
     override fun updateOrientation(insets: WindowInsets) {}
 
     override fun createScreenshotDropInAnimation(screenRect: Rect, showFlash: Boolean): Animator {
-        return animationController.getEntranceAnimation()
+        val entrance = animationController.getEntranceAnimation(screenRect, showFlash)
+        // reset the timeout when animation finishes
+        entrance.doOnEnd { callbacks?.onUserInteraction() }
+        return entrance
     }
 
     override fun addQuickShareChip(quickShareAction: Notification.Action) {}
