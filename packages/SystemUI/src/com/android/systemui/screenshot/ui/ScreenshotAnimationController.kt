@@ -22,6 +22,8 @@ import android.animation.ValueAnimator
 import android.view.View
 import com.android.systemui.res.R
 import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.sign
 
 class ScreenshotAnimationController(private val view: ScreenshotShelfView) {
     private var animator: Animator? = null
@@ -52,7 +54,8 @@ class ScreenshotAnimationController(private val view: ScreenshotShelfView) {
         return animator
     }
 
-    fun getSwipeDismissAnimation(velocity: Float): Animator {
+    fun getSwipeDismissAnimation(requestedVelocity: Float?): Animator {
+        val velocity = getAdjustedVelocity(requestedVelocity)
         val screenWidth = view.resources.displayMetrics.widthPixels
         // translation at which point the visible UI is fully off the screen (in the direction
         // according to velocity)
@@ -76,5 +79,19 @@ class ScreenshotAnimationController(private val view: ScreenshotShelfView) {
 
     fun cancel() {
         animator?.cancel()
+    }
+
+    private fun getAdjustedVelocity(requestedVelocity: Float?): Float {
+        return if (requestedVelocity == null) {
+            val isLTR = view.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_LTR
+            // dismiss to the left in LTR locales, to the right in RTL
+            if (isLTR) -1 * MINIMUM_VELOCITY else MINIMUM_VELOCITY
+        } else {
+            sign(requestedVelocity) * max(MINIMUM_VELOCITY, abs(requestedVelocity))
+        }
+    }
+
+    companion object {
+        private const val MINIMUM_VELOCITY = 1.5f // pixels per second
     }
 }
