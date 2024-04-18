@@ -2393,6 +2393,20 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
         assertNull(mAms.getProcessRecordLocked(PACKAGE_BLUE, getUidForPackage(PACKAGE_BLUE)));
     }
 
+    @Test
+    public void testBroadcastAppStartInfoReported() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+
+        final Intent timezone = new Intent(Intent.ACTION_TIME_TICK);
+        enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN))));
+
+        waitForIdle();
+
+        verify(mAppStartInfoTracker, times(1)).handleProcessBroadcastStart(anyLong(), any(), any(),
+                anyBoolean());
+    }
+
     private long getReceiverScheduledTime(@NonNull BroadcastRecord r, @NonNull Object receiver) {
         for (int i = 0; i < r.receivers.size(); ++i) {
             if (isReceiverEquals(receiver, r.receivers.get(i))) {

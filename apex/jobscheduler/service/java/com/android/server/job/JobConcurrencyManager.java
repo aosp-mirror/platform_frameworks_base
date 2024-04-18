@@ -1650,6 +1650,16 @@ class JobConcurrencyManager {
                     continue;
                 }
 
+                if (Flags.countQuotaFix() && !nextPending.isReady()) {
+                    // This could happen when the constraints for the job have been marked
+                    // as unsatisfiled but hasn't been removed from the pending queue yet.
+                    if (DEBUG) {
+                        Slog.w(TAG, "Pending+not ready job: " + nextPending);
+                    }
+                    pendingJobQueue.remove(nextPending);
+                    continue;
+                }
+
                 if (DEBUG && isSimilarJobRunningLocked(nextPending)) {
                     Slog.w(TAG, "Already running similar job to: " + nextPending);
                 }
@@ -1732,6 +1742,16 @@ class JobConcurrencyManager {
                     Slog.wtf(TAG, "Pending queue contained a running job");
                     if (DEBUG) {
                         Slog.e(TAG, "Pending+running job: " + nextPending);
+                    }
+                    pendingJobQueue.remove(nextPending);
+                    continue;
+                }
+
+                if (Flags.countQuotaFix() && !nextPending.isReady()) {
+                    // This could happen when the constraints for the job have been marked
+                    // as unsatisfiled but hasn't been removed from the pending queue yet.
+                    if (DEBUG) {
+                        Slog.w(TAG, "Pending+not ready job: " + nextPending);
                     }
                     pendingJobQueue.remove(nextPending);
                     continue;

@@ -1,4 +1,5 @@
 package {
+    default_team: "trendy_team_android_core_graphics_stack",
     default_applicable_licenses: ["frameworks_base_libs_hwui_license"],
 }
 
@@ -93,6 +94,7 @@ cc_defaults {
         host: {
             include_dirs: [
                 "external/vulkan-headers/include",
+                "frameworks/av/media/ndk/include",
             ],
             cflags: [
                 "-Wno-unused-variable",
@@ -142,7 +144,6 @@ cc_defaults {
                 "libsync",
                 "libui",
                 "aconfig_text_flags_c_lib",
-                "server_configurable_flags",
             ],
             static_libs: [
                 "libEGL_blobCache",
@@ -267,6 +268,7 @@ cc_defaults {
     cppflags: ["-Wno-conversion-null"],
 
     srcs: [
+        "apex/android_canvas.cpp",
         "apex/android_matrix.cpp",
         "apex/android_paint.cpp",
         "apex/android_region.cpp",
@@ -279,7 +281,6 @@ cc_defaults {
         android: {
             srcs: [ // sources that depend on android only libraries
                 "apex/android_bitmap.cpp",
-                "apex/android_canvas.cpp",
                 "apex/jni_runtime.cpp",
             ],
         },
@@ -338,6 +339,8 @@ cc_defaults {
         "jni/android_graphics_ColorSpace.cpp",
         "jni/android_graphics_drawable_AnimatedVectorDrawable.cpp",
         "jni/android_graphics_drawable_VectorDrawable.cpp",
+        "jni/android_graphics_HardwareRenderer.cpp",
+        "jni/android_graphics_HardwareBufferRenderer.cpp",
         "jni/android_graphics_HardwareRendererObserver.cpp",
         "jni/android_graphics_Matrix.cpp",
         "jni/android_graphics_Picture.cpp",
@@ -422,8 +425,6 @@ cc_defaults {
         android: {
             srcs: [ // sources that depend on android only libraries
                 "jni/android_graphics_TextureLayer.cpp",
-                "jni/android_graphics_HardwareRenderer.cpp",
-                "jni/android_graphics_HardwareBufferRenderer.cpp",
                 "jni/GIFMovie.cpp",
                 "jni/GraphicsStatsService.cpp",
                 "jni/Movie.cpp",
@@ -447,6 +448,12 @@ cc_defaults {
                 "libstatspull_lazy",
                 "libstatssocket_lazy",
             ],
+        },
+        linux: {
+            srcs: ["platform/linux/utils/SharedLib.cpp"],
+        },
+        darwin: {
+            srcs: ["platform/darwin/utils/SharedLib.cpp"],
         },
         host: {
             cflags: [
@@ -543,6 +550,7 @@ cc_defaults {
         "renderthread/CanvasContext.cpp",
         "renderthread/DrawFrameTask.cpp",
         "renderthread/Frame.cpp",
+        "renderthread/RenderEffectCapabilityQuery.cpp",
         "renderthread/RenderProxy.cpp",
         "renderthread/RenderTask.cpp",
         "renderthread/TimeLord.cpp",
@@ -576,6 +584,7 @@ cc_defaults {
         "HWUIProperties.sysprop",
         "Interpolator.cpp",
         "JankTracker.cpp",
+        "Layer.cpp",
         "LayerUpdateQueue.cpp",
         "LightingInfo.cpp",
         "Matrix.cpp",
@@ -624,7 +633,6 @@ cc_defaults {
                 "renderthread/CacheManager.cpp",
                 "renderthread/EglManager.cpp",
                 "renderthread/ReliableSurface.cpp",
-                "renderthread/RenderEffectCapabilityQuery.cpp",
                 "renderthread/VulkanManager.cpp",
                 "renderthread/VulkanSurface.cpp",
                 "renderthread/RenderThread.cpp",
@@ -635,7 +643,6 @@ cc_defaults {
                 "AutoBackendTextureRelease.cpp",
                 "DeferredLayerUpdater.cpp",
                 "HardwareBitmapUploader.cpp",
-                "Layer.cpp",
                 "ProfileDataContainer.cpp",
                 "Readback.cpp",
                 "WebViewFunctorManager.cpp",

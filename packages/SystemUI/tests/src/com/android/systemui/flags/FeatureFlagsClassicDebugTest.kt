@@ -23,7 +23,7 @@ import android.content.res.Resources
 import android.content.res.Resources.NotFoundException
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
-import android.test.suitebuilder.annotation.SmallTest
+import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_SYSUI_TEAMFOOD
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any

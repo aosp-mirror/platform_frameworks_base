@@ -21,11 +21,11 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentSender;
-import android.os.IBinder;
 import android.service.autofill.ConvertCredentialResponse;
 import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
 import android.util.Slog;
+import android.view.autofill.IAutoFillManagerClient;
 
 /**
  * Requests autofill response from a Remote Autofill Service. This autofill service can be
@@ -105,7 +105,8 @@ final class SecondaryProviderHandler implements RemoteFillService.FillServiceCal
     /**
      * Requests a new fill response.
      */
-    public void onFillRequest(FillRequest pendingFillRequest, int flag, IBinder client) {
+    public void onFillRequest(FillRequest pendingFillRequest, int flag,
+            IAutoFillManagerClient client) {
         Slog.v(TAG, "Requesting fill response to secondary provider.");
         mLastFlag = flag;
         if (mRemoteFillService != null && mRemoteFillService.isCredentialAutofillService()) {

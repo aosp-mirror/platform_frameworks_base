@@ -1009,4 +1009,12 @@ interface IActivityManager {
      * @param originatingUid The UID of the instrumented app that initialized the override
      */
     void clearAllOverridePermissionStates(int originatingUid);
+
+    /**
+     * Request the system to log the reason for restricting / unrestricting an app.
+     * @see ActivityManager#noteAppRestrictionEnabled
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DEVICE_POWER)")
+    void noteAppRestrictionEnabled(in String packageName, int uid, int restrictionType,
+            boolean enabled, int reason, in String subReason, long threshold);
 }

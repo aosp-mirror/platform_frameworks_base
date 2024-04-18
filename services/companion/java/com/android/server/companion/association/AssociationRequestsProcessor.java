@@ -284,7 +284,7 @@ public class AssociationRequestsProcessor {
             @Nullable String deviceProfile, @Nullable AssociatedDevice associatedDevice,
             boolean selfManaged, @Nullable IAssociationRequestCallback callback,
             @Nullable ResultReceiver resultReceiver) {
-        final int id = mAssociationStore.getNextId(userId);
+        final int id = mAssociationStore.getNextId();
         final long timestamp = System.currentTimeMillis();
 
         final AssociationInfo association = new AssociationInfo(id, userId, packageName,

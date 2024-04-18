@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.dagger
+#include "utils/SharedLib.h"
 
-import javax.inject.Qualifier
+#include <dlfcn.h>
 
-/** Wifi logs from [WifiRepositoryViaTrackerLib] in table format. */
-@Qualifier
-@MustBeDocumented
-@Retention(AnnotationRetention.RUNTIME)
-annotation class WifiTrackerLibTableLog
+namespace android {
+namespace uirenderer {
+
+void* SharedLib::openSharedLib(std::string filename) {
+    return dlopen((filename + ".dylib").c_str(), RTLD_NOW | RTLD_NODELETE);
+}
+
+void* SharedLib::getSymbol(void* library, const char* symbol) {
+    return dlsym(library, symbol);
+}
+
+}  // namespace uirenderer
+}  // namespace android

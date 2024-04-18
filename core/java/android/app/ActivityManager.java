@@ -1349,12 +1349,26 @@ public class ActivityManager {
     public static final int RESTRICTION_LEVEL_BACKGROUND_RESTRICTED = 50;
 
     /**
-     * The most restricted level where the apps are considered "in-hibernation",
-     * its package visibility to the rest of the system is limited.
+     * The restricted level where the apps are in a force-stopped state.
      *
      * @hide
      */
-    public static final int RESTRICTION_LEVEL_HIBERNATION = 60;
+    public static final int RESTRICTION_LEVEL_FORCE_STOPPED = 60;
+
+    /**
+     * The heavily background restricted level, where apps cannot start without an explicit
+     * launch by the user.
+     *
+     * @hide
+     */
+    public static final int RESTRICTION_LEVEL_USER_LAUNCH_ONLY = 70;
+
+    /**
+     * A reserved restriction level that is not well-defined.
+     *
+     * @hide
+     */
+    public static final int RESTRICTION_LEVEL_CUSTOM = 90;
 
     /**
      * Not a valid restriction level, it defines the maximum numerical value of restriction level.
@@ -1371,11 +1385,115 @@ public class ActivityManager {
             RESTRICTION_LEVEL_ADAPTIVE_BUCKET,
             RESTRICTION_LEVEL_RESTRICTED_BUCKET,
             RESTRICTION_LEVEL_BACKGROUND_RESTRICTED,
-            RESTRICTION_LEVEL_HIBERNATION,
+            RESTRICTION_LEVEL_FORCE_STOPPED,
+            RESTRICTION_LEVEL_USER_LAUNCH_ONLY,
+            RESTRICTION_LEVEL_CUSTOM,
             RESTRICTION_LEVEL_MAX,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface RestrictionLevel{}
+
+    /**
+     * Maximum string length for sub reason for restriction.
+     *
+     * @hide
+     */
+    public static final int RESTRICTION_SUBREASON_MAX_LENGTH = 16;
+
+    /**
+     * Restriction reason unknown - do not use directly.
+     *
+     * For use with noteAppRestrictionEnabled()
+     * @hide
+     */
+    public static final int RESTRICTION_REASON_UNKNOWN = 0;
+
+    /**
+     * Restriction reason to be used when this is normal behavior for the state.
+     *
+     * For use with noteAppRestrictionEnabled()
+     * @hide
+     */
+    public static final int RESTRICTION_REASON_DEFAULT = 1;
+
+    /**
+     * Restriction reason is some kind of timeout that moves the app to a more restricted state.
+     * The threshold should specify how long the app was dormant, in milliseconds.
+     *
+     * For use with noteAppRestrictionEnabled()
+     * @hide
+     */
+    public static final int RESTRICTION_REASON_DORMANT = 2;
+
+    /**
+     * Restriction reason to be used when removing a restriction due to direct or indirect usage
+     * of the app, especially to undo any automatic restrictions.
+     *
+     * For use with noteAppRestrictionEnabled()
+     * @hide
+     */
+    public static final int RESTRICTION_REASON_USAGE = 3;
+
+    /**
+     * Restriction reason to be used when the user chooses to manually restrict the app, through
+     * UI or command line interface.
+     *
+     * For use with noteAppRestrictionEnabled()
+     * @hide
+     */
+    public static final int RESTRICTION_REASON_USER = 4;
+
+    /**
+     * Restriction reason to be used when the user chooses to manually restrict the app on being
+     * prompted by the OS or some anomaly detection algorithm. For example, if the app is causing
+     * high battery drain or affecting system performance and the OS recommends that the user
+     * restrict the app.
+     *
+     * For use with noteAppRestrictionEnabled()
+     * @hide
+     */
+    public static final int RESTRICTION_REASON_USER_NUDGED = 5;
+
+    /**
+     * Restriction reason to be used when the OS automatically detects that the app is causing
+     * system health issues such as performance degradation, battery drain, high memory usage, etc.
+     *
+     * For use with noteAppRestrictionEnabled()
+     * @hide
+     */
+    public static final int RESTRICTION_REASON_SYSTEM_HEALTH = 6;
+
+    /**
+     * Restriction reason to be used when there is a server-side decision made to restrict an app
+     * that is showing widespread problems on user devices, or violating policy in some way.
+     *
+     * For use with noteAppRestrictionEnabled()
+     * @hide
+     */
+    public static final int RESTRICTION_REASON_REMOTE_TRIGGER = 7;
+
+    /**
+     * Restriction reason to be used when some other problem requires restricting the app.
+     *
+     * For use with noteAppRestrictionEnabled()
+     * @hide
+     */
+    public static final int RESTRICTION_REASON_OTHER = 8;
+
+    /** @hide */
+    @IntDef(prefix = { "RESTRICTION_REASON_" }, value = {
+            RESTRICTION_REASON_UNKNOWN,
+            RESTRICTION_REASON_DEFAULT,
+            RESTRICTION_REASON_DORMANT,
+            RESTRICTION_REASON_USAGE,
+            RESTRICTION_REASON_USER,
+            RESTRICTION_REASON_USER_NUDGED,
+            RESTRICTION_REASON_SYSTEM_HEALTH,
+            RESTRICTION_REASON_REMOTE_TRIGGER,
+            RESTRICTION_REASON_OTHER
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RestrictionReason{}
 
     /** @hide */
     @android.ravenwood.annotation.RavenwoodKeep
@@ -1393,12 +1511,16 @@ public class ActivityManager {
                 return "restricted_bucket";
             case RESTRICTION_LEVEL_BACKGROUND_RESTRICTED:
                 return "background_restricted";
-            case RESTRICTION_LEVEL_HIBERNATION:
-                return "hibernation";
+            case RESTRICTION_LEVEL_FORCE_STOPPED:
+                return "stopped";
+            case RESTRICTION_LEVEL_USER_LAUNCH_ONLY:
+                return "user_only";
+            case RESTRICTION_LEVEL_CUSTOM:
+                return "custom";
             case RESTRICTION_LEVEL_MAX:
                 return "max";
             default:
-                return "";
+                return String.valueOf(level);
         }
     }
 
@@ -6124,6 +6246,43 @@ public class ActivityManager {
             e.rethrowFromSystemServer();
         }
         return PowerExemptionManager.REASON_DENIED;
+    }
+
+    /**
+     * Requests the system to log the reason for restricting/unrestricting an app. This API
+     * should be called before applying any change to the restriction level.
+     * <p>
+     * The {@code enabled} value determines whether the state is being applied or removed.
+     * Not all restrictions are actual restrictions. For example,
+     * {@link #RESTRICTION_LEVEL_ADAPTIVE} is a normal state, where there is default lifecycle
+     * management applied to the app. Also, {@link #RESTRICTION_LEVEL_EXEMPTED} is used when the
+     * app is being put in a power-save allowlist.
+     *
+     * @param packageName the package name of the app
+     * @param uid the uid of the app
+     * @param restrictionLevel the restriction level specified in {@code RestrictionLevel}
+     * @param enabled whether the state is being applied or removed
+     * @param reason the reason for the restriction state change, from {@code RestrictionReason}
+     * @param subReason a string sub reason limited to 16 characters that specifies additional
+     *                  information about the reason for restriction.
+     * @param threshold for reasons that are due to exceeding some threshold, the threshold value
+     *                  must be specified. The unit of the threshold depends on the reason and/or
+     *                  subReason. For time, use milliseconds. For memory, use KB. For count, use
+     *                  the actual count or normalized as per-hour. For power, use milliwatts. Etc.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.DEVICE_POWER)
+    public void noteAppRestrictionEnabled(@NonNull String packageName, int uid,
+            @RestrictionLevel int restrictionLevel, boolean enabled,
+            @RestrictionReason int reason,
+            @Nullable String subReason, long threshold) {
+        try {
+            getService().noteAppRestrictionEnabled(packageName, uid, restrictionLevel, enabled,
+                    reason, subReason, threshold);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

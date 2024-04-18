@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.connectivity
 
 import android.os.UserManager
-import android.test.suitebuilder.annotation.SmallTest
+import androidx.test.filters.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.lifecycle.Lifecycle

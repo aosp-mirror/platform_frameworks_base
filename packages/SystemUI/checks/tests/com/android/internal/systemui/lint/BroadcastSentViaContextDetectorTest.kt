@@ -21,7 +21,6 @@ import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Issue
 import org.junit.Test
 
-@Suppress("UnstableApiUsage")
 class BroadcastSentViaContextDetectorTest : SystemUILintDetectorTest() {
 
     override fun getDetector(): Detector = BroadcastSentViaContextDetector()
@@ -30,7 +29,6 @@ class BroadcastSentViaContextDetectorTest : SystemUILintDetectorTest() {
 
     @Test
     fun testSendBroadcast() {
-        println(stubs.size)
         lint()
             .files(
                 TestFiles.java(
@@ -47,7 +45,7 @@ class BroadcastSentViaContextDetectorTest : SystemUILintDetectorTest() {
                 """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(BroadcastSentViaContextDetector.ISSUE)
             .run()
@@ -80,7 +78,7 @@ class BroadcastSentViaContextDetectorTest : SystemUILintDetectorTest() {
                 """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(BroadcastSentViaContextDetector.ISSUE)
             .run()
@@ -114,7 +112,7 @@ class BroadcastSentViaContextDetectorTest : SystemUILintDetectorTest() {
                 """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(BroadcastSentViaContextDetector.ISSUE)
             .run()
@@ -149,7 +147,7 @@ class BroadcastSentViaContextDetectorTest : SystemUILintDetectorTest() {
                 """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(BroadcastSentViaContextDetector.ISSUE)
             .run()
@@ -176,7 +174,7 @@ class BroadcastSentViaContextDetectorTest : SystemUILintDetectorTest() {
                 """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(BroadcastSentViaContextDetector.ISSUE)
             .run()
@@ -201,12 +199,10 @@ class BroadcastSentViaContextDetectorTest : SystemUILintDetectorTest() {
                 """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(BroadcastSentViaContextDetector.ISSUE)
             .run()
             .expectClean()
     }
-
-    private val stubs = androidStubs
 }

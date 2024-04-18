@@ -56,9 +56,9 @@ import android.os.UserHandle;
 import android.service.quicksettings.IQSService;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.TileService;
-import android.test.suitebuilder.annotation.SmallTest;
 
 import androidx.annotation.Nullable;
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;

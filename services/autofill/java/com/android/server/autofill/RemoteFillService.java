@@ -28,7 +28,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.service.autofill.AutofillService;
@@ -43,6 +42,7 @@ import android.service.autofill.ISaveCallback;
 import android.service.autofill.SaveRequest;
 import android.text.format.DateUtils;
 import android.util.Slog;
+import android.view.autofill.IAutoFillManagerClient;
 
 import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.infra.ServiceConnector;
@@ -283,7 +283,8 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
         return callback;
     }
 
-    public void onFillCredentialRequest(@NonNull FillRequest request, IBinder autofillCallback) {
+    public void onFillCredentialRequest(@NonNull FillRequest request,
+            IAutoFillManagerClient autofillCallback) {
         if (sVerbose) {
             Slog.v(TAG, "onFillRequest:" + request);
         }

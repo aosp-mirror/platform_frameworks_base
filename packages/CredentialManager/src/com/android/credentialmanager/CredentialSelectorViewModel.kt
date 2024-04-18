@@ -317,6 +317,14 @@ class CredentialSelectorViewModel(
         )
     }
 
+    fun createFlowOnMoreOptionsOnlySelectedOnCreationSelection() {
+        uiState = uiState.copy(
+                createCredentialUiState = uiState.createCredentialUiState?.copy(
+                        currentScreenState = CreateScreenState.MORE_OPTIONS_SELECTION_ONLY,
+                )
+        )
+    }
+
     fun createFlowOnBackCreationSelectionButtonSelected() {
         uiState = uiState.copy(
             createCredentialUiState = uiState.createCredentialUiState?.copy(

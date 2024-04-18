@@ -26,9 +26,9 @@ import static junit.framework.Assert.fail;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;

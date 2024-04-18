@@ -1760,6 +1760,9 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER,
                 SecureSettingsProto.Accessibility.DISPLAY_DALTONIZER);
         dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_SATURATION_LEVEL,
+                SecureSettingsProto.Accessibility.DISPLAY_DALTONIZER_SATURATION_LEVEL);
+        dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
                 SecureSettingsProto.Accessibility.DISPLAY_INVERSION_ENABLED);
         dumpSetting(s, p,

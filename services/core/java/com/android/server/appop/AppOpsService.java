@@ -5543,6 +5543,20 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                     return 0;
                 }
+                case "note": {
+                    int res = shell.parseUserPackageOp(true, err);
+                    if (res < 0) {
+                        return res;
+                    }
+                    if (shell.packageName != null) {
+                        shell.mInterface.noteOperation(shell.op, shell.packageUid,
+                                shell.packageName, shell.attributionTag, true,
+                                "appops note shell command", true);
+                    } else {
+                        return -1;
+                    }
+                    return 0;
+                }
                 case "start": {
                     int res = shell.parseUserPackageOp(true, err);
                     if (res < 0) {

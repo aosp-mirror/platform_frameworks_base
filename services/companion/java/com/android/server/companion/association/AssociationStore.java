@@ -132,7 +132,7 @@ public class AssociationStore {
     @GuardedBy("mLock")
     private final Map<Integer, AssociationInfo> mIdToAssociationMap = new HashMap<>();
     @GuardedBy("mLock")
-    private final Map<Integer, Integer> mUserToMaxId = new HashMap<>();
+    private int mMaxId = 0;
 
     @GuardedBy("mLocalListeners")
     private final Set<OnChangeListener> mLocalListeners = new LinkedHashSet<>();
@@ -162,7 +162,7 @@ public class AssociationStore {
                 mPersisted = false;
 
                 mIdToAssociationMap.clear();
-                mUserToMaxId.clear();
+                mMaxId = 0;
 
                 // The data is stored in DE directories, so we can read the data for all users now
                 // (which would not be possible if the data was stored to CE directories).
@@ -172,7 +172,7 @@ public class AssociationStore {
                     for (AssociationInfo association : entry.getValue().getAssociations()) {
                         mIdToAssociationMap.put(association.getId(), association);
                     }
-                    mUserToMaxId.put(entry.getKey(), entry.getValue().getMaxId());
+                    mMaxId = Math.max(mMaxId, entry.getValue().getMaxId());
                 }
 
                 mPersisted = true;
@@ -183,18 +183,18 @@ public class AssociationStore {
     /**
      * Get the current max association id.
      */
-    public int getMaxId(int userId) {
+    public int getMaxId() {
         synchronized (mLock) {
-            return mUserToMaxId.getOrDefault(userId, 0);
+            return mMaxId;
         }
     }
 
     /**
      * Get the next available association id.
      */
-    public int getNextId(int userId) {
+    public int getNextId() {
         synchronized (mLock) {
-            return getMaxId(userId) + 1;
+            return getMaxId() + 1;
         }
     }
 
@@ -214,7 +214,7 @@ public class AssociationStore {
             }
 
             mIdToAssociationMap.put(id, association);
-            mUserToMaxId.put(userId, Math.max(mUserToMaxId.getOrDefault(userId, 0), id));
+            mMaxId = Math.max(mMaxId, id);
 
             writeCacheToDisk(userId);
 
@@ -305,7 +305,7 @@ public class AssociationStore {
         mExecutor.execute(() -> {
             Associations associations = new Associations();
             synchronized (mLock) {
-                associations.setMaxId(mUserToMaxId.getOrDefault(userId, 0));
+                associations.setMaxId(mMaxId);
                 associations.setAssociations(
                         CollectionUtils.filter(mIdToAssociationMap.values().stream().toList(),
                                 a -> a.getUserId() == userId));

@@ -4623,6 +4623,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 android.Manifest.permission.STATUS_BAR_SERVICE);
 
         getMagnificationConnectionManager().setConnection(connection);
+
+        if (com.android.window.flags.Flags.alwaysDrawMagnificationFullscreenBorder()
+                && connection == null
+                && mMagnificationController.isFullScreenMagnificationControllerInitialized()) {
+            // Since the connection does not exist, the system ui cannot provide the border
+            // implementation for fullscreen magnification. So we call reset to deactivate the
+            // fullscreen magnification to prevent the magnified but no border situation.
+            final ArrayList<Display> displays = getValidDisplayList();
+            for (int i = 0; i < displays.size(); i++) {
+                final Display display = displays.get(i);
+                getMagnificationController().getFullScreenMagnificationController()
+                        .reset(display.getDisplayId(), false);
+            }
+        }
     }
 
     /**

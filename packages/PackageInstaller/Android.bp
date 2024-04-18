@@ -46,6 +46,7 @@ android_app {
     sdk_version: "system_current",
     rename_resources_package: false,
     static_libs: [
+        "xz-java",
         "androidx.leanback_leanback",
         "androidx.annotation_annotation",
         "androidx.fragment_fragment",
@@ -78,6 +79,7 @@ android_app {
     overrides: ["PackageInstaller"],
 
     static_libs: [
+        "xz-java",
         "androidx.leanback_leanback",
         "androidx.fragment_fragment",
         "androidx.lifecycle_lifecycle-livedata",
@@ -110,6 +112,7 @@ android_app {
     overrides: ["PackageInstaller"],
 
     static_libs: [
+        "xz-java",
         "androidx.leanback_leanback",
         "androidx.annotation_annotation",
         "androidx.fragment_fragment",

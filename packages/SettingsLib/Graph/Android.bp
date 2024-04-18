@@ -1,0 +1,21 @@
+package {
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+filegroup {
+    name: "SettingsLibGraph-srcs",
+    srcs: ["src/**/*"],
+}
+
+android_library {
+    name: "SettingsLibGraph",
+    defaults: [
+        "SettingsLintDefaults",
+    ],
+    srcs: [":SettingsLibGraph-srcs"],
+    static_libs: [
+        "androidx.annotation_annotation",
+        "androidx.preference_preference",
+    ],
+    kotlincflags: ["-Xjvm-default=all"],
+}

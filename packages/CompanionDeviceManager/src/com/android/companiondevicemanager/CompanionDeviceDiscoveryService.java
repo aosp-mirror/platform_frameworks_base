@@ -197,7 +197,12 @@ public class CompanionDeviceDiscoveryService extends Service {
                 filter(allFilters, BluetoothLeDeviceFilter.class);
         final List<WifiDeviceFilter> wifiFilters = filter(allFilters, WifiDeviceFilter.class);
 
-        checkBoundDevicesIfNeeded(request, btFilters);
+        // No need to startDiscovery if the device is already bound or connected for
+        // singleDevice dialog.
+        if (checkBoundDevicesIfNeeded(request, btFilters)) {
+            stopSelf();
+            return;
+        }
 
         // If no filters are specified: look for everything.
         final boolean forceStartScanningAll = isEmpty(allFilters);
@@ -257,33 +262,37 @@ public class CompanionDeviceDiscoveryService extends Service {
         stopSelf();
     }
 
-    private void checkBoundDevicesIfNeeded(@NonNull AssociationRequest request,
+    private boolean checkBoundDevicesIfNeeded(@NonNull AssociationRequest request,
             @NonNull List<BluetoothDeviceFilter> btFilters) {
         // If filtering to get single device by mac address, also search in the set of already
         // bonded devices to allow linking those directly
-        if (btFilters.isEmpty() || !request.isSingleDevice()) return;
+        if (btFilters.isEmpty() || !request.isSingleDevice()) return false;
 
         final BluetoothDeviceFilter singleMacAddressFilter =
                 find(btFilters, filter -> !TextUtils.isEmpty(filter.getAddress()));
 
-        if (singleMacAddressFilter == null) return;
+        if (singleMacAddressFilter == null) return false;
 
-        findAndReportMatches(mBtAdapter.getBondedDevices(), btFilters);
-        findAndReportMatches(mBtManager.getConnectedDevices(BluetoothProfile.GATT), btFilters);
-        findAndReportMatches(
-                mBtManager.getConnectedDevices(BluetoothProfile.GATT_SERVER), btFilters);
+        return findAndReportMatches(mBtAdapter.getBondedDevices(), btFilters)
+                || findAndReportMatches(mBtManager.getConnectedDevices(
+                        BluetoothProfile.GATT), btFilters)
+                || findAndReportMatches(mBtManager.getConnectedDevices(
+                        BluetoothProfile.GATT_SERVER), btFilters);
     }
 
-    private void findAndReportMatches(@Nullable Collection<BluetoothDevice> devices,
+    private boolean findAndReportMatches(@Nullable Collection<BluetoothDevice> devices,
             @NonNull List<BluetoothDeviceFilter> filters) {
-        if (devices == null) return;
+        if (devices == null) return false;
 
         for (BluetoothDevice device : devices) {
             final DeviceFilterPair<BluetoothDevice> match = findMatch(device, filters);
             if (match != null) {
                 onDeviceFound(match);
+                return true;
             }
         }
+
+        return false;
     }
 
     private BluetoothBroadcastReceiver startBtScanningIfNeeded(

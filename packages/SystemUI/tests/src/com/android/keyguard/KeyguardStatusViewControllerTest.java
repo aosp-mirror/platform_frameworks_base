@@ -31,10 +31,11 @@ import static org.mockito.Mockito.when;
 
 import android.animation.AnimatorTestRule;
 import android.platform.test.annotations.DisableFlags;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.app.animation.Interpolators;
 import com.android.systemui.Flags;

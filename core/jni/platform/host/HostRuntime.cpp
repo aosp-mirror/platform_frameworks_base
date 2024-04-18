@@ -80,7 +80,7 @@ int register_libcore_util_NativeAllocationRegistry_Delegate(JNIEnv* env) {
 
 namespace android {
 
-extern int register_android_animation_PropertyValuesHolder(JNIEnv *env);
+extern int register_android_animation_PropertyValuesHolder(JNIEnv* env);
 extern int register_android_content_AssetManager(JNIEnv* env);
 extern int register_android_content_StringBlock(JNIEnv* env);
 extern int register_android_content_XmlBlock(JNIEnv* env);
@@ -106,15 +106,17 @@ extern int register_android_view_MotionEvent(JNIEnv* env);
 extern int register_android_view_ThreadedRenderer(JNIEnv* env);
 extern int register_android_graphics_HardwareBufferRenderer(JNIEnv* env);
 extern int register_android_view_VelocityTracker(JNIEnv* env);
-extern int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv *env);
+extern int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv* env);
 
-#define REG_JNI(name)      { name }
+#define REG_JNI(name) \
+    { name }
 struct RegJNIRec {
     int (*mProc)(JNIEnv*);
 };
 
-// Map of all possible class names to register to their corresponding JNI registration function pointer
-// The actual list of registered classes will be determined at runtime via the 'native_classes' System property
+// Map of all possible class names to register to their corresponding JNI registration function
+// pointer The actual list of registered classes will be determined at runtime via the
+// 'native_classes' System property
 static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
         {"android.animation.PropertyValuesHolder",
          REG_JNI(register_android_animation_PropertyValuesHolder)},
@@ -154,8 +156,7 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
 };
 
 static int register_jni_procs(const std::unordered_map<std::string, RegJNIRec>& jniRegMap,
-        const vector<string>& classesToRegister, JNIEnv* env) {
-
+                              const vector<string>& classesToRegister, JNIEnv* env) {
     for (const string& className : classesToRegister) {
         if (jniRegMap.at(className).mProc(env) < 0) {
             return -1;
@@ -169,15 +170,14 @@ static int register_jni_procs(const std::unordered_map<std::string, RegJNIRec>& 
     return 0;
 }
 
-int AndroidRuntime::registerNativeMethods(JNIEnv* env,
-        const char* className, const JNINativeMethod* gMethods, int numMethods) {
+int AndroidRuntime::registerNativeMethods(JNIEnv* env, const char* className,
+                                          const JNINativeMethod* gMethods, int numMethods) {
     return jniRegisterNativeMethods(env, className, gMethods, numMethods);
 }
 
 JNIEnv* AndroidRuntime::getJNIEnv() {
     JNIEnv* env;
-    if (javaVM->GetEnv((void**) &env, JNI_VERSION_1_6) != JNI_OK)
-        return nullptr;
+    if (javaVM->GetEnv((void**)&env, JNI_VERSION_1_6) != JNI_OK) return nullptr;
     return env;
 }
 
@@ -186,11 +186,10 @@ JavaVM* AndroidRuntime::getJavaVM() {
 }
 
 static vector<string> parseCsv(const string& csvString) {
-    vector<string>   result;
+    vector<string> result;
     istringstream stream(csvString);
     string segment;
-    while(getline(stream, segment, ','))
-    {
+    while (getline(stream, segment, ',')) {
         result.push_back(segment);
     }
     return result;
@@ -274,7 +273,9 @@ static void* mmapFile(const char* dataFilePath) {
     }
 
     struct CloseHandleWrapper {
-        void operator()(HANDLE h) { CloseHandle(h); }
+        void operator()(HANDLE h) {
+            CloseHandle(h);
+        }
     };
     std::unique_ptr<void, CloseHandleWrapper> mmapHandle(
             CreateFileMapping(file, nullptr, PAGE_READONLY, 0, 0, nullptr));
@@ -384,8 +385,9 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
     // Configuration is stored as java System properties.
     // Get a reference to System.getProperty
     jclass system = FindClassOrDie(env, "java/lang/System");
-    jmethodID getPropertyMethod = GetStaticMethodIDOrDie(env, system, "getProperty",
-                                                         "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+    jmethodID getPropertyMethod =
+            GetStaticMethodIDOrDie(env, system, "getProperty",
+                                   "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
 
     // Java system properties that contain LayoutLib config. The initial values in the map
     // are the default values if the property is not specified.

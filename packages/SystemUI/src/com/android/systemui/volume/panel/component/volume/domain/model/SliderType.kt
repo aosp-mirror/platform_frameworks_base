@@ -17,6 +17,7 @@
 package com.android.systemui.volume.panel.component.volume.domain.model
 
 import com.android.settingslib.volume.shared.model.AudioStream
+import com.android.systemui.volume.panel.component.mediaoutput.shared.model.MediaDeviceSession
 
 /** The type of volume slider that can be shown at the UI. */
 sealed interface SliderType {
@@ -25,5 +26,5 @@ sealed interface SliderType {
     data class Stream(val stream: AudioStream) : SliderType
 
     /** The represents media device casting volume. */
-    data object MediaDeviceCast : SliderType
+    data class MediaDeviceCast(val session: MediaDeviceSession) : SliderType
 }

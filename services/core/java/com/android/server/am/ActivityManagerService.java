@@ -37,6 +37,9 @@ import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
+import static android.app.ActivityManager.RESTRICTION_LEVEL_FORCE_STOPPED;
+import static android.app.ActivityManager.RESTRICTION_REASON_DEFAULT;
+import static android.app.ActivityManager.RESTRICTION_REASON_USAGE;
 import static android.app.ActivityManager.StopUserOnSwitch;
 import static android.app.ActivityManager.UidFrozenStateChangedCallback.UID_FROZEN_STATE_FROZEN;
 import static android.app.ActivityManager.UidFrozenStateChangedCallback.UID_FROZEN_STATE_UNFROZEN;
@@ -5105,10 +5108,19 @@ public class ActivityManagerService extends IActivityManager.Stub
                 } // else, stopped packages in private space may still hit the logic below
             }
         }
+
+        final boolean wasForceStopped = app.wasForceStopped()
+                || app.getWindowProcessController().wasForceStopped();
+        if (android.app.Flags.appRestrictionsApi() && wasForceStopped) {
+            noteAppRestrictionEnabled(app.info.packageName, app.uid,
+                    RESTRICTION_LEVEL_FORCE_STOPPED, false,
+                    RESTRICTION_REASON_USAGE, "unknown", 0L);
+        }
+
         if (!sendBroadcast) {
             if (!android.content.pm.Flags.stayStopped()) return;
             // Nothing to do if it wasn't previously stopped
-            if (!app.wasForceStopped() && !app.getWindowProcessController().wasForceStopped()) {
+            if (!wasForceStopped) {
                 return;
             }
         }
@@ -8946,8 +8958,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     com.android.internal.R.integer.config_multiuserMaxRunningUsers);
             final boolean delayUserDataLocking = res.getBoolean(
                     com.android.internal.R.bool.config_multiuserDelayUserDataLocking);
+            final int backgroundUserScheduledStopTimeSecs = res.getInteger(
+                    com.android.internal.R.integer.config_backgroundUserScheduledStopTimeSecs);
             mUserController.setInitialConfig(userSwitchUiEnabled, maxRunningUsers,
-                    delayUserDataLocking);
+                    delayUserDataLocking, backgroundUserScheduledStopTimeSecs);
         }
         mAppErrors.loadAppsNotReportingCrashesFromConfig(res.getString(
                 com.android.internal.R.string.config_appsNotReportingCrashes));
@@ -14327,6 +14341,20 @@ public class ActivityManagerService extends IActivityManager.Stub
         int newBackupUid;
 
         synchronized(this) {
+            if (android.app.Flags.appRestrictionsApi()) {
+                try {
+                    final boolean wasStopped = mPackageManagerInt.isPackageStopped(app.packageName,
+                            UserHandle.getUserId(app.uid));
+                    if (wasStopped) {
+                        noteAppRestrictionEnabled(app.packageName, app.uid,
+                                RESTRICTION_LEVEL_FORCE_STOPPED, false,
+                                RESTRICTION_REASON_DEFAULT, "restore", 0L);
+                    }
+                } catch (NameNotFoundException e) {
+                    Slog.w(TAG, "No such package", e);
+                }
+            }
+
             // !!! TODO: currently no check here that we're already bound
             // Backup agent is now in use, its package can't be stopped.
             try {
@@ -20106,6 +20134,34 @@ public class ActivityManagerService extends IActivityManager.Stub
             mAppRestrictionController.applyRestrictionLevel(packageName, uid, level,
                     null /* trackerInfo */, curBucket, true /* allowUpdateBucket */,
                     reason, subReason);
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
+    }
+
+    /**
+     * Log the reason for changing an app restriction. Purely used for logging purposes and does not
+     * cause any change to app state.
+     *
+     * @see ActivityManager#noteAppRestrictionEnabled(String, int, int, boolean, int, String, long)
+     */
+    @Override
+    public void noteAppRestrictionEnabled(String packageName, int uid,
+            @RestrictionLevel int restrictionType, boolean enabled,
+            @ActivityManager.RestrictionReason int reason, String subReason, long threshold) {
+        if (!android.app.Flags.appRestrictionsApi()) return;
+
+        enforceCallingPermission(android.Manifest.permission.DEVICE_POWER,
+                "noteAppRestrictionEnabled()");
+
+        final int userId = UserHandle.getCallingUserId();
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            if (uid == -1) {
+                uid = mPackageManagerInt.getPackageUid(packageName, 0, userId);
+            }
+            mAppRestrictionController.noteAppRestrictionEnabled(packageName, uid, restrictionType,
+                    enabled, reason, subReason, threshold);
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }

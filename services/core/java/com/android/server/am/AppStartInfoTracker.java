@@ -196,6 +196,8 @@ public final class AppStartInfoTracker {
             start.setIntent(intent);
             start.setStartType(ApplicationStartInfo.START_TYPE_UNSET);
             start.addStartupTimestamp(ApplicationStartInfo.START_TIMESTAMP_LAUNCH, timestampNanos);
+
+            // TODO: handle possible alarm activity start.
             if (intent != null && intent.getCategories() != null
                     && intent.getCategories().contains(Intent.CATEGORY_LAUNCHER)) {
                 start.setReason(ApplicationStartInfo.START_REASON_LAUNCHER);
@@ -313,7 +315,7 @@ public final class AppStartInfoTracker {
     }
 
     public void handleProcessServiceStart(long startTimeNs, ProcessRecord app,
-                ServiceRecord serviceRecord, boolean cold) {
+                ServiceRecord serviceRecord) {
         synchronized (mLock) {
             if (!mEnabled) {
                 return;
@@ -323,8 +325,9 @@ public final class AppStartInfoTracker {
             start.setStartupState(ApplicationStartInfo.STARTUP_STATE_STARTED);
             start.addStartupTimestamp(
                     ApplicationStartInfo.START_TIMESTAMP_LAUNCH, startTimeNs);
-            start.setStartType(cold ? ApplicationStartInfo.START_TYPE_COLD
-                    : ApplicationStartInfo.START_TYPE_WARM);
+            start.setStartType(ApplicationStartInfo.START_TYPE_COLD);
+
+            // TODO: handle possible alarm service start.
             start.setReason(serviceRecord.permission != null
                     && serviceRecord.permission.contains("android.permission.BIND_JOB_SERVICE")
                     ? ApplicationStartInfo.START_REASON_JOB
@@ -336,8 +339,9 @@ public final class AppStartInfoTracker {
         }
     }
 
-    public void handleProcessBroadcastStart(long startTimeNs, ProcessRecord app,
-                BroadcastRecord broadcast, boolean cold) {
+    /** Process a broadcast triggered app start. */
+    public void handleProcessBroadcastStart(long startTimeNs, ProcessRecord app, Intent intent,
+                boolean isAlarm) {
         synchronized (mLock) {
             if (!mEnabled) {
                 return;
@@ -347,26 +351,19 @@ public final class AppStartInfoTracker {
             start.setStartupState(ApplicationStartInfo.STARTUP_STATE_STARTED);
             start.addStartupTimestamp(
                     ApplicationStartInfo.START_TIMESTAMP_LAUNCH, startTimeNs);
-            start.setStartType(cold ? ApplicationStartInfo.START_TYPE_COLD
-                    : ApplicationStartInfo.START_TYPE_WARM);
-            if (broadcast == null) {
-                start.setReason(ApplicationStartInfo.START_REASON_BROADCAST);
-            } else if (broadcast.alarm) {
+            start.setStartType(ApplicationStartInfo.START_TYPE_COLD);
+            if (isAlarm) {
                 start.setReason(ApplicationStartInfo.START_REASON_ALARM);
-            } else if (broadcast.pushMessage || broadcast.pushMessageOverQuota) {
-                start.setReason(ApplicationStartInfo.START_REASON_PUSH);
-            } else if (Intent.ACTION_BOOT_COMPLETED.equals(broadcast.intent.getAction())) {
-                start.setReason(ApplicationStartInfo.START_REASON_BOOT_COMPLETE);
             } else {
                 start.setReason(ApplicationStartInfo.START_REASON_BROADCAST);
             }
-            start.setIntent(broadcast != null ? broadcast.intent : null);
+            start.setIntent(intent);
             addStartInfoLocked(start);
         }
     }
 
-    public void handleProcessContentProviderStart(long startTimeNs, ProcessRecord app,
-                boolean cold) {
+    /** Process a content provider triggered app start. */
+    public void handleProcessContentProviderStart(long startTimeNs, ProcessRecord app) {
         synchronized (mLock) {
             if (!mEnabled) {
                 return;
@@ -376,8 +373,7 @@ public final class AppStartInfoTracker {
             start.setStartupState(ApplicationStartInfo.STARTUP_STATE_STARTED);
             start.addStartupTimestamp(
                     ApplicationStartInfo.START_TIMESTAMP_LAUNCH, startTimeNs);
-            start.setStartType(cold ? ApplicationStartInfo.START_TYPE_COLD
-                    : ApplicationStartInfo.START_TYPE_WARM);
+            start.setStartType(ApplicationStartInfo.START_TYPE_COLD);
             start.setReason(ApplicationStartInfo.START_REASON_CONTENT_PROVIDER);
             addStartInfoLocked(start);
         }
