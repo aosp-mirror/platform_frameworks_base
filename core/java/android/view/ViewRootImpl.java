@@ -9044,20 +9044,26 @@ public final class ViewRootImpl implements ViewParent,
                     mTempInsets, mTempControls, mRelayoutBundle);
             mRelayoutRequested = true;
 
+            if (activityWindowInfoFlag() && mPendingActivityWindowInfo != null) {
+                ActivityWindowInfo outInfo = null;
+                try {
+                    outInfo = mRelayoutBundle.getParcelable(
+                            IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO,
+                            ActivityWindowInfo.class);
+                    mRelayoutBundle.remove(IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO);
+                } catch (IllegalStateException e) {
+                    Log.e(TAG, "Failed to get ActivityWindowInfo from relayout Bundle", e);
+                }
+                if (outInfo != null) {
+                    mPendingActivityWindowInfo.set(outInfo);
+                }
+            }
             final int maybeSyncSeqId = mRelayoutBundle.getInt(
                     IWindowSession.KEY_RELAYOUT_BUNDLE_SEQID);
             if (maybeSyncSeqId > 0) {
                 mSyncSeqId = maybeSyncSeqId;
             }
-            if (activityWindowInfoFlag() && mPendingActivityWindowInfo != null) {
-                final ActivityWindowInfo outInfo = mRelayoutBundle.getParcelable(
-                        IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO,
-                        ActivityWindowInfo.class);
-                if (outInfo != null) {
-                    mPendingActivityWindowInfo.set(outInfo);
-                }
-            }
-            mRelayoutBundle.clear();
+
             mWinFrameInScreen.set(mTmpFrames.frame);
             if (mTranslator != null) {
                 mTranslator.translateRectInScreenToAppWindow(mTmpFrames.frame);
