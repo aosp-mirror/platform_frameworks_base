@@ -502,8 +502,8 @@ public final class NotificationRecord {
         pw.println(prefix + "uid=" + getSbn().getUid() + " userId=" + getSbn().getUserId());
         pw.println(prefix + "opPkg=" + getSbn().getOpPkg());
         pw.println(prefix + "icon=" + notification.getSmallIcon());
-        pw.println(prefix + "flags=0x" + Integer.toHexString(notification.flags));
-        pw.println(prefix + "originalFlags=0x" + Integer.toHexString(mOriginalFlags));
+        pw.println(prefix + "flags=" + Notification.flagsToString(notification.flags));
+        pw.println(prefix + "originalFlags=" + Notification.flagsToString(mOriginalFlags));
         pw.println(prefix + "pri=" + notification.priority);
         pw.println(prefix + "key=" + getSbn().getKey());
         pw.println(prefix + "seen=" + mStats.hasSeen());
@@ -538,8 +538,7 @@ public final class NotificationRecord {
         pw.println(prefix + "mInterruptionTimeMs=" + mInterruptionTimeMs);
         pw.println(prefix + "mSuppressedVisualEffects= " + mSuppressedVisualEffects);
         if (mPreChannelsNotification) {
-            pw.println(prefix + String.format("defaults=0x%08x flags=0x%08x",
-                    notification.defaults, notification.flags));
+            pw.println(prefix + "defaults=" + Notification.defaultsToString(notification.defaults));
             pw.println(prefix + "n.sound=" + notification.sound);
             pw.println(prefix + "n.audioStreamType=" + notification.audioStreamType);
             pw.println(prefix + "n.audioAttributes=" + notification.audioAttributes);
