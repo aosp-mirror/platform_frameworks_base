@@ -2069,6 +2069,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         // Remove views that don't translate
         mTranslateableViews.remove(mChildrenContainerStub);
         mTranslateableViews.remove(mGutsStub);
+        // We don't handle focus highlight in this view, it's done in background drawable instead
+        setDefaultFocusHighlightEnabled(false);
     }
 
     /**
