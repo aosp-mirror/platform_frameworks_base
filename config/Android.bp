@@ -33,3 +33,9 @@ filegroup {
     name: "preloaded-classes-denylist",
     srcs: ["preloaded-classes-denylist"],
 }
+
+prebuilt_etc {
+    name: "dirty-image-objects",
+    src: "dirty-image-objects",
+    filename: "dirty-image-objects",
+}
