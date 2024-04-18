@@ -842,8 +842,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
 
         if ((c.getChangeMask() & CHANGE_FORCE_TRANSLUCENT) != 0) {
-            tr.setForceTranslucent(c.getForceTranslucent());
-            effects |= TRANSACT_EFFECTS_LIFECYCLE;
+            if (tr.setForceTranslucent(c.getForceTranslucent())) {
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
+            }
         }
 
         if ((c.getChangeMask() & WindowContainerTransaction.Change.CHANGE_DRAG_RESIZING) != 0) {
@@ -964,8 +965,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
         }
         if ((c.getChangeMask() & CHANGE_FORCE_TRANSLUCENT) != 0) {
-            taskFragment.setForceTranslucent(c.getForceTranslucent());
-            effects |= TRANSACT_EFFECTS_LIFECYCLE;
+            if (taskFragment.setForceTranslucent(c.getForceTranslucent())) {
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
+            }
         }
 
         effects |= applyChanges(taskFragment, c);
@@ -1568,26 +1570,32 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             case OP_TYPE_REORDER_TO_BOTTOM_OF_TASK: {
                 final Task task = taskFragment.getTask();
                 if (task != null) {
-                    task.mChildren.remove(taskFragment);
-                    task.mChildren.add(0, taskFragment);
-                    if (!taskFragment.hasChild()) {
-                        // Ensure that the child layers are updated if the TaskFragment is empty.
-                        task.assignChildLayers();
+                    if (task.mChildren.peekFirst() != taskFragment) {
+                        task.mChildren.remove(taskFragment);
+                        task.mChildren.add(0, taskFragment);
+                        if (!taskFragment.hasChild()) {
+                            // Ensure that the child layers are updated if the TaskFragment is
+                            // empty.
+                            task.assignChildLayers();
+                        }
+                        effects |= TRANSACT_EFFECTS_LIFECYCLE;
                     }
-                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 }
                 break;
             }
             case OP_TYPE_REORDER_TO_TOP_OF_TASK: {
                 final Task task = taskFragment.getTask();
                 if (task != null) {
-                    task.mChildren.remove(taskFragment);
-                    task.mChildren.add(taskFragment);
-                    if (!taskFragment.hasChild()) {
-                        // Ensure that the child layers are updated if the TaskFragment is empty.
-                        task.assignChildLayers();
+                    if (task.mChildren.peekLast() != taskFragment) {
+                        task.mChildren.remove(taskFragment);
+                        task.mChildren.add(taskFragment);
+                        if (!taskFragment.hasChild()) {
+                            // Ensure that the child layers are updated if the TaskFragment is
+                            // empty.
+                            task.assignChildLayers();
+                        }
+                        effects |= TRANSACT_EFFECTS_LIFECYCLE;
                     }
-                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 }
                 break;
             }

@@ -906,8 +906,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return mForceTranslucent;
     }
 
-    void setForceTranslucent(boolean set) {
+    boolean setForceTranslucent(boolean set) {
+        if (mForceTranslucent == set) {
+            return false;
+        }
         mForceTranslucent = set;
+        return true;
     }
 
     boolean isLeafTaskFragment() {
