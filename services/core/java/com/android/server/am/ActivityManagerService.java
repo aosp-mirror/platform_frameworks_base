@@ -15502,6 +15502,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                             intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME));
                                 } else {
                                     mAppOpsService.uidRemoved(uid);
+                                    mServices.onUidRemovedLocked(uid);
                                 }
                             }
                             break;
