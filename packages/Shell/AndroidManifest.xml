@@ -934,6 +934,9 @@
     <!-- Permission required for Cts test - CtsSettingsTestCases -->
     <uses-permission android:name="android.permission.PREPARE_FACTORY_RESET" />
 
+    <!-- Permission required for CTS test - FileIntegrityManagerTest -->
+    <uses-permission android:name="android.permission.SETUP_FSVERITY" />
+
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"
