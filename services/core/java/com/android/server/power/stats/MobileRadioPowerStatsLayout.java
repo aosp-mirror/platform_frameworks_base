@@ -64,29 +64,30 @@ class MobileRadioPowerStatsLayout extends PowerStatsLayout {
     }
 
     void addDeviceMobileActivity() {
-        mDeviceSleepTimePosition = addDeviceSection(1);
-        mDeviceIdleTimePosition = addDeviceSection(1);
-        mDeviceScanTimePosition = addDeviceSection(1);
-        mDeviceCallTimePosition = addDeviceSection(1);
+        mDeviceSleepTimePosition = addDeviceSection(1, "sleep");
+        mDeviceIdleTimePosition = addDeviceSection(1, "idle");
+        mDeviceScanTimePosition = addDeviceSection(1, "scan");
+        mDeviceCallTimePosition = addDeviceSection(1, "call", FLAG_OPTIONAL);
     }
 
     void addStateStats() {
-        mStateRxTimePosition = addStateSection(1);
+        mStateRxTimePosition = addStateSection(1, "rx");
         mStateTxTimesCount = ModemActivityInfo.getNumTxPowerLevels();
-        mStateTxTimesPosition = addStateSection(mStateTxTimesCount);
+        mStateTxTimesPosition = addStateSection(mStateTxTimesCount, "tx");
     }
 
     void addUidNetworkStats() {
-        mUidRxBytesPosition = addUidSection(1);
-        mUidTxBytesPosition = addUidSection(1);
-        mUidRxPacketsPosition = addUidSection(1);
-        mUidTxPacketsPosition = addUidSection(1);
+        mUidRxPacketsPosition = addUidSection(1, "rx-pkts");
+        mUidRxBytesPosition = addUidSection(1, "rx-B");
+        mUidTxPacketsPosition = addUidSection(1, "tx-pkts");
+        mUidTxBytesPosition = addUidSection(1, "tx-B");
     }
 
     @Override
     public void addDeviceSectionPowerEstimate() {
         super.addDeviceSectionPowerEstimate();
-        mDeviceCallPowerPosition = addDeviceSection(1);
+        // Printed as part of the PhoneCallPowerStatsProcessor
+        mDeviceCallPowerPosition = addDeviceSection(1, "call-power", FLAG_HIDDEN);
     }
 
     public void setDeviceSleepTime(long[] stats, long durationMillis) {

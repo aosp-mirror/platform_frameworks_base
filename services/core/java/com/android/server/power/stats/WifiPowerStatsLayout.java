@@ -65,28 +65,28 @@ public class WifiPowerStatsLayout extends PowerStatsLayout {
         mPowerReportingSupported = powerReportingSupported;
         if (mPowerReportingSupported) {
             mDeviceActiveTimePosition = UNSPECIFIED;
-            mDeviceRxTimePosition = addDeviceSection(1);
-            mDeviceTxTimePosition = addDeviceSection(1);
-            mDeviceIdleTimePosition = addDeviceSection(1);
-            mDeviceScanTimePosition = addDeviceSection(1);
+            mDeviceRxTimePosition = addDeviceSection(1, "rx");
+            mDeviceTxTimePosition = addDeviceSection(1, "tx");
+            mDeviceIdleTimePosition = addDeviceSection(1, "idle");
+            mDeviceScanTimePosition = addDeviceSection(1, "scan");
         } else {
-            mDeviceActiveTimePosition = addDeviceSection(1);
+            mDeviceActiveTimePosition = addDeviceSection(1, "rx-tx");
             mDeviceRxTimePosition = UNSPECIFIED;
             mDeviceTxTimePosition = UNSPECIFIED;
             mDeviceIdleTimePosition = UNSPECIFIED;
             mDeviceScanTimePosition = UNSPECIFIED;
         }
-        mDeviceBasicScanTimePosition = addDeviceSection(1);
-        mDeviceBatchedScanTimePosition = addDeviceSection(1);
+        mDeviceBasicScanTimePosition = addDeviceSection(1, "basic-scan", FLAG_OPTIONAL);
+        mDeviceBatchedScanTimePosition = addDeviceSection(1, "batched-scan", FLAG_OPTIONAL);
     }
 
     void addUidNetworkStats() {
-        mUidRxBytesPosition = addUidSection(1);
-        mUidTxBytesPosition = addUidSection(1);
-        mUidRxPacketsPosition = addUidSection(1);
-        mUidTxPacketsPosition = addUidSection(1);
-        mUidScanTimePosition = addUidSection(1);
-        mUidBatchScanTimePosition = addUidSection(1);
+        mUidRxPacketsPosition = addUidSection(1, "rx-pkts");
+        mUidRxBytesPosition = addUidSection(1, "rx-B");
+        mUidTxPacketsPosition = addUidSection(1, "tx-pkts");
+        mUidTxBytesPosition = addUidSection(1, "tx-B");
+        mUidScanTimePosition = addUidSection(1, "scan", FLAG_OPTIONAL);
+        mUidBatchScanTimePosition = addUidSection(1, "batched-scan", FLAG_OPTIONAL);
     }
 
     public boolean isPowerReportingSupported() {

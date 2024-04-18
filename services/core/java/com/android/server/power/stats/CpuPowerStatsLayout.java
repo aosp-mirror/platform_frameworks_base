@@ -44,7 +44,7 @@ public class CpuPowerStatsLayout extends PowerStatsLayout {
      * Declare that the stats array has a section capturing CPU time per scaling step
      */
     public void addDeviceSectionCpuTimeByScalingStep(int scalingStepCount) {
-        mDeviceCpuTimeByScalingStepPosition = addDeviceSection(scalingStepCount);
+        mDeviceCpuTimeByScalingStepPosition = addDeviceSection(scalingStepCount, "steps");
         mDeviceCpuTimeByScalingStepCount = scalingStepCount;
     }
 
@@ -72,7 +72,7 @@ public class CpuPowerStatsLayout extends PowerStatsLayout {
      * Declare that the stats array has a section capturing CPU time in each cluster
      */
     public void addDeviceSectionCpuTimeByCluster(int clusterCount) {
-        mDeviceCpuTimeByClusterPosition = addDeviceSection(clusterCount);
+        mDeviceCpuTimeByClusterPosition = addDeviceSection(clusterCount, "clusters");
         mDeviceCpuTimeByClusterCount = clusterCount;
     }
 
@@ -102,7 +102,7 @@ public class CpuPowerStatsLayout extends PowerStatsLayout {
     public void addUidSectionCpuTimeByPowerBracket(int[] scalingStepToPowerBracketMap) {
         mScalingStepToPowerBracketMap = scalingStepToPowerBracketMap;
         updatePowerBracketCount();
-        mUidPowerBracketsPosition = addUidSection(mUidPowerBracketCount);
+        mUidPowerBracketsPosition = addUidSection(mUidPowerBracketCount, "time");
     }
 
     private void updatePowerBracketCount() {

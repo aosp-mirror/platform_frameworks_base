@@ -76,21 +76,4 @@ public class PhoneCallPowerStatsProcessor extends PowerStatsProcessor {
                     stats.setDeviceStats(states, mTmpDeviceStats);
                 });
     }
-
-    @Override
-    String deviceStatsToString(PowerStats.Descriptor descriptor, long[] stats) {
-        return "power: " + mStatsLayout.getDevicePowerEstimate(stats);
-    }
-
-    @Override
-    String stateStatsToString(PowerStats.Descriptor descriptor, int key, long[] stats) {
-        // Unsupported for this power component
-        return null;
-    }
-
-    @Override
-    String uidStatsToString(PowerStats.Descriptor descriptor, long[] stats) {
-        // Unsupported for this power component
-        return null;
-    }
 }

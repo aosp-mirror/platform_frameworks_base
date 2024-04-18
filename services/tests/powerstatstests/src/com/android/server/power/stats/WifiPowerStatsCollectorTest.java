@@ -304,10 +304,14 @@ public class WifiPowerStatsCollectorTest {
         String dump = sw.toString();
         assertThat(dump).contains("duration=7500");
         assertThat(dump).contains(
-                "stats=[6000, 1000, 300, 200, 634, 945, " + ((64321 - 10000) * 1000 / 3500)
-                        + ", 0, 0]");
-        assertThat(dump).contains("UID 24: [6000, 3000, 60, 30, 400, 600, 0]");
-        assertThat(dump).contains("UID 42: [1000, 2000, 100, 200, 234, 345, 0]");
+                "rx: 6000 tx: 1000 idle: 300 scan: 200 basic-scan: 634 batched-scan: 945"
+                        + " energy: " + ((64321 - 10000) * 1000 / 3500));
+        assertThat(dump).contains(
+                "UID 24: rx-pkts: 60 rx-B: 6000 tx-pkts: 30 tx-B: 3000"
+                        + " scan: 400 batched-scan: 600");
+        assertThat(dump).contains(
+                "UID 42: rx-pkts: 100 rx-B: 1000 tx-pkts: 200 tx-B: 2000"
+                        + " scan: 234 batched-scan: 345");
     }
 
     private PowerStats collectPowerStats(boolean hasPowerReporting) {

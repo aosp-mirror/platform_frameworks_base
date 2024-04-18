@@ -16,7 +16,6 @@
 
 package com.android.server.power.stats;
 
-import android.os.BatteryStats;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -486,65 +485,5 @@ public class CpuPowerStatsProcessor extends PowerStatsProcessor {
             mStatsLayout.setUidPowerEstimate(mTmpUidStatsArray, power);
             stats.setUidStats(uid, proportionalEstimate.stateValues, mTmpUidStatsArray);
         }
-    }
-
-    @Override
-    public String deviceStatsToString(PowerStats.Descriptor descriptor, long[] stats) {
-        unpackPowerStatsDescriptor(descriptor);
-        StringBuilder sb = new StringBuilder();
-        int cpuScalingStepCount = mStatsLayout.getCpuScalingStepCount();
-        sb.append("steps: [");
-        for (int step = 0; step < cpuScalingStepCount; step++) {
-            if (step != 0) {
-                sb.append(", ");
-            }
-            sb.append(mStatsLayout.getTimeByScalingStep(stats, step));
-        }
-        int clusterCount = mStatsLayout.getCpuClusterCount();
-        sb.append("] clusters: [");
-        for (int cluster = 0; cluster < clusterCount; cluster++) {
-            if (cluster != 0) {
-                sb.append(", ");
-            }
-            sb.append(mStatsLayout.getTimeByCluster(stats, cluster));
-        }
-        sb.append("] uptime: ").append(mStatsLayout.getUsageDuration(stats));
-        int energyConsumerCount = mStatsLayout.getEnergyConsumerCount();
-        if (energyConsumerCount > 0) {
-            sb.append(" energy: [");
-            for (int i = 0; i < energyConsumerCount; i++) {
-                if (i != 0) {
-                    sb.append(", ");
-                }
-                sb.append(mStatsLayout.getConsumedEnergy(stats, i));
-            }
-            sb.append("]");
-        }
-        sb.append(" power: ").append(
-                BatteryStats.formatCharge(mStatsLayout.getDevicePowerEstimate(stats)));
-        return sb.toString();
-    }
-
-    @Override
-    String stateStatsToString(PowerStats.Descriptor descriptor, int key, long[] stats) {
-        // Unsupported for this power component
-        return null;
-    }
-
-    @Override
-    public String uidStatsToString(PowerStats.Descriptor descriptor, long[] stats) {
-        unpackPowerStatsDescriptor(descriptor);
-        StringBuilder sb = new StringBuilder();
-        sb.append("[");
-        int powerBracketCount = mStatsLayout.getCpuPowerBracketCount();
-        for (int bracket = 0; bracket < powerBracketCount; bracket++) {
-            if (bracket != 0) {
-                sb.append(", ");
-            }
-            sb.append(mStatsLayout.getUidTimeByPowerBracket(stats, bracket));
-        }
-        sb.append("] power: ").append(
-                BatteryStats.formatCharge(mStatsLayout.getUidPowerEstimate(stats)));
-        return sb.toString();
     }
 }

@@ -337,12 +337,14 @@ public class MobileRadioPowerStatsCollectorTest {
         pw.flush();
         String dump = sw.toString();
         assertThat(dump).contains("duration=100");
+        assertThat(dump).contains("sleep: 200 idle: 300 scan: 60000 call: 40000 energy: "
+                + ((64321 - 10000) * 1000 / 3500));
+        assertThat(dump).contains("(LTE) rx: 7000 tx: [8000, 9000, 1000, 2000, 3000]");
+        assertThat(dump).contains("(NR MMWAVE) rx: 6000 tx: [1000, 2000, 3000, 4000, 5000]");
         assertThat(dump).contains(
-                "stats=[200, 300, 60000, 40000, " + ((64321 - 10000) * 1000 / 3500) + ", 0, 0, 0]");
-        assertThat(dump).contains("state LTE: [7000, 8000, 9000, 1000, 2000, 3000]");
-        assertThat(dump).contains("state NR MMWAVE: [6000, 1000, 2000, 3000, 4000, 5000]");
-        assertThat(dump).contains("UID 24: [6000, 3000, 60, 30, 0]");
-        assertThat(dump).contains("UID 42: [1000, 2000, 100, 200, 0]");
+                "UID 24: rx-pkts: 60 rx-B: 6000 tx-pkts: 30 tx-B: 3000");
+        assertThat(dump).contains(
+                "UID 42: rx-pkts: 100 rx-B: 1000 tx-pkts: 200 tx-B: 2000");
     }
 
     private PowerStats collectPowerStats(boolean perNetworkTypeData) throws Throwable {

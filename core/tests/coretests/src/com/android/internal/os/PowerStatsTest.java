@@ -22,6 +22,7 @@ import android.os.BatteryConsumer;
 import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.platform.test.ravenwood.RavenwoodRule;
+import android.util.IndentingPrintWriter;
 import android.util.SparseArray;
 import android.util.Xml;
 
@@ -31,6 +32,8 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 
+import com.google.common.truth.StringSubject;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -38,6 +41,7 @@ import org.junit.runner.RunWith;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 
 @RunWith(AndroidJUnit4.class)
@@ -56,6 +60,9 @@ public class PowerStatsTest {
         extras.putBoolean("hasPowerMonitor", true);
         SparseArray<String> stateLabels = new SparseArray<>();
         stateLabels.put(0x0F, "idle");
+        extras.putString(PowerStats.Descriptor.EXTRA_DEVICE_STATS_FORMAT, "device:0[3]");
+        extras.putString(PowerStats.Descriptor.EXTRA_STATE_STATS_FORMAT, "state:0");
+        extras.putString(PowerStats.Descriptor.EXTRA_UID_STATS_FORMAT, "a:0 b:1");
         mDescriptor = new PowerStats.Descriptor(BatteryConsumer.POWER_COMPONENT_CPU, 3, stateLabels,
                 1, 2, extras);
         mRegistry.register(mDescriptor);
@@ -190,5 +197,69 @@ public class PowerStatsTest {
         newParcel.unmarshall(bytes, 0, bytes.length);
         newParcel.setDataPosition(0);
         return newParcel;
+    }
+
+    @Test
+    public void formatForBatteryHistory() {
+        PowerStats stats = new PowerStats(mDescriptor);
+        stats.durationMs = 1234;
+        stats.stats[0] = 10;
+        stats.stats[1] = 20;
+        stats.stats[2] = 30;
+        stats.stateStats.put(0x0F, new long[]{16});
+        stats.stateStats.put(0xF0, new long[]{17});
+        stats.uidStats.put(42, new long[]{40, 50});
+        stats.uidStats.put(99, new long[]{60, 70});
+
+        assertThat(stats.formatForBatteryHistory(" #"))
+                .isEqualTo("duration=1234 cpu="
+                        + "device: [10, 20, 30]"
+                        + " (idle) state: 16"
+                        + " (cpu-f0) state: 17"
+                        + " #42: a: 40 b: 50"
+                        + " #99: a: 60 b: 70");
+    }
+
+    @Test
+    public void dump() {
+        PowerStats stats = new PowerStats(mDescriptor);
+        stats.durationMs = 1234;
+        stats.stats[0] = 10;
+        stats.stats[1] = 20;
+        stats.stats[2] = 30;
+        stats.stateStats.put(0x0F, new long[]{16});
+        stats.stateStats.put(0xF0, new long[]{17});
+        stats.uidStats.put(42, new long[]{40, 50});
+        stats.uidStats.put(99, new long[]{60, 70});
+
+        StringWriter sw = new StringWriter();
+        IndentingPrintWriter pw = new IndentingPrintWriter(sw);
+        stats.dump(pw);
+        pw.flush();
+        String dump = sw.toString();
+
+        assertThat(dump).contains("duration=1234");
+        assertThat(dump).contains("device: [10, 20, 30]");
+        assertThat(dump).contains("(idle) state: 16");
+        assertThat(dump).contains("(cpu-f0) state: 17");
+        assertThat(dump).contains("UID 42: a: 40 b: 50");
+        assertThat(dump).contains("UID 99: a: 60 b: 70");
+    }
+
+    @Test
+    public void formatter() {
+        assertThatFormatted(new long[]{12, 34, 56}, "a:0 b:1[2]")
+                .isEqualTo("a: 12 b: [34, 56]");
+        assertThatFormatted(new long[]{12, 0, 0}, "a:0? b:1[2]?")
+                .isEqualTo("a: 12");
+        assertThatFormatted(new long[]{0, 34, 56}, "a:0? b:1[2]?")
+                .isEqualTo("b: [34, 56]");
+        assertThatFormatted(new long[]{3141592, 2000000, 1414213}, "pi:0p sqrt:1[2]p")
+                .isEqualTo("pi: 3.14 sqrt: [2.00, 1.41]");
+    }
+
+    private static StringSubject assertThatFormatted(long[] stats, String format) {
+        return assertThat(new PowerStats.PowerStatsFormatter(format)
+                .format(stats));
     }
 }
