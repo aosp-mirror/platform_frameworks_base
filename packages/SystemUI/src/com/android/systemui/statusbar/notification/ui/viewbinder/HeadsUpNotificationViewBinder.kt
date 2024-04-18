@@ -16,13 +16,12 @@
 
 package com.android.systemui.statusbar.notification.ui.viewbinder
 
-import android.util.Log
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.shared.HeadsUpRowKey
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel
 import com.android.systemui.util.kotlin.sample
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.coroutineScope
@@ -77,8 +76,7 @@ constructor(private val viewModel: NotificationListViewModel) {
 }
 
 private val NotificationStackScrollLayout.isHeadsUpAnimatingAway: Flow<Boolean>
-    get() =
-        ConflatedCallbackFlow.conflatedCallbackFlow {
-            setHeadsUpAnimatingAwayListener { animatingAway -> trySend(animatingAway) }
-            awaitClose { setHeadsUpAnimatingAwayListener(null) }
-        }
+    get() = conflatedCallbackFlow {
+        setHeadsUpAnimatingAwayListener { animatingAway -> trySend(animatingAway) }
+        awaitClose { setHeadsUpAnimatingAwayListener(null) }
+    }
