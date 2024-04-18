@@ -4006,8 +4006,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 return ActivityManager.RESTRICTION_LEVEL_RESTRICTED_BUCKET;
             case "background_restricted":
                 return ActivityManager.RESTRICTION_LEVEL_BACKGROUND_RESTRICTED;
-            case "hibernation":
-                return ActivityManager.RESTRICTION_LEVEL_HIBERNATION;
+            case "force_stopped":
+                return ActivityManager.RESTRICTION_LEVEL_FORCE_STOPPED;
+            case "user_launch_only":
+                return ActivityManager.RESTRICTION_LEVEL_USER_LAUNCH_ONLY;
+            case "custom":
+                return ActivityManager.RESTRICTION_LEVEL_CUSTOM;
             default:
                 return ActivityManager.RESTRICTION_LEVEL_UNKNOWN;
         }
