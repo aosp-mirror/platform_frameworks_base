@@ -23,6 +23,9 @@ import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_HOME_NOTIF
 import static com.android.server.policy.PhoneWindowManager.SHORT_PRESS_SETTINGS_NOTIFICATION_PANEL;
 
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.view.KeyEvent;
 
 import androidx.test.filters.MediumTest;
@@ -34,6 +37,7 @@ import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -41,6 +45,10 @@ import org.junit.runner.RunWith;
 @MediumTest
 @RunWith(JUnitParamsRunner.class)
 public class ShortcutLoggingTests extends ShortcutKeyTestBase {
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private static final int VENDOR_ID = 0x123;
     private static final int PRODUCT_ID = 0x456;
@@ -153,8 +161,6 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
                         new int[]{META_KEY, CTRL_KEY, KeyEvent.KEYCODE_DPAD_RIGHT},
                         KeyboardLogEvent.SPLIT_SCREEN_NAVIGATION, KeyEvent.KEYCODE_DPAD_RIGHT,
                         META_ON | CTRL_ON},
-                {"Shift + Menu -> Trigger Bug Report", new int[]{SHIFT_KEY, KeyEvent.KEYCODE_MENU},
-                        KeyboardLogEvent.TRIGGER_BUG_REPORT, KeyEvent.KEYCODE_MENU, SHIFT_ON},
                 {"Meta + L -> Lock Homescreen", new int[]{META_KEY, KeyEvent.KEYCODE_L},
                         KeyboardLogEvent.LOCK_SCREEN, KeyEvent.KEYCODE_L, META_ON},
                 {"Meta + Ctrl + N -> Open Notes", new int[]{META_KEY, CTRL_KEY, KeyEvent.KEYCODE_N},
@@ -352,5 +358,14 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
         mPhoneWindowManager.assertShortcutLogged(VENDOR_ID, PRODUCT_ID, expectedLogEvent,
                 expectedKey, expectedModifierState, DEVICE_BUS,
                 "Failed while executing " + testName);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(com.android.server.flags.Flags.FLAG_NEW_BUGREPORT_KEYBOARD_SHORTCUT)
+    public void testBugreportShortcutPress() {
+        sendKeyCombination(new int[]{META_KEY, CTRL_KEY, KeyEvent.KEYCODE_DEL}, 0);
+        mPhoneWindowManager.assertShortcutLogged(VENDOR_ID, PRODUCT_ID,
+                KeyboardLogEvent.TRIGGER_BUG_REPORT, KeyEvent.KEYCODE_DEL, META_ON | CTRL_ON,
+                DEVICE_BUS, "Failed to log bugreport shortcut.");
     }
 }
