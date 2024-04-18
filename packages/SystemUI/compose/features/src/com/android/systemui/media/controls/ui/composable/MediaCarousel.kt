@@ -53,6 +53,11 @@ fun SceneScope.MediaCarousel(
                 val mediaFrame = carouselController.mediaFrame
                 (mediaFrame.parent as? ViewGroup)?.removeView(mediaFrame)
                 addView(mediaFrame)
+                layoutParams =
+                    FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                    )
             }
         },
         update = {
