@@ -74,6 +74,7 @@ aconfig_declarations_group {
         "android.view.inputmethod.flags-aconfig-java",
         "android.webkit.flags-aconfig-java",
         "android.widget.flags-aconfig-java",
+        "backstage_power_flags_lib",
         "backup_flags_lib",
         "camera_platform_flags_core_java_lib",
         "com.android.hardware.input-aconfig-java",
@@ -1331,5 +1332,22 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.systemserver.flags-aconfig-java",
     aconfig_declarations: "android.systemserver.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// backstage power
+aconfig_declarations {
+    name: "backstage_power_flags",
+    package: "com.android.server.power.optimization",
+    container: "system",
+    exportable: true,
+    srcs: [
+        "services/core/java/com/android/server/power/stats/flags.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "backstage_power_flags_lib",
+    aconfig_declarations: "backstage_power_flags",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
