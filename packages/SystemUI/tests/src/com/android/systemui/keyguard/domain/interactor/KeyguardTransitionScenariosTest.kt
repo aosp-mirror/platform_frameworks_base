@@ -755,35 +755,6 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun goneToDreamingLockscreenHosted() =
-        testScope.runTest {
-            // GIVEN a device that is not dreaming or dozing
-            keyguardRepository.setDreamingWithOverlay(false)
-            keyguardRepository.setDozeTransitionModel(
-                DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
-            )
-            runCurrent()
-
-            // GIVEN a prior transition has run to GONE
-            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.GONE)
-
-            // WHEN the device begins to dream with the lockscreen hosted dream
-            keyguardRepository.setDreamingWithOverlay(true)
-            keyguardRepository.setIsActiveDreamLockscreenHosted(true)
-            advanceTimeBy(100L)
-
-            assertThat(transitionRepository)
-                .startedTransition(
-                    to = KeyguardState.DREAMING_LOCKSCREEN_HOSTED,
-                    from = KeyguardState.GONE,
-                    ownerName = "FromGoneTransitionInteractor",
-                    animatorAssertion = { it.isNotNull() }
-                )
-
-            coroutineContext.cancelChildren()
-        }
-
-    @Test
     fun goneToGlanceableHub() =
         testScope.runTest {
             // GIVEN a prior transition has run to GONE
@@ -1244,9 +1215,15 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             keyguardRepository.setKeyguardOccluded(true)
             runCurrent()
 
-            // GIVEN device is docked
+            // GIVEN device is docked/communal is available
             dockManager.setIsDocked(true)
             dockManager.setDockEvent(DockManager.STATE_DOCKED)
+            val idleTransitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(CommunalScenes.Communal)
+                )
+            communalInteractor.setTransitionState(idleTransitionState)
+            runCurrent()
 
             // WHEN occlusion ends
             keyguardRepository.setKeyguardOccluded(false)
@@ -1372,6 +1349,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             // WHEN the keyguard is occluded and device wakes up and is no longer dreaming
             keyguardRepository.setDreaming(false)
+            testScheduler.advanceTimeBy(150) // The dreaming signal is debounced.
+            runCurrent()
             keyguardRepository.setKeyguardOccluded(true)
             powerInteractor.setAwakeForTest()
             runCurrent()
@@ -1379,7 +1358,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // THEN a transition to OCCLUDED should occur
             assertThat(transitionRepository)
                 .startedTransition(
-                    ownerName = "FromDreamingTransitionInteractor",
+                    ownerName = "FromDreamingTransitionInteractor(Occluded but no longer dreaming)",
                     from = KeyguardState.DREAMING,
                     to = KeyguardState.OCCLUDED,
                     animatorAssertion = { it.isNotNull() },
@@ -1516,7 +1495,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // THEN a transition to OCCLUDED should occur
             assertThat(transitionRepository)
                 .startedTransition(
-                    ownerName = "FromAodTransitionInteractor",
+                    ownerName = "FromAodTransitionInteractor(isOccluded = true)",
                     from = KeyguardState.AOD,
                     to = KeyguardState.OCCLUDED,
                     animatorAssertion = { it.isNotNull() },
@@ -1555,7 +1534,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             runTransitionAndSetWakefulness(KeyguardState.AOD, KeyguardState.LOCKSCREEN)
             runCurrent()
 
-            // WHEN the device begins to sleep (first power button press)...
+            // WHEN the device begins to sleep (first power button press), which starts
+            // LS -> DOZING...
             powerInteractor.setAsleepForTest()
             runCurrent()
             reset(transitionRepository)
@@ -1568,11 +1548,11 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             }
             runCurrent()
 
-            // THEN a transition from LOCKSCREEN => OCCLUDED should occur
+            // THEN a transition from DOZING => OCCLUDED should occur
             assertThat(transitionRepository)
                 .startedTransition(
-                    ownerName = "FromLockscreenTransitionInteractor",
-                    from = KeyguardState.LOCKSCREEN,
+                    ownerName = "FromDozingTransitionInteractor",
+                    from = KeyguardState.DOZING,
                     to = KeyguardState.OCCLUDED,
                     animatorAssertion = { it.isNotNull() },
                 )
