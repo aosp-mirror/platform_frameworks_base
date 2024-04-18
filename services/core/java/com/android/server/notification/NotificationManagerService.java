@@ -7235,6 +7235,10 @@ public class NotificationManagerService extends SystemService {
                 }
             }
         }
+        if (Flags.traceCancelEvents()) {
+            Trace.instant(Trace.TRACE_TAG_SYSTEM_SERVER, "cancelNotificationInternal: " +
+                    SmallHash.hash(Objects.hashCode(tag) ^ id));
+        }
 
         cancelNotification(uid, callingPid, pkg, tag, id, 0,
                 mustNotHaveFlags, false, userId, REASON_APP_CANCEL, null);
