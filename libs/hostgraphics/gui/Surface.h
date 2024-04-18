@@ -52,6 +52,8 @@ public:
 
     virtual void destroy() {}
 
+    int getBuffersDataSpace() { return 0; }
+
 protected:
     virtual ~Surface() {}
 
