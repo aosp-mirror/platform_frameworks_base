@@ -149,7 +149,6 @@ import com.android.internal.os.FuseUnavailableMountException;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.modules.utils.TypedXmlPullParser;
@@ -3278,7 +3277,7 @@ class StorageManagerService extends IStorageManager.Stub
             throws RemoteException {
         super.setCeStorageProtection_enforcePermission();
 
-        mVold.setCeStorageProtection(userId, HexDump.toHexString(secret));
+        mVold.setCeStorageProtection(userId, secret);
     }
 
     /* Only for use by LockSettingsService */
@@ -3288,7 +3287,7 @@ class StorageManagerService extends IStorageManager.Stub
         super.unlockCeStorage_enforcePermission();
 
         if (StorageManager.isFileEncrypted()) {
-            mVold.unlockCeStorage(userId, HexDump.toHexString(secret));
+            mVold.unlockCeStorage(userId, secret);
         }
         synchronized (mLock) {
             mCeUnlockedUsers.append(userId);
