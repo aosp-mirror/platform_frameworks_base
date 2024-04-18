@@ -1971,6 +1971,15 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return SCREEN_ORIENTATION_UNSET;
     }
 
+    @ActivityInfo.ScreenOrientation
+    @Override
+    protected int getOverrideOrientation() {
+        if (isEmbedded() && !isVisibleRequested()) {
+            return SCREEN_ORIENTATION_UNSPECIFIED;
+        }
+        return super.getOverrideOrientation();
+    }
+
     /**
      * Whether or not to allow this container to specify an app requested orientation.
      *
