@@ -40,6 +40,9 @@ class AvalancheController @Inject constructor(
     // HUN showing right now, in the floating state where full shade is hidden, on launcher or AOD
     @VisibleForTesting var headsUpEntryShowing: HeadsUpEntry? = null
 
+    // Key of HUN previously showing, is being removed or was removed
+    var previousHunKey: String = ""
+
     // List of runnables to run for the HUN showing right now
     private var headsUpEntryShowingRunnableList: MutableList<Runnable> = ArrayList()
 
@@ -61,6 +64,10 @@ class AvalancheController @Inject constructor(
 
     init {
         dumpManager.registerNormalDumpable(tag, /* module */ this)
+    }
+
+    fun getShowingHunKey(): String {
+        return getKey(headsUpEntryShowing)
     }
 
     /** Run or delay Runnable for given HeadsUpEntry */
@@ -134,8 +141,10 @@ class AvalancheController @Inject constructor(
             debugDropSet.remove(entry)
         } else if (isShowing(entry)) {
             log { "$fn => [remove showing ${getKey(entry)}]" }
+            previousHunKey = getKey(headsUpEntryShowing)
+
             runnable.run()
-            showNext()
+            showNextAfterRemove()
         } else {
             log { "$fn => [removing untracked ${getKey(entry)}]" }
         }
@@ -238,7 +247,7 @@ class AvalancheController @Inject constructor(
         }
     }
 
-    private fun showNext() {
+    private fun showNextAfterRemove() {
         log { "SHOW NEXT" }
         headsUpEntryShowing = null
 
@@ -284,6 +293,7 @@ class AvalancheController @Inject constructor(
 
     private fun getStateStr(): String {
         return "SHOWING: [${getKey(headsUpEntryShowing)}]" +
+                "\nPREVIOUS: [$previousHunKey]" +
                 "\nNEXT LIST: $nextListStr" +
                 "\nNEXT MAP: $nextMapStr" +
                 "\nDROPPED: $dropSetStr"
@@ -325,10 +335,10 @@ class AvalancheController @Inject constructor(
 
     fun getKey(entry: HeadsUpEntry?): String {
         if (entry == null) {
-            return "null"
+            return "HeadsUpEntry null"
         }
         if (entry.mEntry == null) {
-            return entry.toString()
+            return "HeadsUpEntry.mEntry null"
         }
         return entry.mEntry!!.key
     }

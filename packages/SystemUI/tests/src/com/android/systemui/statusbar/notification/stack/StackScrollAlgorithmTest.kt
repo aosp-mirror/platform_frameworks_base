@@ -25,6 +25,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
+import com.android.systemui.statusbar.policy.AvalancheController
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Expect
 import com.google.common.truth.Truth.assertThat
@@ -48,6 +49,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     @JvmField @Rule var expect: Expect = Expect.create()
 
     private val largeScreenShadeInterpolator = mock<LargeScreenShadeInterpolator>()
+    private val avalancheController = mock<AvalancheController>()
 
     private val hostView = FrameLayout(context)
     private val stackScrollAlgorithm = StackScrollAlgorithm(context, hostView)
@@ -71,6 +73,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             /* bypassController */ { false },
             mStatusBarKeyguardViewManager,
             largeScreenShadeInterpolator,
+            avalancheController
         )
 
     private val testableResources = mContext.getOrCreateTestableResources()

@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.BypassController;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.SectionProvider;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.AvalancheController;
 
 import java.io.PrintWriter;
 
@@ -56,6 +57,8 @@ public class AmbientState implements Dumpable {
     private final SectionProvider mSectionProvider;
     private final BypassController mBypassController;
     private final LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
+    private final AvalancheController mAvalancheController;
+
     /**
      *  Used to read bouncer states.
      */
@@ -269,12 +272,14 @@ public class AmbientState implements Dumpable {
             @NonNull SectionProvider sectionProvider,
             @NonNull BypassController bypassController,
             @Nullable StatusBarKeyguardViewManager statusBarKeyguardViewManager,
-            @NonNull LargeScreenShadeInterpolator largeScreenShadeInterpolator
+            @NonNull LargeScreenShadeInterpolator largeScreenShadeInterpolator,
+            AvalancheController avalancheController
     ) {
         mSectionProvider = sectionProvider;
         mBypassController = bypassController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mLargeScreenShadeInterpolator = largeScreenShadeInterpolator;
+        mAvalancheController = avalancheController;
         reload(context);
         dumpManager.registerDumpable(this);
     }
@@ -285,6 +290,14 @@ public class AmbientState implements Dumpable {
     public void reload(Context context) {
         mZDistanceBetweenElements = getZDistanceBetweenElements(context);
         mBaseZHeight = getBaseHeight(mZDistanceBetweenElements);
+    }
+
+    String getAvalancheShowingHunKey() {
+        return mAvalancheController.getShowingHunKey();
+    }
+
+    String getAvalanchePreviousHunKey() {
+        return mAvalancheController.getPreviousHunKey();
     }
 
     void setOverExpansion(float overExpansion) {
