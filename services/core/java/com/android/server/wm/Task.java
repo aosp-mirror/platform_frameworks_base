@@ -4805,6 +4805,14 @@ class Task extends TaskFragment {
                                 topActivity.getSyncTransaction());
                     }
                     lastParentBeforePip.moveToFront("movePinnedActivityToOriginalTask");
+                    // If the reparent is not included in transition, make sure the visibility of
+                    // task is still updated by core. Otherwise if the task is collected (e.g.
+                    // rotation change) after leaving this scope, the visibility operation will be
+                    // put in sync transaction, then it is not synced with reparent.
+                    if (com.android.window.flags.Flags.removePrepareSurfaceInPlacement()
+                            && lastParentBeforePip.mSyncState == SYNC_STATE_NONE) {
+                        lastParentBeforePip.prepareSurfaces();
+                    }
                 }
                 if (isPip2ExperimentEnabled) {
                     super.setWindowingMode(windowingMode);
