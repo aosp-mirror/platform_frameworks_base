@@ -563,6 +563,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 BatteryConsumer.POWER_COMPONENT_WIFI,
                 Flags.streamlinedConnectivityBatteryStats());
 
+        mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
+                Flags.streamlinedConnectivityBatteryStats());
+
         mWorker.systemServicesReady();
         mStats.systemServicesReady(mContext);
         mCpuWakeupStats.systemServicesReady();
