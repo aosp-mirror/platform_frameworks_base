@@ -27,6 +27,7 @@ import static android.system.OsConstants.O_RDWR;
 import static com.android.internal.content.NativeLibraryHelper.LIB64_DIR_NAME;
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH;
+import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NULL_ACTION_MATCH;
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
 import static com.android.server.pm.PackageInstallerSession.APP_METADATA_FILE_ACCESS_MODE;
 import static com.android.server.pm.PackageInstallerSession.getAppMetadataSizeLimit;
@@ -115,6 +116,7 @@ import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.AndroidPackageSplit;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.resolution.ComponentResolverApi;
+import com.android.server.pm.snapshot.PackageDataSnapshot;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 
 import dalvik.system.VMRuntime;
@@ -1198,9 +1200,77 @@ public class PackageManagerServiceUtils {
         return (ps.getFlags() & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
     }
 
-    // Static to give access to ComputeEngine
+    private static ParsedMainComponent componentInfoToComponent(
+            ComponentInfo info, ComponentResolverApi resolver, boolean isReceiver) {
+        if (info instanceof ActivityInfo) {
+            if (isReceiver) {
+                return resolver.getReceiver(info.getComponentName());
+            } else {
+                return resolver.getActivity(info.getComponentName());
+            }
+        } else if (info instanceof ServiceInfo) {
+            return resolver.getService(info.getComponentName());
+        } else {
+            // This shall never happen
+            throw new IllegalArgumentException("Unsupported component type");
+        }
+    }
+
+    /**
+     * Under the correct conditions, remove components if the intent has null action.
+     *
+     * `compat` and `snapshot` may be null when this method is called in ActivityManagerService
+     * CTS tests. The code in this method will properly avoid control flows using these arguments.
+     */
+    public static void applyNullActionBlocking(
+            @Nullable PlatformCompat compat, @Nullable PackageDataSnapshot snapshot,
+            List componentList, boolean isReceiver, Intent intent, int filterCallingUid) {
+        if (ActivityManager.canAccessUnexportedComponents(filterCallingUid)) return;
+
+        final Computer computer = (Computer) snapshot;
+        ComponentResolverApi resolver = null;
+
+        final boolean enforce = android.security.Flags.blockNullActionIntents()
+                && (compat == null || compat.isChangeEnabledByUidInternal(
+                        IntentFilter.BLOCK_NULL_ACTION_INTENTS, filterCallingUid));
+
+        for (int i = componentList.size() - 1; i >= 0; --i) {
+            boolean match = true;
+
+            Object c = componentList.get(i);
+            if (c instanceof ResolveInfo resolveInfo) {
+                if (computer == null) {
+                    // PackageManagerService is not started
+                    return;
+                }
+                if (resolver == null) {
+                    resolver = computer.getComponentResolver();
+                }
+                final ParsedMainComponent comp = componentInfoToComponent(
+                        resolveInfo.getComponentInfo(), resolver, isReceiver);
+                if (!comp.getIntents().isEmpty() && intent.getAction() == null) {
+                    match = false;
+                }
+            } else if (c instanceof IntentFilter) {
+                if (intent.getAction() == null) {
+                    match = false;
+                }
+            }
+
+            if (!match) {
+                ActivityManagerUtils.logUnsafeIntentEvent(
+                        UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NULL_ACTION_MATCH,
+                        filterCallingUid, intent, null, enforce);
+                if (enforce) {
+                    Slog.w(TAG, "Blocking intent with null action: " + intent);
+                    componentList.remove(i);
+                }
+            }
+        }
+    }
+
     public static void applyEnforceIntentFilterMatching(
-            PlatformCompat compat, ComponentResolverApi resolver,
+            PlatformCompat compat, PackageDataSnapshot snapshot,
             List<ResolveInfo> resolveInfos, boolean isReceiver,
             Intent intent, String resolvedType, int filterCallingUid) {
         if (DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS.get()) return;
@@ -1208,13 +1278,19 @@ public class PackageManagerServiceUtils {
         // Do not enforce filter matching when the caller is system or root
         if (ActivityManager.canAccessUnexportedComponents(filterCallingUid)) return;
 
+        final Computer computer = (Computer) snapshot;
+        final ComponentResolverApi resolver = computer.getComponentResolver();
+
         final Printer logPrinter = DEBUG_INTENT_MATCHING
                 ? new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM)
                 : null;
 
-        final boolean enforce = android.security.Flags.enforceIntentFilterMatch()
+        final boolean enforceMatch = android.security.Flags.enforceIntentFilterMatch()
                 && compat.isChangeEnabledByUidInternal(
                         ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS, filterCallingUid);
+        final boolean blockNullAction = android.security.Flags.blockNullActionIntents()
+                && compat.isChangeEnabledByUidInternal(
+                        IntentFilter.BLOCK_NULL_ACTION_INTENTS, filterCallingUid);
 
         for (int i = resolveInfos.size() - 1; i >= 0; --i) {
             final ComponentInfo info = resolveInfos.get(i).getComponentInfo();
@@ -1224,40 +1300,53 @@ public class PackageManagerServiceUtils {
                 continue;
             }
 
-            final ParsedMainComponent comp;
-            if (info instanceof ActivityInfo) {
-                if (isReceiver) {
-                    comp = resolver.getReceiver(info.getComponentName());
-                } else {
-                    comp = resolver.getActivity(info.getComponentName());
-                }
-            } else if (info instanceof ServiceInfo) {
-                comp = resolver.getService(info.getComponentName());
-            } else {
-                // This shall never happen
-                throw new IllegalArgumentException("Unsupported component type");
-            }
+            final ParsedMainComponent comp = componentInfoToComponent(info, resolver, isReceiver);
 
             if (comp == null || comp.getIntents().isEmpty()) {
                 continue;
             }
 
-            boolean match = false;
-            for (int j = 0, size = comp.getIntents().size(); j < size; ++j) {
-                IntentFilter intentFilter = comp.getIntents().get(j).getIntentFilter();
-                if (IntentResolver.intentMatchesFilter(intentFilter, intent, resolvedType)) {
-                    match = true;
-                    break;
+            Boolean match = null;
+
+            if (intent.getAction() == null) {
+                ActivityManagerUtils.logUnsafeIntentEvent(
+                        UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NULL_ACTION_MATCH,
+                        filterCallingUid, intent, resolvedType, enforceMatch && blockNullAction);
+                if (blockNullAction) {
+                    // Skip intent filter matching if blocking null action
+                    match = false;
                 }
             }
-            if (!match) {
+
+            if (match == null) {
+                // Check if any intent filter matches
+                for (int j = 0, size = comp.getIntents().size(); j < size; ++j) {
+                    IntentFilter intentFilter = comp.getIntents().get(j).getIntentFilter();
+                    if (IntentResolver.intentMatchesFilter(intentFilter, intent, resolvedType)) {
+                        match = true;
+                        break;
+                    }
+                }
+            }
+
+            // At this point, the value `match` has the following states:
+            // null : Intent does not match any intent filter
+            // false: Null action intent detected AND blockNullAction == true
+            // true : The intent matches at least one intent filter
+
+            if (match == null) {
                 ActivityManagerUtils.logUnsafeIntentEvent(
                         UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH,
-                        filterCallingUid, intent, resolvedType, enforce);
+                        filterCallingUid, intent, resolvedType, enforceMatch);
+                match = false;
+            }
+
+            if (!match) {
+                // All non-matching intents has to be marked accordingly
                 if (android.security.Flags.enforceIntentFilterMatch()) {
                     intent.addExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
                 }
-                if (enforce) {
+                if (enforceMatch) {
                     Slog.w(TAG, "Intent does not match component's intent filter: " + intent);
                     Slog.w(TAG, "Access blocked: " + comp.getComponentName());
                     if (DEBUG_INTENT_MATCHING) {
@@ -1270,7 +1359,6 @@ public class PackageManagerServiceUtils {
             }
         }
     }
-
 
     /**
      * Do NOT use for intent resolution filtering. That should be done with
