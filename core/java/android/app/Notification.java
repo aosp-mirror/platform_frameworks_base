@@ -765,11 +765,24 @@ public class Notification implements Parcelable
             MessagingStyle.class, CallStyle.class);
 
     /** @hide */
-    @IntDef(flag = true, prefix = { "FLAG_" }, value = {FLAG_SHOW_LIGHTS, FLAG_ONGOING_EVENT,
-            FLAG_INSISTENT, FLAG_ONLY_ALERT_ONCE,
-            FLAG_AUTO_CANCEL, FLAG_NO_CLEAR, FLAG_FOREGROUND_SERVICE, FLAG_HIGH_PRIORITY,
-            FLAG_LOCAL_ONLY, FLAG_GROUP_SUMMARY, FLAG_AUTOGROUP_SUMMARY, FLAG_BUBBLE,
-            FLAG_USER_INITIATED_JOB})
+    @IntDef(flag = true, prefix = {"FLAG_"}, value = {
+            FLAG_SHOW_LIGHTS,
+            FLAG_ONGOING_EVENT,
+            FLAG_INSISTENT,
+            FLAG_ONLY_ALERT_ONCE,
+            FLAG_AUTO_CANCEL,
+            FLAG_NO_CLEAR,
+            FLAG_FOREGROUND_SERVICE,
+            FLAG_HIGH_PRIORITY,
+            FLAG_LOCAL_ONLY,
+            FLAG_GROUP_SUMMARY,
+            FLAG_AUTOGROUP_SUMMARY,
+            FLAG_CAN_COLORIZE,
+            FLAG_BUBBLE,
+            FLAG_NO_DISMISS,
+            FLAG_FSI_REQUESTED_BUT_DENIED,
+            FLAG_USER_INITIATED_JOB
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface NotificationFlags{};
 
