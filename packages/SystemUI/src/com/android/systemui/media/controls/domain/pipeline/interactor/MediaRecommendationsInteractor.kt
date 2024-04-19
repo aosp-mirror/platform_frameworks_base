@@ -49,7 +49,7 @@ class MediaRecommendationsInteractor
 constructor(
     @Application applicationScope: CoroutineScope,
     @Application private val applicationContext: Context,
-    repository: MediaFilterRepository,
+    private val repository: MediaFilterRepository,
     private val mediaDataProcessor: MediaDataProcessor,
     private val broadcastSender: BroadcastSender,
     private val activityStarter: ActivityStarter,
@@ -131,6 +131,10 @@ constructor(
                 mediaRecs = mediaRecs,
             )
         }
+    }
+
+    fun switchToMediaControl(packageName: String) {
+        repository.setMediaFromRecPackageName(packageName)
     }
 
     companion object {

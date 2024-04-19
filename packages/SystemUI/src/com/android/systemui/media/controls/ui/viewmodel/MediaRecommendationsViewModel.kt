@@ -107,6 +107,10 @@ constructor(
             logger.logRecommendationItemTap(packageName, instanceId, index)
         }
         // TODO (b/330897926) log smartspace card reported (SMARTSPACE_CARD_CLICK_EVENT).
+
+        // set the package name of the player added by recommendation once the media is loaded.
+        interactor.switchToMediaControl(packageName)
+
         interactor.startClickIntent(expandable, intent)
     }
 
