@@ -758,7 +758,7 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"ಸೆಟ್ಟಿಂಗ್‌ಗಳ ಕ್ರಮವನ್ನು ಎಡಿಟ್ ಮಾಡಿ."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"ಪವರ್ ಮೆನು"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> ರಲ್ಲಿ <xliff:g id="ID_1">%1$d</xliff:g> ಪುಟ"</string>
-    <string name="tuner_lock_screen" msgid="2267383813241144544">"ಲಾಕ್ ಪರದೆ"</string>
+    <string name="tuner_lock_screen" msgid="2267383813241144544">"ಲಾಕ್ ಸ್ಕ್ರೀನ್"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"ಕಾಳಜಿಯ ಹಂತಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"ಕಾಳಜಿಯ ಹಂತಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"ನಿಮ್ಮ ಸಾಧನವನ್ನು ಅನ್‌ಪ್ಲಗ್ ಮಾಡಿ"</string>

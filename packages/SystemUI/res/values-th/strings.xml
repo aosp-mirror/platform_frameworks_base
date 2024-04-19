@@ -128,7 +128,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"โทรศัพท์"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"ตัวช่วยเสียง"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
-    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"แอปสแกนคิวอาร์โค้ด"</string>
+    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"ตัวสแกนคิวอาร์โค้ด"</string>
     <string name="accessibility_unlock_button" msgid="3613812140816244310">"ปลดล็อกแล้ว"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"อุปกรณ์ถูกล็อก"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"กำลังสแกนใบหน้า"</string>
@@ -537,7 +537,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ปลดล็อกเพื่อใช้"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"เกิดปัญหาในการดึงข้อมูลบัตรของคุณ โปรดลองอีกครั้งในภายหลัง"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"การตั้งค่าหน้าจอล็อก"</string>
-    <string name="qr_code_scanner_title" msgid="1938155688725760702">"แอปสแกนคิวอาร์โค้ด"</string>
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"ตัวสแกนคิวอาร์โค้ด"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"กำลังอัปเดต"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"โปรไฟล์งาน"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"โหมดบนเครื่องบิน"</string>
@@ -880,7 +880,7 @@
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ย้ายไปด้านซ้ายบน"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ย้ายไปด้านขวาบน"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"ย้ายไปด้านซ้ายล่าง"</string>
-    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"ย้ายไปด้านขาวล่าง"</string>
+    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"ย้ายไปด้านขวาล่าง"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"ย้ายไปที่ขอบและซ่อน"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"ย้ายออกจากขอบและแสดง"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"นำออก"</string>
@@ -1119,7 +1119,7 @@
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"เปิด <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"หากต้องการเพิ่มแอป Wallet เป็นทางลัด โปรดตรวจสอบว่าได้ติดตั้งแอปแล้ว"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"หากต้องการเพิ่มแอป Wallet เป็นทางลัด โปรดตรวจสอบว่าได้เพิ่มบัตรอย่างน้อย 1 ใบแล้ว"</string>
-    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"หากต้องการเพิ่มแอปสแกนคิวอาร์โค้ดเป็นทางลัด โปรดตรวจสอบว่าได้ติดตั้งแอปกล้องแล้ว"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"หากต้องการเพิ่มตัวสแกนคิวอาร์โค้ดเป็นทางลัด โปรดตรวจสอบว่าได้ติดตั้งแอปกล้องแล้ว"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"หากต้องการเพิ่มแอป Home เป็นทางลัด โปรดตรวจสอบว่าได้ติดตั้งแอปแล้ว"</string>
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• มีอุปกรณ์พร้อมใช้งานอย่างน้อย 1 รายการ"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"เลือกแอปโน้ตเริ่มต้นเพื่อใช้ทางลัดการจดบันทึก"</string>
