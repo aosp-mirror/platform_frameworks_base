@@ -43,6 +43,21 @@ class SceneContainerRule : TestRule {
                         SceneContainerFlag.isEnabled
                     )
                 }
+                // Get the flag value, treating the unset error as false.
+                val sceneContainerAconfigEnabled = try {
+                    com.android.systemui.Flags.sceneContainer()
+                } catch (e: Exception) {
+                    false
+                }
+                if (sceneContainerAconfigEnabled) {
+                    Assert.assertTrue(
+                            "FLAG_SCENE_CONTAINER is enabled but SceneContainerFlag.isEnabled" +
+                                    " is false.  Use `.andSceneContainer()` from" +
+                                    " SceneContainerFlagParameterization.kt to parameterize this" +
+                                    " flag correctly.",
+                            SceneContainerFlag.isEnabled
+                    )
+                }
                 if (
                     description.hasAnnotation<BrokenWithSceneContainer>() &&
                         SceneContainerFlag.isEnabled
