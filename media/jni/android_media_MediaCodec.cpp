@@ -2099,9 +2099,14 @@ static status_t extractInfosFromObject(
         }
         if (i == 0) {
             *initialOffset = offset;
+            if (CC_UNLIKELY(*initialOffset < 0)) {
+                if (errorDetailMsg) {
+                    *errorDetailMsg = "Error: offset/size in BufferInfo";
+                }
+                return BAD_VALUE;
+            }
         }
-        if (CC_UNLIKELY((offset >  UINT32_MAX)
-                || ((long)(offset + size) > UINT32_MAX)
+        if (CC_UNLIKELY(((ssize_t)(UINT32_MAX - offset) < (ssize_t)size)
                 || ((offset - *initialOffset) != *totalSize))) {
             if (errorDetailMsg) {
                 *errorDetailMsg = "Error: offset/size in BufferInfo";
