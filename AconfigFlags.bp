@@ -92,6 +92,7 @@ aconfig_declarations_group {
         "com.android.window.flags.window-aconfig-java",
         "device_policy_aconfig_flags_lib",
         "display_flags_lib",
+        "dropbox_flags_lib",
         "framework-jobscheduler-job.flags-aconfig-java",
         "framework_graphics_flags_java_lib",
         "hwui_flags_java_lib",
@@ -1349,5 +1350,21 @@ aconfig_declarations {
 java_aconfig_library {
     name: "backstage_power_flags_lib",
     aconfig_declarations: "backstage_power_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Dropbox data
+aconfig_declarations {
+    name: "dropbox_flags",
+    package: "com.android.server.feature.flags",
+    container: "system",
+    srcs: [
+        "services/core/java/com/android/server/feature/dropbox_flags.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "dropbox_flags_lib",
+    aconfig_declarations: "dropbox_flags",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
