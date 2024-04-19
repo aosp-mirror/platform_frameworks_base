@@ -737,7 +737,7 @@
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Otvori listu aplikacija"</string>
     <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Prikaži traku zadataka"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Otvori podešavanja"</string>
-    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Otvori pomoćnika"</string>
+    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Otvori Pomoćnik"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Zaključavanje ekrana"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Napravi belešku"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Obavljanje više zadataka sistema istovremeno"</string>

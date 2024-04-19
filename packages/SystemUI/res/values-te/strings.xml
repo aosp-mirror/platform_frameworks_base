@@ -965,10 +965,10 @@
     <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"యాక్సెసిబిలిటీ బటన్‌ను చూడటానికి ట్యాప్ చేయండి"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> షార్ట్‌కట్ తీసివేయబడింది"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# షార్ట్‌కట్ తీసివేయబడింది}other{# షార్ట్‌కట్‌లు తీసివేయబడ్డాయి}}"</string>
-    <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ఎగువ ఎడమ వైపునకు తరలించు"</string>
-    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ఎగువ కుడి వైపునకు తరలించు"</string>
-    <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"దిగువ ఎడమ వైపునకు తరలించు"</string>
-    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"దిగువ కుడి వైపునకు తరలించు"</string>
+    <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ఎగువున ఎడమ వైపునకు వెళ్లండి"</string>
+    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ఎగువున కుడి వైపునకు వెళ్లండి"</string>
+    <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"దిగువున ఎడమ వైపునకు వెళ్లండి"</string>
+    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"దిగువున కుడి వైపునకు వెళ్లండి"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"అంచుకు తరలించి దాచండి"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"అంచుని తరలించి చూపించు"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"తీసివేయండి"</string>
