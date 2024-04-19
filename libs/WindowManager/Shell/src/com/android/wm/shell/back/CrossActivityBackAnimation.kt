@@ -94,6 +94,8 @@ class CrossActivityBackAnimation @Inject constructor(
     private var scrimLayer: SurfaceControl? = null
     private var maxScrimAlpha: Float = 0f
 
+    private var isLetterboxed = false
+
     override fun onConfigurationChanged(newConfiguration: Configuration) {
         cornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context)
     }
@@ -112,9 +114,15 @@ class CrossActivityBackAnimation @Inject constructor(
         initialTouchPos.set(backMotionEvent.touchX, backMotionEvent.touchY)
 
         transaction.setAnimationTransaction()
-
+        isLetterboxed = closingTarget!!.taskInfo.appCompatTaskInfo.topActivityBoundsLetterboxed
+        if (isLetterboxed) {
+            // Include letterbox in back animation
+            backAnimRect.set(closingTarget!!.windowConfiguration.bounds)
+        } else {
+            // otherwise play animation on localBounds only
+            backAnimRect.set(closingTarget!!.localBounds)
+        }
         // Offset start rectangle to align task bounds.
-        backAnimRect.set(closingTarget!!.localBounds)
         backAnimRect.offsetTo(0, 0)
 
         startClosingRect.set(backAnimRect)
@@ -241,6 +249,7 @@ class CrossActivityBackAnimation @Inject constructor(
         }
         finishCallback = null
         removeScrimLayer()
+        isLetterboxed = false
     }
 
     private fun applyTransform(leash: SurfaceControl?, rect: RectF, alpha: Float) {
@@ -274,10 +283,11 @@ class CrossActivityBackAnimation @Inject constructor(
         scrimLayer = scrimBuilder.build()
         val colorComponents = floatArrayOf(0f, 0f, 0f)
         maxScrimAlpha = if (isDarkTheme) MAX_SCRIM_ALPHA_DARK else MAX_SCRIM_ALPHA_LIGHT
+        val scrimCrop = if (isLetterboxed) backAnimRect else closingTarget!!.localBounds
         transaction
             .setColor(scrimLayer, colorComponents)
             .setAlpha(scrimLayer!!, maxScrimAlpha)
-            .setCrop(scrimLayer!!, closingTarget!!.localBounds)
+            .setCrop(scrimLayer!!, scrimCrop)
             .setRelativeLayer(scrimLayer!!, closingTarget!!.leash, -1)
             .show(scrimLayer)
     }
