@@ -65,7 +65,7 @@ class ShadeTestUtilLegacyImpl(val testScope: TestScope, val shadeRepository: Fak
     }
 }
 
-/** Sets up shade state for tests when the scene container flag is disabled. */
+/** Sets up shade state for tests when the scene container flag is enabled. */
 class ShadeTestUtilSceneImpl(val testScope: TestScope, val sceneInteractor: SceneInteractor) :
     ShadeTestUtilDelegate {
     override fun setShadeAndQsExpansionInternal(shadeExpansion: Float, qsExpansion: Float) {
