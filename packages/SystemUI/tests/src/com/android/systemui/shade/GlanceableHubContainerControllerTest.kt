@@ -37,6 +37,7 @@ import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.util.CommunalColors
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -322,6 +323,19 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
 
                 // Touch events are not intercepted.
                 assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
+            }
+        }
+
+    @Test
+    fun editMode_communalAvailable() =
+        with(kosmos) {
+            testScope.runTest {
+                val available by collectLastValue(underTest.communalAvailable())
+                setCommunalAvailable(false)
+
+                assertThat(available).isFalse()
+                communalInteractor.setEditModeOpen(true)
+                assertThat(available).isTrue()
             }
         }
 

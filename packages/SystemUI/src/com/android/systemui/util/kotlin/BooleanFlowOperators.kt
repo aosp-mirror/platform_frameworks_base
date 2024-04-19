@@ -18,6 +18,7 @@ package com.android.systemui.util.kotlin
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 object BooleanFlowOperators {
@@ -31,7 +32,7 @@ object BooleanFlowOperators {
      * ```
      */
     fun and(vararg flows: Flow<Boolean>): Flow<Boolean> =
-        combine(flows.asIterable()) { values -> values.all { it } }
+        combine(flows.asIterable()) { values -> values.all { it } }.distinctUntilChanged()
 
     /**
      * Logical NOT operator for a boolean flow.
@@ -48,5 +49,5 @@ object BooleanFlowOperators {
      * determine the result.
      */
     fun or(vararg flows: Flow<Boolean>): Flow<Boolean> =
-        combine(flows.asIterable()) { values -> values.any { it } }
+        combine(flows.asIterable()) { values -> values.any { it } }.distinctUntilChanged()
 }
