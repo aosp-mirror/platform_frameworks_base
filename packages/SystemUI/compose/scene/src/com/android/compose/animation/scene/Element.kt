@@ -300,14 +300,16 @@ internal fun shouldDrawOrComposeSharedElement(
     val fromScene = transition.fromScene
     val toScene = transition.toScene
 
-    val chosenByPicker =
+    val pickedScene =
         scenePicker.sceneDuringTransition(
             element = element,
             transition = transition,
             fromSceneZIndex = layoutImpl.scenes.getValue(fromScene).zIndex,
             toSceneZIndex = layoutImpl.scenes.getValue(toScene).zIndex,
-        ) == scene
-    return chosenByPicker || transition.currentOverscrollSpec?.scene == scene
+        )
+            ?: return false
+
+    return pickedScene == scene || transition.currentOverscrollSpec?.scene == scene
 }
 
 private fun isSharedElementEnabled(
