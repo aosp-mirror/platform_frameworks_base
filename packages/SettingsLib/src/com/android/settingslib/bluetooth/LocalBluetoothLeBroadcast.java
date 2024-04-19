@@ -292,7 +292,6 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                                         + ", sourceId = "
                                         + sourceId);
                     }
-                    updateFallbackActiveDeviceIfNeeded();
                 }
 
                 @Override
@@ -314,7 +313,18 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                 public void onSourceAddFailed(
                         @NonNull BluetoothDevice sink,
                         @NonNull BluetoothLeBroadcastMetadata source,
-                        int reason) {}
+                        int reason) {
+                    if (DEBUG) {
+                        Log.d(
+                                TAG,
+                                "onSourceAddFailed(), sink = "
+                                        + sink
+                                        + ", reason = "
+                                        + reason
+                                        + ", source = "
+                                        + source);
+                    }
+                }
 
                 @Override
                 public void onSourceModified(
@@ -368,6 +378,9 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                                         + sourceId
                                         + ", state = "
                                         + state);
+                    }
+                    if (BluetoothUtils.isConnected(state)) {
+                        updateFallbackActiveDeviceIfNeeded();
                     }
                 }
             };
@@ -1056,7 +1069,9 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                                     List<BluetoothLeBroadcastReceiveState> sourceList =
                                             mServiceBroadcastAssistant.getAllSources(
                                                     bluetoothDevice);
-                                    return !sourceList.isEmpty();
+                                    return !sourceList.isEmpty()
+                                            && sourceList.stream()
+                                                    .anyMatch(BluetoothUtils::isConnected);
                                 })
                         .collect(Collectors.toList());
         if (devicesInSharing.isEmpty()) {
@@ -1091,7 +1106,8 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
             return;
         }
         int fallbackActiveGroupId = getFallbackActiveGroupId();
-        if (getGroupId(targetCachedDevice) == fallbackActiveGroupId) {
+        if (fallbackActiveGroupId != BluetoothCsipSetCoordinator.GROUP_ID_INVALID
+                && getGroupId(targetCachedDevice) == fallbackActiveGroupId) {
             Log.d(
                     TAG,
                     "Skip updateFallbackActiveDeviceIfNeeded, already is fallback: "
@@ -1099,12 +1115,6 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
             return;
         }
         targetCachedDevice.setActive();
-    }
-
-    private boolean isDecryptedSource(BluetoothLeBroadcastReceiveState state) {
-        return state.getPaSyncState() == BluetoothLeBroadcastReceiveState.PA_SYNC_STATE_SYNCHRONIZED
-                && state.getBigEncryptionState()
-                        == BluetoothLeBroadcastReceiveState.BIG_ENCRYPTION_STATE_DECRYPTING;
     }
 
     private int getFallbackActiveGroupId() {
