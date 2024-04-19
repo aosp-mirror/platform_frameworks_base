@@ -7,3 +7,10 @@ flag {
     description: "This flag controls the restriction of usb overlay activities"
     bug: "307231174"
 }
+
+flag {
+    name: "enable_bind_to_mtp_service"
+    namespace: "usb"
+    description: "This flag enables binding to MtpService when in mtp/ptp modes"
+    bug: "332256525"
+}
