@@ -178,6 +178,22 @@ class MobileIconInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun inflateSignalStrength_arbitrarilyAddsOneToTheReportedLevel() =
+        testScope.runTest {
+            connectionRepository.inflateSignalStrength.value = false
+            val latest by collectLastValue(underTest.signalLevelIcon)
+
+            connectionRepository.primaryLevel.value = 4
+            assertThat(latest!!.level).isEqualTo(4)
+
+            connectionRepository.inflateSignalStrength.value = true
+            connectionRepository.primaryLevel.value = 4
+
+            // when INFLATE_SIGNAL_STRENGTH is true, we add 1 to the reported signal level
+            assertThat(latest!!.level).isEqualTo(5)
+        }
+
+    @Test
     fun iconGroup_three_g() =
         testScope.runTest {
             connectionRepository.resolvedNetworkType.value =
