@@ -18,8 +18,6 @@ package com.android.systemui.keyguard.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.keyguard.KeyguardClockSwitch.LARGE
-import com.android.keyguard.KeyguardClockSwitch.SMALL
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.DisableSceneContainer
@@ -30,6 +28,7 @@ import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.keyguardClockRepository
 import com.android.systemui.keyguard.data.repository.keyguardRepository
+import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -69,11 +68,11 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
     fun clockSize_sceneContainerFlagOff_basedOnRepository() =
         testScope.runTest {
             val value by collectLastValue(underTest.clockSize)
-            kosmos.keyguardClockRepository.setClockSize(LARGE)
-            assertThat(value).isEqualTo(LARGE)
+            kosmos.keyguardClockRepository.setClockSize(ClockSize.LARGE)
+            assertThat(value).isEqualTo(ClockSize.LARGE)
 
-            kosmos.keyguardClockRepository.setClockSize(SMALL)
-            assertThat(value).isEqualTo(SMALL)
+            kosmos.keyguardClockRepository.setClockSize(ClockSize.SMALL)
+            assertThat(value).isEqualTo(ClockSize.SMALL)
         }
 
     @Test
@@ -96,7 +95,7 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
             kosmos.fakeKeyguardClockRepository.setShouldForceSmallClock(true)
             kosmos.fakeFeatureFlagsClassic.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, true)
             transitionTo(KeyguardState.AOD, KeyguardState.LOCKSCREEN)
-            assertThat(value).isEqualTo(SMALL)
+            assertThat(value).isEqualTo(ClockSize.SMALL)
         }
 
     @Test
@@ -106,7 +105,7 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
             val value by collectLastValue(underTest.clockSize)
             kosmos.shadeRepository.setShadeMode(ShadeMode.Single)
             kosmos.activeNotificationListRepository.setActiveNotifs(1)
-            assertThat(value).isEqualTo(SMALL)
+            assertThat(value).isEqualTo(ClockSize.SMALL)
         }
 
     @Test
@@ -117,7 +116,7 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
             kosmos.shadeRepository.setShadeMode(ShadeMode.Single)
             val userMedia = MediaData().copy(active = true)
             kosmos.mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
-            assertThat(value).isEqualTo(SMALL)
+            assertThat(value).isEqualTo(ClockSize.SMALL)
         }
 
     @Test
@@ -129,7 +128,7 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
             kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
             kosmos.mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
             kosmos.keyguardRepository.setIsDozing(false)
-            assertThat(value).isEqualTo(SMALL)
+            assertThat(value).isEqualTo(ClockSize.SMALL)
         }
 
     @Test
@@ -139,7 +138,7 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
             val value by collectLastValue(underTest.clockSize)
             kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
             kosmos.keyguardRepository.setIsDozing(false)
-            assertThat(value).isEqualTo(LARGE)
+            assertThat(value).isEqualTo(ClockSize.LARGE)
         }
 
     @Test
@@ -151,7 +150,7 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
             kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
             kosmos.mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
             kosmos.keyguardRepository.setIsDozing(true)
-            assertThat(value).isEqualTo(LARGE)
+            assertThat(value).isEqualTo(ClockSize.LARGE)
         }
 
     @Test
@@ -219,14 +218,10 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
         }
 
     private suspend fun transitionTo(from: KeyguardState, to: KeyguardState) {
-        kosmos.fakeKeyguardTransitionRepository.sendTransitionStep(
-            TransitionStep(from, to, 0f, TransitionState.STARTED)
-        )
-        kosmos.fakeKeyguardTransitionRepository.sendTransitionStep(
-            TransitionStep(from, to, 0.5f, TransitionState.RUNNING)
-        )
-        kosmos.fakeKeyguardTransitionRepository.sendTransitionStep(
-            TransitionStep(from, to, 1f, TransitionState.FINISHED)
-        )
+        with(kosmos.fakeKeyguardTransitionRepository) {
+            sendTransitionStep(TransitionStep(from, to, 0f, TransitionState.STARTED))
+            sendTransitionStep(TransitionStep(from, to, 0.5f, TransitionState.RUNNING))
+            sendTransitionStep(TransitionStep(from, to, 1f, TransitionState.FINISHED))
+        }
     }
 }

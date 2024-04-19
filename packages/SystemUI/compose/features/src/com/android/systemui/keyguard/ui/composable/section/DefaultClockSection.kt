@@ -60,6 +60,8 @@ constructor(
         modifier: Modifier = Modifier,
     ) {
         val currentClock by viewModel.currentClock.collectAsState()
+        val smallTopMargin by
+            viewModel.smallClockTopMargin.collectAsState(viewModel.getSmallClockTopMargin())
         if (currentClock?.smallClock?.view == null) {
             return
         }
@@ -75,7 +77,7 @@ constructor(
                 modifier
                     .height(dimensionResource(R.dimen.small_clock_height))
                     .padding(horizontal = dimensionResource(R.dimen.clock_padding_start))
-                    .padding(top = { viewModel.getSmallClockTopMargin(context) })
+                    .padding(top = { smallTopMargin })
                     .onTopPlacementChanged(onTopChanged)
                     .burnInAware(
                         viewModel = aodBurnInViewModel,
@@ -107,13 +109,8 @@ constructor(
                     1f
                 }
 
-            val distance =
-                if (transition.toScene == splitShadeLargeClockScene) {
-                        -getClockCenteringDistance()
-                    } else {
-                        getClockCenteringDistance()
-                    }
-                    .toFloat()
+            val dir = if (transition.toScene == splitShadeLargeClockScene) -1f else 1f
+            val distance = dir * getClockCenteringDistance()
             val largeClock = checkNotNull(currentClock).largeClock
             largeClock.animations.onPositionUpdated(
                 distance = distance,

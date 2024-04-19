@@ -84,7 +84,7 @@ constructor(
     }
 
     /* trigger clock and smartspace constraints change when smartspace appears */
-    var bcSmartspaceVisibility: StateFlow<Int> = smartspaceInteractor.bcSmartspaceVisibility
+    val bcSmartspaceVisibility: StateFlow<Int> = smartspaceInteractor.bcSmartspaceVisibility
 
     companion object {
         fun getSmartspaceStartMargin(context: Context): Int {

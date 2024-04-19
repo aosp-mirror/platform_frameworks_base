@@ -21,6 +21,7 @@ import android.content.res.mainResources
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.policy.fakeConfigurationController
 
 /**
  * Main fixture for supplying a [SystemBarUtilsProxy]. Should be used by other fixtures. Unless
@@ -47,5 +48,9 @@ val Kosmos.systemBarUtilsProxyImpl by Fixture { SystemBarUtilsProxyImpl(applicat
  * tests in order to provide custom results.
  */
 var Kosmos.fakeSystemBarUtilsProxy by Fixture {
-    FakeSystemBarUtilsProxy(mainResources.getDimensionPixelSize(R.dimen.status_bar_height))
+    FakeSystemBarUtilsProxy(
+        fakeConfigurationController,
+        mainResources.getDimensionPixelSize(R.dimen.status_bar_height),
+        mainResources.getDimensionPixelSize(R.dimen.status_bar_header_height_keyguard),
+    )
 }

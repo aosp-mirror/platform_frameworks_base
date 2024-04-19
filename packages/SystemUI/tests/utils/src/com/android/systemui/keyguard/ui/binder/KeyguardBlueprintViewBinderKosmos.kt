@@ -12,12 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-package com.android.systemui.keyguard.shared.model
+package com.android.systemui.keyguard.ui.binder
 
-enum class SettingsClockSize {
-    DYNAMIC,
-    SMALL,
-}
+import android.os.fakeExecutorHandler
+import com.android.systemui.kosmos.Kosmos
+
+val Kosmos.keyguardBlueprintViewBinder by
+    Kosmos.Fixture { KeyguardBlueprintViewBinder(fakeExecutorHandler) }
