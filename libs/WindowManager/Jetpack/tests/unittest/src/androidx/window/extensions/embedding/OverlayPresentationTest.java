@@ -81,7 +81,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,6 +99,8 @@ import java.util.List;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class OverlayPresentationTest {
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
 
     @Rule
     public final SetFlagsRule mSetFlagRule = new SetFlagsRule();
@@ -126,7 +129,6 @@ public class OverlayPresentationTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         doReturn(new WindowLayoutInfo(new ArrayList<>())).when(mWindowLayoutComponent)
                 .getCurrentWindowLayoutInfo(anyInt(), any());
         DeviceStateManagerFoldingFeatureProducer producer =
