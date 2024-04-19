@@ -235,7 +235,7 @@ public class AuthSessionCoordinator implements AuthSessionListener {
             mApiCallNumber = 0;
         }
 
-        void addApiCall(String str) {
+        synchronized void addApiCall(String str) {
             mApiCalls[mCurr] = str;
             mCurr++;
             mCurr %= mSize;
@@ -243,7 +243,7 @@ public class AuthSessionCoordinator implements AuthSessionListener {
         }
 
         @Override
-        public String toString() {
+        public synchronized String toString() {
             String buffer = "";
             int apiCall = mApiCallNumber > mSize ? mApiCallNumber - mSize : 0;
             for (int i = 0; i < mSize; i++) {
