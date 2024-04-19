@@ -16,7 +16,7 @@
 
 package com.android.systemui.shade.domain.startable
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
@@ -25,9 +25,8 @@ import com.android.systemui.authentication.data.repository.fakeAuthenticationRep
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
-import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.flags.EnableSceneContainer
+import com.android.systemui.flags.parameterizeSceneContainerFlag
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
@@ -50,24 +49,42 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class ShadeStartableTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class ShadeStartableTest(flags: FlagsParameterization?) : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val shadeInteractor = kosmos.shadeInteractor
-    private val sceneInteractor = kosmos.sceneInteractor
-    private val shadeExpansionStateManager = kosmos.shadeExpansionStateManager
-    private val deviceEntryRepository = kosmos.fakeDeviceEntryRepository
-    private val deviceUnlockedInteractor = kosmos.deviceUnlockedInteractor
-    private val fakeConfigurationRepository = kosmos.fakeConfigurationRepository
-    private val fakeSceneDataSource = kosmos.fakeSceneDataSource
+    private val shadeInteractor by lazy { kosmos.shadeInteractor }
+    private val sceneInteractor by lazy { kosmos.sceneInteractor }
+    private val shadeExpansionStateManager by lazy { kosmos.shadeExpansionStateManager }
+    private val fakeConfigurationRepository by lazy { kosmos.fakeConfigurationRepository }
+    private val fakeSceneDataSource by lazy { kosmos.fakeSceneDataSource }
 
-    private val underTest = kosmos.shadeStartable
+    private lateinit var underTest: ShadeStartable
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return parameterizeSceneContainerFlag()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags!!)
+    }
+
+    @Before
+    fun setup() {
+        underTest = kosmos.shadeStartable
+    }
 
     @Test
     fun hydrateShadeMode() =
