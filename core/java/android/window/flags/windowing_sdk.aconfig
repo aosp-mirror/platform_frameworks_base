@@ -89,3 +89,13 @@ flag {
     bug: "306666082"
     is_fixed_read_only: true
 }
+
+flag {
+    namespace: "windowing_sdk"
+    name: "always_defer_transition_when_apply_wct"
+    description: "Report error when defer transition fails when it should not"
+    bug: "335562144"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
