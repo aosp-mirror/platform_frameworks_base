@@ -64,7 +64,7 @@
     <string name="bubble_accessibility_action_move_top_left" msgid="2644118920500782758">"ย้ายไปด้านซ้ายบน"</string>
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"ย้ายไปด้านขวาบน"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"ย้ายไปด้านซ้ายล่าง"</string>
-    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"ย้ายไปด้านขาวล่าง"</string>
+    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"ย้ายไปด้านขวาล่าง"</string>
     <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"ขยาย <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"ยุบ <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"การตั้งค่า <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
