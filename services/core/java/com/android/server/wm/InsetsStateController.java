@@ -224,7 +224,6 @@ class InsetsStateController {
         if (changed) {
             notifyInsetsChanged();
             mDisplayContent.updateSystemGestureExclusion();
-            mDisplayContent.updateKeepClearAreas();
             mDisplayContent.getDisplayPolicy().updateSystemBarAttributes();
         }
     }
