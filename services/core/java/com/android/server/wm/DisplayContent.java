@@ -2456,7 +2456,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         config.windowConfiguration.setBounds(mTmpRect);
         config.windowConfiguration.setMaxBounds(mTmpRect);
         config.windowConfiguration.setWindowingMode(getWindowingMode());
-        config.windowConfiguration.setDisplayWindowingMode(getWindowingMode());
 
         computeScreenAppConfiguration(config, dw, dh, displayInfo.rotation);
 
@@ -2832,11 +2831,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 && !mDisplayRotation.isRotatingSeamlessly()) {
             clearFixedRotationLaunchingApp();
         }
-    }
-
-    @Override
-    void setDisplayWindowingMode(int windowingMode) {
-        setWindowingMode(windowingMode);
     }
 
     /**

@@ -502,7 +502,6 @@ public class SizeCompatTests extends WindowTestsBase {
         final WindowConfiguration translucentWinConf = requestedConfig.windowConfiguration;
         translucentWinConf.setActivityType(ACTIVITY_TYPE_STANDARD);
         translucentWinConf.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        translucentWinConf.setDisplayWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         translucentWinConf.setAlwaysOnTop(true);
         translucentActivity.onRequestedOverrideConfigurationChanged(requestedConfig);
 
@@ -511,7 +510,6 @@ public class SizeCompatTests extends WindowTestsBase {
         // The original override of WindowConfiguration should keep.
         assertEquals(ACTIVITY_TYPE_STANDARD, translucentActivity.getActivityType());
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, translucentWinConf.getWindowingMode());
-        assertEquals(WINDOWING_MODE_MULTI_WINDOW, translucentWinConf.getDisplayWindowingMode());
         assertTrue(translucentWinConf.isAlwaysOnTop());
         // Unless display is going to be rotated, it should always inherit from parent.
         assertEquals(ROTATION_UNDEFINED, translucentWinConf.getDisplayRotation());
