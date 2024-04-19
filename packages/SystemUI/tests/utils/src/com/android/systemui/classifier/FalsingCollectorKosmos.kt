@@ -18,4 +18,4 @@ package com.android.systemui.classifier
 
 import com.android.systemui.kosmos.Kosmos
 
-val Kosmos.falsingCollector by Kosmos.Fixture { FalsingCollectorFake() }
+var Kosmos.falsingCollector by Kosmos.Fixture<FalsingCollector> { FalsingCollectorFake() }

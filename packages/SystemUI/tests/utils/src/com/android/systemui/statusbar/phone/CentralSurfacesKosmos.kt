@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.model
+package com.android.systemui.statusbar.phone
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.settings.displayTracker
-import org.mockito.Mockito.spy
+import com.android.systemui.util.mockito.mock
 
-val Kosmos.sysUiState by Fixture {
-    spy(
-        SysUiState(
-            displayTracker,
-            sceneContainerPlugin,
-        )
-    )
-}
+val Kosmos.centralSurfaces by Fixture { mock<CentralSurfaces>() }

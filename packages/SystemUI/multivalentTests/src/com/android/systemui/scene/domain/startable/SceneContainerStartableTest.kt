@@ -27,47 +27,40 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
-import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
-import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.classifier.falsingCollector
 import com.android.systemui.classifier.falsingManager
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
-import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
-import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.model.sysUiState
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
-import com.android.systemui.power.domain.interactor.PowerInteractorFactory
+import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.power.shared.model.WakefulnessState
-import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
+import com.android.systemui.scene.domain.interactor.sceneContainerStartable
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shared.system.QuickStepContract
-import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRowRepository
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
-import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
-import com.android.systemui.statusbar.phone.CentralSurfaces
+import com.android.systemui.statusbar.notificationShadeWindowController
+import com.android.systemui.statusbar.phone.centralSurfaces
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvisioningRepository
-import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
@@ -82,10 +75,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.Mock
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
-import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -95,21 +86,17 @@ import org.mockito.MockitoAnnotations
 @EnableSceneContainer
 class SceneContainerStartableTest : SysuiTestCase() {
 
-    @Mock private lateinit var windowController: NotificationShadeWindowController
-    @Mock private lateinit var centralSurfaces: CentralSurfaces
-
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
-    private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
     private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
     private val faceAuthRepository by lazy { kosmos.fakeDeviceEntryFaceAuthRepository }
-    private val deviceEntryInteractor by lazy { kosmos.deviceEntryInteractor }
-    private val keyguardInteractor by lazy { kosmos.keyguardInteractor }
-    private val sysUiState = spy(kosmos.sysUiState)
-    private val falsingCollector: FalsingCollector = mock()
-    private val powerInteractor = PowerInteractorFactory.create().powerInteractor
+    private val sysUiState = kosmos.sysUiState
+    private val falsingCollector = mock<FalsingCollector>().also { kosmos.falsingCollector = it }
     private val fakeSceneDataSource = kosmos.fakeSceneDataSource
+    private val windowController = kosmos.notificationShadeWindowController
+    private val centralSurfaces = kosmos.centralSurfaces
+    private val powerInteractor = kosmos.powerInteractor
 
     private lateinit var underTest: SceneContainerStartable
 
@@ -117,30 +104,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        underTest =
-            SceneContainerStartable(
-                applicationScope = testScope.backgroundScope,
-                sceneInteractor = sceneInteractor,
-                deviceEntryInteractor = deviceEntryInteractor,
-                deviceUnlockedInteractor = kosmos.deviceUnlockedInteractor,
-                bouncerInteractor = bouncerInteractor,
-                keyguardInteractor = keyguardInteractor,
-                sysUiState = sysUiState,
-                displayId = Display.DEFAULT_DISPLAY,
-                sceneLogger = mock(),
-                falsingCollector = falsingCollector,
-                falsingManager = kosmos.falsingManager,
-                powerInteractor = powerInteractor,
-                simBouncerInteractor = { kosmos.simBouncerInteractor },
-                authenticationInteractor = { authenticationInteractor },
-                windowController = windowController,
-                deviceProvisioningInteractor = kosmos.deviceProvisioningInteractor,
-                centralSurfaces = centralSurfaces,
-                headsUpInteractor = kosmos.headsUpNotificationInteractor,
-                occlusionInteractor = kosmos.sceneContainerOcclusionInteractor,
-                faceUnlockInteractor = kosmos.deviceEntryFaceAuthInteractor,
-                shadeInteractor = kosmos.shadeInteractor,
-            )
+        underTest = kosmos.sceneContainerStartable
     }
 
     @Test
@@ -879,7 +843,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
-    fun hydrateWindowFocus() =
+    fun hydrateWindowController_setNotificationShadeFocusable() =
         testScope.runTest {
             val currentDesiredSceneKey by collectLastValue(sceneInteractor.currentScene)
             val transitionStateFlow =
@@ -930,6 +894,89 @@ class SceneContainerStartableTest : SysuiTestCase() {
             transitionStateFlow.value = ObservableTransitionState.Idle(Scenes.Gone)
             runCurrent()
             verify(windowController, times(2)).setNotificationShadeFocusable(false)
+        }
+
+    @Test
+    fun hydrateWindowController_setKeyguardShowing() =
+        testScope.runTest {
+            underTest.start()
+            val notificationShadeWindowController = kosmos.notificationShadeWindowController
+            val transitionStateFlow = prepareState(initialSceneKey = Scenes.Lockscreen)
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            verify(notificationShadeWindowController).setKeyguardShowing(true)
+
+            emulateSceneTransition(transitionStateFlow, Scenes.Bouncer)
+            verify(notificationShadeWindowController, times(1)).setKeyguardShowing(true)
+
+            emulateSceneTransition(transitionStateFlow, Scenes.Lockscreen)
+            verify(notificationShadeWindowController, times(1)).setKeyguardShowing(true)
+
+            emulateSceneTransition(transitionStateFlow, Scenes.Shade)
+            verify(notificationShadeWindowController, times(1)).setKeyguardShowing(true)
+
+            emulateSceneTransition(transitionStateFlow, Scenes.Lockscreen)
+            verify(notificationShadeWindowController, times(1)).setKeyguardShowing(true)
+        }
+
+    @Test
+    fun hydrateWindowController_setBouncerShowing() =
+        testScope.runTest {
+            underTest.start()
+            val notificationShadeWindowController = kosmos.notificationShadeWindowController
+            val transitionStateFlow = prepareState(initialSceneKey = Scenes.Lockscreen)
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            verify(notificationShadeWindowController, never()).setBouncerShowing(true)
+            verify(notificationShadeWindowController, times(1)).setBouncerShowing(false)
+
+            emulateSceneTransition(transitionStateFlow, Scenes.Bouncer)
+            verify(notificationShadeWindowController, times(1)).setBouncerShowing(true)
+            verify(notificationShadeWindowController, times(1)).setBouncerShowing(false)
+
+            emulateSceneTransition(transitionStateFlow, Scenes.Lockscreen)
+            verify(notificationShadeWindowController, times(1)).setBouncerShowing(true)
+            verify(notificationShadeWindowController, times(2)).setBouncerShowing(false)
+
+            kosmos.deviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
+            verify(notificationShadeWindowController, times(1)).setBouncerShowing(true)
+            verify(notificationShadeWindowController, times(2)).setBouncerShowing(false)
+
+            emulateSceneTransition(transitionStateFlow, Scenes.Lockscreen)
+            verify(notificationShadeWindowController, times(1)).setBouncerShowing(true)
+            verify(notificationShadeWindowController, times(2)).setBouncerShowing(false)
+
+            emulateSceneTransition(transitionStateFlow, Scenes.Bouncer)
+            verify(notificationShadeWindowController, times(2)).setBouncerShowing(true)
+            verify(notificationShadeWindowController, times(2)).setBouncerShowing(false)
+        }
+
+    @Test
+    fun hydrateWindowController_setKeyguardOccluded() =
+        testScope.runTest {
+            underTest.start()
+            val notificationShadeWindowController = kosmos.notificationShadeWindowController
+            prepareState(initialSceneKey = Scenes.Lockscreen)
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            verify(notificationShadeWindowController, never()).setKeyguardOccluded(true)
+            verify(notificationShadeWindowController, times(1)).setKeyguardOccluded(false)
+
+            kosmos.keyguardOcclusionInteractor.setWmNotifiedShowWhenLockedActivityOnTop(
+                true,
+                mock()
+            )
+            runCurrent()
+            verify(notificationShadeWindowController, times(1)).setKeyguardOccluded(true)
+            verify(notificationShadeWindowController, times(1)).setKeyguardOccluded(false)
+
+            kosmos.keyguardOcclusionInteractor.setWmNotifiedShowWhenLockedActivityOnTop(false)
+            runCurrent()
+            verify(notificationShadeWindowController, times(1)).setKeyguardOccluded(true)
+            verify(notificationShadeWindowController, times(2)).setKeyguardOccluded(false)
         }
 
     @Test

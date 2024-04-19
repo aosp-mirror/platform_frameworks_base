@@ -36,53 +36,40 @@ import com.android.systemui.authentication.domain.interactor.authenticationInter
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerActionButtonInteractor
 import com.android.systemui.bouncer.domain.interactor.bouncerActionButtonInteractor
-import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
-import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PasswordBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.bouncerViewModel
 import com.android.systemui.classifier.domain.interactor.falsingInteractor
-import com.android.systemui.classifier.falsingCollector
-import com.android.systemui.classifier.falsingManager
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
-import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
-import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
-import com.android.systemui.model.SysUiState
-import com.android.systemui.model.sceneContainerPlugin
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.qs.footerActionsController
 import com.android.systemui.qs.footerActionsViewModelFactory
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
-import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
+import com.android.systemui.scene.domain.interactor.sceneContainerStartable
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
-import com.android.systemui.settings.FakeDisplayTracker
 import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModel
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.ui.viewmodel.ShadeSceneViewModel
 import com.android.systemui.shade.ui.viewmodel.shadeHeaderViewModel
-import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
-import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
 import com.android.systemui.telephony.data.repository.fakeTelephonyRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.unfold.domain.interactor.unfoldTransitionInteractor
@@ -155,8 +142,6 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             .apply { setTransitionState(transitionState) }
     }
 
-    private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
-
     private lateinit var mobileConnectionsRepository: FakeMobileConnectionsRepository
     private lateinit var bouncerActionButtonInteractor: BouncerActionButtonInteractor
     private lateinit var bouncerViewModel: BouncerViewModel
@@ -177,7 +162,6 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
     private lateinit var shadeSceneViewModel: ShadeSceneViewModel
 
-    private val keyguardInteractor by lazy { kosmos.keyguardInteractor }
     private val powerInteractor by lazy { kosmos.powerInteractor }
 
     private var bouncerSceneJob: Job? = null
@@ -233,32 +217,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 unfoldTransitionInteractor = kosmos.unfoldTransitionInteractor,
             )
 
-        val displayTracker = FakeDisplayTracker(context)
-        val sysUiState = SysUiState(displayTracker, kosmos.sceneContainerPlugin)
-        val startable =
-            SceneContainerStartable(
-                applicationScope = testScope.backgroundScope,
-                sceneInteractor = sceneInteractor,
-                deviceEntryInteractor = deviceEntryInteractor,
-                deviceUnlockedInteractor = kosmos.deviceUnlockedInteractor,
-                bouncerInteractor = bouncerInteractor,
-                keyguardInteractor = keyguardInteractor,
-                sysUiState = sysUiState,
-                displayId = displayTracker.defaultDisplayId,
-                sceneLogger = mock(),
-                falsingCollector = kosmos.falsingCollector,
-                falsingManager = kosmos.falsingManager,
-                powerInteractor = powerInteractor,
-                simBouncerInteractor = dagger.Lazy { kosmos.simBouncerInteractor },
-                authenticationInteractor = dagger.Lazy { kosmos.authenticationInteractor },
-                windowController = mock(),
-                deviceProvisioningInteractor = kosmos.deviceProvisioningInteractor,
-                centralSurfaces = mock(),
-                headsUpInteractor = kosmos.headsUpNotificationInteractor,
-                occlusionInteractor = kosmos.sceneContainerOcclusionInteractor,
-                faceUnlockInteractor = kosmos.deviceEntryFaceAuthInteractor,
-                shadeInteractor = kosmos.shadeInteractor,
-            )
+        val startable = kosmos.sceneContainerStartable
         startable.start()
 
         assertWithMessage("Initial scene key mismatch!")
