@@ -125,7 +125,7 @@ constructor(
                     onTopChanged = burnIn.onSmartspaceTopChanged,
                 )
             }
-            with(mediaCarouselSection) { MediaCarousel() }
+            with(mediaCarouselSection) { KeyguardMediaCarousel() }
         }
     }
 

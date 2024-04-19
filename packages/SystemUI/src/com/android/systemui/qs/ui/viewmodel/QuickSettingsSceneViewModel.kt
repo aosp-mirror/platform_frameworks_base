@@ -29,6 +29,7 @@ import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
@@ -62,6 +63,7 @@ constructor(
     private val footerActionsViewModelFactory: FooterActionsViewModel.Factory,
     private val footerActionsController: FooterActionsController,
     sceneBackInteractor: SceneBackInteractor,
+    val mediaDataManager: MediaDataManager,
 ) {
     private val backScene: StateFlow<SceneKey> =
         sceneBackInteractor.backScene
@@ -140,5 +142,10 @@ constructor(
             footerActionsController.init()
         }
         return footerActionsViewModelFactory.create(lifecycleOwner)
+    }
+
+    fun isMediaVisible(): Boolean {
+        // TODO(b/328207006): use new pipeline to handle updates while visible
+        return mediaDataManager.hasAnyMediaOrRecommendation()
     }
 }

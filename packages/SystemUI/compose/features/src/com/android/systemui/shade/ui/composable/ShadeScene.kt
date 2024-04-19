@@ -50,11 +50,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexScenePicker
@@ -85,7 +83,6 @@ import com.android.systemui.shade.ui.viewmodel.ShadeSceneViewModel
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.phone.ui.TintedIconManager
-import com.android.systemui.util.animation.MeasurementInput
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.math.roundToInt
@@ -243,10 +240,11 @@ private fun SceneScope.SingleShade(
                                 )
                             }
 
-                            MediaIfVisible(
-                                viewModel = viewModel,
-                                mediaCarouselController = mediaCarouselController,
+                            MediaCarousel(
+                                isVisible = viewModel::isMediaVisible,
                                 mediaHost = mediaHost,
+                                modifier = Modifier.fillMaxWidth(),
+                                carouselController = mediaCarouselController,
                             )
 
                             Spacer(modifier = Modifier.height(16.dp))
@@ -406,11 +404,11 @@ private fun SceneScope.SplitShade(
                                 )
                             }
 
-                            MediaIfVisible(
-                                viewModel = viewModel,
-                                mediaCarouselController = mediaCarouselController,
+                            MediaCarousel(
+                                isVisible = viewModel::isMediaVisible,
                                 mediaHost = mediaHost,
                                 modifier = Modifier.fillMaxWidth(),
+                                carouselController = mediaCarouselController,
                             )
                         }
                         FooterActionsWithAnimatedVisibility(
@@ -435,36 +433,5 @@ private fun SceneScope.SplitShade(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun SceneScope.MediaIfVisible(
-    viewModel: ShadeSceneViewModel,
-    mediaCarouselController: MediaCarouselController,
-    mediaHost: MediaHost,
-    modifier: Modifier = Modifier,
-) {
-    if (viewModel.isMediaVisible()) {
-        val density = LocalDensity.current
-        val mediaHeight = dimensionResource(R.dimen.qs_media_session_height_expanded)
-
-        MediaCarousel(
-            modifier =
-                modifier.height(mediaHeight).fillMaxWidth().layout { measurable, constraints ->
-                    val placeable = measurable.measure(constraints)
-
-                    // Notify controller to size the carousel for the
-                    // current space
-                    mediaHost.measurementInput = MeasurementInput(placeable.width, placeable.height)
-                    mediaCarouselController.setSceneContainerSize(placeable.width, placeable.height)
-
-                    layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
-                },
-            mediaHost = mediaHost,
-            layoutWidth = 0,
-            layoutHeight = with(density) { mediaHeight.toPx() }.toInt(),
-            carouselController = mediaCarouselController,
-        )
     }
 }

@@ -67,6 +67,10 @@ import com.android.systemui.common.ui.compose.windowinsets.LocalRawScreenHeight
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.media.controls.ui.composable.MediaCarousel
+import com.android.systemui.media.controls.ui.controller.MediaCarouselController
+import com.android.systemui.media.controls.ui.view.MediaHost
+import com.android.systemui.media.dagger.MediaModule
 import com.android.systemui.notifications.ui.composable.NotificationScrollingStack
 import com.android.systemui.qs.footer.ui.compose.FooterActionsWithAnimatedVisibility
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsSceneViewModel
@@ -82,6 +86,7 @@ import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import javax.inject.Inject
+import javax.inject.Named
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -98,6 +103,8 @@ constructor(
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
     private val statusBarIconController: StatusBarIconController,
+    private val mediaCarouselController: MediaCarouselController,
+    @Named(MediaModule.QS_PANEL) private val mediaHost: MediaHost,
 ) : ComposableScene {
     override val key = Scenes.QuickSettings
 
@@ -118,6 +125,8 @@ constructor(
             createTintedIconManager = tintedIconManagerFactory::create,
             createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
             statusBarIconController = statusBarIconController,
+            mediaCarouselController = mediaCarouselController,
+            mediaHost = mediaHost,
             modifier = modifier,
         )
     }
@@ -130,6 +139,8 @@ private fun SceneScope.QuickSettingsScene(
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
     statusBarIconController: StatusBarIconController,
+    mediaCarouselController: MediaCarouselController,
+    mediaHost: MediaHost,
     modifier: Modifier = Modifier,
 ) {
     val brightnessMirrorShowing by viewModel.brightnessMirrorViewModel.isShowing.collectAsState()
@@ -281,6 +292,13 @@ private fun SceneScope.QuickSettingsScene(
                         { viewModel.qsSceneAdapter.qsHeight },
                         isSplitShade = false,
                         modifier = Modifier.sysuiResTag("expanded_qs_scroll_view"),
+                    )
+
+                    MediaCarousel(
+                        isVisible = viewModel::isMediaVisible,
+                        mediaHost = mediaHost,
+                        modifier = Modifier.fillMaxWidth(),
+                        carouselController = mediaCarouselController,
                     )
                 }
             }
