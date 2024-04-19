@@ -49,6 +49,7 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ExceptionUtils;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
@@ -129,6 +130,12 @@ final class InstallRequest {
      */
     @Nullable
     private String mApexModuleName;
+
+    /**
+     * The title of the responsible installer for the archive behavior used
+     */
+    @Nullable
+    private SparseArray<String> mResponsibleInstallerTitles;
 
     @Nullable
     private ScanResult mScanResult;
@@ -418,6 +425,12 @@ final class InstallRequest {
     public String getApexModuleName() {
         return mApexModuleName;
     }
+
+    @Nullable
+    public SparseArray<String> getResponsibleInstallerTitles() {
+        return mResponsibleInstallerTitles;
+    }
+
     public boolean isRollback() {
         return mInstallArgs != null
                 && mInstallArgs.mInstallReason == PackageManager.INSTALL_REASON_ROLLBACK;
@@ -754,6 +767,11 @@ final class InstallRequest {
 
     public void setApexModuleName(@Nullable String apexModuleName) {
         mApexModuleName = apexModuleName;
+    }
+
+    public void setResponsibleInstallerTitles(
+            @NonNull SparseArray<String> responsibleInstallerTitles) {
+        mResponsibleInstallerTitles = responsibleInstallerTitles;
     }
 
     public void setPkg(AndroidPackage pkg) {
