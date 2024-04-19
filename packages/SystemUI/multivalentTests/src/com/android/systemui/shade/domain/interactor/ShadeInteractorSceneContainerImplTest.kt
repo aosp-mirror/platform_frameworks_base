@@ -23,7 +23,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
@@ -32,7 +31,6 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.testKosmos
-import com.android.systemui.user.data.repository.userRepository
 import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -52,9 +50,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val configurationRepository = kosmos.fakeConfigurationRepository
     private val keyguardRepository = kosmos.fakeKeyguardRepository
-    private val keyguardTransitionRepository = kosmos.keyguardTransitionRepository
     private val sceneInteractor = kosmos.sceneInteractor
-    private val userRepository = kosmos.userRepository
     private val shadeRepository = kosmos.shadeRepository
 
     private val underTest = kosmos.shadeInteractorSceneContainerImpl
