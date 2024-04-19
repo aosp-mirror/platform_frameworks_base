@@ -35,7 +35,9 @@ import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.padding
 import com.android.systemui.customization.R as customizationR
 import com.android.systemui.keyguard.ui.composable.blueprint.WeatherClockElementKeys
+import com.android.systemui.keyguard.ui.composable.modifier.burnInAware
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
+import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.plugins.clocks.ClockController
 import javax.inject.Inject
@@ -50,19 +52,19 @@ constructor(
     @Composable
     fun SceneScope.Time(
         clock: ClockController,
-        modifier: Modifier = Modifier,
+        burnInParams: BurnInParameters,
     ) {
         Row(
             modifier =
                 Modifier.padding(
-                    horizontal = dimensionResource(customizationR.dimen.clock_padding_start)
-                )
+                        horizontal = dimensionResource(customizationR.dimen.clock_padding_start)
+                    )
+                    .burnInAware(aodBurnInViewModel, burnInParams, isClock = true)
         ) {
             WeatherElement(
                 weatherClockElementViewId = customizationR.id.weather_clock_time,
                 clock = clock,
                 elementKey = WeatherClockElementKeys.timeElementKey,
-                modifier = modifier,
             )
         }
     }
@@ -124,7 +126,7 @@ constructor(
         weatherClockElementViewId: Int,
         clock: ClockController,
         elementKey: ElementKey,
-        modifier: Modifier
+        modifier: Modifier = Modifier,
     ) {
         MovableElement(key = elementKey, modifier) {
             content {
@@ -150,6 +152,7 @@ constructor(
 
     @Composable
     fun SceneScope.LargeClockSectionBelowSmartspace(
+        burnInParams: BurnInParameters,
         clock: ClockController,
     ) {
         Row(
@@ -158,6 +161,7 @@ constructor(
                     .padding(
                         horizontal = dimensionResource(customizationR.dimen.clock_padding_start)
                     )
+                    .burnInAware(aodBurnInViewModel, burnInParams, isClock = true)
         ) {
             Date(clock = clock, modifier = Modifier.wrapContentSize())
             Box(

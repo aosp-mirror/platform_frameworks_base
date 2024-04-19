@@ -61,11 +61,10 @@ fun Modifier.burnInAware(
         val scale =
             when {
                 scaleViewModel.scaleClockOnly && isClock -> scaleViewModel.scale
-                !scaleViewModel.scaleClockOnly -> scaleViewModel.scale
                 else -> 1f
             }
 
-        this.translationX = translationX
+        this.translationX = if (isClock) 0F else translationX
         this.translationY = translationY
         this.alpha = alpha
         this.scaleX = scale
