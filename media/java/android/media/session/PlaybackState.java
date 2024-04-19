@@ -15,7 +15,10 @@
  */
 package android.media.session;
 
+import static com.android.media.flags.Flags.FLAG_ENABLE_NOTIFYING_ACTIVITY_MANAGER_WITH_MEDIA_SESSION_STATUS_CHANGE;
+
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.LongDef;
 import android.annotation.Nullable;
@@ -295,9 +298,8 @@ public final class PlaybackState implements Parcelable {
      * foreground.
      *
      * @see Builder#setState
-     * @hide
      */
-    // TODO: b/335561702 Unhide this symbol for the next API bump.
+    @FlaggedApi(FLAG_ENABLE_NOTIFYING_ACTIVITY_MANAGER_WITH_MEDIA_SESSION_STATUS_CHANGE)
     public static final int STATE_PLAYBACK_SUPPRESSED = 12;
 
     /**
