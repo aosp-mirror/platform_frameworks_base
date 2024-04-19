@@ -545,14 +545,15 @@ public final class MediaRouter2 {
                                     ? SCANNING_STATE_SCANNING_FULL
                                     : SCANNING_STATE_WHILE_INTERACTIVE);
 
-                    if (scanRequest.isScreenOffScan()) {
-                        mScreenOffScanRequestCount++;
-                    } else {
-                        mScreenOnScanRequestCount++;
-                    }
                 } catch (RemoteException ex) {
                     throw ex.rethrowFromSystemServer();
                 }
+            }
+
+            if (scanRequest.isScreenOffScan()) {
+                mScreenOffScanRequestCount++;
+            } else {
+                mScreenOnScanRequestCount++;
             }
 
             mScanRequestsMap.put(token.mId, scanRequest);
@@ -580,25 +581,27 @@ public final class MediaRouter2 {
             }
 
             boolean shouldUpdate =
-                    mScreenOffScanRequestCount == 1
-                            && (request.isScreenOffScan() || mScreenOnScanRequestCount == 1);
+                    request.isScreenOffScan()
+                            ? mScreenOffScanRequestCount == 1
+                            : mScreenOnScanRequestCount == 1 && mScreenOffScanRequestCount == 0;
 
             if (shouldUpdate) {
                 try {
-                    if (request.isScreenOffScan() && mScreenOnScanRequestCount == 0) {
+                    if (!request.isScreenOffScan() || mScreenOnScanRequestCount == 0) {
                         mImpl.updateScanningState(SCANNING_STATE_NOT_SCANNING);
                     } else {
                         mImpl.updateScanningState(SCANNING_STATE_WHILE_INTERACTIVE);
                     }
 
-                    if (request.isScreenOffScan()) {
-                        mScreenOffScanRequestCount--;
-                    } else {
-                        mScreenOnScanRequestCount--;
-                    }
                 } catch (RemoteException ex) {
                     ex.rethrowFromSystemServer();
                 }
+            }
+
+            if (request.isScreenOffScan()) {
+                mScreenOffScanRequestCount--;
+            } else {
+                mScreenOnScanRequestCount--;
             }
 
             mScanRequestsMap.remove(token.mId);
