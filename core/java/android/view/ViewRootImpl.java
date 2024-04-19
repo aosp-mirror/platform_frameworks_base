@@ -125,6 +125,7 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility.PACK
 import static com.android.window.flags.Flags.activityWindowInfoFlag;
 import static com.android.window.flags.Flags.enableBufferTransformHintFromDisplay;
 import static com.android.window.flags.Flags.setScPropertiesInClient;
+import static com.android.window.flags.Flags.windowSessionRelayoutInfo;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -1143,7 +1144,14 @@ public final class ViewRootImpl implements ViewParent,
      * we get rid of synchronous relayout, until then, we use this bundle to channel the
      * integer back over relayout.
      */
-    private Bundle mRelayoutBundle = new Bundle();
+    private final Bundle mRelayoutBundle = windowSessionRelayoutInfo()
+            ? null
+            : new Bundle();
+
+    private final WindowRelayoutResult mRelayoutResult = windowSessionRelayoutInfo()
+            ? new WindowRelayoutResult(mTmpFrames, mPendingMergedConfiguration, mSurfaceControl,
+                    mTempInsets, mTempControls)
+            : null;
 
     private static volatile boolean sAnrReported = false;
     static BLASTBufferQueue.TransactionHangCallback sTransactionHangCallback =
@@ -9071,29 +9079,42 @@ public final class ViewRootImpl implements ViewParent,
                     insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0, mRelayoutSeq,
                     mLastSyncSeqId);
         } else {
-            relayoutResult = mWindowSession.relayout(mWindow, params,
-                    requestedWidth, requestedHeight, viewVisibility,
-                    insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0, mRelayoutSeq,
-                    mLastSyncSeqId, mTmpFrames, mPendingMergedConfiguration, mSurfaceControl,
-                    mTempInsets, mTempControls, mRelayoutBundle);
+            if (windowSessionRelayoutInfo()) {
+                relayoutResult = mWindowSession.relayout(mWindow, params,
+                        requestedWidth, requestedHeight, viewVisibility,
+                        insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0,
+                        mRelayoutSeq, mLastSyncSeqId, mRelayoutResult);
+            } else {
+                relayoutResult = mWindowSession.relayoutLegacy(mWindow, params,
+                        requestedWidth, requestedHeight, viewVisibility,
+                        insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0,
+                        mRelayoutSeq, mLastSyncSeqId, mTmpFrames, mPendingMergedConfiguration,
+                        mSurfaceControl, mTempInsets, mTempControls, mRelayoutBundle);
+            }
             mRelayoutRequested = true;
 
             if (activityWindowInfoFlag() && mPendingActivityWindowInfo != null) {
                 ActivityWindowInfo outInfo = null;
-                try {
-                    outInfo = mRelayoutBundle.getParcelable(
-                            IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO,
-                            ActivityWindowInfo.class);
-                    mRelayoutBundle.remove(IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO);
-                } catch (IllegalStateException e) {
-                    Log.e(TAG, "Failed to get ActivityWindowInfo from relayout Bundle", e);
+                if (windowSessionRelayoutInfo()) {
+                    outInfo = mRelayoutResult != null ? mRelayoutResult.activityWindowInfo : null;
+                } else {
+                    try {
+                        outInfo = mRelayoutBundle.getParcelable(
+                                IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO,
+                                ActivityWindowInfo.class);
+                        mRelayoutBundle.remove(
+                                IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO);
+                    } catch (IllegalStateException e) {
+                        Log.e(TAG, "Failed to get ActivityWindowInfo from relayout Bundle", e);
+                    }
                 }
                 if (outInfo != null) {
                     mPendingActivityWindowInfo.set(outInfo);
                 }
             }
-            final int maybeSyncSeqId = mRelayoutBundle.getInt(
-                    IWindowSession.KEY_RELAYOUT_BUNDLE_SEQID);
+            final int maybeSyncSeqId = windowSessionRelayoutInfo()
+                    ? mRelayoutResult.syncSeqId
+                    : mRelayoutBundle.getInt(IWindowSession.KEY_RELAYOUT_BUNDLE_SEQID);
             if (maybeSyncSeqId > 0) {
                 mSyncSeqId = maybeSyncSeqId;
             }
