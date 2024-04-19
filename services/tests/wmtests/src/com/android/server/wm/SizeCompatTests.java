@@ -129,7 +129,6 @@ import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
@@ -1911,8 +1910,7 @@ public class SizeCompatTests extends WindowTestsBase {
         assertThat(mActivity.inSizeCompatMode()).isTrue();
         assertActivityMaxBoundsSandboxed();
 
-
-	final int scale = dh / dw;
+        final int scale = dh / dw;
 
         // App bounds should be dh / scale x dw / scale
         assertEquals(dw, rotatedDisplayBounds.width());
@@ -4137,8 +4135,8 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
-    @Ignore // TODO(b/330888878): fix test in main
-    public void testPortraitCloseToSquareDisplayWithTaskbar_notLetterboxed() {
+    @DisableCompatChanges({ActivityInfo.INSETS_DECOUPLED_CONFIGURATION_ENFORCED})
+    public void testPortraitCloseToSquareDisplayWithTaskbar_letterboxed() {
         // Set up portrait close to square display
         setUpDisplaySizeWithApp(2200, 2280);
         final DisplayContent display = mActivity.mDisplayContent;
@@ -4151,16 +4149,58 @@ public class SizeCompatTests extends WindowTestsBase {
                         .setInsetsSize(Insets.of(0, 0, 0, 150))
         };
         display.getDisplayPolicy().addWindowLw(navbar, navbar.mAttrs);
-        assertTrue(navbar.providesDisplayDecorInsets()
-                && display.getDisplayPolicy().updateDecorInsetsInfo());
+        assertTrue(display.getDisplayPolicy().updateDecorInsetsInfo());
         display.sendNewConfiguration();
 
-        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(mTask)
+                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
+                .setComponent(ComponentName.createRelative(mContext,
+                        SizeCompatTests.class.getName()))
+                .setUid(android.os.Process.myUid())
+                .build();
 
-        // Activity is fullscreen even though orientation is not respected with insets, because
-        // the display still matches or is less than the activity aspect ratio
-        assertEquals(display.getBounds(), mActivity.getBounds());
-        assertFalse(mActivity.isLetterboxedForFixedOrientationAndAspectRatio());
+        final Rect bounds = activity.getBounds();
+        // Activity should be letterboxed and should have portrait app bounds
+        assertTrue(activity.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertTrue(bounds.height() > bounds.width());
+    }
+
+    @Test
+    @DisableCompatChanges({ActivityInfo.INSETS_DECOUPLED_CONFIGURATION_ENFORCED})
+    public void testFixedAspectRatioAppInPortraitCloseToSquareDisplay_notInSizeCompat() {
+        setUpDisplaySizeWithApp(2200, 2280);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        final DisplayContent dc = mActivity.mDisplayContent;
+        // Simulate taskbar, final app bounds are (0, 0, 2200, 2130) - landscape
+        final WindowState navbar = createWindow(null, TYPE_NAVIGATION_BAR, mDisplayContent,
+                "navbar");
+        final Binder owner = new Binder();
+        navbar.mAttrs.providedInsets = new InsetsFrameProvider[] {
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.navigationBars())
+                        .setInsetsSize(Insets.of(0, 0, 0, 150))
+        };
+        dc.getDisplayPolicy().addWindowLw(navbar, navbar.mAttrs);
+        assertTrue(dc.getDisplayPolicy().updateDecorInsetsInfo());
+        dc.sendNewConfiguration();
+
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(mTask)
+                .setComponent(ComponentName.createRelative(mContext,
+                        SizeCompatTests.class.getName()))
+                .setUid(android.os.Process.myUid())
+                .build();
+        prepareMinAspectRatio(activity, OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE,
+                SCREEN_ORIENTATION_LANDSCAPE);
+        // To force config to update again but with the same landscape orientation.
+        activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+
+        assertTrue(activity.shouldCreateCompatDisplayInsets());
+        assertNotNull(activity.getCompatDisplayInsets());
+        // Activity is not letterboxed for fixed orientation because orientation is respected
+        // with insets, and should not be in size compat mode
+        assertFalse(activity.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertFalse(activity.inSizeCompatMode());
     }
 
     @Test
@@ -4177,6 +4217,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // can be aligned inside parentAppBounds
         assertEquals(mActivity.getBounds(), new Rect(0, 0, 1000, 2200));
     }
+
     @Test
     public void testApplyAspectRatio_activityCannotAlignWithParentAppVertical() {
         // The display's app bounds will be (0, 100, 1000, 2150)
