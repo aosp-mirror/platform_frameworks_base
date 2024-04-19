@@ -34,7 +34,9 @@ import android.os.PowerManager.WakeReason;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Slog;
+import android.view.Display;
 import android.view.KeyEvent;
+import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.Clock;
@@ -48,6 +50,7 @@ class WindowWakeUpPolicy {
 
     private final Context mContext;
     private final PowerManager mPowerManager;
+    private final WindowManager mWindowManager;
     private final Clock mClock;
 
     private final boolean mAllowTheaterModeWakeFromKey;
@@ -68,6 +71,7 @@ class WindowWakeUpPolicy {
     WindowWakeUpPolicy(Context context, Clock clock) {
         mContext = context;
         mPowerManager = context.getSystemService(PowerManager.class);
+        mWindowManager = context.getSystemService(WindowManager.class);
         mClock = clock;
 
         final Resources res = context.getResources();
@@ -212,10 +216,21 @@ class WindowWakeUpPolicy {
     }
 
     private boolean canWakeUp(boolean wakeInTheaterMode) {
+        if (supportInputWakeupDelegate() && isDefaultDisplayOn()) {
+            // If the default display is on, theater mode should not influence whether or not
+            // waking up is allowed. This is because the theater mode checks are there to block
+            // the display from being on in situations where the user may not want it to be
+            // on (so if the display is already on, no need to check for theater mode at all).
+            return true;
+        }
         final boolean isTheaterModeEnabled =
                 Settings.Global.getInt(
                         mContext.getContentResolver(), Settings.Global.THEATER_MODE_ON, 0) == 1;
         return wakeInTheaterMode || !isTheaterModeEnabled;
+    }
+
+    private boolean isDefaultDisplayOn() {
+        return Display.isOnState(mWindowManager.getDefaultDisplay().getState());
     }
 
     /** Wakes up {@link PowerManager}. */
