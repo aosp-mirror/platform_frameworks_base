@@ -2113,7 +2113,6 @@ class ActivityStarter {
         if (hostTask == null || targetTask != hostTask) {
             return EMBEDDING_DISALLOWED_NEW_TASK;
         }
-
         return taskFragment.isAllowedToEmbedActivity(starting);
     }
 
@@ -2961,23 +2960,9 @@ class ActivityStarter {
                 sendCanNotEmbedActivityError(mInTaskFragment, embeddingCheckResult);
             }
         } else {
-            TaskFragment candidateTf = mAddingToTaskFragment != null ? mAddingToTaskFragment : null;
+            TaskFragment candidateTf = mAddingToTaskFragment;
             if (candidateTf == null) {
-                // Puts the activity on the top-most non-isolated navigation TF, unless the
-                // activity is launched from the same TF.
-                final TaskFragment sourceTaskFragment =
-                        mSourceRecord != null ? mSourceRecord.getTaskFragment() : null;
-                final ActivityRecord top = task.getActivity(r -> {
-                    if (!r.canBeTopRunning()) {
-                        return false;
-                    }
-                    final TaskFragment taskFragment = r.getTaskFragment();
-                    return !taskFragment.isIsolatedNav() || (sourceTaskFragment != null
-                            && sourceTaskFragment == taskFragment);
-                });
-                if (top != null) {
-                    candidateTf = top.getTaskFragment();
-                }
+                candidateTf = findCandidateTaskFragment(task);
             }
             if (candidateTf != null && candidateTf.isEmbedded()
                     && canEmbedActivity(candidateTf, mStartActivity, task) == EMBEDDING_ALLOWED) {
@@ -2992,6 +2977,50 @@ class ActivityStarter {
         } else {
             mStartActivity.reparent(newParent, newParent.getChildCount() /* top */, reason);
         }
+    }
+
+    /**
+     * Finds a candidate TaskFragment in {@code task} to launch activity, or returns {@code null}
+     * if there's no such a TaskFragment.
+     */
+    @Nullable
+    private TaskFragment findCandidateTaskFragment(@NonNull Task task) {
+        final TaskFragment sourceTaskFragment =
+                mSourceRecord != null ? mSourceRecord.getTaskFragment() : null;
+        for (int i = task.getChildCount() - 1; i >= 0; --i) {
+            final WindowContainer<?> wc = task.getChildAt(i);
+            final ActivityRecord activity = wc.asActivityRecord();
+            if (activity != null) {
+                if (activity.finishing) {
+                    continue;
+                }
+                // Early return if the top child is an Activity.
+                return null;
+            }
+            final TaskFragment taskFragment = wc.asTaskFragment();
+            if (taskFragment == null || taskFragment.isRemovalRequested()) {
+                // Skip if the TaskFragment is going to be finished.
+                continue;
+            }
+            if (taskFragment.getActivity(ActivityRecord::canBeTopRunning) == null) {
+                // Skip if there's no activity in this TF can be top running.
+                continue;
+            }
+            if (taskFragment.isIsolatedNav()) {
+                // Stop here if we reach an isolated navigated TF.
+                return null;
+            }
+            if (sourceTaskFragment != null && sourceTaskFragment == taskFragment) {
+                // Choose the taskFragment launched from even if it's pinned.
+                return taskFragment;
+            }
+            if (taskFragment.isPinned()) {
+                // Skip the pinned TaskFragment.
+                continue;
+            }
+            return taskFragment;
+        }
+        return null;
     }
 
     /**

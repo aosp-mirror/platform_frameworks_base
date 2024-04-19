@@ -188,6 +188,32 @@ public class OverlayPresentationTest {
     }
 
     @Test
+    public void testSetIsolatedNavigation_overlayFeatureDisabled_earlyReturn() {
+        mSetFlagRule.disableFlags(Flags.FLAG_ACTIVITY_EMBEDDING_OVERLAY_PRESENTATION_FLAG);
+
+        final TaskFragmentContainer container = createTestOverlayContainer(TASK_ID, "test");
+
+        mSplitPresenter.setTaskFragmentIsolatedNavigation(mTransaction, container,
+                !container.isIsolatedNavigationEnabled());
+
+        verify(mSplitPresenter, never()).setTaskFragmentIsolatedNavigation(any(),
+                any(IBinder.class), anyBoolean());
+    }
+
+    @Test
+    public void testSetPinned_overlayFeatureDisabled_earlyReturn() {
+        mSetFlagRule.disableFlags(Flags.FLAG_ACTIVITY_EMBEDDING_OVERLAY_PRESENTATION_FLAG);
+
+        final TaskFragmentContainer container = createTestOverlayContainer(TASK_ID, "test");
+
+        mSplitPresenter.setTaskFragmentPinned(mTransaction, container,
+                !container.isPinned());
+
+        verify(mSplitPresenter, never()).setTaskFragmentPinned(any(), any(IBinder.class),
+                anyBoolean());
+    }
+
+    @Test
     public void testGetAllNonFinishingOverlayContainers() {
         assertThat(mSplitController.getAllNonFinishingOverlayContainers()).isEmpty();
 
@@ -608,8 +634,11 @@ public class OverlayPresentationTest {
                 WINDOWING_MODE_UNDEFINED);
         verify(mSplitPresenter).updateAnimationParams(mTransaction, token,
                 TaskFragmentAnimationParams.DEFAULT);
-        verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction, container, false);
         verify(mSplitPresenter).setTaskFragmentDimOnTask(mTransaction, token, false);
+        verify(mSplitPresenter, never()).setTaskFragmentPinned(any(),
+                any(TaskFragmentContainer.class), anyBoolean());
+        verify(mSplitPresenter, never()).setTaskFragmentIsolatedNavigation(any(),
+                any(TaskFragmentContainer.class), anyBoolean());
     }
 
     @Test
@@ -630,9 +659,9 @@ public class OverlayPresentationTest {
                 WINDOWING_MODE_MULTI_WINDOW);
         verify(mSplitPresenter).updateAnimationParams(mTransaction, token,
                 TaskFragmentAnimationParams.DEFAULT);
-        // Set isolated navigation to false if the overlay container is associated with
-        // the launching activity.
-        verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction, container, false);
+        verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction, container, true);
+        verify(mSplitPresenter, never()).setTaskFragmentPinned(any(),
+                any(TaskFragmentContainer.class), anyBoolean());
         verify(mSplitPresenter).setTaskFragmentDimOnTask(mTransaction, token, true);
     }
 
@@ -655,10 +684,9 @@ public class OverlayPresentationTest {
                 container, WINDOWING_MODE_MULTI_WINDOW);
         verify(mSplitPresenter).updateAnimationParams(mTransaction, token,
                 TaskFragmentAnimationParams.DEFAULT);
-        // Set isolated navigation to false if the overlay container is associated with
-        // the launching activity.
-        verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction,
-                container, true);
+        verify(mSplitPresenter, never()).setTaskFragmentIsolatedNavigation(any(),
+                any(TaskFragmentContainer.class), anyBoolean());
+        verify(mSplitPresenter).setTaskFragmentPinned(mTransaction, container, true);
         verify(mSplitPresenter).setTaskFragmentDimOnTask(mTransaction, token, true);
     }
 
@@ -678,6 +706,8 @@ public class OverlayPresentationTest {
         verify(mSplitPresenter).updateAnimationParams(mTransaction, token,
                 TaskFragmentAnimationParams.DEFAULT);
         verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction, container, false);
+        verify(mSplitPresenter, never()).setTaskFragmentPinned(any(),
+                any(TaskFragmentContainer.class), anyBoolean());
         verify(mSplitPresenter).setTaskFragmentDimOnTask(mTransaction, token, false);
     }
 

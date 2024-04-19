@@ -401,24 +401,54 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             return;
         }
 
-        setTaskFragmentIsolatedNavigation(wct, secondaryContainer, !isStacked /* isolatedNav */);
+        setTaskFragmentPinned(wct, secondaryContainer, !isStacked /* pinned */);
         if (isStacked && !splitPinRule.isSticky()) {
             secondaryContainer.getTaskContainer().removeSplitPinContainer();
         }
     }
 
     /**
-     * Sets whether to enable isolated navigation for this {@link TaskFragmentContainer}
+     * Sets whether to enable isolated navigation for this {@link TaskFragmentContainer}.
+     * <p>
+     * If a container enables isolated navigation, activities can't be launched to this container
+     * unless explicitly requested to be launched to.
+     *
+     * @see TaskFragmentContainer#isOverlayWithActivityAssociation()
      */
     void setTaskFragmentIsolatedNavigation(@NonNull WindowContainerTransaction wct,
                                            @NonNull TaskFragmentContainer container,
                                            boolean isolatedNavigationEnabled) {
+        if (!Flags.activityEmbeddingOverlayPresentationFlag() && container.isOverlay()) {
+            return;
+        }
         if (container.isIsolatedNavigationEnabled() == isolatedNavigationEnabled) {
             return;
         }
         container.setIsolatedNavigationEnabled(isolatedNavigationEnabled);
         setTaskFragmentIsolatedNavigation(wct, container.getTaskFragmentToken(),
                 isolatedNavigationEnabled);
+    }
+
+    /**
+     * Sets whether to pin this {@link TaskFragmentContainer}.
+     * <p>
+     * If a container is pinned, it won't be chosen as the launch target unless it's the launching
+     * container.
+     *
+     * @see TaskFragmentContainer#isAlwaysOnTopOverlay()
+     * @see TaskContainer#getSplitPinContainer()
+     */
+    void setTaskFragmentPinned(@NonNull WindowContainerTransaction wct,
+                               @NonNull TaskFragmentContainer container,
+                               boolean pinned) {
+        if (!Flags.activityEmbeddingOverlayPresentationFlag() && container.isOverlay()) {
+            return;
+        }
+        if (container.isPinned() == pinned) {
+            return;
+        }
+        container.setPinned(pinned);
+        setTaskFragmentPinned(wct, container.getTaskFragmentToken(), pinned);
     }
 
     /**
@@ -586,6 +616,11 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         super.setCompanionTaskFragment(wct, primary, secondary);
     }
 
+    /**
+     * Applies the {@code attributes} to a standalone {@code container}.
+     *
+     * @param minDimensions the minimum dimension of the container.
+     */
     void applyActivityStackAttributes(
             @NonNull WindowContainerTransaction wct,
             @NonNull TaskFragmentContainer container,
@@ -594,15 +629,16 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         final Rect relativeBounds = sanitizeBounds(attributes.getRelativeBounds(), minDimensions,
                 container);
         final boolean isFillParent = relativeBounds.isEmpty();
-        // Note that we only set isolated navigation for overlay container without activity
-        // association. Activity will be launched to an expanded container on top of the overlay
-        // if the overlay is associated with an activity. Thus, an overlay with activity association
-        // will never be isolated navigated.
-        final boolean isIsolatedNavigated = container.isAlwaysOnTopOverlay() && !isFillParent;
         final boolean dimOnTask = !isFillParent
-                && attributes.getWindowAttributes().getDimAreaBehavior() == DIM_AREA_ON_TASK
-                && Flags.fullscreenDimFlag();
+                && Flags.fullscreenDimFlag()
+                && attributes.getWindowAttributes().getDimAreaBehavior() == DIM_AREA_ON_TASK;
         final IBinder fragmentToken = container.getTaskFragmentToken();
+
+        if (container.isAlwaysOnTopOverlay()) {
+            setTaskFragmentPinned(wct, container, !isFillParent);
+        } else if (container.isOverlayWithActivityAssociation()) {
+            setTaskFragmentIsolatedNavigation(wct, container, !isFillParent);
+        }
 
         // TODO(b/243518738): Update to resizeTaskFragment after we migrate WCT#setRelativeBounds
         //  and WCT#setWindowingMode to take fragmentToken.
@@ -612,7 +648,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         updateTaskFragmentWindowingModeIfRegistered(wct, container, windowingMode);
         // Always use default animation for standalone ActivityStack.
         updateAnimationParams(wct, fragmentToken, TaskFragmentAnimationParams.DEFAULT);
-        setTaskFragmentIsolatedNavigation(wct, container, isIsolatedNavigated);
         setTaskFragmentDimOnTask(wct, fragmentToken, dimOnTask);
     }
 
