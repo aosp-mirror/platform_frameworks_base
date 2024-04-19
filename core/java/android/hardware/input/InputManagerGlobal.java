@@ -1467,46 +1467,22 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * @see InputManager#addUniqueIdAssociationByPort(String, String)
+     * @see InputManager#addUniqueIdAssociation(String, String)
      */
-    public void addUniqueIdAssociationByPort(@NonNull String inputPort,
-                                             @NonNull String displayUniqueId) {
+    public void addUniqueIdAssociation(@NonNull String inputPort, @NonNull String displayUniqueId) {
         try {
-            mIm.addUniqueIdAssociationByPort(inputPort, displayUniqueId);
+            mIm.addUniqueIdAssociation(inputPort, displayUniqueId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * @see InputManager#removeUniqueIdAssociationByPort(String)
+     * @see InputManager#removeUniqueIdAssociation(String)
      */
-    public void removeUniqueIdAssociationByPort(@NonNull String inputPort) {
+    public void removeUniqueIdAssociation(@NonNull String inputPort) {
         try {
-            mIm.removeUniqueIdAssociationByPort(inputPort);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @see InputManager#addUniqueIdAssociationByDescriptor(String, String)
-     */
-    public void addUniqueIdAssociationByDescriptor(@NonNull String inputDeviceDescriptor,
-                                                   @NonNull String displayUniqueId) {
-        try {
-            mIm.addUniqueIdAssociationByDescriptor(inputDeviceDescriptor, displayUniqueId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @see InputManager#removeUniqueIdAssociationByDescriptor(String)
-     */
-    public void removeUniqueIdAssociationByDescriptor(@NonNull String inputDeviceDescriptor) {
-        try {
-            mIm.removeUniqueIdAssociationByDescriptor(inputDeviceDescriptor);
+            mIm.removeUniqueIdAssociation(inputPort);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
