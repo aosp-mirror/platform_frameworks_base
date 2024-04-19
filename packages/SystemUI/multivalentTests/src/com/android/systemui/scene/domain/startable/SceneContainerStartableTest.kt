@@ -25,10 +25,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
+import com.android.internal.logging.uiEventLoggerFake
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
+import com.android.systemui.bouncer.shared.logging.BouncerUiEvent
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.falsingCollector
 import com.android.systemui.classifier.falsingManager
@@ -39,6 +41,7 @@ import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthR
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeTrustRepository
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.model.sysUiState
@@ -97,6 +100,8 @@ class SceneContainerStartableTest : SysuiTestCase() {
     private val windowController = kosmos.notificationShadeWindowController
     private val centralSurfaces = kosmos.centralSurfaces
     private val powerInteractor = kosmos.powerInteractor
+    private val fakeTrustRepository = kosmos.fakeTrustRepository
+    private val uiEventLoggerFake = kosmos.uiEventLoggerFake
 
     private lateinit var underTest: SceneContainerStartable
 
@@ -1231,6 +1236,25 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(isShadeTouchable).isFalse()
 
             assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+        }
+
+    @Test
+    fun switchToGone_extendUnlock() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            prepareState(
+                initialSceneKey = Scenes.Bouncer,
+                authenticationMethod = AuthenticationMethodModel.Pin,
+            )
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
+
+            underTest.start()
+            fakeTrustRepository.setCurrentUserTrusted(true)
+
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
+            assertThat(uiEventLoggerFake[0].eventId)
+                .isEqualTo(BouncerUiEvent.BOUNCER_DISMISS_EXTENDED_ACCESS.id)
+            assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
         }
 
     private fun TestScope.emulateSceneTransition(

@@ -16,6 +16,7 @@
 
 package com.android.systemui.scene.domain.interactor
 
+import com.android.internal.logging.uiEventLogger
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
@@ -63,5 +64,6 @@ val Kosmos.sceneContainerStartable by Fixture {
         occlusionInteractor = sceneContainerOcclusionInteractor,
         faceUnlockInteractor = deviceEntryFaceAuthInteractor,
         shadeInteractor = shadeInteractor,
+        uiEventLogger = uiEventLogger,
     )
 }
