@@ -140,12 +140,31 @@ constructor(
             )
 
     /**
-     * The previous scene.
+     * The previous scene (or `null` if the previous scene is the [ignored] scene).
      *
      * This is effectively the previous value of [currentScene] which means that all caveats, for
      * example regarding when in a transition the current scene changes, apply.
+     *
+     * @param ignored If the previous scene is the same as [ignored], `null` is emitted. This is
+     *   designed to reduce the chances of a scene using [previousScene] naively to then set up a
+     *   user action that ends up leading to itself, which is an illegal operation that would cause
+     *   a crash.
      */
-    val previousScene: StateFlow<SceneKey?> = repository.previousScene
+    fun previousScene(
+        ignored: SceneKey? = null,
+    ): StateFlow<SceneKey?> {
+        fun SceneKey?.nullifyIfIgnored(): SceneKey? {
+            return this?.takeIf { this != ignored }
+        }
+
+        return repository.previousScene
+            .map { it.nullifyIfIgnored() }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = repository.previousScene.value.nullifyIfIgnored(),
+            )
+    }
 
     /**
      * Returns the keys of all scenes in the container.

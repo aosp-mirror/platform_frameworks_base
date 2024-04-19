@@ -296,7 +296,7 @@ class SceneInteractorTest : SysuiTestCase() {
     fun previousScene() =
         testScope.runTest {
             val currentScene by collectLastValue(underTest.currentScene)
-            val previousScene by collectLastValue(underTest.previousScene)
+            val previousScene by collectLastValue(underTest.previousScene())
             assertThat(previousScene).isNull()
 
             val firstScene = currentScene
@@ -305,5 +305,20 @@ class SceneInteractorTest : SysuiTestCase() {
 
             underTest.changeScene(toScene = Scenes.QuickSettings, "reason")
             assertThat(previousScene).isEqualTo(Scenes.Shade)
+        }
+
+    @Test
+    fun previousScene_withIgnoredScene() =
+        testScope.runTest {
+            val currentScene by collectLastValue(underTest.currentScene)
+            val previousScene by collectLastValue(underTest.previousScene(ignored = Scenes.Shade))
+            assertThat(previousScene).isNull()
+
+            val firstScene = currentScene
+            underTest.changeScene(toScene = Scenes.Shade, "reason")
+            assertThat(previousScene).isEqualTo(firstScene)
+
+            underTest.changeScene(toScene = Scenes.QuickSettings, "reason")
+            assertThat(previousScene).isNull()
         }
 }

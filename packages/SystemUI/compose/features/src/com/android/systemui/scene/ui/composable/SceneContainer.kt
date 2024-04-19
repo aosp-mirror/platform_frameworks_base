@@ -37,8 +37,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
-import com.android.compose.animation.scene.UserAction
-import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.systemui.ribbon.ui.composable.BottomRightCornerRibbon
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
@@ -71,9 +69,7 @@ fun SceneContainer(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val currentSceneKey: SceneKey by viewModel.currentScene.collectAsState()
-    val currentScene = checkNotNull(sceneByKey[currentSceneKey])
-    val currentDestinations: Map<UserAction, UserActionResult> by
-        currentScene.destinationScenes.collectAsState()
+    val currentDestinations by viewModel.currentDestinationScenes(coroutineScope).collectAsState()
     val state: MutableSceneTransitionLayoutState = remember {
         MutableSceneTransitionLayoutState(
             initialScene = currentSceneKey,
