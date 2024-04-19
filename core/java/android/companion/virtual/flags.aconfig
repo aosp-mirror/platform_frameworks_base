@@ -8,6 +8,7 @@
 # instead.
 
 package: "android.companion.virtual.flags"
+container: "system"
 
 flag {
   name: "enable_native_vdm"

@@ -1,4 +1,5 @@
 package: "android.service.autofill"
+container: "system"
 
 flag {
   name: "test"
