@@ -743,11 +743,6 @@ public class PipAnimationController {
                             .alpha(tx, leash, 1f)
                             .round(tx, leash, shouldApplyCornerRadius())
                             .shadow(tx, leash, shouldApplyShadowRadius());
-                    // TODO(b/178632364): this is a work around for the black background when
-                    // entering PiP in button navigation mode.
-                    if (isInPipDirection(direction)) {
-                        tx.setWindowCrop(leash, getStartValue());
-                    }
                     tx.show(leash);
                     tx.apply();
                 }
