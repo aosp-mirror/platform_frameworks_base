@@ -26,6 +26,8 @@ import static android.media.AudioPlaybackConfiguration.MUTED_BY_VOLUME_SHAPER;
 import static android.media.AudioPlaybackConfiguration.PLAYER_PIID_INVALID;
 import static android.media.AudioPlaybackConfiguration.PLAYER_UPDATE_MUTED;
 
+import static com.android.media.audio.Flags.portToPiidSimplification;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -151,6 +153,8 @@ public final class PlaybackActivityMonitor
     private final HashMap<Integer, AudioPlaybackConfiguration> mPlayers =
             new HashMap<Integer, AudioPlaybackConfiguration>();
 
+    @GuardedBy("mPlayerLock")
+    private final SparseIntArray mPiidToPortId = new SparseIntArray();
     @GuardedBy("mPlayerLock")
     private final SparseIntArray mPortIdToPiid = new SparseIntArray();
 
@@ -369,7 +373,11 @@ public final class PlaybackActivityMonitor
             sEventLogger.enqueue(new PlayerEvent(piid, event, eventValue));
 
             if (event == AudioPlaybackConfiguration.PLAYER_UPDATE_PORT_ID) {
-                mPortIdToPiid.put(eventValue, piid);
+                if (portToPiidSimplification()) {
+                    mPiidToPortId.put(piid, eventValue);
+                } else {
+                    mPortIdToPiid.put(eventValue, piid);
+                }
                 return;
             } else if (event == AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
                 for (Integer uidInteger: mBannedUids) {
@@ -430,10 +438,20 @@ public final class PlaybackActivityMonitor
         }
 
         synchronized (mPlayerLock) {
-            int piid = mPortIdToPiid.get(portId, PLAYER_PIID_INVALID);
-            if (piid == PLAYER_PIID_INVALID) {
-                Log.w(TAG, "No piid assigned for invalid/internal port id " + portId);
-                return;
+            int piid;
+            if (portToPiidSimplification()) {
+                int idxOfPiid = mPiidToPortId.indexOfValue(portId);
+                if (idxOfPiid < 0) {
+                    Log.w(TAG, "No piid assigned for invalid/internal port id " + portId);
+                    return;
+                }
+                piid = mPiidToPortId.keyAt(idxOfPiid);
+            } else {
+                piid = mPortIdToPiid.get(portId, PLAYER_PIID_INVALID);
+                if (piid == PLAYER_PIID_INVALID) {
+                    Log.w(TAG, "No piid assigned for invalid/internal port id " + portId);
+                    return;
+                }
             }
             final AudioPlaybackConfiguration apc = mPlayers.get(piid);
             if (apc == null) {
@@ -489,10 +507,14 @@ public final class PlaybackActivityMonitor
                 change = apc.handleStateEvent(AudioPlaybackConfiguration.PLAYER_STATE_RELEASED,
                         AudioPlaybackConfiguration.PLAYER_DEVICEID_INVALID);
 
-                // remove all port ids mapped to the released player
-                int portIdx;
-                while ((portIdx = mPortIdToPiid.indexOfValue(piid)) >= 0) {
-                    mPortIdToPiid.removeAt(portIdx);
+                if (portToPiidSimplification()) {
+                    mPiidToPortId.delete(piid);
+                } else {
+                    // remove all port ids mapped to the released player
+                    int portIdx;
+                    while ((portIdx = mPortIdToPiid.indexOfValue(piid)) >= 0) {
+                        mPortIdToPiid.removeAt(portIdx);
+                    }
                 }
 
                 if (change && mDoNotLogPiidList.contains(piid)) {
@@ -511,10 +533,17 @@ public final class PlaybackActivityMonitor
                 new EventLogger.StringEvent(
                         "clear port id to piid map"));
         synchronized (mPlayerLock) {
-            if (DEBUG) {
-                Log.v(TAG, "clear port id to piid map:\n" + mPortIdToPiid);
+            if (portToPiidSimplification()) {
+                if (DEBUG) {
+                    Log.v(TAG, "clear piid to portId map:\n" + mPiidToPortId);
+                }
+                mPiidToPortId.clear();
+            } else {
+                if (DEBUG) {
+                    Log.v(TAG, "clear port id to piid map:\n" + mPortIdToPiid);
+                }
+                mPortIdToPiid.clear();
             }
-            mPortIdToPiid.clear();
         }
     }
 
@@ -674,12 +703,21 @@ public final class PlaybackActivityMonitor
                 pw.print(" " + piid);
             }
             pw.println("\n");
-            // portId to piid mappings:
-            pw.println("\n  current portId to piid map:");
-            for (int i = 0; i < mPortIdToPiid.size(); ++i) {
-                pw.println(
-                        "  portId: " + mPortIdToPiid.keyAt(i) + " piid: " + mPortIdToPiid.valueAt(
-                                i));
+            if (portToPiidSimplification()) {
+                // portId to piid mappings:
+                pw.println("\n  current piid to portId map:");
+                for (int i = 0; i < mPiidToPortId.size(); ++i) {
+                    pw.println(
+                            "  piid: " + mPiidToPortId.keyAt(i) + " portId: "
+                                    + mPiidToPortId.valueAt(i));
+                }
+            } else {
+                // portId to piid mappings:
+                pw.println("\n  current portId to piid map:");
+                for (int i = 0; i < mPortIdToPiid.size(); ++i) {
+                    pw.println("  portId: " + mPortIdToPiid.keyAt(i) + " piid: "
+                            + mPortIdToPiid.valueAt(i));
+                }
             }
             pw.println("\n");
             // log
