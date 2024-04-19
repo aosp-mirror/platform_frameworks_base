@@ -6548,6 +6548,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
         @BinderThread
         @Override
+        public void setHandwritingSurfaceNotTouchable(boolean notTouchable) {
+            mImms.mHwController.setNotTouchable(notTouchable);
+        }
+
+        @BinderThread
+        @Override
         public void createInputContentUriToken(Uri contentUri, String packageName,
                 AndroidFuture future /* T=IBinder */) {
             @SuppressWarnings("unchecked")

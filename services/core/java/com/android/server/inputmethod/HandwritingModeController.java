@@ -159,6 +159,13 @@ final class HandwritingModeController {
         return OptionalInt.of(mCurrentRequestId);
     }
 
+    void setNotTouchable(boolean notTouchable) {
+        if (!getCurrentRequestId().isPresent()) {
+            return;
+        }
+        mHandwritingSurface.setNotTouchable(notTouchable);
+    }
+
     boolean isStylusGestureOngoing() {
         if (mRecordingGestureAfterStylusUp && !mHandwritingBuffer.isEmpty()) {
             // If it is less than AFTER_STYLUS_UP_ALLOW_PERIOD_MS after the stylus up event, return

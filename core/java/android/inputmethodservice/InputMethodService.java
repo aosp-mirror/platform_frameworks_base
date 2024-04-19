@@ -765,6 +765,7 @@ public class InputMethodService extends AbstractInputMethodService {
 
         private boolean mSystemCallingShowSoftInput;
         private boolean mSystemCallingHideSoftInput;
+        private boolean mSimultaneousStylusAndTouchEnabled;
 
         /**
          * {@inheritDoc}
@@ -1129,9 +1130,11 @@ public class InputMethodService extends AbstractInputMethodService {
             mShowInputRequested = false;
 
             mInkWindow.show();
+            mSimultaneousStylusAndTouchEnabled =
+                    com.android.input.flags.Flags.enableMultiDeviceInput();
 
             // deliver previous @param stylusEvents
-            stylusEvents.forEach(InputMethodService.this::onStylusHandwritingMotionEvent);
+            stylusEvents.forEach(this::deliverStylusHandwritingMotionEvent);
 
             // create receiver for channel
             mHandwritingEventReceiver = new InputEventReceiver(channel, Looper.getMainLooper()) {
@@ -1139,10 +1142,15 @@ public class InputMethodService extends AbstractInputMethodService {
                 public void onInputEvent(InputEvent event) {
                     boolean handled = false;
                     try {
-                        if (!(event instanceof MotionEvent)) {
+                        if (!(event instanceof MotionEvent motionEvent)) {
                             return;
                         }
-                        onStylusHandwritingMotionEvent((MotionEvent) event);
+                        if (!motionEvent.isStylusPointer()) {
+                            // Handwriting surface is touchable, we don't want these touch events
+                            // to get to the IME.
+                            return;
+                        }
+                        deliverStylusHandwritingMotionEvent(motionEvent);
                         scheduleHandwritingSessionTimeout();
                         handled = true;
                     } finally {
@@ -1151,6 +1159,27 @@ public class InputMethodService extends AbstractInputMethodService {
                 }
             };
             scheduleHandwritingSessionTimeout();
+        }
+
+        private void deliverStylusHandwritingMotionEvent(MotionEvent motionEvent) {
+            onStylusHandwritingMotionEvent(motionEvent);
+            if (!mSimultaneousStylusAndTouchEnabled) {
+                return;
+            }
+            switch (motionEvent.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    // Consume and ignore all touches while stylus is down to prevent
+                    // accidental touches from going to the app while writing.
+                    mPrivOps.setHandwritingSurfaceNotTouchable(false);
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    // Go back to only consuming stylus events so that the user
+                    // can continue to interact with the app using touch
+                    // when the stylus is not down.
+                    mPrivOps.setHandwritingSurfaceNotTouchable(true);
+                    break;
+            }
         }
 
         /**
