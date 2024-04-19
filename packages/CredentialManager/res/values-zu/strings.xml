@@ -42,9 +42,6 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Sungula ukhiye wokudlula ukuze ungene ngemvume ku-<xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"Londoloza iphasiwedi ukuze ungene ngemvume ku-<xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Londoloza ulwazi lokungena lwe-<xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"Sebenzisa ukukhiya isikrini sakho ukuze usungule ukhiye wokudlula we-<xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"Sebenzisa ukukhiya isikrini sakho ukuze usungule iphasiwedi ye-<xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"Sebenzisa ukukhiya isikrini sakho ukuze ulondoloze ulwazi lokungena ngemvume lwe-<xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"ukhiye wokudlula"</string>
     <string name="password" msgid="6738570945182936667">"iphasiwedi"</string>
     <string name="passkeys" msgid="5733880786866559847">"okhiye bokudlula"</string>
@@ -71,15 +68,16 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Buyela emuva ekhasini langaphambilini"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"Vala"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Chitha"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Sebenzisa ukhiye wakho wokungena olondoloziwe <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Sebenzisa iphasiwedi yakho elondoloziwe ye-<xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_single_tap_for" msgid="2057945648748859483">"Sebenzisa ukukhiya kwakho kwesikrini ukuze ungene ngemvume ku-<xliff:g id="APP_NAME">%1$s</xliff:g> ngo-<xliff:g id="USERNAME">%2$s</xliff:g>"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Sebenzisa ukungena kwakho ngemvume ku-<xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Vula ukungena ngemvume okukhethwa kukho kwe-<xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Sebenzisa ukhiye wakho wokungena olondoloziwe we-<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Sebenzisa iphasiwedi yakho elondoloziwe ye-<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Sebenzisa i-akhawunti yakho ye-<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for get_dialog_description_single_tap (2797059565126030879) -->
+    <skip />
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Vula ukungena ngemvume okukhethwa kukho kwe-<xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Khetha ukhiye wokudlula olondoloziwe we-<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Khetha iphasiwedi elondoloziwe ye-<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Khetha ukungena ngemvume okulondoloziwe kwe-<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Khetha ukungenangemvume ku-<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"Khetha i-akhawunti ye-<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Khetha ongakhetha kukho kwe-<xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Sebenzisa lolu lwazi ku-<xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Ngena ngemvume ngenye indlela"</string>
