@@ -356,7 +356,9 @@ private fun isElementOpaque(
     val toState = element.sceneStates[toScene]
 
     if (fromState == null && toState == null) {
-        error("This should not happen, element $element is neither in $fromScene or $toScene")
+        // TODO(b/311600838): Throw an exception instead once layers of disposed elements are not
+        // run anymore.
+        return true
     }
 
     val isSharedElement = fromState != null && toState != null
