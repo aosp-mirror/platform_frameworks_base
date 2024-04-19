@@ -63,6 +63,7 @@ public class BrightnessSliderView extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        setLayerType(LAYER_TYPE_HARDWARE, null);
 
         mSlider = requireViewById(R.id.slider);
         mSlider.setAccessibilityLabel(getContentDescription().toString());
