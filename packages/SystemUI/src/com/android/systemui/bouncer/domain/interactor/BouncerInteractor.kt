@@ -95,7 +95,7 @@ constructor(
 
     /** The scene to show when bouncer is dismissed. */
     val dismissDestination: Flow<SceneKey> =
-        sceneInteractor.previousScene.map { it ?: Scenes.Lockscreen }
+        sceneInteractor.previousScene(Scenes.Bouncer).map { it ?: Scenes.Lockscreen }
 
     /** Notifies that the user has places down a pointer, not necessarily dragging just yet. */
     fun onDown() {

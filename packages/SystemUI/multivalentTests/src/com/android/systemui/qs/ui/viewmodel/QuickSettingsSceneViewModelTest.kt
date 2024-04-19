@@ -106,7 +106,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
             val destinations by collectLastValue(underTest.destinationScenes)
 
             val currentScene by collectLastValue(sceneInteractor.currentScene)
-            val previousScene by collectLastValue(sceneInteractor.previousScene)
+            val previousScene by collectLastValue(sceneInteractor.previousScene())
             sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
             sceneInteractor.changeScene(Scenes.QuickSettings, "reason")
             assertThat(currentScene).isEqualTo(Scenes.QuickSettings)

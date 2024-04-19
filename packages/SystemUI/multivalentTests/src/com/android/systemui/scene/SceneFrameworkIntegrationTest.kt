@@ -150,6 +150,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 sceneInteractor = sceneInteractor,
                 falsingInteractor = kosmos.falsingInteractor,
                 powerInteractor = kosmos.powerInteractor,
+                scenes = kosmos.scenes,
             )
             .apply { setTransitionState(transitionState) }
     }
