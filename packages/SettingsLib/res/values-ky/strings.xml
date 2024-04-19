@@ -387,7 +387,7 @@
     <string name="simulate_color_space" msgid="1206503300335835151">"Аномалияга окшошуу"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL трейстерин иштетүү"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Аудиону өткөрүүнү өчүрүү (USB)"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Тышкы USB аудио жабдыктарына авто өткөрүү өчрлт"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Тышкы USB түзмөктөргө автоматтык түрдө өтпөйт"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Элементтрдн чектрин көрст"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Кесилген нерсенин чектери жана жээктери көрүнөт"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Интерфейсти чагылдыруу"</string>
