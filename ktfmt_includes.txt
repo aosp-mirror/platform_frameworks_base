@@ -5,8 +5,6 @@
 -packages/SystemUI/checks/src/com/android/internal/systemui/lint/BroadcastSentViaContextDetector.kt
 -packages/SystemUI/checks/src/com/android/internal/systemui/lint/RegisterReceiverViaContextDetector.kt
 -packages/SystemUI/checks/src/com/android/internal/systemui/lint/SoftwareBitmapDetector.kt
--packages/SystemUI/customization/src/com/android/systemui/shared/clocks/AnimatableClockView.kt
--packages/SystemUI/customization/src/com/android/systemui/shared/clocks/DefaultClockProvider.kt
 -packages/SystemUI/monet/src/com/android/systemui/monet/ColorScheme.kt
 -packages/SystemUI/screenshot/src/com/android/systemui/testing/screenshot/View.kt
 -packages/SystemUI/shared/src/com/android/systemui/flags/Flag.kt
