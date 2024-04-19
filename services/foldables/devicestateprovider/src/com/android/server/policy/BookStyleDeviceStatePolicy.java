@@ -90,6 +90,12 @@ public class BookStyleDeviceStatePolicy extends DeviceStatePolicy implements
         final DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
 
         mEnablePostureBasedClosedState = featureFlags.enableFoldablesPostureBasedClosedState();
+        if (mEnablePostureBasedClosedState) {
+            // This configuration doesn't require listening to hall sensor, it solely relies
+            // on the fused hinge angle sensor
+            hallSensor = null;
+        }
+
         mIsDualDisplayBlockingEnabled = featureFlags.enableDualDisplayBlocking();
 
         final DeviceStateConfiguration[] configuration = createConfiguration(

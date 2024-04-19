@@ -219,6 +219,26 @@ public final class BookStyleDeviceStatePolicyTest {
     }
 
     @Test
+    public void test_postureBasedClosedState_createPolicy_doesNotRegisterHallSensor() {
+        mFakeFeatureFlags.setFlag(Flags.FLAG_ENABLE_FOLDABLES_POSTURE_BASED_CLOSED_STATE, true);
+        clearInvocations(mSensorManager);
+
+        mInstrumentation.runOnMainSync(() -> mProvider = createProvider());
+
+        verify(mSensorManager, never()).registerListener(any(), eq(mHallSensor), anyInt());
+    }
+
+    @Test
+    public void test_postureBasedClosedStateDisabled_createPolicy_registersHallSensor() {
+        mFakeFeatureFlags.setFlag(Flags.FLAG_ENABLE_FOLDABLES_POSTURE_BASED_CLOSED_STATE, false);
+        clearInvocations(mSensorManager);
+
+        mInstrumentation.runOnMainSync(() -> mProvider = createProvider());
+
+        verify(mSensorManager).registerListener(any(), eq(mHallSensor), anyInt());
+    }
+
+    @Test
     public void test_noSensorEventsYet_reportOpenedState() {
         mProvider.setListener(mListener);
         verify(mListener).onStateChanged(mDeviceStateCaptor.capture());
