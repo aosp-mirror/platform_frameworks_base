@@ -1025,7 +1025,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     break;
                 }
                 final Task task = wc.asTask();
-
+                if (task.isVisibleRequested() || task.isVisible()) {
+                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                }
                 if (task.isLeafTask()) {
                     mService.mTaskSupervisor
                             .removeTask(task, true, REMOVE_FROM_RECENTS, "remove-task"
