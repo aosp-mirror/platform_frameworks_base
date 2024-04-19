@@ -765,7 +765,11 @@ public class Utils {
             return false;
         }
 
-        final List<UsbPort> usbPortList = context.getSystemService(UsbManager.class).getPorts();
+        final UsbManager usbManager = context.getSystemService(UsbManager.class);
+        if (usbManager == null) {
+            return false;
+        }
+        final List<UsbPort> usbPortList = usbManager.getPorts();
         if (usbPortList == null || usbPortList.isEmpty()) {
             return false;
         }
