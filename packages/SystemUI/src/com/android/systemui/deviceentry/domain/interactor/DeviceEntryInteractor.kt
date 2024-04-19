@@ -19,6 +19,7 @@ package com.android.systemui.deviceentry.domain.interactor
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
@@ -63,6 +64,7 @@ constructor(
     private val trustInteractor: TrustInteractor,
     private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
     private val systemPropertiesHelper: SystemPropertiesHelper,
+    private val alternateBouncerInteractor: AlternateBouncerInteractor,
 ) {
     /**
      * Whether the device is unlocked.
@@ -211,10 +213,14 @@ constructor(
         //       4. Transition to bouncer scene
         applicationScope.launch {
             if (isAuthenticationRequired()) {
-                sceneInteractor.changeScene(
-                    toScene = Scenes.Bouncer,
-                    loggingReason = "request to unlock device while authentication required",
-                )
+                if (alternateBouncerInteractor.canShowAlternateBouncer.value) {
+                    alternateBouncerInteractor.forceShow()
+                } else {
+                    sceneInteractor.changeScene(
+                        toScene = Scenes.Bouncer,
+                        loggingReason = "request to unlock device while authentication required",
+                    )
+                }
             } else {
                 sceneInteractor.changeScene(
                     toScene = Scenes.Gone,

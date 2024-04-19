@@ -25,6 +25,9 @@ import com.android.systemui.authentication.data.repository.FakeAuthenticationRep
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.biometrics.data.repository.fakeFingerprintPropertyRepository
+import com.android.systemui.bouncer.data.repository.keyguardBouncerRepository
+import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
@@ -40,11 +43,16 @@ import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReaso
 import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReason.UserLockdown
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.fakeSystemPropertiesHelper
+import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
+import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeTrustRepository
 import com.android.systemui.keyguard.shared.model.AuthenticationFlags
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
@@ -371,6 +379,42 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun showOrUnlockDevice_noAlternateBouncer_switchesToBouncerScene() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            switchToScene(Scenes.Lockscreen)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+
+            kosmos.fakeFingerprintPropertyRepository.supportsRearFps() // altBouncer unsupported
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+            runCurrent()
+
+            underTest.attemptDeviceEntry()
+
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
+        }
+
+    @Test
+    fun showOrUnlockDevice_showsAlternateBouncer_staysOnLockscreenScene() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            switchToScene(Scenes.Lockscreen)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+            givenCanShowAlternateBouncer()
+            runCurrent()
+
+            underTest.attemptDeviceEntry()
+
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+        }
+
+    @Test
     fun isBypassEnabled_disabledInRepository_false() =
         testScope.runTest {
             kosmos.fakeDeviceEntryRepository.setBypassEnabled(false)
@@ -592,5 +636,21 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
 
     private fun switchToScene(sceneKey: SceneKey) {
         sceneInteractor.changeScene(sceneKey, "reason")
+    }
+
+    private suspend fun givenCanShowAlternateBouncer() {
+        val canShowAlternateBouncer by
+            testScope.collectLastValue(kosmos.alternateBouncerInteractor.canShowAlternateBouncer)
+        kosmos.fakeFingerprintPropertyRepository.supportsUdfps()
+        kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+            from = KeyguardState.GONE,
+            to = KeyguardState.LOCKSCREEN,
+            testScheduler = testScope.testScheduler,
+        )
+        kosmos.deviceEntryFingerprintAuthRepository.setLockedOut(false)
+        kosmos.biometricSettingsRepository.setIsFingerprintAuthCurrentlyAllowed(true)
+        kosmos.fakeKeyguardRepository.setKeyguardDismissible(false)
+        kosmos.keyguardBouncerRepository.setPrimaryShow(false)
+        assertThat(canShowAlternateBouncer).isTrue()
     }
 }

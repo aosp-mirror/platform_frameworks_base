@@ -17,6 +17,7 @@
 package com.android.systemui.deviceentry.domain.interactor
 
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
+import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.deviceentry.data.repository.deviceEntryRepository
 import com.android.systemui.flags.fakeSystemPropertiesHelper
 import com.android.systemui.keyguard.domain.interactor.trustInteractor
@@ -39,5 +40,6 @@ val Kosmos.deviceEntryInteractor by
             trustInteractor = trustInteractor,
             deviceUnlockedInteractor = deviceUnlockedInteractor,
             systemPropertiesHelper = fakeSystemPropertiesHelper,
+            alternateBouncerInteractor = alternateBouncerInteractor,
         )
     }
