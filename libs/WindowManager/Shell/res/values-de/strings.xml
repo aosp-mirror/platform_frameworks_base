@@ -62,7 +62,7 @@
     <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> von <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="8071515017164630429">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> aus <xliff:g id="APP_NAME">%2$s</xliff:g> und <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> weiteren"</string>
     <string name="bubble_accessibility_action_move_top_left" msgid="2644118920500782758">"Nach oben links verschieben"</string>
-    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Nach rechts oben verschieben"</string>
+    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Nach oben rechts verschieben"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Nach unten links verschieben"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Nach unten rechts verschieben"</string>
     <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> maximieren"</string>
