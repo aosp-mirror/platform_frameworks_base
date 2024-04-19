@@ -17,8 +17,8 @@
 package com.android.systemui.screenshot.ui.binder
 
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.lifecycle.Lifecycle
@@ -26,16 +26,20 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
+import com.android.systemui.screenshot.ui.ScreenshotShelfView
 import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel
 import com.android.systemui.util.children
 import kotlinx.coroutines.launch
 
 object ScreenshotShelfViewBinder {
     fun bind(
-        view: ViewGroup,
+        view: ScreenshotShelfView,
         viewModel: ScreenshotViewModel,
         layoutInflater: LayoutInflater,
+        onTouchListener: (MotionEvent) -> Boolean,
     ) {
+        view.onTouchInterceptListener = onTouchListener
+
         val previewView: ImageView = view.requireViewById(R.id.screenshot_preview)
         val previewBorder = view.requireViewById<View>(R.id.screenshot_preview_border)
         previewView.clipToOutline = true

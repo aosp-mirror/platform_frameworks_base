@@ -42,6 +42,7 @@ import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_DISMISSED_OTHE
 import com.android.systemui.screenshot.scroll.ScrollCaptureController
 import com.android.systemui.screenshot.ui.ScreenshotAnimationController
 import com.android.systemui.screenshot.ui.ScreenshotShelfView
+import com.android.systemui.screenshot.ui.SwipeGestureListener
 import com.android.systemui.screenshot.ui.binder.ScreenshotShelfViewBinder
 import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel
 import dagger.assisted.Assisted
@@ -75,9 +76,17 @@ constructor(
     override var isPendingSharedTransition = false
 
     private val animationController = ScreenshotAnimationController(view)
+    private val swipeGestureListener =
+        SwipeGestureListener(
+            view,
+            onDismiss = { requestDismissal(ScreenshotEvent.SCREENSHOT_SWIPE_DISMISSED, it) },
+            onCancel = { animationController.getSwipeReturnAnimation().start() }
+        )
 
     init {
-        ScreenshotShelfViewBinder.bind(view, viewModel, LayoutInflater.from(context))
+        ScreenshotShelfViewBinder.bind(view, viewModel, LayoutInflater.from(context)) {
+            swipeGestureListener.onMotionEvent(it)
+        }
         addPredictiveBackListener { requestDismissal(SCREENSHOT_DISMISSED_OTHER) }
         setOnKeyListener { requestDismissal(SCREENSHOT_DISMISSED_OTHER) }
         debugLog(DEBUG_WINDOW) { "adding OnComputeInternalInsetsListener" }
@@ -111,6 +120,10 @@ constructor(
     override fun setChipIntents(imageData: SavedImageData) {}
 
     override fun requestDismissal(event: ScreenshotEvent?) {
+        requestDismissal(event, getDismissalVelocity())
+    }
+
+    private fun requestDismissal(event: ScreenshotEvent?, velocity: Float) {
         debugLog(DEBUG_DISMISS) { "screenshot dismissal requested: $event" }
 
         // If we're already animating out, don't restart the animation
@@ -119,7 +132,7 @@ constructor(
             return
         }
         event?.let { logger.log(it, 0, packageName) }
-        val animator = animationController.getExitAnimation()
+        val animator = animationController.getSwipeDismissAnimation(velocity)
         animator.addListener(
             object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animator: Animator) {
@@ -220,6 +233,12 @@ constructor(
                 }
             }
         )
+    }
+
+    private fun getDismissalVelocity(): Float {
+        val isLTR = view.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_LTR
+        // dismiss to the left in LTR locales, to the right in RTL
+        return if (isLTR) -1.5f else 1.5f
     }
 
     @AssistedFactory
