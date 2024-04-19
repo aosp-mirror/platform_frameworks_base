@@ -61,6 +61,16 @@ flag {
 }
 
 flag {
+   name: "notification_over_expansion_clipping_fix"
+   namespace: "systemui"
+   description: "fix NSSL clipping when over-expanding; fixes split shade bug."
+   bug: "288553572"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
     name: "notification_async_group_header_inflation"
     namespace: "systemui"
     description: "Inflates the notification group summary header views from the background thread."
