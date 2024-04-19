@@ -310,6 +310,9 @@
     <!-- Radius for notifications corners without adjacent notifications -->
     <dimen name="notification_corner_radius">28dp</dimen>
 
+    <!-- Stroke width for notifications focus state overlay, see id/notification_focus_outline -->
+    <dimen name="notification_focus_stroke_width">3dp</dimen>
+
     <!-- Distance over which notification corner animations run, near the shelf while scrolling. -->
     <dimen name="notification_corner_animation_distance">48dp</dimen>
 
