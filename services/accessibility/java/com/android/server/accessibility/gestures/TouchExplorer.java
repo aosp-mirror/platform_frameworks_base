@@ -240,7 +240,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
     }
 
     private void clear(MotionEvent event, int policyFlags) {
-        if (mState.isTouchExploring()) {
+        if (mState.isTouchExploring() || Flags.sendHoverEventsBasedOnEventStream()) {
             // If a touch exploration gesture is in progress send events for its end.
             sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
         }
@@ -563,7 +563,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
         mSendHoverEnterAndMoveDelayed.clear();
         mSendHoverExitDelayed.cancel();
         // If a touch exploration gesture is in progress send events for its end.
-        if (mState.isTouchExploring()) {
+        if (mState.isTouchExploring() || Flags.sendHoverEventsBasedOnEventStream()) {
             sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
         }
         if (mState.isClear()) {
@@ -1601,6 +1601,9 @@ public class TouchExplorer extends BaseEventStreamTransformation
             }
             if (mEvents.size() == 0) {
                 return;
+            }
+            if (Flags.sendHoverEventsBasedOnEventStream()) {
+                sendHoverExitAndTouchExplorationGestureEndIfNeeded(mPolicyFlags);
             }
             // Send an accessibility event to announce the touch exploration start.
             mDispatcher.sendAccessibilityEvent(TYPE_TOUCH_EXPLORATION_GESTURE_START);
