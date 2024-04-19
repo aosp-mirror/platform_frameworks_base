@@ -656,8 +656,14 @@ constructor(
         if (width == widthInSceneContainerPx && height == heightInSceneContainerPx) {
             return
         }
+        if (width <= 0 || height <= 0) {
+            // reject as invalid
+            return
+        }
         widthInSceneContainerPx = width
         heightInSceneContainerPx = height
+        mediaCarouselScrollHandler.playerWidthPlusPadding =
+            width + context.resources.getDimensionPixelSize(R.dimen.qs_media_padding)
         updatePlayers(recreateMedia = true)
     }
 
