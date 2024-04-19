@@ -1516,7 +1516,7 @@ public class BackupManagerService extends IBackupManager.Stub {
         String op = nextArg(args, argIndex);
         argIndex++;
 
-        if ("--help".equals(op)) {
+        if ("--help".equals(op) || "-h".equals(op)) {
             showDumpUsage(pw);
             return;
         }
@@ -1548,19 +1548,17 @@ public class BackupManagerService extends IBackupManager.Stub {
             }
             return;
         }
-        if (op == null || "agents".startsWith(op) || "transportclients".equals(op)
-                || "transportstats".equals(op)) {
-            for (int i = 0; i < mUserServices.size(); i++) {
-                UserBackupManagerService userBackupManagerService =
-                        getServiceForUserIfCallerHasPermission(mUserServices.keyAt(i), "dump()");
-                if (userBackupManagerService != null) {
-                    userBackupManagerService.dump(fd, pw, args);
-                }
-            }
-            return;
-        }
 
-        showDumpUsage(pw);
+        // We get here if we have no parameters or parameters unkonwn to us.
+        // Print dumpsys info in either case: bug report creation passes some parameter to
+        // dumpsys that we don't need to check.
+        for (int i = 0; i < mUserServices.size(); i++) {
+            UserBackupManagerService userBackupManagerService =
+                    getServiceForUserIfCallerHasPermission(mUserServices.keyAt(i), "dump()");
+            if (userBackupManagerService != null) {
+                userBackupManagerService.dump(fd, pw, args);
+            }
+        }
     }
 
     private String nextArg(String[] args, int argIndex) {
