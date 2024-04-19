@@ -194,7 +194,7 @@ abstract class StatusBarPipelineModule {
         @SysUISingleton
         @MobileInputLog
         fun provideMobileInputLogBuffer(factory: LogBufferFactory): LogBuffer {
-            return factory.create("MobileInputLog", 100)
+            return factory.create("MobileInputLog", 300)
         }
 
         @Provides
