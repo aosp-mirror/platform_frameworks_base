@@ -20,11 +20,14 @@ import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.server.power.hint.Flags.powerhintThreadCleanup;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.StatsManager;
 import android.app.UidObserver;
 import android.content.Context;
+import android.hardware.power.SessionConfig;
+import android.hardware.power.SessionTag;
 import android.hardware.power.WorkDuration;
 import android.os.Binder;
 import android.os.Handler;
@@ -67,6 +70,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /** An hint service implementation that runs in System Server process. */
 public final class HintManagerService extends SystemService {
@@ -87,7 +91,7 @@ public final class HintManagerService extends SystemService {
     @GuardedBy("mLock")
     private final ArrayMap<Integer, ArrayMap<IBinder, ArraySet<AppHintSession>>> mActiveSessions;
 
-    /** Lock to protect HAL handles and listen list. */
+    /** Lock to protect mActiveSessions. */
     private final Object mLock = new Object();
 
     @GuardedBy("mNonIsolatedTidsLock")
@@ -103,6 +107,8 @@ public final class HintManagerService extends SystemService {
     private final ActivityManagerInternal mAmInternal;
 
     private final Context mContext;
+
+    private AtomicBoolean mConfigCreationSupport = new AtomicBoolean(true);
 
     private static final String PROPERTY_SF_ENABLE_CPU_HINT = "debug.sf.enable_adpf_cpu_hint";
     private static final String PROPERTY_HWUI_ENABLE_HINT_MANAGER = "debug.hwui.use_hint_manager";
@@ -217,6 +223,9 @@ public final class HintManagerService extends SystemService {
         private static native long nativeCreateHintSession(int tgid, int uid, int[] tids,
                 long durationNanos);
 
+        private static native long nativeCreateHintSessionWithConfig(int tgid, int uid, int[] tids,
+                long durationNanos, int tag, SessionConfig config);
+
         private static native void nativePauseHintSession(long halPtr);
 
         private static native void nativeResumeHintSession(long halPtr);
@@ -251,6 +260,12 @@ public final class HintManagerService extends SystemService {
         /** Wrapper for HintManager.nativeCreateHintSession */
         public long halCreateHintSession(int tgid, int uid, int[] tids, long durationNanos) {
             return nativeCreateHintSession(tgid, uid, tids, durationNanos);
+        }
+
+        /** Wrapper for HintManager.nativeCreateHintSessionWithConfig */
+        public long halCreateHintSessionWithConfig(
+                int tgid, int uid, int[] tids, long durationNanos, int tag, SessionConfig config) {
+            return nativeCreateHintSessionWithConfig(tgid, uid, tids, durationNanos, tag, config);
         }
 
         /** Wrapper for HintManager.nativePauseHintSession */
@@ -612,8 +627,12 @@ public final class HintManagerService extends SystemService {
     @VisibleForTesting
     final class BinderService extends IHintManager.Stub {
         @Override
-        public IHintSession createHintSession(IBinder token, int[] tids, long durationNanos) {
-            if (!isHalSupported()) return null;
+        public IHintSession createHintSessionWithConfig(@NonNull IBinder token,
+                @NonNull int[] tids, long durationNanos, @SessionTag int tag,
+                @Nullable SessionConfig config) {
+            if (!isHalSupported()) {
+                throw new UnsupportedOperationException("PowerHAL is not supported!");
+            }
 
             java.util.Objects.requireNonNull(token);
             java.util.Objects.requireNonNull(tids);
@@ -634,8 +653,35 @@ public final class HintManagerService extends SystemService {
                     throw new SecurityException(errMsg);
                 }
 
-                long halSessionPtr = mNativeWrapper.halCreateHintSession(callingTgid, callingUid,
-                        tids, durationNanos);
+                Long halSessionPtr = null;
+                if (mConfigCreationSupport.get()) {
+                    try {
+                        halSessionPtr = mNativeWrapper.halCreateHintSessionWithConfig(
+                                callingTgid, callingUid, tids, durationNanos, tag, config);
+                    } catch (UnsupportedOperationException e) {
+                        mConfigCreationSupport.set(false);
+                    } catch (IllegalStateException e) {
+                        Slog.e("createHintSessionWithConfig failed: ", e.getMessage());
+                        throw new IllegalStateException(
+                            "createHintSessionWithConfig failed: " + e.getMessage());
+                    }
+                }
+
+                if (halSessionPtr == null) {
+                    try {
+                        halSessionPtr = mNativeWrapper.halCreateHintSession(callingTgid,
+                                callingUid, tids, durationNanos);
+                    } catch (UnsupportedOperationException e) {
+                        Slog.w("createHintSession unsupported: ", e.getMessage());
+                        throw new UnsupportedOperationException(
+                            "createHintSession unsupported: " + e.getMessage());
+                    } catch (IllegalStateException e) {
+                        Slog.e("createHintSession failed: ", e.getMessage());
+                        throw new IllegalStateException(
+                            "createHintSession failed: " + e.getMessage());
+                    }
+                }
+
                 if (powerhintThreadCleanup()) {
                     synchronized (mNonIsolatedTidsLock) {
                         for (int i = nonIsolated.size() - 1; i >= 0; i--) {
@@ -643,9 +689,6 @@ public final class HintManagerService extends SystemService {
                             mNonIsolatedTids.get(nonIsolated.get(i)).add(halSessionPtr);
                         }
                     }
-                }
-                if (halSessionPtr == 0) {
-                    return null;
                 }
 
                 AppHintSession hs = new AppHintSession(callingUid, callingTgid, tids, token,
