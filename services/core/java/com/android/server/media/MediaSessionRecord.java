@@ -66,6 +66,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -89,6 +90,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -189,9 +191,6 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
     private final ForegroundServiceDelegationOptions mForegroundServiceDelegationOptions;
 
     private final Object mLock = new Object();
-    // This field is partially guarded by mLock. Writes and non-atomic iterations (for example:
-    // index-based-iterations) must be guarded by mLock. But it is safe to acquire an iterator
-    // without acquiring mLock.
     private final CopyOnWriteArrayList<ISessionControllerCallbackHolder>
             mControllerCallbackHolders = new CopyOnWriteArrayList<>();
 
@@ -887,9 +886,24 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
             playbackState = mPlaybackState;
         }
-        performOnCallbackHolders(
-                "pushPlaybackStateUpdate",
-                holder -> holder.mCallback.onPlaybackStateChanged(playbackState));
+        Collection<ISessionControllerCallbackHolder> deadCallbackHolders = null;
+        for (ISessionControllerCallbackHolder holder : mControllerCallbackHolders) {
+            try {
+                holder.mCallback.onPlaybackStateChanged(playbackState);
+            } catch (DeadObjectException e) {
+                if (deadCallbackHolders == null) {
+                    deadCallbackHolders = new ArrayList<>();
+                }
+                deadCallbackHolders.add(holder);
+                logCallbackException("Removing dead callback in pushPlaybackStateUpdate", holder,
+                        e);
+            } catch (RemoteException e) {
+                logCallbackException("unexpected exception in pushPlaybackStateUpdate", holder, e);
+            }
+        }
+        if (deadCallbackHolders != null) {
+            removeControllerHoldersSafely(deadCallbackHolders);
+        }
     }
 
     private void pushMetadataUpdate() {
@@ -900,8 +914,23 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
             metadata = mMetadata;
         }
-        performOnCallbackHolders(
-                "pushMetadataUpdate", holder -> holder.mCallback.onMetadataChanged(metadata));
+        Collection<ISessionControllerCallbackHolder> deadCallbackHolders = null;
+        for (ISessionControllerCallbackHolder holder : mControllerCallbackHolders) {
+            try {
+                holder.mCallback.onMetadataChanged(metadata);
+            } catch (DeadObjectException e) {
+                if (deadCallbackHolders == null) {
+                    deadCallbackHolders = new ArrayList<>();
+                }
+                deadCallbackHolders.add(holder);
+                logCallbackException("Removing dead callback in pushMetadataUpdate", holder, e);
+            } catch (RemoteException e) {
+                logCallbackException("unexpected exception in pushMetadataUpdate", holder, e);
+            }
+        }
+        if (deadCallbackHolders != null) {
+            removeControllerHoldersSafely(deadCallbackHolders);
+        }
     }
 
     private void pushQueueUpdate() {
@@ -912,18 +941,31 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
             toSend = mQueue == null ? null : new ArrayList<>(mQueue);
         }
-        performOnCallbackHolders(
-                "pushQueueUpdate",
-                holder -> {
-                    ParceledListSlice<QueueItem> parcelableQueue = null;
-                    if (toSend != null) {
-                        parcelableQueue = new ParceledListSlice<>(toSend);
-                        // Limit the size of initial Parcel to prevent binder buffer overflow
-                        // as onQueueChanged is an async binder call.
-                        parcelableQueue.setInlineCountLimit(1);
-                    }
-                    holder.mCallback.onQueueChanged(parcelableQueue);
-                });
+        Collection<ISessionControllerCallbackHolder> deadCallbackHolders = null;
+        for (ISessionControllerCallbackHolder holder : mControllerCallbackHolders) {
+            ParceledListSlice<QueueItem> parcelableQueue = null;
+            if (toSend != null) {
+                parcelableQueue = new ParceledListSlice<>(toSend);
+                // Limit the size of initial Parcel to prevent binder buffer overflow
+                // as onQueueChanged is an async binder call.
+                parcelableQueue.setInlineCountLimit(1);
+            }
+
+            try {
+                holder.mCallback.onQueueChanged(parcelableQueue);
+            } catch (DeadObjectException e) {
+                if (deadCallbackHolders == null) {
+                    deadCallbackHolders = new ArrayList<>();
+                }
+                deadCallbackHolders.add(holder);
+                logCallbackException("Removing dead callback in pushQueueUpdate", holder, e);
+            } catch (RemoteException e) {
+                logCallbackException("unexpected exception in pushQueueUpdate", holder, e);
+            }
+        }
+        if (deadCallbackHolders != null) {
+            removeControllerHoldersSafely(deadCallbackHolders);
+        }
     }
 
     private void pushQueueTitleUpdate() {
@@ -934,8 +976,23 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
             queueTitle = mQueueTitle;
         }
-        performOnCallbackHolders(
-                "pushQueueTitleUpdate", holder -> holder.mCallback.onQueueTitleChanged(queueTitle));
+        Collection<ISessionControllerCallbackHolder> deadCallbackHolders = null;
+        for (ISessionControllerCallbackHolder holder : mControllerCallbackHolders) {
+            try {
+                holder.mCallback.onQueueTitleChanged(queueTitle);
+            } catch (DeadObjectException e) {
+                if (deadCallbackHolders == null) {
+                    deadCallbackHolders = new ArrayList<>();
+                }
+                deadCallbackHolders.add(holder);
+                logCallbackException("Removing dead callback in pushQueueTitleUpdate", holder, e);
+            } catch (RemoteException e) {
+                logCallbackException("unexpected exception in pushQueueTitleUpdate", holder, e);
+            }
+        }
+        if (deadCallbackHolders != null) {
+            removeControllerHoldersSafely(deadCallbackHolders);
+        }
     }
 
     private void pushExtrasUpdate() {
@@ -946,8 +1003,23 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
             extras = mExtras;
         }
-        performOnCallbackHolders(
-                "pushExtrasUpdate", holder -> holder.mCallback.onExtrasChanged(extras));
+        Collection<ISessionControllerCallbackHolder> deadCallbackHolders = null;
+        for (ISessionControllerCallbackHolder holder : mControllerCallbackHolders) {
+            try {
+                holder.mCallback.onExtrasChanged(extras);
+            } catch (DeadObjectException e) {
+                if (deadCallbackHolders == null) {
+                    deadCallbackHolders = new ArrayList<>();
+                }
+                deadCallbackHolders.add(holder);
+                logCallbackException("Removing dead callback in pushExtrasUpdate", holder, e);
+            } catch (RemoteException e) {
+                logCallbackException("unexpected exception in pushExtrasUpdate", holder, e);
+            }
+        }
+        if (deadCallbackHolders != null) {
+            removeControllerHoldersSafely(deadCallbackHolders);
+        }
     }
 
     private void pushVolumeUpdate() {
@@ -958,8 +1030,23 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
             info = getVolumeAttributes();
         }
-        performOnCallbackHolders(
-                "pushVolumeUpdate", holder -> holder.mCallback.onVolumeInfoChanged(info));
+        Collection<ISessionControllerCallbackHolder> deadCallbackHolders = null;
+        for (ISessionControllerCallbackHolder holder : mControllerCallbackHolders) {
+            try {
+                holder.mCallback.onVolumeInfoChanged(info);
+            } catch (DeadObjectException e) {
+                if (deadCallbackHolders == null) {
+                    deadCallbackHolders = new ArrayList<>();
+                }
+                deadCallbackHolders.add(holder);
+                logCallbackException("Removing dead callback in pushVolumeUpdate", holder, e);
+            } catch (RemoteException e) {
+                logCallbackException("unexpected exception in pushVolumeUpdate", holder, e);
+            }
+        }
+        if (deadCallbackHolders != null) {
+            removeControllerHoldersSafely(deadCallbackHolders);
+        }
     }
 
     private void pushEvent(String event, Bundle data) {
@@ -968,7 +1055,23 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
                 return;
             }
         }
-        performOnCallbackHolders("pushEvent", holder -> holder.mCallback.onEvent(event, data));
+        Collection<ISessionControllerCallbackHolder> deadCallbackHolders = null;
+        for (ISessionControllerCallbackHolder holder : mControllerCallbackHolders) {
+            try {
+                holder.mCallback.onEvent(event, data);
+            } catch (DeadObjectException e) {
+                if (deadCallbackHolders == null) {
+                    deadCallbackHolders = new ArrayList<>();
+                }
+                deadCallbackHolders.add(holder);
+                logCallbackException("Removing dead callback in pushEvent", holder, e);
+            } catch (RemoteException e) {
+                logCallbackException("unexpected exception in pushEvent", holder, e);
+            }
+        }
+        if (deadCallbackHolders != null) {
+            removeControllerHoldersSafely(deadCallbackHolders);
+        }
     }
 
     private void pushSessionDestroyed() {
@@ -979,37 +1082,20 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
                 return;
             }
         }
-        performOnCallbackHolders(
-                "pushSessionDestroyed",
-                holder -> {
-                    holder.mCallback.asBinder().unlinkToDeath(holder.mDeathMonitor, 0);
-                    holder.mCallback.onSessionDestroyed();
-                });
-        // After notifying clear all listeners
-        synchronized (mLock) {
-            mControllerCallbackHolders.clear();
-        }
-    }
-
-    private interface ControllerCallbackCall {
-
-        void performOn(ISessionControllerCallbackHolder holder) throws RemoteException;
-    }
-
-    private void performOnCallbackHolders(String operationName, ControllerCallbackCall call) {
-        ArrayList<ISessionControllerCallbackHolder> deadCallbackHolders = new ArrayList<>();
         for (ISessionControllerCallbackHolder holder : mControllerCallbackHolders) {
             try {
-                call.performOn(holder);
-            } catch (RemoteException | NoSuchElementException exception) {
-                deadCallbackHolders.add(holder);
-                logCallbackException(
-                        "Exception while executing: " + operationName, holder, exception);
+                holder.mCallback.asBinder().unlinkToDeath(holder.mDeathMonitor, 0);
+                holder.mCallback.onSessionDestroyed();
+            } catch (NoSuchElementException e) {
+                logCallbackException("error unlinking to binder death", holder, e);
+            } catch (DeadObjectException e) {
+                logCallbackException("Removing dead callback in pushSessionDestroyed", holder, e);
+            } catch (RemoteException e) {
+                logCallbackException("unexpected exception in pushSessionDestroyed", holder, e);
             }
         }
-        synchronized (mLock) {
-            mControllerCallbackHolders.removeAll(deadCallbackHolders);
-        }
+        // After notifying clear all listeners
+        removeControllerHoldersSafely(null);
     }
 
     private PlaybackState getStateWithUpdatedPosition() {
@@ -1055,6 +1141,17 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             }
         }
         return -1;
+    }
+
+    private void removeControllerHoldersSafely(
+            Collection<ISessionControllerCallbackHolder> holders) {
+        synchronized (mLock) {
+            if (holders == null) {
+                mControllerCallbackHolders.clear();
+            } else {
+                mControllerCallbackHolders.removeAll(holders);
+            }
+        }
     }
 
     private PlaybackInfo getVolumeAttributes() {
