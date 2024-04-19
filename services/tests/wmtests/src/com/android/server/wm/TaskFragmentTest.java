@@ -757,6 +757,7 @@ public class TaskFragmentTest extends WindowTestsBase {
         final Task task = createTask(mDisplayContent);
         final TaskFragment tf = createTaskFragmentWithActivity(task);
         final ActivityRecord activity = tf.getTopMostActivity();
+        tf.setVisibleRequested(true);
         tf.setOverrideOrientation(SCREEN_ORIENTATION_BEHIND);
 
         // Should report the override orientation
@@ -765,6 +766,26 @@ public class TaskFragmentTest extends WindowTestsBase {
         // Should report the override orientation even if the activity requests a different value
         activity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
         assertEquals(SCREEN_ORIENTATION_BEHIND, tf.getOrientation(SCREEN_ORIENTATION_UNSET));
+    }
+
+    @Test
+    public void testGetOrientation_reportOverrideOrientation_whenInvisible() {
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment tf = createTaskFragmentWithActivity(task);
+        final ActivityRecord activity = tf.getTopMostActivity();
+        tf.setVisibleRequested(false);
+        tf.setOverrideOrientation(SCREEN_ORIENTATION_BEHIND);
+
+        // Should report SCREEN_ORIENTATION_UNSPECIFIED for the override orientation when invisible
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, tf.getOverrideOrientation());
+
+        // Should report SCREEN_ORIENTATION_UNSET for the orientation
+        assertEquals(SCREEN_ORIENTATION_UNSET, tf.getOrientation(SCREEN_ORIENTATION_UNSET));
+
+        // Should report SCREEN_ORIENTATION_UNSET even if the activity requests a different
+        // value
+        activity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        assertEquals(SCREEN_ORIENTATION_UNSET, tf.getOrientation(SCREEN_ORIENTATION_UNSET));
     }
 
     @Test
