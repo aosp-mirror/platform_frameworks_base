@@ -20,6 +20,7 @@ import android.graphics.Rect
 import android.view.View
 import com.android.app.tracing.traceSection
 import com.android.internal.util.ContrastColorUtil
+import com.android.systemui.Flags
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.StatusBarIconView.NO_COLOR
@@ -34,9 +35,12 @@ object StatusBarIconViewBinder {
     //  view-model (which, at the time of this writing, does not yet exist).
 
     suspend fun bindColor(view: StatusBarIconView, color: Flow<Int>) {
-        color.collectTracingEach("SBIV#bindColor") { color ->
-            view.staticDrawableColor = color
-            view.setDecorColor(color)
+        // Don't change the icon color if an app icon experiment is enabled.
+        if (!android.app.Flags.notificationsUseAppIcon()) {
+            color.collectTracingEach("SBIV#bindColor") { color ->
+                view.staticDrawableColor = color
+                view.setDecorColor(color)
+            }
         }
     }
 
@@ -53,12 +57,15 @@ object StatusBarIconViewBinder {
         iconColors: Flow<NotificationIconColors>,
         contrastColorUtil: ContrastColorUtil,
     ) {
-        iconColors.collectTracingEach("SBIV#bindIconColors") { colors ->
-            val isPreL = java.lang.Boolean.TRUE == view.getTag(R.id.icon_is_pre_L)
-            val isColorized = !isPreL || NotificationUtils.isGrayscale(view, contrastColorUtil)
-            view.staticDrawableColor =
-                if (isColorized) colors.staticDrawableColor(view.viewBounds) else NO_COLOR
-            view.setDecorColor(colors.tint)
+        // Don't change the icon color if an app icon experiment is enabled.
+        if (!android.app.Flags.notificationsUseAppIcon()) {
+            iconColors.collectTracingEach("SBIV#bindIconColors") { colors ->
+                val isPreL = java.lang.Boolean.TRUE == view.getTag(R.id.icon_is_pre_L)
+                val isColorized = !isPreL || NotificationUtils.isGrayscale(view, contrastColorUtil)
+                view.staticDrawableColor =
+                    if (isColorized) colors.staticDrawableColor(view.viewBounds) else NO_COLOR
+                view.setDecorColor(colors.tint)
+            }
         }
     }
 }

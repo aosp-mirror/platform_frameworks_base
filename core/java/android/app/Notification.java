@@ -3090,6 +3090,25 @@ public class Notification implements Parcelable
     }
 
     /**
+     * @hide
+     */
+    public int loadHeaderAppIconRes(Context context) {
+        ApplicationInfo info = null;
+        if (extras.containsKey(EXTRA_BUILDER_APPLICATION_INFO)) {
+            info = extras.getParcelable(
+                    EXTRA_BUILDER_APPLICATION_INFO,
+                    ApplicationInfo.class);
+        }
+        if (info == null) {
+            info = context.getApplicationInfo();
+        }
+        if (info != null) {
+            return info.icon;
+        }
+        return 0;
+    }
+
+    /**
      * Removes heavyweight parts of the Notification object for archival or for sending to
      * listeners when the full contents are not necessary.
      * @hide
@@ -5963,12 +5982,21 @@ public class Notification implements Parcelable
         }
 
         private void bindSmallIcon(RemoteViews contentView, StandardTemplateParams p) {
-            if (mN.mSmallIcon == null && mN.icon != 0) {
+            if (Flags.notificationsUseAppIcon()) {
+                // Override small icon with app icon
+                mN.mSmallIcon = Icon.createWithResource(mContext,
+                        mN.loadHeaderAppIconRes(mContext));
+            } else if (mN.mSmallIcon == null && mN.icon != 0) {
                 mN.mSmallIcon = Icon.createWithResource(mContext, mN.icon);
             }
+
             contentView.setImageViewIcon(R.id.icon, mN.mSmallIcon);
             contentView.setInt(R.id.icon, "setImageLevel", mN.iconLevel);
-            processSmallIconColor(mN.mSmallIcon, contentView, p);
+
+            // Don't change color if we're using the app icon.
+            if (!Flags.notificationsUseAppIcon()) {
+                processSmallIconColor(mN.mSmallIcon, contentView, p);
+            }
         }
 
         /**
@@ -6804,7 +6832,8 @@ public class Notification implements Parcelable
          */
         private void processSmallIconColor(Icon smallIcon, RemoteViews contentView,
                 StandardTemplateParams p) {
-            boolean colorable = !isLegacy() || getColorUtil().isGrayscaleIcon(mContext, smallIcon);
+            boolean colorable = !isLegacy() || getColorUtil().isGrayscaleIcon(mContext,
+                    smallIcon);
             int color = getSmallIconColor(p);
             contentView.setInt(R.id.icon, "setBackgroundColor",
                     getBackgroundColor(p));
