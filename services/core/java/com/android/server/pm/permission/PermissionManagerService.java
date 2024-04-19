@@ -462,8 +462,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @Override
-    public int getNumRegisteredAttributionSources(int uid) {
-        return mAttributionSourceRegistry.getNumRegisteredAttributionSources(uid);
+    public int getRegisteredAttributionSourceCount(int uid) {
+        return mAttributionSourceRegistry.getRegisteredAttributionSourceCount(uid);
     }
 
     @Override
@@ -943,7 +943,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
         }
 
-        public int getNumRegisteredAttributionSources(int uid) {
+        public int getRegisteredAttributionSourceCount(int uid) {
             mContext.enforceCallingOrSelfPermission(UPDATE_APP_OPS_STATS,
                     "getting the number of registered AttributionSources requires "
                             + "UPDATE_APP_OPS_STATS");
@@ -952,14 +952,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             System.gc();
             System.gc();
             synchronized (mLock) {
-                int[] numForUid = { 0 };
-                mAttributions.forEach((key, value) -> {
-                    if (value.getUid() == uid) {
-                        numForUid[0]++;
+                int numForUid = 0;
+                for (Map.Entry<IBinder, AttributionSource> entry : mAttributions.entrySet()) {
+                    if (entry.getValue().getUid() == uid) {
+                        numForUid++;
                     }
-
-                });
-                return numForUid[0];
+                }
+                return numForUid;
             }
         }
 
