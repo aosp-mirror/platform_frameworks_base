@@ -45,6 +45,7 @@ import static android.os.Process.myUid;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.permission.flags.Flags.sensitiveContentImprovements;
 import static android.permission.flags.Flags.sensitiveContentMetricsBugfix;
+import static android.permission.flags.Flags.sensitiveContentRecentsScreenshotBugfix;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
@@ -8834,11 +8835,25 @@ public class WindowManagerService extends IWindowManager.Stub
                         mRoot.forAllWindows((w) -> {
                             if (w.isVisible()) {
                                 WindowManagerService.this.showToastIfBlockingScreenCapture(w);
+                            } else if (sensitiveContentRecentsScreenshotBugfix()
+                                    && shouldInvalidateSnapshot(w)) {
+                                final Task task = w.getTask();
+                                // preventing from showing up in starting window.
+                                mTaskSnapshotController.removeAndDeleteSnapshot(
+                                        task.mTaskId, task.mUserId);
+                                // Refresh TaskThumbnailCache
+                                task.onSnapshotInvalidated();
                             }
                         }, /* traverseTopToBottom= */ true);
                     }
                 }
             }
+        }
+
+        private boolean shouldInvalidateSnapshot(WindowState w) {
+            return w.getTask() != null
+                    && mSensitiveContentPackages.shouldBlockScreenCaptureForApp(
+                    w.getOwningPackage(), w.getOwningUid(), w.getWindowToken());
         }
 
         @Override
