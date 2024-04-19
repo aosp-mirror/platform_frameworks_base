@@ -3867,8 +3867,10 @@ public final class ActiveServices {
                 Slog.w(TAG_SERVICE, "Exception from scheduleTimeoutServiceForType: " + e);
             }
 
-            // ANR the service after giving the service some time to clean up.
-            mFGSAnrTimer.start(sr, mAm.mConstants.mFgsAnrExtraWaitDuration);
+            if (android.app.Flags.introduceNewServiceOntimeoutCallback()) {
+                // ANR the service after giving the service some time to clean up.
+                mFGSAnrTimer.start(sr, mAm.mConstants.mFgsAnrExtraWaitDuration);
+            }
         }
     }
 
