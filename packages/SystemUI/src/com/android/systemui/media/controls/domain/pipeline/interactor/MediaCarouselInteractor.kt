@@ -21,6 +21,7 @@ import android.media.MediaDescription
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.service.notification.StatusBarNotification
+import com.android.internal.logging.InstanceId
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -35,20 +36,15 @@ import com.android.systemui.media.controls.domain.pipeline.MediaSessionBasedFilt
 import com.android.systemui.media.controls.domain.pipeline.MediaTimeoutListener
 import com.android.systemui.media.controls.domain.resume.MediaResumeListener
 import com.android.systemui.media.controls.shared.model.MediaCommonModel
-import com.android.systemui.media.controls.shared.model.MediaDataLoadingModel
-import com.android.systemui.media.controls.shared.model.SmartspaceMediaLoadingModel
 import com.android.systemui.media.controls.util.MediaControlsRefactorFlag
 import com.android.systemui.media.controls.util.MediaFlags
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
@@ -82,8 +78,11 @@ constructor(
                     (smartspaceMediaData.isActive &&
                         (smartspaceMediaData.isValid() || reactivatedKey != null))
             }
-            .distinctUntilChanged()
-            .stateIn(applicationScope, SharingStarted.WhileSubscribed(), false)
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
 
     /** Are there any media entries we should display, including the recommendations? */
     val hasAnyMediaOrRecommendation: StateFlow<Boolean> =
@@ -98,34 +97,41 @@ constructor(
                         smartspaceMediaData.isActive && smartspaceMediaData.isValid()
                     })
             }
-            .distinctUntilChanged()
-            .stateIn(applicationScope, SharingStarted.WhileSubscribed(), false)
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
 
     /** Are there any media notifications active, excluding the recommendations? */
     val hasActiveMedia: StateFlow<Boolean> =
         mediaFilterRepository.selectedUserEntries
             .mapLatest { entries -> entries.any { it.value.active } }
-            .distinctUntilChanged()
-            .stateIn(applicationScope, SharingStarted.WhileSubscribed(), false)
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
 
     /** Are there any media notifications, excluding the recommendations? */
     val hasAnyMedia: StateFlow<Boolean> =
         mediaFilterRepository.selectedUserEntries
             .mapLatest { entries -> entries.isNotEmpty() }
-            .distinctUntilChanged()
-            .stateIn(applicationScope, SharingStarted.WhileSubscribed(), false)
-
-    /** The most recent list of loaded media controls. */
-    val mediaDataLoadedStates: Flow<List<MediaDataLoadingModel>> =
-        mediaFilterRepository.mediaDataLoadedStates
-
-    /** The most recent change to loaded media recommendations. */
-    val recommendationsLoadingState: Flow<SmartspaceMediaLoadingModel> =
-        mediaFilterRepository.recommendationsLoadingState
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
 
     /** The most recent sorted set for user media instances */
-    val sortedMedia: Flow<List<MediaCommonModel>> =
-        mediaFilterRepository.sortedMedia.map { it.values.toList() }
+    val sortedMedia: StateFlow<List<MediaCommonModel>> =
+        mediaFilterRepository.sortedMedia
+            .mapLatest { it.values.toList() }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = emptyList(),
+            )
 
     override fun start() {
         if (!mediaFlags.isMediaControlsRefactorEnabled()) {
@@ -208,6 +214,10 @@ constructor(
 
     override fun dismissMediaData(key: String, delay: Long): Boolean {
         return mediaDataProcessor.dismissMediaData(key, delay)
+    }
+
+    fun removeMediaControl(instanceId: InstanceId, delay: Long) {
+        mediaDataProcessor.dismissMediaData(instanceId, delay)
     }
 
     override fun dismissSmartspaceRecommendation(key: String, delay: Long) {

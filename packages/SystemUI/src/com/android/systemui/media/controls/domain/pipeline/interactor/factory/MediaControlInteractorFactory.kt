@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.controls.shared.model
+package com.android.systemui.media.controls.domain.pipeline.interactor.factory
 
 import com.android.internal.logging.InstanceId
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.media.controls.domain.pipeline.interactor.MediaControlInteractor
+import dagger.assisted.AssistedFactory
 
-/** Models media data loading state. */
-sealed class MediaDataLoadingModel {
+/** Factory to create [MediaControlInteractor] for each media control. */
+@SysUISingleton
+@AssistedFactory
+interface MediaControlInteractorFactory {
 
-    abstract val instanceId: InstanceId
-
-    /** Media data has been loaded. */
-    data class Loaded(
-        override val instanceId: InstanceId,
-        val immediatelyUpdateUi: Boolean = true,
-    ) : MediaDataLoadingModel()
-
-    /** Media data has been removed. */
-    data class Removed(
-        override val instanceId: InstanceId,
-    ) : MediaDataLoadingModel()
+    fun create(instanceId: InstanceId): MediaControlInteractor
 }

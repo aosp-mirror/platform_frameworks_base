@@ -43,14 +43,18 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.kotlin.pairwiseBy
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 /** Encapsulates business logic for single media control. */
-class MediaControlInteractor(
+class MediaControlInteractor
+@AssistedInject
+constructor(
     @Application applicationContext: Context,
-    private val instanceId: InstanceId,
+    @Assisted private val instanceId: InstanceId,
     repository: MediaFilterRepository,
     private val mediaDataProcessor: MediaDataProcessor,
     private val keyguardStateController: KeyguardStateController,

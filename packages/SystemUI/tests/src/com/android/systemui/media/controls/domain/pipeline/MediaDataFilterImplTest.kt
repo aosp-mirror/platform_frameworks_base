@@ -28,6 +28,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.data.repository.MediaFilterRepository
 import com.android.systemui.media.controls.shared.model.EXTRA_KEY_TRIGGER_RESUME
+import com.android.systemui.media.controls.shared.model.MediaCommonModel
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.MediaDataLoadingModel
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
@@ -165,86 +166,88 @@ class MediaDataFilterImplTest : SysuiTestCase() {
     @Test
     fun onDataLoadedForCurrentUser_updatesLoadedStates() =
         testScope.runTest {
-            val mediaDataLoadedStates by collectLastValue(repository.mediaDataLoadedStates)
-            val mediaDataLoadingModel = listOf(MediaDataLoadingModel.Loaded(dataMain.instanceId))
+            val sortedMedia by collectLastValue(repository.sortedMedia)
+            val mediaCommonModel =
+                MediaCommonModel.MediaControl(MediaDataLoadingModel.Loaded(dataMain.instanceId))
 
             mediaDataFilter.onMediaDataLoaded(KEY, null, dataMain)
 
             verify(listener)
                 .onMediaDataLoaded(eq(KEY), eq(null), eq(dataMain), eq(true), eq(0), eq(false))
-            assertThat(mediaDataLoadedStates).isEqualTo(mediaDataLoadingModel)
+            assertThat(sortedMedia?.values).containsExactly(mediaCommonModel)
         }
 
     @Test
     fun onDataLoadedForGuest_doesNotUpdateLoadedStates() =
         testScope.runTest {
-            val mediaDataLoadedStates by collectLastValue(repository.mediaDataLoadedStates)
-            val mediaLoadedStatesModel = listOf(MediaDataLoadingModel.Loaded(dataMain.instanceId))
+            val sortedMedia by collectLastValue(repository.sortedMedia)
+            val mediaCommonModel =
+                MediaCommonModel.MediaControl(MediaDataLoadingModel.Loaded(dataMain.instanceId))
 
             mediaDataFilter.onMediaDataLoaded(KEY, null, dataGuest)
 
             verify(listener, never())
                 .onMediaDataLoaded(any(), any(), any(), anyBoolean(), anyInt(), anyBoolean())
-            assertThat(mediaDataLoadedStates).isNotEqualTo(mediaLoadedStatesModel)
+            assertThat(sortedMedia?.values).doesNotContain(mediaCommonModel)
         }
 
     @Test
     fun onRemovedForCurrent_updatesLoadedStates() =
         testScope.runTest {
-            val mediaDataLoadedStates by collectLastValue(repository.mediaDataLoadedStates)
-            val mediaLoadedStatesModel =
-                mutableListOf(MediaDataLoadingModel.Loaded(dataMain.instanceId))
+            val sortedMedia by collectLastValue(repository.sortedMedia)
+            val mediaCommonModel =
+                MediaCommonModel.MediaControl(MediaDataLoadingModel.Loaded(dataMain.instanceId))
 
             // GIVEN a media was removed for main user
             mediaDataFilter.onMediaDataLoaded(KEY, null, dataMain)
 
-            assertThat(mediaDataLoadedStates).isEqualTo(mediaLoadedStatesModel)
+            assertThat(sortedMedia?.values).containsExactly(mediaCommonModel)
 
-            mediaLoadedStatesModel.remove(MediaDataLoadingModel.Loaded(dataMain.instanceId))
             mediaDataFilter.onMediaDataRemoved(KEY)
 
             verify(listener).onMediaDataRemoved(eq(KEY))
-            assertThat(mediaDataLoadedStates).isEqualTo(mediaLoadedStatesModel)
+            assertThat(sortedMedia?.values).doesNotContain(mediaCommonModel)
         }
 
     @Test
     fun onRemovedForGuest_doesNotUpdateLoadedStates() =
         testScope.runTest {
-            val mediaDataLoadedStates by collectLastValue(repository.mediaDataLoadedStates)
+            val sortedMedia by collectLastValue(repository.sortedMedia)
 
             // GIVEN a media was removed for guest user
             mediaDataFilter.onMediaDataLoaded(KEY, null, dataGuest)
             mediaDataFilter.onMediaDataRemoved(KEY)
 
             verify(listener, never()).onMediaDataRemoved(eq(KEY))
-            assertThat(mediaDataLoadedStates).isEmpty()
+            assertThat(sortedMedia).isEmpty()
         }
 
     @Test
     fun onUserSwitched_removesOldUserControls() =
         testScope.runTest {
-            val mediaDataLoadedStates by collectLastValue(repository.mediaDataLoadedStates)
-            val mediaLoadedStatesModel = listOf(MediaDataLoadingModel.Loaded(dataMain.instanceId))
+            val sortedMedia by collectLastValue(repository.sortedMedia)
+            val mediaLoaded = MediaDataLoadingModel.Loaded(dataMain.instanceId)
 
             // GIVEN that we have a media loaded for main user
             mediaDataFilter.onMediaDataLoaded(KEY, null, dataMain)
 
-            assertThat(mediaDataLoadedStates).isEqualTo(mediaLoadedStatesModel)
+            assertThat(sortedMedia?.values)
+                .containsExactly(MediaCommonModel.MediaControl(mediaLoaded))
 
             // and we switch to guest user
             setUser(USER_GUEST)
 
             // THEN we should remove the main user's media
             verify(listener).onMediaDataRemoved(eq(KEY))
-            assertThat(mediaDataLoadedStates).isEmpty()
+            assertThat(sortedMedia).isEmpty()
         }
 
     @Test
     fun onUserSwitched_addsNewUserControls() =
         testScope.runTest {
-            val mediaDataLoadedStates by collectLastValue(repository.mediaDataLoadedStates)
-            val guestLoadedStatesModel = listOf(MediaDataLoadingModel.Loaded(dataGuest.instanceId))
-            val mainLoadedStatesModel = listOf(MediaDataLoadingModel.Loaded(dataMain.instanceId))
+            val sortedMedia by collectLastValue(repository.sortedMedia)
+            val guestLoadedStatesModel = MediaDataLoadingModel.Loaded(dataGuest.instanceId)
+            val mainLoadedStatesModel = MediaDataLoadingModel.Loaded(dataMain.instanceId)
 
             // GIVEN that we had some media for both users
             mediaDataFilter.onMediaDataLoaded(KEY, null, dataMain)
@@ -267,14 +270,16 @@ class MediaDataFilterImplTest : SysuiTestCase() {
                     anyInt(),
                     anyBoolean()
                 )
-            assertThat(mediaDataLoadedStates).isEqualTo(guestLoadedStatesModel)
-            assertThat(mediaDataLoadedStates).isNotEqualTo(mainLoadedStatesModel)
+            assertThat(sortedMedia?.values)
+                .containsExactly(MediaCommonModel.MediaControl(guestLoadedStatesModel))
+            assertThat(sortedMedia?.values)
+                .doesNotContain(MediaCommonModel.MediaControl(mainLoadedStatesModel))
         }
 
     @Test
     fun onProfileChanged_profileUnavailable_updateStates() =
         testScope.runTest {
-            val mediaDataLoadedStates by collectLastValue(repository.mediaDataLoadedStates)
+            val sortedMedia by collectLastValue(repository.sortedMedia)
 
             // GIVEN that we had some media for both profiles
             mediaDataFilter.onMediaDataLoaded(KEY, null, dataMain)
@@ -283,10 +288,11 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             // and we change profile status
             setPrivateProfileUnavailable()
 
-            val mediaLoadedStatesModel = listOf(MediaDataLoadingModel.Loaded(dataMain.instanceId))
+            val mediaLoadedStatesModel = MediaDataLoadingModel.Loaded(dataMain.instanceId)
             // THEN we should remove the private profile media
             verify(listener).onMediaDataRemoved(eq(KEY_ALT))
-            assertThat(mediaDataLoadedStates).isEqualTo(mediaLoadedStatesModel)
+            assertThat(sortedMedia?.values)
+                .containsExactly(MediaCommonModel.MediaControl(mediaLoadedStatesModel))
         }
 
     @Test
@@ -515,14 +521,14 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             val selectedUserEntries by collectLastValue(repository.selectedUserEntries)
             val smartspaceMediaData by collectLastValue(repository.smartspaceMediaData)
             val reactivatedKey by collectLastValue(repository.reactivatedId)
-            val recommendationsLoadingState by
-                collectLastValue(repository.recommendationsLoadingState)
+            val sortedMedia by collectLastValue(repository.sortedMedia)
             val recommendationsLoadingModel =
                 SmartspaceMediaLoadingModel.Loaded(SMARTSPACE_KEY, isPrioritized = true)
 
             mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
-            assertThat(recommendationsLoadingState).isEqualTo(recommendationsLoadingModel)
+            assertThat(sortedMedia?.values)
+                .containsExactly(MediaCommonModel.MediaRecommendations(recommendationsLoadingModel))
             assertThat(
                     hasActiveMediaOrRecommendation(
                         selectedUserEntries,
@@ -544,14 +550,13 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             val selectedUserEntries by collectLastValue(repository.selectedUserEntries)
             val smartspaceMediaData by collectLastValue(repository.smartspaceMediaData)
             val reactivatedKey by collectLastValue(repository.reactivatedId)
-            val recommendationsLoadingState by
-                collectLastValue(repository.recommendationsLoadingState)
+            val sortedMedia by collectLastValue(repository.sortedMedia)
 
             whenever(smartspaceData.isActive).thenReturn(false)
 
             mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
-            assertThat(recommendationsLoadingState).isEqualTo(SmartspaceMediaLoadingModel.Unknown)
+            assertThat(sortedMedia).isEmpty()
             assertThat(
                     hasActiveMediaOrRecommendation(
                         selectedUserEntries,
@@ -574,16 +579,22 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             val selectedUserEntries by collectLastValue(repository.selectedUserEntries)
             val smartspaceMediaData by collectLastValue(repository.smartspaceMediaData)
             val reactivatedKey by collectLastValue(repository.reactivatedId)
-            val recommendationsLoadingState by
-                collectLastValue(repository.recommendationsLoadingState)
-            val recommendationsLoadingModel =
-                SmartspaceMediaLoadingModel.Loaded(SMARTSPACE_KEY, isPrioritized = true)
+            val sortedMedia by collectLastValue(repository.sortedMedia)
+            val recsCommonModel =
+                MediaCommonModel.MediaRecommendations(
+                    SmartspaceMediaLoadingModel.Loaded(SMARTSPACE_KEY, isPrioritized = true)
+                )
+            val controlCommonModel =
+                MediaCommonModel.MediaControl(
+                    MediaDataLoadingModel.Loaded(dataMain.instanceId),
+                    true
+                )
             val dataOld = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
             mediaDataFilter.onMediaDataLoaded(KEY, null, dataOld)
             clock.advanceTime(MediaDataFilterImpl.SMARTSPACE_MAX_AGE + 100)
             mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
-            assertThat(recommendationsLoadingState).isEqualTo(recommendationsLoadingModel)
+            assertThat(sortedMedia?.values).containsExactly(recsCommonModel, controlCommonModel)
             assertThat(
                     hasActiveMediaOrRecommendation(
                         selectedUserEntries,
@@ -605,8 +616,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             val selectedUserEntries by collectLastValue(repository.selectedUserEntries)
             val smartspaceMediaData by collectLastValue(repository.smartspaceMediaData)
             val reactivatedKey by collectLastValue(repository.reactivatedId)
-            val recommendationsLoadingState by
-                collectLastValue(repository.recommendationsLoadingState)
+            val sortedMedia by collectLastValue(repository.sortedMedia)
             whenever(smartspaceData.isActive).thenReturn(false)
 
             val dataOld = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
@@ -614,7 +624,12 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             clock.advanceTime(MediaDataFilterImpl.SMARTSPACE_MAX_AGE + 100)
             mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
-            assertThat(recommendationsLoadingState).isEqualTo(SmartspaceMediaLoadingModel.Unknown)
+            assertThat(sortedMedia?.values)
+                .doesNotContain(
+                    MediaCommonModel.MediaRecommendations(
+                        SmartspaceMediaLoadingModel.Loaded(SMARTSPACE_KEY)
+                    )
+                )
             assertThat(
                     hasActiveMediaOrRecommendation(
                         selectedUserEntries,
@@ -635,18 +650,20 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             val selectedUserEntries by collectLastValue(repository.selectedUserEntries)
             val smartspaceMediaData by collectLastValue(repository.smartspaceMediaData)
             val reactivatedKey by collectLastValue(repository.reactivatedId)
-            val recommendationsLoadingState by
-                collectLastValue(repository.recommendationsLoadingState)
-            val mediaDataLoadedStates by collectLastValue(repository.mediaDataLoadedStates)
+            val sortedMedia by collectLastValue(repository.sortedMedia)
 
             whenever(smartspaceData.isActive).thenReturn(false)
 
             // WHEN we have media that was recently played, but not currently active
             val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
-            val mediaLoadedStatesModel = listOf(MediaDataLoadingModel.Loaded(dataMain.instanceId))
+            val controlCommonModel =
+                MediaCommonModel.MediaControl(
+                    MediaDataLoadingModel.Loaded(dataMain.instanceId),
+                    true
+                )
             mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
 
-            assertThat(mediaDataLoadedStates).isEqualTo(mediaLoadedStatesModel)
+            assertThat(sortedMedia?.values).containsExactly(controlCommonModel)
             verify(listener)
                 .onMediaDataLoaded(eq(KEY), eq(null), eq(dataCurrent), eq(true), eq(0), eq(false))
 
@@ -654,7 +671,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
             // THEN we should treat the media as not active instead
-            assertThat(recommendationsLoadingState).isEqualTo(SmartspaceMediaLoadingModel.Unknown)
+            assertThat(sortedMedia?.values).containsExactly(controlCommonModel)
             assertThat(
                     hasActiveMediaOrRecommendation(
                         selectedUserEntries,
@@ -677,16 +694,18 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             val selectedUserEntries by collectLastValue(repository.selectedUserEntries)
             val smartspaceMediaData by collectLastValue(repository.smartspaceMediaData)
             val reactivatedKey by collectLastValue(repository.reactivatedId)
-            val recommendationsLoadingState by
-                collectLastValue(repository.recommendationsLoadingState)
-            val mediaDataLoadedStates by collectLastValue(repository.mediaDataLoadedStates)
+            val sortedMedia by collectLastValue(repository.sortedMedia)
             whenever(smartspaceData.isValid()).thenReturn(false)
 
             // WHEN we have media that was recently played, but not currently active
             val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
-            val mediaLoadedStatesModel = listOf(MediaDataLoadingModel.Loaded(dataMain.instanceId))
+            val controlCommonModel =
+                MediaCommonModel.MediaControl(
+                    MediaDataLoadingModel.Loaded(dataMain.instanceId),
+                    true
+                )
             mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
-            assertThat(mediaDataLoadedStates).isEqualTo(mediaLoadedStatesModel)
+            assertThat(sortedMedia?.values).containsExactly(controlCommonModel)
             verify(listener)
                 .onMediaDataLoaded(eq(KEY), eq(null), eq(dataCurrent), eq(true), eq(0), eq(false))
 
@@ -696,7 +715,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
 
             // THEN we should treat the media as active instead
             val dataCurrentAndActive = dataCurrent.copy(active = true)
-            assertThat(mediaDataLoadedStates).isEqualTo(mediaLoadedStatesModel)
+            assertThat(sortedMedia?.values).containsExactly(controlCommonModel)
             assertThat(
                     hasActiveMediaOrRecommendation(
                         selectedUserEntries,
@@ -715,7 +734,6 @@ class MediaDataFilterImplTest : SysuiTestCase() {
                     eq(true)
                 )
             // Smartspace update shouldn't be propagated for the empty rec list.
-            assertThat(recommendationsLoadingState).isEqualTo(SmartspaceMediaLoadingModel.Unknown)
             verify(listener, never()).onSmartspaceMediaDataLoaded(any(), any(), anyBoolean())
             verify(logger, never()).logRecommendationAdded(any(), any())
             verify(logger).logRecommendationActivated(eq(APP_UID), eq(PACKAGE), eq(INSTANCE_ID))
@@ -727,17 +745,22 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             val selectedUserEntries by collectLastValue(repository.selectedUserEntries)
             val smartspaceMediaData by collectLastValue(repository.smartspaceMediaData)
             val reactivatedKey by collectLastValue(repository.reactivatedId)
-            val recommendationsLoadingState by
-                collectLastValue(repository.recommendationsLoadingState)
-            val mediaDataLoadedStates by collectLastValue(repository.mediaDataLoadedStates)
+            val sortedMedia by collectLastValue(repository.sortedMedia)
             // WHEN we have media that was recently played, but not currently active
             val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
-            val mediaDataLoadingModel = listOf(MediaDataLoadingModel.Loaded(dataMain.instanceId))
-            val recommendationsLoadingModel = SmartspaceMediaLoadingModel.Loaded(SMARTSPACE_KEY)
+            val controlCommonModel =
+                MediaCommonModel.MediaControl(
+                    MediaDataLoadingModel.Loaded(dataMain.instanceId),
+                    true
+                )
+            val recsCommonModel =
+                MediaCommonModel.MediaRecommendations(
+                    SmartspaceMediaLoadingModel.Loaded(SMARTSPACE_KEY)
+                )
 
             mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
 
-            assertThat(mediaDataLoadedStates).isEqualTo(mediaDataLoadingModel)
+            assertThat(sortedMedia?.values).containsExactly(controlCommonModel)
             verify(listener)
                 .onMediaDataLoaded(eq(KEY), eq(null), eq(dataCurrent), eq(true), eq(0), eq(false))
 
@@ -756,7 +779,6 @@ class MediaDataFilterImplTest : SysuiTestCase() {
                     eq(100),
                     eq(true)
                 )
-            assertThat(mediaDataLoadedStates).isEqualTo(mediaDataLoadingModel)
             assertThat(
                     hasActiveMediaOrRecommendation(
                         selectedUserEntries,
@@ -766,7 +788,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
                 )
                 .isTrue()
             // Smartspace update should also be propagated but not prioritized.
-            assertThat(recommendationsLoadingState).isEqualTo(recommendationsLoadingModel)
+            assertThat(sortedMedia?.values).containsExactly(controlCommonModel, recsCommonModel)
             verify(listener)
                 .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), eq(false))
             verify(logger).logRecommendationAdded(SMARTSPACE_PACKAGE, SMARTSPACE_INSTANCE_ID)
@@ -779,15 +801,13 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             val selectedUserEntries by collectLastValue(repository.selectedUserEntries)
             val smartspaceMediaData by collectLastValue(repository.smartspaceMediaData)
             val reactivatedKey by collectLastValue(repository.reactivatedId)
-            val recommendationsLoadingState by
-                collectLastValue(repository.recommendationsLoadingState)
-            val recommendationsLoadingModel = SmartspaceMediaLoadingModel.Removed(SMARTSPACE_KEY)
+            val sortedMedia by collectLastValue(repository.sortedMedia)
 
             mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
             mediaDataFilter.onSmartspaceMediaDataRemoved(SMARTSPACE_KEY)
 
             verify(listener).onSmartspaceMediaDataRemoved(SMARTSPACE_KEY)
-            assertThat(recommendationsLoadingState).isEqualTo(recommendationsLoadingModel)
+            assertThat(sortedMedia?.values).isEmpty()
             assertThat(
                     hasActiveMediaOrRecommendation(
                         selectedUserEntries,
@@ -805,15 +825,16 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             val selectedUserEntries by collectLastValue(repository.selectedUserEntries)
             val smartspaceMediaData by collectLastValue(repository.smartspaceMediaData)
             val reactivatedKey by collectLastValue(repository.reactivatedId)
-            val mediaDataLoadedStates by collectLastValue(repository.mediaDataLoadedStates)
-            val recommendationsLoadingState by
-                collectLastValue(repository.recommendationsLoadingState)
-            val recommendationsLoadingModel = SmartspaceMediaLoadingModel.Removed(SMARTSPACE_KEY)
-            val mediaLoadedStatesModel = listOf(MediaDataLoadingModel.Loaded(dataMain.instanceId))
+            val sortedMedia by collectLastValue(repository.sortedMedia)
+            val controlCommonModel =
+                MediaCommonModel.MediaControl(
+                    MediaDataLoadingModel.Loaded(dataMain.instanceId),
+                    true
+                )
             val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
             mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
 
-            assertThat(mediaDataLoadedStates).isEqualTo(mediaLoadedStatesModel)
+            assertThat(sortedMedia?.values).containsExactly(controlCommonModel)
             verify(listener)
                 .onMediaDataLoaded(eq(KEY), eq(null), eq(dataCurrent), eq(true), eq(0), eq(false))
 
@@ -830,12 +851,11 @@ class MediaDataFilterImplTest : SysuiTestCase() {
                     eq(100),
                     eq(true)
                 )
-            assertThat(mediaDataLoadedStates).isEqualTo(mediaLoadedStatesModel)
 
             mediaDataFilter.onSmartspaceMediaDataRemoved(SMARTSPACE_KEY)
 
             verify(listener).onSmartspaceMediaDataRemoved(SMARTSPACE_KEY)
-            assertThat(recommendationsLoadingState).isEqualTo(recommendationsLoadingModel)
+            assertThat(sortedMedia?.values).containsExactly(controlCommonModel)
             assertThat(
                     hasActiveMediaOrRecommendation(
                         selectedUserEntries,
@@ -853,9 +873,11 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             val selectedUserEntries by collectLastValue(repository.selectedUserEntries)
             val smartspaceMediaData by collectLastValue(repository.smartspaceMediaData)
             val reactivatedKey by collectLastValue(repository.reactivatedId)
-            val recommendationsLoadingState by
-                collectLastValue(repository.recommendationsLoadingState)
-            val recommendationsLoadingModel = SmartspaceMediaLoadingModel.Loaded(SMARTSPACE_KEY)
+            val sortedMedia by collectLastValue(repository.sortedMedia)
+            val recsCommonModel =
+                MediaCommonModel.MediaRecommendations(
+                    SmartspaceMediaLoadingModel.Loaded(SMARTSPACE_KEY)
+                )
             whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
             whenever(smartspaceData.isActive).thenReturn(false)
 
@@ -863,7 +885,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
 
             verify(listener)
                 .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), eq(false))
-            assertThat(recommendationsLoadingState).isEqualTo(recommendationsLoadingModel)
+            assertThat(sortedMedia?.values).containsExactly(recsCommonModel)
             assertThat(
                     hasActiveMediaOrRecommendation(
                         selectedUserEntries,
@@ -882,11 +904,16 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             val selectedUserEntries by collectLastValue(repository.selectedUserEntries)
             val smartspaceMediaData by collectLastValue(repository.smartspaceMediaData)
             val reactivatedKey by collectLastValue(repository.reactivatedId)
-            val mediaDataLoadedStates by collectLastValue(repository.mediaDataLoadedStates)
-            val recommendationsLoadingState by
-                collectLastValue(repository.recommendationsLoadingState)
-            val recommendationsLoadingModel = SmartspaceMediaLoadingModel.Loaded(SMARTSPACE_KEY)
-            val mediaLoadedStatesModel = listOf(MediaDataLoadingModel.Loaded(dataMain.instanceId))
+            val sortedMedia by collectLastValue(repository.sortedMedia)
+            val recsCommonModel =
+                MediaCommonModel.MediaRecommendations(
+                    SmartspaceMediaLoadingModel.Loaded(SMARTSPACE_KEY)
+                )
+            val controlCommonModel =
+                MediaCommonModel.MediaControl(
+                    MediaDataLoadingModel.Loaded(dataMain.instanceId),
+                    true
+                )
 
             whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
             whenever(smartspaceData.isActive).thenReturn(false)
@@ -897,7 +924,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
 
             verify(listener)
                 .onMediaDataLoaded(eq(KEY), eq(null), eq(dataCurrent), eq(true), eq(0), eq(false))
-            assertThat(mediaDataLoadedStates).isEqualTo(mediaLoadedStatesModel)
+            assertThat(sortedMedia?.values).containsExactly(controlCommonModel)
 
             // And an inactive recommendation is loaded
             mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
@@ -907,7 +934,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
                 .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), eq(false))
             verify(listener, never())
                 .onMediaDataLoaded(any(), any(), any(), anyBoolean(), anyInt(), anyBoolean())
-            assertThat(recommendationsLoadingState).isEqualTo(recommendationsLoadingModel)
+            assertThat(sortedMedia?.values).containsExactly(controlCommonModel, recsCommonModel)
             assertThat(
                     hasActiveMediaOrRecommendation(
                         selectedUserEntries,
@@ -945,18 +972,23 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             val selectedUserEntries by collectLastValue(repository.selectedUserEntries)
             val smartspaceMediaData by collectLastValue(repository.smartspaceMediaData)
             val reactivatedKey by collectLastValue(repository.reactivatedId)
-            val mediaDataLoadedStates by collectLastValue(repository.mediaDataLoadedStates)
-            val recommendationsLoadingState by
-                collectLastValue(repository.recommendationsLoadingState)
-            val recommendationsLoadingModel = SmartspaceMediaLoadingModel.Loaded(SMARTSPACE_KEY)
-            val mediaLoadedStatesModel = listOf(MediaDataLoadingModel.Loaded(dataMain.instanceId))
+            val sortedMedia by collectLastValue(repository.sortedMedia)
+            val recsCommonModel =
+                MediaCommonModel.MediaRecommendations(
+                    SmartspaceMediaLoadingModel.Loaded(SMARTSPACE_KEY)
+                )
+            val controlCommonModel =
+                MediaCommonModel.MediaControl(
+                    MediaDataLoadingModel.Loaded(dataMain.instanceId),
+                    true
+                )
             // WHEN we have media that was recently played, but not currently active
             val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
             mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
 
             verify(listener)
                 .onMediaDataLoaded(eq(KEY), eq(null), eq(dataCurrent), eq(true), eq(0), eq(false))
-            assertThat(mediaDataLoadedStates).isEqualTo(mediaLoadedStatesModel)
+            assertThat(sortedMedia?.values).containsExactly(controlCommonModel)
 
             // AND we get a smartspace signal with extra to trigger resume
             runCurrent()
@@ -975,7 +1007,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
                     eq(100),
                     eq(true)
                 )
-            assertThat(mediaDataLoadedStates).isEqualTo(mediaLoadedStatesModel)
+            assertThat(sortedMedia?.values).containsExactly(controlCommonModel, recsCommonModel)
             assertThat(
                     hasActiveMediaOrRecommendation(
                         selectedUserEntries,
@@ -985,7 +1017,6 @@ class MediaDataFilterImplTest : SysuiTestCase() {
                 )
                 .isTrue()
             // And update the smartspace data state, but not prioritized
-            assertThat(recommendationsLoadingState).isEqualTo(recommendationsLoadingModel)
             verify(listener)
                 .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), eq(false))
         }
@@ -993,11 +1024,16 @@ class MediaDataFilterImplTest : SysuiTestCase() {
     @Test
     fun smartspaceLoaded_notShouldTriggerResume_doesNotTrigger() =
         testScope.runTest {
-            val mediaDataLoadedStates by collectLastValue(repository.mediaDataLoadedStates)
-            val recommendationsLoadingState by
-                collectLastValue(repository.recommendationsLoadingState)
-            val recommendationsLoadingModel = SmartspaceMediaLoadingModel.Loaded(SMARTSPACE_KEY)
-            val mediaLoadedStatesModel = listOf(MediaDataLoadingModel.Loaded(dataMain.instanceId))
+            val sortedMedia by collectLastValue(repository.sortedMedia)
+            val recsCommonModel =
+                MediaCommonModel.MediaRecommendations(
+                    SmartspaceMediaLoadingModel.Loaded(SMARTSPACE_KEY)
+                )
+            val controlCommonModel =
+                MediaCommonModel.MediaControl(
+                    MediaDataLoadingModel.Loaded(dataMain.instanceId),
+                    true
+                )
 
             // WHEN we have media that was recently played, but not currently active
             val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
@@ -1005,7 +1041,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
 
             verify(listener)
                 .onMediaDataLoaded(eq(KEY), eq(null), eq(dataCurrent), eq(true), eq(0), eq(false))
-            assertThat(mediaDataLoadedStates).isEqualTo(mediaLoadedStatesModel)
+            assertThat(sortedMedia?.values).containsExactly(controlCommonModel)
 
             // AND we get a smartspace signal with extra to not trigger resume
             val extras = Bundle().apply { putBoolean(EXTRA_KEY_TRIGGER_RESUME, false) }
@@ -1018,7 +1054,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             // But the smartspace update is still propagated
             verify(listener)
                 .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), eq(false))
-            assertThat(recommendationsLoadingState).isEqualTo(recommendationsLoadingModel)
+            assertThat(sortedMedia?.values).containsExactly(controlCommonModel, recsCommonModel)
         }
 
     private fun hasActiveMediaOrRecommendation(

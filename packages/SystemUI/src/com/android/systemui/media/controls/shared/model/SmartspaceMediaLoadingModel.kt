@@ -18,18 +18,18 @@ package com.android.systemui.media.controls.shared.model
 
 /** Models smartspace media loading state. */
 sealed class SmartspaceMediaLoadingModel {
-    /** The initial loading state when no smartspace media has yet loaded. */
-    data object Unknown : SmartspaceMediaLoadingModel()
+
+    abstract val key: String
 
     /** Smartspace media has been loaded. */
     data class Loaded(
-        val key: String,
+        override val key: String,
         val isPrioritized: Boolean = false,
     ) : SmartspaceMediaLoadingModel()
 
     /** Smartspace media has been removed. */
     data class Removed(
-        val key: String,
+        override val key: String,
         val immediatelyUpdateUi: Boolean = true,
     ) : SmartspaceMediaLoadingModel()
 }
