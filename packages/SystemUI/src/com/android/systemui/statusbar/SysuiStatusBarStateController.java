@@ -23,7 +23,6 @@ import android.view.View;
 
 import com.android.systemui.CoreStartable;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.startable.Dependencies;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import java.lang.annotation.Retention;
@@ -31,7 +30,6 @@ import java.lang.annotation.Retention;
 /**
  * Sends updates to {@link StateListener}s about changes to the status bar state and dozing state
  */
-@Dependencies(CentralSurfaces.class)
 public interface SysuiStatusBarStateController extends StatusBarStateController, CoreStartable {
 
     // TODO: b/115739177 (remove this explicit ordering if we can)
