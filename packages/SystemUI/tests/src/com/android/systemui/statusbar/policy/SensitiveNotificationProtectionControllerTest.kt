@@ -37,6 +37,7 @@ import android.platform.test.annotations.RequiresFlagsDisabled
 import android.platform.test.annotations.RequiresFlagsEnabled
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import android.provider.Settings.Global.DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS
+import android.telephony.TelephonyManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
@@ -89,6 +90,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
     @Mock private lateinit var activityManager: IActivityManager
     @Mock private lateinit var mediaProjectionManager: MediaProjectionManager
     @Mock private lateinit var packageManager: PackageManager
+    @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var listener1: Runnable
     @Mock private lateinit var listener2: Runnable
     @Mock private lateinit var listener3: Runnable
@@ -141,6 +143,9 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
         whenever(packageManager.checkPermission(anyString(), anyString()))
             .thenReturn(PackageManager.PERMISSION_DENIED)
 
+        whenever(telephonyManager.getEmergencyAssistancePackageName())
+            .thenReturn(EMERGENCY_ASSISTANCE_PACKAGE_NAME)
+
         executor = FakeExecutor(FakeSystemClock())
         globalSettings = FakeGlobalSettings()
         controller =
@@ -150,6 +155,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
                 mediaProjectionManager,
                 activityManager,
                 packageManager,
+                telephonyManager,
                 mockExecutorHandler(executor),
                 executor,
                 logger
@@ -402,6 +408,26 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
         mediaProjectionCallback.onStart(mediaProjectionInfo)
 
         val notificationEntry = setupCoreAppNotificationEntry(TEST_PROJECTION_PACKAGE_NAME)
+
+        assertFalse(controller.shouldProtectNotification(notificationEntry))
+    }
+
+    @Test
+    @DisableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING_BUG_FIX)
+    fun shouldProtectNotification_projectionActive_isFromEmergencyPackage_fixDisabled_true() {
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+
+        val notificationEntry = setupNotificationEntry(EMERGENCY_ASSISTANCE_PACKAGE_NAME)
+
+        assertTrue(controller.shouldProtectNotification(notificationEntry))
+    }
+
+    @Test
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING_BUG_FIX)
+    fun shouldProtectNotification_projectionActive_isFromEmergencyPackage_false() {
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+
+        val notificationEntry = setupNotificationEntry(EMERGENCY_ASSISTANCE_PACKAGE_NAME)
 
         assertFalse(controller.shouldProtectNotification(notificationEntry))
     }
@@ -742,6 +768,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
         private const val TEST_PROJECTION_PACKAGE_NAME =
             "com.android.systemui.statusbar.policy.projectionpackage"
         private const val TEST_PACKAGE_NAME = "com.android.systemui.statusbar.policy.testpackage"
+        private const val EMERGENCY_ASSISTANCE_PACKAGE_NAME = "com.android.test.emergencyassistance"
         private const val BUGREPORT_PACKAGE_NAME = "com.android.test.bugreporthandler"
     }
 }
