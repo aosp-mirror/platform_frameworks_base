@@ -1,4 +1,5 @@
 package: "android.content.flags"
+container: "system"
 
 flag {
     name: "enable_bind_package_isolated_process"

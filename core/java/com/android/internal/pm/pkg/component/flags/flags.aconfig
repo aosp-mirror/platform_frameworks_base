@@ -1,4 +1,5 @@
 package: "com.android.internal.pm.pkg.component.flags"
+container: "system"
 
 flag {
     name: "enable_per_process_use_embedded_dex_attr"

@@ -1,4 +1,5 @@
 package: "android.hardware.devicestate.feature.flags"
+container: "system"
 
 flag {
     name: "device_state_property_api"

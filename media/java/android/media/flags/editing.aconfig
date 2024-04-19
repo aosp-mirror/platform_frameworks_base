@@ -1,4 +1,5 @@
 package: "com.android.media.editing.flags"
+container: "system"
 
 flag {
   name: "add_media_metrics_editing"
