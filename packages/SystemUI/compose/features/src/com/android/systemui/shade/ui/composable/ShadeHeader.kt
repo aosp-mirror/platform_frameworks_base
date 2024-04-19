@@ -531,8 +531,14 @@ private fun shouldUseExpandedFormat(state: TransitionState): Boolean {
             state.currentScene == Scenes.QuickSettings
         }
         is TransitionState.Transition -> {
-            (state.isTransitioning(Scenes.Shade, Scenes.QuickSettings) && state.progress >= 0.5) ||
-                (state.isTransitioning(Scenes.QuickSettings, Scenes.Shade) && state.progress < 0.5)
+            ((state.isTransitioning(Scenes.Shade, Scenes.QuickSettings) ||
+                state.isTransitioning(Scenes.Gone, Scenes.QuickSettings) ||
+                state.isTransitioning(Scenes.Lockscreen, Scenes.QuickSettings)) &&
+                state.progress >= 0.5) ||
+                ((state.isTransitioning(Scenes.QuickSettings, Scenes.Shade) ||
+                    state.isTransitioning(Scenes.QuickSettings, Scenes.Gone) ||
+                    state.isTransitioning(Scenes.QuickSettings, Scenes.Lockscreen)) &&
+                    state.progress <= 0.5)
         }
     }
 }

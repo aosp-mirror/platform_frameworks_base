@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -57,7 +56,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
@@ -67,15 +65,17 @@ import androidx.compose.ui.util.lerp
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.NestedScrollBehavior
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.SceneTransitionLayoutState
 import com.android.compose.modifiers.height
+import com.android.systemui.common.ui.compose.windowinsets.LocalRawScreenHeight
 import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadius
-import com.android.systemui.notifications.ui.composable.Notifications.TransitionThresholds.EXPANSION_FOR_MAX_CORNER_RADIUS
-import com.android.systemui.notifications.ui.composable.Notifications.TransitionThresholds.EXPANSION_FOR_MAX_SCRIM_ALPHA
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.ui.composable.ShadeHeader
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimRounding
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationTransitionThresholds.EXPANSION_FOR_MAX_CORNER_RADIUS
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationTransitionThresholds.EXPANSION_FOR_MAX_SCRIM_ALPHA
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import kotlin.math.roundToInt
 
@@ -168,14 +168,7 @@ fun SceneScope.NotificationScrollingStack(
 
     val navBarHeight =
         with(density) { WindowInsets.systemBars.asPaddingValues().calculateBottomPadding().toPx() }
-    val statusBarHeight = WindowInsets.systemBars.asPaddingValues().calculateTopPadding()
-    val displayCutoutHeight = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
-    val screenHeight =
-        with(density) {
-            (LocalConfiguration.current.screenHeightDp.dp +
-                    maxOf(statusBarHeight, displayCutoutHeight))
-                .toPx()
-        } + navBarHeight
+    val screenHeight = LocalRawScreenHeight.current
 
     val stackHeight = viewModel.stackHeight.collectAsState()
 
@@ -253,7 +246,7 @@ fun SceneScope.NotificationScrollingStack(
                                 scrimCornerRadius,
                                 screenCornerRadius,
                                 { expansionFraction },
-                                layoutState.isTransitioningBetween(Scenes.Gone, Scenes.Shade)
+                                layoutState.isNotificationScrimTransitioning(),
                             )
                             .let { scrimRounding.value.toRoundedCornerShape(it) }
                     clip = true
@@ -288,7 +281,7 @@ fun SceneScope.NotificationScrollingStack(
                 Modifier.fillMaxSize()
                     .graphicsLayer {
                         alpha =
-                            if (layoutState.isTransitioningBetween(Scenes.Gone, Scenes.Shade)) {
+                            if (layoutState.isNotificationScrimTransitioning()) {
                                 (expansionFraction / EXPANSION_FOR_MAX_SCRIM_ALPHA).coerceAtMost(1f)
                             } else 1f
                     }
@@ -425,7 +418,7 @@ private fun Modifier.debugBackground(
         this
     }
 
-fun ShadeScrimRounding.toRoundedCornerShape(radius: Dp): RoundedCornerShape {
+private fun ShadeScrimRounding.toRoundedCornerShape(radius: Dp): RoundedCornerShape {
     val topRadius = if (isTopRounded) radius else 0.dp
     val bottomRadius = if (isBottomRounded) radius else 0.dp
     return RoundedCornerShape(
@@ -434,6 +427,13 @@ fun ShadeScrimRounding.toRoundedCornerShape(radius: Dp): RoundedCornerShape {
         bottomStart = bottomRadius,
         bottomEnd = bottomRadius,
     )
+}
+
+private fun SceneTransitionLayoutState.isNotificationScrimTransitioning(): Boolean {
+    return isTransitioningBetween(Scenes.Gone, Scenes.Shade) ||
+        isTransitioningBetween(Scenes.Lockscreen, Scenes.Shade) ||
+        isTransitioningBetween(Scenes.Gone, Scenes.QuickSettings) ||
+        isTransitioningBetween(Scenes.Lockscreen, Scenes.QuickSettings)
 }
 
 private const val TAG = "FlexiNotifs"

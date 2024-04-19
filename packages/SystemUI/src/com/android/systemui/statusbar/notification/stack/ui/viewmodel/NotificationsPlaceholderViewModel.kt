@@ -93,10 +93,10 @@ constructor(
     val headsUpHeight: StateFlow<Float> = interactor.headsUpHeight.dumpValue("headsUpHeight")
 
     /**
-     * The amount [0-1] that the shade has been opened. At 0, the shade is closed; at 1, the shade
-     * is open.
+     * The amount [0-1] that the shade or quick settings has been opened. At 0, the shade is closed;
+     * at 1, either the shade or quick settings is open.
      */
-    val expandFraction: Flow<Float> = shadeInteractor.shadeExpansion.dumpValue("expandFraction")
+    val expandFraction: Flow<Float> = shadeInteractor.anyExpansion.dumpValue("expandFraction")
 
     /**
      * The amount in px that the notification stack should scroll due to internal expansion. This
@@ -110,4 +110,12 @@ constructor(
     fun setScrolledToTop(scrolledToTop: Boolean) {
         interactor.setScrolledToTop(scrolledToTop)
     }
+}
+
+// Expansion fraction thresholds (between 0-1f) at which the corresponding value should be
+// at its maximum, given they are at their minimum value at expansion = 0f.
+object NotificationTransitionThresholds {
+    const val EXPANSION_FOR_MAX_CORNER_RADIUS = 0.1f
+    const val EXPANSION_FOR_MAX_SCRIM_ALPHA = 0.3f
+    const val EXPANSION_FOR_DELAYED_STACK_FADE_IN = 0.5f
 }

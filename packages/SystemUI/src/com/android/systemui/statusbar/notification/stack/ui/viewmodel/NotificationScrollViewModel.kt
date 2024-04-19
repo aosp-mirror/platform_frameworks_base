@@ -22,11 +22,12 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.shared.model.Scenes.Shade
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimClipping
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationTransitionThresholds.EXPANSION_FOR_DELAYED_STACK_FADE_IN
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationTransitionThresholds.EXPANSION_FOR_MAX_SCRIM_ALPHA
 import com.android.systemui.util.kotlin.FlowDumperImpl
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -52,8 +53,9 @@ constructor(
     val expandFraction: Flow<Float> =
         combine(
                 shadeInteractor.shadeExpansion,
+                shadeInteractor.qsExpansion,
                 sceneInteractor.transitionState,
-            ) { shadeExpansion, transitionState ->
+            ) { shadeExpansion, qsExpansion, transitionState ->
                 when (transitionState) {
                     is ObservableTransitionState.Idle -> {
                         if (transitionState.scene == Scenes.Lockscreen) {
@@ -70,6 +72,16 @@ constructor(
                                     transitionState.toScene == Scenes.Shade)
                         ) {
                             1f
+                        } else if (
+                            (transitionState.fromScene == Scenes.Gone ||
+                                transitionState.fromScene == Scenes.Lockscreen) &&
+                                transitionState.toScene == Scenes.QuickSettings
+                        ) {
+                            // during QS expansion, increase fraction at same rate as scrim alpha,
+                            // but start when scrim alpha is at EXPANSION_FOR_DELAYED_STACK_FADE_IN.
+                            (qsExpansion / EXPANSION_FOR_MAX_SCRIM_ALPHA -
+                                    EXPANSION_FOR_DELAYED_STACK_FADE_IN)
+                                .coerceIn(0f, 1f)
                         } else {
                             shadeExpansion
                         }
@@ -125,5 +137,5 @@ constructor(
 
     /** Whether the notification stack is scrollable or not. */
     val isScrollable: Flow<Boolean> =
-        sceneInteractor.currentScene.map { it == Shade }.dumpWhileCollecting("isScrollable")
+        sceneInteractor.currentScene.map { it == Scenes.Shade }.dumpWhileCollecting("isScrollable")
 }
