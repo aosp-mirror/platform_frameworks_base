@@ -20,6 +20,8 @@ import android.appwidget.AppWidgetHostView
 import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.util.SizeF
+import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
+import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
 import android.widget.FrameLayout
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -115,8 +117,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Popup
 import androidx.core.view.setPadding
 import androidx.window.layout.WindowMetricsCalculator
-import com.android.compose.modifiers.height
-import com.android.compose.modifiers.padding
 import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
@@ -300,7 +300,7 @@ fun CommunalHub(
                             viewModel.onHidePopup()
                             viewModel.onOpenWidgetEditor(selectedKey.value)
                         },
-                        onHide = { viewModel.onHidePopup()}
+                        onHide = { viewModel.onHidePopup() }
                     )
                 }
                 null -> {}
@@ -374,7 +374,7 @@ private fun ScrollOnUpdatedLiveContentEffect(
             liveContentKeys.indexOfFirst { !prevLiveContentKeys.contains(it) }
 
         // Scroll if current position is behind the first updated content
-        if (indexOfFirstUpdatedContent in 0..<gridState.firstVisibleItemIndex) {
+        if (indexOfFirstUpdatedContent in 0 until gridState.firstVisibleItemIndex) {
             // Launching with a scope to prevent the job from being canceled in the case of a
             // recomposition during scrolling
             coroutineScope.launch { gridState.animateScrollToItem(indexOfFirstUpdatedContent) }
@@ -841,6 +841,8 @@ private fun WidgetContent(
     widgetConfigurator: WidgetConfigurator?,
     modifier: Modifier = Modifier,
 ) {
+    val isFocusable by viewModel.isFocusable.collectAsState(initial = false)
+
     Box(
         modifier =
             modifier.thenIf(!viewModel.isEditMode && model.inQuietMode) {
@@ -864,6 +866,16 @@ private fun WidgetContent(
                         // occupy the entire box.
                         setPadding(0)
                     }
+            },
+            update = {
+                it.apply {
+                    importantForAccessibility =
+                        if (isFocusable) {
+                            IMPORTANT_FOR_ACCESSIBILITY_AUTO
+                        } else {
+                            IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                        }
+                }
             },
             // For reusing composition in lazy lists.
             onReset = {},

@@ -24,17 +24,21 @@ import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
 import android.widget.RemoteViews
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
+import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
 import com.android.systemui.communal.data.repository.fakeCommunalMediaRepository
+import com.android.systemui.communal.data.repository.fakeCommunalRepository
 import com.android.systemui.communal.data.repository.fakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.communalTutorialInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel.Companion.POPUP_AUTO_HIDE_TIMEOUT_MS
@@ -45,8 +49,14 @@ import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
 import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
@@ -63,6 +73,7 @@ import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -94,6 +105,8 @@ class CommunalViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
     private lateinit var mediaRepository: FakeCommunalMediaRepository
     private lateinit var userRepository: FakeUserRepository
     private lateinit var shadeTestUtil: ShadeTestUtil
+    private lateinit var keyguardTransitionRepository: FakeKeyguardTransitionRepository
+    private lateinit var communalRepository: FakeCommunalRepository
 
     private lateinit var underTest: CommunalViewModel
 
@@ -106,12 +119,14 @@ class CommunalViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         keyguardRepository = kosmos.fakeKeyguardRepository
+        keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
         tutorialRepository = kosmos.fakeCommunalTutorialRepository
         widgetRepository = kosmos.fakeCommunalWidgetRepository
         smartspaceRepository = kosmos.fakeSmartspaceRepository
         mediaRepository = kosmos.fakeCommunalMediaRepository
         userRepository = kosmos.fakeUserRepository
         shadeTestUtil = kosmos.shadeTestUtil
+        communalRepository = kosmos.fakeCommunalRepository
 
         kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
         mSetFlagsRule.enableFlags(FLAG_COMMUNAL_HUB)
@@ -125,6 +140,7 @@ class CommunalViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
         underTest =
             CommunalViewModel(
                 testScope,
+                kosmos.keyguardTransitionInteractor,
                 kosmos.communalInteractor,
                 kosmos.communalTutorialInteractor,
                 kosmos.shadeInteractor,
@@ -324,6 +340,105 @@ class CommunalViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
             shadeTestUtil.setLockscreenShadeExpansion(1f)
             runCurrent()
             assertThat(underTest.canChangeScene()).isFalse()
+        }
+
+    @Test
+    fun isFocusable_isFalse_whenTransitioningAwayFromGlanceableHub() =
+        testScope.runTest {
+            val isFocusable by collectLastValue(underTest.isFocusable)
+
+            // Shade not expanded.
+            shadeTestUtil.setLockscreenShadeExpansion(0f)
+            // On communal scene.
+            communalRepository.setTransitionState(
+                flowOf(ObservableTransitionState.Idle(CommunalScenes.Communal))
+            )
+            // Open bouncer.
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.GLANCEABLE_HUB,
+                    to = KeyguardState.PRIMARY_BOUNCER,
+                    transitionState = TransitionState.STARTED,
+                )
+            )
+
+            keyguardTransitionRepository.sendTransitionStep(
+                from = KeyguardState.GLANCEABLE_HUB,
+                to = KeyguardState.PRIMARY_BOUNCER,
+                transitionState = TransitionState.RUNNING,
+                value = 0.5f,
+            )
+            assertThat(isFocusable).isEqualTo(false)
+
+            // Transitioned to bouncer.
+            keyguardTransitionRepository.sendTransitionStep(
+                from = KeyguardState.GLANCEABLE_HUB,
+                to = KeyguardState.PRIMARY_BOUNCER,
+                transitionState = TransitionState.FINISHED,
+                value = 1f,
+            )
+            assertThat(isFocusable).isEqualTo(false)
+        }
+
+    @Test
+    fun isFocusable_isFalse_whenNotOnCommunalScene() =
+        testScope.runTest {
+            val isFocusable by collectLastValue(underTest.isFocusable)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GLANCEABLE_HUB,
+                testScope = testScope,
+            )
+            shadeTestUtil.setLockscreenShadeExpansion(0f)
+            // Transitioned away from communal scene.
+            communalRepository.setTransitionState(
+                flowOf(ObservableTransitionState.Idle(CommunalScenes.Blank))
+            )
+
+            assertThat(isFocusable).isEqualTo(false)
+        }
+
+    @Test
+    fun isFocusable_isTrue_whenIdleOnCommunal_andShadeNotExpanded() =
+        testScope.runTest {
+            val isFocusable by collectLastValue(underTest.isFocusable)
+
+            // On communal scene.
+            communalRepository.setTransitionState(
+                flowOf(ObservableTransitionState.Idle(CommunalScenes.Communal))
+            )
+            // Transitioned to Glanceable hub.
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GLANCEABLE_HUB,
+                testScope = testScope,
+            )
+            // Shade not expanded.
+            shadeTestUtil.setLockscreenShadeExpansion(0f)
+
+            assertThat(isFocusable).isEqualTo(true)
+        }
+
+    @Test
+    fun isFocusable_isFalse_whenQsIsExpanded() =
+        testScope.runTest {
+            val isFocusable by collectLastValue(underTest.isFocusable)
+
+            // On communal scene.
+            communalRepository.setTransitionState(
+                flowOf(ObservableTransitionState.Idle(CommunalScenes.Communal))
+            )
+            // Transitioned to Glanceable hub.
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GLANCEABLE_HUB,
+                testScope = testScope,
+            )
+            // Qs is expanded.
+            shadeTestUtil.setQsExpansion(1f)
+
+            assertThat(isFocusable).isEqualTo(false)
         }
 
     private suspend fun setIsMainUser(isMainUser: Boolean) {

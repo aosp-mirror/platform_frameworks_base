@@ -22,6 +22,8 @@ import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
@@ -54,6 +56,7 @@ class CommunalViewModel
 @Inject
 constructor(
     @Application private val scope: CoroutineScope,
+    keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val communalInteractor: CommunalInteractor,
     tutorialInteractor: CommunalTutorialInteractor,
     private val shadeInteractor: ShadeInteractor,
@@ -92,6 +95,18 @@ constructor(
 
     private val _currentPopup: MutableStateFlow<PopupType?> = MutableStateFlow(null)
     override val currentPopup: Flow<PopupType?> = _currentPopup.asStateFlow()
+
+    // The widget is focusable for accessibility when the hub is fully visible and shade is not
+    // opened.
+    override val isFocusable: Flow<Boolean> =
+        combine(
+                keyguardTransitionInteractor.isFinishedInState(KeyguardState.GLANCEABLE_HUB),
+                communalInteractor.isIdleOnCommunal,
+                shadeInteractor.isAnyFullyExpanded,
+            ) { transitionedToGlanceableHub, isIdleOnCommunal, isAnyFullyExpanded ->
+                transitionedToGlanceableHub && isIdleOnCommunal && !isAnyFullyExpanded
+            }
+            .distinctUntilChanged()
 
     private val _isEnableWidgetDialogShowing: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isEnableWidgetDialogShowing: Flow<Boolean> = _isEnableWidgetDialogShowing.asStateFlow()

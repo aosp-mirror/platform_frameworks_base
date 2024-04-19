@@ -37,8 +37,8 @@ abstract class BaseCommunalViewModel(
 ) {
     val currentScene: Flow<SceneKey> = communalInteractor.desiredScene
 
-    /** Whether communal hub can be focused to enable accessibility actions. */
-    val isFocusable: Flow<Boolean> = communalInteractor.isIdleOnCommunal
+    /** Whether communal hub can be focused by accessibility tools. */
+    open val isFocusable: Flow<Boolean> = MutableStateFlow(false)
 
     /** Whether widgets are currently being re-ordered. */
     open val reorderingWidgets: StateFlow<Boolean> = MutableStateFlow(false)
