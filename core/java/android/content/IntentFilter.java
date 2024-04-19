@@ -21,6 +21,9 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
+import android.compat.annotation.Overridable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.Flags;
 import android.net.Uri;
@@ -184,6 +187,18 @@ public class IntentFilter implements Parcelable {
     private static final double[] EMPTY_DOUBLE_ARRAY = new double[0];
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
     private static final boolean[] EMPTY_BOOLEAN_ARRAY = new boolean[0];
+
+    /**
+     * An intent with action set as null used to always pass the action test during intent
+     * filter matching. This causes a lot of confusion and unexpected intent matches.
+     * Null action intents should be blocked when the intent sender application targets V or higher.
+     *
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long BLOCK_NULL_ACTION_INTENTS = 293560872;
 
     /**
      * The filter {@link #setPriority} value at which system high-priority

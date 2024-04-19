@@ -463,6 +463,7 @@ import com.android.server.net.NetworkManagementInternal;
 import com.android.server.os.NativeTombstoneManager;
 import com.android.server.pm.Computer;
 import com.android.server.pm.Installer;
+import com.android.server.pm.PackageManagerServiceUtils;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -15875,6 +15876,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else {
                 registeredReceivers = mReceiverResolver.queryIntent(snapshot, intent,
                         resolvedType, false /*defaultOnly*/, userId);
+            }
+            if (registeredReceivers != null) {
+                PackageManagerServiceUtils.applyNullActionBlocking(
+                        mPlatformCompat, snapshot, registeredReceivers,
+                        true, intent, callingUid);
             }
         }
         BroadcastQueue.traceEnd(cookie);
