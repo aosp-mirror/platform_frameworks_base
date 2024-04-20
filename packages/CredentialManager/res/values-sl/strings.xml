@@ -42,9 +42,6 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Želite ustvariti ključ za dostop za prijavo v aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"Želite shraniti geslo za prijavo v aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Želite shraniti podatke za prijavo za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"Želite uporabiti zaklepanje zaslona za ustvarjanje ključa za dostop za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"Želite uporabiti zaklepanje zaslona za ustvarjanje gesla za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"Želite uporabiti zaklepanje zaslona za shranjevanje podatkov za prijavo za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"ključ za dostop"</string>
     <string name="password" msgid="6738570945182936667">"geslo"</string>
     <string name="passkeys" msgid="5733880786866559847">"ključi za dostop"</string>
@@ -71,15 +68,16 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Nazaj na prejšnjo stran"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"Zapri"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Opusti"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Želite uporabiti shranjeni ključ za dostop do aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Ali želite uporabiti shranjeno geslo za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_single_tap_for" msgid="2057945648748859483">"Uporabite zaklepanje zaslona za prijavo v aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g> z uporabniškim imenom <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Želite uporabiti svojo prijavo za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Želite odkleniti možnosti prijave za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Uporaba shranjenega ključa za dostop za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Uporaba shranjenega gesla za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Uporaba vašega računa za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for get_dialog_description_single_tap (2797059565126030879) -->
+    <skip />
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Odklepanje možnosti prijave za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Izberite shranjeni ključ za dostop za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Izberite shranjeno geslo za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Izberite shranjene podatke za prijavo za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Izberite prijavo za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"Izbira računa za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Izberite možnost za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Želite te podatke uporabiti v aplikaciji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Prijava na drug način"</string>

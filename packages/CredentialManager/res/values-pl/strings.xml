@@ -42,9 +42,6 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Utworzyć klucz dostępu do logowania w aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"Zapisać hasło do logowania w aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Zapisać dane używane do logowania w aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"Użyć metody odblokowania ekranu do utworzenia klucza dostępu do aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"Użyć metody odblokowania ekranu do utworzenia hasła do aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"Użyć metody odblokowania ekranu do zapisania danych logowania do aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"klucz"</string>
     <string name="password" msgid="6738570945182936667">"hasło"</string>
     <string name="passkeys" msgid="5733880786866559847">"klucze dostępu"</string>
@@ -71,15 +68,16 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Wróć do poprzedniej strony"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"Zamknij"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Zamknij"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Użyć zapisanego klucza dla aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Użyć zapisanego hasła do aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_single_tap_for" msgid="2057945648748859483">"Używaj metody odblokowywania ekranu, aby logować się do aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g> za pomocą nazwy użytkownika <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Użyć tych danych logowania do aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Odblokować opcje logowania do aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Użyj zapisanego klucza dostępu do aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Użyj zapisanego hasła do aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Użyj swojego konta w aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for get_dialog_description_single_tap (2797059565126030879) -->
+    <skip />
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Odblokuj opcje logowania w aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Wybierz zapisany klucz dostępu do aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Wybierz zapisane hasło do aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Wybierz zapisane dane logowania do aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Wybierz dane logowania do aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"Wybierz konto dla aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Wybrać opcję dla aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Użyć tych informacji w aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Zaloguj się w inny sposób"</string>
