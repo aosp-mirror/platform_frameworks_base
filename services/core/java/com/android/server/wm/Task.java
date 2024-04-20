@@ -137,6 +137,7 @@ import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppCompatTaskInfo;
 import android.app.AppGlobals;
+import android.app.CameraCompatTaskInfo;
 import android.app.IActivityController;
 import android.app.PictureInPictureParams;
 import android.app.TaskInfo;
@@ -3537,9 +3538,9 @@ class Task extends TaskFragment {
         appCompatTaskInfo.topActivityEligibleForLetterboxEducation = isTopActivityResumed
                 && top.isEligibleForLetterboxEducation();
         // Whether the direct top activity requested showing camera compat control.
-        appCompatTaskInfo.cameraCompatControlState = isTopActivityResumed
+        appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState = isTopActivityResumed
                 ? top.getCameraCompatControlState()
-                : AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
+                : CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
 
         final Task parentTask = getParent() != null ? getParent().asTask() : null;
         info.parentTaskId = parentTask != null && parentTask.mCreatedByOrganizer

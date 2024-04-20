@@ -16,10 +16,10 @@
 
 package com.android.wm.shell;
 
-import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
-import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
-import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
-import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
@@ -435,7 +435,8 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
     public void testOnCameraCompatActivityChanged() {
         final RunningTaskInfo taskInfo1 = createTaskInfo(1, WINDOWING_MODE_FULLSCREEN);
         taskInfo1.displayId = DEFAULT_DISPLAY;
-        taskInfo1.appCompatTaskInfo.cameraCompatControlState = CAMERA_COMPAT_CONTROL_HIDDEN;
+        taskInfo1.appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState =
+                CAMERA_COMPAT_CONTROL_HIDDEN;
         final TrackingTaskListener taskListener = new TrackingTaskListener();
         mOrganizer.addListenerForType(taskListener, TASK_LISTENER_TYPE_FULLSCREEN);
         mOrganizer.onTaskAppeared(taskInfo1, null);
@@ -449,7 +450,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo2 =
                 createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
         taskInfo2.displayId = taskInfo1.displayId;
-        taskInfo2.appCompatTaskInfo.cameraCompatControlState =
+        taskInfo2.appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState =
                 CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
         taskInfo2.isVisible = true;
         mOrganizer.onTaskInfoChanged(taskInfo2);
@@ -461,7 +462,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo3 =
                 createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
         taskInfo3.displayId = taskInfo1.displayId;
-        taskInfo3.appCompatTaskInfo.cameraCompatControlState =
+        taskInfo3.appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState =
                 CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
         taskInfo3.isVisible = true;
         mOrganizer.onTaskInfoChanged(taskInfo3);
@@ -474,7 +475,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
                 createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
         taskInfo4.displayId = taskInfo1.displayId;
         taskInfo4.appCompatTaskInfo.topActivityInSizeCompat = true;
-        taskInfo4.appCompatTaskInfo.cameraCompatControlState =
+        taskInfo4.appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState =
                 CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
         taskInfo4.isVisible = true;
         mOrganizer.onTaskInfoChanged(taskInfo4);
@@ -485,7 +486,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo5 =
                 createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
         taskInfo5.displayId = taskInfo1.displayId;
-        taskInfo5.appCompatTaskInfo.cameraCompatControlState =
+        taskInfo5.appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState =
                 CAMERA_COMPAT_CONTROL_DISMISSED;
         taskInfo5.isVisible = true;
         mOrganizer.onTaskInfoChanged(taskInfo5);
@@ -496,7 +497,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo6 =
                 createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
         taskInfo6.displayId = taskInfo1.displayId;
-        taskInfo6.appCompatTaskInfo.cameraCompatControlState =
+        taskInfo6.appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState =
                 CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
         taskInfo6.isVisible = false;
         mOrganizer.onTaskInfoChanged(taskInfo6);

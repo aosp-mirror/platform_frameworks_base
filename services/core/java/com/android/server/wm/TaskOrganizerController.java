@@ -17,7 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
-import static android.app.AppCompatTaskInfo.cameraCompatControlStateToString;
+import static android.app.CameraCompatTaskInfo.cameraCompatControlStateToString;
 import static android.window.StartingWindowRemovalInfo.DEFER_MODE_NONE;
 import static android.window.StartingWindowRemovalInfo.DEFER_MODE_NORMAL;
 import static android.window.StartingWindowRemovalInfo.DEFER_MODE_ROTATION;
