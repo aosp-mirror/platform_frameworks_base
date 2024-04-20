@@ -15,11 +15,7 @@
  */
 package com.android.server.audio;
 
-import static android.bluetooth.BluetoothDevice.DEVICE_TYPE_CARKIT;
 import static android.bluetooth.BluetoothDevice.DEVICE_TYPE_DEFAULT;
-import static android.bluetooth.BluetoothDevice.DEVICE_TYPE_HEADSET;
-import static android.bluetooth.BluetoothDevice.DEVICE_TYPE_HEARING_AID;
-import static android.bluetooth.BluetoothDevice.DEVICE_TYPE_SPEAKER;
 import static android.bluetooth.BluetoothDevice.DEVICE_TYPE_UNTETHERED_HEADSET;
 import static android.bluetooth.BluetoothDevice.DEVICE_TYPE_WATCH;
 import static android.media.AudioManager.AUDIO_DEVICE_CATEGORY_CARKIT;
@@ -148,6 +144,14 @@ public class BtHelper {
     private static final int BT_HEARING_AID_GAIN_MIN = -128;
     private static final int BT_LE_AUDIO_MIN_VOL = 0;
     private static final int BT_LE_AUDIO_MAX_VOL = 255;
+
+    // BtDevice constants currently rolling out under flag protection. Use own
+    // constants instead to avoid mainline dependency from flag library import
+    // TODO(b/335936458): remove once the BtDevice flag is rolled out
+    private static final String DEVICE_TYPE_SPEAKER = "Speaker";
+    private static final String DEVICE_TYPE_HEADSET = "Headset";
+    private static final String DEVICE_TYPE_CARKIT = "Carkit";
+    private static final String DEVICE_TYPE_HEARING_AID = "HearingAid";
 
     /**
      * Returns a string representation of the scoAudioMode.
