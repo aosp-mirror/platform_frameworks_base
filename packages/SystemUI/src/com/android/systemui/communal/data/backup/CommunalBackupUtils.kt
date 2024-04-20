@@ -20,6 +20,11 @@ import android.content.Context
 import androidx.annotation.WorkerThread
 import com.android.systemui.communal.data.db.CommunalDatabase
 import com.android.systemui.communal.nano.CommunalHubState
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.IOException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
@@ -47,5 +52,62 @@ class CommunalBackupUtils(
             )
         }
         return CommunalHubState().apply { widgets = widgetsState.toTypedArray() }
+    }
+
+    /**
+     * Writes [data] to disk as a file as [FILE_NAME], overwriting existing content if any.
+     *
+     * @throws FileNotFoundException if the file exists but is a directory rather than a regular
+     *   file, does not exist but cannot be created, or cannot be opened for any other reason.
+     * @throws SecurityException if write access is denied.
+     * @throws IOException if writing fails.
+     */
+    @WorkerThread
+    fun writeBytesToDisk(data: ByteArray) {
+        val output = FileOutputStream(getFile())
+        output.write(data)
+        output.close()
+    }
+
+    /**
+     * Reads bytes from [FILE_NAME], and throws if file does not exist.
+     *
+     * @throws FileNotFoundException if file does not exist.
+     * @throws SecurityException if read access is denied.
+     * @throws IOException if reading fails.
+     */
+    @WorkerThread
+    fun readBytesFromDisk(): ByteArray {
+        val input = FileInputStream(getFile())
+        val bytes = input.readAllBytes()
+        input.close()
+
+        return bytes
+    }
+
+    /**
+     * Removes the bytes written to disk at [FILE_NAME].
+     *
+     * @return True if and only if the file is successfully deleted
+     * @throws SecurityException if permission is denied
+     */
+    @WorkerThread
+    fun clear(): Boolean {
+        return getFile().delete()
+    }
+
+    /** Whether [FILE_NAME] exists. */
+    @WorkerThread
+    fun fileExists(): Boolean {
+        return getFile().exists()
+    }
+
+    @WorkerThread
+    private fun getFile(): File {
+        return File(context.filesDir, FILE_NAME)
+    }
+
+    companion object {
+        private const val FILE_NAME = "communal_restore"
     }
 }

@@ -26,6 +26,8 @@ import com.android.systemui.communal.nano.CommunalHubState
 import com.android.systemui.lifecycle.InstantTaskExecutorRule
 import com.google.common.truth.Correspondence
 import com.google.common.truth.Truth.assertThat
+import java.io.FileNotFoundException
+import java.nio.charset.Charset
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -56,6 +58,7 @@ class CommunalBackupUtilsTest : SysuiTestCase() {
     @After
     fun teardown() {
         database.close()
+        underTest.clear()
     }
 
     @Test
@@ -77,6 +80,57 @@ class CommunalBackupUtilsTest : SysuiTestCase() {
         assertThat(actualWidgets)
             .comparingElementsUsing(represents)
             .containsExactlyElementsIn(expectedWidgets)
+    }
+
+    @Test
+    fun write_existingContentIsOverwritten() {
+        // Write old data
+        val dataToWrite = "I am old data. Erase me."
+        underTest.writeBytesToDisk(dataToWrite.toByteArray(Charset.defaultCharset()))
+
+        // Verify old data written
+        var dataRead = underTest.readBytesFromDisk().toString(Charset.defaultCharset())
+        assertThat(dataRead).isEqualTo(dataToWrite)
+
+        // Write new data
+        val newDataToWrite = "I am new data."
+        underTest.writeBytesToDisk(newDataToWrite.toByteArray(Charset.defaultCharset()))
+
+        // Verify new data overwrites old
+        dataRead = underTest.readBytesFromDisk().toString(Charset.defaultCharset())
+        assertThat(dataRead).isEqualTo(newDataToWrite)
+    }
+
+    @Test(expected = FileNotFoundException::class)
+    fun read_fileNotFoundException() {
+        underTest.readBytesFromDisk()
+    }
+
+    @Test(expected = FileNotFoundException::class)
+    fun clear_returnsTrueWhenFileDeleted() {
+        // Write bytes to disk
+        underTest.writeBytesToDisk(byteArrayOf(1, 2, 3))
+
+        assertThat(underTest.clear()).isTrue()
+
+        // Verify a read after that throws a FileNotFoundException
+        underTest.readBytesFromDisk()
+    }
+
+    @Test
+    fun clear_returnsFalseWhenFileDoesNotExist() {
+        assertThat(underTest.clear()).isFalse()
+    }
+
+    @Test
+    fun fileExists() {
+        assertThat(underTest.fileExists()).isFalse()
+
+        underTest.writeBytesToDisk(byteArrayOf(1, 2, 3))
+        assertThat(underTest.fileExists()).isTrue()
+
+        underTest.clear()
+        assertThat(underTest.fileExists()).isFalse()
     }
 
     data class FakeWidgetMetadata(val widgetId: Int, val componentName: String, val rank: Int)
