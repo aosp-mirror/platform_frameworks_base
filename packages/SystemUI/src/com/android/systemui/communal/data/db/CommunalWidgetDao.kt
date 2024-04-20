@@ -128,9 +128,18 @@ interface CommunalWidgetDao {
 
     @Transaction
     fun addWidget(widgetId: Int, provider: ComponentName, priority: Int): Long {
-        return insertWidget(
+        return addWidget(
             widgetId = widgetId,
             componentName = provider.flattenToString(),
+            priority = priority,
+        )
+    }
+
+    @Transaction
+    fun addWidget(widgetId: Int, componentName: String, priority: Int): Long {
+        return insertWidget(
+            widgetId = widgetId,
+            componentName = componentName,
             itemId = insertItemRank(priority),
         )
     }
