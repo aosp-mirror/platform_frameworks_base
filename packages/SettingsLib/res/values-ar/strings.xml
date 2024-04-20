@@ -632,7 +632,7 @@
     <string name="user_image_photo_selector" msgid="433658323306627093">"اختيار صورة"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"لقد استنفدت عدد المحاولات غير الصحيحة وسيتم حذف بيانات هذا الجهاز."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"لقد استنفدت عدد المحاولات غير الصحيحة وسيتم حذف حساب هذا المستخدم."</string>
-    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"لقد استنفدت عدد المحاولات غير الصحيحة وسيتم حذف الملف الشخصي للعمل وبياناته."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"لقد استنفدت عدد المحاولات غير الصحيحة وسيتم حذف ملف العمل وبياناته."</string>
     <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"إغلاق"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"الإعداد التلقائي للجهاز"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"غير مفعّل"</string>

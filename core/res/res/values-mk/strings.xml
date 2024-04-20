@@ -970,7 +970,7 @@
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Точно!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Обидете се повторно"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Обидете се повторно"</string>
-    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Отклучи за сите функции и податоци"</string>
+    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Отклучете за пристап до сите функции и податоци"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Максималниот број обиди на отклучување со лик е надминат"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Нема SIM-картичка"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Нема SIM-картичка во таблетот."</string>
