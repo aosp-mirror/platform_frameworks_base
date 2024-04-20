@@ -1166,7 +1166,11 @@ public final class NotificationRecord {
             mVibration = calculateVibration();
             if (restrictAudioAttributesCall() || restrictAudioAttributesAlarm()
                     || restrictAudioAttributesMedia()) {
-                mAttributes = channel.getAudioAttributes();
+                if (channel.getAudioAttributes() != null) {
+                    mAttributes = channel.getAudioAttributes();
+                } else {
+                    mAttributes = Notification.AUDIO_ATTRIBUTES_DEFAULT;
+                }
             }
         }
     }

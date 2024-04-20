@@ -20,6 +20,7 @@ import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
+import static android.media.AudioAttributes.USAGE_ALARM;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
 import static android.service.notification.Adjustment.KEY_NOT_CONVERSATION;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
@@ -68,6 +69,7 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
@@ -1564,5 +1566,32 @@ public class NotificationRecordTest extends UiServiceTestCase {
         assertTrue(record.getPhoneNumbers().contains("16175551212"));
         assertTrue(record.getPhoneNumbers().contains("16175552121"));
         assertTrue(record.getPhoneNumbers().contains("16175553434"));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_RESTRICT_AUDIO_ATTRIBUTES_ALARM)
+    public void updateChannel_nullAudioAttributes() {
+        StatusBarNotification sbn = getStyledNotification(true, true, true,
+                new Notification.DecoratedCustomViewStyle());
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        record.updateNotificationChannel(new NotificationChannel("new", "new", 3));
+
+        assertThat(record.getAudioAttributes()).isNotNull();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_RESTRICT_AUDIO_ATTRIBUTES_ALARM)
+    public void updateChannel_nonNullAudioAttributes() {
+        StatusBarNotification sbn = getStyledNotification(true, true, true,
+                new Notification.DecoratedCustomViewStyle());
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        NotificationChannel update = new NotificationChannel("new", "new", 3);
+        update.setSound(Uri.EMPTY,
+                new AudioAttributes.Builder().setUsage(USAGE_ALARM).build());
+        record.updateNotificationChannel(update);
+
+        assertThat(record.getAudioAttributes().getUsage()).isEqualTo(USAGE_ALARM);
     }
 }
