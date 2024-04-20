@@ -55,7 +55,7 @@
     <string name="uninstall_application_title" msgid="4045420072401428123">"Հավելվածի ապատեղադրում"</string>
     <string name="uninstall_update_title" msgid="824411791011583031">"Ապատեղադրել թարմացումը"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> գործողությունը հետևյալ հավելվածի մասն է`"</string>
-    <string name="uninstall_application_text" msgid="3816830743706143980">"Ուզո՞ւմ եք ապատեղադրել այս հավելվածը։"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"Ուզում եք ապատեղադրե՞լ այս հավելվածը։"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Ապատեղադրե՞լ այս հավելվածը "<b>"բոլոր"</b>" օգտատերերի համար: Հավելվածը և դրա տվյալները կհեռացվեն սարքի "<b>"բոլոր"</b>" օգտատերերից:"</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Ապատեղադրե՞լ այս հավելվածը <xliff:g id="USERNAME">%1$s</xliff:g> օգտատիրոջ համար:"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Հեռացնե՞լ այս հավելվածը ձեր աշխատանքային պրոֆիլից"</string>

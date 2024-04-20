@@ -630,9 +630,9 @@
     <string name="user_image_take_photo" msgid="467512954561638530">"写真を撮る"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"画像を選択"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"写真を選択"</string>
-    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"間違えた回数が上限を超えました。このデバイスのデータが削除されます。"</string>
-    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"間違えた回数が上限を超えました。このユーザーが削除されます。"</string>
-    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"間違えた回数が上限を超えました。この仕事用プロファイルと関連データが削除されます。"</string>
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"試行回数が上限に達しました。このデバイスのデータが削除されます。"</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"試行回数が上限に達しました。このユーザーが削除されます。"</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"試行回数が上限に達しました。この仕事用プロファイルと関連データが削除されます。"</string>
     <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"閉じる"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"デバイスのデフォルト"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"無効"</string>

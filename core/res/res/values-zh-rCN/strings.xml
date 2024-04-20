@@ -1864,7 +1864,7 @@
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"第三个工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g>克隆"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"取消时要求输入PIN码"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"取消时要求绘制解锁图案"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"取消固定前要求绘制解锁图案"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"取消时要求输入密码"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"已由您的管理员安装"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"已由您的管理员更新"</string>
@@ -1939,7 +1939,7 @@
     <string name="language_selection_title" msgid="52674936078683285">"添加语言"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"地区偏好设置"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"输入语言名称"</string>
-    <string name="language_picker_section_suggested" msgid="6556199184638990447">"建议语言"</string>
+    <string name="language_picker_section_suggested" msgid="6556199184638990447">"建议的语言"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"推荐地区"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"建议的语言"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"建议的地区"</string>

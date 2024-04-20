@@ -881,7 +881,7 @@
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Teisalda üles paremale"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Teisalda alla vasakule"</string>
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Teisalda alla paremale"</string>
-    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Teisalda serva ja kuva"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Teisalda serva ja peida"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Teisalda servast eemale ja kuva"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Eemalda"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"lülita"</string>

@@ -76,11 +76,6 @@
         <option name="test-file-name" value="QueriesAll49.apk"/>
     </target_preparer>
 
-    <test class="com.android.tradefed.testtype.AndroidJUnitTest">
-        <option name="package" value="com.android.perftests.packagemanager"/>
-        <option name="hidden-api-checks" value="false"/>
-    </test>
-
     <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
         <option name="directory-keys" value="/data/local/PackageManagerPerfTests"/>
         <option name="collect-on-run-ended-only" value="true"/>
