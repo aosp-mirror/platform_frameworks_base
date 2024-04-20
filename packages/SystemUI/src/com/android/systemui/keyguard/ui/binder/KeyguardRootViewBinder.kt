@@ -36,6 +36,7 @@ import androidx.activity.setViewTreeOnBackPressedDispatcherOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
+import com.android.app.tracing.coroutines.launch
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
 import com.android.systemui.Flags.newAodTransition
@@ -94,8 +95,8 @@ object KeyguardRootViewBinder {
         view: ViewGroup,
         viewModel: KeyguardRootViewModel,
         configuration: ConfigurationState,
-        occludingAppDeviceEntryMessageViewModel: OccludingAppDeviceEntryMessageViewModel,
-        chipbarCoordinator: ChipbarCoordinator,
+        occludingAppDeviceEntryMessageViewModel: OccludingAppDeviceEntryMessageViewModel?,
+        chipbarCoordinator: ChipbarCoordinator?,
         screenOffAnimationController: ScreenOffAnimationController,
         shadeInteractor: ShadeInteractor,
         clockInteractor: KeyguardClockInteractor,
@@ -121,11 +122,7 @@ object KeyguardRootViewBinder {
         }
 
         val burnInParams = MutableStateFlow(BurnInParameters())
-        val viewState =
-            ViewStateAccessor(
-                alpha = { view.alpha },
-            )
-
+        val viewState = ViewStateAccessor(alpha = { view.alpha })
         disposables +=
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
@@ -145,17 +142,17 @@ object KeyguardRootViewBinder {
                         )
                     }
                     launch {
-                        occludingAppDeviceEntryMessageViewModel.message.collect { biometricMessage
+                        occludingAppDeviceEntryMessageViewModel?.message?.collect { biometricMessage
                             ->
                             if (biometricMessage?.message != null) {
-                                chipbarCoordinator.displayView(
+                                chipbarCoordinator!!.displayView(
                                     createChipbarInfo(
                                         biometricMessage.message,
                                         R.drawable.ic_lock,
                                     )
                                 )
                             } else {
-                                chipbarCoordinator.removeView(ID, "occludingAppMsgNull")
+                                chipbarCoordinator!!.removeView(ID, "occludingAppMsgNull")
                             }
                         }
                     }

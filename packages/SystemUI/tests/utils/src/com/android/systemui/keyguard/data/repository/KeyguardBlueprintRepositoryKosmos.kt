@@ -16,40 +16,83 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import android.content.applicationContext
 import android.os.fakeExecutorHandler
-import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
-import com.android.systemui.keyguard.shared.model.KeyguardSection
-import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint.Companion.DEFAULT
+import com.android.systemui.keyguard.domain.interactor.keyguardBlueprintInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
+import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.SplitShadeKeyguardBlueprint
+import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection
+import com.android.systemui.keyguard.ui.viewmodel.keyguardClockViewModel
+import com.android.systemui.keyguard.ui.viewmodel.keyguardSmartspaceViewModel
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.util.ThreadAssert
 import com.android.systemui.util.mockito.mock
+import java.util.Optional
+
+val Kosmos.keyguardClockSection: ClockSection by
+    Kosmos.Fixture {
+        ClockSection(
+            clockInteractor = keyguardClockInteractor,
+            keyguardClockViewModel = keyguardClockViewModel,
+            context = applicationContext,
+            smartspaceViewModel = keyguardSmartspaceViewModel,
+            blueprintInteractor = { keyguardBlueprintInteractor },
+        )
+    }
+
+val Kosmos.defaultKeyguardBlueprint by
+    Kosmos.Fixture {
+        DefaultKeyguardBlueprint(
+            defaultIndicationAreaSection = mock(),
+            defaultDeviceEntrySection = mock(),
+            defaultShortcutsSection = mock(),
+            defaultAmbientIndicationAreaSection = Optional.of(mock()),
+            defaultSettingsPopupMenuSection = mock(),
+            defaultStatusViewSection = mock(),
+            defaultStatusBarSection = mock(),
+            defaultNotificationStackScrollLayoutSection = mock(),
+            aodNotificationIconsSection = mock(),
+            aodBurnInSection = mock(),
+            communalTutorialIndicatorSection = mock(),
+            clockSection = keyguardClockSection,
+            smartspaceSection = mock(),
+            keyguardSliceViewSection = mock(),
+            udfpsAccessibilityOverlaySection = mock(),
+            accessibilityActionsSection = mock(),
+        )
+    }
+
+val Kosmos.splitShadeBlueprint by
+    Kosmos.Fixture {
+        SplitShadeKeyguardBlueprint(
+            defaultIndicationAreaSection = mock(),
+            defaultDeviceEntrySection = mock(),
+            defaultShortcutsSection = mock(),
+            defaultAmbientIndicationAreaSection = Optional.of(mock()),
+            defaultSettingsPopupMenuSection = mock(),
+            defaultStatusViewSection = mock(),
+            defaultStatusBarSection = mock(),
+            splitShadeNotificationStackScrollLayoutSection = mock(),
+            splitShadeGuidelines = mock(),
+            aodNotificationIconsSection = mock(),
+            aodBurnInSection = mock(),
+            communalTutorialIndicatorSection = mock(),
+            clockSection = keyguardClockSection,
+            smartspaceSection = mock(),
+            mediaSection = mock(),
+            accessibilityActionsSection = mock(),
+        )
+    }
 
 val Kosmos.keyguardBlueprintRepository by
     Kosmos.Fixture {
         KeyguardBlueprintRepository(
             blueprints =
                 setOf(
-                    defaultBlueprint,
+                    defaultKeyguardBlueprint,
                     splitShadeBlueprint,
                 ),
             handler = fakeExecutorHandler,
-            assert = mock<ThreadAssert>(),
+            assert = mock(),
         )
-    }
-
-private val defaultBlueprint =
-    object : KeyguardBlueprint {
-        override val id: String
-            get() = DEFAULT
-        override val sections: List<KeyguardSection>
-            get() = listOf()
-    }
-
-private val splitShadeBlueprint =
-    object : KeyguardBlueprint {
-        override val id: String
-            get() = SplitShadeKeyguardBlueprint.Companion.ID
-        override val sections: List<KeyguardSection>
-            get() = listOf()
     }

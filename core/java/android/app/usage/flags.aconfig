@@ -1,4 +1,5 @@
 package: "android.app.usage"
+container: "system"
 
 flag {
     name: "user_interaction_type_api"

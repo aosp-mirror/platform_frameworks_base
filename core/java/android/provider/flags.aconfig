@@ -1,4 +1,5 @@
 package: "android.provider"
+container: "system"
 
 flag {
     name: "a11y_standalone_fab_enabled"

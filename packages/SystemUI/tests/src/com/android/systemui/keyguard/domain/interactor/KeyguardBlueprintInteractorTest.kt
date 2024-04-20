@@ -24,15 +24,20 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.fakeFingerprintPropertyRepository
+import com.android.systemui.biometrics.shared.model.FingerprintSensorType
+import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.SplitShadeKeyguardBlueprint
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.plugins.clocks.ClockConfig
 import com.android.systemui.plugins.clocks.ClockController
-import com.android.systemui.res.R
+import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.testKosmos
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
@@ -59,17 +64,24 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+        whenever(clockController.config).thenReturn(ClockConfig("TEST", "Test", ""))
+        fingerprintPropertyRepository.setProperties(
+            sensorId = 1,
+            strength = SensorStrength.STRONG,
+            sensorType = FingerprintSensorType.POWER_BUTTON,
+            sensorLocations = mapOf()
+        )
     }
 
     @Test
     fun testAppliesDefaultBlueprint() {
         testScope.runTest {
-            val blueprint by collectLastValue(underTest.blueprint)
-            overrideResource(R.bool.config_use_split_notification_shade, false)
+            val blueprintId by collectLastValue(underTest.blueprintId)
+            kosmos.shadeRepository.setShadeMode(ShadeMode.Single)
             configurationRepository.onConfigurationChange()
             runCurrent()
 
-            assertThat(blueprint?.id).isEqualTo(DefaultKeyguardBlueprint.Companion.DEFAULT)
+            assertThat(blueprintId).isEqualTo(DefaultKeyguardBlueprint.Companion.DEFAULT)
         }
     }
 
@@ -77,12 +89,12 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     @DisableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
     fun testAppliesSplitShadeBlueprint() {
         testScope.runTest {
-            val blueprint by collectLastValue(underTest.blueprint)
-            overrideResource(R.bool.config_use_split_notification_shade, true)
+            val blueprintId by collectLastValue(underTest.blueprintId)
+            kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
             configurationRepository.onConfigurationChange()
             runCurrent()
 
-            assertThat(blueprint?.id).isEqualTo(SplitShadeKeyguardBlueprint.Companion.ID)
+            assertThat(blueprintId).isEqualTo(SplitShadeKeyguardBlueprint.Companion.ID)
         }
     }
 
@@ -90,11 +102,12 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     @DisableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
     fun fingerprintPropertyInitialized_updatesBlueprint() {
         testScope.runTest {
-            val blueprint by collectLastValue(underTest.blueprint)
-            overrideResource(R.bool.config_use_split_notification_shade, true)
+            val blueprintId by collectLastValue(underTest.blueprintId)
+            kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
             fingerprintPropertyRepository.supportsUdfps() // initialize properties
             runCurrent()
-            assertThat(blueprint?.id).isEqualTo(SplitShadeKeyguardBlueprint.Companion.ID)
+
+            assertThat(blueprintId).isEqualTo(SplitShadeKeyguardBlueprint.Companion.ID)
         }
     }
 
@@ -102,13 +115,13 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     @EnableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
     fun testDoesNotApplySplitShadeBlueprint() {
         testScope.runTest {
-            overrideResource(R.bool.config_use_split_notification_shade, true)
-            val blueprint by collectLastValue(underTest.blueprint)
+            val blueprintId by collectLastValue(underTest.blueprintId)
+            kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
             clockRepository.setCurrentClock(clockController)
             configurationRepository.onConfigurationChange()
             runCurrent()
 
-            assertThat(blueprint?.id).isEqualTo(DefaultKeyguardBlueprint.DEFAULT)
+            assertThat(blueprintId).isEqualTo(DefaultKeyguardBlueprint.DEFAULT)
         }
     }
 }

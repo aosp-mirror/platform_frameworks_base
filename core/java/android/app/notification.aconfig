@@ -1,4 +1,5 @@
 package: "android.app"
+container: "system"
 
 # Note: When adding a new flag here, consider including the word "notification(s)" in the flag name
 # when appropriate, as it's not currently part of the namespace so it may not be obvious what the

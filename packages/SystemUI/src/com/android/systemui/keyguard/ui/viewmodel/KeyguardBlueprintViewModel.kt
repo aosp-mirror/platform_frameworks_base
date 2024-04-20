@@ -18,7 +18,6 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import javax.inject.Inject
 
 class KeyguardBlueprintViewModel
@@ -26,7 +25,7 @@ class KeyguardBlueprintViewModel
 constructor(
     keyguardBlueprintInteractor: KeyguardBlueprintInteractor,
 ) {
-    var currentBluePrint: KeyguardBlueprint? = null
     val blueprint = keyguardBlueprintInteractor.blueprint
+    val blueprintId = keyguardBlueprintInteractor.blueprintId
     val refreshTransition = keyguardBlueprintInteractor.refreshTransition
 }

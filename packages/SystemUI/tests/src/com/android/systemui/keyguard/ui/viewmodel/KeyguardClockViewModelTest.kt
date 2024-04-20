@@ -19,7 +19,6 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import androidx.test.filters.SmallTest
-import com.android.keyguard.KeyguardClockSwitch
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -27,175 +26,195 @@ import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
 import com.android.systemui.keyguard.data.repository.keyguardClockRepository
 import com.android.systemui.keyguard.data.repository.keyguardRepository
-import com.android.systemui.keyguard.shared.model.SettingsClockSize
-import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.keyguard.shared.model.ClockSize
+import com.android.systemui.keyguard.shared.model.ClockSizeSetting
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel.ClockLayout
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.plugins.clocks.ClockConfig
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockFaceConfig
 import com.android.systemui.plugins.clocks.ClockFaceController
 import com.android.systemui.res.R
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.shared.model.ShadeMode
+import com.android.systemui.statusbar.ui.fakeSystemBarUtilsProxy
 import com.android.systemui.testKosmos
-import com.android.systemui.util.Utils
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import org.mockito.Mockito.mock
+import org.mockito.Mock
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(JUnit4::class)
 @DisableSceneContainer
 class KeyguardClockViewModelTest : SysuiTestCase() {
-    private lateinit var kosmos: Kosmos
-    private lateinit var underTest: KeyguardClockViewModel
-    private lateinit var testScope: TestScope
-    private lateinit var clockController: ClockController
-    private lateinit var config: ClockFaceConfig
+    val kosmos = testKosmos()
+    val testScope = kosmos.testScope
+    val underTest = kosmos.keyguardClockViewModel
+    val res = context.resources
+
+    @Mock lateinit var clockController: ClockController
+    @Mock lateinit var largeClock: ClockFaceController
+    @Mock lateinit var smallClock: ClockFaceController
+
+    var config = ClockConfig("TEST", "Test", "")
+    var faceConfig = ClockFaceConfig()
 
     @Before
     fun setup() {
-        kosmos = testKosmos()
-        testScope = kosmos.testScope
-        underTest = kosmos.keyguardClockViewModel
-
-        clockController = mock(ClockController::class.java)
-        val largeClock = mock(ClockFaceController::class.java)
-        config = mock(ClockFaceConfig::class.java)
+        MockitoAnnotations.initMocks(this)
 
         whenever(clockController.largeClock).thenReturn(largeClock)
-        whenever(largeClock.config).thenReturn(config)
+        whenever(clockController.smallClock).thenReturn(smallClock)
+        whenever(clockController.config).thenAnswer { config }
+        whenever(largeClock.config).thenAnswer { faceConfig }
+        whenever(smallClock.config).thenAnswer { faceConfig }
     }
 
     @Test
     fun currentClockLayout_splitShadeOn_clockCentered_largeClock() =
         testScope.runTest {
+            val currentClockLayout by collectLastValue(underTest.currentClockLayout)
+
             with(kosmos) {
                 shadeRepository.setShadeMode(ShadeMode.Split)
                 keyguardRepository.setClockShouldBeCentered(true)
-                keyguardClockRepository.setClockSize(KeyguardClockSwitch.LARGE)
+                keyguardClockRepository.setClockSize(ClockSize.LARGE)
             }
-            val currentClockLayout by collectLastValue(underTest.currentClockLayout)
-            assertThat(currentClockLayout).isEqualTo(KeyguardClockViewModel.ClockLayout.LARGE_CLOCK)
+
+            assertThat(currentClockLayout).isEqualTo(ClockLayout.LARGE_CLOCK)
         }
 
     @Test
     fun currentClockLayout_splitShadeOn_clockNotCentered_largeClock_splitShadeLargeClock() =
         testScope.runTest {
+            val currentClockLayout by collectLastValue(underTest.currentClockLayout)
+
             with(kosmos) {
                 shadeRepository.setShadeMode(ShadeMode.Split)
                 keyguardRepository.setClockShouldBeCentered(false)
-                keyguardClockRepository.setClockSize(KeyguardClockSwitch.LARGE)
+                keyguardClockRepository.setClockSize(ClockSize.LARGE)
             }
-            val currentClockLayout by collectLastValue(underTest.currentClockLayout)
-            assertThat(currentClockLayout)
-                .isEqualTo(KeyguardClockViewModel.ClockLayout.SPLIT_SHADE_LARGE_CLOCK)
+
+            assertThat(currentClockLayout).isEqualTo(ClockLayout.SPLIT_SHADE_LARGE_CLOCK)
         }
 
     @Test
     fun currentClockLayout_splitShadeOn_clockNotCentered_smallClock_splitShadeSmallClock() =
         testScope.runTest {
+            val currentClockLayout by collectLastValue(underTest.currentClockLayout)
+
             with(kosmos) {
                 shadeRepository.setShadeMode(ShadeMode.Split)
                 keyguardRepository.setClockShouldBeCentered(false)
-                keyguardClockRepository.setClockSize(KeyguardClockSwitch.SMALL)
+                keyguardClockRepository.setClockSize(ClockSize.SMALL)
             }
-            val currentClockLayout by collectLastValue(underTest.currentClockLayout)
-            assertThat(currentClockLayout)
-                .isEqualTo(KeyguardClockViewModel.ClockLayout.SPLIT_SHADE_SMALL_CLOCK)
+
+            assertThat(currentClockLayout).isEqualTo(ClockLayout.SPLIT_SHADE_SMALL_CLOCK)
         }
 
     @Test
     fun currentClockLayout_singleShade_smallClock_smallClock() =
         testScope.runTest {
+            val currentClockLayout by collectLastValue(underTest.currentClockLayout)
+
             with(kosmos) {
                 shadeRepository.setShadeMode(ShadeMode.Single)
-                keyguardClockRepository.setClockSize(KeyguardClockSwitch.SMALL)
+                keyguardClockRepository.setClockSize(ClockSize.SMALL)
             }
-            val currentClockLayout by collectLastValue(underTest.currentClockLayout)
-            assertThat(currentClockLayout).isEqualTo(KeyguardClockViewModel.ClockLayout.SMALL_CLOCK)
+
+            assertThat(currentClockLayout).isEqualTo(ClockLayout.SMALL_CLOCK)
         }
 
     @Test
     fun currentClockLayout_singleShade_largeClock_largeClock() =
         testScope.runTest {
+            val currentClockLayout by collectLastValue(underTest.currentClockLayout)
+
             with(kosmos) {
                 shadeRepository.setShadeMode(ShadeMode.Single)
-                keyguardClockRepository.setClockSize(KeyguardClockSwitch.LARGE)
+                keyguardClockRepository.setClockSize(ClockSize.LARGE)
             }
-            val currentClockLayout by collectLastValue(underTest.currentClockLayout)
-            assertThat(currentClockLayout).isEqualTo(KeyguardClockViewModel.ClockLayout.LARGE_CLOCK)
+
+            assertThat(currentClockLayout).isEqualTo(ClockLayout.LARGE_CLOCK)
         }
 
     @Test
     fun hasCustomPositionUpdatedAnimation_withConfigTrue_isTrue() =
         testScope.runTest {
+            val hasCustomPositionUpdatedAnimation by
+                collectLastValue(underTest.hasCustomPositionUpdatedAnimation)
+
             with(kosmos) {
-                keyguardClockRepository.setClockSize(KeyguardClockSwitch.LARGE)
-                whenever(config.hasCustomPositionUpdatedAnimation).thenReturn(true)
+                keyguardClockRepository.setClockSize(ClockSize.LARGE)
+                faceConfig = ClockFaceConfig(hasCustomPositionUpdatedAnimation = true)
                 fakeKeyguardClockRepository.setCurrentClock(clockController)
             }
 
-            val hasCustomPositionUpdatedAnimation by
-                collectLastValue(underTest.hasCustomPositionUpdatedAnimation)
             assertThat(hasCustomPositionUpdatedAnimation).isEqualTo(true)
         }
 
     @Test
     fun hasCustomPositionUpdatedAnimation_withConfigFalse_isFalse() =
         testScope.runTest {
-            with(kosmos) {
-                keyguardClockRepository.setClockSize(KeyguardClockSwitch.LARGE)
+            val hasCustomPositionUpdatedAnimation by
+                collectLastValue(underTest.hasCustomPositionUpdatedAnimation)
 
-                whenever(config.hasCustomPositionUpdatedAnimation).thenReturn(false)
+            with(kosmos) {
+                keyguardClockRepository.setClockSize(ClockSize.LARGE)
+                faceConfig = ClockFaceConfig(hasCustomPositionUpdatedAnimation = false)
                 fakeKeyguardClockRepository.setCurrentClock(clockController)
             }
 
-            val hasCustomPositionUpdatedAnimation by
-                collectLastValue(underTest.hasCustomPositionUpdatedAnimation)
             assertThat(hasCustomPositionUpdatedAnimation).isEqualTo(false)
         }
 
     @Test
     fun testClockSize_alwaysSmallClockSize() =
         testScope.runTest {
-            kosmos.fakeKeyguardClockRepository.setSelectedClockSize(SettingsClockSize.SMALL)
-            kosmos.keyguardClockRepository.setClockSize(KeyguardClockSwitch.LARGE)
-
             val value by collectLastValue(underTest.clockSize)
-            assertThat(value).isEqualTo(KeyguardClockSwitch.SMALL)
+
+            with(kosmos) {
+                fakeKeyguardClockRepository.setSelectedClockSize(ClockSizeSetting.SMALL)
+                keyguardClockRepository.setClockSize(ClockSize.LARGE)
+            }
+
+            assertThat(value).isEqualTo(ClockSize.SMALL)
         }
 
     @Test
     fun testClockSize_dynamicClockSize() =
         testScope.runTest {
-            kosmos.keyguardClockRepository.setClockSize(KeyguardClockSwitch.SMALL)
-            kosmos.fakeKeyguardClockRepository.setSelectedClockSize(SettingsClockSize.DYNAMIC)
-            val value by collectLastValue(underTest.clockSize)
-            assertThat(value).isEqualTo(KeyguardClockSwitch.SMALL)
+            with(kosmos) {
+                val value by collectLastValue(underTest.clockSize)
+                fakeKeyguardClockRepository.setSelectedClockSize(ClockSizeSetting.DYNAMIC)
 
-            kosmos.keyguardClockRepository.setClockSize(KeyguardClockSwitch.LARGE)
-            assertThat(value).isEqualTo(KeyguardClockSwitch.LARGE)
+                keyguardClockRepository.setClockSize(ClockSize.SMALL)
+                assertThat(value).isEqualTo(ClockSize.SMALL)
+
+                keyguardClockRepository.setClockSize(ClockSize.LARGE)
+                assertThat(value).isEqualTo(ClockSize.LARGE)
+            }
         }
 
     @Test
     fun isLargeClockVisible_whenLargeClockSize_isTrue() =
         testScope.runTest {
-            kosmos.keyguardClockRepository.setClockSize(KeyguardClockSwitch.LARGE)
             val value by collectLastValue(underTest.isLargeClockVisible)
+            kosmos.keyguardClockRepository.setClockSize(ClockSize.LARGE)
             assertThat(value).isEqualTo(true)
         }
 
     @Test
     fun isLargeClockVisible_whenSmallClockSize_isFalse() =
         testScope.runTest {
-            kosmos.keyguardClockRepository.setClockSize(KeyguardClockSwitch.SMALL)
             val value by collectLastValue(underTest.isLargeClockVisible)
+            kosmos.keyguardClockRepository.setClockSize(ClockSize.SMALL)
             assertThat(value).isEqualTo(false)
         }
 
@@ -203,44 +222,59 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
     @EnableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
     fun testSmallClockTop_splitShade_composeLockscreenOn() =
         testScope.runTest {
-            kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
-            assertThat(underTest.getSmallClockTopMargin(context))
-                .isEqualTo(
-                    context.resources.getDimensionPixelSize(
-                        R.dimen.keyguard_split_shade_top_margin
-                    ) - Utils.getStatusBarHeaderHeightKeyguard(context)
-                )
+            with(kosmos) {
+                shadeRepository.setShadeMode(ShadeMode.Split)
+                fakeSystemBarUtilsProxy.fakeKeyguardStatusBarHeight = KEYGUARD_STATUS_BAR_HEIGHT
+            }
+
+            val expected =
+                res.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin) -
+                    KEYGUARD_STATUS_BAR_HEIGHT
+            assertThat(underTest.getSmallClockTopMargin()).isEqualTo(expected)
         }
 
     @Test
     @DisableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
     fun testSmallClockTop_splitShade_composeLockscreenOff() =
         testScope.runTest {
-            kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
-            assertThat(underTest.getSmallClockTopMargin(context))
-                .isEqualTo(
-                    context.resources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin)
-                )
+            with(kosmos) {
+                shadeRepository.setShadeMode(ShadeMode.Split)
+                fakeSystemBarUtilsProxy.fakeKeyguardStatusBarHeight = KEYGUARD_STATUS_BAR_HEIGHT
+            }
+
+            assertThat(underTest.getSmallClockTopMargin())
+                .isEqualTo(res.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin))
         }
 
     @Test
     @EnableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
     fun testSmallClockTop_nonSplitShade_composeLockscreenOn() =
         testScope.runTest {
-            assertThat(underTest.getSmallClockTopMargin(context))
-                .isEqualTo(
-                    context.resources.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin)
-                )
+            with(kosmos) {
+                shadeRepository.setShadeMode(ShadeMode.Single)
+                fakeSystemBarUtilsProxy.fakeKeyguardStatusBarHeight = KEYGUARD_STATUS_BAR_HEIGHT
+            }
+
+            assertThat(underTest.getSmallClockTopMargin())
+                .isEqualTo(res.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin))
         }
 
     @Test
     @DisableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
     fun testSmallClockTop_nonSplitShade_composeLockscreenOff() =
         testScope.runTest {
-            assertThat(underTest.getSmallClockTopMargin(context))
-                .isEqualTo(
-                    context.resources.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin) +
-                        Utils.getStatusBarHeaderHeightKeyguard(context)
-                )
+            with(kosmos) {
+                shadeRepository.setShadeMode(ShadeMode.Single)
+                fakeSystemBarUtilsProxy.fakeKeyguardStatusBarHeight = KEYGUARD_STATUS_BAR_HEIGHT
+            }
+
+            val expected =
+                res.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin) +
+                    KEYGUARD_STATUS_BAR_HEIGHT
+            assertThat(underTest.getSmallClockTopMargin()).isEqualTo(expected)
         }
+
+    companion object {
+        private const val KEYGUARD_STATUS_BAR_HEIGHT = 20
+    }
 }

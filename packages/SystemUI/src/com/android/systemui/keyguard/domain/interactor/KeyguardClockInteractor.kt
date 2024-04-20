@@ -20,14 +20,12 @@ package com.android.systemui.keyguard.domain.interactor
 import android.util.Log
 import com.android.keyguard.ClockEventController
 import com.android.keyguard.KeyguardClockSwitch
-import com.android.keyguard.KeyguardClockSwitch.ClockSize
-import com.android.keyguard.KeyguardClockSwitch.LARGE
-import com.android.keyguard.KeyguardClockSwitch.SMALL
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardClockRepository
+import com.android.systemui.keyguard.shared.model.ClockSize
+import com.android.systemui.keyguard.shared.model.ClockSizeSetting
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.SettingsClockSize
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockId
@@ -59,12 +57,12 @@ constructor(
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     headsUpNotificationInteractor: HeadsUpNotificationInteractor,
     @Application private val applicationScope: CoroutineScope,
-    private val keyguardClockRepository: KeyguardClockRepository,
+    val keyguardClockRepository: KeyguardClockRepository,
 ) {
     private val isOnAod: Flow<Boolean> =
         keyguardTransitionInteractor.currentKeyguardState.map { it == KeyguardState.AOD }
 
-    val selectedClockSize: StateFlow<SettingsClockSize> = keyguardClockRepository.selectedClockSize
+    val selectedClockSize: StateFlow<ClockSizeSetting> = keyguardClockRepository.selectedClockSize
 
     val currentClockId: Flow<ClockId> = keyguardClockRepository.currentClockId
 
@@ -76,8 +74,7 @@ constructor(
 
     var clock: ClockController? by keyguardClockRepository.clockEventController::clock
 
-    // TODO (b/333389512): Convert this into a more readable enum.
-    val clockSize: StateFlow<Int> =
+    val clockSize: StateFlow<ClockSize> =
         if (SceneContainerFlag.isEnabled) {
             combine(
                     shadeInteractor.shadeMode,
@@ -87,20 +84,19 @@ constructor(
                     isOnAod,
                 ) { shadeMode, hasNotifs, hasMedia, isDozing, isOnAod ->
                     return@combine when {
-                        keyguardClockRepository.shouldForceSmallClock && !isOnAod -> SMALL
-                        shadeMode == ShadeMode.Single && (hasNotifs || hasMedia) -> SMALL
-                        shadeMode == ShadeMode.Single -> LARGE
-                        hasMedia && !isDozing -> SMALL
-                        else -> LARGE
+                        keyguardClockRepository.shouldForceSmallClock && !isOnAod -> ClockSize.SMALL
+                        shadeMode == ShadeMode.Single && (hasNotifs || hasMedia) -> ClockSize.SMALL
+                        shadeMode == ShadeMode.Single -> ClockSize.LARGE
+                        hasMedia && !isDozing -> ClockSize.SMALL
+                        else -> ClockSize.LARGE
                     }
                 }
                 .stateIn(
                     scope = applicationScope,
                     started = SharingStarted.WhileSubscribed(),
-                    initialValue = LARGE
+                    initialValue = ClockSize.LARGE
                 )
         } else {
-            SceneContainerFlag.assertInLegacyMode()
             keyguardClockRepository.clockSize
         }
 
@@ -130,11 +126,14 @@ constructor(
                 }
             }
         } else {
-            SceneContainerFlag.assertInLegacyMode()
             keyguardInteractor.clockShouldBeCentered
         }
 
-    fun setClockSize(@ClockSize size: Int) {
+    fun setClockSize(@KeyguardClockSwitch.ClockSize size: Int) =
+        setClockSize(ClockSize.fromLegacy(size))
+
+    fun setClockSize(size: ClockSize) {
+        SceneContainerFlag.assertInLegacyMode()
         keyguardClockRepository.setClockSize(size)
     }
 

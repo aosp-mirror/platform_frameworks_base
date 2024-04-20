@@ -36,7 +36,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.tracing.coroutines.launch
 import com.android.internal.policy.SystemBarUtils
 import com.android.systemui.customization.R as customizationR
-import com.android.systemui.keyguard.shared.model.SettingsClockSize
+import com.android.systemui.keyguard.shared.model.ClockSizeSetting
 import com.android.systemui.keyguard.ui.preview.KeyguardPreviewRenderer
 import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection.Companion.getDimen
 import com.android.systemui.keyguard.ui.view.layout.sections.setVisibility
@@ -199,14 +199,14 @@ object KeyguardPreviewClockViewBinder {
         // flickering
         val largeClockVisibility =
             when (viewModel.selectedClockSize.value) {
-                SettingsClockSize.DYNAMIC -> VISIBLE
-                SettingsClockSize.SMALL -> INVISIBLE
+                ClockSizeSetting.DYNAMIC -> VISIBLE
+                ClockSizeSetting.SMALL -> INVISIBLE
                 null -> INVISIBLE
             }
         val smallClockVisibility =
             when (viewModel.selectedClockSize.value) {
-                SettingsClockSize.DYNAMIC -> INVISIBLE
-                SettingsClockSize.SMALL -> VISIBLE
+                ClockSizeSetting.DYNAMIC -> INVISIBLE
+                ClockSizeSetting.SMALL -> VISIBLE
                 null -> INVISIBLE
             }
         cs.apply {

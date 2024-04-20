@@ -16,6 +16,7 @@
 
 package com.android.wm.shell;
 
+
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -30,7 +31,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.AppCompatTaskInfo;
+import android.app.CameraCompatTaskInfo.CameraCompatControlState;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.content.LocusId;
@@ -718,8 +719,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     }
 
     @Override
-    public void onCameraControlStateUpdated(
-            int taskId, @AppCompatTaskInfo.CameraCompatControlState int state) {
+    public void onCameraControlStateUpdated(int taskId, @CameraCompatControlState int state) {
         final TaskAppearedInfo info;
         synchronized (mLock) {
             info = mTasks.get(taskId);

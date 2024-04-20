@@ -17,7 +17,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
-import com.android.systemui.keyguard.shared.model.SettingsClockSize
+import com.android.systemui.keyguard.shared.model.ClockSizeSetting
 import com.android.systemui.plugins.clocks.ClockController
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -33,12 +33,12 @@ constructor(
 
     var shouldHighlightSelectedAffordance: Boolean = false
     val isLargeClockVisible: Flow<Boolean> =
-        interactor.selectedClockSize.map { it == SettingsClockSize.DYNAMIC }
+        interactor.selectedClockSize.map { it == ClockSizeSetting.DYNAMIC }
 
     val isSmallClockVisible: Flow<Boolean> =
-        interactor.selectedClockSize.map { it == SettingsClockSize.SMALL }
+        interactor.selectedClockSize.map { it == ClockSizeSetting.SMALL }
 
     val previewClock: Flow<ClockController> = interactor.previewClock
 
-    val selectedClockSize: StateFlow<SettingsClockSize?> = interactor.selectedClockSize
+    val selectedClockSize: StateFlow<ClockSizeSetting?> = interactor.selectedClockSize
 }

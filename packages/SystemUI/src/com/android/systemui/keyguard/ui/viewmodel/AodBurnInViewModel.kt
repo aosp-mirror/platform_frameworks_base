@@ -21,7 +21,6 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.util.Log
 import android.util.MathUtils
 import com.android.app.animation.Interpolators
-import com.android.keyguard.KeyguardClockSwitch
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
@@ -29,6 +28,7 @@ import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.BurnInModel
+import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.keyguard.ui.StateToValue
 import com.android.systemui.res.R
 import javax.inject.Inject
@@ -124,7 +124,7 @@ constructor(
                     clock.config.useAlternateSmartspaceAODTransition
                 } == true
             val useScaleOnly =
-                useAltAod && keyguardClockViewModel.clockSize.value == KeyguardClockSwitch.LARGE
+                useAltAod && keyguardClockViewModel.clockSize.value == ClockSize.LARGE
 
             if (useScaleOnly) {
                 BurnInModel(

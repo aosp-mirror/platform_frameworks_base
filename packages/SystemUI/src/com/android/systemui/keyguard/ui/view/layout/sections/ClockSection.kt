@@ -31,7 +31,7 @@ import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.constraintlayout.widget.ConstraintSet.VISIBLE
 import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
-import com.android.systemui.customization.R as customizationR
+import com.android.systemui.customization.R as custR
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
@@ -56,7 +56,7 @@ internal fun ConstraintSet.setAlpha(
     alpha: Float,
 ) = views.forEach { view -> this.setAlpha(view.id, alpha) }
 
-open class ClockSection
+class ClockSection
 @Inject
 constructor(
     private val clockInteractor: KeyguardClockInteractor,
@@ -66,7 +66,6 @@ constructor(
     val blueprintInteractor: Lazy<KeyguardBlueprintInteractor>,
 ) : KeyguardSection() {
     override fun addViews(constraintLayout: ConstraintLayout) {}
-
     override fun bindData(constraintLayout: ConstraintLayout) {
         if (!MigrateClocksToBlueprint.isEnabled) {
             return
@@ -106,21 +105,18 @@ constructor(
             setVisibility(getNonTargetClockFace(clock).views, GONE)
             setAlpha(getTargetClockFace(clock).views, 1F)
             setAlpha(getNonTargetClockFace(clock).views, 0F)
-            if (!keyguardClockViewModel.useLargeClock) {
+            if (!keyguardClockViewModel.isLargeClockVisible.value) {
                 connect(sharedR.id.bc_smartspace_view, TOP, sharedR.id.date_smartspace_view, BOTTOM)
             }
         }
     }
 
     private fun getTargetClockFace(clock: ClockController): ClockFaceLayout =
-        if (keyguardClockViewModel.useLargeClock) getLargeClockFace(clock)
-        else getSmallClockFace(clock)
+        if (keyguardClockViewModel.isLargeClockVisible.value) clock.largeClock.layout
+        else clock.smallClock.layout
     private fun getNonTargetClockFace(clock: ClockController): ClockFaceLayout =
-        if (keyguardClockViewModel.useLargeClock) getSmallClockFace(clock)
-        else getLargeClockFace(clock)
-
-    private fun getLargeClockFace(clock: ClockController): ClockFaceLayout = clock.largeClock.layout
-    private fun getSmallClockFace(clock: ClockController): ClockFaceLayout = clock.smallClock.layout
+        if (keyguardClockViewModel.isLargeClockVisible.value) clock.smallClock.layout
+        else clock.largeClock.layout
 
     fun constrainWeatherClockDateIconsBarrier(constraints: ConstraintSet) {
         constraints.apply {
@@ -159,27 +155,27 @@ constructor(
             connect(R.id.lockscreen_clock_view_large, START, PARENT_ID, START)
             connect(R.id.lockscreen_clock_view_large, END, guideline, END)
             connect(R.id.lockscreen_clock_view_large, BOTTOM, R.id.device_entry_icon_view, TOP)
-            var largeClockTopMargin = KeyguardClockViewModel.getLargeClockTopMargin(context)
-            largeClockTopMargin += getDimen(DATE_WEATHER_VIEW_HEIGHT)
-            largeClockTopMargin += getDimen(ENHANCED_SMARTSPACE_HEIGHT)
-
+            val largeClockTopMargin =
+                keyguardClockViewModel.getLargeClockTopMargin() +
+                    getDimen(DATE_WEATHER_VIEW_HEIGHT) +
+                    getDimen(ENHANCED_SMARTSPACE_HEIGHT)
             connect(R.id.lockscreen_clock_view_large, TOP, PARENT_ID, TOP, largeClockTopMargin)
             constrainWidth(R.id.lockscreen_clock_view_large, WRAP_CONTENT)
             constrainHeight(R.id.lockscreen_clock_view_large, MATCH_CONSTRAINT)
             constrainWidth(R.id.lockscreen_clock_view, WRAP_CONTENT)
             constrainHeight(
                 R.id.lockscreen_clock_view,
-                context.resources.getDimensionPixelSize(customizationR.dimen.small_clock_height)
+                context.resources.getDimensionPixelSize(custR.dimen.small_clock_height)
             )
             connect(
                 R.id.lockscreen_clock_view,
                 START,
                 PARENT_ID,
                 START,
-                context.resources.getDimensionPixelSize(customizationR.dimen.clock_padding_start) +
+                context.resources.getDimensionPixelSize(custR.dimen.clock_padding_start) +
                     context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
             )
-            val smallClockTopMargin = keyguardClockViewModel.getSmallClockTopMargin(context)
+            val smallClockTopMargin = keyguardClockViewModel.getSmallClockTopMargin()
             create(R.id.small_clock_guideline_top, ConstraintSet.HORIZONTAL_GUIDELINE)
             setGuidelineBegin(R.id.small_clock_guideline_top, smallClockTopMargin)
             connect(R.id.lockscreen_clock_view, TOP, R.id.small_clock_guideline_top, BOTTOM)

@@ -235,7 +235,8 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Панел за известување"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Брзи поставки."</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"„Брзи поставки“ и „Панел со известувања“."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Заклучен екран."</string>
+    <!-- no translation found for accessibility_desc_lock_screen (409034672704273634) -->
+    <skip />
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Работен заклучен екран"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Затвори"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"целосна тишина"</string>
@@ -376,6 +377,8 @@
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Слушни апарати"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Спари нов уред"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Кликнете за да спарите нов уред"</string>
+    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Да се одблокира пристапот до микрофонот на уредот?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Да се одблокира пристапот до камерата на уредот?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Да се одблокира пристапот до камерата и микрофонот на уредот?"</string>
@@ -441,6 +444,8 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Се полни брзо • Полна по <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Се полни бавно • Полна по <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Се полни • Полна по <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <!-- no translation found for accessibility_action_open_communal_hub (3081702792413787849) -->
+    <skip />
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Повлечете налево за да го започнете заедничкото упатство"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Приспособете"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Отфрли"</string>
@@ -459,6 +464,10 @@
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Отвори ги поставките"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Да се актив. работните аплик.?"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"Прекини ја паузата"</string>
+    <!-- no translation found for accessibility_action_label_close_communal_hub (6790396569621032333) -->
+    <skip />
+    <!-- no translation found for accessibility_content_description_for_communal_hub (1670220840599380118) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Промени го корисникот"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"паѓачко мени"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Сите апликации и податоци во сесијава ќе се избришат."</string>
@@ -1010,7 +1019,7 @@
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Премести над работ и прикажи"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Отстрани"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"вклучување/исклучување"</string>
-    <string name="accessibility_floating_button_action_edit" msgid="1688227814600463987">"Изменете"</string>
+    <string name="accessibility_floating_button_action_edit" msgid="1688227814600463987">"Измени"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Контроли за уредите"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Изберете апликација за да додадете контроли"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Додадена е # контрола.}one{Додадени се # контрола.}other{Додадени се # контроли.}}"</string>

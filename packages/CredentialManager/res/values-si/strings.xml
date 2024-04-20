@@ -42,9 +42,6 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"<xliff:g id="APP_NAME">%1$s</xliff:g> වෙත පුරනය වීමට මුරයතුරක් තනන්න ද?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"<xliff:g id="APP_NAME">%1$s</xliff:g> වෙත පුරනය වීමට මුරපදය සුරකින්න ද?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා පුරනය වීමේ තතු සුරකින්න ද?"</string>
-    <string name="choose_create_single_tap_passkey_title" msgid="3872793514041774218">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා මුරපදයක් තැනීමට ඔබේ තිර අගුල භාවිත කරන්න ද?"</string>
-    <string name="choose_create_single_tap_password_title" msgid="5231871886818921622">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා මුරපදයක් තැනීමට ඔබේ තිර අගුල භාවිත කරන්න ද?"</string>
-    <string name="choose_create_single_tap_sign_in_title" msgid="256498714574099587">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා පුරනය වීමේ තතු සුරැකීමට ඔබේ තිර අගුල භාවිතා කරන්න ද?"</string>
     <string name="passkey" msgid="632353688396759522">"මුරයතුර"</string>
     <string name="password" msgid="6738570945182936667">"මුරපදය"</string>
     <string name="passkeys" msgid="5733880786866559847">"මුරයතුරු"</string>
@@ -71,15 +68,16 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"පෙර පිටුවට ආපසු යන්න"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"වසන්න"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"අස් කරන්න"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා ඔබේ සුරැකි මුරයතුර භාවිතා කරන්න ද?"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා ඔබේ සුරැකි මුරපදය භාවිත කරන්න ද?"</string>
-    <string name="get_dialog_title_single_tap_for" msgid="2057945648748859483">"<xliff:g id="USERNAME">%2$s</xliff:g> සමඟින් <xliff:g id="APP_NAME">%1$s</xliff:g> වෙත පුරනය වීමට ඔබේ තිර අගුල භාවිත කරන්න"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා ඔබේ පුරනය වීම භාවිතා කරන්න ද?"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා පුරන විකල්ප අගුලු හරින්න ද?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා ඔබේ සුරැකි මුරයතුර භාවිතා කරන්න"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා ඔබේ සුරැකි මුරපදය භාවිතා කරන්න"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා ඔබේ ගිණුම භාවිතා කරන්න"</string>
+    <!-- no translation found for get_dialog_description_single_tap (2797059565126030879) -->
+    <skip />
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා පුරනය වීමේ විකල්ප අගුළු හරින්න"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා සුරකින ලද මුරයතුරක් තෝරන්න"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා සුරකින ලද මුරපදයක් තෝරන්න"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා සුරැකි පුරනයක් තෝරා ගන්න"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා පුරනය වීමක් තෝරා ගන්න"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා ගිණුමක් තෝරා ගන්න"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා විකල්පයක් තෝරන්නද?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"<xliff:g id="APP_NAME">%1$s</xliff:g> මත මෙම තතු භාවිතා කරන්න ද?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"වෙනත් ආකාරයකින් පුරන්න"</string>

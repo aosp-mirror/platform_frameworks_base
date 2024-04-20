@@ -1,4 +1,5 @@
 package: "android.tracing"
+container: "system"
 
 flag {
     name: "perfetto_transition_tracing"

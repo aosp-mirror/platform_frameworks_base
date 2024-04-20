@@ -3785,9 +3785,9 @@ public class NotificationManagerService extends SystemService {
                 // If cancellation will be prevented due to lifetime extension, we send updates
                 // to system UI.
                 synchronized (mNotificationLock) {
-                    notifySystemUiListenerLifetimeExtendedListLocked(mNotificationList,
+                    maybeNotifySystemUiListenerLifetimeExtendedListLocked(mNotificationList,
                             packageImportance);
-                    notifySystemUiListenerLifetimeExtendedListLocked(mEnqueuedNotifications,
+                    maybeNotifySystemUiListenerLifetimeExtendedListLocked(mEnqueuedNotifications,
                             packageImportance);
                 }
             } else {
@@ -4974,10 +4974,10 @@ public class NotificationManagerService extends SystemService {
                                             | FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY);
                             // If cancellation will be prevented due to lifetime extension, we send
                             // an update to system UI.
-                            notifySystemUiListenerLifetimeExtendedListLocked(mNotificationList,
-                                    packageImportance);
-                            notifySystemUiListenerLifetimeExtendedListLocked(mEnqueuedNotifications,
-                                    packageImportance);
+                            maybeNotifySystemUiListenerLifetimeExtendedListLocked(
+                                    mNotificationList, packageImportance);
+                            maybeNotifySystemUiListenerLifetimeExtendedListLocked(
+                                    mEnqueuedNotifications, packageImportance);
                         } else {
                             cancelAllLocked(callingUid, callingPid, info.userid,
                                     REASON_LISTENER_CANCEL_ALL, info, info.supportsProfiles(),
@@ -8298,14 +8298,6 @@ public class NotificationManagerService extends SystemService {
                         mUsageStats.registerClickedByUser(r);
                     }
 
-                    // If cancellation will be prevented due to lifetime extension, we need to
-                    // send an update to system UI. This must be checked before flags are checked.
-                    // We do not want to send this update.
-                    if (lifetimeExtensionRefactor() && mReason != REASON_CLICK) {
-                        maybeNotifySystemUiListenerLifetimeExtendedLocked(r, mPkg,
-                                packageImportance);
-                    }
-
                     if ((mReason == REASON_LISTENER_CANCEL
                             && r.getNotification().isBubbleNotification())
                             || (mReason == REASON_CLICK && r.canBubble()
@@ -8322,6 +8314,12 @@ public class NotificationManagerService extends SystemService {
                         return;
                     }
                     if ((r.getNotification().flags & mMustNotHaveFlags) != 0) {
+                        if (lifetimeExtensionRefactor()) {
+                            // If cancellation will be prevented due to lifetime extension,
+                            // we need to send an update to system UI first.
+                            maybeNotifySystemUiListenerLifetimeExtendedLocked(r, mPkg,
+                                    packageImportance);
+                        }
                         return;
                     }
 
@@ -11244,7 +11242,7 @@ public class NotificationManagerService extends SystemService {
 
     @FlaggedApi(FLAG_LIFETIME_EXTENSION_REFACTOR)
     @GuardedBy("mNotificationLock")
-    private void notifySystemUiListenerLifetimeExtendedListLocked(
+    private void maybeNotifySystemUiListenerLifetimeExtendedListLocked(
             List<NotificationRecord> notificationList, int packageImportance) {
         for (int i = notificationList.size() - 1; i >= 0; --i) {
             NotificationRecord record = notificationList.get(i);

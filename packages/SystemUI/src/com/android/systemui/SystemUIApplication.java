@@ -44,15 +44,16 @@ import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.process.ProcessWrapper;
 import com.android.systemui.res.R;
+import com.android.systemui.startable.Dependencies;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.NotificationChannels;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.StringJoiner;
 import java.util.TreeMap;
 
@@ -306,9 +307,9 @@ public class SystemUIApplication extends Application implements
                 Map.Entry<Class<?>, Provider<CoreStartable>> entry = queue.removeFirst();
 
                 Class<?> cls = entry.getKey();
-                Set<Class<? extends CoreStartable>> deps =
-                        mSysUIComponent.getStartableDependencies().get(cls);
-                if (deps == null || startedStartables.containsAll(deps)) {
+                Dependencies dep = cls.getAnnotation(Dependencies.class);
+                Class<?>[] deps = (dep == null ? null : dep.value());
+                if (deps == null || startedStartables.containsAll(Arrays.asList(deps))) {
                     String clsName = cls.getName();
                     int i = serviceIndex;  // Copied to make lambda happy.
                     timeInitialization(
@@ -330,12 +331,12 @@ public class SystemUIApplication extends Application implements
             while (!nextQueue.isEmpty()) {
                 Map.Entry<Class<?>, Provider<CoreStartable>> entry = nextQueue.removeFirst();
                 Class<?> cls = entry.getKey();
-                Set<Class<? extends CoreStartable>> deps =
-                        mSysUIComponent.getStartableDependencies().get(cls);
+                Dependencies dep = cls.getAnnotation(Dependencies.class);
+                Class<?>[] deps = (dep == null ? null : dep.value());
                 StringJoiner stringJoiner = new StringJoiner(", ");
-                for (Class<? extends CoreStartable> c : deps) {
-                    if (!startedStartables.contains(c)) {
-                        stringJoiner.add(c.getName());
+                for (int i = 0; deps != null && i < deps.length; i++) {
+                    if (!startedStartables.contains(deps[i])) {
+                        stringJoiner.add(deps[i].getName());
                     }
                 }
                 Log.e(TAG, "Failed to start " + cls.getName()

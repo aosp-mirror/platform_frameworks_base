@@ -235,7 +235,7 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"לוח התראות."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"הגדרות מהירות."</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"הגדרות מהירות ולוח ההתראות."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"מסך נעילה."</string>
+    <string name="accessibility_desc_lock_screen" msgid="409034672704273634">"מסך הנעילה"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"מסך נעילה של עבודה"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"סגירה"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"השתקה מוחלטת"</string>
@@ -376,6 +376,8 @@
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"מכשירי שמיעה"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"התאמה של מכשיר חדש"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"צריך ללחוץ כדי להתאים מכשיר חדש"</string>
+    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"לבטל את חסימת המיקרופון של המכשיר?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"לבטל את חסימת המצלמה של המכשיר?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"לבטל את חסימת המצלמה והמיקרופון של המכשיר?"</string>
@@ -441,6 +443,7 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה מהירה • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה איטית • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום"</string>
+    <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"ווידג\'טים במסך הנעילה"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"אפשר להחליק שמאלה כדי להפעיל את המדריך המשותף"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"התאמה אישית"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"סגירה"</string>
@@ -459,6 +462,8 @@
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"לפתיחת ההגדרות"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"להפעיל את האפליקציות לעבודה?"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"ביטול ההשהיה"</string>
+    <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"סגירת ווידג\'טים במסך הנעילה"</string>
+    <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"ווידג\'טים במסך הנעילה"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"החלפת משתמש"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"תפריט במשיכה למטה"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"כל האפליקציות והנתונים בסשן הזה יימחקו."</string>
