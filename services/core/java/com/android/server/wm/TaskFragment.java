@@ -2210,38 +2210,20 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return getTask() != null ? getTask().mTaskId : INVALID_TASK_ID;
     }
 
+    static class ConfigOverrideHint {
+        @Nullable DisplayInfo mTmpOverrideDisplayInfo;
+        @Nullable ActivityRecord.CompatDisplayInsets mTmpCompatInsets;
+        boolean mUseLegacyInsetsForStableBounds;
+    }
+
     void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
             @NonNull Configuration parentConfig) {
-        computeConfigResourceOverrides(inOutConfig, parentConfig, null /* overrideDisplayInfo */,
-                null /* compatInsets */);
-    }
-
-    void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
-            @NonNull Configuration parentConfig, @Nullable DisplayInfo overrideDisplayInfo) {
-        if (overrideDisplayInfo != null) {
-            // Make sure the screen related configs can be computed by the provided display info.
-            inOutConfig.screenLayout = Configuration.SCREENLAYOUT_UNDEFINED;
-            invalidateAppBoundsConfig(inOutConfig);
-        }
-        computeConfigResourceOverrides(inOutConfig, parentConfig, overrideDisplayInfo,
-                null /* compatInsets */);
-    }
-
-    void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
-            @NonNull Configuration parentConfig,
-            @Nullable ActivityRecord.CompatDisplayInsets compatInsets) {
-        if (compatInsets != null) {
-            // Make sure the app bounds can be computed by the compat insets.
-            invalidateAppBoundsConfig(inOutConfig);
-        }
-        computeConfigResourceOverrides(inOutConfig, parentConfig, null /* overrideDisplayInfo */,
-                compatInsets);
+        computeConfigResourceOverrides(inOutConfig, parentConfig, null /* configOverrideHint */);
     }
 
     /**
      * Forces the app bounds related configuration can be computed by
-     * {@link #computeConfigResourceOverrides(Configuration, Configuration, DisplayInfo,
-     * ActivityRecord.CompatDisplayInsets)}.
+     * {@link #computeConfigResourceOverrides(Configuration, Configuration, ConfigOverrideHint)}.
      */
     private static void invalidateAppBoundsConfig(@NonNull Configuration inOutConfig) {
         final Rect appBounds = inOutConfig.windowConfiguration.getAppBounds();
@@ -2261,8 +2243,24 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * just be inherited from the parent configuration.
      **/
     void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
-            @NonNull Configuration parentConfig, @Nullable DisplayInfo overrideDisplayInfo,
-            @Nullable ActivityRecord.CompatDisplayInsets compatInsets) {
+            @NonNull Configuration parentConfig, @Nullable ConfigOverrideHint overrideHint) {
+        DisplayInfo overrideDisplayInfo = null;
+        ActivityRecord.CompatDisplayInsets compatInsets = null;
+        boolean useLegacyInsetsForStableBounds = false;
+        if (overrideHint != null) {
+            overrideDisplayInfo = overrideHint.mTmpOverrideDisplayInfo;
+            compatInsets = overrideHint.mTmpCompatInsets;
+            useLegacyInsetsForStableBounds = overrideHint.mUseLegacyInsetsForStableBounds;
+            if (overrideDisplayInfo != null) {
+                // Make sure the screen related configs can be computed by the provided
+                // display info.
+                inOutConfig.screenLayout = Configuration.SCREENLAYOUT_UNDEFINED;
+            }
+            if (overrideDisplayInfo != null || compatInsets != null) {
+                // Make sure the app bounds can be computed by the compat insets.
+                invalidateAppBoundsConfig(inOutConfig);
+            }
+        }
         int windowingMode = inOutConfig.windowConfiguration.getWindowingMode();
         if (windowingMode == WINDOWING_MODE_UNDEFINED) {
             windowingMode = parentConfig.windowConfiguration.getWindowingMode();
@@ -2331,7 +2329,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 // area, i.e. the screen area without the system bars.
                 // The non decor inset are areas that could never be removed in Honeycomb. See
                 // {@link WindowManagerPolicy#getNonDecorInsetsLw}.
-                calculateInsetFrames(mTmpNonDecorBounds, mTmpStableBounds, mTmpFullBounds, di);
+                calculateInsetFrames(mTmpNonDecorBounds, mTmpStableBounds, mTmpFullBounds, di,
+                        useLegacyInsetsForStableBounds);
             } else {
                 // Apply the given non-decor and stable insets to calculate the corresponding bounds
                 // for screen size of configuration.
@@ -2429,9 +2428,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * @param outNonDecorBounds where to place bounds with non-decor insets applied.
      * @param outStableBounds where to place bounds with stable insets applied.
      * @param bounds the bounds to inset.
+     * @param useLegacyInsetsForStableBounds {@code true} if we need to use the legacy insets frame
+     *                for apps targeting U or before when calculating stable bounds.
      */
     void calculateInsetFrames(Rect outNonDecorBounds, Rect outStableBounds, Rect bounds,
-            DisplayInfo displayInfo) {
+            DisplayInfo displayInfo, boolean useLegacyInsetsForStableBounds) {
         outNonDecorBounds.set(bounds);
         outStableBounds.set(bounds);
         if (mDisplayContent == null) {
@@ -2442,8 +2443,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         final DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
         final DisplayPolicy.DecorInsets.Info info = policy.getDecorInsetsInfo(
                 displayInfo.rotation, displayInfo.logicalWidth, displayInfo.logicalHeight);
-        intersectWithInsetsIfFits(outNonDecorBounds, mTmpBounds, info.mNonDecorInsets);
-        intersectWithInsetsIfFits(outStableBounds, mTmpBounds, info.mConfigInsets);
+        if (!useLegacyInsetsForStableBounds) {
+            intersectWithInsetsIfFits(outStableBounds, mTmpBounds, info.mConfigInsets);
+            intersectWithInsetsIfFits(outNonDecorBounds, mTmpBounds, info.mNonDecorInsets);
+        } else {
+            intersectWithInsetsIfFits(outStableBounds, mTmpBounds, info.mOverrideConfigInsets);
+            intersectWithInsetsIfFits(outNonDecorBounds, mTmpBounds, info.mOverrideNonDecorInsets);
+        }
     }
 
     /**
