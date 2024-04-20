@@ -499,7 +499,7 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"いいえ"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"アプリを固定しました"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"アプリの固定を解除しました"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"発信"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"通話"</string>
     <string name="stream_system" msgid="7663148785370565134">"システム"</string>
     <string name="stream_ring" msgid="7550670036738697526">"着信音"</string>
     <string name="stream_music" msgid="2188224742361847580">"メディア"</string>
