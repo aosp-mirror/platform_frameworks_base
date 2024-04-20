@@ -19,13 +19,20 @@ package com.android.systemui.qs.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.Back
+import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
@@ -41,6 +48,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -66,12 +74,15 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
 
     private lateinit var underTest: QuickSettingsSceneViewModel
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     fun setUp() {
         kosmos.fakeFeatureFlagsClassic.set(Flags.NEW_NETWORK_SLICE_UI, false)
 
         underTest =
             QuickSettingsSceneViewModel(
+                applicationScope = testScope.backgroundScope,
+                deviceEntryInteractor = kosmos.deviceEntryInteractor,
                 brightnessMirrorViewModel = kosmos.brightnessMirrorViewModel,
                 shadeHeaderViewModel = kosmos.shadeHeaderViewModel,
                 qsSceneAdapter = qsFlexiglassAdapter,
@@ -83,17 +94,27 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun destinations_whenNotCustomizing() =
+    fun destinations_whenNotCustomizing_unlocked() =
         testScope.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, false)
             val destinations by collectLastValue(underTest.destinationScenes)
             qsFlexiglassAdapter.setCustomizing(false)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
 
             assertThat(destinations)
                 .isEqualTo(
                     mapOf(
                         Back to UserActionResult(Scenes.Shade),
                         Swipe(SwipeDirection.Up) to UserActionResult(Scenes.Shade),
+                        Swipe(
+                            fromSource = Edge.Bottom,
+                            direction = SwipeDirection.Up,
+                        ) to UserActionResult(Scenes.Gone)
                     )
                 )
         }
@@ -111,12 +132,39 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
             sceneInteractor.changeScene(Scenes.QuickSettings, "reason")
             assertThat(currentScene).isEqualTo(Scenes.QuickSettings)
             assertThat(previousScene).isEqualTo(Scenes.Lockscreen)
-
             assertThat(destinations)
                 .isEqualTo(
                     mapOf(
                         Back to UserActionResult(Scenes.Lockscreen),
                         Swipe(SwipeDirection.Up) to UserActionResult(Scenes.Lockscreen),
+                        Swipe(
+                            fromSource = Edge.Bottom,
+                            direction = SwipeDirection.Up,
+                        ) to UserActionResult(Scenes.Lockscreen)
+                    )
+                )
+        }
+
+    @Test
+    fun destinations_whenNotCustomizing_authMethodSwipe_lockscreenNotDismissed() =
+        testScope.runTest {
+            overrideResource(R.bool.config_use_split_notification_shade, false)
+            val destinations by collectLastValue(underTest.destinationScenes)
+            qsFlexiglassAdapter.setCustomizing(false)
+            kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.None
+            )
+
+            assertThat(destinations)
+                .isEqualTo(
+                    mapOf(
+                        Back to UserActionResult(Scenes.Shade),
+                        Swipe(SwipeDirection.Up) to UserActionResult(Scenes.Shade),
+                        Swipe(
+                            fromSource = Edge.Bottom,
+                            direction = SwipeDirection.Up,
+                        ) to UserActionResult(Scenes.Lockscreen)
                     )
                 )
         }
@@ -132,17 +180,27 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun destinations_whenNotCustomizing_inSplitShade() =
+    fun destinations_whenNotCustomizing_inSplitShade_unlocked() =
         testScope.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, true)
             val destinations by collectLastValue(underTest.destinationScenes)
             qsFlexiglassAdapter.setCustomizing(false)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
 
             assertThat(destinations)
                 .isEqualTo(
                     mapOf(
                         Back to UserActionResult(Scenes.Shade),
                         Swipe(SwipeDirection.Up) to UserActionResult(Scenes.Shade),
+                        Swipe(
+                            fromSource = Edge.Bottom,
+                            direction = SwipeDirection.Up,
+                        ) to UserActionResult(Scenes.Gone),
                     )
                 )
         }
