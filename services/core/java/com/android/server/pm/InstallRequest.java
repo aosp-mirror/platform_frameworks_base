@@ -502,6 +502,12 @@ final class InstallRequest {
     }
 
     @Nullable
+    public PackageSetting getScanRequestDisabledPackageSetting() {
+        assertScanResultExists();
+        return mScanResult.mRequest.mDisabledPkgSetting;
+    }
+
+    @Nullable
     public String getRealPackageName() {
         assertScanResultExists();
         return mScanResult.mRequest.mRealPkgName;

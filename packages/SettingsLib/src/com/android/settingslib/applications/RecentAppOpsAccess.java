@@ -50,6 +50,7 @@ public class RecentAppOpsAccess {
     };
     private static final int[] MICROPHONE_OPS = new int[]{
             AppOpsManager.OP_RECORD_AUDIO,
+            AppOpsManager.OP_PHONE_CALL_MICROPHONE,
     };
     private static final int[] CAMERA_OPS = new int[]{
             AppOpsManager.OP_CAMERA,
@@ -142,6 +143,11 @@ public class RecentAppOpsAccess {
             if (!showSystemApps) {
                 for (int op : mOps) {
                     final String permission = AppOpsManager.opToPermission(op);
+                    if (permission == null) {
+                        // Some ops like OP_PHONE_CALL_MICROPHONE don't have corresponding
+                        // permissions. No need to check in this case.
+                        continue;
+                    }
                     final int permissionFlags = mPackageManager.getPermissionFlags(permission,
                             packageName,
                             user);
