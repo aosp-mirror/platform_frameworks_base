@@ -17,6 +17,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/root"
     style="@style/Widget.SliceView.Panel"
     android:layout_width="wrap_content"
@@ -26,9 +27,33 @@
         android:id="@+id/device_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/pair_new_device_button" />
+        app:layout_constraintBottom_toTopOf="@id/preset_spinner" />
+
+    <Spinner
+        android:id="@+id/preset_spinner"
+        style="@style/BluetoothTileDialog.Device"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/hearing_devices_preset_spinner_height"
+        android:layout_marginTop="@dimen/hearing_devices_preset_spinner_margin"
+        android:layout_marginBottom="@dimen/hearing_devices_preset_spinner_margin"
+        android:gravity="center_vertical"
+        android:background="@drawable/hearing_devices_preset_spinner_background"
+        android:popupBackground="@drawable/hearing_devices_preset_spinner_popup_background"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/device_list"
+        app:layout_constraintBottom_toTopOf="@id/pair_new_device_button"
+        android:visibility="gone"/>
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/device_barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="device_list,preset_spinner" />
 
     <Button
         android:id="@+id/pair_new_device_button"
@@ -41,7 +66,7 @@
         android:contentDescription="@string/accessibility_hearing_device_pair_new_device"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/device_list"
+        app:layout_constraintTop_toBottomOf="@id/device_barrier"
         android:drawableStart="@drawable/ic_add"
         android:drawablePadding="20dp"
         android:drawableTint="?android:attr/textColorPrimary"

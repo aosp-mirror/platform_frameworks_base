@@ -502,7 +502,6 @@ public class SizeCompatTests extends WindowTestsBase {
         final WindowConfiguration translucentWinConf = requestedConfig.windowConfiguration;
         translucentWinConf.setActivityType(ACTIVITY_TYPE_STANDARD);
         translucentWinConf.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        translucentWinConf.setDisplayWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         translucentWinConf.setAlwaysOnTop(true);
         translucentActivity.onRequestedOverrideConfigurationChanged(requestedConfig);
 
@@ -511,7 +510,6 @@ public class SizeCompatTests extends WindowTestsBase {
         // The original override of WindowConfiguration should keep.
         assertEquals(ACTIVITY_TYPE_STANDARD, translucentActivity.getActivityType());
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, translucentWinConf.getWindowingMode());
-        assertEquals(WINDOWING_MODE_MULTI_WINDOW, translucentWinConf.getDisplayWindowingMode());
         assertTrue(translucentWinConf.isAlwaysOnTop());
         // Unless display is going to be rotated, it should always inherit from parent.
         assertEquals(ROTATION_UNDEFINED, translucentWinConf.getDisplayRotation());
@@ -1380,6 +1378,25 @@ public class SizeCompatTests extends WindowTestsBase {
                 .isUserAppAspectRatioFullscreenEnabled();
         doReturn(USER_MIN_ASPECT_RATIO_FULLSCREEN).when(activity.mLetterboxUiController)
                 .getUserMinAspectRatioOverrideCode();
+        assertFalse(activity.shouldCreateCompatDisplayInsets());
+    }
+
+    @Test
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_ANY_ORIENTATION_TO_USER})
+    public void testShouldNotCreateCompatDisplays_systemFullscreenOverride() {
+        setUpDisplaySizeWithApp(1000, 2500);
+
+        // Make the task root resizable.
+        mActivity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
+
+        // Create an activity on the same task.
+        final ActivityRecord activity = buildActivityRecord(/* supportsSizeChanges= */false,
+                RESIZE_MODE_UNRESIZEABLE, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        // Simulate the user selecting the fullscreen user aspect ratio override
+        spyOn(activity.mLetterboxUiController);
+        doReturn(true).when(activity.mLetterboxUiController)
+                .isSystemOverrideToFullscreenEnabled();
         assertFalse(activity.shouldCreateCompatDisplayInsets());
     }
 

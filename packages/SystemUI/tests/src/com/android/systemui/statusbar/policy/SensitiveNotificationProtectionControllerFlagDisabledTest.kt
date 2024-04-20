@@ -21,6 +21,7 @@ import android.content.pm.PackageManager
 import android.media.projection.MediaProjectionManager
 import android.os.Handler
 import android.platform.test.annotations.DisableFlags
+import android.telephony.TelephonyManager
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.server.notification.Flags
@@ -46,6 +47,7 @@ class SensitiveNotificationProtectionControllerFlagDisabledTest : SysuiTestCase(
     @Mock private lateinit var activityManager: IActivityManager
     @Mock private lateinit var mediaProjectionManager: MediaProjectionManager
     @Mock private lateinit var packageManager: PackageManager
+    @Mock private lateinit var telephonyManager: TelephonyManager
     private lateinit var controller: SensitiveNotificationProtectionControllerImpl
 
     @Before
@@ -59,6 +61,7 @@ class SensitiveNotificationProtectionControllerFlagDisabledTest : SysuiTestCase(
                 mediaProjectionManager,
                 activityManager,
                 packageManager,
+                telephonyManager,
                 handler,
                 FakeExecutor(FakeSystemClock()),
                 logger

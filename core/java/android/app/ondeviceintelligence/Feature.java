@@ -137,8 +137,8 @@ public final class Feature implements Parcelable {
         if (mModelName != null) flg |= 0x4;
         dest.writeByte(flg);
         dest.writeInt(mId);
-        if (mName != null) dest.writeString8(mName);
-        if (mModelName != null) dest.writeString8(mModelName);
+        if (mName != null) dest.writeString(mName);
+        if (mModelName != null) dest.writeString(mModelName);
         dest.writeInt(mType);
         dest.writeInt(mVariant);
         dest.writeTypedObject(mFeatureParams, flags);

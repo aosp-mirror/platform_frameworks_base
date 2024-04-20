@@ -594,7 +594,6 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     .setName("animation-background")
                     .setCallsite("DefaultTransitionHandler")
                     .setColorLayer();
-            final SurfaceControl backgroundSurface = colorLayerBuilder.build();
 
             // Attaching the background surface to the transition root could unexpectedly make it
             // cover one of the split root tasks. To avoid this, put the background surface just
@@ -605,8 +604,10 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             if (isSplitTaskInvolved) {
                 mRootTDAOrganizer.attachToDisplayArea(displayId, colorLayerBuilder);
             } else {
-                startTransaction.reparent(backgroundSurface, info.getRootLeash());
+                colorLayerBuilder.setParent(info.getRootLeash());
             }
+
+            final SurfaceControl backgroundSurface = colorLayerBuilder.build();
             startTransaction.setColor(backgroundSurface, colorArray)
                     .setLayer(backgroundSurface, -1)
                     .show(backgroundSurface);

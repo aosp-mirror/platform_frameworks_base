@@ -1050,6 +1050,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         // TaskFragment override orientation should be set for a system organizer.
         final TaskFragment taskFragment = mWindowOrganizerController.getTaskFragment(fragmentToken);
         assertNotNull(taskFragment);
+
+        taskFragment.setVisibleRequested(true);
         assertEquals(SCREEN_ORIENTATION_BEHIND, taskFragment.getOverrideOrientation());
     }
 

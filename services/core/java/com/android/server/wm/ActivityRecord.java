@@ -8363,7 +8363,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *         aspect ratio.
      */
     boolean shouldCreateCompatDisplayInsets() {
-        if (mLetterboxUiController.shouldApplyUserFullscreenOverride()) {
+        if (mLetterboxUiController.hasFullscreenOverride()) {
             // If the user has forced the applications aspect ratio to be fullscreen, don't use size
             // compatibility mode in any situation. The user has been warned and therefore accepts
             // the risk of the application misbehaving.
@@ -8378,7 +8378,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             default:
                 // Fall through
         }
-        if (inMultiWindowMode() || getWindowConfiguration().hasWindowDecorCaption()) {
+        // Use root activity's info for tasks in multi-window mode, or fullscreen tasks in freeform
+        // task display areas, to ensure visual consistency across activity launches and exits in
+        // the same task.
+        final TaskDisplayArea tda = getTaskDisplayArea();
+        if (inMultiWindowMode() || (tda != null && tda.inFreeformWindowingMode())) {
             final ActivityRecord root = task != null ? task.getRootActivity() : null;
             if (root != null && root != this && !root.shouldCreateCompatDisplayInsets()) {
                 // If the root activity doesn't use size compatibility mode, the activities above

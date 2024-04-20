@@ -32,6 +32,8 @@ internal fun BasePreference(
     title: String,
     summary: () -> String,
     modifier: Modifier = Modifier,
+    titleContentDescription: String? = null,
+    summaryContentDescription: () -> String? = { null },
     singleLineSummary: Boolean = false,
     icon: @Composable (() -> Unit)? = null,
     enabled: () -> Boolean = { true },
@@ -42,9 +44,11 @@ internal fun BasePreference(
 ) {
     BaseLayout(
         title = title,
+        titleContentDescription = titleContentDescription,
         subTitle = {
             SettingsBody(
                 body = summary(),
+                contentDescription = summaryContentDescription(),
                 maxLines = if (singleLineSummary) 1 else Int.MAX_VALUE,
             )
         },

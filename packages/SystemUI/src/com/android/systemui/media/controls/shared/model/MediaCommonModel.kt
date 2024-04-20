@@ -16,11 +16,13 @@
 
 package com.android.systemui.media.controls.shared.model
 
-import com.android.internal.logging.InstanceId
-
 /** Models any type of media. */
 sealed class MediaCommonModel {
-    data class MediaControl(val instanceId: InstanceId) : MediaCommonModel()
+    data class MediaControl(
+        val mediaLoadedModel: MediaDataLoadingModel.Loaded,
+        val canBeRemoved: Boolean = false
+    ) : MediaCommonModel()
 
-    data class MediaRecommendations(val key: String) : MediaCommonModel()
+    data class MediaRecommendations(val recsLoadingModel: SmartspaceMediaLoadingModel) :
+        MediaCommonModel()
 }

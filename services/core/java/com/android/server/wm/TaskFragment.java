@@ -906,8 +906,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return mForceTranslucent;
     }
 
-    void setForceTranslucent(boolean set) {
+    boolean setForceTranslucent(boolean set) {
+        if (mForceTranslucent == set) {
+            return false;
+        }
         mForceTranslucent = set;
+        return true;
     }
 
     boolean isLeafTaskFragment() {
@@ -1965,6 +1969,15 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return super.getOrientation(candidate);
         }
         return SCREEN_ORIENTATION_UNSET;
+    }
+
+    @ActivityInfo.ScreenOrientation
+    @Override
+    protected int getOverrideOrientation() {
+        if (isEmbedded() && !isVisibleRequested()) {
+            return SCREEN_ORIENTATION_UNSPECIFIED;
+        }
+        return super.getOverrideOrientation();
     }
 
     /**

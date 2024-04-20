@@ -30,6 +30,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.deviceentry.data.repository.FaceWakeUpTriggersConfigModule
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.SystemUIDeviceEntryFaceAuthInteractor
+import com.android.systemui.keyguard.ui.composable.blueprint.DefaultBlueprintModule
 import com.android.systemui.scene.SceneContainerFrameworkModule
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.SceneContainerConfig
@@ -60,6 +61,7 @@ import kotlinx.coroutines.test.runTest
             TestMocksModule::class,
             CoroutineTestScopeModule::class,
             FakeSystemUiModule::class,
+            DefaultBlueprintModule::class,
             SceneContainerFrameworkModule::class,
             FaceWakeUpTriggersConfigModule::class,
         ]

@@ -8424,9 +8424,11 @@
                 android:process=":ui">
         </activity>
 
+        <!-- BlockedAppStreamingActivity is launched as the system user. -->
         <activity android:name="com.android.internal.app.BlockedAppStreamingActivity"
             android:theme="@style/Theme.Dialog.Confirmation"
             android:excludeFromRecents="true"
+            android:showForAllUsers="true"
             android:process=":ui">
         </activity>
 

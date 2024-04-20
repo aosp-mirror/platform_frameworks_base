@@ -29,6 +29,7 @@ import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -93,11 +94,10 @@ class PreferenceTest {
             }
         }
 
-        val summaryNode = composeTestRule.onNodeWithText(LONG_SUMMARY)
         try {
             // There is no assertHeightIsAtMost, so use the assertHeightIsAtLeast and catch the
             // expected exception.
-            summaryNode.assertHeightIsAtLeast(lineHeightDp.times(2))
+            composeTestRule.onRoot().assertHeightIsAtLeast(lineHeightDp.times(5))
         } catch (e: AssertionError) {
             assertThat(e).hasMessageThat().contains("height")
             return

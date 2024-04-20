@@ -30,16 +30,23 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.android.settingslib.spa.framework.compose.contentDescription
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsOpacity.alphaForEnabled
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.theme.toMediumWeight
 
 @Composable
-fun SettingsTitle(title: String, useMediumWeight: Boolean = false) {
+fun SettingsTitle(
+    title: String,
+    contentDescription: String? = null,
+    useMediumWeight: Boolean = false,
+) {
     Text(
         text = title,
-        modifier = Modifier.padding(vertical = SettingsDimension.paddingTiny),
+        modifier = Modifier
+            .padding(vertical = SettingsDimension.paddingTiny)
+            .contentDescription(contentDescription),
         color = MaterialTheme.colorScheme.onSurface,
         style = MaterialTheme.typography.titleMedium.withWeight(useMediumWeight),
     )
@@ -81,11 +88,13 @@ fun SettingsListItem(text: String, enabled: Boolean = true) {
 @Composable
 fun SettingsBody(
     body: String,
+    contentDescription: String? = null,
     maxLines: Int = Int.MAX_VALUE,
 ) {
     if (body.isNotEmpty()) {
         Text(
             text = body,
+            modifier = Modifier.contentDescription(contentDescription),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodyMedium,
             overflow = TextOverflow.Ellipsis,

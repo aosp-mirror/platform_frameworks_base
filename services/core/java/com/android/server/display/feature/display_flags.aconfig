@@ -126,7 +126,7 @@ flag {
     name: "even_dimmer"
     namespace: "display_manager"
     description: "Feature flag for extending the brightness below traditional range"
-    bug: "179428400"
+    bug: "294760970"
     is_fixed_read_only: true
 }
 

@@ -1133,7 +1133,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static final int FOCUSABLE_MASK = 0x00000011;
 
     /**
-     * This view will adjust its padding to fit sytem windows (e.g. status bar)
+     * This view will adjust its padding to fit system windows (e.g. status bar)
      */
     private static final int FITS_SYSTEM_WINDOWS = 0x00000002;
 
@@ -5764,23 +5764,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     static final float MAX_FRAME_RATE = 140;
 
-    private static final int INFREQUENT_UPDATE_INTERVAL_MILLIS = 100;
-    private static final int INFREQUENT_UPDATE_COUNTS = 2;
-
     // The preferred frame rate of the view that is mainly used for
     // touch boosting, view velocity handling, and TextureView.
     private float mPreferredFrameRate = REQUESTED_FRAME_RATE_CATEGORY_DEFAULT;
 
-    private int mInfrequentUpdateCount = 0;
-    private long mLastUpdateTimeMillis = 0;
-    /**
-     * @hide
-     */
-    protected int mMinusOneFrameIntervalMillis = 0;
-    /**
-     * @hide
-     */
-    protected int mMinusTwoFrameIntervalMillis = 0;
     private int mLastFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
 
     @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
@@ -23651,7 +23638,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (sToolkitSetFrameRateReadOnlyFlagValue
                 && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
             votePreferredFrameRate();
-            updateInfrequentCount();
         }
 
         mPrivateFlags4 = (mPrivateFlags4 & ~PFLAG4_HAS_MOVED) | PFLAG4_HAS_DRAWN;
@@ -32835,6 +32821,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             SENSITIVE_CONTENT_AUTOFILL_HINTS.add(View.AUTOFILL_HINT_USERNAME);
             SENSITIVE_CONTENT_AUTOFILL_HINTS.add(View.AUTOFILL_HINT_PASSWORD_AUTO);
             SENSITIVE_CONTENT_AUTOFILL_HINTS.add(View.AUTOFILL_HINT_PASSWORD);
+            SENSITIVE_CONTENT_AUTOFILL_HINTS.add(View.AUTOFILL_HINT_CREDIT_CARD_NUMBER);
+            SENSITIVE_CONTENT_AUTOFILL_HINTS.add(View.AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE);
+            SENSITIVE_CONTENT_AUTOFILL_HINTS.add(View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE);
+            SENSITIVE_CONTENT_AUTOFILL_HINTS.add(View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DAY);
+            SENSITIVE_CONTENT_AUTOFILL_HINTS.add(View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_MONTH);
+            SENSITIVE_CONTENT_AUTOFILL_HINTS.add(View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_YEAR);
+            SENSITIVE_CONTENT_AUTOFILL_HINTS.add(View.AUTOFILL_HINT_CREDENTIAL_MANAGER);
         }
 
         /**
@@ -33903,15 +33896,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     protected int calculateFrameRateCategory() {
-        if (mMinusTwoFrameIntervalMillis + mMinusOneFrameIntervalMillis
-                < INFREQUENT_UPDATE_INTERVAL_MILLIS) {
-            return mSizeBasedFrameRateCategoryAndReason;
+        int category;
+        switch (getViewRootImpl().intermittentUpdateState()) {
+            case ViewRootImpl.INTERMITTENT_STATE_INTERMITTENT ->
+                    category = FRAME_RATE_CATEGORY_NORMAL | FRAME_RATE_CATEGORY_REASON_INTERMITTENT;
+            case ViewRootImpl.INTERMITTENT_STATE_NOT_INTERMITTENT ->
+                    category = mSizeBasedFrameRateCategoryAndReason;
+            default -> category = mLastFrameRateCategory;
         }
-
-        if (mInfrequentUpdateCount == INFREQUENT_UPDATE_COUNTS) {
-            return FRAME_RATE_CATEGORY_NORMAL | FRAME_RATE_CATEGORY_REASON_INTERMITTENT;
-        }
-        return mLastFrameRateCategory;
+        return category;
     }
 
     /**
@@ -33922,76 +33915,99 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected void votePreferredFrameRate() {
         // use toolkitSetFrameRate flag to gate the change
         ViewRootImpl viewRootImpl = getViewRootImpl();
-        int width = mRight - mLeft;
-        int height = mBottom - mTop;
-
-        if (viewRootImpl != null && (width != 0 && height != 0)) {
-            if (viewRootImpl.shouldCheckFrameRate(mPreferredFrameRate > 0f)) {
-                float velocityFrameRate = 0f;
-                if (mAttachInfo.mViewVelocityApi) {
-                    float velocity = mFrameContentVelocity;
-
-                    if (velocity < 0f
-                            && (mPrivateFlags4 & (PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)) == (
-                            PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)
-                            && mParent instanceof View
-                            && ((View) mParent).mFrameContentVelocity <= 0
-                    ) {
-                        // This current calculation is very simple. If something on the screen
-                        // moved, then it votes for the highest velocity.
-                        velocityFrameRate = MAX_FRAME_RATE;
-                    } else if (velocity > 0f) {
-                        velocityFrameRate = convertVelocityToFrameRate(velocity);
-                    }
-                }
-                if (velocityFrameRate > 0f || mPreferredFrameRate > 0f) {
-                    int compatibility = FRAME_RATE_COMPATIBILITY_GTE;
-                    float frameRate = velocityFrameRate;
-                    if (mPreferredFrameRate > velocityFrameRate) {
-                        compatibility = FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
-                        frameRate = mPreferredFrameRate;
-                    }
-                    viewRootImpl.votePreferredFrameRate(frameRate, compatibility);
-                }
+        if (viewRootImpl == null) {
+            return; // can't vote if not connected
+        }
+        float velocity = mFrameContentVelocity;
+        float frameRate = mPreferredFrameRate;
+        ViewParent parent = mParent;
+        if (velocity <= 0 && Float.isNaN(frameRate)) {
+            // The most common case is when nothing is set, so this special case is called
+            // often.
+            if (mAttachInfo.mViewVelocityApi
+                    && (mPrivateFlags4 & (PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)) == (
+                    PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)
+                    && viewRootImpl.shouldCheckFrameRate(false)
+                    && parent instanceof View
+                    && ((View) parent).mFrameContentVelocity <= 0) {
+                viewRootImpl.votePreferredFrameRate(MAX_FRAME_RATE, FRAME_RATE_COMPATIBILITY_GTE);
             }
-            if (!willNotDraw() && isDirty() && viewRootImpl.shouldCheckFrameRateCategory()) {
-                if (sToolkitMetricsForFrameRateDecisionFlagValue) {
-                    float sizePercentage = width * height / mAttachInfo.mDisplayPixelCount;
-                    viewRootImpl.recordViewPercentage(sizePercentage);
-                }
-
-                int frameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
-                if (Float.isNaN(mPreferredFrameRate)) {
-                    frameRateCategory = calculateFrameRateCategory();
-                } else if (mPreferredFrameRate < 0) {
-                    switch ((int) mPreferredFrameRate) {
-                        case (int) REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE ->
-                                frameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE
-                                        | FRAME_RATE_CATEGORY_REASON_REQUESTED;
-                        case (int) REQUESTED_FRAME_RATE_CATEGORY_LOW ->
-                                frameRateCategory = FRAME_RATE_CATEGORY_LOW
-                                        | FRAME_RATE_CATEGORY_REASON_REQUESTED;
-                        case (int) REQUESTED_FRAME_RATE_CATEGORY_NORMAL ->
-                                frameRateCategory = FRAME_RATE_CATEGORY_NORMAL
-                                        | FRAME_RATE_CATEGORY_REASON_REQUESTED;
-                        case (int) REQUESTED_FRAME_RATE_CATEGORY_HIGH ->
-                                frameRateCategory = FRAME_RATE_CATEGORY_HIGH
-                                        | FRAME_RATE_CATEGORY_REASON_REQUESTED;
-                        default -> {
-                            // invalid frame rate, use default
-                            int category = sToolkitFrameRateDefaultNormalReadOnlyFlagValue
-                                    ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
-                            frameRateCategory = category
-                                    | FRAME_RATE_CATEGORY_REASON_INVALID;
-                        }
-                    }
-                }
-
+            if (!willNotDraw() && viewRootImpl.shouldCheckFrameRateCategory()) {
+                int frameRateCategory = calculateFrameRateCategory();
                 int category = frameRateCategory & ~FRAME_RATE_CATEGORY_REASON_MASK;
                 int reason = frameRateCategory & FRAME_RATE_CATEGORY_REASON_MASK;
                 viewRootImpl.votePreferredFrameRateCategory(category, reason, this);
                 mLastFrameRateCategory = frameRateCategory;
             }
+            return;
+        }
+        if (viewRootImpl.shouldCheckFrameRate(frameRate > 0f)) {
+            float velocityFrameRate = 0f;
+            if (mAttachInfo.mViewVelocityApi) {
+                if (velocity < 0f
+                        && (mPrivateFlags4 & (PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)) == (
+                        PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)
+                        && mParent instanceof View
+                        && ((View) mParent).mFrameContentVelocity <= 0
+                ) {
+                    // This current calculation is very simple. If something on the screen
+                    // moved, then it votes for the highest velocity.
+                    velocityFrameRate = MAX_FRAME_RATE;
+                } else if (velocity > 0f) {
+                    velocityFrameRate = convertVelocityToFrameRate(velocity);
+                }
+            }
+            if (velocityFrameRate > 0f || frameRate > 0f) {
+                int compatibility;
+                if (frameRate >= velocityFrameRate) {
+                    compatibility = FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
+                } else {
+                    compatibility = FRAME_RATE_COMPATIBILITY_GTE;
+                    frameRate = velocityFrameRate;
+                }
+                viewRootImpl.votePreferredFrameRate(frameRate, compatibility);
+            }
+        }
+
+        if (!willNotDraw() && viewRootImpl.shouldCheckFrameRateCategory()) {
+            if (sToolkitMetricsForFrameRateDecisionFlagValue) {
+                int width = mRight - mLeft;
+                int height = mBottom - mTop;
+                float sizePercentage = width * height / mAttachInfo.mDisplayPixelCount;
+                viewRootImpl.recordViewPercentage(sizePercentage);
+            }
+
+            int frameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
+            if (Float.isNaN(frameRate)) {
+                frameRateCategory = calculateFrameRateCategory();
+            } else if (frameRate < 0) {
+                switch ((int) frameRate) {
+                    case (int) REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE ->
+                            frameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE
+                                    | FRAME_RATE_CATEGORY_REASON_REQUESTED;
+                    case (int) REQUESTED_FRAME_RATE_CATEGORY_LOW ->
+                            frameRateCategory = FRAME_RATE_CATEGORY_LOW
+                                    | FRAME_RATE_CATEGORY_REASON_REQUESTED;
+                    case (int) REQUESTED_FRAME_RATE_CATEGORY_NORMAL ->
+                            frameRateCategory = FRAME_RATE_CATEGORY_NORMAL
+                                    | FRAME_RATE_CATEGORY_REASON_REQUESTED;
+                    case (int) REQUESTED_FRAME_RATE_CATEGORY_HIGH ->
+                            frameRateCategory = FRAME_RATE_CATEGORY_HIGH
+                                    | FRAME_RATE_CATEGORY_REASON_REQUESTED;
+                    default -> {
+                        // invalid frame rate, use default
+                        int category = sToolkitFrameRateDefaultNormalReadOnlyFlagValue
+                                ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
+                        frameRateCategory = category
+                                | FRAME_RATE_CATEGORY_REASON_INVALID;
+                    }
+                }
+            }
+
+            int category = frameRateCategory & ~FRAME_RATE_CATEGORY_REASON_MASK;
+            int reason = frameRateCategory & FRAME_RATE_CATEGORY_REASON_MASK;
+            viewRootImpl.votePreferredFrameRateCategory(category, reason, this);
+            mLastFrameRateCategory = frameRateCategory;
         }
     }
 
@@ -34073,34 +34089,5 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return mPreferredFrameRate;
         }
         return 0;
-    }
-
-    /**
-     * This function is mainly used for migrating infrequent layer logic
-     * from SurfaceFlinger to Toolkit.
-     * The infrequent layer logic includes:
-     * - NORMAL for infrequent update: FT2-FT1 > 100 && FT3-FT2 > 100.
-     * - HIGH/NORMAL based on size for frequent update: (FT3-FT2) + (FT2 - FT1) < 100.
-     * - otherwise, use the previous category value.
-     */
-    private void updateInfrequentCount() {
-        if (!willNotDraw()) {
-            long currentTimeMillis = getDrawingTime();
-            int timeIntervalMillis =
-                    (int) Math.min(Integer.MAX_VALUE, currentTimeMillis - mLastUpdateTimeMillis);
-            mMinusTwoFrameIntervalMillis = mMinusOneFrameIntervalMillis;
-            mMinusOneFrameIntervalMillis = timeIntervalMillis;
-
-            mLastUpdateTimeMillis = currentTimeMillis;
-            if (mMinusTwoFrameIntervalMillis >= 30 && timeIntervalMillis < 2) {
-                return;
-            }
-            if (timeIntervalMillis >= INFREQUENT_UPDATE_INTERVAL_MILLIS) {
-                mInfrequentUpdateCount = mInfrequentUpdateCount == INFREQUENT_UPDATE_COUNTS
-                        ? mInfrequentUpdateCount : mInfrequentUpdateCount + 1;
-            } else {
-                mInfrequentUpdateCount = 0;
-            }
-        }
     }
 }

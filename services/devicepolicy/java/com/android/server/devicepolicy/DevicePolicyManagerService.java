@@ -821,6 +821,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     public static final long THROW_SECURITY_EXCEPTION_FOR_SENSOR_PERMISSIONS = 277035314L;
 
+    /**
+     * Allows DPCs to provisioning fully managed headless devices in single-user mode.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = 35)
+    public static final long PROVISION_SINGLE_USER_MODE = 289515470L;
+
     // Only add to the end of the list. Do not change or rearrange these values, that will break
     // historical data. Do not use negative numbers or zero, logger only handles positive
     // integers.
@@ -6834,7 +6841,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         // If there is a profile owner, redirect to that; otherwise query the device owner.
         ComponentName aliasChooser = getProfileOwnerAsUser(caller.getUserId());
-        if (aliasChooser == null && caller.getUserHandle().isSystem()) {
+        boolean isDoUser = Flags.headlessSingleUserFixes()
+                ? caller.getUserId() == getDeviceOwnerUserId()
+                : caller.getUserHandle().isSystem();
+        if (aliasChooser == null && isDoUser) {
             synchronized (getLockObject()) {
                 final ActiveAdmin deviceOwnerAdmin = getDeviceOwnerAdminLocked();
                 if (deviceOwnerAdmin != null) {
@@ -7828,7 +7838,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mInjector.binderWithCleanCallingIdentity(() -> {
             // First check whether the admin is allowed to wipe the device/user/profile.
             final String restriction;
-            if (userId == UserHandle.USER_SYSTEM) {
+            boolean shouldFactoryReset = userId == UserHandle.USER_SYSTEM;
+            if (Flags.headlessSingleUserFixes() && getHeadlessDeviceOwnerModeForDeviceOwner()
+                    == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER) {
+                shouldFactoryReset = userId == getMainUserId();
+            }
+            if (shouldFactoryReset) {
                 restriction = UserManager.DISALLOW_FACTORY_RESET;
             } else if (isManagedProfile(userId)) {
                 restriction = UserManager.DISALLOW_REMOVE_MANAGED_PROFILE;
@@ -7842,12 +7857,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         });
 
         boolean isSystemUser = userId == UserHandle.USER_SYSTEM;
+        boolean isMainUser = userId == getMainUserId();
         boolean wipeDevice;
         if (factoryReset == null || !mInjector.isChangeEnabled(EXPLICIT_WIPE_BEHAVIOUR,
                 adminPackage,
                 userId)) {
             // Legacy mode
-            wipeDevice = isSystemUser;
+            wipeDevice = Flags.headlessSingleUserFixes()
+                    && getHeadlessDeviceOwnerModeForDeviceOwner()
+                    == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER ? isMainUser : isSystemUser;
         } else {
             // Explicit behaviour
             if (factoryReset) {
@@ -8185,6 +8203,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             userHandle, /* parent= */ false);
                     int max = strictestAdmin != null
                             ? strictestAdmin.maximumFailedPasswordsForWipe : 0;
+
                     if (max > 0 && policy.mFailedPasswordAttempts >= max) {
                         wipeData = true;
                     }
@@ -18398,6 +18417,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller)
                 || isProfileOwner(caller) || isFinancedDeviceOwner(caller));
 
+        // Backup service has to be enabled on the main user in order for it to be enabled on
+        // secondary users.
+        if (Flags.headlessSingleUserFixes() && isDeviceOwner(caller)
+                && getHeadlessDeviceOwnerModeForDeviceOwner()
+                == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER) {
+            toggleBackupServiceActive(UserHandle.USER_SYSTEM, enabled);
+        }
+
         toggleBackupServiceActive(caller.getUserId(), enabled);
 
         if (Flags.backupServiceSecurityLogEventEnabled()) {
@@ -21745,7 +21772,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Objects.requireNonNull(deviceAdmin, "admin is null.");
         Objects.requireNonNull(provisioningParams.getOwnerName(), "owner name is null.");
 
-        final CallerIdentity caller = getCallerIdentity();
+        final CallerIdentity caller = getCallerIdentity(callerPackage);
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(MANAGE_PROFILE_AND_DEVICE_OWNERS)
                         || (hasCallingOrSelfPermission(permission.PROVISION_DEMO_DEVICE)
@@ -21755,6 +21782,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         final long identity = Binder.clearCallingIdentity();
         try {
+            boolean isSingleUserMode;
+            if (Flags.headlessDeviceOwnerProvisioningFixEnabled()) {
+                int headlessDeviceOwnerMode = getHeadlessDeviceOwnerModeForDeviceAdmin(
+                        deviceAdmin, caller.getUserId());
+                isSingleUserMode =
+                        headlessDeviceOwnerMode == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER;
+            } else {
+                isSingleUserMode =
+                        getHeadlessDeviceOwnerModeForDeviceOwner()
+                                == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER;
+            }
+
+            if (Flags.headlessSingleUserFixes() && isSingleUserMode && !mInjector.isChangeEnabled(
+                    PROVISION_SINGLE_USER_MODE, deviceAdmin.getPackageName(), caller.getUserId())) {
+                throw new IllegalStateException("Device admin is not targeting Android V.");
+            }
+
             int result = checkProvisioningPreconditionSkipPermission(
                     ACTION_PROVISION_MANAGED_DEVICE, deviceAdmin, caller.getUserId());
             if (result != STATUS_OK) {
@@ -21768,17 +21812,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             setTimeAndTimezone(provisioningParams.getTimeZone(), provisioningParams.getLocalTime());
             setLocale(provisioningParams.getLocale());
 
-            boolean isSingleUserMode;
-            if (Flags.headlessDeviceOwnerProvisioningFixEnabled()) {
-                int headlessDeviceOwnerMode = getHeadlessDeviceOwnerModeForDeviceAdmin(
-                        deviceAdmin, caller.getUserId());
-                isSingleUserMode =
-                        headlessDeviceOwnerMode == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER;
-            } else {
-                isSingleUserMode =
-                        getHeadlessDeviceOwnerModeForDeviceOwner()
-                                == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER;
-            }
             int deviceOwnerUserId = Flags.headlessDeviceOwnerSingleUserEnabled()
                     && isSingleUserMode
                     ? mUserManagerInternal.getMainUserId() : UserHandle.USER_SYSTEM;

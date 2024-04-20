@@ -292,6 +292,24 @@ public class UserAspectRatioSettingsWindowManagerTest extends ShellTestCase {
     }
 
     @Test
+    public void testUserFullscreenOverrideEnabled_buttonAlwaysShown() {
+        TaskInfo taskInfo = createTaskInfo(/* eligibleForUserAspectRatioButton= */
+                true, /* topActivityBoundsLetterboxed */ true, ACTION_MAIN, CATEGORY_LAUNCHER);
+
+        final Rect stableBounds = mWindowManager.getTaskStableBounds();
+
+        // Letterboxed activity that has user fullscreen override should always show button,
+        // layout should be inflated
+        taskInfo.appCompatTaskInfo.topActivityLetterboxHeight = stableBounds.height();
+        taskInfo.appCompatTaskInfo.topActivityLetterboxWidth = stableBounds.width();
+        taskInfo.appCompatTaskInfo.isUserFullscreenOverrideEnabled = true;
+
+        mWindowManager.updateCompatInfo(taskInfo, mTaskListener, /* canShow= */ true);
+
+        verify(mWindowManager).inflateLayout();
+    }
+
+    @Test
     public void testUpdateDisplayLayout() {
         final DisplayInfo displayInfo = new DisplayInfo();
         displayInfo.logicalWidth = 1000;

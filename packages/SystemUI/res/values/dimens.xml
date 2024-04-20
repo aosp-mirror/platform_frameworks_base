@@ -310,6 +310,9 @@
     <!-- Radius for notifications corners without adjacent notifications -->
     <dimen name="notification_corner_radius">28dp</dimen>
 
+    <!-- Stroke width for notifications focus state overlay, see id/notification_focus_outline -->
+    <dimen name="notification_focus_stroke_width">3dp</dimen>
+
     <!-- Distance over which notification corner animations run, near the shelf while scrolling. -->
     <dimen name="notification_corner_animation_distance">48dp</dimen>
 
@@ -1761,6 +1764,14 @@
     <dimen name="bluetooth_dialog_scroll_view_min_height">145dp</dimen>
     <!-- The height of the main scroll view in bluetooth dialog with auto on toggle. -->
     <dimen name="bluetooth_dialog_scroll_view_min_height_with_auto_on">350dp</dimen>
+
+    <!-- Hearing devices dialog related dimensions -->
+    <dimen name="hearing_devices_preset_spinner_height">72dp</dimen>
+    <dimen name="hearing_devices_preset_spinner_margin">24dp</dimen>
+    <dimen name="hearing_devices_preset_spinner_text_padding_start">20dp</dimen>
+    <dimen name="hearing_devices_preset_spinner_text_padding_end">80dp</dimen>
+    <dimen name="hearing_devices_preset_spinner_arrow_size">24dp</dimen>
+    <dimen name="hearing_devices_preset_spinner_background_radius">28dp</dimen>
 
     <!-- Height percentage of the parent container occupied by the communal view -->
     <item name="communal_source_height_percentage" format="float" type="dimen">0.80</item>

@@ -145,6 +145,7 @@ java_library_static {
     defaults: [
         "platform_service_defaults",
         "android.hardware.power-java_shared",
+        "latest_android_hardware_broadcastradio_java_static",
     ],
     srcs: [
         ":android.hardware.tv.hdmi.connection-V1-java-source",
@@ -207,7 +208,6 @@ java_library_static {
         "android.hardware.boot-V1.2-java", // HIDL
         "android.hardware.boot-V1-java", // AIDL
         "android.hardware.broadcastradio-V2.0-java", // HIDL
-        "android.hardware.broadcastradio-V2-java", // AIDL
         "android.hardware.health-V1.0-java", // HIDL
         "android.hardware.health-V2.0-java", // HIDL
         "android.hardware.health-V2.1-java", // HIDL
@@ -234,7 +234,6 @@ java_library_static {
         "android.hidl.manager-V1.2-java",
         "cbor-java",
         "com.android.media.audio-aconfig-java",
-        "dropbox_flags_lib",
         "icu4j_calendar_astronomer",
         "android.security.aaid_aidl-java",
         "netd-client",
@@ -243,7 +242,6 @@ java_library_static {
         "com.android.sysprop.watchdog",
         "securebox",
         "apache-commons-math",
-        "backstage_power_flags_lib",
         "notification_flags_lib",
         "power_hint_flags_lib",
         "biometrics_flags_lib",

@@ -253,7 +253,8 @@ constructor(
             // Track the previous scene (sans Bouncer), so that we know where to go when the device
             // is unlocked whilst on the bouncer.
             val previousScene =
-                sceneInteractor.previousScene
+                sceneInteractor
+                    .previousScene()
                     .filterNot { it == Scenes.Bouncer }
                     .stateIn(this, SharingStarted.Eagerly, initialValue = null)
             deviceUnlockedInteractor.deviceUnlockStatus

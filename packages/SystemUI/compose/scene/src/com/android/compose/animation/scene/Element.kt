@@ -300,14 +300,16 @@ internal fun shouldDrawOrComposeSharedElement(
     val fromScene = transition.fromScene
     val toScene = transition.toScene
 
-    val chosenByPicker =
+    val pickedScene =
         scenePicker.sceneDuringTransition(
             element = element,
             transition = transition,
             fromSceneZIndex = layoutImpl.scenes.getValue(fromScene).zIndex,
             toSceneZIndex = layoutImpl.scenes.getValue(toScene).zIndex,
-        ) == scene
-    return chosenByPicker || transition.currentOverscrollSpec?.scene == scene
+        )
+            ?: return false
+
+    return pickedScene == scene || transition.currentOverscrollSpec?.scene == scene
 }
 
 private fun isSharedElementEnabled(
@@ -356,7 +358,9 @@ private fun isElementOpaque(
     val toState = element.sceneStates[toScene]
 
     if (fromState == null && toState == null) {
-        error("This should not happen, element $element is neither in $fromScene or $toScene")
+        // TODO(b/311600838): Throw an exception instead once layers of disposed elements are not
+        // run anymore.
+        return true
     }
 
     val isSharedElement = fromState != null && toState != null

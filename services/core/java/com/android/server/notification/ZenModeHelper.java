@@ -1493,9 +1493,13 @@ public class ZenModeHelper {
             newConfig = mConfig.copy();
             if (zenMode == Global.ZEN_MODE_OFF) {
                 newConfig.manualRule = null;
-                for (ZenRule automaticRule : newConfig.automaticRules.values()) {
-                    if (automaticRule.isAutomaticActive()) {
-                        automaticRule.snoozing = true;
+                if (!Flags.modesUi() || origin != UPDATE_ORIGIN_USER) {
+                    // User deactivation of DND means just turning off the manual DND rule.
+                    // For API calls (different origin) keep old behavior of snoozing all rules.
+                    for (ZenRule automaticRule : newConfig.automaticRules.values()) {
+                        if (automaticRule.isAutomaticActive()) {
+                            automaticRule.snoozing = true;
+                        }
                     }
                 }
             } else {

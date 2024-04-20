@@ -16,7 +16,15 @@
 
 package com.android.server.accessibility;
 
+import static android.Manifest.permission.CREATE_VIRTUAL_DEVICE;
+import static android.Manifest.permission.INJECT_EVENTS;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+import static android.Manifest.permission.MANAGE_ACCESSIBILITY;
+import static android.Manifest.permission.MANAGE_BIND_INSTANT_SERVICE;
+import static android.Manifest.permission.MODIFY_ACCESSIBILITY_DATA;
+import static android.Manifest.permission.RETRIEVE_WINDOW_CONTENT;
+import static android.Manifest.permission.SET_SYSTEM_AUDIO_CAPTION;
+import static android.Manifest.permission.STATUS_BAR_SERVICE;
 import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_MANAGER;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_MANAGER_CLIENT;
@@ -45,7 +53,6 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 import static com.android.server.accessibility.AccessibilityUserState.doesShortcutTargetsStringContain;
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
-import android.Manifest;
 import android.accessibilityservice.AccessibilityGestureEvent;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -53,9 +60,11 @@ import android.accessibilityservice.AccessibilityShortcutInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.MagnificationConfig;
 import android.accessibilityservice.TouchInteractionController;
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
+import android.annotation.PermissionManuallyEnforced;
+import android.annotation.RequiresNoPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
@@ -95,6 +104,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PermissionEnforcer;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
@@ -204,7 +214,6 @@ import java.util.stream.Collectors;
  * event dispatch for {@link AccessibilityEvent}s generated across all processes
  * on the device. Events are dispatched to {@link AccessibilityService}s.
  */
-@SuppressWarnings("MissingPermissionAnnotation")
 public class AccessibilityManagerService extends IAccessibilityManager.Stub
         implements AbstractAccessibilityServiceConnection.SystemSupport,
         AccessibilityUserState.ServiceInfoChangeListener,
@@ -479,7 +488,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             AccessibilityDisplayListener a11yDisplayListener,
             MagnificationController magnificationController,
             @Nullable AccessibilityInputFilter inputFilter,
-            ProxyManager proxyManager) {
+            ProxyManager proxyManager,
+            PermissionEnforcer permissionEnforcer) {
+        super(permissionEnforcer);
         mContext = context;
         mPowerManager =  (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWindowManagerService = LocalServices.getService(WindowManagerInternal.class);
@@ -514,6 +525,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * @param context A {@link Context} instance.
      */
     public AccessibilityManagerService(Context context) {
+        super(PermissionEnforcer.fromContext(context));
         mContext = context;
         mPowerManager = context.getSystemService(PowerManager.class);
         mWindowManagerService = LocalServices.getService(WindowManagerInternal.class);
@@ -627,6 +639,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public IAccessibilityManager.WindowTransformationSpec getWindowTransformationSpec(
             int windowId) {
         IAccessibilityManager.WindowTransformationSpec windowTransformationSpec =
@@ -723,8 +736,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     void setBindInstantServiceAllowed(int userId, boolean allowed) {
         mContext.enforceCallingOrSelfPermission(
-                Manifest.permission.MANAGE_BIND_INSTANT_SERVICE,
-                "setBindInstantServiceAllowed");
+                MANAGE_BIND_INSTANT_SERVICE, "setBindInstantServiceAllowed");
         synchronized (mLock) {
             final AccessibilityUserState userState = getUserStateLocked(userId);
             if (allowed != userState.getBindInstantServiceAllowedLocked()) {
@@ -1120,6 +1132,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public long addClient(IAccessibilityManagerClient callback, int userId) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".addClient", FLAGS_ACCESSIBILITY_MANAGER,
@@ -1183,6 +1196,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public boolean removeClient(IAccessibilityManagerClient callback, int userId) {
         // TODO(b/190216606): Add tracing for removeClient when implementation is the same in master
 
@@ -1211,6 +1225,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public void sendAccessibilityEvent(AccessibilityEvent event, int userId) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".sendAccessibilityEvent", FLAGS_ACCESSIBILITY_MANAGER,
@@ -1327,12 +1342,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * system action.
      */
     @Override
+    @EnforcePermission(MANAGE_ACCESSIBILITY)
     public void registerSystemAction(RemoteAction action, int actionId) {
+        registerSystemAction_enforcePermission();
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".registerSystemAction",
                     FLAGS_ACCESSIBILITY_MANAGER, "action=" + action + ";actionId=" + actionId);
         }
-        mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
         getSystemActionPerformer().registerSystemAction(actionId, action);
     }
 
@@ -1342,12 +1358,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * system action.
      */
     @Override
+    @EnforcePermission(MANAGE_ACCESSIBILITY)
     public void unregisterSystemAction(int actionId) {
+        unregisterSystemAction_enforcePermission();
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".unregisterSystemAction",
                     FLAGS_ACCESSIBILITY_MANAGER, "actionId=" + actionId);
         }
-        mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
+
         getSystemActionPerformer().unregisterSystemAction(actionId);
     }
 
@@ -1360,6 +1378,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public ParceledListSlice<AccessibilityServiceInfo> getInstalledAccessibilityServiceList(
             int userId) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
@@ -1403,6 +1422,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int feedbackType,
             int userId) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
@@ -1445,6 +1465,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public void interrupt(int userId) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".interrupt",
@@ -1498,6 +1519,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public int addAccessibilityInteractionConnection(IWindow windowToken, IBinder leashToken,
             IAccessibilityInteractionConnection connection, String packageName,
             int userId) throws RemoteException {
@@ -1513,6 +1535,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public void removeAccessibilityInteractionConnection(IWindow window) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".removeAccessibilityInteractionConnection",
@@ -1522,32 +1545,31 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @EnforcePermission(MODIFY_ACCESSIBILITY_DATA)
     public void setPictureInPictureActionReplacingConnection(
             IAccessibilityInteractionConnection connection) throws RemoteException {
+        setPictureInPictureActionReplacingConnection_enforcePermission();
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".setPictureInPictureActionReplacingConnection",
                     FLAGS_ACCESSIBILITY_MANAGER, "connection=" + connection);
         }
-        mSecurityPolicy.enforceCallingPermission(Manifest.permission.MODIFY_ACCESSIBILITY_DATA,
-                SET_PIP_ACTION_REPLACEMENT);
         mA11yWindowManager.setPictureInPictureActionReplacingConnection(connection);
     }
 
     @Override
+    @EnforcePermission(RETRIEVE_WINDOW_CONTENT)
     public void registerUiTestAutomationService(IBinder owner,
             IAccessibilityServiceClient serviceClient,
             AccessibilityServiceInfo accessibilityServiceInfo,
             int userId,
             int flags) {
+        registerUiTestAutomationService_enforcePermission();
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".registerUiTestAutomationService",
                     FLAGS_ACCESSIBILITY_MANAGER,
                     "owner=" + owner + ";serviceClient=" + serviceClient
                     + ";accessibilityServiceInfo=" + accessibilityServiceInfo + ";flags=" + flags);
         }
-
-        mSecurityPolicy.enforceCallingPermission(Manifest.permission.RETRIEVE_WINDOW_CONTENT,
-                FUNCTION_REGISTER_UI_TEST_AUTOMATION_SERVICE);
 
         synchronized (mLock) {
             changeCurrentUserForTestAutomationIfNeededLocked(userId);
@@ -1560,6 +1582,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public void unregisterUiTestAutomationService(IAccessibilityServiceClient serviceClient) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".unregisterUiTestAutomationService",
@@ -1619,15 +1642,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @EnforcePermission(RETRIEVE_WINDOW_CONTENT)
     public IBinder getWindowToken(int windowId, int userId) {
+        getWindowToken_enforcePermission();
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".getWindowToken",
                     FLAGS_ACCESSIBILITY_MANAGER, "windowId=" + windowId + ";userId=" + userId);
         }
 
-        mSecurityPolicy.enforceCallingPermission(
-                Manifest.permission.RETRIEVE_WINDOW_TOKEN,
-                GET_WINDOW_TOKEN);
         synchronized (mLock) {
             // We treat calls from a profile as if made by its parent as profiles
             // share the accessibility state of the parent. The call below
@@ -1663,18 +1685,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      *        specified target.
      */
     @Override
+    @EnforcePermission(STATUS_BAR_SERVICE)
     public void notifyAccessibilityButtonClicked(int displayId, String targetName) {
+        notifyAccessibilityButtonClicked_enforcePermission();
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".notifyAccessibilityButtonClicked",
                     FLAGS_ACCESSIBILITY_MANAGER,
                     "displayId=" + displayId + ";targetName=" + targetName);
         }
 
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Caller does not hold permission "
-                    + android.Manifest.permission.STATUS_BAR_SERVICE);
-        }
         if (targetName == null) {
             synchronized (mLock) {
                 final AccessibilityUserState userState = getCurrentUserStateLocked();
@@ -1694,37 +1713,27 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      *                  user, {@code false} otherwise
      */
     @Override
+    @EnforcePermission(STATUS_BAR_SERVICE)
     public void notifyAccessibilityButtonVisibilityChanged(boolean shown) {
+        notifyAccessibilityButtonVisibilityChanged_enforcePermission();
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".notifyAccessibilityButtonVisibilityChanged",
                     FLAGS_ACCESSIBILITY_MANAGER, "shown=" + shown);
         }
 
-        mSecurityPolicy.enforceCallingOrSelfPermission(
-                android.Manifest.permission.STATUS_BAR_SERVICE);
         synchronized (mLock) {
             notifyAccessibilityButtonVisibilityChangedLocked(shown);
         }
     }
 
     @Override
-    @RequiresPermission(allOf = {
-            Manifest.permission.STATUS_BAR_SERVICE,
-            Manifest.permission.MANAGE_ACCESSIBILITY
-    })
+    @EnforcePermission(allOf = { STATUS_BAR_SERVICE, MANAGE_ACCESSIBILITY })
     public void notifyQuickSettingsTilesChanged(
             @UserIdInt int userId, @NonNull List<ComponentName> tileComponentNames) {
+        notifyQuickSettingsTilesChanged_enforcePermission();
         if (!android.view.accessibility.Flags.a11yQsShortcut()) {
             return;
         }
-
-        mContext.enforceCallingPermission(
-                Manifest.permission.STATUS_BAR_SERVICE,
-                /* function= */ "notifyQuickSettingsTilesChanged");
-        mContext.enforceCallingPermission(
-                Manifest.permission.MANAGE_ACCESSIBILITY,
-                /* function= */ "notifyQuickSettingsTilesChanged");
-
         if (DEBUG) {
             Slog.d(LOG_TAG, TextUtils.formatSimple(
                     "notifyQuickSettingsTilesChanged userId: %d, tileComponentNames: %s",
@@ -3953,19 +3962,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      *        class implementing a supported accessibility feature, or {@code null} if there's no
      *        specified target.
      */
+    @EnforcePermission(MANAGE_ACCESSIBILITY)
     @Override
     public void performAccessibilityShortcut(String targetName) {
+        performAccessibilityShortcut_enforcePermission();
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".performAccessibilityShortcut",
                     FLAGS_ACCESSIBILITY_MANAGER, "targetName=" + targetName);
         }
 
-        if ((UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID)
-                && (mContext.checkCallingPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
-                != PackageManager.PERMISSION_GRANTED)) {
-            throw new SecurityException(
-                    "performAccessibilityShortcut requires the MANAGE_ACCESSIBILITY permission");
-        }
         mMainHandler.sendMessage(obtainMessage(
                 AccessibilityManagerService::performAccessibilityShortcutInternal, this,
                 Display.DEFAULT_DISPLAY, UserShortcutType.HARDWARE, targetName));
@@ -4172,16 +4177,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * @hide
      */
     @Override
+    @EnforcePermission(MANAGE_ACCESSIBILITY)
     public void enableShortcutsForTargets(
             boolean enable, @UserShortcutType int shortcutTypes,
             @NonNull List<String> shortcutTargets, @UserIdInt int userId) {
-        if (android.view.accessibility.Flags.migrateEnableShortcuts()) {
-            mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.MANAGE_ACCESSIBILITY, "enableShortcutsForTargets");
-        } else {
-            mContext.enforceCallingPermission(
-                    Manifest.permission.MANAGE_ACCESSIBILITY, "enableShortcutsForTargets");
-        }
+        enableShortcutsForTargets_enforcePermission();
         for (int shortcutType : USER_SHORTCUT_TYPES) {
             if ((shortcutTypes & shortcutType) == shortcutType) {
                 enableShortcutForTargets(enable, shortcutType, shortcutTargets, userId);
@@ -4376,10 +4376,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @EnforcePermission(MANAGE_ACCESSIBILITY)
     public Bundle getA11yFeatureToTileMap(@UserIdInt int userId) {
-        mContext.enforceCallingPermission(
-                Manifest.permission.MANAGE_ACCESSIBILITY, "getA11yFeatureToTileMap");
-
+        getA11yFeatureToTileMap_enforcePermission();
         Bundle bundle = new Bundle();
         Map<ComponentName, ComponentName> a11yFeatureToTile =
                 getA11yFeatureToTileMapInternal(userId);
@@ -4435,16 +4434,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @EnforcePermission(MANAGE_ACCESSIBILITY)
     public List<String> getAccessibilityShortcutTargets(@UserShortcutType int shortcutType) {
+        getAccessibilityShortcutTargets_enforcePermission();
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".getAccessibilityShortcutTargets",
                     FLAGS_ACCESSIBILITY_MANAGER, "shortcutType=" + shortcutType);
-        }
-
-        if (mContext.checkCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException(
-                    "getAccessibilityShortcutService requires the MANAGE_ACCESSIBILITY permission");
         }
         return getAccessibilityShortcutTargetsInternal(shortcutType);
     }
@@ -4536,6 +4531,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * doesn't.
      */
     @Override
+    @RequiresNoPermission
     public boolean sendFingerprintGesture(int gestureKeyCode) {
         if (mTraceManager.isA11yTracingEnabledForTypes(
                 FLAGS_ACCESSIBILITY_MANAGER | FLAGS_FINGERPRINT)) {
@@ -4546,6 +4542,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         synchronized(mLock) {
             if (UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID) {
+                // TODO(b/333547153) remove the AIDL definitions for these functions that are
+                // restricted to system server and move them to AccessibilityManagerInternal.
                 throw new SecurityException("Only SYSTEM can call sendFingerprintGesture");
             }
         }
@@ -4564,6 +4562,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      *   registered.
      */
     @Override
+    @RequiresNoPermission
     public int getAccessibilityWindowId(@Nullable IBinder windowToken) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".getAccessibilityWindowId",
@@ -4586,6 +4585,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * integer for non-interactive one.
      */
     @Override
+    @RequiresNoPermission
     public long getRecommendedTimeoutMillis() {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(
@@ -4610,17 +4610,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @EnforcePermission(STATUS_BAR_SERVICE)
     public void setMagnificationConnection(
             IMagnificationConnection connection) throws RemoteException {
+        setMagnificationConnection_enforcePermission();
         if (mTraceManager.isA11yTracingEnabledForTypes(
                 FLAGS_ACCESSIBILITY_MANAGER | FLAGS_MAGNIFICATION_CONNECTION)) {
             mTraceManager.logTrace(LOG_TAG + ".setMagnificationConnection",
                     FLAGS_ACCESSIBILITY_MANAGER | FLAGS_MAGNIFICATION_CONNECTION,
                     "connection=" + connection);
         }
-
-        mSecurityPolicy.enforceCallingOrSelfPermission(
-                android.Manifest.permission.STATUS_BAR_SERVICE);
 
         getMagnificationConnectionManager().setConnection(connection);
 
@@ -4660,6 +4659,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public void associateEmbeddedHierarchy(@NonNull IBinder host, @NonNull IBinder embedded) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".associateEmbeddedHierarchy",
@@ -4672,6 +4672,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public void disassociateEmbeddedHierarchy(@NonNull IBinder token) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".disassociateEmbeddedHierarchy",
@@ -4688,6 +4689,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * @return The stroke width.
      */
     @Override
+    @RequiresNoPermission
     public int getFocusStrokeWidth() {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".getFocusStrokeWidth", FLAGS_ACCESSIBILITY_MANAGER);
@@ -4709,6 +4711,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * @return The color.
      */
     @Override
+    @RequiresNoPermission
     public int getFocusColor() {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".getFocusColor", FLAGS_ACCESSIBILITY_MANAGER);
@@ -4730,6 +4733,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * @return {@code true} if the audio description is enabled, {@code false} otherwise.
      */
     @Override
+    @RequiresNoPermission
     public boolean isAudioDescriptionByDefaultEnabled() {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".isAudioDescriptionByDefaultEnabled",
@@ -4752,6 +4756,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * @param attributes The accessibility window attributes.
      */
     @Override
+    @RequiresNoPermission
     public void setAccessibilityWindowAttributes(int displayId, int windowId, int userId,
             AccessibilityWindowAttributes attributes) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
@@ -4763,34 +4768,30 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
-    @RequiresPermission(Manifest.permission.SET_SYSTEM_AUDIO_CAPTION)
+    @EnforcePermission(SET_SYSTEM_AUDIO_CAPTION)
     public void setSystemAudioCaptioningEnabled(boolean isEnabled, int userId) {
-        mContext.enforceCallingOrSelfPermission(
-                Manifest.permission.SET_SYSTEM_AUDIO_CAPTION,
-                "setSystemAudioCaptioningEnabled");
-
+        setSystemAudioCaptioningEnabled_enforcePermission();
         mCaptioningManagerImpl.setSystemAudioCaptioningEnabled(isEnabled, userId);
     }
 
     @Override
+    @RequiresNoPermission
     public boolean isSystemAudioCaptioningUiEnabled(int userId) {
         return mCaptioningManagerImpl.isSystemAudioCaptioningUiEnabled(userId);
     }
 
     @Override
-    @RequiresPermission(Manifest.permission.SET_SYSTEM_AUDIO_CAPTION)
+    @EnforcePermission(SET_SYSTEM_AUDIO_CAPTION)
     public void setSystemAudioCaptioningUiEnabled(boolean isEnabled, int userId) {
-        mContext.enforceCallingOrSelfPermission(
-                Manifest.permission.SET_SYSTEM_AUDIO_CAPTION,
-                "setSystemAudioCaptioningUiEnabled");
-
+        setSystemAudioCaptioningUiEnabled_enforcePermission();
         mCaptioningManagerImpl.setSystemAudioCaptioningUiEnabled(isEnabled, userId);
     }
 
     @Override
+    @EnforcePermission(CREATE_VIRTUAL_DEVICE)
     public boolean registerProxyForDisplay(IAccessibilityServiceClient client, int displayId)
             throws RemoteException {
-        mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.CREATE_VIRTUAL_DEVICE);
+        registerProxyForDisplay_enforcePermission();
         mSecurityPolicy.checkForAccessibilityPermissionOrRole();
         if (client == null) {
             return false;
@@ -4826,8 +4827,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @EnforcePermission(CREATE_VIRTUAL_DEVICE)
     public boolean unregisterProxyForDisplay(int displayId) {
-        mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.CREATE_VIRTUAL_DEVICE);
+        unregisterProxyForDisplay_enforcePermission();
         mSecurityPolicy.checkForAccessibilityPermissionOrRole();
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -4842,6 +4844,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public boolean startFlashNotificationSequence(String opPkg,
             @FlashNotificationReason int reason, IBinder token) {
         final long identity = Binder.clearCallingIdentity();
@@ -4854,6 +4857,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public boolean stopFlashNotificationSequence(String opPkg) {
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -4864,6 +4868,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public boolean startFlashNotificationEvent(String opPkg,
             @FlashNotificationReason int reason, String reasonPkg) {
         final long identity = Binder.clearCallingIdentity();
@@ -4876,6 +4881,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public boolean isAccessibilityTargetAllowed(String packageName, int uid, int userId) {
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -4917,6 +4923,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public boolean sendRestrictedDialogIntent(String packageName, int uid, int userId) {
         // The accessibility service is allowed. Don't show the restricted dialog.
         if (isAccessibilityTargetAllowed(packageName, uid, userId)) {
@@ -4950,8 +4957,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @EnforcePermission(MANAGE_ACCESSIBILITY)
     public boolean isAccessibilityServiceWarningRequired(AccessibilityServiceInfo info) {
-        mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
+        isAccessibilityServiceWarningRequired_enforcePermission();
         final ComponentName componentName = info.getComponentName();
 
         // Warning is not required if the service is already enabled.
@@ -4997,6 +5005,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @PermissionManuallyEnforced // DUMP
     public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;
         synchronized (mLock) {
@@ -5139,6 +5148,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @RequiresNoPermission
     public void onShellCommand(FileDescriptor in, FileDescriptor out,
             FileDescriptor err, String[] args, ShellCallback callback,
             ResultReceiver resultReceiver) {
@@ -6159,9 +6169,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    @EnforcePermission(INJECT_EVENTS)
     public void injectInputEventToInputFilter(InputEvent event) {
-        mSecurityPolicy.enforceCallingPermission(Manifest.permission.INJECT_EVENTS,
-                "injectInputEventToInputFilter");
+        injectInputEventToInputFilter_enforcePermission();
         synchronized (mLock) {
             final long endMillis =
                     SystemClock.uptimeMillis() + WAIT_INPUT_FILTER_INSTALL_TIMEOUT_MS;
@@ -6246,11 +6256,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    /** Used to attach accessibility overlays from the system itself i.e. magnification. */
+    @EnforcePermission(INTERNAL_SYSTEM_WINDOW)
     @Override
-    public void attachAccessibilityOverlayToDisplay(
-            int displayId, SurfaceControl sc) {
-        mContext.enforceCallingPermission(
-                INTERNAL_SYSTEM_WINDOW, "attachAccessibilityOverlayToDisplay");
+    public void attachAccessibilityOverlayToDisplay(int displayId, SurfaceControl sc) {
+        attachAccessibilityOverlayToDisplay_enforcePermission();
         mMainHandler.sendMessage(
                 obtainMessage(
                         AccessibilityManagerService::attachAccessibilityOverlayToDisplayInternal,
@@ -6261,6 +6271,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         null));
     }
 
+    /** Called by services to attach accessibility overlays. */
     @Override
     public void attachAccessibilityOverlayToDisplay(
             int interactionId,

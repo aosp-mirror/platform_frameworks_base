@@ -95,3 +95,36 @@ flag {
   bug: "331967355"
 }
 
+flag {
+  name: "persist_incomplete_restore_data"
+  namespace: "systemui"
+  description: "Stores restore data for not-yet-installed pkgs for 48 hours"
+  bug: "334999659"
+}
+
+flag {
+  name: "trace_cancel_events"
+  namespace: "systemui"
+  description: "Adds performance tracing for binder cancel calls"
+  bug: "331677193"
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "exit_invalid_cancel_early"
+  namespace: "systemui"
+  description: "aborts cancel binder events early if notif doesn't exist"
+  bug: "331677193"
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "use_ipcdatacache_channels"
+  namespace: "systemui"
+  description: "Adds an IPCDataCache for notification channel/group lookups"
+  bug: "331677193"
+}

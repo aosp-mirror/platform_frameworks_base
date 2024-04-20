@@ -22,6 +22,7 @@ import android.app.IUidObserver
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.Person
+import android.platform.test.annotations.DisableFlags
 import android.service.notification.NotificationListenerService.REASON_USER_STOPPED
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -193,6 +194,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
     /** Regression test for b/192379214. */
     @Test
+    @DisableFlags(android.app.Flags.FLAG_UPDATE_RANKING_TIME)
     fun onEntryUpdated_notificationWhenIsZero_timeHidden() {
         val notification = NotificationEntryBuilder(createOngoingCallNotifEntry())
         notification.modifyNotification(context).setWhen(0)

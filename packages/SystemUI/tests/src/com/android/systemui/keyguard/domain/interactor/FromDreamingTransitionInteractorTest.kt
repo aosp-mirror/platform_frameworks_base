@@ -37,6 +37,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
@@ -158,6 +159,19 @@ class FromDreamingTransitionInteractorTest : SysuiTestCase() {
                 .startedTransition(
                     from = KeyguardState.DREAMING,
                     to = KeyguardState.LOCKSCREEN,
+                )
+        }
+
+    @Test
+    fun testTransitionToAlternateBouncer() =
+        testScope.runTest {
+            kosmos.fakeKeyguardBouncerRepository.setAlternateVisible(true)
+            runCurrent()
+
+            assertThat(transitionRepository)
+                .startedTransition(
+                    from = KeyguardState.DREAMING,
+                    to = KeyguardState.ALTERNATE_BOUNCER,
                 )
         }
 }

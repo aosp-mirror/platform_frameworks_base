@@ -332,7 +332,8 @@ AndroidManifest.xml file.</p>
 
 <pre class=prettyprint>
 &lt;service android:name="<strong>MySynthDeviceService</strong>"
-  android:permission="android.permission.BIND_MIDI_DEVICE_SERVICE">
+  android:permission="android.permission.BIND_MIDI_DEVICE_SERVICE"
+  android:exported="true">
   &lt;intent-filter>
     &lt;action android:name="android.media.midi.MidiDeviceService" />
   &lt;/intent-filter>
@@ -474,7 +475,8 @@ MIDI 1.0 virtual devices, android.media.midi.MidiUmpDeviceService is used</p>
 
 <pre class=prettyprint>
 &lt;service android:name="<strong>MidiEchoDeviceService</strong>"
-  android:permission="android.permission.BIND_MIDI_DEVICE_SERVICE">
+  android:permission="android.permission.BIND_MIDI_DEVICE_SERVICE"
+  android:exported="true">
   &lt;intent-filter>
     &lt;action android:name="android.media.midi.MidiUmpDeviceService" />
   &lt;/intent-filter>
@@ -508,6 +510,11 @@ two ports like the MIDI 1.0 ports.</p>
 import android.media.midi.MidiDeviceStatus;
 import android.media.midi.MidiReceiver;
 import android.media.midi.MidiUmpDeviceService;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class MidiEchoDeviceService extends MidiUmpDeviceService {
     private static final String TAG = "MidiEchoDeviceService";

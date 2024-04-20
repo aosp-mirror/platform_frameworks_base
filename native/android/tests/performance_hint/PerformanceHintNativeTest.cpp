@@ -16,6 +16,8 @@
 
 #define LOG_TAG "PerformanceHintNativeTest"
 
+#include <aidl/android/hardware/power/SessionConfig.h>
+#include <aidl/android/hardware/power/SessionTag.h>
 #include <aidl/android/hardware/power/WorkDuration.h>
 #include <aidl/android/os/IHintManager.h>
 #include <android/binder_manager.h>
@@ -28,6 +30,8 @@
 #include <memory>
 #include <vector>
 
+using aidl::android::hardware::power::SessionConfig;
+using aidl::android::hardware::power::SessionTag;
 using aidl::android::hardware::power::WorkDuration;
 using aidl::android::os::IHintManager;
 using aidl::android::os::IHintSession;
@@ -39,8 +43,9 @@ using namespace testing;
 
 class MockIHintManager : public IHintManager {
 public:
-    MOCK_METHOD(ScopedAStatus, createHintSession,
+    MOCK_METHOD(ScopedAStatus, createHintSessionWithConfig,
                 (const SpAIBinder& token, const ::std::vector<int32_t>& tids, int64_t durationNanos,
+                 SessionTag tag, std::optional<SessionConfig>* config,
                  std::shared_ptr<IHintSession>* _aidl_return),
                 (override));
     MOCK_METHOD(ScopedAStatus, getHintSessionPreferredRate, (int64_t * _aidl_return), (override));
@@ -92,14 +97,18 @@ public:
     APerformanceHintSession* createSession(APerformanceHintManager* manager,
                                            int64_t targetDuration = 56789L) {
         mMockSession = ndk::SharedRefBase::make<NiceMock<MockIHintSession>>();
-
+        int64_t sessionId = 123;
         std::vector<int32_t> tids;
         tids.push_back(1);
         tids.push_back(2);
 
-        ON_CALL(*mMockIHintManager, createHintSession(_, Eq(tids), Eq(targetDuration), _))
-                .WillByDefault(DoAll(SetArgPointee<3>(std::shared_ptr<IHintSession>(mMockSession)),
+        ON_CALL(*mMockIHintManager,
+                createHintSessionWithConfig(_, Eq(tids), Eq(targetDuration), _, _, _))
+                .WillByDefault(DoAll(SetArgPointee<4>(
+                                             std::make_optional<SessionConfig>({.id = sessionId})),
+                                     SetArgPointee<5>(std::shared_ptr<IHintSession>(mMockSession)),
                                      [] { return ScopedAStatus::ok(); }));
+
         ON_CALL(*mMockIHintManager, setHintSessionThreads(_, _)).WillByDefault([] {
             return ScopedAStatus::ok();
         });
@@ -115,7 +124,6 @@ public:
         ON_CALL(*mMockSession, reportActualWorkDuration2(_)).WillByDefault([] {
             return ScopedAStatus::ok();
         });
-
         return APerformanceHint_createSession(manager, tids.data(), tids.size(), targetDuration);
     }
 
@@ -175,6 +183,14 @@ TEST_F(PerformanceHintTest, TestSession) {
     EXPECT_EQ(EINVAL, result);
 
     EXPECT_CALL(*mMockSession, close()).Times(Exactly(1));
+    APerformanceHint_closeSession(session);
+}
+
+TEST_F(PerformanceHintTest, TestUpdatedSessionCreation) {
+    EXPECT_CALL(*mMockIHintManager, createHintSessionWithConfig(_, _, _, _, _, _)).Times(1);
+    APerformanceHintManager* manager = createManager();
+    APerformanceHintSession* session = createSession(manager);
+    ASSERT_TRUE(session);
     APerformanceHint_closeSession(session);
 }
 

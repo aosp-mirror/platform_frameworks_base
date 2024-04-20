@@ -306,10 +306,6 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     };
 
     private final DynamicPrivacyController.Listener mDynamicPrivacyControllerListener = () -> {
-        if (mView.isExpanded()) {
-            // The bottom might change because we're using the final actual height of the view
-            mView.setAnimateBottomOnLayout(true);
-        }
         if (!FooterViewRefactor.isEnabled()) {
             // Let's update the footer once the notifications have been updated (in the next frame)
             mView.post(this::updateFooter);

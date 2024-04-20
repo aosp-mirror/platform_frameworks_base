@@ -21,6 +21,8 @@ import static android.view.View.VISIBLE;
 
 import static java.util.Collections.emptyList;
 
+import android.bluetooth.BluetoothHapClient;
+import android.bluetooth.BluetoothHapPresetInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
@@ -30,7 +32,11 @@ import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.Visibility;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -40,7 +46,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.settingslib.bluetooth.BluetoothCallback;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
+import com.android.settingslib.bluetooth.HapClientProfile;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
+import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.systemui.accessibility.hearingaid.HearingDevicesListAdapter.HearingDeviceItemCallback;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.bluetooth.qsdialog.ActiveHearingDeviceItemFactory;
@@ -48,7 +56,9 @@ import com.android.systemui.bluetooth.qsdialog.AvailableHearingDeviceItemFactory
 import com.android.systemui.bluetooth.qsdialog.ConnectedDeviceItemFactory;
 import com.android.systemui.bluetooth.qsdialog.DeviceItem;
 import com.android.systemui.bluetooth.qsdialog.DeviceItemFactory;
+import com.android.systemui.bluetooth.qsdialog.DeviceItemType;
 import com.android.systemui.bluetooth.qsdialog.SavedHearingDeviceItemFactory;
+import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.res.R;
@@ -80,11 +90,37 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
     private final LocalBluetoothManager mLocalBluetoothManager;
     private final Handler mMainHandler;
     private final AudioManager mAudioManager;
-
+    private final LocalBluetoothProfileManager mProfileManager;
+    private final HapClientProfile mHapClientProfile;
     private HearingDevicesListAdapter mDeviceListAdapter;
+    private HearingDevicesPresetsController mPresetsController;
+    private Context mApplicationContext;
     private SystemUIDialog mDialog;
     private RecyclerView mDeviceList;
+    private List<DeviceItem> mHearingDeviceItemList;
+    private Spinner mPresetSpinner;
+    private ArrayAdapter<String> mPresetInfoAdapter;
     private Button mPairButton;
+    private final HearingDevicesPresetsController.PresetCallback mPresetCallback =
+            new HearingDevicesPresetsController.PresetCallback() {
+                @Override
+                public void onPresetInfoUpdated(List<BluetoothHapPresetInfo> presetInfos,
+                        int activePresetIndex) {
+                    mMainHandler.post(
+                            () -> refreshPresetInfoAdapter(presetInfos, activePresetIndex));
+                }
+
+                @Override
+                public void onPresetCommandFailed(int reason) {
+                    final List<BluetoothHapPresetInfo> presetInfos =
+                            mPresetsController.getAllPresetInfo();
+                    final int activePresetIndex = mPresetsController.getActivePresetIndex();
+                    mMainHandler.post(() -> {
+                        refreshPresetInfoAdapter(presetInfos, activePresetIndex);
+                        showPresetErrorToast(mApplicationContext);
+                    });
+                }
+            };
     private final List<DeviceItemFactory> mHearingDeviceItemFactoryList = List.of(
             new ActiveHearingDeviceItemFactory(),
             new AvailableHearingDeviceItemFactory(),
@@ -107,6 +143,7 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
 
     @AssistedInject
     public HearingDevicesDialogDelegate(
+            @Application Context applicationContext,
             @Assisted boolean showPairNewDevice,
             SystemUIDialog.Factory systemUIDialogFactory,
             ActivityStarter activityStarter,
@@ -114,6 +151,7 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
             @Nullable LocalBluetoothManager localBluetoothManager,
             @Main Handler handler,
             AudioManager audioManager) {
+        mApplicationContext = applicationContext;
         mShowPairNewDevice = showPairNewDevice;
         mSystemUIDialogFactory = systemUIDialogFactory;
         mActivityStarter = activityStarter;
@@ -121,6 +159,8 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         mLocalBluetoothManager = localBluetoothManager;
         mMainHandler = handler;
         mAudioManager = audioManager;
+        mProfileManager = localBluetoothManager.getProfileManager();
+        mHapClientProfile = mProfileManager.getHapClientProfile();
     }
 
     @Override
@@ -158,19 +198,34 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
     @Override
     public void onActiveDeviceChanged(@Nullable CachedBluetoothDevice activeDevice,
             int bluetoothProfile) {
-        mMainHandler.post(() -> mDeviceListAdapter.refreshDeviceItemList(getHearingDevicesList()));
+        CachedBluetoothDevice activeHearingDevice;
+        mHearingDeviceItemList = getHearingDevicesList();
+        if (mPresetsController != null) {
+            activeHearingDevice = getActiveHearingDevice(mHearingDeviceItemList);
+            mPresetsController.setActiveHearingDevice(activeHearingDevice);
+        } else {
+            activeHearingDevice = null;
+        }
+        mMainHandler.post(() -> {
+            mDeviceListAdapter.refreshDeviceItemList(mHearingDeviceItemList);
+            mPresetSpinner.setVisibility(
+                    (activeHearingDevice != null && !mPresetInfoAdapter.isEmpty()) ? VISIBLE
+                            : GONE);
+        });
     }
 
     @Override
     public void onProfileConnectionStateChanged(@NonNull CachedBluetoothDevice cachedDevice,
             int state, int bluetoothProfile) {
-        mMainHandler.post(() -> mDeviceListAdapter.refreshDeviceItemList(getHearingDevicesList()));
+        mHearingDeviceItemList = getHearingDevicesList();
+        mMainHandler.post(() -> mDeviceListAdapter.refreshDeviceItemList(mHearingDeviceItemList));
     }
 
     @Override
     public void onAclConnectionStateChanged(@NonNull CachedBluetoothDevice cachedDevice,
             int state) {
-        mMainHandler.post(() -> mDeviceListAdapter.refreshDeviceItemList(getHearingDevicesList()));
+        mHearingDeviceItemList = getHearingDevicesList();
+        mMainHandler.post(() -> mDeviceListAdapter.refreshDeviceItemList(mHearingDeviceItemList));
     }
 
     @Override
@@ -187,10 +242,15 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
 
     @Override
     public void onCreate(@NonNull SystemUIDialog dialog, @Nullable Bundle savedInstanceState) {
+        if (mLocalBluetoothManager == null) {
+            return;
+        }
         mPairButton = dialog.requireViewById(R.id.pair_new_device_button);
         mDeviceList = dialog.requireViewById(R.id.device_list);
+        mPresetSpinner = dialog.requireViewById(R.id.preset_spinner);
 
         setupDeviceListView(dialog);
+        setupPresetSpinner(dialog);
         setupPairNewDeviceButton(dialog, mShowPairNewDevice ? VISIBLE : GONE);
     }
 
@@ -199,7 +259,14 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         if (mLocalBluetoothManager == null) {
             return;
         }
+
         mLocalBluetoothManager.getEventManager().registerCallback(this);
+        if (mPresetsController != null) {
+            mPresetsController.registerHapCallback();
+            if (mHapClientProfile != null && !mHapClientProfile.isProfileReady()) {
+                mProfileManager.addServiceListener(mPresetsController);
+            }
+        }
     }
 
     @Override
@@ -207,13 +274,49 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         if (mLocalBluetoothManager == null) {
             return;
         }
+
+        if (mPresetsController != null) {
+            mPresetsController.unregisterHapCallback();
+            mProfileManager.removeServiceListener(mPresetsController);
+        }
         mLocalBluetoothManager.getEventManager().unregisterCallback(this);
     }
 
     private void setupDeviceListView(SystemUIDialog dialog) {
         mDeviceList.setLayoutManager(new LinearLayoutManager(dialog.getContext()));
-        mDeviceListAdapter = new HearingDevicesListAdapter(getHearingDevicesList(), this);
+        mHearingDeviceItemList = getHearingDevicesList();
+        mDeviceListAdapter = new HearingDevicesListAdapter(mHearingDeviceItemList, this);
         mDeviceList.setAdapter(mDeviceListAdapter);
+    }
+
+    private void setupPresetSpinner(SystemUIDialog dialog) {
+        mPresetsController = new HearingDevicesPresetsController(mProfileManager, mPresetCallback);
+        final CachedBluetoothDevice activeHearingDevice = getActiveHearingDevice(
+                mHearingDeviceItemList);
+        mPresetsController.setActiveHearingDevice(activeHearingDevice);
+
+        mPresetInfoAdapter = new ArrayAdapter<>(dialog.getContext(),
+                android.R.layout.simple_spinner_dropdown_item);
+        mPresetInfoAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mPresetSpinner.setAdapter(mPresetInfoAdapter);
+        mPresetSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mPresetsController.selectPreset(
+                        mPresetsController.getAllPresetInfo().get(position).getIndex());
+                mPresetSpinner.setSelection(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Do nothing
+            }
+        });
+        final List<BluetoothHapPresetInfo> presetInfos = mPresetsController.getAllPresetInfo();
+        final int activePresetIndex = mPresetsController.getActivePresetIndex();
+        refreshPresetInfoAdapter(presetInfos, activePresetIndex);
+        mPresetSpinner.setVisibility(
+                (activeHearingDevice != null && !mPresetInfoAdapter.isEmpty()) ? VISIBLE : GONE);
     }
 
     private void setupPairNewDeviceButton(SystemUIDialog dialog, @Visibility int visibility) {
@@ -230,6 +333,21 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         }
     }
 
+    private void refreshPresetInfoAdapter(List<BluetoothHapPresetInfo> presetInfos,
+            int activePresetIndex) {
+        mPresetInfoAdapter.clear();
+        mPresetInfoAdapter.addAll(
+                presetInfos.stream().map(BluetoothHapPresetInfo::getName).toList());
+        if (activePresetIndex != BluetoothHapClient.PRESET_INDEX_UNAVAILABLE) {
+            final int size = mPresetInfoAdapter.getCount();
+            for (int position = 0; position < size; position++) {
+                if (presetInfos.get(position).getIndex() == activePresetIndex) {
+                    mPresetSpinner.setSelection(position);
+                }
+            }
+        }
+    }
+
     private List<DeviceItem> getHearingDevicesList() {
         if (mLocalBluetoothManager == null
                 || !mLocalBluetoothManager.getBluetoothAdapter().isEnabled()) {
@@ -240,6 +358,15 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
                 .map(this::createHearingDeviceItem)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+    }
+
+    @Nullable
+    private CachedBluetoothDevice getActiveHearingDevice(List<DeviceItem> hearingDeviceItemList) {
+        return hearingDeviceItemList.stream()
+                .filter(item -> item.getType() == DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE)
+                .map(DeviceItem::getCachedBluetoothDevice)
+                .findFirst()
+                .orElse(null);
     }
 
     private DeviceItem createHearingDeviceItem(CachedBluetoothDevice cachedDevice) {
@@ -259,5 +386,9 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         if (mDialog != null) {
             mDialog.dismiss();
         }
+    }
+
+    private void showPresetErrorToast(Context context) {
+        Toast.makeText(context, R.string.hearing_devices_presets_error, Toast.LENGTH_SHORT).show();
     }
 }

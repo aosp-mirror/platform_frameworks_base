@@ -467,13 +467,6 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         onRequestedOverrideConfigurationChanged(mRequestsTmpConfig);
     }
 
-    /** Sets the windowing mode for the configuration container. */
-    void setDisplayWindowingMode(int windowingMode) {
-        mRequestsTmpConfig.setTo(getRequestedOverrideConfiguration());
-        mRequestsTmpConfig.windowConfiguration.setDisplayWindowingMode(windowingMode);
-        onRequestedOverrideConfigurationChanged(mRequestsTmpConfig);
-    }
-
     /**
      * Returns true if this container is currently in multi-window mode. I.e. sharing the screen
      * with another activity.

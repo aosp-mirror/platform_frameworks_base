@@ -18,7 +18,9 @@ package com.android.systemui.biometrics;
 
 import static com.android.systemui.biometrics.BiometricNotificationBroadcastReceiver.ACTION_SHOW_FACE_REENROLL_DIALOG;
 import static com.android.systemui.biometrics.BiometricNotificationBroadcastReceiver.ACTION_SHOW_FINGERPRINT_REENROLL_DIALOG;
+
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -98,7 +100,7 @@ public class BiometricNotificationServiceTest extends SysuiTestCase {
     public void setUp() {
         when(mFingerprintReEnrollNotificationOptional.orElse(any()))
                 .thenReturn(mFingerprintReEnrollNotification);
-        when(mFingerprintReEnrollNotification.isFingerprintReEnrollRequired(
+        when(mFingerprintReEnrollNotification.isFingerprintReEnrollRequested(
                 FINGERPRINT_ACQUIRED_RE_ENROLL)).thenReturn(true);
 
         mLooper = TestableLooper.get(this);
@@ -140,8 +142,10 @@ public class BiometricNotificationServiceTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShowFingerprintReEnrollNotification_onAcquiredReEnroll() {
+    public void testShowFingerprintReEnrollNotification_onAcquiredReEnroll_Optional() {
         when(mKeyguardStateController.isShowing()).thenReturn(false);
+        when(mFingerprintReEnrollNotification.isFingerprintReEnrollForced(
+                FINGERPRINT_ACQUIRED_RE_ENROLL)).thenReturn(false);
 
         mKeyguardUpdateMonitorCallback.onBiometricHelp(
                 FINGERPRINT_ACQUIRED_RE_ENROLL,
@@ -160,6 +164,35 @@ public class BiometricNotificationServiceTest extends SysuiTestCase {
 
         assertThat(fingerprintNotification.contentIntent.getIntent().getAction())
                 .isEqualTo(ACTION_SHOW_FINGERPRINT_REENROLL_DIALOG);
+        assertThat(fingerprintNotification.contentIntent.getIntent().getBooleanExtra(
+                BiometricNotificationBroadcastReceiver.EXTRA_IS_REENROLL_FORCED, false)).isFalse();
+    }
+
+    @Test
+    public void testShowFingerprintReEnrollNotification_onAcquiredReEnroll_force() {
+        when(mKeyguardStateController.isShowing()).thenReturn(false);
+        when(mFingerprintReEnrollNotification.isFingerprintReEnrollForced(
+                FINGERPRINT_ACQUIRED_RE_ENROLL)).thenReturn(true);
+
+        mKeyguardUpdateMonitorCallback.onBiometricHelp(
+                FINGERPRINT_ACQUIRED_RE_ENROLL,
+                "Testing Fingerprint Re-enrollment" /* errString */,
+                BiometricSourceType.FINGERPRINT
+        );
+        mKeyguardStateControllerCallback.onKeyguardShowingChanged();
+
+        mLooper.moveTimeForward(SHOW_NOTIFICATION_DELAY_MS);
+        mLooper.processAllMessages();
+
+        verify(mNotificationManager).notifyAsUser(eq(TAG), eq(FINGERPRINT_NOTIFICATION_ID),
+                mNotificationArgumentCaptor.capture(), any());
+
+        Notification fingerprintNotification = mNotificationArgumentCaptor.getValue();
+
+        assertThat(fingerprintNotification.contentIntent.getIntent().getAction())
+                .isEqualTo(ACTION_SHOW_FINGERPRINT_REENROLL_DIALOG);
+        assertThat(fingerprintNotification.contentIntent.getIntent().getBooleanExtra(
+                BiometricNotificationBroadcastReceiver.EXTRA_IS_REENROLL_FORCED, false)).isTrue();
     }
     @Test
     public void testShowFaceReEnrollNotification_onErrorReEnroll() {

@@ -463,8 +463,10 @@ public class PackageArchiver {
         final CompletableFuture<Void> archiveStateStored = new CompletableFuture<>();
         mPm.mHandler.post(() -> {
             try {
+                final String installerTitle = getResponsibleInstallerTitle(
+                        mContext, installerInfo, responsibleInstallerPackage, userId);
                 var archiveState = createArchiveStateInternal(packageName, userId, mainActivities,
-                        installerInfo.loadLabel(mContext.getPackageManager()).toString());
+                        installerTitle);
                 storeArchiveState(packageName, archiveState, userId);
                 archiveStateStored.complete(null);
             } catch (IOException | PackageManager.NameNotFoundException e) {

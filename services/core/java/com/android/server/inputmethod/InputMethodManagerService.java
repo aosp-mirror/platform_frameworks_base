@@ -289,6 +289,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @GuardedBy("ImfLock.class")
     private int mCurrentUserId;
 
+    /** Holds all user related data */
+    @GuardedBy("ImfLock.class")
+    private UserDataRepository mUserDataRepository;
+
     @MultiUserUnawareField
     final SettingsObserver mSettingsObserver;
     final WindowManagerInternal mWindowManagerInternal;
@@ -1284,7 +1288,11 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         public void onUserStarting(TargetUser user) {
             // Called on ActivityManager thread.
             SecureSettingsWrapper.onUserStarting(user.getUserIdentifier());
+            synchronized (ImfLock.class) {
+                mService.mUserDataRepository.getOrCreate(user.getUserIdentifier());
+            }
         }
+
     }
 
     void onUnlockUser(@UserIdInt int userId) {
@@ -1373,6 +1381,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             AdditionalSubtypeMapRepository.initialize(mHandler, mContext);
 
             mCurrentUserId = mActivityManagerInternal.getCurrentUserId();
+            mUserDataRepository = new UserDataRepository(mHandler, mUserManagerInternal);
+            for (int id : mUserManagerInternal.getUserIds()) {
+                mUserDataRepository.getOrCreate(id);
+            }
 
             final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
 
@@ -5856,6 +5868,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             @SuppressWarnings("GuardedBy") Consumer<ClientState> clientControllerDump = c -> {
                 p.println("  " + c + ":");
                 p.println("    client=" + c.mClient);
+
                 p.println("    fallbackInputConnection="
                         + c.mFallbackInputConnection);
                 p.println("    sessionRequested="
@@ -5864,6 +5877,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         "    sessionRequestedForAccessibility="
                                 + c.mSessionRequestedForAccessibility);
                 p.println("    curSession=" + c.mCurSession);
+                p.println("    selfReportedDisplayId=" + c.mSelfReportedDisplayId);
+                p.println("    uid=" + c.mUid);
+                p.println("    pid=" + c.mPid);
             };
             mClientController.forAllClients(clientControllerDump);
             p.println("  mCurrentUserId=" + mCurrentUserId);
@@ -6528,6 +6544,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         @Override
         public void reportStartInputAsync(IBinder startInputToken) {
             mImms.reportStartInput(mToken, startInputToken);
+        }
+
+        @BinderThread
+        @Override
+        public void setHandwritingSurfaceNotTouchable(boolean notTouchable) {
+            mImms.mHwController.setNotTouchable(notTouchable);
         }
 
         @BinderThread

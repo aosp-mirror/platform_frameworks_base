@@ -106,6 +106,7 @@ import static android.service.notification.NotificationListenerService.Ranking.U
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 import static com.android.server.am.PendingIntentRecord.FLAG_ACTIVITY_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_BROADCAST_SENDER;
@@ -118,11 +119,11 @@ import static com.android.server.notification.NotificationManagerService.TAG;
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_ADJUSTED;
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_POSTED;
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_UPDATED;
+
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -131,6 +132,7 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertSame;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
+
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -156,6 +158,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 import android.Manifest;
 import android.annotation.Nullable;
@@ -270,8 +275,10 @@ import android.util.Pair;
 import android.util.Xml;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.RemoteViews;
+
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
+
 import com.android.internal.R;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.config.sysui.TestableFlagResolver;
@@ -303,10 +310,12 @@ import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.quota.MultiRateLimiter;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
+
 import com.google.android.collect.Lists;
 import com.google.common.collect.ImmutableList;
 import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
 import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -5931,6 +5940,45 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isEqualTo(
                 FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY);
         assertThat(captor.getValue().shouldPostSilently()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
+    public void testUpdate_DirectReplyLifetimeExtendedUpdateSucceeds() throws Exception {
+        // Creates a lifetime extended notification.
+        NotificationRecord original = generateNotificationRecord(mTestNotificationChannel);
+        original.getSbn().getNotification().flags |= FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+        mService.addNotification(original);
+
+        // Post an update for that notification.
+        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, original.getSbn().getId(),
+                original.getSbn().getTag(), mUid, 0,
+                new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                        .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                        .setContentTitle("new title").build(),
+                UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord update = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+        mService.addEnqueuedNotification(update);
+
+        NotificationManagerService.PostNotificationRunnable runnable =
+                mService.new PostNotificationRunnable(update.getKey(),
+                        update.getSbn().getPackageName(),
+                        update.getUid(),
+                        mPostNotificationTrackerFactory.newTracker(null));
+        runnable.run();
+        waitForIdle();
+
+        // Checks the update was sent, and that update contains the new title, and does not contain
+        // the lifetime extension flag.
+        ArgumentCaptor<NotificationRecord> captor =
+                ArgumentCaptor.forClass(NotificationRecord.class);
+        verify(mListeners, times(1)).prepareNotifyPostedLocked(captor.capture(), any(),
+                anyBoolean());
+        assertThat(captor.getValue().getNotification().flags
+                & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isEqualTo(0);
+        assertThat(captor.getValue()
+                .getNotification().extras.getCharSequence(Notification.EXTRA_TITLE).toString())
+                .isEqualTo("new title");
     }
 
     @Test
@@ -12602,7 +12650,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // the notifyPostedLocked function is called twice.
         verify(mWorkerHandler, times(2)).postDelayed(any(Runnable.class), anyLong());
-        //verify(mListeners, times(2)).notifyPostedLocked(any(), any());
     }
 
     @Test

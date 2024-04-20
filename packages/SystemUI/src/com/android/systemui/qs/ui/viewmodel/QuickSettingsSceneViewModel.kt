@@ -56,7 +56,7 @@ constructor(
                 // TODO(b/330200163) Add an Up from Bottom to be able to collapse the shade
                 // while customizing
             } else {
-                sceneInteractor.previousScene.map { previousScene ->
+                sceneInteractor.previousScene(ignored = Scenes.QuickSettings).map { previousScene ->
                     mapOf(
                         Back to UserActionResult(previousScene ?: Scenes.Shade),
                         Swipe(SwipeDirection.Up) to UserActionResult(previousScene ?: Scenes.Shade),

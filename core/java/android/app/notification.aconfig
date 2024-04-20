@@ -1,5 +1,9 @@
 package: "android.app"
 
+# Note: When adding a new flag here, consider including the word "notification(s)" in the flag name
+# when appropriate, as it's not currently part of the namespace so it may not be obvious what the
+# flag relates to.
+
 flag {
   name: "modes_api"
   is_exported: true
@@ -38,6 +42,13 @@ flag {
   namespace: "systemui"
   description: "Guards the security fix that ensures all URIs in intents and Person.java are valid"
   bug: "281044385"
+}
+
+flag {
+  name: "notifications_use_app_icon"
+  namespace: "systemui"
+  description: "Experiment to replace the small icon in a notification with the app icon."
+  bug: "335211019"
 }
 
 flag {

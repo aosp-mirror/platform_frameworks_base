@@ -20,6 +20,7 @@ import android.content.ComponentName
 import android.os.UserHandle
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.widgets.WidgetConfigurator
@@ -52,8 +53,8 @@ abstract class BaseCommunalViewModel(
         communalInteractor.signalUserInteraction()
     }
 
-    fun changeScene(scene: SceneKey) {
-        communalInteractor.changeScene(scene)
+    fun changeScene(scene: SceneKey, transitionKey: TransitionKey? = null) {
+        communalInteractor.changeScene(scene, transitionKey)
     }
 
     /**

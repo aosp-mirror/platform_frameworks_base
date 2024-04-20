@@ -48,10 +48,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.debug.UiModePreviews
+import com.android.settingslib.spa.framework.compose.contentDescription
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsShape.CornerExtraLarge
 import com.android.settingslib.spa.framework.theme.SettingsShape.CornerExtraSmall
@@ -191,8 +190,7 @@ private fun Buttons(buttons: List<CardButton>, color: Color) {
 private fun Button(button: CardButton, color: Color) {
     TextButton(
         onClick = button.onClick,
-        modifier =
-            Modifier.semantics { button.contentDescription?.let { this.contentDescription = it } }
+        modifier = Modifier.contentDescription(button.contentDescription),
     ) {
         Text(text = button.text, color = color)
     }

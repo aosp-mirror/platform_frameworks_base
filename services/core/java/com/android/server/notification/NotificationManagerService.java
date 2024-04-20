@@ -98,6 +98,7 @@ import static android.os.UserHandle.USER_NULL;
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.Flags.callstyleCallbackApi;
 import static android.service.notification.Flags.redactSensitiveNotificationsFromUntrustedListeners;
+import static android.service.notification.Flags.redactSensitiveNotificationsBigTextStyle;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_CONVERSATIONS;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ONGOING;
@@ -139,6 +140,7 @@ import static android.service.notification.NotificationListenerService.TRIM_FULL
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.contentprotection.flags.Flags.rapidClearNotificationsByListenerAppOpEnabled;
+
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
@@ -306,6 +308,7 @@ import android.view.Display;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.RemoteViews;
 import android.widget.Toast;
+
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -357,7 +360,9 @@ import com.android.server.utils.quota.MultiRateLimiter;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.BackgroundActivityStartCallback;
 import com.android.server.wm.WindowManagerInternal;
+
 import libcore.io.IoUtils;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParserException;
@@ -2514,7 +2519,8 @@ public class NotificationManagerService extends SystemService {
                 mNotificationChannelLogger,
                 mAppOps,
                 mUserProfiles,
-                mShowReviewPermissionsNotification);
+                mShowReviewPermissionsNotification,
+                Clock.systemUTC());
         mRankingHelper = new RankingHelper(getContext(), mRankingHandler, mPreferencesHelper,
                 mZenModeHelper, mUsageStats, extractorNames, mPlatformCompat);
         mSnoozeHelper = snoozeHelper;
@@ -7234,6 +7240,10 @@ public class NotificationManagerService extends SystemService {
                 }
             }
         }
+        if (Flags.traceCancelEvents()) {
+            Trace.instant(Trace.TRACE_TAG_SYSTEM_SERVER, "cancelNotificationInternal: " +
+                    SmallHash.hash(Objects.hashCode(tag) ^ id));
+        }
 
         cancelNotification(uid, callingPid, pkg, tag, id, 0,
                 mustNotHaveFlags, false, userId, REASON_APP_CANCEL, null);
@@ -11774,10 +11784,18 @@ public class NotificationManagerService extends SystemService {
                     }
 
                     if (lifetimeExtensionRefactor()) {
+                        if (sendRedacted && redactedSbn == null) {
+                            redactedSbn = redactStatusBarNotification(sbn);
+                            redactedCache = new TrimCache(redactedSbn);
+                        }
+                        final StatusBarNotification sbnToPost = sendRedacted
+                                ? redactedCache.ForListener(info) : trimCache.ForListener(info);
+
                         // Checks if this is a request to notify system UI about a notification that
                         // has been lifetime extended.
                         // (We only need to check old for the flag, because in both cancellation and
-                        // update cases, old should have the flag.)
+                        // update cases, old should have the flag, whereas in update cases the
+                        // new will NOT have the flag.)
                         // If it is such a request, and this is system UI, we send the post request
                         // only to System UI, and break as we don't need to continue checking other
                         // Managed Services.
@@ -11785,7 +11803,7 @@ public class NotificationManagerService extends SystemService {
                                 && (old.getNotification().flags
                                 & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY) > 0) {
                             final NotificationRankingUpdate update = makeRankingUpdateLocked(info);
-                            listenerCalls.add(() -> notifyPosted(info, oldSbn, update));
+                            listenerCalls.add(() -> notifyPosted(info, sbnToPost, update));
                             break;
                         }
                     }
@@ -11915,6 +11933,14 @@ public class NotificationManagerService extends SystemService {
                 messageStyle.addMessage(new MessagingStyle.Message(
                         redactedText, System.currentTimeMillis(), empty));
                 redactedNotifBuilder.setStyle(messageStyle);
+            }
+            if (redactSensitiveNotificationsBigTextStyle()
+                    && oldNotif.isStyle(Notification.BigTextStyle.class)) {
+                Notification.BigTextStyle bigTextStyle = new Notification.BigTextStyle();
+                bigTextStyle.bigText(mContext.getString(R.string.redacted_notification_message));
+                bigTextStyle.setBigContentTitle("");
+                bigTextStyle.setSummaryText("");
+                redactedNotifBuilder.setStyle(bigTextStyle);
             }
 
             Notification redacted = redactedNotifBuilder.build();

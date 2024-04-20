@@ -59,7 +59,10 @@ internal class Scene(
     ): Map<UserAction, UserActionResult> {
         userActions.forEach { (action, result) ->
             if (key == result.toScene) {
-                error("Transition to the same scene is not supported. Scene $key, action $action")
+                error(
+                    "Transition to the same scene is not supported. Scene $key, action $action," +
+                        " result $result"
+                )
             }
         }
         return userActions

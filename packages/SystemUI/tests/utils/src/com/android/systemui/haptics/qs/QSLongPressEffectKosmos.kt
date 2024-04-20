@@ -19,7 +19,6 @@ package com.android.systemui.haptics.qs
 import com.android.systemui.haptics.vibratorHelper
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testScope
 
 val Kosmos.qsLongPressEffect by
-    Kosmos.Fixture { QSLongPressEffect(vibratorHelper, keyguardInteractor, testScope) }
+    Kosmos.Fixture { QSLongPressEffect(vibratorHelper, keyguardInteractor) }

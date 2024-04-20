@@ -20,9 +20,12 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.view.View
+import com.android.systemui.res.R
+import kotlin.math.abs
 
-class ScreenshotAnimationController(private val view: View) {
+class ScreenshotAnimationController(private val view: ScreenshotShelfView) {
     private var animator: Animator? = null
+    private val actionContainer = view.requireViewById<View>(R.id.actions_container_background)
 
     fun getEntranceAnimation(): Animator {
         val animator = ValueAnimator.ofFloat(0f, 1f)
@@ -41,19 +44,32 @@ class ScreenshotAnimationController(private val view: View) {
         return animator
     }
 
-    fun getExitAnimation(): Animator {
-        val animator = ValueAnimator.ofFloat(1f, 0f)
-        animator.addUpdateListener { view.alpha = it.animatedValue as Float }
-        animator.addListener(
-            object : AnimatorListenerAdapter() {
-                override fun onAnimationStart(animator: Animator) {
-                    view.alpha = 1f
-                }
-                override fun onAnimationEnd(animator: Animator) {
-                    view.alpha = 0f
-                }
+    fun getSwipeReturnAnimation(): Animator {
+        animator?.cancel()
+        val animator = ValueAnimator.ofFloat(view.translationX, 0f)
+        animator.addUpdateListener { view.translationX = it.animatedValue as Float }
+        this.animator = animator
+        return animator
+    }
+
+    fun getSwipeDismissAnimation(velocity: Float): Animator {
+        val screenWidth = view.resources.displayMetrics.widthPixels
+        // translation at which point the visible UI is fully off the screen (in the direction
+        // according to velocity)
+        val endX =
+            if (velocity < 0) {
+                -1f * actionContainer.right
+            } else {
+                (screenWidth - actionContainer.left).toFloat()
             }
-        )
+        val distance = endX - view.translationX
+        val animator = ValueAnimator.ofFloat(view.translationX, endX)
+        animator.addUpdateListener {
+            view.translationX = it.animatedValue as Float
+            view.alpha = 1f - it.animatedFraction
+        }
+        animator.duration = ((abs(distance / velocity))).toLong()
+
         this.animator = animator
         return animator
     }

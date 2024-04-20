@@ -41,7 +41,7 @@
         android:supportsRtl="true">
 
         <activity
-            android:name=".CompanionDeviceActivity"
+            android:name=".CompanionAssociationActivity"
             android:exported="true"
             android:launchMode="singleInstance"
             android:excludeFromRecents="true"

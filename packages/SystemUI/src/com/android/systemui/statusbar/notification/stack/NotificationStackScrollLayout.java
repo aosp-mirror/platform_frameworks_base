@@ -482,7 +482,6 @@ public class NotificationStackScrollLayout
     private Interpolator mHideXInterpolator = Interpolators.FAST_OUT_SLOW_IN;
 
     private final NotificationSectionsManager mSectionsManager;
-    private boolean mAnimateBottomOnLayout;
     private float mLastSentAppear;
     private float mLastSentExpandedHeight;
     private boolean mWillExpand;
@@ -2941,23 +2940,11 @@ public class NotificationStackScrollLayout
     }
 
     private void updateFirstAndLastBackgroundViews() {
-        NotificationSection firstSection = getFirstVisibleSection();
-        NotificationSection lastSection = getLastVisibleSection();
-        ExpandableView previousFirstChild =
-                firstSection == null ? null : firstSection.getFirstVisibleChild();
-        ExpandableView previousLastChild =
-                lastSection == null ? null : lastSection.getLastVisibleChild();
-
-        ExpandableView firstChild = getFirstChildWithBackground();
         ExpandableView lastChild = getLastChildWithBackground();
         boolean sectionViewsChanged = mSectionsManager.updateFirstAndLastViewsForAllSections(
                 mSections, getChildrenWithBackground());
 
-        if (mAnimationsEnabled && mIsExpanded) {
-        } else {
-        }
         mAmbientState.setLastVisibleBackgroundChild(lastChild);
-        mAnimateBottomOnLayout = false;
         invalidate();
     }
 
@@ -5463,10 +5450,6 @@ public class NotificationStackScrollLayout
                 view.setTranslationY(wakeUplocation);
             }
         }
-    }
-
-    void setAnimateBottomOnLayout(boolean animateBottomOnLayout) {
-        mAnimateBottomOnLayout = animateBottomOnLayout;
     }
 
     public void setOnPulseHeightChangedListener(Runnable listener) {

@@ -403,7 +403,7 @@ skcms_TransferFunction GetPQSkTransferFunction(float sdr_white_level) {
 }
 
 static skcms_TransferFunction trfn_apply_gain(const skcms_TransferFunction trfn, float gain) {
-    float pow_gain_ginv = sk_float_pow(gain, 1 / trfn.g);
+    float pow_gain_ginv = std::pow(gain, 1 / trfn.g);
     skcms_TransferFunction result;
     result.g = trfn.g;
     result.a = trfn.a * pow_gain_ginv;

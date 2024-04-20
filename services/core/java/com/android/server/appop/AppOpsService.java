@@ -4727,9 +4727,14 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         if ((code == OP_CAMERA) && isAutomotive()) {
-            if ((Flags.cameraPrivacyAllowlist())
-                    && (mSensorPrivacyManager.isCameraPrivacyEnabled(packageName))) {
-                return true;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                if ((Flags.cameraPrivacyAllowlist())
+                        && (mSensorPrivacyManager.isCameraPrivacyEnabled(packageName))) {
+                    return true;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
 

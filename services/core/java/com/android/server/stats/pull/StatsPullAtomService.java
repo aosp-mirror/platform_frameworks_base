@@ -61,6 +61,7 @@ import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STA
 import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__UNKNOWN;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.stats.Flags.addMobileBytesTransferByProcStatePuller;
+import static com.android.server.stats.Flags.statsPullNetworkStatsManagerInitOrderFix;
 import static com.android.server.stats.pull.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
 import static com.android.server.stats.pull.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
 import static com.android.server.stats.pull.ProcfsMemoryUtil.getProcessCmdlines;
@@ -355,7 +356,17 @@ public class StatsPullAtomService extends SystemService {
     private TelephonyManager mTelephony;
     private UwbManager mUwbManager;
     private SubscriptionManager mSubscriptionManager;
-    private NetworkStatsManager mNetworkStatsManager;
+
+    /**
+     * NetworkStatsManager initialization happens from one thread before any worker thread
+     * is going to access the networkStatsManager instance:
+     * - @initNetworkStatsManager() - initialization happens no worker thread to access are
+     *   active yet
+     * - @initAndRegisterNetworkStatsPullers Network stats dependant pullers can only be
+     *   initialized after service is ready. Worker thread is spawn here only after the
+     *   initialization is completed in a thread safe way (no async access expected)
+     */
+    private NetworkStatsManager mNetworkStatsManager = null;
 
     @GuardedBy("mKernelWakelockLock")
     private KernelWakelockReader mKernelWakelockReader;
@@ -419,6 +430,12 @@ public class StatsPullAtomService extends SystemService {
      */
     public static final boolean ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER =
                 addMobileBytesTransferByProcStatePuller();
+
+    /**
+     * Whether or not to enable the mNetworkStatsManager initialization order fix
+     */
+    private static final boolean ENABLE_NETWORK_STATS_MANAGER_INIT_ORDER_FIX =
+                statsPullNetworkStatsManagerInitOrderFix();
 
     // Puller locks
     private final Object mDataBytesTransferLock = new Object();
@@ -823,6 +840,9 @@ public class StatsPullAtomService extends SystemService {
                 registerEventListeners();
             });
         } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
+            if (ENABLE_NETWORK_STATS_MANAGER_INIT_ORDER_FIX) {
+                initNetworkStatsManager();
+            }
             BackgroundThread.getHandler().post(() -> {
                 // Network stats related pullers can only be initialized after service is ready.
                 initAndRegisterNetworkStatsPullers();
@@ -843,7 +863,9 @@ public class StatsPullAtomService extends SystemService {
                 mContext.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
         mStatsSubscriptionsListener = new StatsSubscriptionsListener(mSubscriptionManager);
         mStorageManager = (StorageManager) mContext.getSystemService(StorageManager.class);
-        mNetworkStatsManager = mContext.getSystemService(NetworkStatsManager.class);
+        if (!ENABLE_NETWORK_STATS_MANAGER_INIT_ORDER_FIX) {
+            initNetworkStatsManager();
+        }
 
         // Initialize DiskIO
         mStoragedUidIoStatsReader = new StoragedUidIoStatsReader();
@@ -1017,6 +1039,24 @@ public class StatsPullAtomService extends SystemService {
                     new AggregatedMobileDataStatsPuller(
                             mContext.getSystemService(NetworkStatsManager.class));
         }
+    }
+
+    /**
+     * Calling getNetworkStatsManager() before PHASE_THIRD_PARTY_APPS_CAN_START is unexpected
+     * Callers use before PHASE_THIRD_PARTY_APPS_CAN_START stage is not legit
+     */
+    @NonNull
+    private NetworkStatsManager getNetworkStatsManager() {
+        if (ENABLE_NETWORK_STATS_MANAGER_INIT_ORDER_FIX) {
+            if (mNetworkStatsManager == null) {
+                throw new IllegalStateException("NetworkStatsManager is not ready");
+            }
+        }
+        return mNetworkStatsManager;
+    }
+
+    private void initNetworkStatsManager() {
+        mNetworkStatsManager = mContext.getSystemService(NetworkStatsManager.class);
     }
 
     private void initAndRegisterNetworkStatsPullers() {
@@ -1514,11 +1554,11 @@ public class StatsPullAtomService extends SystemService {
         //  I/O and also block main thread when polling.
         //  Consider making perfd queries NetworkStatsService directly.
         if (template.getMatchRule() == MATCH_WIFI && template.getSubscriberIds().isEmpty()) {
-            mNetworkStatsManager.forceUpdate();
+            getNetworkStatsManager().forceUpdate();
         }
 
         final android.app.usage.NetworkStats queryNonTaggedStats =
-                mNetworkStatsManager.querySummary(
+                getNetworkStatsManager().querySummary(
                         template, currentTimeInMillis - elapsedMillisSinceBoot - bucketDuration,
                         currentTimeInMillis);
 
@@ -1528,7 +1568,7 @@ public class StatsPullAtomService extends SystemService {
         if (!includeTags) return nonTaggedStats;
 
         final android.app.usage.NetworkStats queryTaggedStats =
-                mNetworkStatsManager.queryTaggedSummary(template,
+                getNetworkStatsManager().queryTaggedSummary(template,
                         currentTimeInMillis - elapsedMillisSinceBoot - bucketDuration,
                         currentTimeInMillis);
         final NetworkStats taggedStats =

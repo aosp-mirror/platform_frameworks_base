@@ -668,6 +668,10 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         default SurfaceControlViewHost create(Context c, Display d, WindowlessWindowManager wmm) {
             return new SurfaceControlViewHost(c, d, wmm, "WindowDecoration");
         }
+        default SurfaceControlViewHost create(Context c, Display d,
+                WindowlessWindowManager wmm, String callsite) {
+            return new SurfaceControlViewHost(c, d, wmm, callsite);
+        }
     }
 
     /**

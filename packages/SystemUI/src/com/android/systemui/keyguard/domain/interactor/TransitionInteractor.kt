@@ -224,20 +224,12 @@ sealed class TransitionInteractor(
     ) {
         if (!KeyguardWmStateRefactor.isEnabled) {
             scope.launch {
-                keyguardInteractor.onCameraLaunchDetected
-                    .sample(transitionInteractor.finishedKeyguardState)
-                    .collect { finishedKeyguardState ->
-                        // Other keyguard state transitions may trigger on the first power button
-                        // push,
-                        // so use the last finishedKeyguardState to determine the overriding FROM
-                        // state
-                        if (finishedKeyguardState == fromState) {
-                            startTransitionTo(
-                                toState = KeyguardState.OCCLUDED,
-                                modeOnCanceled = TransitionModeOnCanceled.RESET,
-                            )
-                        }
-                    }
+                keyguardInteractor.onCameraLaunchDetected.filterRelevantKeyguardState().collect {
+                    startTransitionTo(
+                        toState = KeyguardState.OCCLUDED,
+                        modeOnCanceled = TransitionModeOnCanceled.RESET,
+                    )
+                }
             }
         }
     }

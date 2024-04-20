@@ -21,6 +21,7 @@ package com.android.systemui.bouncer.ui.composable
 import android.app.AlertDialog
 import android.content.DialogInterface
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
@@ -54,6 +55,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,6 +68,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -75,6 +78,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import com.android.compose.PlatformButton
+import com.android.compose.animation.Easings
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
@@ -665,10 +669,42 @@ private fun ActionArea(
     modifier: Modifier = Modifier,
 ) {
     val actionButton: BouncerActionButtonModel? by viewModel.actionButton.collectAsState()
+    val appearFadeInAnimatable = remember { Animatable(0f) }
+    val appearMoveAnimatable = remember { Animatable(0f) }
+    val appearAnimationInitialOffset = with(LocalDensity.current) { 80.dp.toPx() }
 
     actionButton?.let { actionButtonViewModel ->
+        LaunchedEffect(Unit) {
+            appearFadeInAnimatable.animateTo(
+                targetValue = 1f,
+                animationSpec =
+                    tween(
+                        durationMillis = 450,
+                        delayMillis = 133,
+                        easing = Easings.LegacyDecelerate,
+                    )
+            )
+        }
+        LaunchedEffect(Unit) {
+            appearMoveAnimatable.animateTo(
+                targetValue = 1f,
+                animationSpec =
+                    tween(
+                        durationMillis = 450,
+                        delayMillis = 133,
+                        easing = Easings.StandardDecelerate,
+                    )
+            )
+        }
+
         Box(
-            modifier = modifier,
+            modifier =
+                modifier.graphicsLayer {
+                    // Translate the button up from an initially pushed-down position:
+                    translationY = (1 - appearMoveAnimatable.value) * appearAnimationInitialOffset
+                    // Fade the button in:
+                    alpha = appearFadeInAnimatable.value
+                },
         ) {
             Button(
                 onClick = actionButtonViewModel.onClick,
