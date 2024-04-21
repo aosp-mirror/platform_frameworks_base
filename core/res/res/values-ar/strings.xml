@@ -185,10 +185,10 @@
     <string name="low_memory" product="default" msgid="2539532364144025569">"مساحة تخزين الهاتف ممتلئة. احذف بعض الملفات لإخلاء مساحة."</string>
     <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{تم تثبيت مرجع التصديق.}zero{تم تثبيت مراجع التصديق.}two{تم تثبيت مرجعَي التصديق.}few{تم تثبيت مراجع التصديق.}many{تم تثبيت مراجع التصديق.}other{تم تثبيت مراجع التصديق.}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"بواسطة جهة خارجية غير معلومة"</string>
-    <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"بواسطة مشرف الملف الشخصي للعمل"</string>
+    <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"بواسطة مشرف ملف العمل"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"بواسطة <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
-    <string name="work_profile_deleted" msgid="5891181538182009328">"تم حذف الملف الشخصي للعمل."</string>
-    <string name="work_profile_deleted_details" msgid="3773706828364418016">"تطبيق المشرف للملف الشخصي للعمل مفقود أو تالف لذا تم حذف الملف الشخصي للعمل والبيانات ذات الصلة. اتصل بالمشرف للحصول على المساعدة."</string>
+    <string name="work_profile_deleted" msgid="5891181538182009328">"تم حذف ملف العمل."</string>
+    <string name="work_profile_deleted_details" msgid="3773706828364418016">"تطبيق المشرف لملف العمل مفقود أو تالف لذا تم حذف ملف العمل والبيانات ذات الصلة. اتصل بالمشرف للحصول على المساعدة."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"لم يعد ملفك الشخصي للعمل متاحًا على هذا الجهاز"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"تم إجراء محاولات كثيرة جدًا لإدخال كلمة المرور"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"تنازل المشرف عن الجهاز للاستخدام الشخصي"</string>
@@ -208,9 +208,9 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"سيتم محو بيانات جهازك."</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"تعذّر استخدام تطبيق المشرف. سيتم محو بيانات جهازك الآن.\n\nإذا كانت لديك أسئلة، اتصل بمشرف مؤسستك."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"تم إيقاف الطباعة بواسطة <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
-    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"تفعيل الملف الشخصي للعمل"</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"تفعيل ملف العمل"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"تم حظر تطبيقاتك الشخصية إلى أن تفعِّل ملفك الشخصي للعمل."</string>
-    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"سيتم حظر التطبيقات الشخصية في <xliff:g id="DATE">%1$s</xliff:g> في <xliff:g id="TIME">%2$s</xliff:g>. لا يسمح مشرف تكنولوجيا المعلومات في مؤسستك بإيقاف الملف الشخصي للعمل أكثر من <xliff:g id="NUMBER">%3$d</xliff:g> يوم."</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"سيتم حظر التطبيقات الشخصية في <xliff:g id="DATE">%1$s</xliff:g> في <xliff:g id="TIME">%2$s</xliff:g>. لا يسمح مشرف تكنولوجيا المعلومات في مؤسستك بإيقاف ملف العمل أكثر من <xliff:g id="NUMBER">%3$d</xliff:g> يوم."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"تفعيل"</string>
     <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"المكالمات والرسائل غير مفعّلة"</string>
     <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"لقد أوقفت تطبيقات العمل مؤقتًا. لن تتلقّى مكالمات هاتفية أو رسائل نصية."</string>
@@ -301,9 +301,9 @@
     <string name="safeMode" msgid="8974401416068943888">"الوضع الآمن"</string>
     <string name="android_system_label" msgid="5974767339591067210">"‏نظام Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"التبديل إلى الملف الشخصي"</string>
-    <string name="managed_profile_label" msgid="7316778766973512382">"التبديل إلى الملف الشخصي للعمل"</string>
+    <string name="managed_profile_label" msgid="7316778766973512382">"التبديل إلى ملف العمل"</string>
     <string name="user_owner_app_label" msgid="1553595155465750298">"التبديل إلى تطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" في الملف الشخصي"</string>
-    <string name="managed_profile_app_label" msgid="367401088383965725">"التبديل إلى تطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" في الملف الشخصي للعمل"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"التبديل إلى تطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" في ملف العمل"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"جهات الاتصال"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"الوصول إلى جهات اتصالك"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"الموقع الجغرافي"</string>
@@ -685,10 +685,10 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"الإضاءة غير كافية"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"يُرجى إبعاد الهاتف عنك."</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"يُرجى تقريب الهاتف منك"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"يُرجى رفع الهاتف للأعلى"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"يُرجى خفض الهاتف للأسفل"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"يُرجى تحريك الهاتف لجهة اليسار"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"يُرجى تحريك الهاتف لجهة اليمين"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"ارفع الهاتف للأعلى"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"خفّض الهاتف للأسفل"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"حرِّك الهاتف لجهة اليسار"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"حرِّك الهاتف لجهة اليمين"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"يُرجى النظر إلى جهازك مباشرة أكثر."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"ارفع هاتفك إلى مستوى العينَين لأنّه تتعذّر رؤية وجهك"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"حركة أكثر من اللازم. يُرجى حمل الهاتف بثبات."</string>
@@ -1868,7 +1868,7 @@
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"العمل الثالث <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"نسخة طبق الأصل عن \"<xliff:g id="LABEL">%1$s</xliff:g>\""</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"طلب إدخال رقم التعريف الشخصي قبل إزالة التثبيت"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"طلب إدخال النقش الخاص بإلغاء القفل قبل إزالة التثبيت"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"طلب إدخال نقش فتح القفل قبل إزالة التثبيت"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"طلب إدخال كلمة المرور قبل إزالة التثبيت"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"تم التثبيت بواسطة المشرف"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"تم التحديث بواسطة المشرف"</string>
@@ -1912,7 +1912,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"‏تم تغيير طلب SS إلى طلب USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"‏تم التغيير إلى طلب SS الجديد."</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"تنبيه بشأن تصيّد احتيالي"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"الملف الشخصي للعمل"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"ملف العمل"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"تمّ تفعيل التنبيه"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"تم التحقّق من المتّصل"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"توسيع"</string>
@@ -1983,8 +1983,8 @@
     <string name="new_sms_notification_title" msgid="6528758221319927107">"لديك رسائل جديدة"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"‏فتح تطبيق الرسائل القصيرة SMS للعرض"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"قد تكون بعض الوظائف مُقيّدة."</string>
-    <string name="profile_encrypted_detail" msgid="5279730442756849055">"تم قفل الملف الشخصي للعمل."</string>
-    <string name="profile_encrypted_message" msgid="1128512616293157802">"انقر لإلغاء قفل الملف الشخصي للعمل"</string>
+    <string name="profile_encrypted_detail" msgid="5279730442756849055">"تم قفل ملف العمل."</string>
+    <string name="profile_encrypted_message" msgid="1128512616293157802">"انقر لإلغاء قفل ملف العمل"</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"تم الاتصال بـ <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"انقر لعرض الملفات"</string>
     <string name="pin_target" msgid="8036028973110156895">"تثبيت"</string>
@@ -2169,7 +2169,7 @@
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ما مِن تطبيقات شخصية."</string>
     <string name="miniresolver_open_work" msgid="6286176185835401931">"هل تريد فتح تطبيق \"<xliff:g id="APP">%s</xliff:g>\" في ملفك الشخصي للعمل؟"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"هل تريد فتح المحتوى في تطبيق \"<xliff:g id="APP">%s</xliff:g>\" في الملف الشخصي؟"</string>
-    <string name="miniresolver_open_in_work" msgid="941341494673509916">"هل تريد فتح المحتوى في تطبيق \"<xliff:g id="APP">%s</xliff:g>\" في الملف الشخصي للعمل؟"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"هل تريد فتح المحتوى في تطبيق \"<xliff:g id="APP">%s</xliff:g>\" في ملف العمل؟"</string>
     <string name="miniresolver_call_in_work" msgid="528779988307529039">"هل تريد الاتصال من تطبيق العمل؟"</string>
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"هل تريد الانتقال إلى تطبيق العمل؟"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"تسمح لك مؤسستك بإجراء المكالمات من تطبيقات العمل فقط."</string>
