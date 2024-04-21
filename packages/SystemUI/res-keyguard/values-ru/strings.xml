@@ -85,7 +85,7 @@
     <string name="kg_fp_locked_out" msgid="6228277682396768830">"Превышен лимит попыток разблокировки отпечатком."</string>
     <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"Агент доверия недоступен."</string>
     <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Слишком много неудачных попыток ввести PIN-код."</string>
-    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Слишком много неудачных попыток ввести граф. ключ."</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Слишком много неудачных попыток ввести графический ключ."</string>
     <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Слишком много неудачных попыток ввести пароль."</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Повторите попытку через # секунду.}one{Повторите попытку через # секунду.}few{Повторите попытку через # секунды.}many{Повторите попытку через # секунд.}other{Повторите попытку через # секунды.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Введите PIN-код SIM-карты."</string>
