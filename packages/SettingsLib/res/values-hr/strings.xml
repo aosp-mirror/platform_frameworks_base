@@ -33,7 +33,7 @@
     <string name="wifi_security_short_none_owe" msgid="8827409046261759703">"Ništa/OWE"</string>
     <string name="wifi_security_short_owe" msgid="5073524307942025369">"OWE"</string>
     <string name="wifi_security_short_eap_suiteb" msgid="4174071135081556115">"Suite-B-192"</string>
-    <string name="wifi_security_none" msgid="7392696451280611452">"Nema"</string>
+    <string name="wifi_security_none" msgid="7392696451280611452">"Ništa"</string>
     <string name="wifi_security_wep" msgid="1413627788581122366">"WEP"</string>
     <string name="wifi_security_wpa" msgid="1072450904799930636">"WPA-Personal"</string>
     <string name="wifi_security_wpa2" msgid="4038267581230425543">"WPA2-Personal"</string>
