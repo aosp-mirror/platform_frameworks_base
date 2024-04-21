@@ -1502,7 +1502,7 @@
     <string name="vpn_text_long" msgid="278540576806169831">"<xliff:g id="SESSION">%s</xliff:g>सँग जोडिएको। नेटवर्क प्रबन्ध गर्न हान्नुहोस्।"</string>
     <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"VPN जडान सधै जोड्दै…"</string>
     <string name="vpn_lockdown_connected" msgid="2853127976590658469">"सधैँ खुल्ला हुने VPN जोडिएको"</string>
-    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"सधैँ-सक्रिय रहने VPN सेवाबाट विच्छेद गरियो"</string>
+    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"सधैँ-सक्रिय रहने VPN सेवाबाट डिस्कनेक्ट गरियो"</string>
     <string name="vpn_lockdown_error" msgid="4453048646854247947">"सधैँ सक्रिय रहने VPN सेवामा जडान गर्न सकिएन"</string>
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"नेटवर्क वा VPN सम्बन्धी सेटिङहरू परिवर्तन गर्नुहोस्"</string>
     <string name="upload_file" msgid="8651942222301634271">"फाइल छान्नुहोस्"</string>
