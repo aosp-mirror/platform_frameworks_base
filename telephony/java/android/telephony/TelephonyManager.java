@@ -13787,11 +13787,11 @@ public class TelephonyManager {
      * <p>This method returns valid data on devices with {@link
      * android.content.pm.PackageManager#FEATURE_TELEPHONY_CARRIERLOCK} enabled.
      *
-     * @deprecated Apps should use {@link getCarriersRestrictionRules} to retrieve the list of
+     * @deprecated Apps should use {@link #getCarrierRestrictionRules} to retrieve the list of
      * allowed and excliuded carriers, as the result of this API is valid only when the excluded
      * list is empty. This API could return an empty list, even if some restrictions are present.
      *
-     * @return List of {@link android.telephony.CarrierIdentifier}; empty list
+     * @return List of {@link android.service.carrier.CarrierIdentifier}; empty list
      * means all carriers are allowed.
      *
      * @throws UnsupportedOperationException If the device does not have
