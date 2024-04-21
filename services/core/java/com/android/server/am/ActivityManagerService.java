@@ -14606,6 +14606,53 @@ public class ActivityManagerService extends IActivityManager.Stub
     public Intent registerReceiverWithFeature(IApplicationThread caller, String callerPackage,
             String callerFeatureId, String receiverId, IIntentReceiver receiver,
             IntentFilter filter, String permission, int userId, int flags) {
+        traceRegistrationBegin(receiverId, receiver, filter, userId);
+        try {
+            return registerReceiverWithFeatureTraced(caller, callerPackage, callerFeatureId,
+                    receiverId, receiver, filter, permission, userId, flags);
+        } finally {
+            traceRegistrationEnd();
+        }
+    }
+
+    private static void traceRegistrationBegin(String receiverId, IIntentReceiver receiver,
+            IntentFilter filter, int userId) {
+        if (!Flags.traceReceiverRegistration()) {
+            return;
+        }
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+            final StringBuilder sb = new StringBuilder("registerReceiver: ");
+            sb.append(Binder.getCallingUid()); sb.append('/');
+            sb.append(receiverId == null ? "null" : receiverId); sb.append('/');
+            final int actionsCount = filter.countActions();
+            if (actionsCount > 0) {
+                for (int i = 0; i < actionsCount; ++i) {
+                    sb.append(filter.getAction(i));
+                    if (i != actionsCount - 1) sb.append(',');
+                }
+            } else {
+                sb.append("null");
+            }
+            sb.append('/');
+            sb.append('u'); sb.append(userId); sb.append('/');
+            sb.append(receiver == null ? "null" : receiver.asBinder());
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, sb.toString());
+        }
+    }
+
+    private static void traceRegistrationEnd() {
+        if (!Flags.traceReceiverRegistration()) {
+            return;
+        }
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
+    }
+
+    private Intent registerReceiverWithFeatureTraced(IApplicationThread caller,
+            String callerPackage, String callerFeatureId, String receiverId,
+            IIntentReceiver receiver, IntentFilter filter, String permission,
+            int userId, int flags) {
         enforceNotIsolatedCaller("registerReceiver");
         ArrayList<StickyBroadcast> stickyBroadcasts = null;
         ProcessRecord callerApp = null;
@@ -14921,6 +14968,35 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     public void unregisterReceiver(IIntentReceiver receiver) {
+        traceUnregistrationBegin(receiver);
+        try {
+            unregisterReceiverTraced(receiver);
+        } finally {
+            traceUnregistrationEnd();
+        }
+    }
+
+    private static void traceUnregistrationBegin(IIntentReceiver receiver) {
+        if (!Flags.traceReceiverRegistration()) {
+            return;
+        }
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                    TextUtils.formatSimple("unregisterReceiver: %d/%s", Binder.getCallingUid(),
+                            receiver == null ? "null" : receiver.asBinder()));
+        }
+    }
+
+    private static void traceUnregistrationEnd() {
+        if (!Flags.traceReceiverRegistration()) {
+            return;
+        }
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
+    }
+
+    private void unregisterReceiverTraced(IIntentReceiver receiver) {
         if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Unregister receiver: " + receiver);
 
         final long origId = Binder.clearCallingIdentity();
