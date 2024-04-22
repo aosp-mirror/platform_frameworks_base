@@ -71,8 +71,7 @@
     <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"استخدام مفتاح المرور المحفوظ لتسجيل الدخول إلى \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"استخدام كلمة المرور المحفوظة لتسجيل الدخول إلى \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"استخدام حسابك لتسجيل الدخول إلى \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
-    <!-- no translation found for get_dialog_description_single_tap (2797059565126030879) -->
-    <skip />
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"استخدِم قفل الشاشة لتسجيل الدخول إلى \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" باستخدام <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"فتح القفل لاستعادة خيارات تسجيل الدخول إلى \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"اختيار مفتاح مرور محفوظ لتطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"اختيار كلمة مرور محفوظة لتطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
