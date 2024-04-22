@@ -153,45 +153,27 @@ class AvalancheController @Inject constructor(
             // Use default duration, like we did before AvalancheController existed
             return autoDismissMs
         }
+
         val showingList: MutableList<HeadsUpEntry> = mutableListOf()
-        if (headsUpEntryShowing != null) {
-            showingList.add(headsUpEntryShowing!!)
-        }
+        headsUpEntryShowing?.let { showingList.add(it) }
+
         nextList.sort()
         val entryList = showingList + nextList
-        if (entryList.isEmpty()) {
-            log { "No avalanche HUNs, use default ms: $autoDismissMs" }
-            return autoDismissMs
-        }
-        // entryList.indexOf(entry) returns -1 even when the entry is in entryList
-        var thisEntryIndex = -1
-        for ((i, e) in entryList.withIndex()) {
-            if (e == entry) {
-                thisEntryIndex = i
-            }
-        }
-        if (thisEntryIndex == -1) {
-            log { "Untracked entry, use default ms: $autoDismissMs" }
-            return autoDismissMs
-        }
+        val thisEntryIndex = entryList.indexOf(entry)
         val nextEntryIndex = thisEntryIndex + 1
 
         // If last entry, use default duration
         if (nextEntryIndex >= entryList.size) {
-            log { "Last entry, use default ms: $autoDismissMs" }
             return autoDismissMs
         }
         val nextEntry = entryList[nextEntryIndex]
         if (nextEntry.compareNonTimeFields(entry) == -1) {
             // Next entry is higher priority
-            log { "Next entry is higher priority: 500ms" }
             return 500
         } else if (nextEntry.compareNonTimeFields(entry) == 0) {
             // Next entry is same priority
-            log { "Next entry is same priority: 1000ms" }
             return 1000
         } else {
-            log { "Next entry is lower priority, use default ms: $autoDismissMs" }
             return autoDismissMs
         }
     }
