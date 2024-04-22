@@ -46,7 +46,7 @@ class MediaDiffUtilTest : SysuiTestCase() {
             MediaViewModelListUpdateCallback(
                 oldList,
                 newList,
-                { commonViewModel -> assertThat(commonViewModel).isEqualTo(mediaControl) },
+                { commonViewModel, _ -> assertThat(commonViewModel).isEqualTo(mediaControl) },
                 { fail("Unexpected to update $it") },
                 { fail("Unexpected to remove $it") },
                 { commonViewModel, _, _ -> fail("Unexpected to move $commonViewModel ") },
@@ -65,7 +65,7 @@ class MediaDiffUtilTest : SysuiTestCase() {
             MediaViewModelListUpdateCallback(
                 oldList,
                 newList,
-                { commonViewModel -> assertThat(commonViewModel).isEqualTo(mediaRecs) },
+                { commonViewModel, _ -> assertThat(commonViewModel).isEqualTo(mediaRecs) },
                 { fail("Unexpected to update $it") },
                 { fail("Unexpected to remove $it") },
                 { commonViewModel, _, _ -> fail("Unexpected to move $commonViewModel ") },
@@ -84,7 +84,7 @@ class MediaDiffUtilTest : SysuiTestCase() {
             MediaViewModelListUpdateCallback(
                 oldList,
                 newList,
-                { fail("Unexpected to add $it") },
+                { commonViewModel, _ -> fail("Unexpected to add $commonViewModel") },
                 { commonViewModel -> assertThat(commonViewModel).isNotEqualTo(mediaControl) },
                 { fail("Unexpected to remove $it") },
                 { commonViewModel, _, _ -> fail("Unexpected to move $commonViewModel ") },
@@ -103,7 +103,7 @@ class MediaDiffUtilTest : SysuiTestCase() {
             MediaViewModelListUpdateCallback(
                 oldList,
                 newList,
-                { fail("Unexpected to add $it") },
+                { commonViewModel, _ -> fail("Unexpected to add $commonViewModel") },
                 { commonViewModel -> assertThat(commonViewModel).isNotEqualTo(mediaRecs) },
                 { fail("Unexpected to remove $it") },
                 { commonViewModel, _, _ -> fail("Unexpected to move $commonViewModel ") },
@@ -123,7 +123,7 @@ class MediaDiffUtilTest : SysuiTestCase() {
             MediaViewModelListUpdateCallback(
                 oldList,
                 newList,
-                { fail("Unexpected to add $it") },
+                { commonViewModel, _ -> fail("Unexpected to add $commonViewModel") },
                 { fail("Unexpected to update $it") },
                 { fail("Unexpected to remove $it") },
                 { commonViewModel, _, _ -> assertThat(commonViewModel).isEqualTo(mediaControl1) },
@@ -144,7 +144,7 @@ class MediaDiffUtilTest : SysuiTestCase() {
             MediaViewModelListUpdateCallback(
                 oldList,
                 newList,
-                { fail("Unexpected to add $it") },
+                { commonViewModel, _ -> fail("Unexpected to add $commonViewModel") },
                 { fail("Unexpected to update $it") },
                 { fail("Unexpected to remove $it") },
                 { commonViewModel, _, _ -> assertThat(commonViewModel).isEqualTo(mediaRecs) },
@@ -163,7 +163,7 @@ class MediaDiffUtilTest : SysuiTestCase() {
             MediaViewModelListUpdateCallback(
                 oldList,
                 newList,
-                { fail("Unexpected to add $it") },
+                { commonViewModel, _ -> fail("Unexpected to add $commonViewModel") },
                 { fail("Unexpected to update $it") },
                 { commonViewModel -> assertThat(commonViewModel).isEqualTo(mediaControl) },
                 { commonViewModel, _, _ -> fail("Unexpected to move $commonViewModel ") },
@@ -182,7 +182,7 @@ class MediaDiffUtilTest : SysuiTestCase() {
             MediaViewModelListUpdateCallback(
                 oldList,
                 newList,
-                { fail("Unexpected to add $it") },
+                { commonViewModel, _ -> fail("Unexpected to add $commonViewModel") },
                 { fail("Unexpected to update $it") },
                 { commonViewModel -> assertThat(commonViewModel).isEqualTo(mediaRecs) },
                 { commonViewModel, _, _ -> fail("Unexpected to move $commonViewModel ") },
@@ -200,7 +200,7 @@ class MediaDiffUtilTest : SysuiTestCase() {
             immediatelyUpdateUi = immediatelyUpdateUi,
             controlViewModel = kosmos.mediaControlViewModel,
             onAdded = {},
-            onRemoved = { _, _ -> },
+            onRemoved = {},
             onUpdated = {}
         )
     }
@@ -214,7 +214,7 @@ class MediaDiffUtilTest : SysuiTestCase() {
             loadingEnabled = loadingEnabled,
             recsViewModel = kosmos.mediaRecommendationsViewModel,
             onAdded = {},
-            onRemoved = { _, _ -> },
+            onRemoved = {},
             onUpdated = {}
         )
     }
