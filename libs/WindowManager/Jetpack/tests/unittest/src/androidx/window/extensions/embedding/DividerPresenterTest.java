@@ -266,6 +266,22 @@ public class DividerPresenterTest {
     }
 
     @Test
+    public void testSanitizeDividerAttributes_setDefaultValues_fixedDivider() {
+        DividerAttributes attributes =
+                new DividerAttributes.Builder(DividerAttributes.DIVIDER_TYPE_FIXED).build();
+        DividerAttributes sanitized = DividerPresenter.sanitizeDividerAttributes(attributes);
+
+        assertEquals(DividerAttributes.DIVIDER_TYPE_FIXED, sanitized.getDividerType());
+        assertEquals(DividerPresenter.DEFAULT_DIVIDER_WIDTH_DP, sanitized.getWidthDp());
+
+        // The ratios should not be set for fixed divider
+        assertEquals(DividerAttributes.RATIO_SYSTEM_DEFAULT, sanitized.getPrimaryMinRatio(),
+                0.0f /* delta */);
+        assertEquals(DividerAttributes.RATIO_SYSTEM_DEFAULT, sanitized.getPrimaryMaxRatio(),
+                0.0f /* delta */);
+    }
+
+    @Test
     public void testSanitizeDividerAttributes_notChangingValidValues() {
         DividerAttributes attributes =
                 new DividerAttributes.Builder(DividerAttributes.DIVIDER_TYPE_DRAGGABLE)
