@@ -94,6 +94,7 @@ val Kosmos.footerActionsViewModelFactory by Fixture {
         falsingManager = falsingManager,
         footerActionsInteractor = footerActionsInteractor,
         globalActionsDialogLiteProvider = { mock() },
+        activityStarter,
         showPowerButton = true,
     )
 }
