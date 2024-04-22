@@ -68,6 +68,8 @@ public final class CallbackToken implements Parcelable {
      * invocations of this method will result in {@link OutcomeReceiver#onError} being called with
      * an {@link IllegalAccessException}.
      *
+     * Note that the callback could be invoked multiple times, e.g. in the case of split screen.
+     *
      * @param executor The executor which will be used to invoke the callback.
      * @param callback The callback which will be used to return {@link ContextualSearchState}
      *                 if/when it is available via {@link OutcomeReceiver#onResult}. It will also be
