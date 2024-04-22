@@ -337,6 +337,94 @@ class SceneTransitionLayoutTest {
         }
     }
 
+    @Test
+    fun multipleTransitionsWillComposeMultipleScenes() {
+        val duration = 10 * 16L
+
+        var currentScene: SceneKey by mutableStateOf(SceneA)
+        lateinit var state: SceneTransitionLayoutState
+        rule.setContent {
+            state =
+                updateSceneTransitionLayoutState(
+                    currentScene = currentScene,
+                    onChangeScene = { currentScene = it },
+                    transitions =
+                        transitions {
+                            from(SceneA, to = SceneB) {
+                                spec = tween(duration.toInt(), easing = LinearEasing)
+                            }
+                            from(SceneB, to = SceneC) {
+                                spec = tween(duration.toInt(), easing = LinearEasing)
+                            }
+                        }
+                )
+
+            SceneTransitionLayout(state) {
+                scene(SceneA) { Box(Modifier.testTag("aRoot").fillMaxSize()) }
+                scene(SceneB) { Box(Modifier.testTag("bRoot").fillMaxSize()) }
+                scene(SceneC) { Box(Modifier.testTag("cRoot").fillMaxSize()) }
+            }
+        }
+
+        // Initial state: only A is composed.
+        rule.onNodeWithTag("aRoot").assertExists()
+        rule.onNodeWithTag("bRoot").assertDoesNotExist()
+        rule.onNodeWithTag("cRoot").assertDoesNotExist()
+
+        // Pause the clock so we can manually advance it.
+        rule.waitForIdle()
+        rule.mainClock.autoAdvance = false
+
+        // Start A => B and go to the middle of the transition.
+        currentScene = SceneB
+
+        // We need to tick 2 frames after changing [currentScene] before the animation actually
+        // starts.
+        rule.mainClock.advanceTimeByFrame()
+        rule.mainClock.advanceTimeByFrame()
+        rule.mainClock.advanceTimeBy(duration / 2)
+        rule.waitForIdle()
+        assertThat(state.currentTransition?.progress).isEqualTo(0.5f)
+
+        // A and B are composed.
+        rule.onNodeWithTag("aRoot").assertExists()
+        rule.onNodeWithTag("bRoot").assertExists()
+        rule.onNodeWithTag("cRoot").assertDoesNotExist()
+
+        // Start B => C.
+        currentScene = SceneC
+        rule.mainClock.advanceTimeByFrame()
+        rule.mainClock.advanceTimeByFrame()
+        rule.waitForIdle()
+        assertThat(state.currentTransition?.progress).isEqualTo(0f)
+
+        // A, B and C are composed.
+        rule.onNodeWithTag("aRoot").assertExists()
+        rule.onNodeWithTag("bRoot").assertExists()
+        rule.onNodeWithTag("cRoot").assertExists()
+
+        // Let A => B finish.
+        rule.mainClock.advanceTimeBy(duration / 2L)
+        assertThat(state.currentTransition?.progress).isEqualTo(0.5f)
+        rule.waitForIdle()
+
+        // B and C are composed.
+        rule.onNodeWithTag("aRoot").assertDoesNotExist()
+        rule.onNodeWithTag("bRoot").assertExists()
+        rule.onNodeWithTag("cRoot").assertExists()
+
+        // Let B => C finish.
+        rule.mainClock.advanceTimeBy(duration / 2L)
+        rule.mainClock.advanceTimeByFrame()
+        assertThat(state.currentTransition).isNull()
+        rule.waitForIdle()
+
+        // Only C is composed.
+        rule.onNodeWithTag("aRoot").assertDoesNotExist()
+        rule.onNodeWithTag("bRoot").assertDoesNotExist()
+        rule.onNodeWithTag("cRoot").assertExists()
+    }
+
     private fun SemanticsNodeInteraction.offsetRelativeTo(
         other: SemanticsNodeInteraction,
     ): DpOffset {
