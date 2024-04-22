@@ -235,8 +235,7 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"അറിയിപ്പ് ഷെയ്‌ഡ്."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"ദ്രുത ക്രമീകരണങ്ങൾ."</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"അറിയിപ്പ് ഷെയ്‌ഡിനുള്ള ദ്രുത ക്രമീകരണം."</string>
-    <!-- no translation found for accessibility_desc_lock_screen (409034672704273634) -->
-    <skip />
+    <string name="accessibility_desc_lock_screen" msgid="409034672704273634">"ലോക്ക് സ്‌ക്രീൻ"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"ഔദ്യോഗിക ലോക്ക് സ്ക്രീൻ"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"അവസാനിപ്പിക്കുക"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"പൂർണ്ണ നിശബ്‌ദത"</string>
@@ -271,20 +270,15 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"എല്ലാം കാണുക"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth ഉപയോഗിക്കുക"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"കണക്‌റ്റ് ചെയ്‌തു"</string>
-    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing (1496358082943301670) -->
-    <skip />
+    <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"ഓഡിയോ പങ്കിടൽ"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"സംരക്ഷിച്ചു"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"വിച്ഛേദിക്കുക"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"സജീവമാക്കുക"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"നാളെ വീണ്ടും സ്വയമേവ ഓണാക്കുക"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (682984290339848844) -->
-    <skip />
-    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (7440944034584560279) -->
-    <skip />
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (4499275822759907822) -->
-    <skip />
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (8626191139359072540) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"ക്വിക്ക് ഷെയർ, Find My Device പോലുള്ള ഫീച്ചറുകൾ Bluetooth ഉപയോഗിക്കുന്നു"</string>
+    <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth നാളെ രാവിലെ ഓണാകും"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"ഓഡിയോ പങ്കിടൽ"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"ഓഡിയോ പങ്കിടുന്നു"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ബാറ്ററി"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ഓഡിയോ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ഹെഡ്‌സെറ്റ്"</string>
@@ -444,8 +438,7 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • വേഗത്തിൽ ചാർജ് ചെയ്യുന്നു • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>-ൽ പൂർത്തിയാകും"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • പതുക്കെ ചാർജ് ചെയ്യുന്നു • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>-ൽ പൂർത്തിയാകും"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ചാർജ് ചെയ്യുന്നു • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>-ൽ പൂർത്തിയാകും"</string>
-    <!-- no translation found for accessibility_action_open_communal_hub (3081702792413787849) -->
-    <skip />
+    <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"ലോക്ക് സ്‌ക്രീനിൽ വിജറ്റുകൾ"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"കമ്മ്യൂണൽ ട്യൂട്ടോറിയൽ ആരംഭിക്കാൻ ഇടത്തോട്ട് സ്വൈപ്പ് ചെയ്യുക"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"ഇഷ്‌ടാനുസൃതമാക്കുക"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"ഡിസ്‌മിസ് ചെയ്യുക"</string>
@@ -464,10 +457,8 @@
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"ക്രമീകരണം തുറക്കുക"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"വർക്ക് ആപ്പുകൾ പുനരാരംഭിക്കണോ?"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"പുനരാരംഭിക്കുക"</string>
-    <!-- no translation found for accessibility_action_label_close_communal_hub (6790396569621032333) -->
-    <skip />
-    <!-- no translation found for accessibility_content_description_for_communal_hub (1670220840599380118) -->
-    <skip />
+    <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"ലോക്ക് സ്ക്രീനിൽ വിജറ്റുകൾ അടയ്ക്കുക"</string>
+    <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"ലോക്ക് സ്‌ക്രീനിൽ വിജറ്റുകൾ"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ഉപയോക്താവ് മാറുക"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"പുൾഡൗൺ മെനു"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ഈ സെഷനിലെ എല്ലാ ആപ്പുകളും ഡാറ്റയും ഇല്ലാതാക്കും."</string>
