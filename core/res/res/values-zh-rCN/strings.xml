@@ -662,8 +662,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"未能识别指纹"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"未能识别指纹"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5590293588784953188) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5590293588784953188">"无法识别面孔。请改用指纹。"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"已验证指纹"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"面孔已验证"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"面孔已验证，请按确认按钮"</string>
@@ -1897,7 +1896,8 @@
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"取消时要求输入PIN码"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"取消固定前要求绘制解锁图案"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"取消时要求输入密码"</string>
-    <string name="package_installed_device_owner" msgid="7035926868974878525">"已由您的管理员安装"</string>
+    <!-- no translation found for package_installed_device_owner (8684974629306529138) -->
+    <skip />
     <string name="package_updated_device_owner" msgid="7560272363805506941">"已由您的管理员更新"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"已由您的管理员删除"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"确定"</string>
@@ -2394,6 +2394,8 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"工作 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"测试"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"共用"</string>
+    <!-- no translation found for redacted_notification_message (1520587845842228816) -->
+    <skip />
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"为安全起见而在屏幕共享画面中处于隐藏状态的应用内容"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"自动连接到卫星"</string>

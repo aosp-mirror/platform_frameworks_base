@@ -1896,7 +1896,8 @@
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"અનપિન કરતા પહેલાં પિન માટે પૂછો"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"અનપિન કરતા પહેલાં અનલૉક પૅટર્ન માટે પૂછો"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"અનપિન કરતાં પહેલાં પાસવર્ડ માટે પૂછો"</string>
-    <string name="package_installed_device_owner" msgid="7035926868974878525">"તમારા વ્યવસ્થાપક દ્વારા ઇન્સ્ટૉલ કરવામાં આવેલ છે"</string>
+    <!-- no translation found for package_installed_device_owner (8684974629306529138) -->
+    <skip />
     <string name="package_updated_device_owner" msgid="7560272363805506941">"તમારા વ્યવસ્થાપક દ્વારા અપડેટ કરવામાં આવેલ છે"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"તમારા વ્યવસ્થાપક દ્વારા કાઢી નાખવામાં આવેલ છે"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ઓકે"</string>
@@ -2393,6 +2394,8 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"ઑફિસ 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"પરીક્ષણ કરો"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"કૉમ્યુનલ"</string>
+    <!-- no translation found for redacted_notification_message (1520587845842228816) -->
+    <skip />
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"સુરક્ષા માટે સ્ક્રીન શેર કરતી વખતે ઍપનું કન્ટેન્ટ છુપાવેલું છે"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"સેટેલાઇટ સાથે ઑટોમૅટિક રીતે કનેક્ટેડ"</string>
