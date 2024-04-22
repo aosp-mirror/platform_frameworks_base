@@ -22,7 +22,8 @@ import android.os.Bundle;
 import android.test.mock.MockContext;
 import android.test.suitebuilder.ListTestCaseNames;
 import android.test.suitebuilder.ListTestCaseNames.TestDescriptor;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
