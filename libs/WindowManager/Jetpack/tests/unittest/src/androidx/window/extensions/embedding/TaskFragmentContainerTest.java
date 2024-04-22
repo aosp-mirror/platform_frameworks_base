@@ -51,10 +51,12 @@ import androidx.window.extensions.layout.WindowLayoutComponentImpl;
 import com.google.android.collect.Lists;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,6 +73,9 @@ import java.util.List;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class TaskFragmentContainerTest {
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
+
     @Mock
     private SplitPresenter mPresenter;
     private SplitController mController;
@@ -83,7 +88,6 @@ public class TaskFragmentContainerTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
         DeviceStateManagerFoldingFeatureProducer producer =
                 mock(DeviceStateManagerFoldingFeatureProducer.class);
         WindowLayoutComponentImpl component = mock(WindowLayoutComponentImpl.class);

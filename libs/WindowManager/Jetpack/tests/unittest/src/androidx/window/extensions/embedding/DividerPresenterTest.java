@@ -59,7 +59,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.concurrent.Executor;
 
@@ -73,6 +74,9 @@ import java.util.concurrent.Executor;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class DividerPresenterTest {
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
+
     @Rule
     public final SetFlagsRule mSetFlagRule = new SetFlagsRule();
 
@@ -118,7 +122,6 @@ public class DividerPresenterTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         mSetFlagRule.enableFlags(Flags.FLAG_ACTIVITY_EMBEDDING_INTERACTIVE_DIVIDER_FLAG);
 
         when(mTaskContainer.getTaskId()).thenReturn(MOCK_TASK_ID);
