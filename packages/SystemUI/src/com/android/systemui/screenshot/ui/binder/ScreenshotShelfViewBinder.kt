@@ -17,7 +17,6 @@
 package com.android.systemui.screenshot.ui.binder
 
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -26,7 +25,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
+import com.android.systemui.screenshot.ScreenshotEvent
 import com.android.systemui.screenshot.ui.ScreenshotShelfView
+import com.android.systemui.screenshot.ui.SwipeGestureListener
 import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel
 import com.android.systemui.util.children
 import kotlinx.coroutines.launch
@@ -36,16 +37,28 @@ object ScreenshotShelfViewBinder {
         view: ScreenshotShelfView,
         viewModel: ScreenshotViewModel,
         layoutInflater: LayoutInflater,
-        onTouchListener: (MotionEvent) -> Boolean,
+        onDismissalRequested: (event: ScreenshotEvent, velocity: Float?) -> Unit,
+        onDismissalCancelled: () -> Unit,
     ) {
-        view.onTouchInterceptListener = onTouchListener
+        val swipeGestureListener =
+            SwipeGestureListener(
+                view,
+                onDismiss = {
+                    onDismissalRequested(ScreenshotEvent.SCREENSHOT_SWIPE_DISMISSED, it)
+                },
+                onCancel = onDismissalCancelled
+            )
+        view.onTouchInterceptListener = { swipeGestureListener.onMotionEvent(it) }
 
         val previewView: ImageView = view.requireViewById(R.id.screenshot_preview)
         val previewBorder = view.requireViewById<View>(R.id.screenshot_preview_border)
         previewView.clipToOutline = true
         val actionsContainer: LinearLayout = view.requireViewById(R.id.screenshot_actions)
-        view.requireViewById<View>(R.id.screenshot_dismiss_button).visibility =
-            if (viewModel.showDismissButton) View.VISIBLE else View.GONE
+        val dismissButton = view.requireViewById<View>(R.id.screenshot_dismiss_button)
+        dismissButton.visibility = if (viewModel.showDismissButton) View.VISIBLE else View.GONE
+        dismissButton.setOnClickListener {
+            onDismissalRequested(ScreenshotEvent.SCREENSHOT_EXPLICIT_DISMISSAL, null)
+        }
 
         view.repeatWhenAttached {
             lifecycleScope.launch {
