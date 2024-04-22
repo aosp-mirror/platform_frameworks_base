@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.pipeline.satellite.data
 
 import com.android.systemui.statusbar.pipeline.satellite.shared.model.SatelliteConnectionState
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Device-based satellite refers to the capability of a device to connect directly to a satellite
@@ -26,12 +26,22 @@ import kotlinx.coroutines.flow.Flow
  */
 interface DeviceBasedSatelliteRepository {
     /** See [SatelliteConnectionState] for available states */
-    val connectionState: Flow<SatelliteConnectionState>
+    val connectionState: StateFlow<SatelliteConnectionState>
 
     /** 0-4 level (similar to wifi and mobile) */
     // @IntRange(from = 0, to = 4)
-    val signalStrength: Flow<Int>
+    val signalStrength: StateFlow<Int>
 
     /** Clients must observe this property, as device-based satellite is location-dependent */
-    val isSatelliteAllowedForCurrentLocation: Flow<Boolean>
+    val isSatelliteAllowedForCurrentLocation: StateFlow<Boolean>
 }
+
+/**
+ * A no-op interface used for Dagger bindings.
+ *
+ * [DeviceBasedSatelliteRepositorySwitcher] needs to inject both the real repository and the demo
+ * mode repository, both of which implement the [DeviceBasedSatelliteRepository] interface. To help
+ * distinguish the two for the switcher, [DeviceBasedSatelliteRepositoryImpl] will implement this
+ * [RealDeviceBasedSatelliteRepository] interface.
+ */
+interface RealDeviceBasedSatelliteRepository : DeviceBasedSatelliteRepository
