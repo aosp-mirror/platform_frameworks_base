@@ -519,7 +519,7 @@ public class ScreenshotController {
         removeWindow();
         releaseMediaPlayer();
         releaseContext();
-        mBgExecutor.shutdownNow();
+        mBgExecutor.shutdown();
     }
 
     /**
