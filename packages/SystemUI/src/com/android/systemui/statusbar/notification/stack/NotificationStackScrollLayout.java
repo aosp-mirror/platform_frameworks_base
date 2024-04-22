@@ -23,6 +23,7 @@ import static android.view.MotionEvent.ACTION_UP;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SHADE_CLEAR_ALL;
 import static com.android.systemui.Flags.newAodTransition;
+import static com.android.systemui.Flags.notificationOverExpansionClippingFix;
 import static com.android.systemui.flags.Flags.UNCLEARED_TRANSIENT_HUN_FIX;
 import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_SILENT;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
@@ -516,6 +517,7 @@ public class NotificationStackScrollLayout
     private int mRoundedRectClippingTop;
     private int mRoundedRectClippingBottom;
     private int mRoundedRectClippingRight;
+    private int mRoundedRectClippingYTranslation;
     private final float[] mBgCornerRadii = new float[8];
 
     /**
@@ -671,6 +673,9 @@ public class NotificationStackScrollLayout
      */
     void setOverExpansion(float margin) {
         mAmbientState.setOverExpansion(margin);
+        if (notificationOverExpansionClippingFix() && !SceneContainerFlag.isEnabled()) {
+            setRoundingClippingYTranslation((int) margin);
+        }
         updateStackPosition();
         requestChildrenUpdate();
     }
@@ -5115,6 +5120,7 @@ public class NotificationStackScrollLayout
         pw.append(" t=").print(mRoundedRectClippingTop);
         pw.append(" r=").print(mRoundedRectClippingRight);
         pw.append(" b=").print(mRoundedRectClippingBottom);
+        pw.append(" +y=").print(mRoundedRectClippingYTranslation);
         pw.append("} topRadius=").print(mBgCornerRadii[0]);
         pw.append(" bottomRadius=").println(mBgCornerRadii[4]);
     }
@@ -5663,8 +5669,28 @@ public class NotificationStackScrollLayout
         mBgCornerRadii[5] = bottomRadius;
         mBgCornerRadii[6] = bottomRadius;
         mBgCornerRadii[7] = bottomRadius;
+        updateRoundedClipPath();
+    }
+
+    // see b/288553572
+    private void setRoundingClippingYTranslation(int yTranslation) {
+        SceneContainerFlag.assertInLegacyMode();
+        if (mRoundedRectClippingYTranslation == yTranslation) {
+            return;
+        }
+        mRoundedRectClippingYTranslation = yTranslation;
+        updateRoundedClipPath();
+    }
+
+    private void updateRoundedClipPath() {
+        SceneContainerFlag.assertInLegacyMode();
         mRoundedClipPath.reset();
-        mRoundedClipPath.addRoundRect(left, top, right, bottom, mBgCornerRadii, Path.Direction.CW);
+        mRoundedClipPath.addRoundRect(
+                mRoundedRectClippingLeft,
+                mRoundedRectClippingTop + mRoundedRectClippingYTranslation,
+                mRoundedRectClippingRight,
+                mRoundedRectClippingBottom + mRoundedRectClippingYTranslation,
+                mBgCornerRadii, Path.Direction.CW);
         if (mShouldUseRoundedRectClipping) {
             invalidate();
         }
