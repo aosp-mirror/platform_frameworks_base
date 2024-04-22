@@ -39,11 +39,6 @@ import java.util.Objects;
 public final class VirtualCameraStreamConfig implements Parcelable {
     // TODO(b/310857519): Check if we should increase the fps upper limit in future.
     static final int MAX_FPS_UPPER_LIMIT = 60;
-    // This is the minimum guaranteed upper bound of texture size supported by all devices.
-    // Keep this in sync with kMaxTextureSize from services/camera/virtualcamera/util/Util.cc
-    // TODO(b/310857519): Remove this once we add support for fetching the maximum texture size
-    // supported by the current device.
-    static final int DIMENSION_UPPER_LIMIT = 2048;
 
     private final int mWidth;
     private final int mHeight;
