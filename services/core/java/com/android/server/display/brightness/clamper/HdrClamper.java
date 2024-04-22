@@ -56,6 +56,11 @@ public class HdrClamper {
     private float mTransitionRate = -1f;
     private float mDesiredTransitionRate = -1f;
 
+    /**
+     * Indicates that maxBrightness is changed, and we should use slow transition
+     */
+    private boolean mUseSlowTransition = false;
+
     public HdrClamper(BrightnessClamperController.ClamperChangeListener clamperChangeListener,
             Handler handler) {
         this(clamperChangeListener, handler, new Injector());
@@ -69,6 +74,7 @@ public class HdrClamper {
         mDebouncer = () -> {
             mTransitionRate = mDesiredTransitionRate;
             mMaxBrightness = mDesiredMaxBrightness;
+            mUseSlowTransition = true;
             mClamperChangeListener.onChanged();
         };
         mHdrListener = injector.getHdrListener((visible) -> {
@@ -77,14 +83,24 @@ public class HdrClamper {
         }, handler);
     }
 
-    // Called in same looper: mHandler.getLooper()
+    /**
+     * Applies clamping
+     * Called in same looper: mHandler.getLooper()
+     */
+    public float clamp(float brightness) {
+        return Math.min(brightness, mMaxBrightness);
+    }
+
+    @VisibleForTesting
     public float getMaxBrightness() {
         return mMaxBrightness;
     }
 
     // Called in same looper: mHandler.getLooper()
     public float getTransitionRate() {
-        return mTransitionRate;
+        float expectedTransitionRate =  mUseSlowTransition ? mTransitionRate : -1;
+        mUseSlowTransition = false;
+        return  expectedTransitionRate;
     }
 
     /**
@@ -157,7 +173,8 @@ public class HdrClamper {
         mMaxBrightness = PowerManager.BRIGHTNESS_MAX;
         mDesiredMaxBrightness = PowerManager.BRIGHTNESS_MAX;
         mDesiredTransitionRate = -1f;
-        mTransitionRate = 1f;
+        mTransitionRate = -1f;
+        mUseSlowTransition = false;
         mClamperChangeListener.onChanged();
     }
 
