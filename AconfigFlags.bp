@@ -685,15 +685,17 @@ java_aconfig_library {
 // Permissions
 aconfig_declarations {
     name: "android.permission.flags-aconfig",
-    package: "android.permission.flags",
     container: "system",
+    package: "android.permission.flags",
+    exportable: true,
     srcs: ["core/java/android/permission/flags.aconfig"],
 }
 
 java_aconfig_library {
-    name: "android.permission.flags-aconfig-java",
+    name: "android.permission.flags-aconfig-java-export",
     aconfig_declarations: "android.permission.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
+    mode: "exported",
     min_sdk_version: "30",
     apex_available: [
         "//apex_available:platform",
@@ -708,9 +710,15 @@ java_aconfig_library {
     host_supported: true,
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
     min_sdk_version: "30",
+}
+
+java_aconfig_library {
+    name: "android.permission.flags-aconfig-java",
+    aconfig_declarations: "android.permission.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+    min_sdk_version: "30",
     apex_available: [
         "//apex_available:platform",
-        "com.android.permission",
         "com.android.nfcservices",
     ],
 }

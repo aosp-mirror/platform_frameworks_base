@@ -2,20 +2,20 @@ package: "android.permission.flags"
 container: "system"
 
 flag {
-  name: "device_aware_permission_apis_enabled"
-  is_exported: true
-  is_fixed_read_only: true
-  namespace: "permissions"
-  description: "enable device aware permission APIs"
-  bug: "274852670"
+    name: "device_aware_permission_apis_enabled"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "enable device aware permission APIs"
+    bug: "274852670"
 }
 
 flag {
-  name: "voice_activation_permission_apis"
-  is_exported: true
-  namespace: "permissions"
-  description: "enable voice activation permission APIs"
-  bug: "287264308"
+    name: "voice_activation_permission_apis"
+    is_exported: true
+    namespace: "permissions"
+    description: "enable voice activation permission APIs"
+    bug: "287264308"
 }
 
 flag {
@@ -28,11 +28,11 @@ flag {
 }
 
 flag {
-  name: "set_next_attribution_source"
-  is_exported: true
-  namespace: "permissions"
-  description: "enable AttributionSource.setNextAttributionSource"
-  bug: "304478648"
+    name: "set_next_attribution_source"
+    is_exported: true
+    namespace: "permissions"
+    description: "enable AttributionSource.setNextAttributionSource"
+    bug: "304478648"
 }
 
 flag {
@@ -53,19 +53,19 @@ flag {
 }
 
 flag {
-  name: "op_enable_mobile_data_by_user"
-  is_exported: true
-  namespace: "permissions"
-  description: "enables logging of the OP_ENABLE_MOBILE_DATA_BY_USER"
-  bug: "222650148"
+    name: "op_enable_mobile_data_by_user"
+    is_exported: true
+    namespace: "permissions"
+    description: "enables logging of the OP_ENABLE_MOBILE_DATA_BY_USER"
+    bug: "222650148"
 }
 
 flag {
-  name: "factory_reset_prep_permission_apis"
-  is_exported: true
-  namespace: "wallet_integration"
-  description: "enable Permission PREPARE_FACTORY_RESET."
-  bug: "302016478"
+    name: "factory_reset_prep_permission_apis"
+    is_exported: true
+    namespace: "wallet_integration"
+    description: "enable Permission PREPARE_FACTORY_RESET."
+    bug: "302016478"
 }
 
 flag {
@@ -92,57 +92,61 @@ flag {
 }
 
 flag {
-  name: "signature_permission_allowlist_enabled"
-  is_fixed_read_only: true
-  namespace: "permissions"
-  description: "Enable signature permission allowlist"
-  bug: "308573169"
+    name: "signature_permission_allowlist_enabled"
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "Enable signature permission allowlist"
+    bug: "308573169"
 }
 
 flag {
-  name: "sensitive_notification_app_protection"
-  namespace: "permissions"
-  description: "This flag controls the sensitive notification app protections while screen sharing"
-  bug: "312784351"
-  # Referenced in WM where WM starts before DeviceConfig
-  is_fixed_read_only: true
+    name: "sensitive_notification_app_protection"
+    is_exported: true
+    # Referenced in WM where WM starts before DeviceConfig
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "This flag controls the sensitive notification app protections while screen sharing"
+    bug: "312784351"
 }
 
 flag {
-  name: "sensitive_content_improvements"
-  namespace: "permissions"
-  description: "Improvements to sensitive content/notification features, such as the Toast UX."
-  bug: "301960090"
-  # Referenced in WM where WM starts before DeviceConfig
-  is_fixed_read_only: true
+    name: "sensitive_content_improvements"
+    # Referenced in WM where WM starts before DeviceConfig
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "Improvements to sensitive content/notification features, such as the Toast UX."
+    bug: "301960090"
+
 }
 
 flag {
-  name: "sensitive_content_metrics_bugfix"
-  namespace: "permissions"
-  description: "Enables metrics bugfixes for sensitive content/notification features"
-  bug: "312784351"
-  # Referenced in WM where WM starts before DeviceConfig
-  is_fixed_read_only: true
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
+    name: "sensitive_content_metrics_bugfix"
+    # Referenced in WM where WM starts before DeviceConfig
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "Enables metrics bugfixes for sensitive content/notification features"
+    bug: "312784351"
+
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
-  name: "sensitive_content_recents_screenshot_bugfix"
-  namespace: "permissions"
-  description: "Enables recents screenshot bugfixes for sensitive content/notification features"
-  bug: "312784351"
-  # Referenced in WM where WM starts before DeviceConfig
-  is_fixed_read_only: true
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
+    name: "sensitive_content_recents_screenshot_bugfix"
+    # Referenced in WM where WM starts before DeviceConfig
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "Enables recents screenshot bugfixes for sensitive content/notification features"
+    bug: "312784351"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
     name: "device_aware_permissions_enabled"
+    is_exported: true
     is_fixed_read_only: true
     namespace: "permissions"
     description: "When the flag is off no permissions can be device aware"
