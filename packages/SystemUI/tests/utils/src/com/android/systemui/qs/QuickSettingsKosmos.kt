@@ -16,16 +16,37 @@
 
 package com.android.systemui.qs
 
+import android.app.admin.devicePolicyManager
+import android.content.applicationContext
+import android.os.fakeExecutorHandler
+import android.os.looper
+import com.android.internal.logging.metricsLogger
+import com.android.internal.logging.uiEventLogger
 import com.android.internal.logging.uiEventLoggerFake
 import com.android.systemui.InstanceIdSequenceFake
+import com.android.systemui.animation.dialogTransitionAnimator
+import com.android.systemui.broadcast.broadcastDispatcher
+import com.android.systemui.classifier.falsingManager
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.plugins.activityStarter
 import com.android.systemui.plugins.qs.QSFactory
-import com.android.systemui.qs.tiles.di.NewQSTileFactory
+import com.android.systemui.qs.footer.domain.interactor.FooterActionsInteractorImpl
+import com.android.systemui.qs.footer.foregroundServicesRepository
+import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
+import com.android.systemui.security.data.repository.securityRepository
+import com.android.systemui.settings.userTracker
+import com.android.systemui.statusbar.policy.deviceProvisionedController
+import com.android.systemui.statusbar.policy.securityController
+import com.android.systemui.user.data.repository.userSwitcherRepository
+import com.android.systemui.user.domain.interactor.userSwitcherInteractor
+import com.android.systemui.util.mockito.mock
 
-val Kosmos.instanceIdSequenceFake: InstanceIdSequenceFake by
-    Kosmos.Fixture { InstanceIdSequenceFake(0) }
-val Kosmos.qsEventLogger: QsEventLoggerFake by
-    Kosmos.Fixture { QsEventLoggerFake(uiEventLoggerFake, instanceIdSequenceFake) }
+val Kosmos.instanceIdSequenceFake: InstanceIdSequenceFake by Fixture { InstanceIdSequenceFake(0) }
+val Kosmos.qsEventLogger: QsEventLoggerFake by Fixture {
+    QsEventLoggerFake(uiEventLoggerFake, instanceIdSequenceFake)
+}
 
 var Kosmos.qsTileFactory by Fixture<QSFactory>()
 
