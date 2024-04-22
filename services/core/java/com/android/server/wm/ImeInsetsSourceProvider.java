@@ -181,8 +181,10 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
         }
         WindowToken imeToken = mWindowContainer.asWindowState() != null
                 ? mWindowContainer.asWindowState().mToken : null;
-        if (mDisplayContent.getAsyncRotationController() != null
-                && mDisplayContent.getAsyncRotationController().isTargetToken(imeToken)) {
+        final var rotationController = mDisplayContent.getAsyncRotationController();
+        if ((rotationController != null && rotationController.isTargetToken(imeToken))
+                || (imeToken != null && imeToken.isSelfAnimating(
+                        0 /* flags */, SurfaceAnimator.ANIMATION_TYPE_TOKEN_TRANSFORM))) {
             // Skip reporting IME drawn state when the control target is in fixed
             // rotation, AsyncRotationController will report after the animation finished.
             return;
