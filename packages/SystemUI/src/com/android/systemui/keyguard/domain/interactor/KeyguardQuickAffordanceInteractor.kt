@@ -23,6 +23,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.android.app.tracing.coroutines.withContext
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
@@ -45,6 +46,9 @@ import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAfforda
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
@@ -82,6 +86,7 @@ constructor(
     private val biometricSettingsRepository: BiometricSettingsRepository,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     @Application private val appContext: Context,
+    private val sceneInteractor: Lazy<SceneInteractor>,
 ) {
 
     /**
@@ -102,7 +107,21 @@ constructor(
         return combine(
             quickAffordanceAlwaysVisible(position),
             keyguardInteractor.isDozing,
-            keyguardInteractor.isKeyguardShowing,
+            if (SceneContainerFlag.isEnabled) {
+                sceneInteractor
+                    .get()
+                    .transitionState
+                    .map {
+                        when (it) {
+                            is ObservableTransitionState.Idle -> it.scene == Scenes.Lockscreen
+                            is ObservableTransitionState.Transition ->
+                                it.fromScene == Scenes.Lockscreen || it.toScene == Scenes.Lockscreen
+                        }
+                    }
+                    .distinctUntilChanged()
+            } else {
+                keyguardInteractor.isKeyguardShowing
+            },
             shadeInteractor.anyExpansion.map { it < 1.0f }.distinctUntilChanged(),
             biometricSettingsRepository.isCurrentUserInLockdown,
         ) { affordance, isDozing, isKeyguardShowing, isQuickSettingsVisible, isUserInLockdown ->
