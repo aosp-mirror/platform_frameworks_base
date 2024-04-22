@@ -1056,6 +1056,12 @@ fun AccessibilityContainer(viewModel: BaseCommunalViewModel, content: @Composabl
                             ) {
                                 viewModel.changeScene(CommunalScenes.Blank)
                                 true
+                            },
+                            CustomAccessibilityAction(
+                                context.getString(R.string.accessibility_action_label_edit_widgets)
+                            ) {
+                                viewModel.onOpenWidgetEditor()
+                                true
                             }
                         )
                 }
