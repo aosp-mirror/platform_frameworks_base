@@ -239,7 +239,7 @@ object MediaRecommendationsViewBinder {
         set.setAlpha(resId, if (visible) 1.0f else 0.0f)
     }
 
-    private fun updateRecommendationsVisibility(
+    fun updateRecommendationsVisibility(
         mediaViewController: MediaViewController,
         cardView: TransitionLayout,
     ) {
