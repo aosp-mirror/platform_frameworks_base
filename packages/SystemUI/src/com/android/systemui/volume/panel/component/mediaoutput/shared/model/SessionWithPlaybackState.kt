@@ -16,9 +16,7 @@
 
 package com.android.systemui.volume.panel.component.mediaoutput.shared.model
 
-import android.media.session.PlaybackState
-
-data class SessionWithPlayback(
+data class SessionWithPlaybackState(
     val session: MediaDeviceSession,
-    val playback: PlaybackState,
+    val isPlaybackActive: Boolean,
 )
