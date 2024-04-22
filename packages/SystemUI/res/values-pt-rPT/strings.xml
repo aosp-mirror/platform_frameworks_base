@@ -966,7 +966,7 @@
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Atalho de <xliff:g id="FEATURE_NAME">%s</xliff:g> removido"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# atalho removido}many{# atalhos removidos}other{# atalhos removidos}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Mover p/ parte sup. esquerda"</string>
-    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Mover parte superior direita"</string>
+    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Mover p/ parte sup. direita"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Mover p/ parte infer. esquerda"</string>
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Mover p/ parte infer. direita"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Mover p/ extremidade e ocultar"</string>

@@ -663,8 +663,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Huella digital no reconocida"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Huella digital no reconocida"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5590293588784953188) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5590293588784953188">"Cara no reconocida. Usa la huella digital."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Se ha autenticado la huella digital"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Cara autenticada"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Se ha autenticado la cara, pulsa para confirmar"</string>

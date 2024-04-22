@@ -56,10 +56,13 @@ constructor(
             if (!allOos) {
                 flowOf(false)
             } else {
-                combine(interactor.isSatelliteAllowed, airplaneModeRepository.isAirplaneMode) {
-                    isSatelliteAllowed,
-                    isAirplaneMode ->
-                    isSatelliteAllowed && !isAirplaneMode
+                combine(
+                    interactor.isSatelliteAllowed,
+                    interactor.isDeviceProvisioned,
+                    interactor.isWifiActive,
+                    airplaneModeRepository.isAirplaneMode
+                ) { isSatelliteAllowed, isDeviceProvisioned, isWifiActive, isAirplaneMode ->
+                    isSatelliteAllowed && isDeviceProvisioned && !isWifiActive && !isAirplaneMode
                 }
             }
         }

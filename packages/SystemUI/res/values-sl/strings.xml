@@ -973,7 +973,7 @@
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Premakni z roba in pokaži"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Odstrani"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"preklop"</string>
-    <string name="accessibility_floating_button_action_edit" msgid="1688227814600463987">"Urejanje"</string>
+    <string name="accessibility_floating_button_action_edit" msgid="1688227814600463987">"Uredi"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Kontrolniki naprave"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Izberite aplikacijo za dodajanje kontrolnikov"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# kontrolnik je dodan.}one{# kontrolnik je dodan.}two{# kontrolnika sta dodana.}few{# kontrolniki so dodani.}other{# kontrolnikov je dodanih.}}"</string>
