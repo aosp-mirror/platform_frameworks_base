@@ -19,7 +19,6 @@ package com.android.systemui.haptics.qs
 import android.animation.ValueAnimator
 import android.os.VibrationEffect
 import android.view.View
-import android.view.ViewConfiguration
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.annotation.VisibleForTesting
 import androidx.core.animation.doOnCancel
@@ -32,7 +31,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 
 /**
  * A class that handles the long press visuo-haptic effect for a QS tile.
@@ -75,9 +73,6 @@ constructor(
                 action
             }
         }
-
-    // Should a tap timeout countdown begin
-    val shouldWaitForTapTimeout: Flow<Boolean> = state.map { it == State.TIMEOUT_WAIT }
 
     /** Haptic effects */
     private val durations =
@@ -246,13 +241,5 @@ constructor(
         CLICK,
         LONG_PRESS,
         RESET_AND_LONG_PRESS,
-    }
-
-    companion object {
-        /**
-         * A timeout to let the tile resolve if it is being swiped/scrolled. Since QS tiles are
-         * inside a scrollable container, they will be considered pressed only after a tap timeout.
-         */
-        val PRESSED_TIMEOUT = ViewConfiguration.getTapTimeout().toLong() + 20L
     }
 }
