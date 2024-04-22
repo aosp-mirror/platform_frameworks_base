@@ -26,6 +26,9 @@ import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_SETTING
 import android.hardware.biometrics.BiometricRequestConstants.REASON_ENROLL_ENROLLING
 import android.hardware.biometrics.BiometricRequestConstants.REASON_ENROLL_FIND_SENSOR
 import android.hardware.biometrics.BiometricSourceType
+import android.hardware.biometrics.events.AuthenticationAcquiredInfo
+import android.hardware.biometrics.events.AuthenticationStartedInfo
+import android.hardware.biometrics.events.AuthenticationStoppedInfo
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.shared.model.AuthenticationReason
@@ -78,7 +81,10 @@ class BiometricStatusRepositoryTest : SysuiTestCase() {
 
             assertThat(fingerprintAuthenticationReason).isEqualTo(AuthenticationReason.NotRunning)
 
-            listener.onAuthenticationStarted(REASON_AUTH_BP)
+            listener.onAuthenticationStarted(
+                AuthenticationStartedInfo.Builder(BiometricSourceType.FINGERPRINT, REASON_AUTH_BP)
+                    .build()
+            )
             assertThat(fingerprintAuthenticationReason)
                 .isEqualTo(AuthenticationReason.BiometricPromptAuthentication)
         }
@@ -94,7 +100,13 @@ class BiometricStatusRepositoryTest : SysuiTestCase() {
 
             assertThat(fingerprintAuthenticationReason).isEqualTo(AuthenticationReason.NotRunning)
 
-            listener.onAuthenticationStarted(REASON_AUTH_KEYGUARD)
+            listener.onAuthenticationStarted(
+                AuthenticationStartedInfo.Builder(
+                        BiometricSourceType.FINGERPRINT,
+                        REASON_AUTH_KEYGUARD
+                    )
+                    .build()
+            )
             assertThat(fingerprintAuthenticationReason)
                 .isEqualTo(AuthenticationReason.DeviceEntryAuthentication)
         }
@@ -110,7 +122,13 @@ class BiometricStatusRepositoryTest : SysuiTestCase() {
 
             assertThat(fingerprintAuthenticationReason).isEqualTo(AuthenticationReason.NotRunning)
 
-            listener.onAuthenticationStarted(REASON_AUTH_OTHER)
+            listener.onAuthenticationStarted(
+                AuthenticationStartedInfo.Builder(
+                        BiometricSourceType.FINGERPRINT,
+                        REASON_AUTH_OTHER
+                    )
+                    .build()
+            )
             assertThat(fingerprintAuthenticationReason)
                 .isEqualTo(AuthenticationReason.OtherAuthentication)
         }
@@ -126,7 +144,13 @@ class BiometricStatusRepositoryTest : SysuiTestCase() {
 
             assertThat(fingerprintAuthenticationReason).isEqualTo(AuthenticationReason.NotRunning)
 
-            listener.onAuthenticationStarted(REASON_AUTH_SETTINGS)
+            listener.onAuthenticationStarted(
+                AuthenticationStartedInfo.Builder(
+                        BiometricSourceType.FINGERPRINT,
+                        REASON_AUTH_SETTINGS
+                    )
+                    .build()
+            )
             assertThat(fingerprintAuthenticationReason)
                 .isEqualTo(AuthenticationReason.SettingsAuthentication(SettingsOperations.OTHER))
         }
@@ -142,7 +166,13 @@ class BiometricStatusRepositoryTest : SysuiTestCase() {
 
             assertThat(fingerprintAuthenticationReason).isEqualTo(AuthenticationReason.NotRunning)
 
-            listener.onAuthenticationStarted(REASON_ENROLL_FIND_SENSOR)
+            listener.onAuthenticationStarted(
+                AuthenticationStartedInfo.Builder(
+                        BiometricSourceType.FINGERPRINT,
+                        REASON_ENROLL_FIND_SENSOR
+                    )
+                    .build()
+            )
             assertThat(fingerprintAuthenticationReason)
                 .isEqualTo(
                     AuthenticationReason.SettingsAuthentication(
@@ -150,7 +180,13 @@ class BiometricStatusRepositoryTest : SysuiTestCase() {
                     )
                 )
 
-            listener.onAuthenticationStarted(REASON_ENROLL_ENROLLING)
+            listener.onAuthenticationStarted(
+                AuthenticationStartedInfo.Builder(
+                        BiometricSourceType.FINGERPRINT,
+                        REASON_ENROLL_ENROLLING
+                    )
+                    .build()
+            )
             assertThat(fingerprintAuthenticationReason)
                 .isEqualTo(
                     AuthenticationReason.SettingsAuthentication(SettingsOperations.ENROLL_ENROLLING)
@@ -166,8 +202,14 @@ class BiometricStatusRepositoryTest : SysuiTestCase() {
 
             val listener = biometricManager.captureListener()
 
-            listener.onAuthenticationStarted(REASON_AUTH_BP)
-            listener.onAuthenticationStopped()
+            listener.onAuthenticationStarted(
+                AuthenticationStartedInfo.Builder(BiometricSourceType.FINGERPRINT, REASON_AUTH_BP)
+                    .build()
+            )
+            listener.onAuthenticationStopped(
+                AuthenticationStoppedInfo.Builder(BiometricSourceType.FINGERPRINT, REASON_AUTH_BP)
+                    .build()
+            )
             assertThat(fingerprintAuthenticationReason).isEqualTo(AuthenticationReason.NotRunning)
         }
 
@@ -179,15 +221,43 @@ class BiometricStatusRepositoryTest : SysuiTestCase() {
 
             val listener = biometricManager.captureListener()
             listener.onAuthenticationAcquired(
-                BiometricSourceType.FINGERPRINT,
-                REASON_AUTH_BP,
-                BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START
+                AuthenticationAcquiredInfo.Builder(
+                        BiometricSourceType.FINGERPRINT,
+                        REASON_AUTH_BP,
+                        BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START
+                    )
+                    .build()
             )
 
             assertThat(fingerprintAcquiredStatus)
                 .isEqualTo(
                     AcquiredFingerprintAuthenticationStatus(
                         AuthenticationReason.BiometricPromptAuthentication,
+                        BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START
+                    )
+                )
+        }
+
+    @Test
+    fun updatesFingerprintAcquiredStatusWhenDeviceEntryAuthenticationAcquired() =
+        testScope.runTest {
+            val fingerprintAcquiredStatus by collectLastValue(underTest.fingerprintAcquiredStatus)
+            runCurrent()
+
+            val listener = biometricManager.captureListener()
+            listener.onAuthenticationAcquired(
+                AuthenticationAcquiredInfo.Builder(
+                        BiometricSourceType.FINGERPRINT,
+                        REASON_AUTH_KEYGUARD,
+                        BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START
+                    )
+                    .build()
+            )
+
+            assertThat(fingerprintAcquiredStatus)
+                .isEqualTo(
+                    AcquiredFingerprintAuthenticationStatus(
+                        AuthenticationReason.DeviceEntryAuthentication,
                         BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START
                     )
                 )

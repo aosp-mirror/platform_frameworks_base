@@ -496,7 +496,8 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                     createLogger(BiometricsProtoEnums.ACTION_ENROLL,
                             BiometricsProtoEnums.CLIENT_UNKNOWN,
                             mAuthenticationStatsCollector),
-                    mBiometricContext, maxTemplatesPerUser, debugConsent, options);
+                    mBiometricContext, maxTemplatesPerUser, debugConsent, options,
+                    mAuthenticationStateListeners);
             scheduleForSensor(sensorId, client, mBiometricStateCallback);
         });
         return id;
@@ -522,7 +523,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                     token, id, callback, options,
                     createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient,
                             mAuthenticationStatsCollector),
-                    mBiometricContext, isStrongBiometric);
+                    mBiometricContext, mAuthenticationStateListeners, isStrongBiometric);
             scheduleForSensor(sensorId, client, mBiometricStateCallback);
         });
 
