@@ -39,7 +39,6 @@ import com.android.systemui.statusbar.notification.stack.domain.interactor.heads
 import com.android.systemui.statusbar.notificationShadeWindowController
 import com.android.systemui.statusbar.phone.centralSurfaces
 import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
-import dagger.Lazy
 
 val Kosmos.sceneContainerStartable by Fixture {
     SceneContainerStartable(
@@ -55,8 +54,8 @@ val Kosmos.sceneContainerStartable by Fixture {
         falsingCollector = falsingCollector,
         falsingManager = falsingManager,
         powerInteractor = powerInteractor,
-        simBouncerInteractor = Lazy { simBouncerInteractor },
-        authenticationInteractor = Lazy { authenticationInteractor },
+        simBouncerInteractor = { simBouncerInteractor },
+        authenticationInteractor = { authenticationInteractor },
         windowController = notificationShadeWindowController,
         deviceProvisioningInteractor = deviceProvisioningInteractor,
         centralSurfaces = centralSurfaces,
@@ -65,5 +64,6 @@ val Kosmos.sceneContainerStartable by Fixture {
         faceUnlockInteractor = deviceEntryFaceAuthInteractor,
         shadeInteractor = shadeInteractor,
         uiEventLogger = uiEventLogger,
+        sceneBackInteractor = sceneBackInteractor,
     )
 }

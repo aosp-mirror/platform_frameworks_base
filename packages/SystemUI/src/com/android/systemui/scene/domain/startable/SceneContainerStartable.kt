@@ -45,6 +45,7 @@ import com.android.systemui.model.updateFlags
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.FalsingManager.FalsingBeliefListener
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.scene.domain.interactor.SceneBackInteractor
 import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -56,6 +57,7 @@ import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNoti
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisioningInteractor
 import com.android.systemui.util.asIndenting
+import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.printSection
 import com.android.systemui.util.println
@@ -111,6 +113,7 @@ constructor(
     private val faceUnlockInteractor: DeviceEntryFaceAuthInteractor,
     private val shadeInteractor: ShadeInteractor,
     private val uiEventLogger: UiEventLogger,
+    private val sceneBackInteractor: SceneBackInteractor,
 ) : CoreStartable {
 
     override fun start() {
@@ -124,6 +127,7 @@ constructor(
             hydrateInteractionState()
             handleBouncerOverscroll()
             hydrateWindowController()
+            hydrateBackStack()
         } else {
             sceneLogger.logFrameworkEnabled(
                 isEnabled = false,
@@ -257,8 +261,7 @@ constructor(
             // Track the previous scene (sans Bouncer), so that we know where to go when the device
             // is unlocked whilst on the bouncer.
             val previousScene =
-                sceneInteractor
-                    .previousScene()
+                sceneBackInteractor.backScene
                     .filterNot { it == Scenes.Bouncer }
                     .stateIn(this, SharingStarted.Eagerly, initialValue = null)
             deviceUnlockedInteractor.deviceUnlockStatus
@@ -580,5 +583,13 @@ constructor(
             toScene = targetSceneKey,
             loggingReason = loggingReason,
         )
+    }
+
+    private fun hydrateBackStack() {
+        applicationScope.launch {
+            sceneInteractor.currentScene.pairwise().collect { (from, to) ->
+                sceneBackInteractor.onSceneChange(from = from, to = to)
+            }
+        }
     }
 }

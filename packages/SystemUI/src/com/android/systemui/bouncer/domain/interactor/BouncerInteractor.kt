@@ -34,7 +34,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.log.SessionTracker
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.domain.interactor.SceneBackInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -59,7 +59,7 @@ constructor(
     private val powerInteractor: PowerInteractor,
     private val uiEventLogger: UiEventLogger,
     private val sessionTracker: SessionTracker,
-    sceneInteractor: SceneInteractor,
+    sceneBackInteractor: SceneBackInteractor,
 ) {
     private val _onIncorrectBouncerInput = MutableSharedFlow<Unit>()
     val onIncorrectBouncerInput: SharedFlow<Unit> = _onIncorrectBouncerInput
@@ -95,7 +95,9 @@ constructor(
 
     /** The scene to show when bouncer is dismissed. */
     val dismissDestination: Flow<SceneKey> =
-        sceneInteractor.previousScene(Scenes.Bouncer).map { it ?: Scenes.Lockscreen }
+        sceneBackInteractor.backScene
+            .filter { it != Scenes.Bouncer }
+            .map { it ?: Scenes.Lockscreen }
 
     /** Notifies that the user has places down a pointer, not necessarily dragging just yet. */
     fun onDown() {
