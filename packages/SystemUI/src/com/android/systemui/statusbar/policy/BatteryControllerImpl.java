@@ -37,7 +37,6 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerSaveState;
 import android.util.IndentingPrintWriter;
-import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -76,8 +75,6 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     private static final String TAG = "BatteryController";
 
     private static final String ACTION_LEVEL_TEST = "com.android.systemui.BATTERY_LEVEL_TEST";
-
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final EnhancedEstimates mEstimates;
     protected final BroadcastDispatcher mBroadcastDispatcher;
@@ -449,7 +446,6 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         PowerSaveState state = mPowerManager.getPowerSaveState(PowerManager.ServiceType.AOD);
         mAodPowerSave = state.batterySaverEnabled;
 
-        if (DEBUG) Log.d(TAG, "Power save is " + (mPowerSave ? "on" : "off"));
         firePowerSaveChanged();
     }
 
@@ -475,6 +471,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     }
 
     private void firePowerSaveChanged() {
+        mLogger.logPowerSaveChangedCallback(mPowerSave);
         dispatchSafeChange((callback) -> callback.onPowerSaveChanged(mPowerSave));
     }
 
