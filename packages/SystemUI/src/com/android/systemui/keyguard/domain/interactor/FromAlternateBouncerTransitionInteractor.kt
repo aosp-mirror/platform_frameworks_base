@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -32,14 +33,21 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
+@ExperimentalCoroutinesApi
 @SysUISingleton
 class FromAlternateBouncerTransitionInteractor
 @Inject
@@ -53,6 +61,7 @@ constructor(
     private val communalInteractor: CommunalInteractor,
     powerInteractor: PowerInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
+    private val primaryBouncerInteractor: PrimaryBouncerInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.ALTERNATE_BOUNCER,
@@ -102,13 +111,14 @@ constructor(
                     keyguardInteractor.primaryBouncerShowing,
                     powerInteractor.isAwake,
                     keyguardInteractor.isAodAvailable,
-                    communalInteractor.isIdleOnCommunal
+                    communalInteractor.isIdleOnCommunal,
+                    keyguardInteractor.isKeyguardOccluded,
                 )
                 .filterRelevantKeyguardStateAnd {
                     (isAlternateBouncerShowing, isPrimaryBouncerShowing, _, _, _) ->
                     !isAlternateBouncerShowing && !isPrimaryBouncerShowing
                 }
-                .collect { (_, _, isAwake, isAodAvailable, isIdleOnCommunal) ->
+                .collect { (_, _, isAwake, isAodAvailable, isIdleOnCommunal, isOccluded) ->
                     val to =
                         if (!isAwake) {
                             if (isAodAvailable) {
@@ -119,6 +129,8 @@ constructor(
                         } else {
                             if (isIdleOnCommunal) {
                                 KeyguardState.GLANCEABLE_HUB
+                            } else if (isOccluded) {
+                                KeyguardState.OCCLUDED
                             } else {
                                 KeyguardState.LOCKSCREEN
                             }
@@ -135,10 +147,19 @@ constructor(
         }
 
         scope.launch {
-            keyguardInteractor.isKeyguardGoingAway
-                .sampleUtil(finishedKeyguardState, ::Pair)
-                .collect { (isKeyguardGoingAway, keyguardState) ->
-                    if (isKeyguardGoingAway && keyguardState == KeyguardState.ALTERNATE_BOUNCER) {
+            merge(
+                    keyguardInteractor.isKeyguardGoingAway.filter { it }.map {}, // map to Unit
+                    keyguardInteractor.isKeyguardOccluded.flatMapLatest { keyguardOccluded ->
+                        if (keyguardOccluded) {
+                            primaryBouncerInteractor.keyguardAuthenticatedBiometricsHandled
+                        } else {
+                            emptyFlow()
+                        }
+                    }
+                )
+                .sampleUtil(finishedKeyguardState)
+                .collect { keyguardState ->
+                    if (keyguardState == KeyguardState.ALTERNATE_BOUNCER) {
                         startTransitionTo(KeyguardState.GONE)
                     }
                 }
