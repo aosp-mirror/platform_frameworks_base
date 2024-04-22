@@ -78,7 +78,6 @@ import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.IdleScreenRefreshRateConfig;
 import android.view.SurfaceControl.RefreshRateRange;
-import android.view.SurfaceControl.RefreshRateRanges;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
@@ -841,61 +840,6 @@ public class DisplayModeDirectorTest {
         assertThat(desiredSpecs.primary.physical.max).isAtLeast(expectedPhysicalRefreshRate);
         assertThat(desiredSpecs.appRequest.physical.min).isAtMost(0);
         assertThat(desiredSpecs.appRequest.physical.max).isAtLeast(expectedAppRequestedRefreshRate);
-    }
-
-    void verifySpecsWithRefreshRateSettings(DisplayModeDirector director, float minFps,
-            float peakFps, float defaultFps, RefreshRateRanges primary,
-            RefreshRateRanges appRequest) {
-        DesiredDisplayModeSpecs specs = director.getDesiredDisplayModeSpecsWithInjectedFpsSettings(
-                minFps, peakFps, defaultFps);
-        assertThat(specs.primary).isEqualTo(primary);
-        assertThat(specs.appRequest).isEqualTo(appRequest);
-    }
-
-    @Test
-    public void testSpecsFromRefreshRateSettings() {
-        // Confirm that, with varying settings for min, peak, and default refresh rate,
-        // DesiredDisplayModeSpecs is calculated correctly.
-        float[] refreshRates = {30.f, 60.f, 90.f, 120.f, 150.f};
-        DisplayModeDirector director =
-                createDirectorFromRefreshRateArray(refreshRates, /*baseModeId=*/0);
-
-        float inf = Float.POSITIVE_INFINITY;
-        RefreshRateRange rangeAll = new RefreshRateRange(0, inf);
-        RefreshRateRange range0to60 = new RefreshRateRange(0, 60);
-        RefreshRateRange range0to90 = new RefreshRateRange(0, 90);
-        RefreshRateRange range0to120 = new RefreshRateRange(0, 120);
-        RefreshRateRange range60to90 = new RefreshRateRange(60, 90);
-        RefreshRateRange range90to90 = new RefreshRateRange(90, 90);
-        RefreshRateRange range90to120 = new RefreshRateRange(90, 120);
-        RefreshRateRange range60toInf = new RefreshRateRange(60, inf);
-        RefreshRateRange range90toInf = new RefreshRateRange(90, inf);
-
-        RefreshRateRanges frameRateAll = new RefreshRateRanges(rangeAll, rangeAll);
-        RefreshRateRanges frameRate90toInf = new RefreshRateRanges(range90toInf, range90toInf);
-        RefreshRateRanges frameRate0to60 = new RefreshRateRanges(rangeAll, range0to60);
-        RefreshRateRanges frameRate0to90 = new RefreshRateRanges(rangeAll, range0to90);
-        RefreshRateRanges frameRate0to120 = new RefreshRateRanges(rangeAll, range0to120);
-        RefreshRateRanges frameRate60to90 = new RefreshRateRanges(range60toInf, range60to90);
-        RefreshRateRanges frameRate90to90 = new RefreshRateRanges(range90toInf, range90to90);
-        RefreshRateRanges frameRate90to120 = new RefreshRateRanges(range90toInf, range90to120);
-
-        verifySpecsWithRefreshRateSettings(director, 0, 0, 0, frameRateAll, frameRateAll);
-        verifySpecsWithRefreshRateSettings(director, 0, 0, 90, frameRate0to90, frameRateAll);
-        verifySpecsWithRefreshRateSettings(director, 0, 90, 0, frameRate0to90, frameRate0to90);
-        verifySpecsWithRefreshRateSettings(director, 0, 90, 60, frameRate0to60, frameRate0to90);
-        verifySpecsWithRefreshRateSettings(director, 0, 90, 120, frameRate0to90,
-                frameRate0to90);
-        verifySpecsWithRefreshRateSettings(director, 90, 0, 0, frameRate90toInf, frameRateAll);
-        verifySpecsWithRefreshRateSettings(director, 90, 0, 120, frameRate90to120,
-                frameRateAll);
-        verifySpecsWithRefreshRateSettings(director, 90, 0, 60, frameRate90toInf, frameRateAll);
-        verifySpecsWithRefreshRateSettings(director, 90, 120, 0, frameRate90to120,
-                frameRate0to120);
-        verifySpecsWithRefreshRateSettings(director, 90, 60, 0, frameRate90to90,
-                frameRate0to90);
-        verifySpecsWithRefreshRateSettings(director, 60, 120, 90, frameRate60to90,
-                frameRate0to120);
     }
 
     void verifyBrightnessObserverCall(DisplayModeDirector director, float minFps, float peakFps,

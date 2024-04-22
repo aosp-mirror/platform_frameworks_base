@@ -244,3 +244,14 @@ flag {
     bug: "306203895"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "enable_peak_refresh_rate_physical_limit"
+    namespace: "display_manager"
+    description: "Flag for adding physical refresh rate limit if smooth display setting is on "
+    bug: "332413475"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
