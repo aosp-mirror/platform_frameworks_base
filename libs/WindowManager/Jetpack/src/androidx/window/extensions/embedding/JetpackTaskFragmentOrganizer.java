@@ -354,14 +354,14 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     void setTaskFragmentIsolatedNavigation(@NonNull WindowContainerTransaction wct,
             @NonNull IBinder fragmentToken, boolean isolatedNav) {
         final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
-                OP_TYPE_SET_ISOLATED_NAVIGATION).setIsolatedNav(isolatedNav).build();
+                OP_TYPE_SET_ISOLATED_NAVIGATION).setBooleanValue(isolatedNav).build();
         wct.addTaskFragmentOperation(fragmentToken, operation);
     }
 
     void setTaskFragmentDimOnTask(@NonNull WindowContainerTransaction wct,
             @NonNull IBinder fragmentToken, boolean dimOnTask) {
         final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
-                OP_TYPE_SET_DIM_ON_TASK).setDimOnTask(dimOnTask).build();
+                OP_TYPE_SET_DIM_ON_TASK).setBooleanValue(dimOnTask).build();
         wct.addTaskFragmentOperation(fragmentToken, operation);
     }
 

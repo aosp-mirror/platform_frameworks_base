@@ -291,7 +291,7 @@ public class AmbientState implements Dumpable {
         mOverExpansion = overExpansion;
     }
 
-    float getOverExpansion() {
+    public float getOverExpansion() {
         return mOverExpansion;
     }
 

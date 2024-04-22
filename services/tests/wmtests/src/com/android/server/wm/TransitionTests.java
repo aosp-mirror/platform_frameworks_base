@@ -23,6 +23,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
@@ -1665,7 +1666,11 @@ public class TransitionTests extends WindowTestsBase {
         final Task task = createTask(mDisplayContent);
         final ActivityRecord activity0 = createActivityRecord(task);
         final ActivityRecord activity1 = createActivityRecord(task);
-        doReturn(true).when(activity1).hasStartingWindow();
+        final WindowManager.LayoutParams attrs =
+                new WindowManager.LayoutParams(TYPE_APPLICATION_STARTING);
+        final TestWindowState startingWindow = createWindowState(attrs, activity1);
+        activity1.mStartingData = mock(StartingData.class);
+        activity1.addWindow(startingWindow);
 
         // Start states.
         changes.put(activity0,

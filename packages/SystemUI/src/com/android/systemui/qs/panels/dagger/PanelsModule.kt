@@ -18,10 +18,20 @@ package com.android.systemui.qs.panels.dagger
 
 import com.android.systemui.qs.panels.data.repository.IconTilesRepository
 import com.android.systemui.qs.panels.data.repository.IconTilesRepositoryImpl
+import com.android.systemui.qs.panels.shared.model.GridLayoutTypeKey
+import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
+import com.android.systemui.qs.panels.ui.compose.GridLayout
+import com.android.systemui.qs.panels.ui.compose.InfiniteGridLayout
 import dagger.Binds
 import dagger.Module
+import dagger.multibindings.IntoMap
 
 @Module
 interface PanelsModule {
     @Binds fun bindIconTilesRepository(impl: IconTilesRepositoryImpl): IconTilesRepository
+
+    @Binds
+    @IntoMap
+    @GridLayoutTypeKey(InfiniteGridLayoutType::class)
+    fun bindGridLayout(impl: InfiniteGridLayout): GridLayout
 }

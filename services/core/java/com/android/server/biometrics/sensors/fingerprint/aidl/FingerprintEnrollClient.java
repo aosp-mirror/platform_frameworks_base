@@ -16,6 +16,12 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_VENDOR;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_VENDOR_BASE;
+import static android.hardware.fingerprint.FingerprintManager.getAcquiredString;
+import static android.hardware.fingerprint.FingerprintManager.getErrorString;
+
 import static com.android.systemui.shared.Flags.sidefpsControllerRefactor;
 
 import android.annotation.NonNull;
@@ -24,8 +30,14 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricFingerprintConstants.FingerprintAcquired;
+import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.BiometricStateListener;
 import android.hardware.biometrics.common.ICancellationSignal;
+import android.hardware.biometrics.events.AuthenticationAcquiredInfo;
+import android.hardware.biometrics.events.AuthenticationErrorInfo;
+import android.hardware.biometrics.events.AuthenticationHelpInfo;
+import android.hardware.biometrics.events.AuthenticationStartedInfo;
+import android.hardware.biometrics.events.AuthenticationStoppedInfo;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintEnrollOptions;
@@ -150,7 +162,11 @@ public class FingerprintEnrollClient extends EnrollClient<AidlSession> implement
             resetIgnoreDisplayTouches();
             mSensorOverlays.hide(getSensorId());
             if (sidefpsControllerRefactor()) {
-                mAuthenticationStateListeners.onAuthenticationStopped();
+                mAuthenticationStateListeners.onAuthenticationStopped(
+                        new AuthenticationStoppedInfo.Builder(
+                                BiometricSourceType.FINGERPRINT,
+                                getRequestReasonFromFingerprintEnrollReason(mEnrollReason)).build()
+                );
             }
         }
 
@@ -158,6 +174,24 @@ public class FingerprintEnrollClient extends EnrollClient<AidlSession> implement
 
     @Override
     public void onAcquired(@FingerprintAcquired int acquiredInfo, int vendorCode) {
+        if (acquiredInfo != FINGERPRINT_ACQUIRED_START) {
+            mAuthenticationStateListeners.onAuthenticationAcquired(
+                    new AuthenticationAcquiredInfo.Builder(BiometricSourceType.FINGERPRINT,
+                            getRequestReasonFromFingerprintEnrollReason(mEnrollReason),
+                            acquiredInfo).build()
+            );
+        }
+        String helpMsg = getAcquiredString(getContext(), acquiredInfo, vendorCode);
+        if (helpMsg != null) {
+            int helpCode = acquiredInfo == FINGERPRINT_ACQUIRED_VENDOR
+                    ? (vendorCode + FINGERPRINT_ACQUIRED_VENDOR_BASE) : acquiredInfo;
+            mAuthenticationStateListeners.onAuthenticationHelp(
+                    new AuthenticationHelpInfo.Builder(BiometricSourceType.FINGERPRINT,
+                            getRequestReasonFromFingerprintEnrollReason(mEnrollReason),
+                            helpMsg, helpCode).build()
+            );
+        }
+
         boolean acquiredGood =
                 acquiredInfo == BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_GOOD;
         // For UDFPS, notify SysUI that the illumination can be turned off.
@@ -181,11 +215,20 @@ public class FingerprintEnrollClient extends EnrollClient<AidlSession> implement
 
     @Override
     public void onError(int errorCode, int vendorCode) {
+        mAuthenticationStateListeners.onAuthenticationError(new AuthenticationErrorInfo
+                .Builder(BiometricSourceType.FINGERPRINT,
+                getRequestReasonFromFingerprintEnrollReason(mEnrollReason),
+                getErrorString(getContext(), errorCode, vendorCode), errorCode).build()
+        );
         super.onError(errorCode, vendorCode);
+
         resetIgnoreDisplayTouches();
         mSensorOverlays.hide(getSensorId());
         if (sidefpsControllerRefactor()) {
-            mAuthenticationStateListeners.onAuthenticationStopped();
+            mAuthenticationStateListeners.onAuthenticationStopped(
+                    new AuthenticationStoppedInfo.Builder(BiometricSourceType.FINGERPRINT,
+                            getRequestReasonFromFingerprintEnrollReason(mEnrollReason)).build()
+            );
         }
     }
 
@@ -198,11 +241,13 @@ public class FingerprintEnrollClient extends EnrollClient<AidlSession> implement
     @Override
     protected void startHalOperation() {
         resetIgnoreDisplayTouches();
-        mSensorOverlays.show(getSensorId(), getRequestReasonFromEnrollReason(mEnrollReason),
-                this);
+        mSensorOverlays.show(getSensorId(),
+                getRequestReasonFromFingerprintEnrollReason(mEnrollReason), this);
         if (sidefpsControllerRefactor()) {
-            mAuthenticationStateListeners.onAuthenticationStarted(
-                    getRequestReasonFromEnrollReason(mEnrollReason));
+            mAuthenticationStateListeners.onAuthenticationStarted(new AuthenticationStartedInfo
+                    .Builder(BiometricSourceType.FINGERPRINT,
+                    getRequestReasonFromFingerprintEnrollReason(mEnrollReason)).build()
+            );
         }
 
         BiometricNotificationUtils.cancelBadCalibrationNotification(getContext());
@@ -250,7 +295,10 @@ public class FingerprintEnrollClient extends EnrollClient<AidlSession> implement
         resetIgnoreDisplayTouches();
         mSensorOverlays.hide(getSensorId());
         if (sidefpsControllerRefactor()) {
-            mAuthenticationStateListeners.onAuthenticationStopped();
+            mAuthenticationStateListeners.onAuthenticationStopped(new AuthenticationStoppedInfo
+                    .Builder(BiometricSourceType.FINGERPRINT,
+                    getRequestReasonFromFingerprintEnrollReason(mEnrollReason)).build()
+            );
         }
 
         unsubscribeBiometricContext();

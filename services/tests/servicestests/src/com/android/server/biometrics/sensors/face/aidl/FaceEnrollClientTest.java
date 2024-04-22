@@ -16,6 +16,9 @@
 
 package com.android.server.biometrics.sensors.face.aidl;
 
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_START;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -24,13 +27,21 @@ import static org.mockito.ArgumentMatchers.anyByte;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.hardware.biometrics.BiometricFaceConstants;
+import android.hardware.biometrics.BiometricRequestConstants;
+import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.OperationContext;
+import android.hardware.biometrics.events.AuthenticationErrorInfo;
+import android.hardware.biometrics.events.AuthenticationHelpInfo;
+import android.hardware.biometrics.events.AuthenticationStartedInfo;
+import android.hardware.biometrics.events.AuthenticationStoppedInfo;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.face.Face;
 import android.hardware.face.FaceEnrollOptions;
@@ -44,9 +55,11 @@ import android.testing.TestableContext;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.internal.R;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.OperationContextExt;
+import com.android.server.biometrics.sensors.AuthenticationStateListeners;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -56,6 +69,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -93,18 +107,32 @@ public class FaceEnrollClientTest {
     private ClientMonitorCallback mCallback;
     @Mock
     private AidlResponseHandler mAidlResponseHandler;
+    @Mock
+    private AuthenticationStateListeners mAuthenticationStateListeners;
     @Captor
     private ArgumentCaptor<OperationContextExt> mOperationContextCaptor;
     @Captor
     private ArgumentCaptor<Consumer<OperationContext>> mContextInjector;
     @Captor
     private ArgumentCaptor<Consumer<OperationContext>> mStartHalConsumer;
+    @Captor
+    private ArgumentCaptor<AuthenticationErrorInfo> mAuthenticationErrorCaptor;
+    @Captor
+    private ArgumentCaptor<AuthenticationHelpInfo> mAuthenticationHelpCaptor;
+    @Captor
+    private ArgumentCaptor<AuthenticationStartedInfo> mAuthenticationStartedCaptor;
+    @Captor
+    private ArgumentCaptor<AuthenticationStoppedInfo> mAuthenticationStoppedCaptor;
 
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
 
     @Before
     public void setup() {
+        mContext.getOrCreateTestableResources().addOverride(R.string.face_error_hw_not_available,
+                "hw not available");
+        mContext.getOrCreateTestableResources().addOverride(R.string.face_acquired_too_dark,
+                "too dark");
         when(mBiometricContext.updateContext(any(), anyBoolean())).thenAnswer(
                 i -> i.getArgument(0));
     }
@@ -184,6 +212,85 @@ public class FaceEnrollClientTest {
                 null /* previewSurface */, 8 /* sensorId */,
                 mBiometricLogger, mBiometricContext, 5 /* maxTemplatesPerUser */,
                 true /* debugConsent */,
-                (new FaceEnrollOptions.Builder()).setEnrollReason(ENROLL_SOURCE).build());
+                (new FaceEnrollOptions.Builder()).setEnrollReason(ENROLL_SOURCE).build(),
+                mAuthenticationStateListeners);
     }
+
+    @Test
+    public void testAuthenticationStateListeners_onEnrollmentStartedAndStopped()
+            throws RemoteException {
+        final FaceEnrollClient client = createClient();
+        client.start(mCallback);
+        verify(mAuthenticationStateListeners).onAuthenticationStarted(
+                mAuthenticationStartedCaptor.capture());
+
+        assertThat(mAuthenticationStartedCaptor.getValue()).isEqualTo(
+                new AuthenticationStartedInfo.Builder(BiometricSourceType.FACE,
+                        BiometricRequestConstants.REASON_ENROLL_ENROLLING).build()
+        );
+        client.stopHalOperation();
+
+        verify(mAuthenticationStateListeners).onAuthenticationStopped(
+                mAuthenticationStoppedCaptor.capture());
+
+        assertThat(mAuthenticationStoppedCaptor.getValue()).isEqualTo(
+                new AuthenticationStoppedInfo.Builder(BiometricSourceType.FACE,
+                        BiometricRequestConstants.REASON_ENROLL_ENROLLING).build()
+        );
+    }
+
+    @Test
+    public void testAuthenticationStateListeners_onEnrollmentError()
+            throws RemoteException {
+        final FaceEnrollClient client = createClient();
+        client.start(mCallback);
+        client.onError(BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE, 0);
+
+        InOrder inOrder = inOrder(mAuthenticationStateListeners);
+        inOrder.verify(mAuthenticationStateListeners).onAuthenticationError(
+                mAuthenticationErrorCaptor.capture());
+        inOrder.verify(mAuthenticationStateListeners).onAuthenticationStopped(
+                mAuthenticationStoppedCaptor.capture());
+
+        assertThat(mAuthenticationErrorCaptor.getValue()).isEqualTo(
+                new AuthenticationErrorInfo.Builder(BiometricSourceType.FACE,
+                        BiometricRequestConstants.REASON_ENROLL_ENROLLING,
+                        mContext.getString(R.string.face_error_hw_not_available),
+                        BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE).build()
+        );
+        assertThat(mAuthenticationStoppedCaptor.getValue()).isEqualTo(
+                new AuthenticationStoppedInfo.Builder(BiometricSourceType.FACE,
+                        BiometricRequestConstants.REASON_ENROLL_ENROLLING).build()
+        );
+    }
+
+    @Test
+    public void testAuthenticationStateListeners_onAuthenticationHelp()
+            throws RemoteException {
+        final FaceEnrollClient client = createClient();
+        client.start(mCallback);
+        client.onAcquired(FACE_ACQUIRED_START, 0);
+
+        InOrder inOrder = inOrder(mAuthenticationStateListeners);
+        inOrder.verify(mAuthenticationStateListeners).onAuthenticationHelp(
+                mAuthenticationHelpCaptor.capture());
+        assertThat(mAuthenticationHelpCaptor.getValue()).isEqualTo(
+                new AuthenticationHelpInfo.Builder(BiometricSourceType.FACE,
+                        BiometricRequestConstants.REASON_ENROLL_ENROLLING,
+                        null, FACE_ACQUIRED_START)
+                        .build()
+        );
+
+        client.onAcquired(FACE_ACQUIRED_TOO_DARK, 0);
+        inOrder.verify(mAuthenticationStateListeners).onAuthenticationHelp(
+                mAuthenticationHelpCaptor.capture());
+        assertThat(mAuthenticationHelpCaptor.getValue()).isEqualTo(
+                new AuthenticationHelpInfo.Builder(BiometricSourceType.FACE,
+                        BiometricRequestConstants.REASON_ENROLL_ENROLLING,
+                        mContext.getString(R.string.face_acquired_too_dark),
+                        FACE_ACQUIRED_TOO_DARK)
+                        .build()
+        );
+    }
+
 }

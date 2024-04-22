@@ -881,7 +881,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mTransaction.addTaskFragmentOperation(mFragmentToken, operation);
         final TaskFragmentOperation dimOperation = new TaskFragmentOperation.Builder(
                 OP_TYPE_SET_DIM_ON_TASK)
-                .setDimOnTask(true)
+                .setBooleanValue(true)
                 .build();
         mTransaction.addTaskFragmentOperation(mFragmentToken, dimOperation);
         mOrganizer.applyTransaction(mTransaction, TASK_FRAGMENT_TRANSIT_CHANGE,

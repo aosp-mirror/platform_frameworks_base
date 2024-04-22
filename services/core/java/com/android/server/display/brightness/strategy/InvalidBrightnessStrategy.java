@@ -40,7 +40,7 @@ public class InvalidBrightnessStrategy implements DisplayBrightnessStrategy {
 
     @Override
     public String getName() {
-        return "InvalidBrightnessStrategy";
+        return DisplayBrightnessStrategyConstants.INVALID_BRIGHTNESS_STRATEGY_NAME;
     }
 
     @Override

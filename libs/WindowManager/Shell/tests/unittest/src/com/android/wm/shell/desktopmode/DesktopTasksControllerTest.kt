@@ -105,6 +105,7 @@ import org.mockito.Mockito.verify
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.capture
 import org.mockito.quality.Strictness
+import java.util.Optional
 import org.mockito.Mockito.`when` as whenever
 
 /**
@@ -145,6 +146,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     private lateinit var controller: DesktopTasksController
     private lateinit var shellInit: ShellInit
     private lateinit var desktopModeTaskRepository: DesktopModeTaskRepository
+    private lateinit var desktopTasksLimiter: DesktopTasksLimiter
     private lateinit var recentsTransitionStateListener: RecentsTransitionStateListener
 
     private val shellExecutor = TestShellExecutor()
@@ -160,9 +162,12 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         shellInit = Mockito.spy(ShellInit(testExecutor))
         desktopModeTaskRepository = DesktopModeTaskRepository()
+        desktopTasksLimiter =
+                DesktopTasksLimiter(transitions, desktopModeTaskRepository, shellTaskOrganizer)
 
         whenever(shellTaskOrganizer.getRunningTasks(anyInt())).thenAnswer { runningTasks }
         whenever(transitions.startTransition(anyInt(), any(), isNull())).thenAnswer { Binder() }
+        whenever(enterDesktopTransitionHandler.moveToDesktop(any())).thenAnswer { Binder() }
         whenever(displayController.getDisplayLayout(anyInt())).thenReturn(displayLayout)
         whenever(displayLayout.getStableBounds(any())).thenAnswer { i ->
                 (i.arguments.first() as Rect).set(STABLE_BOUNDS)
@@ -203,7 +208,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
             launchAdjacentController,
             recentsTransitionHandler,
             multiInstanceHelper,
-            shellExecutor
+            shellExecutor,
+            Optional.of(desktopTasksLimiter),
         )
     }
 
@@ -409,6 +415,25 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
+    fun showDesktopApps_dontReorderMinimizedTask() {
+        val homeTask = setUpHomeTask()
+        val freeformTask = setUpFreeformTask()
+        val minimizedTask = setUpFreeformTask()
+        markTaskHidden(freeformTask)
+        markTaskHidden(minimizedTask)
+        desktopModeTaskRepository.minimizeTask(DEFAULT_DISPLAY, minimizedTask.taskId)
+
+        controller.showDesktopApps(DEFAULT_DISPLAY, RemoteTransition(TestRemoteTransition()))
+
+        val wct = getLatestWct(
+                type = TRANSIT_TO_FRONT, handlerClass = OneShotRemoteHandler::class.java)
+        assertThat(wct.hierarchyOps).hasSize(2)
+        // Reorder home and freeform task to top, don't reorder the minimized task
+        wct.assertReorderAt(index = 0, homeTask, toTop = true)
+        wct.assertReorderAt(index = 1, freeformTask, toTop = true)
+    }
+
+    @Test
     fun getVisibleTaskCount_noTasks_returnsZero() {
         assertThat(controller.getVisibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(0)
     }
@@ -606,6 +631,24 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
+    fun moveToDesktop_bringsTasksOverLimit_dontShowBackTask() {
+        val taskLimit = desktopTasksLimiter.getMaxTaskLimit()
+        val homeTask = setUpHomeTask()
+        val freeformTasks = (1..taskLimit).map { _ -> setUpFreeformTask() }
+        val newTask = setUpFullscreenTask()
+
+        controller.moveToDesktop(newTask)
+
+        val wct = getLatestMoveToDesktopWct()
+        assertThat(wct.hierarchyOps.size).isEqualTo(taskLimit + 1) // visible tasks + home
+        wct.assertReorderAt(0, homeTask)
+        for (i in 1..<taskLimit) { // Skipping freeformTasks[0]
+            wct.assertReorderAt(index = i, task = freeformTasks[i])
+        }
+        wct.assertReorderAt(taskLimit, newTask)
+    }
+
+    @Test
     fun moveToFullscreen_tdaFullscreen_windowingModeSetToUndefined() {
         val task = setUpFreeformTask()
         val tda = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY)!!
@@ -656,6 +699,20 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val wct = getLatestWct(type = TRANSIT_TO_FRONT)
         assertThat(wct.hierarchyOps).hasSize(1)
         wct.assertReorderAt(index = 0, task1)
+    }
+
+    @Test
+    fun moveTaskToFront_bringsTasksOverLimit_minimizesBackTask() {
+        val taskLimit = desktopTasksLimiter.getMaxTaskLimit()
+        setUpHomeTask()
+        val freeformTasks = (1..taskLimit + 1).map { _ -> setUpFreeformTask() }
+
+        controller.moveTaskToFront(freeformTasks[0])
+
+        val wct = getLatestWct(type = TRANSIT_TO_FRONT)
+        assertThat(wct.hierarchyOps.size).isEqualTo(2) // move-to-front + minimize
+        wct.assertReorderAt(0, freeformTasks[0], toTop = true)
+        wct.assertReorderAt(1, freeformTasks[1], toTop = false)
     }
 
     @Test
@@ -777,6 +834,38 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
+    fun handleRequest_fullscreenTaskToFreeform_underTaskLimit_dontMinimize() {
+        assumeTrue(ENABLE_SHELL_TRANSITIONS)
+
+        val freeformTask = setUpFreeformTask()
+        markTaskVisible(freeformTask)
+        val fullscreenTask = createFullscreenTask()
+
+        val wct = controller.handleRequest(Binder(), createTransition(fullscreenTask))
+
+        // Make sure we only reorder the new task to top (we don't reorder the old task to bottom)
+        assertThat(wct?.hierarchyOps?.size).isEqualTo(1)
+        wct!!.assertReorderAt(0, fullscreenTask, toTop = true)
+    }
+
+    @Test
+    fun handleRequest_fullscreenTaskToFreeform_bringsTasksOverLimit_otherTaskIsMinimized() {
+        assumeTrue(ENABLE_SHELL_TRANSITIONS)
+
+        val taskLimit = desktopTasksLimiter.getMaxTaskLimit()
+        val freeformTasks = (1..taskLimit).map { _ -> setUpFreeformTask() }
+        freeformTasks.forEach { markTaskVisible(it) }
+        val fullscreenTask = createFullscreenTask()
+
+        val wct = controller.handleRequest(Binder(), createTransition(fullscreenTask))
+
+        // Make sure we reorder the new task to top, and the back task to the bottom
+        assertThat(wct!!.hierarchyOps.size).isEqualTo(2)
+        wct!!.assertReorderAt(0, fullscreenTask, toTop = true)
+        wct!!.assertReorderAt(1, freeformTasks[0], toTop = false)
+    }
+
+    @Test
     fun handleRequest_fullscreenTask_freeformNotVisible_returnNull() {
         assumeTrue(ENABLE_SHELL_TRANSITIONS)
 
@@ -838,6 +927,22 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         val freeformTask2 = createFreeformTask()
         assertThat(controller.handleRequest(Binder(), createTransition(freeformTask2))).isNull()
+    }
+
+    @Test
+    fun handleRequest_freeformTask_freeformVisible_aboveTaskLimit_minimize() {
+        assumeTrue(ENABLE_SHELL_TRANSITIONS)
+
+        val taskLimit = desktopTasksLimiter.getMaxTaskLimit()
+        val freeformTasks = (1..taskLimit).map { _ -> setUpFreeformTask() }
+        freeformTasks.forEach { markTaskVisible(it) }
+        val newFreeformTask = createFreeformTask()
+
+        val wct =
+                controller.handleRequest(Binder(), createTransition(newFreeformTask, TRANSIT_OPEN))
+
+        assertThat(wct?.hierarchyOps?.size).isEqualTo(1)
+        wct!!.assertReorderAt(0, freeformTasks[0], toTop = false) // Reorder to the bottom
     }
 
     @Test
@@ -1352,11 +1457,16 @@ private fun WindowContainerTransaction.assertIndexInBounds(index: Int) {
         .isGreaterThan(index)
 }
 
-private fun WindowContainerTransaction.assertReorderAt(index: Int, task: RunningTaskInfo) {
+private fun WindowContainerTransaction.assertReorderAt(
+        index: Int,
+        task: RunningTaskInfo,
+        toTop: Boolean? = null
+) {
     assertIndexInBounds(index)
     val op = hierarchyOps[index]
     assertThat(op.type).isEqualTo(HIERARCHY_OP_TYPE_REORDER)
     assertThat(op.container).isEqualTo(task.token.asBinder())
+    toTop?.let { assertThat(op.toTop).isEqualTo(it) }
 }
 
 private fun WindowContainerTransaction.assertReorderSequence(vararg tasks: RunningTaskInfo) {

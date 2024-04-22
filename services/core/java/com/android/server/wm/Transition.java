@@ -112,7 +112,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 
 /**
@@ -3254,9 +3253,15 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     // Whether this is in a Task with embedded activity.
                     flags |= FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
                 }
-                if (parentTask.forAllActivities(ActivityRecord::hasStartingWindow)) {
-                    // The starting window should cover all windows inside the leaf Task.
-                    flags |= FLAG_IS_BEHIND_STARTING_WINDOW;
+                final ActivityRecord starting = parentTask.topActivityContainsStartingWindow();
+                if (starting != null) {
+                    if (starting == record || (starting.mStartingData != null
+                            && starting.mStartingData.mAssociatedTask != null)) {
+                        flags |= FLAG_IS_BEHIND_STARTING_WINDOW;
+                    } else if (record != null && parentTask.mChildren.indexOf(record)
+                            < parentTask.mChildren.indexOf(starting)) {
+                        flags |= FLAG_IS_BEHIND_STARTING_WINDOW;
+                    }
                 }
                 if (isWindowFillingTask(wc, parentTask)) {
                     // Whether the container fills its parent Task bounds.

@@ -57,6 +57,7 @@ import com.android.internal.R;
 import com.android.server.display.config.HdrBrightnessData;
 import com.android.server.display.config.HysteresisLevels;
 import com.android.server.display.config.IdleScreenRefreshRateTimeoutLuxThresholdPoint;
+import com.android.server.display.config.RefreshRateData;
 import com.android.server.display.config.ThermalStatus;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.feature.flags.Flags;
@@ -222,17 +223,18 @@ public final class DisplayDeviceConfigTest {
         assertArrayEquals(new float[]{0.23f, 0.24f, 0.25f},
                 ambientIdleHysteresis.getDarkeningThresholdsPercentages(), ZERO_DELTA);
 
+        RefreshRateData refreshRateData = mDisplayDeviceConfig.getRefreshRateData();
         assertEquals(75, mDisplayDeviceConfig.getDefaultLowBlockingZoneRefreshRate());
         assertEquals(90, mDisplayDeviceConfig.getDefaultHighBlockingZoneRefreshRate());
-        assertEquals(85, mDisplayDeviceConfig.getDefaultPeakRefreshRate());
-        assertEquals(45, mDisplayDeviceConfig.getDefaultRefreshRate());
+        assertEquals(85, refreshRateData.defaultPeakRefreshRate);
+        assertEquals(45, refreshRateData.defaultRefreshRate);
         assertEquals(2, mDisplayDeviceConfig.getRefreshRangeProfiles().size());
         assertEquals(60, mDisplayDeviceConfig.getRefreshRange("test1").min, SMALL_DELTA);
         assertEquals(60, mDisplayDeviceConfig.getRefreshRange("test1").max, SMALL_DELTA);
         assertEquals(80, mDisplayDeviceConfig.getRefreshRange("test2").min, SMALL_DELTA);
         assertEquals(90, mDisplayDeviceConfig.getRefreshRange("test2").max, SMALL_DELTA);
-        assertEquals(82, mDisplayDeviceConfig.getDefaultRefreshRateInHbmHdr());
-        assertEquals(83, mDisplayDeviceConfig.getDefaultRefreshRateInHbmSunlight());
+        assertEquals(82, refreshRateData.defaultRefreshRateInHbmHdr);
+        assertEquals(83, refreshRateData.defaultRefreshRateInHbmSunlight);
 
         assertNotNull(mDisplayDeviceConfig.getHostUsiVersion());
         assertEquals(mDisplayDeviceConfig.getHostUsiVersion().getMajorVersion(), 2);
@@ -697,6 +699,7 @@ public final class DisplayDeviceConfigTest {
         HysteresisLevels screenHysteresis = mDisplayDeviceConfig.getScreenBrightnessHysteresis();
         HysteresisLevels screenIdleHysteresis =
                 mDisplayDeviceConfig.getScreenBrightnessIdleHysteresis();
+
         // Test thresholds
         assertEquals(0, ambientHysteresis.getMinBrightening(), ZERO_DELTA);
         assertEquals(0, ambientIdleHysteresis.getMinBrightening(), ZERO_DELTA);
@@ -737,6 +740,8 @@ public final class DisplayDeviceConfigTest {
         assertArrayEquals(new float[]{0.37f, 0.38f, 0.39f},
                 screenIdleHysteresis.getDarkeningThresholdsPercentages(), ZERO_DELTA);
 
+        RefreshRateData refreshRateData = mDisplayDeviceConfig.getRefreshRateData();
+
         assertArrayEquals(new float[]{0, 30, 31},
                 ambientIdleHysteresis.getBrighteningThresholdLevels(), ZERO_DELTA);
         assertArrayEquals(new float[]{0.27f, 0.28f, 0.29f},
@@ -749,13 +754,12 @@ public final class DisplayDeviceConfigTest {
                 DEFAULT_LOW_BLOCKING_ZONE_REFRESH_RATE);
         assertEquals(mDisplayDeviceConfig.getDefaultHighBlockingZoneRefreshRate(),
                 DEFAULT_HIGH_BLOCKING_ZONE_REFRESH_RATE);
-        assertEquals(mDisplayDeviceConfig.getDefaultPeakRefreshRate(), DEFAULT_PEAK_REFRESH_RATE);
-        assertEquals(mDisplayDeviceConfig.getDefaultRefreshRate(), DEFAULT_REFRESH_RATE);
+        assertEquals(refreshRateData.defaultPeakRefreshRate, DEFAULT_PEAK_REFRESH_RATE);
+        assertEquals(refreshRateData.defaultRefreshRate, DEFAULT_REFRESH_RATE);
         assertEquals(0, mDisplayDeviceConfig.getRefreshRangeProfiles().size());
-        assertEquals(mDisplayDeviceConfig.getDefaultRefreshRateInHbmSunlight(),
+        assertEquals(refreshRateData.defaultRefreshRateInHbmSunlight,
                 DEFAULT_REFRESH_RATE_IN_HBM_SUNLIGHT);
-        assertEquals(mDisplayDeviceConfig.getDefaultRefreshRateInHbmHdr(),
-                DEFAULT_REFRESH_RATE_IN_HBM_HDR);
+        assertEquals(refreshRateData.defaultRefreshRateInHbmHdr, DEFAULT_REFRESH_RATE_IN_HBM_HDR);
 
         assertEquals("test_light_sensor", mDisplayDeviceConfig.getAmbientLightSensor().type);
         assertEquals("", mDisplayDeviceConfig.getAmbientLightSensor().name);

@@ -1561,7 +1561,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 break;
             }
             case OP_TYPE_SET_ISOLATED_NAVIGATION: {
-                final boolean isolatedNav = operation.isIsolatedNav();
+                final boolean isolatedNav = operation.getBooleanValue();
                 taskFragment.setIsolatedNav(isolatedNav);
                 break;
             }
@@ -1606,14 +1606,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 break;
             }
             case OP_TYPE_SET_DIM_ON_TASK: {
-                final boolean dimOnTask = operation.isDimOnTask();
+                final boolean dimOnTask = operation.getBooleanValue();
                 taskFragment.setEmbeddedDimArea(dimOnTask ? EMBEDDED_DIM_AREA_PARENT_TASK
                         : EMBEDDED_DIM_AREA_TASK_FRAGMENT);
                 break;
             }
             case OP_TYPE_SET_MOVE_TO_BOTTOM_IF_CLEAR_WHEN_LAUNCH: {
-                taskFragment.setMoveToBottomIfClearWhenLaunch(
-                        operation.isMoveToBottomIfClearWhenLaunch());
+                taskFragment.setMoveToBottomIfClearWhenLaunch(operation.getBooleanValue());
                 break;
             }
             case OP_TYPE_SET_DECOR_SURFACE_BOOSTED: {

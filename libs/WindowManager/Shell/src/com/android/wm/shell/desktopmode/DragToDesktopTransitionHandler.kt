@@ -150,20 +150,20 @@ class DragToDesktopTransitionHandler(
      * windowing mode changes to the dragged task. This is called when the dragged task is released
      * inside the desktop drop zone.
      */
-    fun finishDragToDesktopTransition(wct: WindowContainerTransaction) {
+    fun finishDragToDesktopTransition(wct: WindowContainerTransaction): IBinder? {
         if (!inProgress) {
             // Don't attempt to finish a drag to desktop transition since there is no transition in
             // progress which means that the drag to desktop transition was never successfully
             // started.
-            return
+            return null
         }
         if (requireTransitionState().startAborted) {
             // Don't attempt to complete the drag-to-desktop since the start transition didn't
             // succeed as expected. Just reset the state as if nothing happened.
             clearState()
-            return
+            return null
         }
-        transitions.startTransition(TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP, wct, this)
+        return transitions.startTransition(TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP, wct, this)
     }
 
     /**

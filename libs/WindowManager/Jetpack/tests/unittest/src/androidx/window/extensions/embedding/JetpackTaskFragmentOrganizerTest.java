@@ -42,10 +42,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 
@@ -61,6 +63,9 @@ import java.util.ArrayList;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class JetpackTaskFragmentOrganizerTest {
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
+
     @Mock
     private WindowContainerTransaction mTransaction;
     @Mock
@@ -73,7 +78,6 @@ public class JetpackTaskFragmentOrganizerTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
         mOrganizer = new JetpackTaskFragmentOrganizer(Runnable::run, mCallback);
         mOrganizer.registerOrganizer();
         spyOn(mOrganizer);

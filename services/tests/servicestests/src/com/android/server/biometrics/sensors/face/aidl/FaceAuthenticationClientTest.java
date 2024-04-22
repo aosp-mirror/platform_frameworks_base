@@ -18,6 +18,8 @@ package com.android.server.biometrics.sensors.face.aidl;
 
 import static android.adaptiveauth.Flags.FLAG_REPORT_BIOMETRIC_AUTH_ATTEMPTS;
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_ERROR_CANCELED;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_START;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK;
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT;
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT;
 
@@ -38,11 +40,21 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.content.ComponentName;
 import android.hardware.biometrics.BiometricConstants;
+import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.BiometricRequestConstants;
+import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.common.AuthenticateReason;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.common.WakeReason;
+import android.hardware.biometrics.events.AuthenticationAcquiredInfo;
+import android.hardware.biometrics.events.AuthenticationErrorInfo;
+import android.hardware.biometrics.events.AuthenticationFailedInfo;
+import android.hardware.biometrics.events.AuthenticationHelpInfo;
+import android.hardware.biometrics.events.AuthenticationStartedInfo;
+import android.hardware.biometrics.events.AuthenticationStoppedInfo;
+import android.hardware.biometrics.events.AuthenticationSucceededInfo;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.face.Face;
 import android.hardware.face.FaceAuthenticateOptions;
@@ -58,6 +70,7 @@ import android.testing.TestableContext;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.internal.R;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.OperationContextExt;
@@ -136,6 +149,20 @@ public class FaceAuthenticationClientTest {
     private ArgumentCaptor<Consumer<OperationContext>> mStartHalConsumerCaptor;
     @Captor
     private ArgumentCaptor<FaceAuthenticateOptions> mFaceAuthenticateOptionsCaptor;
+    @Captor
+    private ArgumentCaptor<AuthenticationAcquiredInfo> mAuthenticationAcquiredCaptor;
+    @Captor
+    private ArgumentCaptor<AuthenticationErrorInfo> mAuthenticationErrorCaptor;
+    @Captor
+    private ArgumentCaptor<AuthenticationFailedInfo> mAuthenticationFailedCaptor;
+    @Captor
+    private ArgumentCaptor<AuthenticationHelpInfo> mAuthenticationHelpCaptor;
+    @Captor
+    private ArgumentCaptor<AuthenticationStartedInfo> mAuthenticationStartedCaptor;
+    @Captor
+    private ArgumentCaptor<AuthenticationStoppedInfo> mAuthenticationStoppedCaptor;
+    @Captor
+    private ArgumentCaptor<AuthenticationSucceededInfo> mAuthenticationSucceededCaptor;
 
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
@@ -143,6 +170,10 @@ public class FaceAuthenticationClientTest {
     @Before
     public void setup() {
         mContext.addMockSystemService(BiometricManager.class, mBiometricManager);
+        mContext.getOrCreateTestableResources().addOverride(R.string.face_error_hw_not_available,
+                "hw not available");
+        mContext.getOrCreateTestableResources().addOverride(R.string.face_acquired_too_dark,
+                "too dark");
         when(mBiometricContext.updateContext(any(), anyBoolean())).thenAnswer(
                 i -> i.getArgument(0));
         when(mBiometricContext.getAuthSessionCoordinator()).thenReturn(mAuthSessionCoordinator);
@@ -294,6 +325,90 @@ public class FaceAuthenticationClientTest {
     }
 
     @Test
+    public void testAuthenticationStateListeners_onAuthenticationStartedAndStopped()
+            throws RemoteException {
+        final FaceAuthenticationClient client = createClient();
+        client.start(mCallback);
+        verify(mAuthenticationStateListeners).onAuthenticationStarted(
+                mAuthenticationStartedCaptor.capture());
+
+        assertThat(mAuthenticationStartedCaptor.getValue()).isEqualTo(
+                new AuthenticationStartedInfo.Builder(BiometricSourceType.FACE,
+                        BiometricRequestConstants.REASON_AUTH_BP).build()
+        );
+        client.stopHalOperation();
+
+        verify(mAuthenticationStateListeners).onAuthenticationStopped(
+                mAuthenticationStoppedCaptor.capture());
+
+        assertThat(mAuthenticationStoppedCaptor.getValue()).isEqualTo(
+                new AuthenticationStoppedInfo.Builder(BiometricSourceType.FACE,
+                        BiometricRequestConstants.REASON_AUTH_BP).build()
+        );
+    }
+
+    @Test
+    public void testAuthenticationStateListeners_onAuthenticationAcquired_onAuthenticationHelp()
+            throws RemoteException {
+        final FaceAuthenticationClient client = createClient();
+        client.start(mCallback);
+        client.onAcquired(FACE_ACQUIRED_START, 0);
+
+        InOrder inOrder = inOrder(mAuthenticationStateListeners);
+        inOrder.verify(mAuthenticationStateListeners).onAuthenticationAcquired(
+                mAuthenticationAcquiredCaptor.capture());
+        assertThat(mAuthenticationAcquiredCaptor.getValue()).isEqualTo(
+                new AuthenticationAcquiredInfo.Builder(BiometricSourceType.FACE,
+                        BiometricRequestConstants.REASON_AUTH_BP, FACE_ACQUIRED_START)
+                        .build()
+        );
+
+        client.onAcquired(FACE_ACQUIRED_TOO_DARK, 0);
+        inOrder.verify(mAuthenticationStateListeners).onAuthenticationAcquired(
+                mAuthenticationAcquiredCaptor.capture());
+        inOrder.verify(mAuthenticationStateListeners).onAuthenticationHelp(
+                mAuthenticationHelpCaptor.capture());
+
+        assertThat(mAuthenticationAcquiredCaptor.getValue()).isEqualTo(
+                new AuthenticationAcquiredInfo.Builder(BiometricSourceType.FACE,
+                        BiometricRequestConstants.REASON_AUTH_BP, FACE_ACQUIRED_TOO_DARK)
+                        .build()
+        );
+        assertThat(mAuthenticationHelpCaptor.getValue()).isEqualTo(
+                new AuthenticationHelpInfo.Builder(BiometricSourceType.FACE,
+                        BiometricRequestConstants.REASON_AUTH_BP,
+                        mContext.getString(R.string.face_acquired_too_dark),
+                        FACE_ACQUIRED_TOO_DARK)
+                        .build()
+        );
+    }
+
+    @Test
+    public void testAuthenticationStateListeners_onAuthenticationError()
+            throws RemoteException {
+        final FaceAuthenticationClient client = createClient();
+        client.start(mCallback);
+        client.onError(BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE, 0);
+
+        InOrder inOrder = inOrder(mAuthenticationStateListeners);
+        inOrder.verify(mAuthenticationStateListeners).onAuthenticationError(
+                mAuthenticationErrorCaptor.capture());
+        inOrder.verify(mAuthenticationStateListeners).onAuthenticationStopped(
+                mAuthenticationStoppedCaptor.capture());
+
+        assertThat(mAuthenticationErrorCaptor.getValue()).isEqualTo(
+                new AuthenticationErrorInfo.Builder(BiometricSourceType.FACE,
+                        BiometricRequestConstants.REASON_AUTH_BP,
+                        mContext.getString(R.string.face_error_hw_not_available),
+                        BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE).build()
+        );
+        assertThat(mAuthenticationStoppedCaptor.getValue()).isEqualTo(
+                new AuthenticationStoppedInfo.Builder(BiometricSourceType.FACE,
+                        BiometricRequestConstants.REASON_AUTH_BP).build()
+        );
+    }
+
+    @Test
     public void testAuthenticationStateListeners_onAuthenticationSucceeded()
             throws RemoteException {
         mSetFlagsRule.enableFlags(FLAG_REPORT_BIOMETRIC_AUTH_ATTEMPTS);
@@ -302,7 +417,14 @@ public class FaceAuthenticationClientTest {
         client.onAuthenticated(new Face("friendly", 1 /* faceId */, 2 /* deviceId */),
                 true /* authenticated */, new ArrayList<>());
 
-        verify(mAuthenticationStateListeners).onAuthenticationSucceeded(anyInt(), anyInt());
+        verify(mAuthenticationStateListeners).onAuthenticationSucceeded(
+                mAuthenticationSucceededCaptor.capture());
+
+        assertThat(mAuthenticationSucceededCaptor.getValue()).isEqualTo(
+                new AuthenticationSucceededInfo.Builder(BiometricSourceType.FACE,
+                        BiometricRequestConstants.REASON_AUTH_BP, true, USER_ID)
+                        .build()
+        );
     }
 
     @Test
@@ -313,7 +435,14 @@ public class FaceAuthenticationClientTest {
         client.onAuthenticated(new Face("friendly", 1 /* faceId */, 2 /* deviceId */),
                 false /* authenticated */, new ArrayList<>());
 
-        verify(mAuthenticationStateListeners).onAuthenticationFailed(anyInt(), anyInt());
+        verify(mAuthenticationStateListeners).onAuthenticationFailed(
+                mAuthenticationFailedCaptor.capture());
+
+        assertThat(mAuthenticationFailedCaptor.getValue()).isEqualTo(
+                new AuthenticationFailedInfo.Builder(BiometricSourceType.FACE,
+                        BiometricRequestConstants.REASON_AUTH_BP, USER_ID)
+                        .build()
+        );
     }
 
     private FaceAuthenticationClient createClient() throws RemoteException {

@@ -320,6 +320,7 @@ import android.window.ITaskFpsCallback;
 import android.window.ITrustedPresentationListener;
 import android.window.InputTransferToken;
 import android.window.ScreenCapture;
+import android.window.ScreenCapture.ScreenshotHardwareBuffer;
 import android.window.SystemPerformanceHinter;
 import android.window.TaskSnapshot;
 import android.window.TrustedPresentationThresholds;
@@ -384,6 +385,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -4172,7 +4174,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Nullable
-    private ScreenCapture.ScreenshotHardwareBuffer takeAssistScreenshot() {
+    private ScreenshotHardwareBuffer takeAssistScreenshot(Set<Integer> windowTypesToExclude) {
         if (!checkCallingPermission(READ_FRAME_BUFFER, "requestAssistScreenshot()")) {
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
@@ -4187,11 +4189,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 captureArgs = null;
             } else {
-                captureArgs = displayContent.getLayerCaptureArgs();
+                captureArgs = displayContent.getLayerCaptureArgs(windowTypesToExclude);
             }
         }
 
-        final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer;
+        final ScreenshotHardwareBuffer screenshotBuffer;
         if (captureArgs != null) {
             ScreenCapture.SynchronousScreenCaptureListener syncScreenCapture =
                     ScreenCapture.createSyncCaptureListener();
@@ -4217,7 +4219,8 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     @Override
     public boolean requestAssistScreenshot(final IAssistDataReceiver receiver) {
-        final ScreenCapture.ScreenshotHardwareBuffer shb = takeAssistScreenshot();
+        final ScreenshotHardwareBuffer shb =
+                takeAssistScreenshot(/* windowTypesToExclude= */ Set.of());
         final Bitmap bm = shb != null ? shb.asBitmap() : null;
         FgThread.getHandler().post(() -> {
             try {
@@ -4272,7 +4275,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mTmpRect.offsetTo(0, 0);
 
             final SurfaceControl sc = task.getSurfaceControl();
-            final ScreenCapture.ScreenshotHardwareBuffer buffer = ScreenCapture.captureLayers(
+            final ScreenshotHardwareBuffer buffer = ScreenCapture.captureLayers(
                     layerCaptureArgsBuilder.setLayer(sc).setSourceCrop(mTmpRect).build());
             if (buffer == null) {
                 Slog.w(TAG, "Could not get screenshot buffer for taskId: " + taskId);
@@ -8807,9 +8810,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public ScreenCapture.ScreenshotHardwareBuffer takeAssistScreenshot() {
+        public ScreenshotHardwareBuffer takeAssistScreenshot(Set<Integer> windowTypesToExclude) {
             // WMS.takeAssistScreenshot takes care of the locking.
-            return WindowManagerService.this.takeAssistScreenshot();
+            return WindowManagerService.this.takeAssistScreenshot(windowTypesToExclude);
         }
     }
 

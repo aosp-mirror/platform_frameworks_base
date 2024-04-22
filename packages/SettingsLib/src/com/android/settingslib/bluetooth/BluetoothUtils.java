@@ -534,11 +534,16 @@ public class BluetoothUtils {
     /** Returns if the le audio sharing is enabled. */
     public static boolean isAudioSharingEnabled() {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        return Flags.enableLeAudioSharing()
-                && adapter.isLeAudioBroadcastSourceSupported()
-                        == BluetoothStatusCodes.FEATURE_SUPPORTED
-                && adapter.isLeAudioBroadcastAssistantSupported()
-                        == BluetoothStatusCodes.FEATURE_SUPPORTED;
+        try {
+            return Flags.enableLeAudioSharing()
+                    && adapter.isLeAudioBroadcastSourceSupported()
+                            == BluetoothStatusCodes.FEATURE_SUPPORTED
+                    && adapter.isLeAudioBroadcastAssistantSupported()
+                            == BluetoothStatusCodes.FEATURE_SUPPORTED;
+        } catch (IllegalStateException e) {
+            Log.d(TAG, "LE state is on, but there is no bluetooth service.", e);
+            return false;
+        }
     }
 
     /** Returns if the broadcast is on-going. */
@@ -789,5 +794,28 @@ public class BluetoothUtils {
     @NonNull
     public static Set<String> getExclusiveManagers() {
         return EXCLUSIVE_MANAGERS;
+    }
+
+    /**
+     * Get CSIP group id for {@link CachedBluetoothDevice}.
+     *
+     * <p>If CachedBluetoothDevice#getGroupId is invalid, fetch group id from
+     * LeAudioProfile#getGroupId.
+     */
+    public static int getGroupId(@NonNull CachedBluetoothDevice cachedDevice) {
+        int groupId = cachedDevice.getGroupId();
+        String anonymizedAddress = cachedDevice.getDevice().getAnonymizedAddress();
+        if (groupId != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
+            Log.d(TAG, "getGroupId by CSIP profile for device: " + anonymizedAddress);
+            return groupId;
+        }
+        for (LocalBluetoothProfile profile : cachedDevice.getProfiles()) {
+            if (profile instanceof LeAudioProfile) {
+                Log.d(TAG, "getGroupId by LEA profile for device: " + anonymizedAddress);
+                return ((LeAudioProfile) profile).getGroupId(cachedDevice.getDevice());
+            }
+        }
+        Log.d(TAG, "getGroupId return invalid id for device: " + anonymizedAddress);
+        return BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
     }
 }

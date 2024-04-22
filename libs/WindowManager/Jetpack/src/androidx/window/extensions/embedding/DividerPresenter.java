@@ -33,6 +33,7 @@ import static androidx.window.extensions.embedding.SplitPresenter.CONTAINER_POSI
 import static androidx.window.extensions.embedding.SplitPresenter.CONTAINER_POSITION_RIGHT;
 import static androidx.window.extensions.embedding.SplitPresenter.CONTAINER_POSITION_TOP;
 
+import android.annotation.DimenRes;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.content.Context;
@@ -61,7 +62,6 @@ import android.window.TaskFragmentParentInfo;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.GuardedBy;
-import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.window.extensions.core.util.function.Consumer;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType;
@@ -341,7 +341,7 @@ class DividerPresenter implements View.OnTouchListener {
                 applicationContext.getResources().getDisplayMetrics());
     }
 
-    private static int getDimensionDp(@IdRes int resId) {
+    private static int getDimensionDp(@DimenRes int resId) {
         final Context context = ActivityThread.currentActivityThread().getApplication();
         final int px = context.getResources().getDimensionPixelSize(resId);
         return (int) TypedValue.convertPixelsToDimension(
@@ -431,6 +431,9 @@ class DividerPresenter implements View.OnTouchListener {
             return null;
         }
         int widthDp = dividerAttributes.getWidthDp();
+        float minRatio = dividerAttributes.getPrimaryMinRatio();
+        float maxRatio = dividerAttributes.getPrimaryMaxRatio();
+
         if (widthDp == WIDTH_SYSTEM_DEFAULT) {
             widthDp = DEFAULT_DIVIDER_WIDTH_DP;
         }
@@ -439,16 +442,14 @@ class DividerPresenter implements View.OnTouchListener {
             // Draggable divider width must be larger than the drag handle size.
             widthDp = Math.max(widthDp,
                     getDimensionDp(R.dimen.activity_embedding_divider_touch_target_width));
-        }
 
-        float minRatio = dividerAttributes.getPrimaryMinRatio();
-        if (minRatio == RATIO_SYSTEM_DEFAULT) {
-            minRatio = DEFAULT_MIN_RATIO;
-        }
-
-        float maxRatio = dividerAttributes.getPrimaryMaxRatio();
-        if (maxRatio == RATIO_SYSTEM_DEFAULT) {
-            maxRatio = DEFAULT_MAX_RATIO;
+            // Update minRatio and maxRatio only when it is a draggable divider.
+            if (minRatio == RATIO_SYSTEM_DEFAULT) {
+                minRatio = DEFAULT_MIN_RATIO;
+            }
+            if (maxRatio == RATIO_SYSTEM_DEFAULT) {
+                maxRatio = DEFAULT_MAX_RATIO;
+            }
         }
 
         return new DividerAttributes.Builder(dividerAttributes)

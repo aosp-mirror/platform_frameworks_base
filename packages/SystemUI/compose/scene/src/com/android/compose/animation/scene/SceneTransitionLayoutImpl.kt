@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastForEachReversed
 import com.android.compose.ui.util.lerp
 import kotlinx.coroutines.CoroutineScope
 
@@ -191,38 +192,44 @@ internal class SceneTransitionLayoutImpl(
                 .then(LayoutElement(layoutImpl = this))
         ) {
             LookaheadScope {
-                val scenesToCompose =
-                    when (val state = state.transitionState) {
-                        is TransitionState.Idle -> listOf(scene(state.currentScene))
-                        is TransitionState.Transition -> {
-                            if (state.toScene != state.fromScene) {
-                                listOf(scene(state.toScene), scene(state.fromScene))
-                            } else {
-                                listOf(scene(state.fromScene))
-                            }
-                        }
-                    }
+                BackHandler()
 
-                // Handle back events.
-                val targetSceneForBackOrNull =
-                    scene(state.transitionState.currentScene).userActions[Back]?.toScene
-                BackHandler(
-                    enabled = targetSceneForBackOrNull != null,
-                ) {
-                    targetSceneForBackOrNull?.let { targetSceneForBack ->
-                        // TODO(b/290184746): Handle predictive back and use result.distance if
-                        // specified.
-                        if (state.canChangeScene(targetSceneForBack)) {
-                            with(state) { coroutineScope.onChangeScene(targetSceneForBack) }
-                        }
+                scenesToCompose().fastForEach { scene -> key(scene.key) { scene.Content() } }
+            }
+        }
+    }
+
+    @Composable
+    private fun BackHandler() {
+        val targetSceneForBackOrNull =
+            scene(state.transitionState.currentScene).userActions[Back]?.toScene
+        BackHandler(enabled = targetSceneForBackOrNull != null) {
+            targetSceneForBackOrNull?.let { targetSceneForBack ->
+                // TODO(b/290184746): Handle predictive back and use result.distance if specified.
+                if (state.canChangeScene(targetSceneForBack)) {
+                    with(state) { coroutineScope.onChangeScene(targetSceneForBack) }
+                }
+            }
+        }
+    }
+
+    private fun scenesToCompose(): List<Scene> {
+        val transitions = state.currentTransitions
+        return if (transitions.isEmpty()) {
+            listOf(scene(state.transitionState.currentScene))
+        } else {
+            buildList {
+                val visited = mutableSetOf<SceneKey>()
+                fun maybeAdd(sceneKey: SceneKey) {
+                    if (visited.add(sceneKey)) {
+                        add(scene(sceneKey))
                     }
                 }
 
-                Box {
-                    scenesToCompose.fastForEach { scene ->
-                        val key = scene.key
-                        key(key) { scene.Content() }
-                    }
+                // Compose the new scene we are going to first.
+                transitions.fastForEachReversed { transition ->
+                    maybeAdd(transition.toScene)
+                    maybeAdd(transition.fromScene)
                 }
             }
         }

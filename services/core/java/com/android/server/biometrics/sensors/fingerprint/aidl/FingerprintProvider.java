@@ -537,7 +537,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                     options,
                     createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient,
                             mAuthenticationStatsCollector),
-                    mBiometricContext, mUdfpsOverlayController, isStrongBiometric);
+                    mBiometricContext, mAuthenticationStateListeners, mUdfpsOverlayController,
+                    isStrongBiometric);
             scheduleForSensor(sensorId, client, mBiometricStateCallback);
         });
 
