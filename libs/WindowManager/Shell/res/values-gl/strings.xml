@@ -61,10 +61,10 @@
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Engadir de novo á pilla"</string>
     <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> de <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="8071515017164630429">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> de <xliff:g id="APP_NAME">%2$s</xliff:g> e <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> máis"</string>
-    <string name="bubble_accessibility_action_move_top_left" msgid="2644118920500782758">"Mover á parte super. esquerda"</string>
-    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Mover á parte superior dereita"</string>
-    <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Mover á parte infer. esquerda"</string>
-    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Mover á parte inferior dereita"</string>
+    <string name="bubble_accessibility_action_move_top_left" msgid="2644118920500782758">"Mover arriba á esquerda"</string>
+    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Mover arriba á dereita"</string>
+    <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Mover abaixo á esquerda"</string>
+    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Mover abaixo á dereita"</string>
     <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"despregar <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"contraer <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Configuración de <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
