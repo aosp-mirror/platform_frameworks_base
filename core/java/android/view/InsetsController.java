@@ -1620,7 +1620,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         onAnimationStateChanged(removedTypes, false /* running */);
     }
 
-    private void onAnimationStateChanged(@InsetsType int types, boolean running) {
+    void onAnimationStateChanged(@InsetsType int types, boolean running) {
         boolean insetsChanged = false;
         for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
             final InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
