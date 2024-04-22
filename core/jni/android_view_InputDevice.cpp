@@ -90,7 +90,8 @@ jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& devi
                                           deviceInfo.hasButtonUnderPad(), deviceInfo.hasSensor(),
                                           deviceInfo.hasBattery(), usiVersion.majorVersion,
                                           usiVersion.minorVersion,
-                                          deviceInfo.getAssociatedDisplayId()));
+                                          deviceInfo.getAssociatedDisplayId(),
+                                          deviceInfo.isEnabled()));
     // Note: We do not populate the Bluetooth address into the InputDevice object to avoid leaking
     // it to apps that do not have the Bluetooth permission.
 
@@ -126,7 +127,7 @@ int register_android_view_InputDevice(JNIEnv* env)
     gInputDeviceClassInfo.ctor = GetMethodIDOrDie(env, gInputDeviceClassInfo.clazz, "<init>",
                                                   "(IIILjava/lang/String;IIILjava/lang/"
                                                   "String;ZIILandroid/view/KeyCharacterMap;Ljava/"
-                                                  "lang/String;Ljava/lang/String;ZZZZZIII)V");
+                                                  "lang/String;Ljava/lang/String;ZZZZZIIIZ)V");
 
     gInputDeviceClassInfo.addMotionRange =
             GetMethodIDOrDie(env, gInputDeviceClassInfo.clazz, "addMotionRange", "(IIFFFFF)V");

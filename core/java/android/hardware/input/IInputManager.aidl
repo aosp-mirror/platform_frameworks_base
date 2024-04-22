@@ -55,7 +55,6 @@ interface IInputManager {
     int[] getInputDeviceIds();
 
     // Enable/disable input device.
-    boolean isInputDeviceEnabled(int deviceId);
     void enableInputDevice(int deviceId);
     void disableInputDevice(int deviceId);
 

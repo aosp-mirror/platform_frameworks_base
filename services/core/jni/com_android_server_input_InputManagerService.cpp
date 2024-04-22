@@ -2451,12 +2451,6 @@ static void nativeMonitor(JNIEnv* env, jobject nativeImplObj) {
     im->getInputManager()->getDispatcher().monitor();
 }
 
-static jboolean nativeIsInputDeviceEnabled(JNIEnv* env, jobject nativeImplObj, jint deviceId) {
-    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
-
-    return im->getInputManager()->getReader().isInputDeviceEnabled(deviceId);
-}
-
 static void nativeEnableInputDevice(JNIEnv* env, jobject nativeImplObj, jint deviceId) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
@@ -2798,7 +2792,6 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"sysfsNodeChanged", "(Ljava/lang/String;)V", (void*)nativeSysfsNodeChanged},
         {"dump", "()Ljava/lang/String;", (void*)nativeDump},
         {"monitor", "()V", (void*)nativeMonitor},
-        {"isInputDeviceEnabled", "(I)Z", (void*)nativeIsInputDeviceEnabled},
         {"enableInputDevice", "(I)V", (void*)nativeEnableInputDevice},
         {"disableInputDevice", "(I)V", (void*)nativeDisableInputDevice},
         {"reloadPointerIcons", "()V", (void*)nativeReloadPointerIcons},
