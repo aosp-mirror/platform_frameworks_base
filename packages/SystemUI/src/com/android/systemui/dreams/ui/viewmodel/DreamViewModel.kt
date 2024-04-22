@@ -47,7 +47,7 @@ constructor(
     configurationInteractor: ConfigurationInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     fromGlanceableHubTransitionInteractor: GlanceableHubToDreamingTransitionViewModel,
-    private val toGlanceableHubTransitionViewModel: DreamingToGlanceableHubTransitionViewModel,
+    toGlanceableHubTransitionViewModel: DreamingToGlanceableHubTransitionViewModel,
     private val toLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
     private val communalInteractor: CommunalInteractor,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
@@ -60,7 +60,6 @@ constructor(
             communalInteractor.isCommunalEnabled.value &&
                 !keyguardUpdateMonitor.isEncryptedOrLockdown(userTracker.userId)
         if (showGlanceableHub) {
-            toGlanceableHubTransitionViewModel.startTransition()
             communalInteractor.changeScene(CommunalScenes.Communal)
         } else {
             toLockscreenTransitionViewModel.startTransition()
