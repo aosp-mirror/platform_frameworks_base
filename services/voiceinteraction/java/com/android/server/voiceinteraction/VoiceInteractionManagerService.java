@@ -2536,7 +2536,8 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
-        PackageMonitor mPackageMonitor = new PackageMonitor() {
+        PackageMonitor mPackageMonitor = new PackageMonitor(
+                /* supportsPackageRestartQuery= */ true) {
 
             @Override
             public boolean onHandleForceStop(Intent intent, String[] packages, int uid,

@@ -920,6 +920,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
          */
         private ArrayList<String> mDataClearedPackages = new ArrayList<>();
 
+        private MyPackageMonitor() {
+            super(true);
+        }
+
         @GuardedBy("ImfLock.class")
         void clearKnownImePackageNamesLocked() {
             mKnownImePackageNames.clear();
