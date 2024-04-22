@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -57,8 +58,7 @@ public class JsonStyleParser implements EventParser {
                     String name = mReader.nextName();
                     switch (name) {
                         case "id" -> eb.setId(readInt());
-                        case "command" -> eb.setCommand(
-                                Event.Command.valueOf(mReader.nextString().toUpperCase()));
+                        case "command" -> eb.setCommand(readCommand());
                         case "name" -> eb.setName(mReader.nextString());
                         case "vid" -> eb.setVendorId(readInt());
                         case "pid" -> eb.setProductId(readInt());
@@ -89,6 +89,18 @@ public class JsonStyleParser implements EventParser {
         }
 
         return e;
+    }
+
+    private Event.Command readCommand() throws IOException {
+        String commandStr = mReader.nextString();
+        return switch (commandStr.toLowerCase(Locale.ROOT)) {
+            case "register" -> Event.Command.REGISTER;
+            case "delay" -> Event.Command.DELAY;
+            case "inject" -> Event.Command.INJECT;
+            case "sync" -> Event.Command.SYNC;
+            case "updatetimebase" -> Event.Command.UPDATE_TIME_BASE;
+            default -> throw new IllegalStateException("Invalid command \"" + commandStr + "\"");
+        };
     }
 
     private ArrayList<Integer> readInjectedEvents() throws IOException {
