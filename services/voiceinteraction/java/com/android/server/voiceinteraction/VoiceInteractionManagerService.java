@@ -127,6 +127,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -2739,7 +2740,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
             }
             final ScreenCapture.ScreenshotHardwareBuffer shb =
-                    mWmInternal.takeAssistScreenshot();
+                    mWmInternal.takeAssistScreenshot(/* windowTypesToExclude= */ Set.of());
             final Bitmap bm = shb != null ? shb.asBitmap() : null;
             // Now that everything is fetched, putting it in the launchIntent.
             if (bm != null) {
