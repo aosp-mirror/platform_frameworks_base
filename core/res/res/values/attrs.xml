@@ -4472,8 +4472,8 @@
     </declare-styleable>
 
     <!-- Specify one or more <code>polling-loop-filter</code> elements inside a
-         <code>host-apdu-service</code> to indicate polling loop frames that
-         your service can handle. -->
+         <code>host-apdu-service</code> or <code>offhost-apdu-service</code> to indicate polling
+         loop frames that your service can handle. -->
     <!-- @FlaggedApi("android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP") -->
     <declare-styleable name="PollingLoopFilter">
         <!-- The polling loop frame. This attribute is mandatory. -->
@@ -4485,8 +4485,8 @@
     </declare-styleable>
 
     <!-- Specify one or more <code>polling-loop-pattern-filter</code> elements inside a
-         <code>host-apdu-service</code> to indicate polling loop frames that
-         your service can handle. -->
+         <code>host-apdu-service</code> or <code>offhost-apdu-service</code>  to indicate polling
+         loop frames that your service can handle. -->
     <!-- @FlaggedApi("android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP") -->
     <declare-styleable name="PollingLoopPatternFilter">
         <!-- The patter to match polling loop frames to, must to be compatible with
