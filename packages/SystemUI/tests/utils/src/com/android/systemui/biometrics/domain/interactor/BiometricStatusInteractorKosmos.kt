@@ -18,12 +18,14 @@ package com.android.systemui.biometrics.domain.interactor
 
 import com.android.app.activityTaskManager
 import com.android.systemui.biometrics.data.repository.biometricStatusRepository
+import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 
 val Kosmos.biometricStatusInteractor by Fixture {
     BiometricStatusInteractorImpl(
         activityTaskManager = activityTaskManager,
-        biometricStatusRepository = biometricStatusRepository
+        biometricStatusRepository = biometricStatusRepository,
+        fingerprintPropertyRepository = fingerprintPropertyRepository
     )
 }

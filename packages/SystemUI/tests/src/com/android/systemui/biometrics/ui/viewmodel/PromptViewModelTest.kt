@@ -169,7 +169,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             )
         biometricStatusRepository = FakeBiometricStatusRepository()
         biometricStatusInteractor =
-            BiometricStatusInteractorImpl(activityTaskManager, biometricStatusRepository)
+            BiometricStatusInteractorImpl(activityTaskManager, biometricStatusRepository,
+                fingerprintRepository)
         selector =
             PromptSelectorInteractorImpl(fingerprintRepository, promptRepository, lockPatternUtils)
         selector.resetPrompt()
