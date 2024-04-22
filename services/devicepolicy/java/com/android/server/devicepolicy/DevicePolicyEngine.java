@@ -1636,15 +1636,14 @@ final class DevicePolicyEngine {
      * active policies for that admin.
      */
     private <V> void decreasePolicySizeForAdmin(PolicyState<V> policyState, EnforcingAdmin admin) {
-        if (policyState.getPoliciesSetByAdmins().containsKey(admin)) {
-            mAdminPolicySize.get(admin.getUserId()).put(admin,
-                    mAdminPolicySize.get(admin.getUserId()).get(admin) - sizeOf(
-                            policyState.getPoliciesSetByAdmins().get(admin)));
-        }
-        if (!mAdminPolicySize.contains(admin.getUserId())
+        if (!policyState.getPoliciesSetByAdmins().containsKey(admin)
+                || !mAdminPolicySize.contains(admin.getUserId())
                 || !mAdminPolicySize.get(admin.getUserId()).containsKey(admin)) {
             return;
         }
+        mAdminPolicySize.get(admin.getUserId()).put(admin,
+                mAdminPolicySize.get(admin.getUserId()).get(admin) - sizeOf(
+                        policyState.getPoliciesSetByAdmins().get(admin)));
         if (mAdminPolicySize.get(admin.getUserId()).get(admin) <= 0) {
             mAdminPolicySize.get(admin.getUserId()).remove(admin);
         }
@@ -1704,6 +1703,25 @@ final class DevicePolicyEngine {
                 pw.println();
             }
             pw.decreaseIndent();
+            if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
+                pw.println();
+
+                pw.println("Default admin policy size limit: " + DEFAULT_POLICY_SIZE_LIMIT);
+                pw.println("Current admin policy size limit: " + mPolicySizeLimit);
+                pw.println("Admin Policies size: ");
+                for (int i = 0; i < mAdminPolicySize.size(); i++) {
+                    int userId = mAdminPolicySize.keyAt(i);
+                    pw.printf("User %d:\n", userId);
+                    pw.increaseIndent();
+                    for (EnforcingAdmin admin : mAdminPolicySize.get(userId).keySet()) {
+                        pw.printf("Admin : " + admin + " : " + mAdminPolicySize.get(userId).get(
+                                admin));
+                        pw.println();
+                    }
+                    pw.decreaseIndent();
+                }
+                pw.decreaseIndent();
+            }
         }
     }
 
