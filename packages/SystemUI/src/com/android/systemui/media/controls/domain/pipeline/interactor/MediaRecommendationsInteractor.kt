@@ -65,6 +65,8 @@ constructor(
             .distinctUntilChanged()
             .stateIn(applicationScope, SharingStarted.WhileSubscribed(), false)
 
+    val onAnyMediaConfigurationChange: Flow<Unit> = repository.onAnyMediaConfigurationChange
+
     fun removeMediaRecommendations(key: String, dismissIntent: Intent?, delayMs: Long) {
         mediaDataProcessor.dismissSmartspaceRecommendation(key, delayMs)
         if (dismissIntent == null) {

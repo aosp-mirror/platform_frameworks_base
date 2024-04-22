@@ -50,8 +50,10 @@ import com.android.systemui.monet.Style
 import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -67,9 +69,12 @@ constructor(
     private val logger: MediaUiEventLogger,
 ) {
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     val mediaRecsCard: Flow<MediaRecsCardViewModel?> =
-        interactor.recommendations
-            .map { recsCard -> toRecsViewModel(recsCard) }
+        interactor.onAnyMediaConfigurationChange
+            .flatMapLatest {
+                interactor.recommendations.map { recsCard -> toRecsViewModel(recsCard) }
+            }
             .distinctUntilChanged()
             .flowOn(backgroundDispatcher)
 

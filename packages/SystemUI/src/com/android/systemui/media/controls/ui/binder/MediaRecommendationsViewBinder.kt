@@ -68,7 +68,7 @@ object MediaRecommendationsViewBinder {
         }
     }
 
-    private fun bindRecsCard(
+    fun bindRecsCard(
         viewHolder: RecommendationViewHolder,
         viewModel: MediaRecsCardViewModel,
         mediaViewController: MediaViewController,
