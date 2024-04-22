@@ -1,4 +1,5 @@
 package: "com.android.internal.os"
+container: "system"
 
 flag {
     name: "enable_apache_http_legacy_preload"

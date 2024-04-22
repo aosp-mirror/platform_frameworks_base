@@ -379,6 +379,7 @@ cc_aconfig_library {
 aconfig_declarations {
     name: "com.android.internal.os.flags-aconfig",
     package: "com.android.internal.os",
+    container: "system",
     srcs: ["core/java/com/android/internal/os/flags.aconfig"],
 }
 
@@ -853,6 +854,7 @@ java_aconfig_library {
 aconfig_declarations {
     name: "com.android.server.contextualsearch.flags-aconfig",
     package: "com.android.server.contextualsearch.flags",
+    container: "system",
     srcs: ["services/contextualsearch/flags/flags.aconfig"],
 }
 
