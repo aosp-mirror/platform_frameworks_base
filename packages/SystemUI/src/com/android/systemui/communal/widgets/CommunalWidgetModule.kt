@@ -38,7 +38,7 @@ import kotlinx.coroutines.CoroutineScope
 @Module
 interface CommunalWidgetModule {
     companion object {
-        private const val APP_WIDGET_HOST_ID = 116
+        const val APP_WIDGET_HOST_ID = 116
         const val DEFAULT_WIDGETS = "default_widgets"
 
         @SysUISingleton

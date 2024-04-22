@@ -46,6 +46,10 @@ class FakeCommunalWidgetRepository(private val coroutineScope: CoroutineScope) :
         _communalWidgets.value = _communalWidgets.value.filter { it.appWidgetId != widgetId }
     }
 
+    override fun restoreWidgets(oldToNewWidgetIdMap: Map<Int, Int>) {}
+
+    override fun abortRestoreWidgets() {}
+
     private fun onConfigured(id: Int, providerInfo: AppWidgetProviderInfo, priority: Int) {
         _communalWidgets.value += listOf(CommunalWidgetContentModel(id, providerInfo, priority))
     }

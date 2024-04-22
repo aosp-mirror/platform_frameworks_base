@@ -22,13 +22,17 @@ import android.appwidget.AppWidgetProviderInfo
 import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_CONFIGURATION_OPTIONAL
 import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_RECONFIGURABLE
 import android.content.ComponentName
+import android.content.applicationContext
 import android.os.UserHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.data.backup.CommunalBackupUtils
 import com.android.systemui.communal.data.db.CommunalItemRank
 import com.android.systemui.communal.data.db.CommunalWidgetDao
 import com.android.systemui.communal.data.db.CommunalWidgetItem
+import com.android.systemui.communal.nano.CommunalHubState
+import com.android.systemui.communal.proto.toByteArray
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.CommunalWidgetHost
@@ -43,6 +47,7 @@ import com.android.systemui.res.R
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -71,6 +76,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var communalWidgetDao: CommunalWidgetDao
     @Mock private lateinit var backupManager: BackupManager
 
+    private lateinit var backupUtils: CommunalBackupUtils
     private lateinit var logBuffer: LogBuffer
     private lateinit var fakeWidgets: MutableStateFlow<Map<CommunalItemRank, CommunalWidgetItem>>
 
@@ -91,6 +97,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         fakeWidgets = MutableStateFlow(emptyMap())
         logBuffer = logcatLogBuffer(name = "CommunalWidgetRepoImplTest")
+        backupUtils = CommunalBackupUtils(kosmos.applicationContext)
 
         setAppWidgetIds(emptyList())
 
@@ -109,6 +116,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                 communalWidgetDao,
                 logBuffer,
                 backupManager,
+                backupUtils,
             )
     }
 
@@ -288,6 +296,144 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             verify(backupManager).dataChanged()
         }
 
+    @Test
+    fun restoreWidgets_deleteStateFileIfRestoreFails() =
+        testScope.runTest {
+            // Write a state file that is invalid, and verify it is written
+            backupUtils.writeBytesToDisk(byteArrayOf(1, 2, 3, 4, 5, 6))
+            assertThat(backupUtils.fileExists()).isTrue()
+
+            // Try to restore widgets
+            underTest.restoreWidgets(emptyMap())
+            runCurrent()
+
+            // The restore should fail, and verify that the file is deleted
+            assertThat(backupUtils.fileExists()).isFalse()
+        }
+
+    @Test
+    fun restoreWidgets_deleteStateFileAfterWidgetsRestored() =
+        testScope.runTest {
+            // Write a state file, and verify it is written
+            backupUtils.writeBytesToDisk(fakeState.toByteArray())
+            assertThat(backupUtils.fileExists()).isTrue()
+
+            // Set up app widget host with widget ids
+            setAppWidgetIds(listOf(11, 12))
+
+            // Restore widgets
+            underTest.restoreWidgets(mapOf(Pair(1, 11), Pair(2, 12)))
+            runCurrent()
+
+            // Verify state restored
+            verify(communalWidgetDao).restoreCommunalHubState(any())
+
+            // Verify state file deleted
+            assertThat(backupUtils.fileExists()).isFalse()
+        }
+
+    @Test
+    fun restoreWidgets_restoredWidgetsNotRegisteredWithHostAreSkipped() =
+        testScope.runTest {
+            // Write fake state to file
+            backupUtils.writeBytesToDisk(fakeState.toByteArray())
+
+            // Set up app widget host with widget ids. Widget 12 (previously 2) is absent.
+            setAppWidgetIds(listOf(11))
+
+            // Restore widgets.
+            underTest.restoreWidgets(mapOf(Pair(1, 11), Pair(2, 12)))
+            runCurrent()
+
+            // Verify state restored, and widget 2 skipped
+            val restoredState =
+                withArgCaptor<CommunalHubState> {
+                    verify(communalWidgetDao).restoreCommunalHubState(capture())
+                }
+            val restoredWidgets = restoredState.widgets.toList()
+            assertThat(restoredWidgets).hasSize(1)
+
+            val restoredWidget = restoredWidgets.first()
+            val expectedWidget = fakeState.widgets.first()
+
+            // Verify widget id is updated, and the rest remain the same as expected
+            assertThat(restoredWidget.widgetId).isEqualTo(11)
+            assertThat(restoredWidget.componentName).isEqualTo(expectedWidget.componentName)
+            assertThat(restoredWidget.rank).isEqualTo(expectedWidget.rank)
+        }
+
+    @Test
+    fun restoreWidgets_registeredWidgetsNotRestoredAreRemoved() =
+        testScope.runTest {
+            // Write fake state to file
+            backupUtils.writeBytesToDisk(fakeState.toByteArray())
+
+            // Set up app widget host with widget ids. Widget 13 will not be restored.
+            setAppWidgetIds(listOf(11, 12, 13))
+
+            // Restore widgets.
+            underTest.restoreWidgets(mapOf(Pair(1, 11), Pair(2, 12)))
+            runCurrent()
+
+            // Verify widget 1 and 2 are restored, and are now 11 and 12.
+            val restoredState =
+                withArgCaptor<CommunalHubState> {
+                    verify(communalWidgetDao).restoreCommunalHubState(capture())
+                }
+            val restoredWidgets = restoredState.widgets.toList()
+            assertThat(restoredWidgets).hasSize(2)
+
+            val restoredWidget1 = restoredWidgets[0]
+            val expectedWidget1 = fakeState.widgets[0]
+            assertThat(restoredWidget1.widgetId).isEqualTo(11)
+            assertThat(restoredWidget1.componentName).isEqualTo(expectedWidget1.componentName)
+            assertThat(restoredWidget1.rank).isEqualTo(expectedWidget1.rank)
+
+            val restoredWidget2 = restoredWidgets[1]
+            val expectedWidget2 = fakeState.widgets[1]
+            assertThat(restoredWidget2.widgetId).isEqualTo(12)
+            assertThat(restoredWidget2.componentName).isEqualTo(expectedWidget2.componentName)
+            assertThat(restoredWidget2.rank).isEqualTo(expectedWidget2.rank)
+
+            // Verify widget 13 removed since it is not restored
+            verify(appWidgetHost).deleteAppWidgetId(13)
+        }
+
+    @Test
+    fun restoreWidgets_onlySomeWidgetsGotNewIds() =
+        testScope.runTest {
+            // Write fake state to file
+            backupUtils.writeBytesToDisk(fakeState.toByteArray())
+
+            // Set up app widget host with widget ids. Widget 2 gets a new id: 12, but widget 1 does
+            // not.
+            setAppWidgetIds(listOf(1, 12))
+
+            // Restore widgets.
+            underTest.restoreWidgets(mapOf(Pair(2, 12)))
+            runCurrent()
+
+            // Verify widget 1 and 2 are restored, and are now 1 and 12.
+            val restoredState =
+                withArgCaptor<CommunalHubState> {
+                    verify(communalWidgetDao).restoreCommunalHubState(capture())
+                }
+            val restoredWidgets = restoredState.widgets.toList()
+            assertThat(restoredWidgets).hasSize(2)
+
+            val restoredWidget1 = restoredWidgets[0]
+            val expectedWidget1 = fakeState.widgets[0]
+            assertThat(restoredWidget1.widgetId).isEqualTo(1)
+            assertThat(restoredWidget1.componentName).isEqualTo(expectedWidget1.componentName)
+            assertThat(restoredWidget1.rank).isEqualTo(expectedWidget1.rank)
+
+            val restoredWidget2 = restoredWidgets[1]
+            val expectedWidget2 = fakeState.widgets[1]
+            assertThat(restoredWidget2.widgetId).isEqualTo(12)
+            assertThat(restoredWidget2.componentName).isEqualTo(expectedWidget2.componentName)
+            assertThat(restoredWidget2.rank).isEqualTo(expectedWidget2.rank)
+        }
+
     private fun installedProviders(providers: List<AppWidgetProviderInfo>) {
         whenever(appWidgetManager.installedProviders).thenReturn(providers)
     }
@@ -304,6 +450,23 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                 configure = ComponentName("test.pkg", "test.cmp")
                 widgetFeatures =
                     WIDGET_FEATURE_CONFIGURATION_OPTIONAL or WIDGET_FEATURE_RECONFIGURABLE
+            }
+        val fakeState =
+            CommunalHubState().apply {
+                widgets =
+                    listOf(
+                            CommunalHubState.CommunalWidgetItem().apply {
+                                widgetId = 1
+                                componentName = "pk_name/fake_widget_1"
+                                rank = 1
+                            },
+                            CommunalHubState.CommunalWidgetItem().apply {
+                                widgetId = 2
+                                componentName = "pk_name/fake_widget_2"
+                                rank = 2
+                            },
+                        )
+                        .toTypedArray()
             }
     }
 }
