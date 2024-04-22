@@ -79,8 +79,9 @@ class InputManagerMockHelper {
         when(mIInputManagerMock.getInputDeviceIds()).thenReturn(new int[0]);
         doAnswer(inv -> mDevices.get(inv.getArgument(0)))
                 .when(mIInputManagerMock).getInputDevice(anyInt());
-        doAnswer(inv -> mUniqueIdAssociation.put(inv.getArgument(0), inv.getArgument(1))).when(
-                mIInputManagerMock).addUniqueIdAssociation(anyString(), anyString());
+        doAnswer(inv -> mUniqueIdAssociation.put(inv.getArgument(0),
+                inv.getArgument(1))).when(mIInputManagerMock).addUniqueIdAssociation(
+                        anyString(), anyString());
         doAnswer(inv -> mUniqueIdAssociation.remove(inv.getArgument(0))).when(
                 mIInputManagerMock).removeUniqueIdAssociation(anyString());
 
