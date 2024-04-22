@@ -17,13 +17,12 @@
 package com.android.systemui.qs.panels.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.panels.data.repository.IconTilesRepository
-import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.panels.data.repository.GridLayoutTypeRepository
+import com.android.systemui.qs.panels.shared.model.GridLayoutType
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
-/** Interactor for retrieving the list of [TileSpec] to be displayed as icons. */
 @SysUISingleton
-class IconTilesInteractor @Inject constructor(repo: IconTilesRepository) {
-    val iconTilesSpecs: Flow<Set<TileSpec>> = repo.iconTilesSpecs
+class GridLayoutTypeInteractor @Inject constructor(repo: GridLayoutTypeRepository) {
+    val layout: Flow<GridLayoutType> = repo.layout
 }

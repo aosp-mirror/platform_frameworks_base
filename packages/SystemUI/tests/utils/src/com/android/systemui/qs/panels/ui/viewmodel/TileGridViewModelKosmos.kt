@@ -14,24 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.dagger
+package com.android.systemui.qs.panels.ui.viewmodel
 
-import com.android.systemui.qs.panels.data.repository.IconTilesRepository
-import com.android.systemui.qs.panels.data.repository.IconTilesRepositoryImpl
-import com.android.systemui.qs.panels.shared.model.GridLayoutTypeKey
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.qs.panels.domain.interactor.gridLayoutTypeInteractor
+import com.android.systemui.qs.panels.domain.interactor.iconTilesInteractor
 import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
-import com.android.systemui.qs.panels.ui.compose.GridLayout
 import com.android.systemui.qs.panels.ui.compose.InfiniteGridLayout
-import dagger.Binds
-import dagger.Module
-import dagger.multibindings.IntoMap
+import com.android.systemui.qs.pipeline.domain.interactor.currentTilesInteractor
 
-@Module
-interface PanelsModule {
-    @Binds fun bindIconTilesRepository(impl: IconTilesRepositoryImpl): IconTilesRepository
-
-    @Binds
-    @IntoMap
-    @GridLayoutTypeKey(InfiniteGridLayoutType::class)
-    fun bindGridLayout(impl: InfiniteGridLayout): GridLayout
-}
+val Kosmos.tileGridViewModel by
+    Kosmos.Fixture {
+        TileGridViewModel(
+            gridLayoutTypeInteractor,
+            mapOf(Pair(InfiniteGridLayoutType::class.java, InfiniteGridLayout())),
+            currentTilesInteractor,
+            iconTilesInteractor
+        )
+    }
