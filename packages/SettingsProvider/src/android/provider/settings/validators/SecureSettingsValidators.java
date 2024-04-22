@@ -432,5 +432,6 @@ public class SecureSettingsValidators {
                 Secure.RESOLUTION_MODE_UNKNOWN, Secure.RESOLUTION_MODE_FULL));
         VALIDATORS.put(Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_SATURATION_LEVEL,
                 new InclusiveIntegerRangeValidator(0, 10));
+        VALIDATORS.put(Secure.CHARGE_OPTIMIZATION_MODE, new InclusiveIntegerRangeValidator(0, 10));
     }
 }
