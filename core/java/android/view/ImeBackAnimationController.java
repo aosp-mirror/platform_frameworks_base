@@ -31,8 +31,11 @@ import android.util.Log;
 import android.view.animation.BackGestureInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
+import android.view.inputmethod.ImeTracker;
 import android.window.BackEvent;
 import android.window.OnBackAnimationCallback;
+
+import com.android.internal.inputmethod.SoftInputShowHideReason;
 
 /**
  * Controller for IME predictive back animation
@@ -192,6 +195,24 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
         mPostCommitAnimator.setDuration(
                 triggerBack ? POST_COMMIT_DURATION_MS : POST_COMMIT_CANCEL_DURATION_MS);
         mPostCommitAnimator.start();
+        if (triggerBack) {
+            mInsetsController.setPredictiveBackImeHideAnimInProgress(true);
+            notifyHideIme();
+        }
+    }
+
+    private void notifyHideIme() {
+        ImeTracker.Token statsToken = ImeTracker.forLogging().onStart(ImeTracker.TYPE_HIDE,
+                ImeTracker.ORIGIN_CLIENT,
+                SoftInputShowHideReason.HIDE_SOFT_INPUT_REQUEST_HIDE_WITH_CONTROL, true);
+        // This notifies the IME that it is being hidden. In response, the IME will unregister the
+        // animation callback, such that new back gestures happening during the post-commit phase of
+        // the hide animation can already dispatch to a new callback.
+        // Note that the IME will call hide() in InsetsController. InsetsController will not animate
+        // that hide request if it sees that ImeBackAnimationController is already animating
+        // the IME away
+        mInsetsController.getHost().getInputMethodManager()
+                .notifyImeHidden(mInsetsController.getHost().getWindowToken(), statsToken);
     }
 
     private void reset() {
@@ -200,6 +221,7 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
         mLastProgress = 0f;
         mTriggerBack = false;
         mIsPreCommitAnimationInProgress = false;
+        mInsetsController.setPredictiveBackImeHideAnimInProgress(false);
     }
 
     private void resetPostCommitAnimator() {
