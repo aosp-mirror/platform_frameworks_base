@@ -907,8 +907,8 @@
     <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"पुनः मिलाउनुहोस्"</string>
     <string name="controls_favorite_add_controls" msgid="1221420435546694004">"कन्ट्रोलहरू हाल्नुहोस्"</string>
     <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"सम्पादन गर्ने स्क्रिनमा फर्कनुहोस्"</string>
-    <string name="controls_favorite_load_error" msgid="5126216176144877419">"नियन्त्रण सुविधाहरू लोड गर्न सकिएन। <xliff:g id="APP">%s</xliff:g> एपका सेटिङ परिवर्तन गरिएका छैनन् भन्ने कुरा सुनिश्चित गर्न उक्त एप जाँच्नुहोस्।"</string>
-    <string name="controls_favorite_load_none" msgid="7687593026725357775">"मिल्दा नियन्त्रण सुविधाहरू उपलब्ध छैनन्"</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"कन्ट्रोल लोड गर्न सकिएन। <xliff:g id="APP">%s</xliff:g> एपका सेटिङ परिवर्तन गरिएका छैनन् भन्ने कुरा सुनिश्चित गर्न उक्त एप जाँच्नुहोस्।"</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"मिल्दा कन्ट्रोल उपलब्ध छैनन्"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"अन्य"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"डिभाइस नियन्त्रण गर्ने विजेटहरूको सूचीमा थप्नुहोस्"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"थप्नुहोस्"</string>
