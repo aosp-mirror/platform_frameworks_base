@@ -50,6 +50,5 @@
     <string name="keyboard_layout_belarusian" msgid="7619281752698687588">"ബെലാറുഷ്യൻ"</string>
     <string name="keyboard_layout_mongolian" msgid="7678483495823936626">"മംഗോളിയൻ"</string>
     <string name="keyboard_layout_georgian" msgid="4596185456863747454">"ജോര്‍ജ്ജിയൻ"</string>
-    <!-- no translation found for keyboard_layout_thai_kedmanee (6637147314580760938) -->
-    <skip />
+    <string name="keyboard_layout_thai_kedmanee" msgid="6637147314580760938">"തായ് (Kedmanee)"</string>
 </resources>
