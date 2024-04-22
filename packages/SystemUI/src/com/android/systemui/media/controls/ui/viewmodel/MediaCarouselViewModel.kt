@@ -115,7 +115,7 @@ constructor(
                     immediatelyUpdateUi = commonModel.mediaLoadedModel.immediatelyUpdateUi,
                     controlViewModel = createMediaControlViewModel(instanceId),
                     onAdded = { onMediaControlAddedOrUpdated(it, commonModel) },
-                    onRemoved = { _, _ ->
+                    onRemoved = {
                         interactor.removeMediaControl(instanceId, delay = 0L)
                         mediaControlByInstanceId.remove(instanceId)
                     },
@@ -151,7 +151,7 @@ constructor(
                     onAdded = { commonViewModel ->
                         onMediaRecommendationAddedOrUpdated(commonViewModel)
                     },
-                    onRemoved = { _, immediatelyRemove ->
+                    onRemoved = { immediatelyRemove ->
                         onMediaRecommendationRemoved(commonModel, immediatelyRemove)
                     },
                     onUpdated = { commonViewModel ->
@@ -170,7 +170,7 @@ constructor(
             // This media control is due for removal as it is now paused + timed out, and resumption
             // setting is off.
             if (isReorderingAllowed()) {
-                commonViewModel.onRemoved(commonViewModel, true)
+                commonViewModel.onRemoved(true)
             } else {
                 modelsPendingRemoval.add(commonModel)
             }
@@ -182,7 +182,7 @@ constructor(
     private fun onMediaRecommendationAddedOrUpdated(commonViewModel: MediaCommonViewModel) {
         if (!interactor.isRecommendationActive()) {
             if (!mediaFlags.isPersistentSsCardEnabled()) {
-                commonViewModel.onRemoved(commonViewModel, true)
+                commonViewModel.onRemoved(true)
             }
         } else {
             // TODO (b/330897926) log smartspace card reported (SMARTSPACE_CARD_RECEIVED)

@@ -22,7 +22,7 @@ import com.android.internal.logging.InstanceId
 sealed class MediaCommonViewModel {
 
     abstract val onAdded: (MediaCommonViewModel) -> Unit
-    abstract val onRemoved: (MediaCommonViewModel, Boolean) -> Unit
+    abstract val onRemoved: (Boolean) -> Unit
     abstract val onUpdated: (MediaCommonViewModel) -> Unit
 
     data class MediaControl(
@@ -30,7 +30,7 @@ sealed class MediaCommonViewModel {
         val immediatelyUpdateUi: Boolean,
         val controlViewModel: MediaControlViewModel,
         override val onAdded: (MediaCommonViewModel) -> Unit,
-        override val onRemoved: (MediaCommonViewModel, Boolean) -> Unit,
+        override val onRemoved: (Boolean) -> Unit,
         override val onUpdated: (MediaCommonViewModel) -> Unit,
     ) : MediaCommonViewModel()
 
@@ -39,7 +39,7 @@ sealed class MediaCommonViewModel {
         val loadingEnabled: Boolean,
         val recsViewModel: MediaRecommendationsViewModel,
         override val onAdded: (MediaCommonViewModel) -> Unit,
-        override val onRemoved: (MediaCommonViewModel, Boolean) -> Unit,
+        override val onRemoved: (Boolean) -> Unit,
         override val onUpdated: (MediaCommonViewModel) -> Unit,
     ) : MediaCommonViewModel()
 }
