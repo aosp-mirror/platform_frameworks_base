@@ -37,7 +37,7 @@ import com.android.systemui.settings.displayTracker
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.notificationShadeWindowController
-import com.android.systemui.statusbar.phone.centralSurfaces
+import com.android.systemui.statusbar.phone.centralSurfacesOptional
 import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
 
 val Kosmos.sceneContainerStartable by Fixture {
@@ -58,7 +58,7 @@ val Kosmos.sceneContainerStartable by Fixture {
         authenticationInteractor = { authenticationInteractor },
         windowController = notificationShadeWindowController,
         deviceProvisioningInteractor = deviceProvisioningInteractor,
-        centralSurfaces = centralSurfaces,
+        centralSurfacesOptLazy = { centralSurfacesOptional },
         headsUpInteractor = headsUpNotificationInteractor,
         occlusionInteractor = sceneContainerOcclusionInteractor,
         faceUnlockInteractor = deviceEntryFaceAuthInteractor,

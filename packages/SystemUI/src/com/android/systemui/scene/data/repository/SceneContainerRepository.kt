@@ -81,14 +81,6 @@ constructor(
         toScene: SceneKey,
         transitionKey: TransitionKey? = null,
     ) {
-        check(allSceneKeys().contains(toScene)) {
-            """
-                Cannot set the desired scene key to "$toScene". The configuration does not
-                contain a scene with that key.
-            """
-                .trimIndent()
-        }
-
         dataSource.changeScene(
             toScene = toScene,
             transitionKey = transitionKey,
