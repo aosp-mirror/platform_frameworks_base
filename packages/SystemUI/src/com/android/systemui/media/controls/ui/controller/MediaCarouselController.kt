@@ -758,7 +758,7 @@ constructor(
                     isSsReactivated,
                     debugLogger
                 )
-                updatePlayerToState(newPlayer, noAnimation = true)
+                updatePlayerToState(newPlayer.mediaViewController, noAnimation = true)
                 // Media data added from a recommendation card should starts playing.
                 if (
                     (shouldScrollToKey && data.isPlaying == true) ||
@@ -856,7 +856,7 @@ constructor(
                 systemClock,
                 debugLogger,
             )
-            updatePlayerToState(newRecs, noAnimation = true)
+            updatePlayerToState(newRecs.mediaViewController, noAnimation = true)
             reorderAllPlayers(curVisibleMediaKey)
             updatePageIndicator()
             mediaFrame.requiresRemeasuring = true
@@ -886,7 +886,7 @@ constructor(
         val removed =
             MediaPlayerData.removeMediaPlayer(key, dismissMediaData || dismissRecommendation)
         return removed?.apply {
-            mediaCarouselScrollHandler.onPrePlayerRemoved(removed)
+            mediaCarouselScrollHandler.onPrePlayerRemoved(removed.mediaViewHolder?.player)
             mediaContent.removeView(removed.mediaViewHolder?.player)
             mediaContent.removeView(removed.recommendationViewHolder?.recommendations)
             removed.onDestroy()
@@ -980,7 +980,7 @@ constructor(
             currentEndLocation = endLocation
             currentTransitionProgress = progress
             for (mediaPlayer in MediaPlayerData.players()) {
-                updatePlayerToState(mediaPlayer, immediately)
+                updatePlayerToState(mediaPlayer.mediaViewController, immediately)
             }
             maybeResetSettingsCog()
             updatePageIndicatorAlpha()
@@ -1080,8 +1080,8 @@ constructor(
         }
     }
 
-    private fun updatePlayerToState(mediaPlayer: MediaControlPanel, noAnimation: Boolean) {
-        mediaPlayer.mediaViewController.setCurrentState(
+    private fun updatePlayerToState(viewController: MediaViewController, noAnimation: Boolean) {
+        viewController.setCurrentState(
             startLocation = currentStartLocation,
             endLocation = currentEndLocation,
             transitionProgress = currentTransitionProgress,

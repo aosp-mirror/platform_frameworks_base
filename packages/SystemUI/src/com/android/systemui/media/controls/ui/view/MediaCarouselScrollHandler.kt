@@ -31,11 +31,11 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.settingslib.Utils
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.classifier.Classifier.NOTIFICATION_DISMISS
-import com.android.systemui.media.controls.ui.controller.MediaControlPanel
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PageIndicator
 import com.android.systemui.res.R
+import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.wm.shell.shared.animation.PhysicsAnimator
 
@@ -535,8 +535,8 @@ class MediaCarouselScrollHandler(
      * Notify that a player will be removed right away. This gives us the opporunity to look where
      * it was and update our scroll position.
      */
-    fun onPrePlayerRemoved(removed: MediaControlPanel) {
-        val removedIndex = mediaContent.indexOfChild(removed.mediaViewHolder?.player)
+    fun onPrePlayerRemoved(player: TransitionLayout?) {
+        val removedIndex = mediaContent.indexOfChild(player)
         // If the removed index is less than the visibleMediaIndex, then we need to decrement it.
         // RTL has no effect on this, because indices are always relative (start-to-end).
         // Update the index 'manually' since we won't always get a call to onMediaScrollingChanged
