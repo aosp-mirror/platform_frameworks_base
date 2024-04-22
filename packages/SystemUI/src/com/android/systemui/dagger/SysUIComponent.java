@@ -25,7 +25,6 @@ import com.android.systemui.dagger.qualifiers.PerUser;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.people.PeopleProvider;
-import com.android.systemui.startable.Dependencies;
 import com.android.systemui.statusbar.NotificationInsetsModule;
 import com.android.systemui.statusbar.QsFrameTranslateModule;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -48,7 +47,6 @@ import dagger.Subcomponent;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.inject.Provider;
 
@@ -160,11 +158,6 @@ public interface SysUIComponent {
      * Returns {@link CoreStartable}s that should be started for every user.
      */
     @PerUser Map<Class<?>, Provider<CoreStartable>> getPerUserStartables();
-
-    /**
-     * Returns {@link CoreStartable} dependencies if there are any.
-     */
-    @Dependencies Map<Class<?>, Set<Class<? extends CoreStartable>>> getStartableDependencies();
 
     /**
      * Member injection into the supplied argument.

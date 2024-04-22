@@ -41,7 +41,6 @@ import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeSurface;
 import com.android.systemui.shade.ShadeSurfaceImpl;
 import com.android.systemui.shade.carrier.ShadeCarrierGroupController;
-import com.android.systemui.startable.Dependencies;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationClickNotifier;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -53,7 +52,6 @@ import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.CentralSurfacesImpl;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
@@ -69,8 +67,6 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
-
-import java.util.Set;
 
 import javax.inject.Provider;
 
@@ -159,15 +155,6 @@ public interface CentralSurfacesDependenciesModule {
     @IntoMap
     @ClassKey(SysuiStatusBarStateController.class)
     CoreStartable bindsStartStatusBarStateController(StatusBarStateControllerImpl sbsc);
-
-    /** */
-    @Provides
-    @IntoMap
-    @Dependencies
-    @ClassKey(SysuiStatusBarStateController.class)
-    static Set<Class<? extends CoreStartable>> providesStatusBarStateControllerDeps() {
-        return Set.of(CentralSurfaces.class);
-    }
 
     /** */
     @Binds
