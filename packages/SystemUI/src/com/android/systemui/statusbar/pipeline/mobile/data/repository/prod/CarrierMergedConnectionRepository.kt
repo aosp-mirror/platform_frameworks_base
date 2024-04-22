@@ -165,6 +165,7 @@ class CarrierMergedConnectionRepository(
 
     override val isRoaming = MutableStateFlow(false).asStateFlow()
     override val carrierId = MutableStateFlow(INVALID_SUBSCRIPTION_ID).asStateFlow()
+    override val inflateSignalStrength = MutableStateFlow(false).asStateFlow()
     override val isEmergencyOnly = MutableStateFlow(false).asStateFlow()
     override val operatorAlphaShort = MutableStateFlow(null).asStateFlow()
     override val isInService = MutableStateFlow(true).asStateFlow()
