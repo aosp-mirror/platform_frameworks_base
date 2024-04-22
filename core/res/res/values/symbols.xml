@@ -4693,6 +4693,8 @@
   <java-symbol type="integer" name="config_letterboxDefaultPositionForTabletopModeReachability" />
   <java-symbol type="bool" name="config_letterboxIsPolicyForIgnoringRequestedOrientationEnabled" />
   <java-symbol type="bool" name="config_letterboxIsEducationEnabled" />
+  <java-symbol type="dimen" name="config_letterboxThinLetterboxWidthDp" />
+  <java-symbol type="dimen" name="config_letterboxThinLetterboxHeightDp" />
   <java-symbol type="dimen" name="config_letterboxDefaultMinAspectRatioForUnresizableApps" />
   <java-symbol type="bool" name="config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled" />
   <java-symbol type="bool" name="config_letterboxIsDisplayAspectRatioForFixedOrientationLetterboxEnabled" />
