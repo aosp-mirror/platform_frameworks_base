@@ -18,18 +18,14 @@ package com.android.systemui.bouncer.domain.interactor
 
 import android.content.Context
 import android.content.res.ColorStateList
-import android.hardware.biometrics.BiometricSourceType
 import android.os.Handler
 import android.os.Trace
 import android.util.Log
 import android.view.View
-import com.android.keyguard.KeyguardConstants
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.DejankUtils
 import com.android.systemui.Flags
-import com.android.systemui.biometrics.shared.SideFpsControllerRefactor
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN
@@ -122,31 +118,9 @@ constructor(
 
     /** Allow for interaction when just about fully visible */
     val isInteractable: Flow<Boolean> = bouncerExpansion.map { it > 0.9 }
-    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
-    val sideFpsShowing: Flow<Boolean> = repository.sideFpsShowing
     private var currentUserActiveUnlockRunning = false
 
-    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
-    /** This callback needs to be a class field so it does not get garbage collected. */
-    val keyguardUpdateMonitorCallback =
-        object : KeyguardUpdateMonitorCallback() {
-            override fun onBiometricRunningStateChanged(
-                running: Boolean,
-                biometricSourceType: BiometricSourceType?
-            ) {
-                updateSideFpsVisibility()
-            }
-
-            override fun onStrongAuthStateChanged(userId: Int) {
-                updateSideFpsVisibility()
-            }
-        }
-
     init {
-        // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
-        if (!SideFpsControllerRefactor.isEnabled) {
-            keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
-        }
         applicationScope.launch {
             trustRepository.isCurrentUserActiveUnlockRunning.collect {
                 currentUserActiveUnlockRunning = it
@@ -355,36 +329,6 @@ constructor(
         }
 
         repository.setPrimaryStartDisappearAnimation(runnable)
-    }
-
-    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
-    /** Determine whether to show the side fps animation. */
-    fun updateSideFpsVisibility() {
-        SideFpsControllerRefactor.assertInLegacyMode()
-        val sfpsEnabled: Boolean =
-            context.resources.getBoolean(R.bool.config_show_sidefps_hint_on_bouncer)
-        val fpsDetectionRunning: Boolean = keyguardUpdateMonitor.isFingerprintDetectionRunning
-        val isUnlockingWithFpAllowed: Boolean =
-            keyguardUpdateMonitor.isUnlockingWithFingerprintAllowed
-        val toShow =
-            (isBouncerShowing() &&
-                sfpsEnabled &&
-                fpsDetectionRunning &&
-                isUnlockingWithFpAllowed &&
-                !isAnimatingAway())
-
-        if (KeyguardConstants.DEBUG) {
-            Log.d(
-                TAG,
-                ("sideFpsToShow=$toShow\n" +
-                    "isBouncerShowing=${isBouncerShowing()}\n" +
-                    "configEnabled=$sfpsEnabled\n" +
-                    "fpsDetectionRunning=$fpsDetectionRunning\n" +
-                    "isUnlockingWithFpAllowed=$isUnlockingWithFpAllowed\n" +
-                    "isAnimatingAway=${isAnimatingAway()}")
-            )
-        }
-        repository.setSideFpsShowing(toShow)
     }
 
     /** Returns whether bouncer is fully showing. */

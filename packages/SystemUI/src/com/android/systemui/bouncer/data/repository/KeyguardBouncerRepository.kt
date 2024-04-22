@@ -18,7 +18,6 @@ package com.android.systemui.bouncer.data.repository
 
 import android.os.Build
 import android.util.Log
-import com.android.systemui.biometrics.shared.SideFpsControllerRefactor
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN
 import com.android.systemui.bouncer.shared.model.BouncerDismissActionModel
 import com.android.systemui.bouncer.shared.model.BouncerShowMessageModel
@@ -89,7 +88,6 @@ interface KeyguardBouncerRepository {
     val resourceUpdateRequests: StateFlow<Boolean>
     val alternateBouncerVisible: StateFlow<Boolean>
     val alternateBouncerUIAvailable: StateFlow<Boolean>
-    val sideFpsShowing: StateFlow<Boolean>
 
     /** Action that should be run right after the bouncer is dismissed. */
     var bouncerDismissActionModel: BouncerDismissActionModel?
@@ -125,9 +123,6 @@ interface KeyguardBouncerRepository {
     fun setAlternateVisible(isVisible: Boolean)
 
     fun setAlternateBouncerUIAvailable(isAvailable: Boolean)
-
-    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
-    fun setSideFpsShowing(isShowing: Boolean)
 }
 
 @SysUISingleton
@@ -196,8 +191,6 @@ constructor(
     private val _alternateBouncerUIAvailable = MutableStateFlow(false)
     override val alternateBouncerUIAvailable: StateFlow<Boolean> =
         _alternateBouncerUIAvailable.asStateFlow()
-    private val _sideFpsShowing = MutableStateFlow(false)
-    override val sideFpsShowing: StateFlow<Boolean> = _sideFpsShowing.asStateFlow()
 
     init {
         setUpLogging()
@@ -269,12 +262,6 @@ constructor(
         _isBackButtonEnabled.value = isBackButtonEnabled
     }
 
-    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
-    override fun setSideFpsShowing(isShowing: Boolean) {
-        SideFpsControllerRefactor.assertInLegacyMode()
-        _sideFpsShowing.value = isShowing
-    }
-
     /** Sets up logs for state flows. */
     private fun setUpLogging() {
         if (!Build.IS_DEBUGGABLE) {
@@ -320,9 +307,6 @@ constructor(
             .launchIn(applicationScope)
         alternateBouncerUIAvailable
             .logDiffsForTable(buffer, "", "IsAlternateBouncerUIAvailable", false)
-            .launchIn(applicationScope)
-        sideFpsShowing
-            .logDiffsForTable(buffer, "", "isSideFpsShowing", false)
             .launchIn(applicationScope)
     }
 

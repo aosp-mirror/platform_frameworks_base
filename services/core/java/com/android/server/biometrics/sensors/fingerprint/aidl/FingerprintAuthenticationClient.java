@@ -22,8 +22,6 @@ import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPR
 import static android.hardware.fingerprint.FingerprintManager.getAcquiredString;
 import static android.hardware.fingerprint.FingerprintManager.getErrorString;
 
-import static com.android.systemui.shared.Flags.sidefpsControllerRefactor;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.TaskStackListener;
@@ -46,7 +44,6 @@ import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.FingerprintAuthenticateOptions;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
-import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -111,8 +108,6 @@ public class FingerprintAuthenticationClient
             boolean isStrongBiometric,
             @Nullable TaskStackListener taskStackListener,
             @Nullable IUdfpsOverlayController udfpsOverlayController,
-            // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
-            @Nullable ISidefpsController sidefpsController,
             @NonNull AuthenticationStateListeners authenticationStateListeners,
             boolean allowBackgroundAuthentication,
             @NonNull FingerprintSensorPropertiesInternal sensorProps,
@@ -137,11 +132,7 @@ public class FingerprintAuthenticationClient
                 false /* shouldVibrate */,
                 biometricStrength);
         setRequestId(requestId);
-        if (sidefpsControllerRefactor()) {
-            mSensorOverlays = new SensorOverlays(udfpsOverlayController);
-        } else {
-            mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
-        }
+        mSensorOverlays = new SensorOverlays(udfpsOverlayController);
         mAuthenticationStateListeners = authenticationStateListeners;
         mIsStrongBiometric = isStrongBiometric;
         mSensorProps = sensorProps;
@@ -198,11 +189,9 @@ public class FingerprintAuthenticationClient
                                 getRequestReason(), mIsStrongBiometric, getTargetUserId()).build()
                 );
             }
-            if (sidefpsControllerRefactor()) {
-                mAuthenticationStateListeners.onAuthenticationStopped(new AuthenticationStoppedInfo
-                        .Builder(BiometricSourceType.FINGERPRINT, getRequestReason()).build()
-                );
-            }
+            mAuthenticationStateListeners.onAuthenticationStopped(new AuthenticationStoppedInfo
+                    .Builder(BiometricSourceType.FINGERPRINT, getRequestReason()).build()
+            );
         } else {
             mState = STATE_STARTED_PAUSED_ATTEMPTED;
             if (reportBiometricAuthAttempts()) {
@@ -287,23 +276,18 @@ public class FingerprintAuthenticationClient
 
         resetIgnoreDisplayTouches();
         mSensorOverlays.hide(getSensorId());
-        if (sidefpsControllerRefactor()) {
-            mAuthenticationStateListeners.onAuthenticationStopped(new AuthenticationStoppedInfo
-                    .Builder(BiometricSourceType.FINGERPRINT, getRequestReason()).build()
-            );
-        }
+        mAuthenticationStateListeners.onAuthenticationStopped(new AuthenticationStoppedInfo
+                .Builder(BiometricSourceType.FINGERPRINT, getRequestReason()).build()
+        );
     }
 
     @Override
     protected void startHalOperation() {
         resetIgnoreDisplayTouches();
         mSensorOverlays.show(getSensorId(), getRequestReason(), this);
-        if (sidefpsControllerRefactor()) {
-            mAuthenticationStateListeners.onAuthenticationStarted(new AuthenticationStartedInfo
-                    .Builder(BiometricSourceType.FINGERPRINT, getRequestReason()).build()
-            );
-        }
-
+        mAuthenticationStateListeners.onAuthenticationStarted(new AuthenticationStartedInfo
+                .Builder(BiometricSourceType.FINGERPRINT, getRequestReason()).build()
+        );
         try {
             doAuthenticate();
         } catch (RemoteException e) {
@@ -362,11 +346,9 @@ public class FingerprintAuthenticationClient
     protected void stopHalOperation() {
         resetIgnoreDisplayTouches();
         mSensorOverlays.hide(getSensorId());
-        if (sidefpsControllerRefactor()) {
-            mAuthenticationStateListeners.onAuthenticationStopped(new AuthenticationStoppedInfo
-                    .Builder(BiometricSourceType.FINGERPRINT, getRequestReason()).build()
-            );
-        }
+        mAuthenticationStateListeners.onAuthenticationStopped(new AuthenticationStoppedInfo
+                .Builder(BiometricSourceType.FINGERPRINT, getRequestReason()).build()
+        );
         unsubscribeBiometricContext();
 
         if (mCancellationSignal != null) {
@@ -468,11 +450,9 @@ public class FingerprintAuthenticationClient
 
         resetIgnoreDisplayTouches();
         mSensorOverlays.hide(getSensorId());
-        if (sidefpsControllerRefactor()) {
-            mAuthenticationStateListeners.onAuthenticationStopped(new AuthenticationStoppedInfo
-                    .Builder(BiometricSourceType.FINGERPRINT, getRequestReason()).build()
-            );
-        }
+        mAuthenticationStateListeners.onAuthenticationStopped(new AuthenticationStoppedInfo
+                .Builder(BiometricSourceType.FINGERPRINT, getRequestReason()).build()
+        );
         mCallback.onClientFinished(this, false /* success */);
     }
 
@@ -505,11 +485,9 @@ public class FingerprintAuthenticationClient
 
         resetIgnoreDisplayTouches();
         mSensorOverlays.hide(getSensorId());
-        if (sidefpsControllerRefactor()) {
-            mAuthenticationStateListeners.onAuthenticationStopped(new AuthenticationStoppedInfo
-                    .Builder(BiometricSourceType.FINGERPRINT, getRequestReason()).build()
-            );
-        }
+        mAuthenticationStateListeners.onAuthenticationStopped(new AuthenticationStoppedInfo
+                .Builder(BiometricSourceType.FINGERPRINT, getRequestReason()).build()
+        );
         mCallback.onClientFinished(this, false /* success */);
     }
 

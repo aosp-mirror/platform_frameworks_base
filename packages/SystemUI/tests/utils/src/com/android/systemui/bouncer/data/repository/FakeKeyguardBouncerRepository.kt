@@ -1,6 +1,5 @@
 package com.android.systemui.bouncer.data.repository
 
-import com.android.systemui.biometrics.shared.SideFpsControllerRefactor
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.bouncer.shared.model.BouncerDismissActionModel
 import com.android.systemui.bouncer.shared.model.BouncerShowMessageModel
@@ -11,7 +10,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -52,8 +50,6 @@ class FakeKeyguardBouncerRepository @Inject constructor() : KeyguardBouncerRepos
     override var lastAlternateBouncerVisibleTime: Long = 0L
     private val _isAlternateBouncerUIAvailable = MutableStateFlow<Boolean>(false)
     override val alternateBouncerUIAvailable = _isAlternateBouncerUIAvailable.asStateFlow()
-    private val _sideFpsShowing: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    override val sideFpsShowing: StateFlow<Boolean> = _sideFpsShowing.asStateFlow()
     override var bouncerDismissActionModel: BouncerDismissActionModel? = null
 
     override fun setPrimaryScrimmed(isScrimmed: Boolean) {
@@ -114,12 +110,6 @@ class FakeKeyguardBouncerRepository @Inject constructor() : KeyguardBouncerRepos
 
     override fun setIsBackButtonEnabled(isBackButtonEnabled: Boolean) {
         _isBackButtonEnabled.value = isBackButtonEnabled
-    }
-
-    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
-    override fun setSideFpsShowing(isShowing: Boolean) {
-        SideFpsControllerRefactor.assertInLegacyMode()
-        _sideFpsShowing.value = isShowing
     }
 }
 

@@ -962,24 +962,6 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         }
     }
 
-    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
-    /**
-     * @hide
-     */
-    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public void setSidefpsController(@NonNull ISidefpsController controller) {
-        if (mService == null) {
-            Slog.w(TAG, "setSidefpsController: no fingerprint service");
-            return;
-        }
-
-        try {
-            mService.setSidefpsController(controller);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
     /**
      * Forwards BiometricStateListener to FingerprintService
      * @param listener new BiometricStateListener being added
