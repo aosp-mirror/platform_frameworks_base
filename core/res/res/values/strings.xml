@@ -1018,6 +1018,9 @@
     <!-- The title to use when a dream is opened in preview mode. [CHAR LIMIT=NONE] -->
     <string name="dream_preview_title">Preview, <xliff:g id="dream_name" example="Clock">%1$s</xliff:g></string>
 
+    <!-- The title to use when a dream is open in accessibility mode to let users know to double tap to dismiss the dream  [CHAR LIMIT=32] -->
+    <string name="dream_accessibility_action_click">dismiss</string>
+
     <!--  Permissions -->
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

@@ -52,6 +52,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.service.controls.flags.Flags;
+import android.service.dreams.utils.DreamAccessibility;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
@@ -273,6 +274,7 @@ public class DreamService extends Service implements Window.Callback {
     private boolean mDebug = false;
 
     private ComponentName mDreamComponent;
+    private DreamAccessibility mDreamAccessibility;
     private boolean mShouldShowComplications;
 
     private DreamServiceWrapper mDreamServiceWrapper;
@@ -664,6 +666,7 @@ public class DreamService extends Service implements Window.Callback {
      */
     public void setInteractive(boolean interactive) {
         mInteractive = interactive;
+        updateAccessibilityMessage();
     }
 
     /**
@@ -1430,7 +1433,7 @@ public class DreamService extends Service implements Window.Callback {
         // Hide all insets when the dream is showing
         mWindow.getDecorView().getWindowInsetsController().hide(WindowInsets.Type.systemBars());
         mWindow.setDecorFitsSystemWindows(false);
-
+        updateAccessibilityMessage();
         mWindow.getDecorView().addOnAttachStateChangeListener(
                 new View.OnAttachStateChangeListener() {
                     private Consumer<IDreamOverlayClient> mDreamStartOverlayConsumer;
@@ -1475,6 +1478,15 @@ public class DreamService extends Service implements Window.Callback {
                         }
                     }
                 });
+    }
+
+    private void updateAccessibilityMessage() {
+        if (mWindow == null) return;
+        if (mDreamAccessibility == null) {
+            final View rootView = mWindow.getDecorView();
+            mDreamAccessibility = new DreamAccessibility(this, rootView);
+        }
+        mDreamAccessibility.updateAccessibilityConfiguration(isInteractive());
     }
 
     private boolean getWindowFlagValue(int flag, boolean defaultValue) {
