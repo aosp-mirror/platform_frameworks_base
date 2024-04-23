@@ -1554,11 +1554,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // but InsetsStateController#notifyControlTargetChanged still waits for IME to redraw.
         final InsetsSourceProvider sourceProvider = imeWindow.getControllableInsetProvider();
         if (sourceProvider == null || sourceProvider.mControl == null
+                || !sourceProvider.isClientVisible()
                 || imeTarget == sourceProvider.getControlTarget()) {
             return;
         }
         final SurfaceControl imeInsetsLeash = sourceProvider.mControl.getLeash();
-        if (imeInsetsLeash != null) {
+        final InsetsControlTarget controlTarget = sourceProvider.getControlTarget();
+        if (imeInsetsLeash != null && controlTarget != null && controlTarget.getWindow() != null
+                && !controlTarget.getWindow().mToken.isVisible()) {
             dc.getSyncTransaction().reparent(imeInsetsLeash, null);
         }
     }
