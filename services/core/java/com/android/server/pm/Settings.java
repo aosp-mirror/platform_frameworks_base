@@ -3243,6 +3243,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         if (pkg.isForceQueryableOverride()) {
             serializer.attributeBoolean(null, "forceQueryable", true);
         }
+        if (pkg.isPendingRestore()) {
+            serializer.attributeBoolean(null, "pendingRestore", true);
+        }
         if (pkg.isLoading()) {
             serializer.attributeBoolean(null, "isLoading", true);
         }
@@ -4046,6 +4049,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         PackageSetting packageSetting = null;
         long versionCode = 0;
         boolean installedForceQueryable = false;
+        boolean isPendingRestore = false;
         float loadingProgress = 0;
         long loadingCompletedTime = 0;
         UUID domainSetId;
@@ -4071,6 +4075,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             cpuAbiOverrideString = parser.getAttributeValue(null, "cpuAbiOverride");
             updateAvailable = parser.getAttributeBoolean(null, "updateAvailable", false);
             installedForceQueryable = parser.getAttributeBoolean(null, "forceQueryable", false);
+            isPendingRestore = parser.getAttributeBoolean(null, "pendingRestore", false);
             loadingProgress = parser.getAttributeFloat(null, "loadingProgress", 0);
             loadingCompletedTime = parser.getAttributeLongHex(null, "loadingCompletedTime", 0);
 
@@ -4244,6 +4249,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     .setSecondaryCpuAbi(secondaryCpuAbiString)
                     .setUpdateAvailable(updateAvailable)
                     .setForceQueryableOverride(installedForceQueryable)
+                    .setPendingRestore(isPendingRestore)
                     .setLoadingProgress(loadingProgress)
                     .setLoadingCompletedTime(loadingCompletedTime)
                     .setAppMetadataFilePath(appMetadataFilePath)

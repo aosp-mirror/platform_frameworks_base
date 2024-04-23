@@ -830,7 +830,7 @@ final class InstallPackageHelper {
             doRestore = performRollbackManagerRestore(userId, token, request);
         }
 
-        if (succeeded && !request.hasPostInstallRunnable()) {
+        if (succeeded && doRestore && !request.hasPostInstallRunnable()) {
             boolean hasNeverBeenRestored =
                     packageSetting != null && packageSetting.isPendingRestore();
             request.setPostInstallRunnable(() -> {
