@@ -28,6 +28,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessReason;
+import com.android.server.display.brightness.StrategyExecutionRequest;
 import com.android.server.display.brightness.StrategySelectionNotifyRequest;
 import com.android.server.display.feature.DisplayManagerFlags;
 
@@ -70,7 +71,8 @@ public class OffloadBrightnessStrategyTest {
                         .setShouldUpdateScreenBrightnessSetting(true)
                         .build();
         DisplayBrightnessState updatedDisplayBrightnessState =
-                mOffloadBrightnessStrategy.updateBrightness(displayPowerRequest);
+                mOffloadBrightnessStrategy.updateBrightness(
+                        new StrategyExecutionRequest(displayPowerRequest, 0.2f));
         assertEquals(updatedDisplayBrightnessState, expectedDisplayBrightnessState);
         assertEquals(PowerManager.BRIGHTNESS_INVALID_FLOAT, mOffloadBrightnessStrategy
                 .getOffloadScreenBrightness(), 0.0f);

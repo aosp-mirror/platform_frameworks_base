@@ -17,7 +17,8 @@
 package com.android.server.wm;
 
 import android.annotation.NonNull;
-import android.internal.perfetto.protos.PerfettoTrace;
+import android.internal.perfetto.protos.ShellTransitionOuterClass.ShellTransition;
+import android.internal.perfetto.protos.TracePacketOuterClass.TracePacket;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.tracing.perfetto.DataSourceParams;
@@ -71,18 +72,18 @@ class PerfettoTransitionTracer implements TransitionTracer {
         mDataSource.trace((ctx) -> {
             final ProtoOutputStream os = ctx.newTracePacket();
 
-            final long token = os.start(PerfettoTrace.TracePacket.SHELL_TRANSITION);
+            final long token = os.start(TracePacket.SHELL_TRANSITION);
 
-            os.write(PerfettoTrace.ShellTransition.ID, transition.getSyncId());
-            os.write(PerfettoTrace.ShellTransition.CREATE_TIME_NS,
+            os.write(ShellTransition.ID, transition.getSyncId());
+            os.write(ShellTransition.CREATE_TIME_NS,
                     transition.mLogger.mCreateTimeNs);
-            os.write(PerfettoTrace.ShellTransition.SEND_TIME_NS, transition.mLogger.mSendTimeNs);
-            os.write(PerfettoTrace.ShellTransition.START_TRANSACTION_ID,
+            os.write(ShellTransition.SEND_TIME_NS, transition.mLogger.mSendTimeNs);
+            os.write(ShellTransition.START_TRANSACTION_ID,
                     transition.getStartTransaction().getId());
-            os.write(PerfettoTrace.ShellTransition.FINISH_TRANSACTION_ID,
+            os.write(ShellTransition.FINISH_TRANSACTION_ID,
                     transition.getFinishTransaction().getId());
-            os.write(PerfettoTrace.ShellTransition.TYPE, transition.mType);
-            os.write(PerfettoTrace.ShellTransition.FLAGS, transition.getFlags());
+            os.write(ShellTransition.TYPE, transition.mType);
+            os.write(ShellTransition.FLAGS, transition.getFlags());
 
             addTransitionTargetsToProto(os, targets);
 
@@ -114,9 +115,9 @@ class PerfettoTransitionTracer implements TransitionTracer {
         mDataSource.trace((ctx) -> {
             final ProtoOutputStream os = ctx.newTracePacket();
 
-            final long token = os.start(PerfettoTrace.TracePacket.SHELL_TRANSITION);
-            os.write(PerfettoTrace.ShellTransition.ID, transition.getSyncId());
-            os.write(PerfettoTrace.ShellTransition.FINISH_TIME_NS,
+            final long token = os.start(TracePacket.SHELL_TRANSITION);
+            os.write(ShellTransition.ID, transition.getSyncId());
+            os.write(ShellTransition.FINISH_TIME_NS,
                     transition.mLogger.mFinishTimeNs);
             os.end(token);
         });
@@ -146,9 +147,9 @@ class PerfettoTransitionTracer implements TransitionTracer {
         mDataSource.trace((ctx) -> {
             final ProtoOutputStream os = ctx.newTracePacket();
 
-            final long token = os.start(PerfettoTrace.TracePacket.SHELL_TRANSITION);
-            os.write(PerfettoTrace.ShellTransition.ID, transition.getSyncId());
-            os.write(PerfettoTrace.ShellTransition.WM_ABORT_TIME_NS,
+            final long token = os.start(TracePacket.SHELL_TRANSITION);
+            os.write(ShellTransition.ID, transition.getSyncId());
+            os.write(ShellTransition.WM_ABORT_TIME_NS,
                     transition.mLogger.mAbortTimeNs);
             os.end(token);
         });
@@ -172,9 +173,9 @@ class PerfettoTransitionTracer implements TransitionTracer {
         mDataSource.trace((ctx) -> {
             final ProtoOutputStream os = ctx.newTracePacket();
 
-            final long token = os.start(PerfettoTrace.TracePacket.SHELL_TRANSITION);
-            os.write(PerfettoTrace.ShellTransition.ID, startingData.mTransitionId);
-            os.write(PerfettoTrace.ShellTransition.STARTING_WINDOW_REMOVE_TIME_NS,
+            final long token = os.start(TracePacket.SHELL_TRANSITION);
+            os.write(ShellTransition.ID, startingData.mTransitionId);
+            os.write(ShellTransition.STARTING_WINDOW_REMOVE_TIME_NS,
                     SystemClock.elapsedRealtimeNanos());
             os.end(token);
         });
@@ -215,11 +216,11 @@ class PerfettoTransitionTracer implements TransitionTracer {
             }
             final int windowId = System.identityHashCode(target.mContainer);
 
-            final long token = os.start(PerfettoTrace.ShellTransition.TARGETS);
-            os.write(PerfettoTrace.ShellTransition.Target.MODE, target.mReadyMode);
-            os.write(PerfettoTrace.ShellTransition.Target.FLAGS, target.mReadyFlags);
-            os.write(PerfettoTrace.ShellTransition.Target.LAYER_ID, layerId);
-            os.write(PerfettoTrace.ShellTransition.Target.WINDOW_ID, windowId);
+            final long token = os.start(ShellTransition.TARGETS);
+            os.write(ShellTransition.Target.MODE, target.mReadyMode);
+            os.write(ShellTransition.Target.FLAGS, target.mReadyFlags);
+            os.write(ShellTransition.Target.LAYER_ID, layerId);
+            os.write(ShellTransition.Target.WINDOW_ID, windowId);
             os.end(token);
         }
     }

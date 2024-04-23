@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -113,7 +114,8 @@ public final class DisplayBrightnessControllerTest {
         when(mDisplayBrightnessStrategySelector.selectStrategy(
                 any(StrategySelectionRequest.class))).thenReturn(displayBrightnessStrategy);
         mDisplayBrightnessController.updateBrightness(displayPowerRequest, targetDisplayState);
-        verify(displayBrightnessStrategy).updateBrightness(displayPowerRequest);
+        verify(displayBrightnessStrategy).updateBrightness(
+                eq(new StrategyExecutionRequest(displayPowerRequest, DEFAULT_BRIGHTNESS)));
         assertEquals(mDisplayBrightnessController.getCurrentDisplayBrightnessStrategy(),
                 displayBrightnessStrategy);
     }

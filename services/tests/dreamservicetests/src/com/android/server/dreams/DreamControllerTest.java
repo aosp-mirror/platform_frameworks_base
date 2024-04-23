@@ -19,6 +19,8 @@ package com.android.server.dreams;
 import static android.os.PowerManager.USER_ACTIVITY_EVENT_OTHER;
 import static android.os.PowerManager.USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -268,6 +270,31 @@ public class DreamControllerTest {
         verify(mPowerManager).userActivity(/*displayId=*/ anyInt(), /*time=*/ anyLong(),
                 eq(USER_ACTIVITY_EVENT_OTHER),
                 eq(USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS));
+    }
+
+    @Test
+    public void setDreamHasFocus_true_dreamHasFocus() {
+        mDreamController.startDream(mToken, mDreamName, false /*isPreview*/, false /*doze*/,
+                0 /*userId*/, null /*wakeLock*/, mOverlayName, "test" /*reason*/);
+
+        mDreamController.setDreamHasFocus(true);
+        assertTrue(mDreamController.dreamHasFocus());
+    }
+
+    @Test
+    public void setDreamHasFocus_false_dreamDoesNotHaveFocus() {
+        mDreamController.startDream(mToken, mDreamName, false /*isPreview*/, false /*doze*/,
+                0 /*userId*/, null /*wakeLock*/, mOverlayName, "test" /*reason*/);
+
+        mDreamController.setDreamHasFocus(false);
+        assertFalse(mDreamController.dreamHasFocus());
+    }
+
+    @Test
+    public void setDreamHasFocus_notDreaming_dreamDoesNotHaveFocus() {
+        mDreamController.setDreamHasFocus(true);
+        // Dream still doesn't have focus because it was never started.
+        assertFalse(mDreamController.dreamHasFocus());
     }
 
     private ServiceConnection captureServiceConnection() {

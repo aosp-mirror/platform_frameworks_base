@@ -30,7 +30,6 @@ import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.dagger.MediaModule
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.CoroutineScope
@@ -57,7 +56,7 @@ constructor(
     @Application private val scope: CoroutineScope,
     private val communalInteractor: CommunalInteractor,
     tutorialInteractor: CommunalTutorialInteractor,
-    shadeInteractor: ShadeInteractor,
+    private val shadeInteractor: ShadeInteractor,
     deviceEntryInteractor: DeviceEntryInteractor,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
     @CommunalLog logBuffer: LogBuffer,
@@ -102,9 +101,6 @@ constructor(
         MutableStateFlow(false)
     val isEnableWorkProfileDialogShowing: Flow<Boolean> =
         _isEnableWorkProfileDialogShowing.asStateFlow()
-
-    /** Whether touches should be disabled in communal */
-    val touchesAllowed: Flow<Boolean> = not(shadeInteractor.isAnyFullyExpanded)
 
     val deviceUnlocked: Flow<Boolean> = deviceEntryInteractor.isUnlocked
 
@@ -190,6 +186,11 @@ constructor(
     private fun cancelDelayedPopupHiding() {
         delayedHidePopupJob?.cancel()
         delayedHidePopupJob = null
+    }
+
+    /** Whether we can transition to a new scene based on a user gesture. */
+    fun canChangeScene(): Boolean {
+        return !shadeInteractor.isAnyFullyExpanded.value
     }
 
     companion object {

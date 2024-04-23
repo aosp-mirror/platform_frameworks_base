@@ -43,6 +43,7 @@ import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepo
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
@@ -329,6 +330,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
                 biometricSettingsRepository = biometricSettingsRepository,
                 backgroundDispatcher = testDispatcher,
                 appContext = mContext,
+                sceneInteractor = { kosmos.sceneInteractor },
             )
     }
 

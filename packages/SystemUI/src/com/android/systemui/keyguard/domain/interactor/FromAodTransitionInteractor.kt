@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launch
+import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -28,6 +29,7 @@ import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.Companion
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -47,6 +49,8 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     powerInteractor: PowerInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
+    private val lockPatternUtils: LockPatternUtils,
+    private val selectedUserInteractor: SelectedUserInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.AOD,
@@ -79,9 +83,8 @@ constructor(
                     startedKeyguardTransitionStep,
                     keyguardInteractor.biometricUnlockState,
                     keyguardInteractor.primaryBouncerShowing,
-                    keyguardInteractor.isKeyguardShowing,
                     keyguardInteractor.isKeyguardOccluded,
-                    keyguardInteractor.isKeyguardDismissible,
+                    selectedUserInteractor.selectedUser,
                 )
                 .collect {
                     (
@@ -89,10 +92,11 @@ constructor(
                         startedStep,
                         biometricUnlockState,
                         primaryBouncerShowing,
-                        _,
                         isKeyguardOccludedLegacy,
-                        _) ->
+                        currentUser,
+                    ) ->
                     if (!maybeHandleInsecurePowerGesture()) {
+                        val securityNone = lockPatternUtils.isLockScreenDisabled(currentUser)
                         val shouldTransitionToLockscreen =
                             if (KeyguardWmStateRefactor.isEnabled) {
                                 // Check with the superclass to see if an occlusion transition is
@@ -101,11 +105,13 @@ constructor(
                                 // completes.
                                 !maybeStartTransitionToOccludedOrInsecureCamera() &&
                                     !isWakeAndUnlock(biometricUnlockState) &&
-                                    !primaryBouncerShowing
+                                    !primaryBouncerShowing &&
+                                    !securityNone
                             } else {
                                 !isKeyguardOccludedLegacy &&
                                     !isWakeAndUnlock(biometricUnlockState) &&
-                                    !primaryBouncerShowing
+                                    !primaryBouncerShowing &&
+                                    !securityNone
                             }
 
                         // With the refactor enabled, maybeStartTransitionToOccludedOrInsecureCamera

@@ -25,4 +25,5 @@ oneway interface IDreamService {
     void attach(IBinder windowToken, boolean canDoze, boolean isPreviewMode, IRemoteCallback started);
     void detach();
     void wakeUp();
+    void comeToFront();
 }

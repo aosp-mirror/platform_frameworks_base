@@ -61,9 +61,10 @@ import java.util.function.Consumer;
 
 /**
  * A handler for dealing with transitions involving multiple other handlers. For example: an
- * activity in split-screen going into PiP.
+ * activity in split-screen going into PiP. Note this is provided as a handset-specific
+ * implementation of {@code MixedTransitionHandler}.
  */
-public class DefaultMixedHandler implements Transitions.TransitionHandler,
+public class DefaultMixedHandler implements MixedTransitionHandler,
         RecentsTransitionHandler.RecentsMixedHandler {
 
     private final Transitions mPlayer;
@@ -116,7 +117,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         final IBinder mTransition;
 
         protected final Transitions mPlayer;
-        protected final DefaultMixedHandler mMixedHandler;
+        protected final MixedTransitionHandler mMixedHandler;
         protected final PipTransitionController mPipHandler;
         protected final StageCoordinator mSplitHandler;
         protected final KeyguardTransitionHandler mKeyguardHandler;
@@ -142,7 +143,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         int mInFlightSubAnimations = 0;
 
         MixedTransition(int type, IBinder transition, Transitions player,
-                DefaultMixedHandler mixedHandler, PipTransitionController pipHandler,
+                MixedTransitionHandler mixedHandler, PipTransitionController pipHandler,
                 StageCoordinator splitHandler, KeyguardTransitionHandler keyguardHandler) {
             mType = type;
             mTransition = transition;

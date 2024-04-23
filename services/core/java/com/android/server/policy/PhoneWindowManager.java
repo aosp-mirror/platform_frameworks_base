@@ -76,6 +76,7 @@ import static android.view.WindowManagerGlobal.ADD_PERMISSION_DENIED;
 import static android.view.contentprotection.flags.Flags.createAccessibilityOverlayAppOpEnabled;
 
 import static com.android.hardware.input.Flags.emojiAndScreenshotKeycodesAvailable;
+import static com.android.server.flags.Flags.newBugreportKeyboardShortcut;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.SCREENSHOT_KEYCHORD_DELAY;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVER_ABSENT;
@@ -466,8 +467,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Assigned on main thread, accessed on UI thread
     volatile VrManagerInternal mVrManagerInternal;
 
-    /** If true, hitting shift & menu will broadcast Intent.ACTION_BUG_REPORT */
-    boolean mEnableShiftMenuBugReports = false;
+    /** If true, can use a keyboard shortcut to trigger a bugreport. */
+    boolean mEnableBugReportKeyboardShortcut = false;
 
     /** Controller that supports enabling an AccessibilityService by holding down the volume keys */
     private AccessibilityShortcutController mAccessibilityShortcutController;
@@ -2303,7 +2304,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 "PhoneWindowManager.mBroadcastWakeLock");
         mPowerKeyWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "PhoneWindowManager.mPowerKeyWakeLock");
-        mEnableShiftMenuBugReports = "1".equals(SystemProperties.get("ro.debuggable"));
+        mEnableBugReportKeyboardShortcut = "1".equals(SystemProperties.get("ro.debuggable"));
         mLidKeyboardAccessibility = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_lidKeyboardAccessibility);
         mLidNavigationAccessibility = mContext.getResources().getInteger(
@@ -2360,8 +2361,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mDisplayFoldController = DisplayFoldController.create(mContext, DEFAULT_DISPLAY);
 
-        mAccessibilityManager = (AccessibilityManager) mContext.getSystemService(
-                Context.ACCESSIBILITY_SERVICE);
+        mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
 
         // register for dock events
         IntentFilter filter = new IntentFilter();
@@ -3409,19 +3409,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         switch (keyCode) {
             case KeyEvent.KEYCODE_HOME:
                 return handleHomeShortcuts(focusedToken, event);
-            case KeyEvent.KEYCODE_MENU:
-                // Hijack modified menu keys for debugging features
-                final int chordBug = KeyEvent.META_SHIFT_ON;
-
-                if (mEnableShiftMenuBugReports && firstDown
-                        && (metaState & chordBug) == chordBug) {
-                    Intent intent = new Intent(Intent.ACTION_BUG_REPORT);
-                    mContext.sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT,
-                            null, null, null, 0, null, null);
-                    logKeyboardSystemsEvent(event, KeyboardLogEvent.TRIGGER_BUG_REPORT);
-                    return true;
-                }
-                break;
             case KeyEvent.KEYCODE_RECENT_APPS:
                 if (firstDown) {
                     showRecentApps(false /* triggeredFromAltTab */);
@@ -3487,6 +3474,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             case KeyEvent.KEYCODE_DEL:
+                if (newBugreportKeyboardShortcut()) {
+                    if (mEnableBugReportKeyboardShortcut && firstDown
+                            && event.isMetaPressed() && event.isCtrlPressed()) {
+                        try {
+                            mActivityManagerService.requestInteractiveBugReport();
+                        } catch (RemoteException e) {
+                            Slog.d(TAG, "Error taking bugreport", e);
+                        }
+                        logKeyboardSystemsEvent(event, KeyboardLogEvent.TRIGGER_BUG_REPORT);
+                        return true;
+                    }
+                }
+                // fall through
             case KeyEvent.KEYCODE_ESCAPE:
                 if (firstDown && event.isMetaPressed()) {
                     logKeyboardSystemsEvent(event, KeyboardLogEvent.BACK);

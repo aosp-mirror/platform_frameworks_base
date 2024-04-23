@@ -57,6 +57,7 @@ import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.Process;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -738,11 +739,11 @@ public class MediaControlPanel {
                                     mPackageName, mMediaViewHolder.getSeamlessButton());
                         } else {
                             mLogger.logOpenOutputSwitcher(mUid, mPackageName, mInstanceId);
-                            // TODO: b/321969740 - Populate the userHandle parameter. The user
-                            // handle is necessary to disambiguate the same package running on
-                            // different users.
                             mMediaOutputDialogManager.createAndShow(
-                                    mPackageName, true, mMediaViewHolder.getSeamlessButton(), null);
+                                    mPackageName,
+                                    /* aboveStatusBar */ true,
+                                    mMediaViewHolder.getSeamlessButton(),
+                                    UserHandle.getUserHandleForUid(mUid));
                         }
                     } else {
                         mLogger.logOpenOutputSwitcher(mUid, mPackageName, mInstanceId);
@@ -770,11 +771,11 @@ public class MediaControlPanel {
                                 Log.w(TAG, "Device pending intent is not an activity.");
                             }
                         } else {
-                            // TODO: b/321969740 - Populate the userHandle parameter. The user
-                            // handle is necessary to disambiguate the same package running on
-                            // different users.
                             mMediaOutputDialogManager.createAndShow(
-                                    mPackageName, true, mMediaViewHolder.getSeamlessButton(), null);
+                                    mPackageName,
+                                    /* aboveStatusBar */ true,
+                                    mMediaViewHolder.getSeamlessButton(),
+                                    UserHandle.getUserHandleForUid(mUid));
                         }
                     }
                 });

@@ -1182,7 +1182,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 final boolean inImmersiveMode = !source.isVisible();
                 // Calls WindowDecoration#relayout if decoration visibility needs to be updated
                 if (inImmersiveMode != mInImmersiveMode) {
-                    decor.relayout(decor.mTaskInfo);
+                    if (Flags.enableDesktopWindowingImmersiveHandleHiding()) {
+                        decor.relayout(decor.mTaskInfo);
+                    }
                     mInImmersiveMode = inImmersiveMode;
                 }
 

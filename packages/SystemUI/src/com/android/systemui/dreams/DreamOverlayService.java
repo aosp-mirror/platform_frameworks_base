@@ -45,10 +45,14 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.ambient.touch.TouchMonitor;
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent;
+import com.android.systemui.ambient.touch.scrim.ScrimManager;
+import com.android.systemui.communal.domain.interactor.CommunalInteractor;
+import com.android.systemui.communal.shared.model.CommunalScenes;
 import com.android.systemui.complication.Complication;
 import com.android.systemui.complication.dagger.ComplicationComponent;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
+import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
@@ -76,6 +80,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     private DreamOverlayContainerViewController mDreamOverlayContainerViewController;
     private final DreamOverlayCallbackController mDreamOverlayCallbackController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private final ScrimManager mScrimManager;
     @Nullable
     private final ComponentName mLowLightDreamComponent;
     @Nullable
@@ -106,6 +111,10 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     private final LifecycleRegistry mLifecycleRegistry;
 
     private TouchMonitor mTouchMonitor;
+
+    private final CommunalInteractor mCommunalInteractor;
+
+    private final SystemDialogsCloser mSystemDialogsCloser;
 
     private final KeyguardUpdateMonitorCallback mKeyguardCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -168,6 +177,9 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             AmbientTouchComponent.Factory ambientTouchComponentFactory,
             DreamOverlayStateController stateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
+            ScrimManager scrimManager,
+            CommunalInteractor communalInteractor,
+            SystemDialogsCloser systemDialogsCloser,
             UiEventLogger uiEventLogger,
             @Named(DREAM_TOUCH_INSET_MANAGER) TouchInsetManager touchInsetManager,
             @Nullable @Named(LowLightDreamModule.LOW_LIGHT_DREAM_COMPONENT)
@@ -181,6 +193,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mExecutor = executor;
         mWindowManager = windowManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mScrimManager = scrimManager;
         mLowLightDreamComponent = lowLightDreamComponent;
         mHomeControlPanelDreamComponent = homeControlPanelDreamComponent;
         mKeyguardUpdateMonitor.registerCallback(mKeyguardCallback);
@@ -188,6 +201,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mUiEventLogger = uiEventLogger;
         mDreamOverlayCallbackController = dreamOverlayCallbackController;
         mWindowTitle = windowTitle;
+        mCommunalInteractor = communalInteractor;
+        mSystemDialogsCloser = systemDialogsCloser;
 
         final ViewModelStore viewModelStore = new ViewModelStore();
         final Complication.Host host =
@@ -290,6 +305,28 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             mDreamOverlayCallbackController.onWakeUp();
             mDreamOverlayContainerViewController.wakeUp();
         }
+    }
+
+    @Override
+    public void onComeToFront() {
+        // Make sure the bouncer is closed. Expanding the shade effectively contracts the bouncer
+        // an equal amount.
+        if (mDreamOverlayContainerViewController != null
+                && mDreamOverlayContainerViewController.isBouncerShowing()) {
+            mScrimManager.getCurrentController().expand(
+                    new ShadeExpansionChangeEvent(
+                            /* fraction= */ 1.f,
+                            /* expanded= */ false,
+                            /* tracking= */ true));
+        }
+
+        // closeSystemDialogs takes care of closing anything that responds to the
+        // {@link Intent.ACTION_CLOSE_SYSTEM_DIALOGS} broadcast (which includes the notification
+        // shade).
+        mSystemDialogsCloser.closeSystemDialogs();
+
+        // Hide glanceable hub (this is a nop if glanceable hub is not open).
+        mCommunalInteractor.changeScene(CommunalScenes.Blank, null);
     }
 
     /**

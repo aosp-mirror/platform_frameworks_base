@@ -3411,7 +3411,14 @@ class MediaRouter2ServiceImpl {
             for (RouterRecord activeRouterRecord : activeRouterRecords) {
                 RouteDiscoveryPreference preference = activeRouterRecord.mDiscoveryPreference;
                 preferredFeatures.addAll(preference.getPreferredFeatures());
-                if (activeRouterRecord.isActivelyScanning()) {
+
+                boolean isRouterRecordActivelyScanning =
+                        Flags.enablePreventionOfManagerScansWhenNoAppsScan()
+                                ? (activeRouterRecord.isActivelyScanning() || shouldForceActiveScan)
+                                        && !preference.getPreferredFeatures().isEmpty()
+                                : activeRouterRecord.isActivelyScanning();
+
+                if (isRouterRecordActivelyScanning) {
                     activeScan = true;
                     activelyScanningPackages.add(activeRouterRecord.mPackageName);
                 }

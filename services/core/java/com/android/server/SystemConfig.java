@@ -106,6 +106,9 @@ public class SystemConfig {
     // property for runtime configuration differentiation in vendor
     private static final String VENDOR_SKU_PROPERTY = "ro.boot.product.vendor.sku";
 
+    // property for runtime configuration differentation in product
+    private static final String PRODUCT_SKU_PROPERTY = "ro.boot.hardware.sku";
+
     private static final ArrayMap<String, ArraySet<String>> EMPTY_PERMISSIONS =
             new ArrayMap<>();
 
@@ -693,6 +696,17 @@ public class SystemConfig {
                 Environment.getProductDirectory(), "etc", "sysconfig"), productPermissionFlag);
         readPermissions(parser, Environment.buildPath(
                 Environment.getProductDirectory(), "etc", "permissions"), productPermissionFlag);
+
+        String productSkuProperty = SystemProperties.get(PRODUCT_SKU_PROPERTY, "");
+        if (!productSkuProperty.isEmpty()) {
+            String productSkuDir = "sku_" + productSkuProperty;
+            readPermissions(parser, Environment.buildPath(
+                    Environment.getProductDirectory(), "etc", "sysconfig", productSkuDir),
+                    productPermissionFlag);
+            readPermissions(parser, Environment.buildPath(
+                    Environment.getProductDirectory(), "etc", "permissions", productSkuDir),
+                    productPermissionFlag);
+        }
 
         // Allow /system_ext to customize all system configs
         readPermissions(parser, Environment.buildPath(

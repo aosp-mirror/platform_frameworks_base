@@ -651,6 +651,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private @Appearance int mAppearanceControlled;
     private @Appearance int mAppearanceFromResource;
     private boolean mBehaviorControlled;
+    private boolean mIsPredictiveBackImeHideAnimInProgress;
 
     private final Runnable mPendingControlTimeout = this::abortPendingImeControlRequest;
     private final ArrayList<OnControllableInsetsChangedListener> mControllableInsetsChangedListeners
@@ -1027,6 +1028,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         reportRequestedVisibleTypes();
     }
 
+    void setPredictiveBackImeHideAnimInProgress(boolean isInProgress) {
+        mIsPredictiveBackImeHideAnimInProgress = isInProgress;
+    }
+
+    boolean isPredictiveBackImeHideAnimInProgress() {
+        return mIsPredictiveBackImeHideAnimInProgress;
+    }
+
     @Override
     public void show(@InsetsType int types) {
         show(types, false /* fromIme */, null /* statsToken */);
@@ -1090,7 +1099,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 }
                 continue;
             }
-            if (fromIme && animationType == ANIMATION_TYPE_USER) {
+            if (fromIme && animationType == ANIMATION_TYPE_USER
+                    && !mIsPredictiveBackImeHideAnimInProgress) {
                 // App is already controlling the IME, don't cancel it.
                 if (isIme) {
                     ImeTracker.forLogging().onFailed(
@@ -1186,7 +1196,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 }
             }
             if (!requestedVisible && animationType == ANIMATION_TYPE_NONE
-                    || animationType == ANIMATION_TYPE_HIDE) {
+                    || animationType == ANIMATION_TYPE_HIDE || (animationType
+                    == ANIMATION_TYPE_USER && mIsPredictiveBackImeHideAnimInProgress)) {
                 // no-op: already hidden or animating out (because window visibility is
                 // applied before starting animation).
                 if (isImeAnimation) {
@@ -1609,7 +1620,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         onAnimationStateChanged(removedTypes, false /* running */);
     }
 
-    private void onAnimationStateChanged(@InsetsType int types, boolean running) {
+    void onAnimationStateChanged(@InsetsType int types, boolean running) {
         boolean insetsChanged = false;
         for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
             final InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);

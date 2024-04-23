@@ -21,6 +21,7 @@ import static android.view.KeyEvent.KEYCODE_B;
 import static android.view.KeyEvent.KEYCODE_BRIGHTNESS_DOWN;
 import static android.view.KeyEvent.KEYCODE_C;
 import static android.view.KeyEvent.KEYCODE_CTRL_LEFT;
+import static android.view.KeyEvent.KEYCODE_DEL;
 import static android.view.KeyEvent.KEYCODE_E;
 import static android.view.KeyEvent.KEYCODE_ENTER;
 import static android.view.KeyEvent.KEYCODE_H;
@@ -42,16 +43,25 @@ import android.app.role.RoleManager;
 import android.content.Intent;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.SparseArray;
 
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 @Presubmit
 @SmallTest
 public class ModifierShortcutTests extends ShortcutKeyTestBase {
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+
     private static final SparseArray<String> INTENT_SHORTCUTS =  new SparseArray<>();
     private static final SparseArray<String> ROLE_SHORTCUTS =  new SparseArray<>();
     static {
@@ -228,4 +238,25 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
         sendKeyCombination(new int[]{KEYCODE_SCREENSHOT}, 0);
         mPhoneWindowManager.assertTakeScreenshotNotCalled();
     }
+
+    /**
+     * META+CTRL+BACKSPACE for taking a bugreport when the flag is enabled.
+     */
+    @Test
+    @RequiresFlagsEnabled(com.android.server.flags.Flags.FLAG_NEW_BUGREPORT_KEYBOARD_SHORTCUT)
+    public void testTakeBugReport_flagEnabled() throws RemoteException {
+        sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_CTRL_LEFT, KEYCODE_DEL}, 0);
+        mPhoneWindowManager.assertTakeBugreport(true);
+    }
+
+    /**
+     * META+CTRL+BACKSPACE for taking a bugreport does nothing when the flag is disabledd.
+     */
+    @Test
+    @RequiresFlagsDisabled(com.android.server.flags.Flags.FLAG_NEW_BUGREPORT_KEYBOARD_SHORTCUT)
+    public void testTakeBugReport_flagDisabled() throws RemoteException {
+        sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_CTRL_LEFT, KEYCODE_DEL}, 0);
+        mPhoneWindowManager.assertTakeBugreport(false);
+    }
+
 }

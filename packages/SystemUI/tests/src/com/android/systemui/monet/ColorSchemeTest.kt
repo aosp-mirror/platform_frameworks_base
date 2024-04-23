@@ -15,7 +15,7 @@
  */
 package com.android.systemui.monet
 
-import android.test.suitebuilder.annotation.SmallTest
+import androidx.test.filters.SmallTest
 import android.testing.AndroidTestingRunner
 import android.util.Log
 import com.android.systemui.SysuiTestCase

@@ -94,7 +94,7 @@ constructor(
 
     /** Currently connected [MediaDevice]. */
     val currentConnectedDevice: Flow<MediaDevice?> =
-        localMediaRepository.flatMapLatest { it.currentConnectedDevice }
+        localMediaRepository.flatMapLatest { it.currentConnectedDevice }.distinctUntilChanged()
 
     private suspend fun getApplicationLabel(packageName: String): CharSequence? {
         return try {

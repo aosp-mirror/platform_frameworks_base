@@ -105,6 +105,15 @@ constructor(@BatteryControllerLog private val logBuffer: LogBuffer) {
         )
     }
 
+    fun logPowerSaveChangedCallback(isPowerSave: Boolean) {
+        logBuffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            { bool1 = isPowerSave },
+            { "Sending onPowerSaveChanged callback with powerSave=$bool1" }
+        )
+    }
+
     private fun Int.report(): String =
         if (this == DEFAULT) {
             "(missing)"

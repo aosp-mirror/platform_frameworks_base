@@ -20,7 +20,6 @@ import static android.hardware.display.DisplayManagerInternal.DisplayPowerReques
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.display.BrightnessConfiguration;
-import android.hardware.display.DisplayManagerInternal;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -32,6 +31,7 @@ import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessEvent;
 import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.brightness.BrightnessUtils;
+import com.android.server.display.brightness.StrategyExecutionRequest;
 import com.android.server.display.brightness.StrategySelectionNotifyRequest;
 
 import java.io.PrintWriter;
@@ -96,13 +96,21 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
     // want to re-evaluate the auto-brightness state
     private boolean mIsConfigured;
 
-    public AutomaticBrightnessStrategy(Context context, int displayId) {
+    private Injector mInjector;
+
+    @VisibleForTesting
+    AutomaticBrightnessStrategy(Context context, int displayId, Injector injector) {
         super(context, displayId);
         mContext = context;
         mDisplayId = displayId;
         mAutoBrightnessAdjustment = getAutoBrightnessAdjustmentSetting();
         mPendingAutoBrightnessAdjustment = PowerManager.BRIGHTNESS_INVALID_FLOAT;
         mTemporaryAutoBrightnessAdjustment = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        mInjector = (injector == null) ? new RealInjector() : injector;
+    }
+
+    public AutomaticBrightnessStrategy(Context context, int displayId) {
+        this(context, displayId, null);
     }
 
     /**
@@ -252,10 +260,10 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
 
     @Override
     public DisplayBrightnessState updateBrightness(
-            DisplayManagerInternal.DisplayPowerRequest displayPowerRequest) {
+            StrategyExecutionRequest strategyExecutionRequest) {
         BrightnessReason brightnessReason = new BrightnessReason();
         brightnessReason.setReason(BrightnessReason.REASON_AUTOMATIC);
-        BrightnessEvent brightnessEvent = new BrightnessEvent(mDisplayId);
+        BrightnessEvent brightnessEvent = mInjector.getBrightnessEvent(mDisplayId);
         float brightness = getAutomaticScreenBrightness(brightnessEvent);
         return new DisplayBrightnessState.Builder()
                 .setBrightness(brightness)
@@ -265,6 +273,9 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
                 .setIsSlowChange(hasAppliedAutoBrightness()
                         && !getAutoBrightnessAdjustmentChanged())
                 .setBrightnessEvent(brightnessEvent)
+                .setBrightnessAdjustmentFlag(mAutoBrightnessAdjustmentReasonsFlags)
+                .setShouldUpdateScreenBrightnessSetting(
+                        brightness != strategyExecutionRequest.getCurrentScreenBrightness())
                 .build();
     }
 
@@ -357,13 +368,6 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
                 : PowerManager.BRIGHTNESS_INVALID_FLOAT;
         adjustAutomaticBrightnessStateIfValid(brightness);
         return brightness;
-    }
-
-    /**
-     * Gets the auto-brightness adjustment flag change reason
-     */
-    public int getAutoBrightnessAdjustmentReasonsFlags() {
-        return mAutoBrightnessAdjustmentReasonsFlags;
     }
 
     /**
@@ -496,5 +500,16 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
         final float adj = Settings.System.getFloatForUser(mContext.getContentResolver(),
                 Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, 0.0f, UserHandle.USER_CURRENT);
         return Float.isNaN(adj) ? 0.0f : BrightnessUtils.clampBrightnessAdjustment(adj);
+    }
+
+    @VisibleForTesting
+    interface Injector {
+        BrightnessEvent getBrightnessEvent(int displayId);
+    }
+
+    static class RealInjector implements Injector {
+        public BrightnessEvent getBrightnessEvent(int displayId) {
+            return new BrightnessEvent(displayId);
+        }
     }
 }

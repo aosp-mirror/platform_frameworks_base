@@ -21,11 +21,10 @@ import android.view.VelocityTracker
 import android.view.View
 import com.android.systemui.screenshot.FloatingWindowUtil
 import kotlin.math.abs
-import kotlin.math.sign
 
 class SwipeGestureListener(
     private val view: View,
-    private val onDismiss: (Float) -> Unit,
+    private val onDismiss: (Float?) -> Unit,
     private val onCancel: () -> Unit
 ) {
     private val velocityTracker = VelocityTracker.obtain()
@@ -52,7 +51,7 @@ class SwipeGestureListener(
                     abs(view.translationX) >
                         FloatingWindowUtil.dpToPx(displayMetrics, DISMISS_THRESHOLD_DP)
                 ) {
-                    onDismiss.invoke(1.5f * sign(view.translationX))
+                    onDismiss.invoke(xVelocity)
                     return true
                 } else {
                     velocityTracker.clear()

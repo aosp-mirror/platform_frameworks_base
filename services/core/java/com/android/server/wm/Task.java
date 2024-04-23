@@ -4852,11 +4852,13 @@ class Task extends TaskFragment {
     /**
      * Abort an incomplete pip-entry. If left in this state, it will cover everything but remain
      * paused. If this is needed, there is a bug -- this should only be used for recovery.
+     *
+     * @return true if there is an inconsistency in the task and activity state.
      */
-    void abortPipEnter(ActivityRecord top) {
+    boolean abortPipEnter(ActivityRecord top) {
         // an incomplete state has the task PINNED but the activity not.
         if (!inPinnedWindowingMode() || top.inPinnedWindowingMode() || !canMoveTaskToBack(this)) {
-            return;
+            return false;
         }
         final Transition transition = new Transition(TRANSIT_TO_BACK, 0 /* flags */,
                 mTransitionController, mWmService.mSyncEngine);
@@ -4878,6 +4880,7 @@ class Task extends TaskFragment {
             top.setWindowingMode(WINDOWING_MODE_UNDEFINED);
             top.mWaitForEnteringPinnedMode = false;
         }
+        return true;
     }
 
     void resumeNextFocusAfterReparent() {

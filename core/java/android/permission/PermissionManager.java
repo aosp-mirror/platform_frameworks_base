@@ -1680,9 +1680,9 @@ public final class PermissionManager {
      * @hide
      */
     @RequiresPermission(Manifest.permission.UPDATE_APP_OPS_STATS)
-    public int getNumRegisteredAttributionSourcesForTest(int uid) {
+    public int getRegisteredAttributionSourceCountForTest(int uid) {
         try {
-            return mPermissionManager.getNumRegisteredAttributionSources(uid);
+            return mPermissionManager.getRegisteredAttributionSourceCount(uid);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

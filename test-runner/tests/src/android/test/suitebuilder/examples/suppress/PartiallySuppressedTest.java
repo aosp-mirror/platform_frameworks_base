@@ -16,7 +16,7 @@
 
 package android.test.suitebuilder.examples.suppress;
 
-import android.test.suitebuilder.annotation.Suppress;
+import androidx.test.filters.Suppress;
 
 import junit.framework.TestCase;
 

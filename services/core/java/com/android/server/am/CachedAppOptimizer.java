@@ -2371,6 +2371,14 @@ public final class CachedAppOptimizer {
                     return;
                 }
 
+                if (opt.shouldNotFreeze()) {
+                    if (DEBUG_FREEZER) {
+                        Slog.d(TAG_AM, "Skipping freeze because process is marked "
+                                + "should not be frozen");
+                    }
+                    return;
+                }
+
                 if (pid == 0 || opt.isFrozen()) {
                     // Already frozen or not a real process, either one being
                     // launched or one being killed

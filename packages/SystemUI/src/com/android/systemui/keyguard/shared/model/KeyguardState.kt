@@ -87,6 +87,7 @@ enum class KeyguardState {
         }
 
         /** Whether either of the bouncers are visible when we're FINISHED in the given state. */
+        @JvmStatic
         fun isBouncerState(state: KeyguardState): Boolean {
             return state == PRIMARY_BOUNCER || state == ALTERNATE_BOUNCER
         }

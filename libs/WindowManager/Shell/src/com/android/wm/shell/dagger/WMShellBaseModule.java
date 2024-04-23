@@ -107,6 +107,7 @@ import com.android.wm.shell.taskview.TaskViewFactory;
 import com.android.wm.shell.taskview.TaskViewFactoryController;
 import com.android.wm.shell.taskview.TaskViewTransitions;
 import com.android.wm.shell.transition.HomeTransitionObserver;
+import com.android.wm.shell.transition.MixedTransitionHandler;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider;
 import com.android.wm.shell.unfold.UnfoldAnimationController;
@@ -675,6 +676,22 @@ public abstract class WMShellBaseModule {
         return new TaskViewTransitions(transitions);
     }
 
+    // Workaround for dynamic overriding with a default implementation, see {@link DynamicOverride}
+    @BindsOptionalOf
+    @DynamicOverride
+    abstract MixedTransitionHandler optionalMixedTransitionHandler();
+
+    @WMSingleton
+    @Provides
+    static Optional<MixedTransitionHandler> provideMixedTransitionHandler(
+            @DynamicOverride Optional<MixedTransitionHandler> mixedTransitionHandler
+    ) {
+        if (mixedTransitionHandler.isPresent()) {
+            return mixedTransitionHandler;
+        }
+        return Optional.empty();
+    }
+
     //
     // Keyguard transitions (optional feature)
     //
@@ -934,6 +951,7 @@ public abstract class WMShellBaseModule {
             Optional<OneHandedController> oneHandedControllerOptional,
             Optional<HideDisplayCutoutController> hideDisplayCutoutControllerOptional,
             Optional<ActivityEmbeddingController> activityEmbeddingOptional,
+            Optional<MixedTransitionHandler> mixedTransitionHandler,
             Transitions transitions,
             StartingWindowController startingWindow,
             ProtoLogController protoLogController,

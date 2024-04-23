@@ -30,7 +30,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
 import static com.android.server.contextualsearch.flags.Flags.enableExcludePersistentUi;
-
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_CONTENT;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
 
@@ -65,6 +64,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
+import android.os.SystemClock;
 import android.util.Log;
 import android.util.Slog;
 import android.view.IWindowManager;
@@ -246,6 +246,9 @@ public class ContextualSearchManagerService extends SystemService {
         if (DEBUG_USER) Log.d(TAG, "Launch component: " + launchIntent.getComponent());
         launchIntent.addFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_NO_ANIMATION
                 | FLAG_ACTIVITY_NO_USER_ACTION);
+        launchIntent.putExtra(
+                ContextualSearchManager.EXTRA_INVOCATION_TIME_MS,
+                SystemClock.uptimeMillis());
         launchIntent.putExtra(ContextualSearchManager.EXTRA_ENTRYPOINT, entrypoint);
         launchIntent.putExtra(ContextualSearchManager.EXTRA_TOKEN, mToken);
         boolean isAssistDataAllowed = mAtmInternal.isAssistDataAllowed();

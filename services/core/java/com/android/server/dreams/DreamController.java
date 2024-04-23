@@ -249,6 +249,16 @@ final class DreamController {
         mCurrentDream.mAppTask = appTask;
     }
 
+    void setDreamHasFocus(boolean hasFocus) {
+        if (mCurrentDream != null) {
+            mCurrentDream.mDreamHasFocus = hasFocus;
+        }
+    }
+
+    boolean dreamHasFocus() {
+        return mCurrentDream != null && mCurrentDream.mDreamHasFocus;
+    }
+
     /**
      * Sends a user activity signal to PowerManager to stop the screen from turning off immediately
      * if there hasn't been any user interaction in a while.
@@ -269,6 +279,21 @@ final class DreamController {
     public void stopDream(boolean immediate, String reason) {
         stopPreviousDreams();
         stopDreamInstance(immediate, reason, mCurrentDream);
+    }
+
+    public boolean bringDreamToFront() {
+        if (mCurrentDream == null || mCurrentDream.mService == null) {
+            return false;
+        }
+
+        try {
+            mCurrentDream.mService.comeToFront();
+            return true;
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Error asking dream to come to the front", e);
+        }
+
+        return false;
     }
 
     /**
@@ -426,6 +451,7 @@ final class DreamController {
         private String mStopReason;
         private long mDreamStartTime;
         public boolean mWakingGently;
+        public boolean mDreamHasFocus;
 
         private final Runnable mStopPreviousDreamsIfNeeded = this::stopPreviousDreamsIfNeeded;
         private final Runnable mReleaseWakeLockIfNeeded = this::releaseWakeLockIfNeeded;

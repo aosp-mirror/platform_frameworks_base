@@ -79,10 +79,10 @@ fun CommunalContainer(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val currentSceneKey: SceneKey by viewModel.currentScene.collectAsState(CommunalScenes.Blank)
-    val touchesAllowed by viewModel.touchesAllowed.collectAsState(initial = false)
     val state: MutableSceneTransitionLayoutState = remember {
         MutableSceneTransitionLayoutState(
             initialScene = currentSceneKey,
+            canChangeScene = { _ -> viewModel.canChangeScene() },
             transitions = sceneTransitions,
             enableInterruptions = false,
         )
@@ -112,14 +112,9 @@ fun CommunalContainer(
         scene(
             CommunalScenes.Blank,
             userActions =
-                if (touchesAllowed) {
-                    mapOf(
-                        Swipe(SwipeDirection.Left, fromSource = Edge.Right) to
-                            CommunalScenes.Communal
-                    )
-                } else {
-                    emptyMap()
-                }
+                mapOf(
+                    Swipe(SwipeDirection.Left, fromSource = Edge.Right) to CommunalScenes.Communal
+                )
         ) {
             // This scene shows nothing only allowing for transitions to the communal scene.
             Box(modifier = Modifier.fillMaxSize())
@@ -128,13 +123,7 @@ fun CommunalContainer(
         scene(
             CommunalScenes.Communal,
             userActions =
-                if (touchesAllowed) {
-                    mapOf(
-                        Swipe(SwipeDirection.Right, fromSource = Edge.Left) to CommunalScenes.Blank
-                    )
-                } else {
-                    emptyMap()
-                },
+                mapOf(Swipe(SwipeDirection.Right, fromSource = Edge.Left) to CommunalScenes.Blank)
         ) {
             CommunalScene(viewModel, colors, dialogFactory, modifier = modifier)
         }

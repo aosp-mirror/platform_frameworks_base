@@ -432,6 +432,20 @@ public class LocationManager {
     public static final String METADATA_SETTINGS_FOOTER_STRING =
             "com.android.settings.location.FOOTER_STRING";
 
+    /**
+     * Metadata name for {@link LocationManager#SETTINGS_FOOTER_DISPLAYED_ACTION} broadcast
+     * receivers to specify a string resource id as location settings footer HTML snippet. This is
+     * for use only by apps that are included in the system image. If HTML snippet is provided,
+     * plain text footer text specified with {@link #METADATA_SETTINGS_FOOTER_STRING} will be
+     * ignored.
+     *
+     * <p>See {@link #SETTINGS_FOOTER_DISPLAYED_ACTION} for more detail on how to use.
+     *
+     * @hide
+     */
+    public static final String METADATA_SETTINGS_FOOTER_HTML =
+            "com.android.settings.location.FOOTER_HTML";
+
     private static final long MAX_SINGLE_LOCATION_TIMEOUT_MS = 30 * 1000;
 
     private static final String CACHE_KEY_LOCATION_ENABLED_PROPERTY =

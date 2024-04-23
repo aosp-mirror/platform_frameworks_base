@@ -37,6 +37,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.controls.ui.animation.ColorSchemeTransition
 import com.android.systemui.media.controls.ui.animation.MetadataAnimationHandler
 import com.android.systemui.media.controls.ui.binder.MediaControlViewBinder
+import com.android.systemui.media.controls.ui.binder.MediaRecommendationsViewBinder
 import com.android.systemui.media.controls.ui.binder.SeekBarObserver
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController.Companion.calculateAlpha
 import com.android.systemui.media.controls.ui.view.GutsViewHolder
@@ -185,7 +186,10 @@ constructor(
     private var nextNotVisibleValue = ConstraintSet.GONE
     private var isNextButtonAvailable = false
 
-    private lateinit var mediaViewHolder: MediaViewHolder
+    /** View holders for controller */
+    lateinit var recommendationViewHolder: RecommendationViewHolder
+    lateinit var mediaViewHolder: MediaViewHolder
+
     private lateinit var seekBarObserver: SeekBarObserver
     private lateinit var turbulenceNoiseController: TurbulenceNoiseController
     private lateinit var loadingEffect: LoadingEffect
@@ -786,6 +790,15 @@ constructor(
                 refreshState()
             }
         }
+    }
+
+    fun attachRecommendations(recommendationViewHolder: RecommendationViewHolder) {
+        if (!mediaFlags.isMediaControlsRefactorEnabled()) return
+        this.recommendationViewHolder = recommendationViewHolder
+
+        attach(recommendationViewHolder.recommendations, TYPE.RECOMMENDATION)
+        recsConfigurationChangeListener =
+            MediaRecommendationsViewBinder::updateRecommendationsVisibility
     }
 
     fun bindSeekBar(onSeek: () -> Unit, onBindSeekBar: (SeekBarViewModel) -> Unit) {

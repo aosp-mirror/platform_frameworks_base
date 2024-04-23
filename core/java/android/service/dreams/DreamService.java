@@ -18,6 +18,7 @@ package android.service.dreams;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.service.dreams.Flags.dreamHandlesConfirmKeys;
+import static android.service.dreams.Flags.dreamTracksFocus;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IdRes;
@@ -52,6 +53,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.service.controls.flags.Flags;
+import android.service.dreams.utils.DreamAccessibility;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
@@ -273,6 +275,7 @@ public class DreamService extends Service implements Window.Callback {
     private boolean mDebug = false;
 
     private ComponentName mDreamComponent;
+    private DreamAccessibility mDreamAccessibility;
     private boolean mShouldShowComplications;
 
     private DreamServiceWrapper mDreamServiceWrapper;
@@ -455,6 +458,15 @@ public class DreamService extends Service implements Window.Callback {
     /** {@inheritDoc} */
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
+        if (!dreamTracksFocus()) {
+            return;
+        }
+
+        try {
+            mDreamManager.onDreamFocusChanged(hasFocus);
+        } catch (RemoteException ex) {
+            // system server died
+        }
     }
 
     /** {@inheritDoc} */
@@ -664,6 +676,7 @@ public class DreamService extends Service implements Window.Callback {
      */
     public void setInteractive(boolean interactive) {
         mInteractive = interactive;
+        updateAccessibilityMessage();
     }
 
     /**
@@ -1149,6 +1162,19 @@ public class DreamService extends Service implements Window.Callback {
         wakeUp(false);
     }
 
+    /**
+     * Tells the dream to come to the front (which in turn tells the overlay to come to the front).
+     */
+    private void comeToFront() {
+        mOverlayConnection.addConsumer(overlay -> {
+            try {
+                overlay.comeToFront();
+            } catch (RemoteException e) {
+                Log.e(mTag, "could not tell overlay to come to front:" + e);
+            }
+        });
+    }
+
     private void wakeUp(boolean fromSystem) {
         if (mDebug) {
             Slog.v(mTag, "wakeUp(): fromSystem=" + fromSystem + ", mWaking=" + mWaking
@@ -1430,7 +1456,7 @@ public class DreamService extends Service implements Window.Callback {
         // Hide all insets when the dream is showing
         mWindow.getDecorView().getWindowInsetsController().hide(WindowInsets.Type.systemBars());
         mWindow.setDecorFitsSystemWindows(false);
-
+        updateAccessibilityMessage();
         mWindow.getDecorView().addOnAttachStateChangeListener(
                 new View.OnAttachStateChangeListener() {
                     private Consumer<IDreamOverlayClient> mDreamStartOverlayConsumer;
@@ -1475,6 +1501,15 @@ public class DreamService extends Service implements Window.Callback {
                         }
                     }
                 });
+    }
+
+    private void updateAccessibilityMessage() {
+        if (mWindow == null) return;
+        if (mDreamAccessibility == null) {
+            final View rootView = mWindow.getDecorView();
+            mDreamAccessibility = new DreamAccessibility(this, rootView);
+        }
+        mDreamAccessibility.updateAccessibilityConfiguration(isInteractive());
     }
 
     private boolean getWindowFlagValue(int flag, boolean defaultValue) {
@@ -1595,6 +1630,15 @@ public class DreamService extends Service implements Window.Callback {
         @Override
         public void wakeUp() {
             mHandler.post(() -> DreamService.this.wakeUp(true /*fromSystem*/));
+        }
+
+        @Override
+        public void comeToFront() {
+            if (!dreamTracksFocus()) {
+                return;
+            }
+
+            mHandler.post(DreamService.this::comeToFront);
         }
     }
 

@@ -19,6 +19,7 @@ package com.android.server.power.stats;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.os.BatteryStats.Uid.NUM_PROCESS_STATE;
+import static android.os.BatteryStats.Uid.NUM_WIFI_BATCHED_SCAN_BINS;
 import static android.os.BatteryStatsManager.NUM_WIFI_STATES;
 import static android.os.BatteryStatsManager.NUM_WIFI_SUPPL_STATES;
 
@@ -292,7 +293,25 @@ public class BatteryStatsImpl extends BatteryStats {
     private int[] mCpuPowerBracketMap;
     private final CpuPowerStatsCollector mCpuPowerStatsCollector;
     private final MobileRadioPowerStatsCollector mMobileRadioPowerStatsCollector;
+    private final WifiPowerStatsCollector mWifiPowerStatsCollector;
     private final SparseBooleanArray mPowerStatsCollectorEnabled = new SparseBooleanArray();
+    private final WifiPowerStatsCollector.WifiStatsRetriever mWifiStatsRetriever =
+            new WifiPowerStatsCollector.WifiStatsRetriever() {
+                @Override
+                public void retrieveWifiScanTimes(Callback callback) {
+                    synchronized (BatteryStatsImpl.this) {
+                        retrieveWifiScanTimesLocked(callback);
+                    }
+                }
+
+                @Override
+                public long getWifiActiveDuration() {
+                    synchronized (BatteryStatsImpl.this) {
+                        return getGlobalWifiRunningTime(mClock.elapsedRealtime() * 1000,
+                                STATS_SINCE_CHARGED) / 1000;
+                    }
+                }
+            };
 
     public LongSparseArray<SamplingTimer> getKernelMemoryStats() {
         return mKernelMemoryStats;
@@ -500,6 +519,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 setPowerStatsThrottlePeriodMillis(BatteryConsumer.POWER_COMPONENT_CPU,
                         TimeUnit.MINUTES.toMillis(1));
                 setPowerStatsThrottlePeriodMillis(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
+                        TimeUnit.HOURS.toMillis(1));
+                setPowerStatsThrottlePeriodMillis(BatteryConsumer.POWER_COMPONENT_WIFI,
                         TimeUnit.HOURS.toMillis(1));
             }
 
@@ -1885,11 +1906,12 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     private class PowerStatsCollectorInjector implements CpuPowerStatsCollector.Injector,
-            MobileRadioPowerStatsCollector.Injector {
+            MobileRadioPowerStatsCollector.Injector, WifiPowerStatsCollector.Injector {
         private PackageManager mPackageManager;
         private PowerStatsCollector.ConsumedEnergyRetriever mConsumedEnergyRetriever;
         private NetworkStatsManager mNetworkStatsManager;
         private TelephonyManager mTelephonyManager;
+        private WifiManager mWifiManager;
 
         void setContext(Context context) {
             mPackageManager = context.getPackageManager();
@@ -1897,6 +1919,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     LocalServices.getService(PowerStatsInternal.class));
             mNetworkStatsManager = context.getSystemService(NetworkStatsManager.class);
             mTelephonyManager = context.getSystemService(TelephonyManager.class);
+            mWifiManager = context.getSystemService(WifiManager.class);
         }
 
         @Override
@@ -1950,8 +1973,23 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
+        public Supplier<NetworkStats> getWifiNetworkStatsSupplier() {
+            return () -> readWifiNetworkStatsLocked(mNetworkStatsManager);
+        }
+
+        @Override
+        public WifiPowerStatsCollector.WifiStatsRetriever getWifiStatsRetriever() {
+            return mWifiStatsRetriever;
+        }
+
+        @Override
         public TelephonyManager getTelephonyManager() {
             return mTelephonyManager;
+        }
+
+        @Override
+        public WifiManager getWifiManager() {
+            return mWifiManager;
         }
 
         @Override
@@ -6354,7 +6392,11 @@ public class BatteryStatsImpl extends BatteryStats {
                     HistoryItem.STATE2_WIFI_ON_FLAG);
             mWifiOn = true;
             mWifiOnTimer.startRunningLocked(elapsedRealtimeMs);
-            scheduleSyncExternalStatsLocked("wifi-off", ExternalStatsSync.UPDATE_WIFI);
+            if (mWifiPowerStatsCollector.isEnabled()) {
+                mWifiPowerStatsCollector.schedule();
+            } else {
+                scheduleSyncExternalStatsLocked("wifi-off", ExternalStatsSync.UPDATE_WIFI);
+            }
         }
     }
 
@@ -6365,7 +6407,11 @@ public class BatteryStatsImpl extends BatteryStats {
                     HistoryItem.STATE2_WIFI_ON_FLAG);
             mWifiOn = false;
             mWifiOnTimer.stopRunningLocked(elapsedRealtimeMs);
-            scheduleSyncExternalStatsLocked("wifi-on", ExternalStatsSync.UPDATE_WIFI);
+            if (mWifiPowerStatsCollector.isEnabled()) {
+                mWifiPowerStatsCollector.schedule();
+            } else {
+                scheduleSyncExternalStatsLocked("wifi-on", ExternalStatsSync.UPDATE_WIFI);
+            }
         }
     }
 
@@ -6757,8 +6803,11 @@ public class BatteryStatsImpl extends BatteryStats {
                             .noteWifiRunningLocked(elapsedRealtimeMs);
                 }
             }
-
-            scheduleSyncExternalStatsLocked("wifi-running", ExternalStatsSync.UPDATE_WIFI);
+            if (mWifiPowerStatsCollector.isEnabled()) {
+                mWifiPowerStatsCollector.schedule();
+            } else {
+                scheduleSyncExternalStatsLocked("wifi-running", ExternalStatsSync.UPDATE_WIFI);
+            }
         } else {
             Log.w(TAG, "noteWifiRunningLocked -- called while WIFI running");
         }
@@ -6827,7 +6876,11 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
             }
 
-            scheduleSyncExternalStatsLocked("wifi-stopped", ExternalStatsSync.UPDATE_WIFI);
+            if (mWifiPowerStatsCollector.isEnabled()) {
+                mWifiPowerStatsCollector.schedule();
+            } else {
+                scheduleSyncExternalStatsLocked("wifi-stopped", ExternalStatsSync.UPDATE_WIFI);
+            }
         } else {
             Log.w(TAG, "noteWifiStoppedLocked -- called while WIFI not running");
         }
@@ -6842,7 +6895,11 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             mWifiState = wifiState;
             mWifiStateTimer[wifiState].startRunningLocked(elapsedRealtimeMs);
-            scheduleSyncExternalStatsLocked("wifi-state", ExternalStatsSync.UPDATE_WIFI);
+            if (mWifiPowerStatsCollector.isEnabled()) {
+                mWifiPowerStatsCollector.schedule();
+            } else {
+                scheduleSyncExternalStatsLocked("wifi-state", ExternalStatsSync.UPDATE_WIFI);
+            }
         }
     }
 
@@ -6963,6 +7020,25 @@ public class BatteryStatsImpl extends BatteryStats {
         uid = mapUid(uid);
         getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
                 .noteWifiBatchedScanStoppedLocked(elapsedRealtimeMs);
+    }
+
+    private void retrieveWifiScanTimesLocked(
+            WifiPowerStatsCollector.WifiStatsRetriever.Callback callback) {
+        long elapsedTimeUs = mClock.elapsedRealtime() * 1000;
+        for (int i = mUidStats.size() - 1; i >= 0; i--) {
+            int uid = mUidStats.keyAt(i);
+            Uid uidStats = mUidStats.valueAt(i);
+            long scanTimeUs = uidStats.getWifiScanTime(elapsedTimeUs, STATS_SINCE_CHARGED);
+            long batchScanTimeUs = 0;
+            for (int bucket = 0; bucket < NUM_WIFI_BATCHED_SCAN_BINS; bucket++) {
+                batchScanTimeUs += uidStats.getWifiBatchedScanTime(bucket, elapsedTimeUs,
+                        STATS_SINCE_CHARGED);
+            }
+            if (scanTimeUs != 0 || batchScanTimeUs != 0) {
+                callback.onWifiScanTime(uid, (scanTimeUs + 500) / 1000,
+                        (batchScanTimeUs + 500) / 1000);
+            }
+        }
     }
 
     private int mWifiMulticastNesting = 0;
@@ -11101,6 +11177,11 @@ public class BatteryStatsImpl extends BatteryStats {
                 BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO));
         mMobileRadioPowerStatsCollector.addConsumer(this::recordPowerStats);
 
+        mWifiPowerStatsCollector = new WifiPowerStatsCollector(
+                mPowerStatsCollectorInjector, mBatteryStatsConfig.getPowerStatsThrottlePeriod(
+                BatteryConsumer.POWER_COMPONENT_WIFI));
+        mWifiPowerStatsCollector.addConsumer(this::recordPowerStats);
+
         mStartCount++;
         initTimersAndCounters();
         mOnBattery = mOnBatteryInternal = false;
@@ -12095,10 +12176,10 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
             }
             if (lastEntry != null) {
-                delta.mRxBytes = entry.getRxBytes() - lastEntry.getRxBytes();
-                delta.mRxPackets = entry.getRxPackets() - lastEntry.getRxPackets();
-                delta.mTxBytes = entry.getTxBytes() - lastEntry.getTxBytes();
-                delta.mTxPackets = entry.getTxPackets() - lastEntry.getTxPackets();
+                delta.mRxBytes = Math.max(0, entry.getRxBytes() - lastEntry.getRxBytes());
+                delta.mRxPackets = Math.max(0, entry.getRxPackets() - lastEntry.getRxPackets());
+                delta.mTxBytes = Math.max(0, entry.getTxBytes() - lastEntry.getTxBytes());
+                delta.mTxPackets = Math.max(0, entry.getTxPackets() - lastEntry.getTxPackets());
             } else {
                 delta.mRxBytes = entry.getRxBytes();
                 delta.mRxPackets = entry.getRxPackets();
@@ -12119,6 +12200,10 @@ public class BatteryStatsImpl extends BatteryStats {
     public void updateWifiState(@Nullable final WifiActivityEnergyInfo info,
             final long consumedChargeUC, long elapsedRealtimeMs, long uptimeMs,
             @NonNull NetworkStatsManager networkStatsManager) {
+        if (mWifiPowerStatsCollector.isEnabled()) {
+            return;
+        }
+
         if (DEBUG_ENERGY) {
             synchronized (mWifiNetworkLock) {
                 Slog.d(TAG, "Updating wifi stats: " + Arrays.toString(mWifiIfaces));
@@ -14507,6 +14592,10 @@ public class BatteryStatsImpl extends BatteryStats {
                 mPowerStatsCollectorEnabled.get(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO));
         mMobileRadioPowerStatsCollector.schedule();
 
+        mWifiPowerStatsCollector.setEnabled(
+                mPowerStatsCollectorEnabled.get(BatteryConsumer.POWER_COMPONENT_WIFI));
+        mWifiPowerStatsCollector.schedule();
+
         mSystemReady = true;
     }
 
@@ -14521,6 +14610,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 return mCpuPowerStatsCollector;
             case BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO:
                 return mMobileRadioPowerStatsCollector;
+            case BatteryConsumer.POWER_COMPONENT_WIFI:
+                return mWifiPowerStatsCollector;
         }
         return null;
     }
@@ -16056,6 +16147,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public void schedulePowerStatsSampleCollection() {
         mCpuPowerStatsCollector.forceSchedule();
         mMobileRadioPowerStatsCollector.forceSchedule();
+        mWifiPowerStatsCollector.forceSchedule();
     }
 
     /**
@@ -16074,6 +16166,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public void dumpStatsSample(PrintWriter pw) {
         mCpuPowerStatsCollector.collectAndDump(pw);
         mMobileRadioPowerStatsCollector.collectAndDump(pw);
+        mWifiPowerStatsCollector.collectAndDump(pw);
     }
 
     private final Runnable mWriteAsyncRunnable = () -> {

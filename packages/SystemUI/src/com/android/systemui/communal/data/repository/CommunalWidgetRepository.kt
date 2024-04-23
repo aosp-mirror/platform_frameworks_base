@@ -16,13 +16,17 @@
 
 package com.android.systemui.communal.data.repository
 
+import android.app.backup.BackupManager
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.os.UserHandle
 import androidx.annotation.WorkerThread
+import com.android.systemui.communal.data.backup.CommunalBackupUtils
 import com.android.systemui.communal.data.db.CommunalItemRank
 import com.android.systemui.communal.data.db.CommunalWidgetDao
 import com.android.systemui.communal.data.db.CommunalWidgetItem
+import com.android.systemui.communal.nano.CommunalHubState
+import com.android.systemui.communal.proto.toCommunalHubState
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.CommunalWidgetHost
@@ -69,6 +73,15 @@ interface CommunalWidgetRepository {
      * @param widgetIdToPriorityMap mapping of the widget ids to the priority of the widget.
      */
     fun updateWidgetOrder(widgetIdToPriorityMap: Map<Int, Int>) {}
+
+    /**
+     * Restores the database by reading a state file from disk and updating the widget ids according
+     * to [oldToNewWidgetIdMap].
+     */
+    fun restoreWidgets(oldToNewWidgetIdMap: Map<Int, Int>)
+
+    /** Aborts the restore process and removes files from disk if necessary. */
+    fun abortRestoreWidgets()
 }
 
 @SysUISingleton
@@ -82,6 +95,8 @@ constructor(
     private val communalWidgetHost: CommunalWidgetHost,
     private val communalWidgetDao: CommunalWidgetDao,
     @CommunalLog logBuffer: LogBuffer,
+    private val backupManager: BackupManager,
+    private val backupUtils: CommunalBackupUtils,
 ) : CommunalWidgetRepository {
     companion object {
         const val TAG = "CommunalWidgetRepository"
@@ -143,6 +158,7 @@ constructor(
                     provider = provider,
                     priority = priority,
                 )
+                backupManager.dataChanged()
             } else {
                 appWidgetHost.deleteAppWidgetId(id)
             }
@@ -155,6 +171,7 @@ constructor(
             if (communalWidgetDao.deleteWidgetById(widgetId)) {
                 appWidgetHost.deleteAppWidgetId(widgetId)
                 logger.i("Deleted widget with id $widgetId.")
+                backupManager.dataChanged()
             }
         }
     }
@@ -165,6 +182,76 @@ constructor(
             logger.i({ "Updated the order of widget list with ids: $str1." }) {
                 str1 = widgetIdToPriorityMap.toString()
             }
+            backupManager.dataChanged()
+        }
+    }
+
+    override fun restoreWidgets(oldToNewWidgetIdMap: Map<Int, Int>) {
+        bgScope.launch {
+            // Read restored state file from disk
+            val state: CommunalHubState
+            try {
+                state = backupUtils.readBytesFromDisk().toCommunalHubState()
+            } catch (e: Exception) {
+                logger.e({ "Failed reading restore data from disk: $str1" }) {
+                    str1 = e.localizedMessage
+                }
+                abortRestoreWidgets()
+                return@launch
+            }
+
+            val widgetsWithHost = appWidgetHost.appWidgetIds.toList()
+            val widgetsToRemove = widgetsWithHost.toMutableList()
+
+            // Produce a new state to be restored, skipping invalid widgets
+            val newWidgets =
+                state.widgets.mapNotNull { restoredWidget ->
+                    val newWidgetId =
+                        oldToNewWidgetIdMap[restoredWidget.widgetId] ?: restoredWidget.widgetId
+
+                    // Skip if widget id is not registered with the host
+                    if (!widgetsWithHost.contains(newWidgetId)) {
+                        logger.d({
+                            "Skipped restoring widget (old:$int1 new:$int2) " +
+                                "because it is not registered with host"
+                        }) {
+                            int1 = restoredWidget.widgetId
+                            int2 = newWidgetId
+                        }
+                        return@mapNotNull null
+                    }
+
+                    widgetsToRemove.remove(newWidgetId)
+
+                    CommunalHubState.CommunalWidgetItem().apply {
+                        widgetId = newWidgetId
+                        componentName = restoredWidget.componentName
+                        rank = restoredWidget.rank
+                    }
+                }
+            val newState = CommunalHubState().apply { widgets = newWidgets.toTypedArray() }
+
+            // Restore database
+            logger.i("Restoring communal database $newState")
+            communalWidgetDao.restoreCommunalHubState(newState)
+
+            // Delete restored state file from disk
+            backupUtils.clear()
+
+            // Remove widgets from host that have not been restored
+            widgetsToRemove.forEach { widgetId ->
+                logger.i({ "Deleting widget $int1 from host since it has not been restored" }) {
+                    int1 = widgetId
+                }
+                appWidgetHost.deleteAppWidgetId(widgetId)
+            }
+        }
+    }
+
+    override fun abortRestoreWidgets() {
+        bgScope.launch {
+            logger.i("Restore widgets aborted")
+            backupUtils.clear()
         }
     }
 

@@ -170,6 +170,23 @@ constructor(
     }
 
     /**
+     * Repopulates the communal widgets database by first reading a backed-up state from disk and
+     * updating the widget ids indicated by [oldToNewWidgetIdMap]. The backed-up state is removed
+     * from disk afterwards.
+     */
+    fun restoreWidgets(oldToNewWidgetIdMap: Map<Int, Int>) {
+        widgetRepository.restoreWidgets(oldToNewWidgetIdMap)
+    }
+
+    /**
+     * Aborts the task of restoring widgets from a backup. The backed up state stored on disk is
+     * removed.
+     */
+    fun abortRestoreWidgets() {
+        widgetRepository.abortRestoreWidgets()
+    }
+
+    /**
      * Updates the transition state of the hub [SceneTransitionLayout].
      *
      * Note that you must call is with `null` when the UI is done or risk a memory leak.

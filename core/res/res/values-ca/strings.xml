@@ -1897,7 +1897,8 @@
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Sol·licita el PIN per deixar de fixar"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Sol·licita el patró de desbloqueig per deixar de fixar"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Demana la contrasenya per deixar de fixar"</string>
-    <string name="package_installed_device_owner" msgid="7035926868974878525">"Instal·lat per l\'administrador"</string>
+    <!-- no translation found for package_installed_device_owner (8684974629306529138) -->
+    <skip />
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualitzat per l\'administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Suprimit per l\'administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"D\'acord"</string>
@@ -2394,6 +2395,8 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Treball 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Prova"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Compartit"</string>
+    <!-- no translation found for redacted_notification_message (1520587845842228816) -->
+    <skip />
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Contingut de l\'aplicació amagat de la compartició de pantalla per motius de seguretat"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"S\'ha connectat automàticament a un satèl·lit"</string>

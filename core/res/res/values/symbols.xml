@@ -4471,6 +4471,7 @@
   <java-symbol type="string" name="capability_title_canTakeScreenshot" />
 
   <java-symbol type="string" name="dream_preview_title" />
+  <java-symbol type="string" name="dream_accessibility_action_click" />
 
   <java-symbol type="string" name="config_servicesExtensionPackage" />
 
@@ -5218,6 +5219,7 @@
   <java-symbol type="bool" name="config_batteryStatsResetOnUnplugAfterSignificantCharge" />
   <java-symbol type="integer" name="config_defaultPowerStatsThrottlePeriodCpu" />
   <java-symbol type="integer" name="config_defaultPowerStatsThrottlePeriodMobileRadio" />
+  <java-symbol type="integer" name="config_defaultPowerStatsThrottlePeriodWifi" />
   <java-symbol type="integer" name="config_powerStatsAggregationPeriod" />
   <java-symbol type="integer" name="config_aggregatedPowerStatsSpanDuration" />
 
@@ -5380,6 +5382,7 @@
   <java-symbol type="string" name="satellite_notification_open_message" />
   <java-symbol type="string" name="satellite_notification_how_it_works" />
   <java-symbol type="drawable" name="ic_satellite_alt_24px" />
+  <java-symbol type="drawable" name="ic_android_satellite_24px" />
 
   <!-- DisplayManager configs. -->
   <java-symbol type="bool" name="config_evenDimmerEnabled" />

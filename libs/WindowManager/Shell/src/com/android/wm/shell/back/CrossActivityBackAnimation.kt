@@ -283,7 +283,11 @@ class CrossActivityBackAnimation @Inject constructor(
         scrimLayer = scrimBuilder.build()
         val colorComponents = floatArrayOf(0f, 0f, 0f)
         maxScrimAlpha = if (isDarkTheme) MAX_SCRIM_ALPHA_DARK else MAX_SCRIM_ALPHA_LIGHT
-        val scrimCrop = if (isLetterboxed) backAnimRect else closingTarget!!.localBounds
+        val scrimCrop = if (isLetterboxed) {
+            closingTarget!!.windowConfiguration.bounds
+        } else {
+            closingTarget!!.localBounds
+        }
         transaction
             .setColor(scrimLayer, colorComponents)
             .setAlpha(scrimLayer!!, maxScrimAlpha)

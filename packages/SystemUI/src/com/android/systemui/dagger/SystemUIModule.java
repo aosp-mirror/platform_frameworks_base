@@ -18,6 +18,7 @@ package com.android.systemui.dagger;
 
 import android.app.INotificationManager;
 import android.app.Service;
+import android.app.backup.BackupManager;
 import android.content.Context;
 import android.service.dreams.IDreamManager;
 
@@ -316,6 +317,13 @@ public abstract class SystemUIModule {
     static Monitor provideSystemUserMonitor(@Main Executor executor,
             SystemProcessCondition systemProcessCondition, @MonitorLog TableLogBuffer logBuffer) {
         return new Monitor(executor, Collections.singleton(systemProcessCondition), logBuffer);
+    }
+
+    /** Provides the package name for SystemUI. */
+    @SysUISingleton
+    @Provides
+    static BackupManager provideBackupManager(@Application Context context) {
+        return new BackupManager(context);
     }
 
     @BindsOptionalOf

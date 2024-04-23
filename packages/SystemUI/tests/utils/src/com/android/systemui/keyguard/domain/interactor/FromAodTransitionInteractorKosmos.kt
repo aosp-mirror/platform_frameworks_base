@@ -16,12 +16,14 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import com.android.internal.widget.lockPatternUtils
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
+import com.android.systemui.user.domain.interactor.selectedUserInteractor
 
 val Kosmos.fromAodTransitionInteractor by
     Kosmos.Fixture {
@@ -34,5 +36,7 @@ val Kosmos.fromAodTransitionInteractor by
             keyguardInteractor = keyguardInteractor,
             powerInteractor = powerInteractor,
             keyguardOcclusionInteractor = keyguardOcclusionInteractor,
+            selectedUserInteractor = selectedUserInteractor,
+            lockPatternUtils = lockPatternUtils,
         )
     }

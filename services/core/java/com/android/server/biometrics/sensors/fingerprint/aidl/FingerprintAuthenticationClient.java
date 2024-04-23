@@ -35,6 +35,7 @@ import android.hardware.biometrics.BiometricFingerprintConstants.FingerprintAcqu
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.common.ICancellationSignal;
+import android.hardware.biometrics.common.OperationState;
 import android.hardware.biometrics.events.AuthenticationAcquiredInfo;
 import android.hardware.biometrics.events.AuthenticationErrorInfo;
 import android.hardware.biometrics.events.AuthenticationFailedInfo;
@@ -344,6 +345,12 @@ public class FingerprintAuthenticationClient
             if (session.hasContextMethods()) {
                 try {
                     session.getSession().onContextChanged(ctx);
+                    // TODO(b/317414324): Deprecate setIgnoreDisplayTouches
+                    if (ctx.operationState != null && ctx.operationState.getTag()
+                            == OperationState.fingerprintOperationState) {
+                        session.getSession().setIgnoreDisplayTouches(ctx.operationState
+                                .getFingerprintOperationState().isHardwareIgnoringTouches);
+                    }
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Unable to notify context changed", e);
                 }

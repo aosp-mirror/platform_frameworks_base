@@ -21,6 +21,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.Display.TYPE_EXTERNAL;
 import static android.view.Display.TYPE_OVERLAY;
+import static android.view.Display.TYPE_VIRTUAL;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
@@ -1794,18 +1795,34 @@ public class DisplayRotation {
         }
     }
 
+    @VisibleForTesting
+    int getDemoUserRotationOverride() {
+        return SystemProperties.getInt("persist.demo.userrotation", Surface.ROTATION_0);
+    }
+
+    @VisibleForTesting
+    @NonNull
+    String getDemoUserRotationPackage() {
+        return SystemProperties.get("persist.demo.userrotation.package_name");
+    }
+
     @Surface.Rotation
     private int getUserRotationOverride() {
-        final int userRotationOverride = SystemProperties.getInt("persist.demo.userrotation",
-                Surface.ROTATION_0);
+        final int userRotationOverride = getDemoUserRotationOverride();
         if (userRotationOverride == Surface.ROTATION_0) {
             return userRotationOverride;
         }
 
-        final var display = mDisplayContent.mDisplay;
+        final var display = mDisplayContent.getDisplay();
         if (display.getType() == TYPE_EXTERNAL || display.getType() == TYPE_OVERLAY) {
-            // TODO b/329442350 add chromecast virtual displays here
             return userRotationOverride;
+        }
+
+        if (display.getType() == TYPE_VIRTUAL) {
+            final var packageName = getDemoUserRotationPackage();
+            if (!packageName.isEmpty() && packageName.equals(display.getOwnerPackageName())) {
+                return userRotationOverride;
+            }
         }
 
         return Surface.ROTATION_0;
