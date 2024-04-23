@@ -47,7 +47,7 @@ abstract class SpaDialogWindowTypeActivity : ComponentActivity() {
         super.finish()
     }
 
-    abstract val dialogWindowType: Int?
+    abstract fun getDialogWindowType(): Int?
 
     @Composable
     abstract fun Content()
@@ -67,7 +67,7 @@ abstract class SpaDialogWindowTypeActivity : ComponentActivity() {
         }
 
         override fun onCreate(savedInstanceState: Bundle?) {
-            dialogWindowType?.let { window?.setType(it) }
+            getDialogWindowType()?.let { window?.setType(it) }
             super.onCreate(savedInstanceState)
         }
     }
