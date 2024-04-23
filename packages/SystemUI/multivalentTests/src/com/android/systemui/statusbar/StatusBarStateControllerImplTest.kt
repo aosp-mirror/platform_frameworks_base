@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,60 +19,32 @@
 package com.android.systemui.statusbar
 
 import android.animation.ObjectAnimator
-import android.testing.AndroidTestingRunner
+import android.platform.test.flag.junit.FlagsParameterization
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
-import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
-import com.android.systemui.classifier.FalsingCollectorFake
-import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
-import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
-import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.flags.parameterizeSceneContainerFlag
 import com.android.systemui.jank.interactionJankMonitor
-import com.android.systemui.keyguard.data.repository.FakeCommandQueue
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
-import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor
-import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.fromGoneTransitionInteractor
-import com.android.systemui.keyguard.domain.interactor.fromLockscreenTransitionInteractor
-import com.android.systemui.keyguard.domain.interactor.fromPrimaryBouncerTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
-import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.power.data.repository.FakePowerRepository
-import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.shade.LargeScreenHeaderHelper
-import com.android.systemui.shade.data.repository.FakeShadeRepository
-import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl
-import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl
-import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository
-import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
-import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
-import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
-import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupRepository
-import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.testKosmos
 import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -87,25 +59,33 @@ import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import org.mockito.Mockito.`when` as whenever
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @TestableLooper.RunWithLooper
-class StatusBarStateControllerImplTest : SysuiTestCase() {
+class StatusBarStateControllerImplTest(flags: FlagsParameterization?) : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private lateinit var shadeInteractor: ShadeInteractor
-    private lateinit var fromLockscreenTransitionInteractor: FromLockscreenTransitionInteractor
-    private lateinit var fromPrimaryBouncerTransitionInteractor:
-        FromPrimaryBouncerTransitionInteractor
+
     private val mockDarkAnimator = mock<ObjectAnimator>()
-    private val deviceEntryUdfpsInteractor = mock<DeviceEntryUdfpsInteractor>()
-    private val largeScreenHeaderHelper = mock<LargeScreenHeaderHelper>()
 
     private lateinit var underTest: StatusBarStateControllerImpl
     private lateinit var uiEventLogger: UiEventLoggerFake
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return parameterizeSceneContainerFlag()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags!!)
+    }
 
     @Before
     fun setUp() {
@@ -118,7 +98,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
                     uiEventLogger,
                     kosmos.interactionJankMonitor,
                     JavaAdapter(testScope.backgroundScope),
-                    { shadeInteractor },
+                    { kosmos.shadeInteractor },
                     { kosmos.deviceUnlockedInteractor },
                     { kosmos.sceneInteractor },
                     { kosmos.keyguardClockInteractor },
@@ -127,59 +107,6 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
                     return mockDarkAnimator
                 }
             }
-
-        val powerInteractor =
-            PowerInteractor(FakePowerRepository(), FalsingCollectorFake(), mock(), underTest)
-        val keyguardRepository = FakeKeyguardRepository()
-        val keyguardTransitionRepository = FakeKeyguardTransitionRepository()
-        val featureFlags = FakeFeatureFlagsClassic()
-        val shadeRepository = FakeShadeRepository()
-        val configurationRepository = FakeConfigurationRepository()
-        val keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor
-        fromLockscreenTransitionInteractor = kosmos.fromLockscreenTransitionInteractor
-        fromPrimaryBouncerTransitionInteractor = kosmos.fromPrimaryBouncerTransitionInteractor
-
-        val keyguardInteractor =
-            KeyguardInteractor(
-                keyguardRepository,
-                FakeCommandQueue(),
-                powerInteractor,
-                FakeKeyguardBouncerRepository(),
-                ConfigurationInteractor(configurationRepository),
-                shadeRepository,
-                keyguardTransitionInteractor,
-                { kosmos.sceneInteractor },
-                { kosmos.fromGoneTransitionInteractor },
-                { kosmos.sharedNotificationContainerInteractor },
-                testScope,
-            )
-
-        whenever(deviceEntryUdfpsInteractor.isUdfpsSupported).thenReturn(MutableStateFlow(false))
-        shadeInteractor =
-            ShadeInteractorImpl(
-                testScope.backgroundScope,
-                kosmos.deviceProvisioningInteractor,
-                FakeDisableFlagsRepository(),
-                mock(),
-                keyguardRepository,
-                keyguardTransitionInteractor,
-                powerInteractor,
-                FakeUserSetupRepository(),
-                mock(),
-                ShadeInteractorLegacyImpl(
-                    testScope.backgroundScope,
-                    keyguardRepository,
-                    SharedNotificationContainerInteractor(
-                        configurationRepository,
-                        mContext,
-                        ResourcesSplitShadeStateController(),
-                        keyguardInteractor,
-                        deviceEntryUdfpsInteractor,
-                        largeScreenHeaderHelperLazy = { largeScreenHeaderHelper }
-                    ),
-                    shadeRepository,
-                )
-            )
     }
 
     @Test

@@ -24,6 +24,7 @@ import com.android.systemui.Flags.FLAG_EXAMPLE_FLAG
 import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.andSceneContainer
+import com.android.systemui.flags.parameterizeSceneContainerFlag
 import com.google.common.truth.Truth
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,6 +36,14 @@ internal class SceneContainerFlagParameterizationTest : SysuiTestCase() {
     @Test
     fun emptyAndSceneContainer() {
         val result = FlagsParameterization.allCombinationsOf().andSceneContainer()
+        Truth.assertThat(result).hasSize(2)
+        Truth.assertThat(result[0].mOverrides[FLAG_SCENE_CONTAINER]).isFalse()
+        Truth.assertThat(result[1].mOverrides[FLAG_SCENE_CONTAINER]).isTrue()
+    }
+
+    @Test
+    fun parameterizeSceneContainer() {
+        val result = parameterizeSceneContainerFlag()
         Truth.assertThat(result).hasSize(2)
         Truth.assertThat(result[0].mOverrides[FLAG_SCENE_CONTAINER]).isFalse()
         Truth.assertThat(result[1].mOverrides[FLAG_SCENE_CONTAINER]).isTrue()

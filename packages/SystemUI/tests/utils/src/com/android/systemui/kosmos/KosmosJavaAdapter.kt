@@ -30,8 +30,8 @@ import com.android.systemui.communal.data.repository.fakeCommunalRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryUdfpsInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
-import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.globalactions.domain.interactor.globalActionsInteractor
 import com.android.systemui.haptics.qs.qsLongPressEffect
 import com.android.systemui.jank.interactionJankMonitor
@@ -50,6 +50,8 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.shared.model.sceneDataSource
 import com.android.systemui.settings.brightness.domain.interactor.brightnessMirrorShowingInteractor
+import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.shadeController
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 import com.android.systemui.statusbar.phone.screenOffAnimationController
@@ -69,7 +71,6 @@ class KosmosJavaAdapter(
 
     val testDispatcher by lazy { kosmos.testDispatcher }
     val testScope by lazy { kosmos.testScope }
-    val fakeFeatureFlags by lazy { kosmos.fakeFeatureFlagsClassic }
     val fakeExecutor by lazy { kosmos.fakeExecutor }
     val fakeExecutorHandler by lazy { kosmos.fakeExecutorHandler }
     val configurationRepository by lazy { kosmos.fakeConfigurationRepository }
@@ -91,6 +92,7 @@ class KosmosJavaAdapter(
     val falsingCollector by lazy { kosmos.falsingCollector }
     val powerInteractor by lazy { kosmos.powerInteractor }
     val deviceEntryInteractor by lazy { kosmos.deviceEntryInteractor }
+    val deviceEntryUdfpsInteractor by lazy { kosmos.deviceEntryUdfpsInteractor }
     val deviceUnlockedInteractor by lazy { kosmos.deviceUnlockedInteractor }
     val communalInteractor by lazy { kosmos.communalInteractor }
     val sceneContainerPlugin by lazy { kosmos.sceneContainerPlugin }
@@ -110,6 +112,8 @@ class KosmosJavaAdapter(
     val brightnessMirrorShowingInteractor by lazy { kosmos.brightnessMirrorShowingInteractor }
     val qsLongPressEffect by lazy { kosmos.qsLongPressEffect }
     val shadeController by lazy { kosmos.shadeController }
+    val shadeRepository by lazy { kosmos.shadeRepository }
+    val shadeInteractor by lazy { kosmos.shadeInteractor }
 
     init {
         kosmos.applicationContext = testCase.context
