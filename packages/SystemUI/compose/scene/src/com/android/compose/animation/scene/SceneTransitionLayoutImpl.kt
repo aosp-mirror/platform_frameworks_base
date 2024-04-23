@@ -251,8 +251,8 @@ private data class LayoutElement(private val layoutImpl: SceneTransitionLayoutIm
 
 private class LayoutNode(var layoutImpl: SceneTransitionLayoutImpl) :
     Modifier.Node(), ApproachLayoutModifierNode {
-    override fun isMeasurementApproachComplete(lookaheadSize: IntSize): Boolean {
-        return layoutImpl.state.currentTransition == null
+    override fun isMeasurementApproachInProgress(lookaheadSize: IntSize): Boolean {
+        return layoutImpl.state.isTransitioning()
     }
 
     @ExperimentalComposeUiApi
