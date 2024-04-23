@@ -814,3 +814,10 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "enforce_brightness_base_user_restriction"
+    namespace: "systemui"
+    description: "Enforce BaseUserRestriction for DISALLOW_CONFIG_BRIGHTNESS."
+    bug: "329205638"
+}
