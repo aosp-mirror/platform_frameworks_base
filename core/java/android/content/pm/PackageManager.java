@@ -62,6 +62,7 @@ import android.content.pm.dex.ArtManager;
 import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
 import android.graphics.drawable.AdaptiveIconDrawable;
@@ -11742,5 +11743,18 @@ public abstract class PackageManager {
             @NonNull Function<XmlResourceParser, T> parserFunction) throws IOException {
         throw new UnsupportedOperationException(
                 "parseAndroidManifest not implemented in subclass");
+    }
+
+    /**
+     * @param info    The {@link ServiceInfo} to pull the attributes from.
+     * @param name    The name of the Xml metadata where the attributes are stored.
+     * @param rootTag The root tag of the attributes.
+     * @return A {@link TypedArray} of attributes if successful, {@code null} otherwise.
+     * @hide
+     */
+    public TypedArray extractPackageItemInfoAttributes(PackageItemInfo info, String name,
+            String rootTag, int[] attributes) {
+        throw new UnsupportedOperationException(
+                "parseServiceMetadata not implemented in subclass");
     }
 }

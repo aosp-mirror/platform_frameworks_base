@@ -19,10 +19,20 @@ package android.app;
 import static android.os.storage.VolumeInfo.STATE_MOUNTED;
 import static android.os.storage.VolumeInfo.STATE_UNMOUNTED;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageItemInfo;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.content.res.XmlResourceParser;
+import android.os.Bundle;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.platform.test.annotations.Presubmit;
@@ -35,9 +45,11 @@ import com.android.internal.annotations.VisibleForTesting;
 import junit.framework.TestCase;
 
 import org.mockito.Mockito;
+import org.xmlpull.v1.XmlPullParser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 @Presubmit
@@ -93,9 +105,11 @@ public class ApplicationPackageManagerTest extends TestCase {
     private static final class MockedApplicationPackageManager extends ApplicationPackageManager {
         private boolean mForceAllowOnExternal = false;
         private boolean mAllow3rdPartyOnInternal = true;
+        private HashMap<ApplicationInfo, Resources> mResourcesMap;
 
         public MockedApplicationPackageManager() {
             super(null, null);
+            mResourcesMap = new HashMap<ApplicationInfo, Resources>();
         }
 
         public void setForceAllowOnExternal(boolean forceAllowOnExternal) {
@@ -104,6 +118,10 @@ public class ApplicationPackageManagerTest extends TestCase {
 
         public void setAllow3rdPartyOnInternal(boolean allow3rdPartyOnInternal) {
             mAllow3rdPartyOnInternal = allow3rdPartyOnInternal;
+        }
+
+        public void setResourcesForApplication(ApplicationInfo info, Resources resources) {
+            mResourcesMap.put(info, resources);
         }
 
         @Override
@@ -121,6 +139,16 @@ public class ApplicationPackageManagerTest extends TestCase {
         protected @NonNull List<VolumeInfo> getPackageCandidateVolumes(ApplicationInfo app,
                 StorageManager storageManager, IPackageManager pm) {
             return super.getPackageCandidateVolumes(app, storageManager, pm);
+        }
+
+        @Override
+        public Resources getResourcesForApplication(ApplicationInfo app)
+                throws NameNotFoundException {
+            if (mResourcesMap.containsKey(app)) {
+                return mResourcesMap.get(app);
+            }
+
+            return super.getResourcesForApplication(app);
         }
     }
 
@@ -253,5 +281,74 @@ public class ApplicationPackageManagerTest extends TestCase {
             candidates = appPkgMgr.getPackageCandidateVolumes(appInfo, storageManager, pm);
             verifyReturnedVolumes(candidates, sAdoptedVol);
         }
+    }
+
+    public void testExtractPackageItemInfoAttributes_noServiceInfo() {
+        final MockedApplicationPackageManager appPkgMgr = new MockedApplicationPackageManager();
+        assertThat(appPkgMgr.extractPackageItemInfoAttributes(null, null, null,
+                new int[]{})).isNull();
+    }
+
+    public void testExtractPackageItemInfoAttributes_noMetaData() {
+        final MockedApplicationPackageManager appPkgMgr = new MockedApplicationPackageManager();
+        final PackageItemInfo packageItemInfo = Mockito.mock(PackageItemInfo.class);
+        assertThat(appPkgMgr.extractPackageItemInfoAttributes(packageItemInfo, null, null,
+                new int[]{})).isNull();
+    }
+
+    public void testExtractPackageItemInfoAttributes_noParser() {
+        final MockedApplicationPackageManager appPkgMgr = new MockedApplicationPackageManager();
+        final PackageItemInfo packageItemInfo = Mockito.mock(PackageItemInfo.class);
+        final ApplicationInfo applicationInfo = Mockito.mock(ApplicationInfo.class);
+        when(packageItemInfo.getApplicationInfo()).thenReturn(applicationInfo);
+        assertThat(appPkgMgr.extractPackageItemInfoAttributes(packageItemInfo, null, null,
+                new int[]{})).isNull();
+    }
+
+    public void testExtractPackageItemInfoAttributes_noMetaDataXml() {
+        final MockedApplicationPackageManager appPkgMgr = new MockedApplicationPackageManager();
+        final PackageItemInfo packageItemInfo = Mockito.mock(PackageItemInfo.class);
+        final ApplicationInfo applicationInfo = Mockito.mock(ApplicationInfo.class);
+        when(packageItemInfo.getApplicationInfo()).thenReturn(applicationInfo);
+        when(packageItemInfo.loadXmlMetaData(any(), any())).thenReturn(null);
+        assertThat(appPkgMgr.extractPackageItemInfoAttributes(packageItemInfo, null, null,
+                new int[]{})).isNull();
+    }
+
+    public void testExtractPackageItemInfoAttributes_nonMatchingRootTag() throws Exception {
+        final String rootTag = "rootTag";
+        final MockedApplicationPackageManager appPkgMgr = new MockedApplicationPackageManager();
+        final PackageItemInfo packageItemInfo = Mockito.mock(PackageItemInfo.class);
+        final ApplicationInfo applicationInfo = Mockito.mock(ApplicationInfo.class);
+        final XmlResourceParser parser = Mockito.mock(XmlResourceParser.class);
+
+        when(packageItemInfo.getApplicationInfo()).thenReturn(applicationInfo);
+        packageItemInfo.metaData = new Bundle();
+        when(packageItemInfo.loadXmlMetaData(any(), any())).thenReturn(parser);
+        when(parser.next()).thenReturn(XmlPullParser.END_DOCUMENT);
+        when(parser.getName()).thenReturn(rootTag + "0");
+        assertThat(appPkgMgr.extractPackageItemInfoAttributes(packageItemInfo, null, rootTag,
+                new int[]{})).isNull();
+    }
+
+    public void testExtractPackageItemInfoAttributes_successfulExtraction() throws Exception {
+        final String rootTag = "rootTag";
+        final MockedApplicationPackageManager appPkgMgr = new MockedApplicationPackageManager();
+        final PackageItemInfo packageItemInfo = Mockito.mock(PackageItemInfo.class);
+        final ApplicationInfo applicationInfo = Mockito.mock(ApplicationInfo.class);
+        final XmlResourceParser parser = Mockito.mock(XmlResourceParser.class);
+        final Resources resources = Mockito.mock(Resources.class);
+        final TypedArray attributes = Mockito.mock(TypedArray.class);
+
+        when(packageItemInfo.getApplicationInfo()).thenReturn(applicationInfo);
+        packageItemInfo.metaData = new Bundle();
+        when(packageItemInfo.loadXmlMetaData(any(), any())).thenReturn(parser);
+        when(parser.next()).thenReturn(XmlPullParser.END_DOCUMENT);
+        when(parser.getName()).thenReturn(rootTag);
+        when(resources.obtainAttributes(any(), any())).thenReturn(attributes);
+        appPkgMgr.setResourcesForApplication(applicationInfo, resources);
+
+        assertThat(appPkgMgr.extractPackageItemInfoAttributes(packageItemInfo, null, rootTag,
+                new int[]{})).isEqualTo(attributes);
     }
 }
