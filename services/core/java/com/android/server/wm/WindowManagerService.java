@@ -44,6 +44,7 @@ import static android.os.Process.myPid;
 import static android.os.Process.myUid;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.permission.flags.Flags.sensitiveContentImprovements;
+import static android.permission.flags.Flags.sensitiveContentMetricsBugfix;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
@@ -113,6 +114,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STARTING_WIND
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_MOVEMENT;
 import static com.android.internal.protolog.ProtoLogGroup.WM_ERROR;
 import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
+import static com.android.internal.util.FrameworkStatsLog.SENSITIVE_NOTIFICATION_APP_PROTECTION_APPLIED;
 import static com.android.internal.util.LatencyTracker.ACTION_ROTATE_SCREEN;
 import static com.android.server.LockGuard.INDEX_WINDOW;
 import static com.android.server.LockGuard.installLock;
@@ -340,6 +342,7 @@ import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.view.WindowManagerPolicyThread;
 import com.android.server.AnimationThread;
@@ -1108,6 +1111,9 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     SystemPerformanceHinter mSystemPerformanceHinter;
+
+    @GuardedBy("mGlobalLock")
+    private long mSensitiveContentProtectionSessionId = 0;
 
     @GuardedBy("mGlobalLock")
     final SensitiveContentPackages mSensitiveContentPackages = new SensitiveContentPackages();
@@ -8740,6 +8746,16 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
+        public void setBlockScreenCaptureForAppsSessionId(long sessionId) {
+            synchronized (mGlobalLock) {
+                if (sensitiveContentMetricsBugfix()
+                        && mSensitiveContentProtectionSessionId != sessionId) {
+                    mSensitiveContentProtectionSessionId = sessionId;
+                }
+            }
+        }
+
+        @Override
         public void addBlockScreenCaptureForApps(ArraySet<PackageInfo> packageInfos) {
             synchronized (mGlobalLock) {
                 boolean modified =
@@ -10203,6 +10219,15 @@ public class WindowManagerService extends IWindowManager.Stub
                                 Toast.LENGTH_SHORT)
                         .show();
             });
+            // If blocked due to notification protection (null window token) log protection applied
+            if (sensitiveContentMetricsBugfix()
+                    && mSensitiveContentPackages
+                    .shouldBlockScreenCaptureForApp(w.getOwningPackage(), uid, null)) {
+                FrameworkStatsLog.write(
+                        SENSITIVE_NOTIFICATION_APP_PROTECTION_APPLIED,
+                        mSensitiveContentProtectionSessionId,
+                        uid);
+            }
         }
     }
 }
