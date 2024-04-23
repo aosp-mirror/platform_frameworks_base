@@ -25,12 +25,12 @@ import android.os.UserHandle
 import android.util.Log
 import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.BroadcastDispatcher
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.demomode.DemoMode.ACTION_DEMO
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.util.Assert
 import com.android.systemui.util.settings.GlobalSettings
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import java.io.PrintWriter
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -209,20 +209,18 @@ constructor(
         pw.println("DemoModeController state -")
         pw.println("  isInDemoMode=$isInDemoMode")
         pw.println("  isDemoModeAllowed=$isAvailable")
-        pw.print("  receivers=[")
-        val copy: List<DemoModeCommandReceiver>
+        val copy: List<DemoMode>
         synchronized(this) { copy = receivers.toList() }
-        copy.forEach { recv -> pw.print(" ${recv.javaClass.simpleName}") }
-        pw.println(" ]")
+
+        // List of all receivers
+        pw.println("  receivers=[${copy.joinToString(", ") { it.logName() }}]")
+
+        // Print out the map of COMMAND -> list of receivers for that command
         pw.println("  receiverMap= [")
-        receiverMap.keys.forEach { command ->
-            pw.print("    $command : [")
-            val recvs =
-                receiverMap[command]!!
-                    .map { receiver -> receiver.javaClass.simpleName }
-                    .joinToString(",")
-            pw.println("$recvs ]")
+        receiverMap.entries.forEach { (comm, recv) ->
+            pw.println("    $comm : [${recv.joinToString(", ") {it.logName()}}]")
         }
+        pw.println(" ]")
     }
 
     private val tracker =
