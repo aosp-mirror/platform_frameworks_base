@@ -20,6 +20,7 @@ import android.credentials.flags.Flags.credmanBiometricApiEnabled
 import android.credentials.flags.Flags.selectorUiImprovementsEnabled
 import android.graphics.drawable.Drawable
 import android.hardware.biometrics.BiometricPrompt
+import android.os.CancellationSignal
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
@@ -161,9 +162,11 @@ fun GetCredentialScreen(
                                 fallbackToOriginalFlow =
                                 viewModel::fallbackFromBiometricToNormalFlow,
                                 getBiometricPromptState =
-                                viewModel::getBiometricPromptState,
+                                viewModel::getBiometricPromptStateStatus,
                                 onBiometricPromptStateChange =
-                                viewModel::onBiometricPromptStateChange
+                                viewModel::onBiometricPromptStateChange,
+                                getBiometricCancellationSignal =
+                                viewModel::getBiometricCancellationSignal
                             )
                         } else if (credmanBiometricApiEnabled() &&
                                 getCredentialUiState.currentScreenState
@@ -256,6 +259,7 @@ internal fun BiometricSelectionPage(
     fallbackToOriginalFlow: (BiometricFlowType) -> Unit,
     getBiometricPromptState: () -> BiometricPromptState,
     onBiometricPromptStateChange: (BiometricPromptState) -> Unit,
+    getBiometricCancellationSignal: () -> CancellationSignal,
 ) {
     if (biometricEntry == null) {
         fallbackToOriginalFlow(BiometricFlowType.GET)
@@ -273,7 +277,8 @@ internal fun BiometricSelectionPage(
         getRequestDisplayInfo = requestDisplayInfo,
         getProviderInfoList = providerInfoList,
         getProviderDisplayInfo = providerDisplayInfo,
-        onBiometricFailureFallback = fallbackToOriginalFlow
+        onBiometricFailureFallback = fallbackToOriginalFlow,
+        getBiometricCancellationSignal = getBiometricCancellationSignal
     )
 }
 

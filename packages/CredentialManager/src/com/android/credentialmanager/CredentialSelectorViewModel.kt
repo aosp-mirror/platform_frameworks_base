@@ -19,6 +19,7 @@ package com.android.credentialmanager
 import android.app.Activity
 import android.hardware.biometrics.BiometricPrompt
 import android.hardware.biometrics.BiometricPrompt.AuthenticationResult
+import android.os.CancellationSignal
 import android.os.IBinder
 import android.text.TextUtils
 import android.util.Log
@@ -232,8 +233,13 @@ class CredentialSelectorViewModel(
         authResult: BiometricPrompt.AuthenticationResult? = null,
         authError: BiometricError? = null,
     ) {
-        Log.d(Constants.LOG_TAG, "credential selected: {provider=${entry.providerId}" +
-            ", key=${entry.entryKey}, subkey=${entry.entrySubkey}}")
+        if (authError == null) {
+            Log.d(Constants.LOG_TAG, "credential selected: {provider=${entry.providerId}" +
+                        ", key=${entry.entryKey}, subkey=${entry.entrySubkey}}")
+        } else {
+                Log.d(Constants.LOG_TAG, "Biometric flow error: ${authError.errorCode} " +
+                        "propagating to provider, message: ${authError.errorMessage}.")
+        }
         uiState = if (entry.pendingIntent != null) {
             uiState.copy(
                 selectedEntry = entry,
@@ -385,9 +391,15 @@ class CredentialSelectorViewModel(
         val providerId = selectedEntry.providerId
         val entryKey = selectedEntry.entryKey
         val entrySubkey = selectedEntry.entrySubkey
-        Log.d(
-            Constants.LOG_TAG, "Option selected for entry: " +
-            " {provider=$providerId, key=$entryKey, subkey=$entrySubkey")
+        if (authError == null) {
+            Log.d(
+                Constants.LOG_TAG, "Option selected for entry: " +
+                        " {provider=$providerId, key=$entryKey, subkey=$entrySubkey"
+            )
+        } else {
+            Log.d(Constants.LOG_TAG, "Biometric flow error: ${authError.errorCode} " +
+                    "propagating to provider, message: ${authError.errorMessage}.")
+        }
         if (selectedEntry.pendingIntent != null) {
             uiState = uiState.copy(
                 selectedEntry = selectedEntry,
@@ -424,6 +436,33 @@ class CredentialSelectorViewModel(
     /**************************************************************************/
 
     /**
+     * Cancels the biometric prompt's cancellation signal. Should only be called when the credential
+     * manager ui receives a developer cancellation signal. If the prompt is already done, we do
+     * not allow a cancellation, given the UI cancellation will be caught by the backend. We also
+     * set the biometricStatus to CANCELED, so that only in this case, we do *not* propagate the
+     * ERROR_CANCELED when a developer cancellation signal is the root cause.
+     */
+    fun onDeveloperCancellationReceivedForBiometricPrompt() {
+        val biometricCancellationSignal = uiState.biometricState.biometricCancellationSignal
+        if (!biometricCancellationSignal.isCanceled && uiState.biometricState.biometricStatus
+            != BiometricPromptState.COMPLETE) {
+            uiState = uiState.copy(
+                biometricState = uiState.biometricState.copy(
+                    biometricStatus = BiometricPromptState.CANCELED
+                )
+            )
+            biometricCancellationSignal.cancel()
+        }
+    }
+
+    /**
+     * Retrieve the biometric prompt's cancellation signal (e.g. to pass into the 'authenticate'
+     * API).
+     */
+    fun getBiometricCancellationSignal(): CancellationSignal =
+        uiState.biometricState.biometricCancellationSignal
+
+    /**
      * This allows falling back from the biometric prompt screen to the normal get flow by applying
      * a reset to all necessary states involved in the fallback.
      */
@@ -450,9 +489,9 @@ class CredentialSelectorViewModel(
     }
 
     /**
-     * This returns the present biometric state.
+     * This returns the present biometric prompt state's status.
      */
-    fun getBiometricPromptState(): BiometricPromptState =
+    fun getBiometricPromptStateStatus(): BiometricPromptState =
         uiState.biometricState.biometricStatus
 
     /**************************************************************************/
