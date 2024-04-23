@@ -16,6 +16,9 @@
 
 package com.android.server.devicepolicy;
 
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -185,6 +188,9 @@ final class PolicyEnforcerCallbacks {
         }
     }
 
+    // TODO: when a local policy exists for a user, this callback will be invoked for this user
+    // individually as well as for USER_ALL. This can be optimized by separating local and global
+    // enforcement in the policy engine.
     static boolean setUserControlDisabledPackages(
             @Nullable Set<String> packages, Context context, int userId, PolicyKey policyKey) {
         Binder.withCleanCallingIdentity(() -> {
@@ -201,18 +207,33 @@ final class PolicyEnforcerCallbacks {
                     return;
                 }
                 final AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
-                for (var pkg : packages) {
-                    final var appInfo = pmi.getApplicationInfo(pkg,
-                            PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                            Process.myUid(), userId);
-                    if (appInfo != null) {
-                        DevicePolicyManagerService.setBgUsageAppOp(appOpsManager, appInfo);
-                    }
-                }
+                resolveUsers(userId).forEach(
+                        user -> setBgUsageAppOp(packages, pmi, user, appOpsManager));
             }
         });
         return true;
+    }
+
+    /** Handles USER_ALL expanding it into the list of all intact users. */
+    private static List<Integer> resolveUsers(int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            UserManagerInternal userManager = LocalServices.getService(UserManagerInternal.class);
+            return userManager.getUsers(/* excludeDying= */ true)
+                    .stream().map(ui -> ui.id).toList();
+        } else {
+            return List.of(userId);
+        }
+    }
+
+    private static void setBgUsageAppOp(Set<String> packages, PackageManagerInternal pmi,
+            int userId, AppOpsManager appOpsManager) {
+        for (var pkg : packages) {
+            int packageFlags = MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
+            final var appInfo = pmi.getApplicationInfo(pkg, packageFlags, Process.myUid(), userId);
+            if (appInfo != null) {
+                DevicePolicyManagerService.setBgUsageAppOp(appOpsManager, appInfo);
+            }
+        }
     }
 
     static boolean addPersistentPreferredActivity(
