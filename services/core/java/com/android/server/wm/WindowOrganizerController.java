@@ -69,7 +69,6 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANI
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerService.enforceTaskPermission;
-import static com.android.server.wm.ActivityTaskManagerService.isPip2ExperimentEnabled;
 import static com.android.server.wm.ActivityTaskSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_PINNED_TASK;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
@@ -838,8 +837,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     private int applyTaskChanges(Task tr, WindowContainerTransaction.Change c) {
-        final boolean wasPrevFocusableAndVisible = tr.isFocusableAndVisible();
-
         int effects = applyChanges(tr, c);
         final SurfaceControl.Transaction t = c.getBoundsChangeTransaction();
 
@@ -885,28 +882,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 boolean canEnterPip = activity.checkEnterPictureInPictureState(
                         "applyTaskChanges", true /* beforeStopping */);
                 if (canEnterPip) {
-                    mService.mTaskSupervisor.beginDeferResume();
-                    try {
-                        canEnterPip = mService.mActivityClientController
-                                .requestPictureInPictureMode(activity);
-                    } finally {
-                        mService.mTaskSupervisor.endDeferResume();
-                        if (canEnterPip && !isPip2ExperimentEnabled()) {
-                            // Wait until the transaction is applied to only resume once.
-                            effects |= TRANSACT_EFFECTS_LIFECYCLE;
-                        }
-                    }
+                    canEnterPip = mService.mActivityClientController
+                            .requestPictureInPictureMode(activity);
                 }
                 if (!canEnterPip) {
                     // Restore the flag to its previous state when the activity cannot enter PIP.
                     activity.supportsEnterPipOnTaskSwitch = lastSupportsEnterPipOnTaskSwitch;
                 }
             }
-        }
-
-        // Activity in this Task may resume/pause when enter/exit pip.
-        if (wasPrevFocusableAndVisible != tr.isFocusableAndVisible()) {
-            effects |= TRANSACT_EFFECTS_LIFECYCLE;
         }
 
         return effects;
