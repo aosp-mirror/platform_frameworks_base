@@ -1671,7 +1671,7 @@ public class DatabaseUtils {
             return null;
         }
         final int eos = Math.min(n+3, end);
-        return sql.substring(n, eos);
+        return sql.substring(n, eos).toUpperCase(Locale.ROOT);
     }
 
     /**
