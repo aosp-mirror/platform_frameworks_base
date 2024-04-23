@@ -2313,6 +2313,18 @@ public class UserManagerService extends IUserManager.Stub {
         return userTypeDetails.getLabel(userIndex);
     }
 
+    @Override
+    public @NonNull int getProfileAccessibilityLabelResId(@UserIdInt int userId) {
+        checkQueryOrInteractPermissionIfCallerInOtherProfileGroup(userId,
+                "getProfileAccessibilityLabelResId");
+        final UserInfo userInfo = getUserInfoNoChecks(userId);
+        final UserTypeDetails userTypeDetails = getUserTypeDetails(userInfo);
+        if (userInfo == null || userTypeDetails == null) {
+            return Resources.ID_NULL;
+        }
+        return userTypeDetails.getAccessibilityString();
+    }
+
     public boolean isProfile(@UserIdInt int userId) {
         checkQueryOrInteractPermissionIfCallerInOtherProfileGroup(userId, "isProfile");
         return isProfileUnchecked(userId);

@@ -237,6 +237,8 @@ public final class UserManagerTest {
         assertThat(mainUserId).isEqualTo(parentProfileInfo.id);
         removeUser(cloneProfileUser.id);
         assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
+        assertThat(mUserManager.getProfileAccessibilityString(cloneProfileUser.id)).isEqualTo(
+                Resources.getSystem().getString(userTypeDetails.getAccessibilityString()));
     }
 
     @Test
@@ -276,6 +278,9 @@ public final class UserManagerTest {
         assertWithMessage("Communal profile not visible").that(umCommunal.isUserVisible()).isTrue();
         switchUser(originalCurrent);
         assertWithMessage("Communal profile not visible").that(umCommunal.isUserVisible()).isTrue();
+        assertThat(mUserManager.getProfileAccessibilityString(communal.getIdentifier()))
+                .isEqualTo(Resources.getSystem()
+                        .getString(userTypeDetails.getAccessibilityString()));
     }
 
     @Test
@@ -372,6 +377,18 @@ public final class UserManagerTest {
         assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
         assertThat(profileUM.getProfileLabel()).isEqualTo(
                 Resources.getSystem().getString(userTypeDetails.getLabel(0)));
+        assertThat(mUserManager.getProfileAccessibilityString(privateProfileUser.id)).isEqualTo(
+                Resources.getSystem().getString(userTypeDetails.getAccessibilityString()));
+    }
+
+    @Test
+    public void testGetProfileAccessibilityString_throwsExceptionForNonProfileUser() {
+        UserInfo user1 = createUser("Guest 1", UserInfo.FLAG_GUEST);
+        assertThat(user1).isNotNull();
+        assertThrows(Resources.NotFoundException.class,
+                () -> mUserManager.getProfileAccessibilityString(user1.id));
+        assertThrows(Resources.NotFoundException.class,
+                () -> mUserManager.getProfileAccessibilityString(UserHandle.USER_SYSTEM));
     }
 
     @MediumTest
@@ -1003,6 +1020,8 @@ public final class UserManagerTest {
                 "android", 0, asHandle(userId)));
         assertThat(userManagerForUser.isUserOfType(userTypeDetails.getName())).isTrue();
         assertThat(userManagerForUser.isProfile()).isEqualTo(userTypeDetails.isProfile());
+        assertThat(mUserManager.getProfileAccessibilityString(managedProfileUser.id)).isEqualTo(
+                Resources.getSystem().getString(userTypeDetails.getAccessibilityString()));
     }
 
     /** Test that UserManager returns the correct UserProperties for a new managed profile. */

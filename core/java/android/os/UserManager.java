@@ -18,6 +18,7 @@ package android.os;
 
 import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_COLORED;
 import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_BADGED_LABEL;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.STATUS_BAR_WORK_ICON_ACCESSIBILITY;
 import static android.app.admin.DevicePolicyResources.UNDEFINED;
 
 import android.Manifest;
@@ -5950,6 +5951,43 @@ public class UserManager {
             return Resources.getSystem().getString(resourceId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the string used to represent the profile associated with the given userId. This
+     * string typically includes the profile name used by accessibility services like TalkBack.
+     * @hide
+     *
+     * @return String representing the accessibility label for the given profile user.
+     *
+     * @throws android.content.res.Resources.NotFoundException if the user does not have a label
+     * defined.
+     */
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    Manifest.permission.MANAGE_USERS,
+                    Manifest.permission.QUERY_USERS,
+                    Manifest.permission.INTERACT_ACROSS_USERS})
+    public String getProfileAccessibilityString(int userId) {
+        if (isManagedProfile(mUserId)) {
+            DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+            dpm.getResources().getString(
+                    STATUS_BAR_WORK_ICON_ACCESSIBILITY,
+                    () -> getProfileAccessibilityLabel(userId));
+        }
+        return getProfileAccessibilityLabel(userId);
+    }
+
+    private String getProfileAccessibilityLabel(int userId) {
+        try {
+            final int resourceId = mService.getProfileAccessibilityLabelResId(userId);
+            return Resources.getSystem().getString(resourceId);
+        } catch (Resources.NotFoundException nfe) {
+            Log.e(TAG, "Accessibility label not defined for user " + userId);
+            throw nfe;
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
         }
     }
 
