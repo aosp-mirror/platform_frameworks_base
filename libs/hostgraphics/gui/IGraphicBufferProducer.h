@@ -17,9 +17,8 @@
 #ifndef ANDROID_GUI_IGRAPHICBUFFERPRODUCER_H
 #define ANDROID_GUI_IGRAPHICBUFFERPRODUCER_H
 
-#include <utils/RefBase.h>
-
 #include <ui/GraphicBuffer.h>
+#include <utils/RefBase.h>
 
 namespace android {
 
