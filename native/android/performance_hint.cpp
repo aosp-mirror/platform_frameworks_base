@@ -463,6 +463,15 @@ APerformanceHintSession* APerformanceHint_createSession(APerformanceHintManager*
     return manager->createSession(threadIds, size, initialTargetWorkDurationNanos);
 }
 
+APerformanceHintSession* APerformanceHint_createSessionInternal(
+        APerformanceHintManager* manager, const int32_t* threadIds, size_t size,
+        int64_t initialTargetWorkDurationNanos, SessionTag tag) {
+    VALIDATE_PTR(manager)
+    VALIDATE_PTR(threadIds)
+    return manager->createSession(threadIds, size, initialTargetWorkDurationNanos,
+                                  static_cast<hal::SessionTag>(tag));
+}
+
 int64_t APerformanceHint_getPreferredUpdateRateNanos(APerformanceHintManager* manager) {
     VALIDATE_PTR(manager)
     return manager->getPreferredRateNanos();
@@ -486,9 +495,9 @@ void APerformanceHint_closeSession(APerformanceHintSession* session) {
     delete session;
 }
 
-int APerformanceHint_sendHint(void* session, SessionHint hint) {
+int APerformanceHint_sendHint(APerformanceHintSession* session, SessionHint hint) {
     VALIDATE_PTR(session)
-    return reinterpret_cast<APerformanceHintSession*>(session)->sendHint(hint);
+    return session->sendHint(hint);
 }
 
 int APerformanceHint_setThreads(APerformanceHintSession* session, const pid_t* threadIds,
@@ -498,11 +507,10 @@ int APerformanceHint_setThreads(APerformanceHintSession* session, const pid_t* t
     return session->setThreads(threadIds, size);
 }
 
-int APerformanceHint_getThreadIds(void* aPerformanceHintSession, int32_t* const threadIds,
+int APerformanceHint_getThreadIds(APerformanceHintSession* session, int32_t* const threadIds,
                                   size_t* const size) {
-    VALIDATE_PTR(aPerformanceHintSession)
-    return static_cast<APerformanceHintSession*>(aPerformanceHintSession)
-            ->getThreadIds(threadIds, size);
+    VALIDATE_PTR(session)
+    return session->getThreadIds(threadIds, size);
 }
 
 int APerformanceHint_setPreferPowerEfficiency(APerformanceHintSession* session, bool enabled) {
