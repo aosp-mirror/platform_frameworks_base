@@ -207,8 +207,9 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                     return;
                 }
                 ensureRemoteIntelligenceServiceInitialized();
+                int callerUid = Binder.getCallingUid();
                 mRemoteOnDeviceIntelligenceService.run(
-                        service -> service.getFeature(Binder.getCallingUid(), id, featureCallback));
+                        service -> service.getFeature(callerUid, id, featureCallback));
             }
 
             @Override
@@ -227,8 +228,9 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                     return;
                 }
                 ensureRemoteIntelligenceServiceInitialized();
+                int callerUid = Binder.getCallingUid();
                 mRemoteOnDeviceIntelligenceService.run(
-                        service -> service.listFeatures(Binder.getCallingUid(),
+                        service -> service.listFeatures(callerUid,
                                 listFeaturesCallback));
             }
 
@@ -250,8 +252,9 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                     return;
                 }
                 ensureRemoteIntelligenceServiceInitialized();
+                int callerUid = Binder.getCallingUid();
                 mRemoteOnDeviceIntelligenceService.run(
-                        service -> service.getFeatureDetails(Binder.getCallingUid(), feature,
+                        service -> service.getFeatureDetails(callerUid, feature,
                                 featureDetailsCallback));
             }
 
@@ -272,8 +275,9 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                             PersistableBundle.EMPTY);
                 }
                 ensureRemoteIntelligenceServiceInitialized();
+                int callerUid = Binder.getCallingUid();
                 mRemoteOnDeviceIntelligenceService.run(
-                        service -> service.requestFeatureDownload(Binder.getCallingUid(), feature,
+                        service -> service.requestFeatureDownload(callerUid, feature,
                                 wrapCancellationFuture(cancellationSignalFuture),
                                 downloadCallback));
             }
@@ -301,9 +305,9 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                                 PersistableBundle.EMPTY);
                     }
                     ensureRemoteInferenceServiceInitialized();
-
+                    int callerUid = Binder.getCallingUid();
                     result = mRemoteInferenceService.post(
-                            service -> service.requestTokenInfo(Binder.getCallingUid(), feature,
+                            service -> service.requestTokenInfo(callerUid, feature,
                                     request,
                                     wrapCancellationFuture(cancellationSignalFuture),
                                     wrapWithValidation(tokenInfoCallback)));
@@ -340,8 +344,9 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                                 PersistableBundle.EMPTY);
                     }
                     ensureRemoteInferenceServiceInitialized();
+                    int callerUid = Binder.getCallingUid();
                     result = mRemoteInferenceService.post(
-                            service -> service.processRequest(Binder.getCallingUid(), feature,
+                            service -> service.processRequest(callerUid, feature,
                                     request,
                                     requestType,
                                     wrapCancellationFuture(cancellationSignalFuture),
@@ -379,8 +384,9 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                                 PersistableBundle.EMPTY);
                     }
                     ensureRemoteInferenceServiceInitialized();
+                    int callerUid = Binder.getCallingUid();
                     result = mRemoteInferenceService.post(
-                            service -> service.processRequestStreaming(Binder.getCallingUid(),
+                            service -> service.processRequestStreaming(callerUid,
                                     feature,
                                     request, requestType,
                                     wrapCancellationFuture(cancellationSignalFuture),
