@@ -29,7 +29,6 @@ import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.CameraProtectionModule;
-import com.android.systemui.CoreStartable;
 import com.android.systemui.SystemUISecondaryUserService;
 import com.android.systemui.accessibility.AccessibilityModule;
 import com.android.systemui.accessibility.data.repository.AccessibilityRepositoryModule;
@@ -106,7 +105,6 @@ import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolatorImpl;
 import com.android.systemui.shared.condition.Monitor;
 import com.android.systemui.smartspace.dagger.SmartspaceModule;
-import com.android.systemui.startable.Dependencies;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -164,14 +162,11 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
-import dagger.multibindings.Multibinds;
 
 import kotlinx.coroutines.CoroutineScope;
 
 import java.util.Collections;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.Executor;
 
 import javax.inject.Named;
@@ -274,10 +269,6 @@ import javax.inject.Named;
             WindowRootViewComponent.class,
         })
 public abstract class SystemUIModule {
-
-    @Multibinds
-    @Dependencies
-    abstract Map<Class<?>, Set<Class<? extends CoreStartable>>> startableDependencyMap();
 
     @Binds
     abstract BootCompleteCache bindBootCompleteCache(BootCompleteCacheImpl bootCompleteCache);
