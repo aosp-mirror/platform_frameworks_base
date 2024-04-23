@@ -644,6 +644,15 @@ public class TelephonyCallback {
     public static final int EVENT_SIMULTANEOUS_CELLULAR_CALLING_SUBSCRIPTIONS_CHANGED = 41;
 
     /**
+     * Event for listening to changes in carrier roaming non-terrestrial network mode.
+     *
+     * @see CarrierRoamingNtnModeListener
+     *
+     * @hide
+     */
+    public static final int EVENT_CARRIER_ROAMING_NTN_MODE_CHANGED = 42;
+
+    /**
      * @hide
      */
     @IntDef(prefix = {"EVENT_"}, value = {
@@ -687,7 +696,8 @@ public class TelephonyCallback {
             EVENT_TRIGGER_NOTIFY_ANBR,
             EVENT_MEDIA_QUALITY_STATUS_CHANGED,
             EVENT_EMERGENCY_CALLBACK_MODE_CHANGED,
-            EVENT_SIMULTANEOUS_CELLULAR_CALLING_SUBSCRIPTIONS_CHANGED
+            EVENT_SIMULTANEOUS_CELLULAR_CALLING_SUBSCRIPTIONS_CHANGED,
+            EVENT_CARRIER_ROAMING_NTN_MODE_CHANGED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TelephonyEvent {
@@ -1686,6 +1696,24 @@ public class TelephonyCallback {
     }
 
     /**
+     * Interface for carrier roaming non-terrestrial network listener.
+     *
+     * @hide
+     */
+    public interface CarrierRoamingNtnModeListener {
+        /**
+         * Callback invoked when carrier roaming non-terrestrial network mode changes.
+         *
+         * @param active {@code true} If the device is connected to carrier roaming
+         *                           non-terrestrial network or was connected within the
+         *                           {CarrierConfigManager
+         *                           #KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT} duration,
+         *                           {code false} otherwise.
+         */
+        void onCarrierRoamingNtnModeChanged(boolean active);
+    }
+
+    /**
      * The callback methods need to be called on the handler thread where
      * this object was created.  If the binder did that for us it'd be nice.
      * <p>
@@ -2085,6 +2113,17 @@ public class TelephonyCallback {
 
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(() -> listener.onCallBackModeStopped(type, reason)));
+        }
+
+        public void onCarrierRoamingNtnModeChanged(boolean active) {
+            if (!Flags.carrierEnabledSatelliteFlag()) return;
+
+            CarrierRoamingNtnModeListener listener =
+                    (CarrierRoamingNtnModeListener) mTelephonyCallbackWeakRef.get();
+            if (listener == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> listener.onCarrierRoamingNtnModeChanged(active)));
         }
     }
 }
