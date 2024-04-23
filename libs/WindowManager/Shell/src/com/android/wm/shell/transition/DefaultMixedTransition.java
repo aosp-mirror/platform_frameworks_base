@@ -41,7 +41,7 @@ class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
     private final ActivityEmbeddingController mActivityEmbeddingController;
 
     DefaultMixedTransition(int type, IBinder transition, Transitions player,
-            DefaultMixedHandler mixedHandler, PipTransitionController pipHandler,
+            MixedTransitionHandler mixedHandler, PipTransitionController pipHandler,
             StageCoordinator splitHandler, KeyguardTransitionHandler keyguardHandler,
             UnfoldTransitionHandler unfoldHandler,
             ActivityEmbeddingController activityEmbeddingController) {
