@@ -120,4 +120,5 @@ interface ITelephonyRegistry {
 
     void notifyCallbackModeStarted(int phoneId, int subId, int type);
     void notifyCallbackModeStopped(int phoneId, int subId, int type, int reason);
+    void notifyCarrierRoamingNtnModeChanged(int subId, in boolean active);
 }
