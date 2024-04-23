@@ -1007,4 +1007,7 @@
 
     <!-- Whether volume panel should use the large screen layout or not -->
     <bool name="volume_panel_is_large_screen">false</bool>
+
+    <!-- The width of the shortcut helper container, as a fraction of the screen's width. -->
+    <item name="shortcut_helper_screen_width_fraction" format="float" type="dimen">1.0</item>
 </resources>

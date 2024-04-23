@@ -1033,6 +1033,7 @@
 
         <receiver
             android:name=".statusbar.KeyboardShortcutsReceiver"
+            android:visibleToInstantApps="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.android.intent.action.DISMISS_KEYBOARD_SHORTCUTS" />
@@ -1113,5 +1114,11 @@
                 android:name="android.service.dream"
                 android:resource="@xml/home_controls_dream_metadata" />
         </service>
+
+        <activity android:name="com.android.systemui.keyboard.shortcut.ShortcutHelperActivity"
+            android:exported="false"
+            android:theme="@style/ShortcutHelperTheme"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true" />
     </application>
 </manifest>
