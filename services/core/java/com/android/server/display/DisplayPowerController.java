@@ -1345,6 +1345,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         boolean slowChange = displayBrightnessState.isSlowChange();
         // custom transition duration
         float customAnimationRate = displayBrightnessState.getCustomAnimationRate();
+        int brightnessAdjustmentFlags = displayBrightnessState.getBrightnessAdjustmentFlag();
         final boolean userSetBrightnessChanged =
                 mDisplayBrightnessController.getIsUserSetScreenBrightnessUpdated();
         if (displayBrightnessState.getBrightnessEvent() != null) {
@@ -1392,15 +1393,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 displayBrightnessState.shouldUpdateScreenBrightnessSetting();
         float currentBrightnessSetting = mDisplayBrightnessController.getCurrentBrightness();
         // Apply auto-brightness.
-        int brightnessAdjustmentFlags = 0;
         // All the conditions inside this if block will be moved to AutomaticBrightnessStrategy
         if (mFlags.isRefactorDisplayPowerControllerEnabled()
                 && displayBrightnessState.getBrightnessReason().getReason()
                         == BrightnessReason.REASON_AUTOMATIC) {
-            brightnessAdjustmentFlags =
-                    mAutomaticBrightnessStrategy.getAutoBrightnessAdjustmentReasonsFlags();
-            updateScreenBrightnessSetting = currentBrightnessSetting != brightnessState;
-            mBrightnessReasonTemp.setReason(BrightnessReason.REASON_AUTOMATIC);
             if (mScreenOffBrightnessSensorController != null) {
                 mScreenOffBrightnessSensorController.setLightSensorEnabled(false);
             }

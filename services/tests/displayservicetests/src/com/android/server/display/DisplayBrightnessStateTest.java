@@ -47,6 +47,7 @@ public class DisplayBrightnessStateTest {
         float sdrBrightness = 0.2f;
         boolean shouldUseAutoBrightness = true;
         boolean shouldUpdateScreenBrightnessSetting = true;
+        int brightnessAdjustmentFlag = 2;
         BrightnessReason brightnessReason = new BrightnessReason();
         brightnessReason.setReason(BrightnessReason.REASON_AUTOMATIC);
         brightnessReason.setModifier(BrightnessReason.MODIFIER_DIMMED);
@@ -56,6 +57,7 @@ public class DisplayBrightnessStateTest {
                 .setBrightnessReason(brightnessReason)
                 .setShouldUseAutoBrightness(shouldUseAutoBrightness)
                 .setShouldUpdateScreenBrightnessSetting(shouldUpdateScreenBrightnessSetting)
+                .setBrightnessAdjustmentFlag(brightnessAdjustmentFlag)
                 .build();
 
         assertEquals(displayBrightnessState.getBrightness(), brightness, FLOAT_DELTA);
@@ -105,7 +107,9 @@ public class DisplayBrightnessStateTest {
                 .append("\n    shouldUpdateScreenBrightnessSetting:")
                 .append(displayBrightnessState.shouldUpdateScreenBrightnessSetting())
                 .append("\n    mBrightnessEvent:")
-                .append(Objects.toString(displayBrightnessState.getBrightnessEvent(), "null"));
+                .append(Objects.toString(displayBrightnessState.getBrightnessEvent(), "null"))
+                .append("\n    mBrightnessAdjustmentFlag:")
+                .append(displayBrightnessState.getBrightnessAdjustmentFlag());
         return sb.toString();
     }
 }
